@@ -1525,6 +1525,7 @@ namespace dp2SSL
                 // string old_photopath = _patron.PhotoPath;
                 App.Invoke(new Action(() =>
                 {
+                    _patron.MaskDefinition = ShelfData.GetPatronMask();
                     _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
                     this.patronControl.SetBorrowed(result.ReaderXml);
                 }));
@@ -4016,7 +4017,16 @@ string usage)
             }));
 
             // 欢迎您，
-            App.CurrentApp.Speak($"{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
+            // App.CurrentApp.Speak($"{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
+            {
+                // 2021/7/28
+                var name = (string.IsNullOrEmpty(_patron.PatronNameMasked) ? _patron.BarcodeMasked : _patron.PatronNameMasked);
+                if (string.IsNullOrEmpty(name) == false
+                    && name.Contains("*") == false)
+                    App.CurrentApp.Speak($"欢迎您，{name}");
+                else
+                    App.CurrentApp.Speak($"欢迎您");
+            }
 
             // 身份读写器平放
             if (IsVerticalCard() /*App.PatronReaderVertical*/ == false)
@@ -4069,6 +4079,12 @@ string usage)
 
             string name = DomUtil.GetElementText(patron_dom.DocumentElement, "name");
             string department = DomUtil.GetElementText(patron_dom.DocumentElement, "department");
+
+            // 2021/7/29
+            // 遮盖显示内容
+            var mask_def = ShelfData.GetPatronMask();
+            name = Patron.Mask(mask_def, name, "name");
+            department = Patron.Mask(mask_def, department, "department");
 
             FlowDocument doc = new FlowDocument();
 
@@ -4391,7 +4407,13 @@ string usage)
                     return;
                 }
 
-                string patron_name = DomUtil.GetElementText(dom.DocumentElement, "name");
+                // string patron_name = DomUtil.GetElementText(dom.DocumentElement, "name");
+                // 2021/7/29
+                // 用于提示和显示的读者姓名
+                // string patron_name = (string.IsNullOrEmpty(_patron.PatronNameMasked) ? _patron.BarcodeMasked : _patron.PatronNameMasked);
+                string patron_name = _patron.PatronNameMasked;
+                if (string.IsNullOrEmpty(_patron.BarcodeMasked) == false)
+                    patron_name += " (" + _patron.BarcodeMasked + ")";
 
                 // TODO: 弹出一个对话框，检测 ISO14443A 读者卡
                 // 注意探测读者卡的时候，不是要刷新右侧的读者信息，而是把探测到的信息拦截到对话框里面，右侧的读者信息不要有任何变化
@@ -4420,7 +4442,8 @@ string usage)
                     // 修改读者 XML 记录中的 cardNumber 元素
                     var modify_result = ModifyBinding(dom,
     "bind",
-    bind_uid);
+    bind_uid,
+    patron_name);
                     if (modify_result.Value == -1)
                     {
                         DisplayError(ref progress, $"绑定失败: {modify_result.ErrorInfo}", "red", "关闭");
@@ -4433,7 +4456,8 @@ string usage)
                     // 从读者记录的 cardNumber 元素中移走指定的 UID
                     var modify_result = ModifyBinding(dom,
 "release",
-bind_uid);
+bind_uid,
+patron_name);
                     if (modify_result.Value == -1)
                     {
                         DisplayError(ref progress, $"解除绑定失败: {modify_result.ErrorInfo}", "red", "关闭");
@@ -4540,13 +4564,16 @@ bind_uid);
             throw new NotImplementedException();
         }
 
+        // parameters:
+        //      patron_name 用于报错的读者姓名，可能是被遮盖以后的内容
         public static NormalResult ModifyBinding(XmlDocument dom,
             string action,
-            string uid)
+            string uid,
+            string patron_name)
         {
             uid = uid.ToUpper();
 
-            string patron_name = DomUtil.GetElementText(dom.DocumentElement, "name");
+            // string patron_name = DomUtil.GetElementText(dom.DocumentElement, "name");
 
             string value = DomUtil.GetElementText(dom.DocumentElement, "cardNumber");
             if (value != null)

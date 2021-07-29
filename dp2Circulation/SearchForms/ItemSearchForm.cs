@@ -6110,7 +6110,10 @@ Program.MainForm.DefaultFont);
         {
             string strError = "";
 
-            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.42") < 0)
+            // 2021/7/27
+            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            if (control == false
+                && StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.42") < 0)
             {
                 //		dp2library 3.41 (2020/12/21) SetEntities() API 的 delete action 功能，style 可以包含使用 "force_clear_keys"，用于删除 XML 结构已经被破坏的册记录，作用是提醒 dp2kernel 层(根据记录 id)强制删除册记录的检索点 key
                 //		dp2library 3.42 (2020/12/23) 进一步巩固检索和删除册记录过程中遇到的 XML 部分被破坏(对象文件删除)场景下的功能完整性

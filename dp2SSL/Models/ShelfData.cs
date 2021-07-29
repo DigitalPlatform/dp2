@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using Microsoft.VisualStudio.Threading;
 
 using static dp2SSL.LibraryChannelUtil;
+using dp2SSL.Models;
 
 using DigitalPlatform;
 using DigitalPlatform.WPF;
@@ -28,8 +29,6 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
 using static DigitalPlatform.RFID.LogicChip;
-using Microsoft.Extensions.DependencyModel.Resolution;
-using dp2SSL.Models;
 
 namespace dp2SSL
 {
@@ -292,9 +291,9 @@ namespace dp2SSL
                             {
                                 string text = "";
                                 if (result.NewState == "open")
-                                    text = $"门 '{result.Door.Name}' 被 {result.Door.Operator?.GetDisplayString()} 打开";
+                                    text = $"门 '{result.Door.Name}' 被 {result.Door.Operator?.GetDisplayStringMasked()} 打开";
                                 else
-                                    text = $"门 '{result.Door.Name}' 被 {result.Door.Operator?.GetDisplayString()} 关上";
+                                    text = $"门 '{result.Door.Name}' 被 {result.Door.Operator?.GetDisplayStringMasked()} 关上";
                                 PageShelf.TrySetMessage(null, text);
                             }
 
@@ -1161,6 +1160,16 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
 
             return count;
+        }
+
+        // 读者信息屏蔽
+        public static string GetPatronMask()
+        {
+            if (ShelfCfgDom == null)
+                return null;
+            var value = ShelfCfgDom.DocumentElement?.SelectSingleNode("settings/key[@name='读者信息屏蔽']/@value")?.Value;
+
+            return value;
         }
 
         // 从 shelf.xml 配置文件中归纳出所有的读卡器名，包括天线编号部分
@@ -7308,10 +7317,31 @@ TaskScheduler.Default);
     public class Operator
     {
         public string PatronName { get; set; }
+
         public string PatronBarcode { get; set; }
         // 2020/7/26
         // 读者的 OI 或者 AOI
         public string PatronInstitution { get; set; }
+
+        [JsonIgnore]
+        public string PatronNameMasked
+        {
+            get
+            {
+                var def = ShelfData.GetPatronMask();
+                return Patron.Mask(def, PatronName, "name");
+            }
+        }
+
+        [JsonIgnore]
+        public string PatronBarcodeMasked
+        {
+            get
+            {
+                var def = ShelfData.GetPatronMask();
+                return Patron.Mask(def, PatronBarcode, "barcode");
+            }
+        }
 
         public Operator Clone()
         {
@@ -7332,6 +7362,13 @@ TaskScheduler.Default);
             if (string.IsNullOrEmpty(PatronName) == false)
                 return PatronName;
             return PatronBarcode;
+        }
+
+        public string GetDisplayStringMasked()
+        {
+            if (string.IsNullOrEmpty(PatronNameMasked) == false)
+                return PatronNameMasked;
+            return PatronBarcodeMasked;
         }
 
         public static bool IsPatronBarcodeWorker(string patronBarcode)

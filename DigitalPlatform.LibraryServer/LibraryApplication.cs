@@ -10780,7 +10780,11 @@ out strError);
             // 追加读者记录中定义的权限值
             string strAddRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
             if (string.IsNullOrEmpty(strAddRights) == false)
-                account.Rights += "," + strAddRights;
+            {
+                // account.Rights += "," + strAddRights;
+                // 2021/7/30
+                account.Rights = MergeRights(account.Rights, strAddRights);
+            }
 
             {
                 // 2016/6/7

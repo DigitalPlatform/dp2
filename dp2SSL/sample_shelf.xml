@@ -7,6 +7,7 @@
     <key name="缓存工作人员账户到本地" value="false"/>
     <key name="休眠关闭提交对话框秒数" value="0"/>
     <key name="语音提醒关门延迟秒数" value="15,10"/>
+    <key name="读者信息屏蔽" value="barcode:1|0,name,department"/>
 
   </settings>
   <shelf>

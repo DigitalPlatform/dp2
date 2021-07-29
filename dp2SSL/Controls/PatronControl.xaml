@@ -85,18 +85,18 @@
                     <TextBlock Grid.Row="2" Grid.Column="1" 
                            Text="证条码号" 
                            Foreground="Gray" Margin="6" FontSize="12"  TextAlignment="Right"/>
-                    <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Barcode}"
+                    <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding BarcodeMasked}"
                        Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="12"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="1" 
                            Text="姓名" 
                            Foreground="Gray" Margin="6" FontSize="24"  TextAlignment="Right"/>
-                    <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding PatronName}"
+                    <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding PatronNameMasked}"
                        Foreground="#eeeeee" TextWrapping="Wrap" Margin="6" FontSize="24" FontWeight="Bold"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="1" Text="单位" 
                            Foreground="Gray" Margin="6" FontSize="16" TextAlignment="Right"/>
-                    <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding Department}"
+                    <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding DepartmentMasked}"
                        Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="16"/>
 
                     <TextBlock Grid.Row="5" Grid.Column="1"

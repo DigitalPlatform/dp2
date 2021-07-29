@@ -5439,6 +5439,9 @@ out strError);
                     XmlDocument struct_dom = new XmlDocument();
                     struct_dom.LoadXml("<structure />");
                     {
+                        // 2021/7/29
+                        List<string> base_names = null;
+
                         // 2021/7/15
                         // return:
                         //      null    没有找到 getreaderinfo 前缀
@@ -5450,23 +5453,44 @@ out strError);
                         else if (string.IsNullOrEmpty(read_level) == false)
                         {
                             var names = GetElementNames(read_level);
+                            if (base_names != null)
+                                names = new List<string>(names.Intersect(base_names));
                             struct_dom.DocumentElement.SetAttribute("visibleFields", StringUtil.MakePathList(names));
                         }
                         else
-                            struct_dom.DocumentElement.SetAttribute("visibleFields", "[all]");
+                        {
+                            if (base_names != null)
+                                struct_dom.DocumentElement.SetAttribute("visibleFields", StringUtil.MakePathList(base_names));
+                            else
+                                struct_dom.DocumentElement.SetAttribute("visibleFields", "[all]");
+                        }
                     }
 
                     {
+                        // 2021/7/29
+                        List<string> base_names = null;
+                        if (sessioninfo.UserType == "reader")
+                        {
+                            base_names = new List<string>(_selfchangeable_reader_element_names);
+                        }
+
                         string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
                         if (write_level == null)
                             struct_dom.DocumentElement.SetAttribute("writeableFields", "[none]");
                         else if (string.IsNullOrEmpty(write_level) == false)
                         {
                             var names = GetElementNames(write_level);
+                            if (base_names != null)
+                                names = new List<string>(names.Intersect(base_names));
                             struct_dom.DocumentElement.SetAttribute("writeableFields", StringUtil.MakePathList(names));
                         }
                         else
-                            struct_dom.DocumentElement.SetAttribute("writeableFields", "[all]");
+                        {
+                            if (base_names != null)
+                                struct_dom.DocumentElement.SetAttribute("writeableFields", StringUtil.MakePathList(base_names));
+                            else
+                                struct_dom.DocumentElement.SetAttribute("writeableFields", "[all]");
+                        }
                     }
 
                     SetResult(results_list, i, struct_dom.DocumentElement.OuterXml);
@@ -7033,6 +7057,48 @@ out strError);
             //      其他     返回值部分
             var level = StringUtil.GetParameterByPrefix(rights, prefix);
             return level;
+        }
+
+        // 合并两个权限字符串。
+        // 如果 rights2 里面有 getreaderinfo:n，那么要去掉 rights1 里面的 getreaderinfo:n，然后合并
+        public static string MergeRights(string rights1, string rights2)
+        {
+            if (string.IsNullOrEmpty(rights1))
+                return rights2 == null ? "" : rights2;
+            if (string.IsNullOrEmpty(rights2))
+                return rights1 == null ? "" : rights1;
+
+            var list1 = new List<string>(rights1.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+            var list2 = new List<string>(rights2.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+
+            var delete_list = new List<string>();
+            foreach (string r2 in list2)
+            {
+                string prefix = GetPrefix(r2);
+                foreach(string r1 in list1)
+                {
+                    if (r1 == prefix || r1.Contains(prefix + ":"))
+                        delete_list.Add(r1);
+                }
+            }
+
+            foreach(var right in delete_list)
+            {
+                list1.Remove(right);
+            }
+
+            list1.AddRange(list2);
+            return string.Join(",", list1);
+        }
+
+        static string GetPrefix(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            int index = text.IndexOf(":");
+            if (index == -1)
+                return text;
+            return text.Substring(0, index);
         }
     }
 }

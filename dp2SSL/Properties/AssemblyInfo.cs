@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.36")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.36.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.37")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.37.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -121,3 +121,4 @@ using System.Windows;
 //      1.8.34 (2021/7/2) 设置页面增加临时菜单命令“* 清除动作记录的 dontsync 状态”
 //      1.8.35 (2021/7/15) dp2ssl 启动时，选择断网模式的对话框，增加了延时 5 分钟后自动选择继续以断网模式启动的功能。另外如果在这个对话框选择了“以联网模式继续启动”，则后续显示的报错信息里面增加了注释文字，注明什么时间曾经弹出过对话框，人工选择了用什么模式继续启动，便于管理员诊断分析
 //      1.8.36 (2021/7/21) 针对 getreaderinfo:n 和 setreaderinfo:n 权限做了适配
+//      1.8.37 (2021/7/27) shelf.xml 中可以用参数 <key name="读者信息屏蔽" value="barcode:1|0,name,department"/> 定义读者信息区如何屏蔽字段文字

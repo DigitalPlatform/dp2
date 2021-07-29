@@ -28,14 +28,14 @@ namespace dp2SSL
             if (person == null)
                 return "";
             if (Style == "barcode")
-                return GetAccountName(person.PatronBarcode);
+                return GetAccountName(person.PatronBarcodeMasked);
             else if (Style == "name")
-                return person.PatronName;
+                return person.PatronNameMasked;
             else
             {
-                if (string.IsNullOrEmpty(person.PatronName) == false)
-                    return person.PatronName;
-                return GetAccountName(person.PatronBarcode);
+                if (string.IsNullOrEmpty(person.PatronNameMasked) == false)
+                    return person.PatronNameMasked;
+                return GetAccountName(person.PatronBarcodeMasked);
             }
         }
 

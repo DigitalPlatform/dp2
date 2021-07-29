@@ -112,7 +112,7 @@ namespace dp2SSL
                         actions.ForEach((o) =>
                         {
                             if (o.Operator != null)
-                                names.Add(string.IsNullOrEmpty(o.Operator.PatronName) ? o.Operator.PatronBarcode : o.Operator.PatronName);
+                                names.Add(string.IsNullOrEmpty(o.Operator.PatronNameMasked) ? o.Operator.PatronBarcodeMasked : o.Operator.PatronNameMasked);
                         });
                         StringUtil.RemoveDupNoSort(ref names);
                     }
@@ -215,7 +215,7 @@ namespace dp2SSL
                 actions.ForEach((o) =>
                 {
                     if (o.Operator != null)
-                        names.Add(string.IsNullOrEmpty(o.Operator.PatronName) ? o.Operator.PatronBarcode : o.Operator.PatronName);
+                        names.Add(string.IsNullOrEmpty(o.Operator.PatronNameMasked) ? o.Operator.PatronBarcodeMasked : o.Operator.PatronNameMasked);
                 });
                 StringUtil.RemoveDupNoSort(ref names);
             }

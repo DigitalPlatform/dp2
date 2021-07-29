@@ -1178,7 +1178,7 @@ namespace dp2SSL
 
             var person = new Operator
             {
-                PatronBarcode = current_patron.Barcode,
+                PatronBarcode = current_patron.Barcode, // 这里必须用未屏蔽的证条码号，因为要完成功能
                 // 2020/7/26
                 PatronInstitution = string.IsNullOrEmpty(current_patron.OI) ? current_patron.AOI : current_patron.OI,
                 PatronName = current_patron.PatronName
@@ -1218,7 +1218,7 @@ namespace dp2SSL
                 string libraryCodeOfPatron = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode");
                 if (libraryCodeOfDoor != libraryCodeOfPatron)
                 {
-                    ErrorBox("无法开门", $"权限不足，无法开门。\r\n\r\n详情: 读者 {_patron.PatronName} 所属馆代码 '{libraryCodeOfPatron}' 和门所属馆代码 '{libraryCodeOfDoor}' 不同");
+                    ErrorBox("无法开门", $"权限不足，无法开门。\r\n\r\n详情: 读者 {_patron.PatronNameMasked} 所属馆代码 '{libraryCodeOfPatron}' 和门所属馆代码 '{libraryCodeOfDoor}' 不同");
                     return;
                 }
             }
@@ -1799,7 +1799,7 @@ namespace dp2SSL
                         GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(!loose_oi),
                             ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
                         // 2021/5/17
-                        if (result.Value == -1 
+                        if (result.Value == -1
                             && result.ErrorCode == "RequestError"
                             && ShelfData.LibraryNetworkCondition != "OK")
                         {
@@ -3507,6 +3507,7 @@ namespace dp2SSL
                 // string old_photopath = _patron.PhotoPath;
                 App.Invoke(new Action(() =>
                 {
+                    _patron.MaskDefinition = ShelfData.GetPatronMask();
                     _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
                     this.patronControl.SetBorrowed(result.ReaderXml);
                 }));
@@ -4573,7 +4574,7 @@ namespace dp2SSL
         {
             StringBuilder text = new StringBuilder();
             // text.AppendLine($"{person.GetDisplayString()}");
-            text.AppendLine($"{person.PatronName} ({person.PatronBarcode})");
+            text.AppendLine($"{person.PatronNameMasked} ({person.PatronBarcodeMasked})");
             int i = 0;
             foreach (var info in infos)
             {
@@ -4794,7 +4795,16 @@ namespace dp2SSL
                 clearPatron.IsEnabled = true;
             }));
 
-            App.CurrentApp.Speak($"欢迎您，{(string.IsNullOrEmpty(_patron.PatronName) ? _patron.Barcode : _patron.PatronName)}");
+            {
+                // 2021/7/28
+                var name = (string.IsNullOrEmpty(_patron.PatronNameMasked) ? _patron.BarcodeMasked : _patron.PatronNameMasked);
+                if (string.IsNullOrEmpty(name) == false
+                    && name.Contains("*") == false)
+                    App.CurrentApp.Speak($"欢迎您，{name}");
+                else
+                    App.CurrentApp.Speak($"欢迎您");
+            }
+
             BeginDelayClearTask();
 
             // 2021/5/12
@@ -4806,23 +4816,25 @@ namespace dp2SSL
 
             this.doorControl.AnimateDoors();
 
-            var name = $"读者 {_patron.PatronName} ({_patron.Barcode}, {_patron.Department})";
-            if (Operator.IsPatronBarcodeWorker(_patron.Barcode))
-                name = $"工作人员 {_patron.Barcode}";
+            {
+                var name = $"读者 {_patron.PatronName} ({_patron.Barcode}, {_patron.Department})";
+                if (Operator.IsPatronBarcodeWorker(_patron.Barcode))
+                    name = $"工作人员 {_patron.Barcode}";
 
-            var style = _patron.Protocol;
-            if (_patron.Protocol == InventoryInfo.ISO14443A)
-                style = "IC 卡";
-            else if (_patron.Protocol == InventoryInfo.ISO15693)
-                style = "RFID 卡";
-            else if (_patron.Protocol == "barcode")
-                style = "条码卡";
-            else if (_patron.Protocol == "fingerprint")
-                style = "指纹";
-            else if (_patron.Protocol == "face")
-                style = "人脸";
+                var style = _patron.Protocol;
+                if (_patron.Protocol == InventoryInfo.ISO14443A)
+                    style = "IC 卡";
+                else if (_patron.Protocol == InventoryInfo.ISO15693)
+                    style = "RFID 卡";
+                else if (_patron.Protocol == "barcode")
+                    style = "条码卡";
+                else if (_patron.Protocol == "fingerprint")
+                    style = "指纹";
+                else if (_patron.Protocol == "face")
+                    style = "人脸";
 
-            TrySetMessage(null, $"{name} 刷{style}");
+                TrySetMessage(null, $"{name} 刷{style}");
+            }
         }
 
         public bool IsPatronEmpty()
