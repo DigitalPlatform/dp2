@@ -168,6 +168,9 @@ namespace dp2SSL
         static Hashtable _notifiedPatronTable = new Hashtable();
         public static bool HasNotified(string pii)
         {
+            if (string.IsNullOrEmpty(pii))
+                return false;
+
             lock (_notifiedPatronTable.SyncRoot)
             {
                 // 防止规模太大

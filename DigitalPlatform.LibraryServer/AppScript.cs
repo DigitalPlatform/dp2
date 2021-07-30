@@ -2192,7 +2192,8 @@ namespace DigitalPlatform.LibraryServer
                 if (Array.IndexOf<string>(special_rights, s) != -1)
                     continue;
 
-                if (Array.IndexOf<string>(right, s) == -1)
+                // if (Array.IndexOf<string>(right, s) == -1)
+                if (Contains(right, s) == false)    // 2021/7/30
                 {
                     if (StringUtil.HasHead(s, "level-") == true)
                     {
@@ -2208,6 +2209,19 @@ namespace DigitalPlatform.LibraryServer
                 return false;
 
             return true;
+        }
+
+        static bool Contains(string [] array, string s)
+        {
+            s = LibraryApplication.GetPrefix(s);
+            foreach(string a in array)
+            {
+                var prefix = LibraryApplication.GetPrefix(a);
+                if (s == prefix)
+                    return true;
+            }
+
+            return false;
         }
 
         // return:

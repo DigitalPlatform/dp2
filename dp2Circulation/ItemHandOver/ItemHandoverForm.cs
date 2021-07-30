@@ -7153,7 +7153,15 @@ MessageBoxDefaultButton.Button2);
                     if (String.IsNullOrEmpty(strItemBarcode) == true)
                         continue;
 
-                    form.AsyncDoAction(form.SmartFuncState, strItemBarcode);
+                    try
+                    {
+                        form.AsyncDoAction(form.SmartFuncState, strItemBarcode);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        strError = ex.Message;
+                        return -1;
+                    }
 
                     stop.SetProgressValue(++i);
 

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.70.*")]
-[assembly: AssemblyFileVersion("3.70.0.0")]
+[assembly: AssemblyVersion("3.71.*")]
+[assembly: AssemblyFileVersion("3.71.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -262,3 +262,4 @@ ItemCanReturn()
 //						账户权限中 getreaderinfo:xxx 和 setreaderinfo:xxx 其中的 xxx 部分可以使用的元素名增加了 dprms.file，代表数字对象 <dprms:file> 元素。名字中用点是为了规避权限字符串中的冒号
 //		3.69 (2021/7/28) 发布正式版
 //		3.70 (2021/7/29) 当读者权限中包含 getreaderinfo 时, GetReaderInfo() API 以读者身份获得自己的读者记录的时候，structure 里面会返回限定元素 displayName 和 preferrence。此前的版本这里不正确，会返回 [all]
+//		3.71 (2021/7/30) 读者身份登录时，根据 reader 账户权限和读者 XML 记录 rights 元素合成最终权限的过程，会正确处理 getreaderinfo:n 和 setreaderinfo:n 的合并

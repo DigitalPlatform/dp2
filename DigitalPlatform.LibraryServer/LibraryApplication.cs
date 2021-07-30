@@ -3800,7 +3800,7 @@ namespace DigitalPlatform.LibraryServer
 
         static void RestoreElements(
             XmlDocument cfg_dom,
-            XmlTextWriter writer, 
+            XmlTextWriter writer,
             string[] elements)
         {
             foreach (string element in elements)
@@ -12676,7 +12676,6 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-
                 string strExistingBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
 
                 // 如果是读者身份, 或者通过参数 strReaderOldPassword (非null)要求，需要验证旧密码
@@ -12730,6 +12729,16 @@ out strError);
                     else
                     {
                         result.Value = 1;
+                    }
+
+                    // 2021/7/30
+                    // 权限字符串
+                    if (StringUtil.IsInList("changereaderpassword", rights) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "修改读者密码被拒绝。不具备 changereaderpassword 权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
                     }
 
                     // 2021/7/8

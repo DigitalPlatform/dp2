@@ -4811,7 +4811,9 @@ namespace dp2SSL
             CloseProgressWindow();
 
             // TODO: 对同一个读者只需要提醒一次，不用反复提醒
-            if (ShelfData.HasNotified(_patron.GetOiPii()) == false)
+            var oi_pii = _patron.GetOiPii();
+            if (string.IsNullOrEmpty(oi_pii) == false
+                && ShelfData.HasNotified(oi_pii) == false)
                 ShelfData.AddOpenDoorSpeak("取放图书后请及时关门");
 
             this.doorControl.AnimateDoors();

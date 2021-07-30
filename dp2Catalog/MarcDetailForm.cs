@@ -2180,7 +2180,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                         strError = "放弃处理...";
                         goto ERROR1;
                     }
-
                 }
             }
 
@@ -2188,7 +2187,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             MainForm.LastCrLfIso2709 = dlg.CrLf;
             MainForm.LastEncodingName = dlg.EncodingName;
             MainForm.LastRemoveField998 = dlg.RemoveField998;
-
 
             Stream s = null;
             try

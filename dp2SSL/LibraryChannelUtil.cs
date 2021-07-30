@@ -1302,12 +1302,6 @@ namespace dp2SSL
             string password,
             string style)
         {
-            if (string.IsNullOrEmpty(App.dp2ServerUrl) == true)
-                return new LoginResult
-                {
-                    Value = -1,
-                    ErrorInfo = "dp2library 服务器 URL 尚未配置，无法进行工作人员登录"
-                };
 
             // 如果当前参数是不缓存账户，则要主动清除以前缓存的全部账户记录
             if (ShelfData.CacheWorkerAccount() == "false"
@@ -1335,6 +1329,17 @@ namespace dp2SSL
                     Value = -1,
                     ErrorInfo = "style 参数至少要包含 local 和 network 中的一个值"
                 };
+
+            // 检查 App.dp2ServerUrl
+            if (network)
+            {
+                if (string.IsNullOrEmpty(App.dp2ServerUrl) == true)
+                    return new LoginResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "dp2library 服务器 URL 尚未配置，无法进行工作人员登录"
+                    };
+            }
 
             LibraryChannel channel = App.CurrentApp.GetChannel(userName);
             TimeSpan old_timeout = channel.Timeout;

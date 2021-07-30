@@ -403,6 +403,7 @@ string color = "red")
         {
             //FingerprintManager.Base.State = "pause";
             var old_seconds = App.AutoBackMainMenuSeconds;
+            var old_messageServerUrl = App.messageServerUrl;
 
             App.PauseBarcodeScan();
             try
@@ -506,6 +507,14 @@ string color = "red")
 
                     if (App.Function == "智能书柜")
                     {
+                        // 2021/7/30
+                        // 如果 App.messageServerUrl 被增配上，则启动发送消息的任务
+                        if (string.IsNullOrEmpty(old_messageServerUrl)
+                            && string.IsNullOrEmpty(App.messageServerUrl) == false)
+                            _ = App.StartMessageSendingAsync("配置界面启用消息发送");
+
+                        // _ = App.ConnectMessageServerAsync();
+
                         // 2019/12/9
                         App.InitialShelfCfg();
 
@@ -519,7 +528,6 @@ string color = "red")
                     // 重新启动 Proccess 监控
                     App.CurrentApp.StartProcessManager();
 
-                    _ = App.ConnectMessageServerAsync();
 
                     // 切断 SIP2 通道。因为可能刚才在配置参数中修改了 SIP2 通道的编码方式
                     SipChannelUtil.CloseChannel();
@@ -1265,7 +1273,7 @@ string color = "red")
         private async void clearDontsyncState_Click(object sender, RoutedEventArgs e)
         {
             var count = await ShelfData.FixActionsFromDatabaseAsync();
-            App.ErrorBox("清除动作记录的 dontsync 状态", 
+            App.ErrorBox("清除动作记录的 dontsync 状态",
                 $"处理完成。修改记录 {count} 条",
                 "green");
         }

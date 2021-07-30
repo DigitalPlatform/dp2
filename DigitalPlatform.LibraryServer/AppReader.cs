@@ -6613,7 +6613,7 @@ out strError);
             // 追加读者记录中定义的权限值
             rights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
             if (string.IsNullOrEmpty(rights) == false)
-                rights = accountref.Rights + "," + rights;
+                rights = MergeRights(accountref.Rights, rights);
             else
                 rights = accountref.Rights;
 
@@ -7091,7 +7091,7 @@ out strError);
             return string.Join(",", list1);
         }
 
-        static string GetPrefix(string text)
+        public static string GetPrefix(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return text;

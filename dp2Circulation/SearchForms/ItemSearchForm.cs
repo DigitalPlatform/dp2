@@ -5561,7 +5561,15 @@ dlg.UiState);
 
                     form.SmartFuncState = FuncState.Borrow;
                     string strID = Guid.NewGuid().ToString();
-                    form.AsyncDoAction(FuncState.Borrow, strReaderBarcode, strID);
+                    try
+                    {
+                        form.AsyncDoAction(FuncState.Borrow, strReaderBarcode, strID);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        strError = ex.Message;
+                        return -1;
+                    }
                     DateTime start = DateTime.Now;
                     // 等待任务完成
                     while (true)
@@ -5645,7 +5653,15 @@ Program.MainForm.DefaultFont);
                     if (String.IsNullOrEmpty(strItemBarcode) == true)
                         continue;
 
-                    form.AsyncDoAction(form.SmartFuncState, strItemBarcode);
+                    try
+                    {
+                        form.AsyncDoAction(form.SmartFuncState, strItemBarcode);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        strError = ex.Message;
+                        return -1;
+                    }
 
                     stop.SetProgressValue(++i);
 
