@@ -151,7 +151,7 @@
             this.menuStrip_main.MdiWindowListItem = this.MenuItem_window;
             this.menuStrip_main.Name = "menuStrip_main";
             this.menuStrip_main.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
-            this.menuStrip_main.Size = new System.Drawing.Size(1060, 39);
+            this.menuStrip_main.Size = new System.Drawing.Size(1060, 42);
             this.menuStrip_main.TabIndex = 0;
             this.menuStrip_main.Text = "menuStrip1";
             // 
@@ -619,9 +619,9 @@
             this.toolButton_search,
             this.toolButton_stop,
             this.toolStripButton_testSearch});
-            this.toolStrip_main.Location = new System.Drawing.Point(0, 39);
+            this.toolStrip_main.Location = new System.Drawing.Point(0, 42);
             this.toolStrip_main.Name = "toolStrip_main";
-            this.toolStrip_main.Size = new System.Drawing.Size(1060, 38);
+            this.toolStrip_main.Size = new System.Drawing.Size(1060, 44);
             this.toolStrip_main.TabIndex = 1;
             this.toolStrip_main.Text = "toolStrip1";
             // 
@@ -632,7 +632,7 @@
             this.toolButton_saveTo.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_saveTo.Image")));
             this.toolButton_saveTo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_saveTo.Name = "toolButton_saveTo";
-            this.toolButton_saveTo.Size = new System.Drawing.Size(40, 32);
+            this.toolButton_saveTo.Size = new System.Drawing.Size(40, 38);
             this.toolButton_saveTo.Text = "保存到...";
             this.toolButton_saveTo.Click += new System.EventHandler(this.toolButton_saveTo_Click);
             // 
@@ -912,10 +912,10 @@
             this.panel_fixed.Controls.Add(this.tabControl_panelFixed);
             this.panel_fixed.Controls.Add(this.toolStrip_panelFixed);
             this.panel_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel_fixed.Location = new System.Drawing.Point(762, 77);
+            this.panel_fixed.Location = new System.Drawing.Point(762, 86);
             this.panel_fixed.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel_fixed.Name = "panel_fixed";
-            this.panel_fixed.Size = new System.Drawing.Size(298, 439);
+            this.panel_fixed.Size = new System.Drawing.Size(298, 430);
             this.panel_fixed.TabIndex = 6;
             // 
             // tabControl_panelFixed
@@ -926,12 +926,12 @@
             this.tabControl_panelFixed.Controls.Add(this.tabPage_verifyResult);
             this.tabControl_panelFixed.Controls.Add(this.tabPage_generateData);
             this.tabControl_panelFixed.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl_panelFixed.Location = new System.Drawing.Point(0, 25);
+            this.tabControl_panelFixed.Location = new System.Drawing.Point(0, 44);
             this.tabControl_panelFixed.Margin = new System.Windows.Forms.Padding(0);
             this.tabControl_panelFixed.Name = "tabControl_panelFixed";
             this.tabControl_panelFixed.Padding = new System.Drawing.Point(0, 0);
             this.tabControl_panelFixed.SelectedIndex = 0;
-            this.tabControl_panelFixed.Size = new System.Drawing.Size(298, 414);
+            this.tabControl_panelFixed.Size = new System.Drawing.Size(298, 386);
             this.tabControl_panelFixed.TabIndex = 1;
             // 
             // tabPage_operHistory
@@ -940,7 +940,7 @@
             this.tabPage_operHistory.Location = new System.Drawing.Point(4, 34);
             this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tabPage_operHistory.Name = "tabPage_operHistory";
-            this.tabPage_operHistory.Size = new System.Drawing.Size(290, 376);
+            this.tabPage_operHistory.Size = new System.Drawing.Size(290, 348);
             this.tabPage_operHistory.TabIndex = 4;
             this.tabPage_operHistory.Text = "操作历史";
             this.tabPage_operHistory.UseVisualStyleBackColor = true;
@@ -952,7 +952,7 @@
             this.webBrowser_history.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.webBrowser_history.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser_history.Name = "webBrowser_history";
-            this.webBrowser_history.Size = new System.Drawing.Size(290, 376);
+            this.webBrowser_history.Size = new System.Drawing.Size(290, 348);
             this.webBrowser_history.TabIndex = 0;
             // 
             // tabPage_property
@@ -993,7 +993,7 @@
             this.toolStripButton_close});
             this.toolStrip_panelFixed.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_panelFixed.Name = "toolStrip_panelFixed";
-            this.toolStrip_panelFixed.Size = new System.Drawing.Size(298, 25);
+            this.toolStrip_panelFixed.Size = new System.Drawing.Size(298, 44);
             this.toolStrip_panelFixed.TabIndex = 3;
             this.toolStrip_panelFixed.Text = "toolStrip1";
             // 
@@ -1012,10 +1012,10 @@
             // splitter_fixed
             // 
             this.splitter_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitter_fixed.Location = new System.Drawing.Point(758, 77);
+            this.splitter_fixed.Location = new System.Drawing.Point(758, 86);
             this.splitter_fixed.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.splitter_fixed.Name = "splitter_fixed";
-            this.splitter_fixed.Size = new System.Drawing.Size(4, 439);
+            this.splitter_fixed.Size = new System.Drawing.Size(4, 430);
             this.splitter_fixed.TabIndex = 7;
             this.splitter_fixed.TabStop = false;
             // 

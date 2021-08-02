@@ -2158,6 +2158,7 @@ namespace DigitalPlatform.LibraryServer
         static string[] special_rights = new string[] { 
             "denychangemypassword",
             "neverexpire",
+            "denyresetmypassword",    // 2021/8/2
         };
 
         // strLeft 包含的权限是否小于等于 strRight

@@ -1198,6 +1198,13 @@ update
                 return;
             }
 
+            // 列出图书
+            if (command.StartsWith("list book"))
+            {
+                await ListBookAsync(command, groupName);
+                return;
+            }
+
             // 修改操作历史
             if (command.StartsWith("change history"))
             {
@@ -1544,6 +1551,60 @@ update
             };
             p.Start();
             return true;
+        }
+
+        // 列出书柜中的现有图书
+        static async Task ListBookAsync(string command, string groupName)
+        {
+            try
+            {
+                StringBuilder text = new StringBuilder();
+
+                List<string> names = new List<string>();
+                ShelfData.Doors.ForEach(o => names.Add(o.Name));
+                text.AppendLine($"=== 书柜共有 {ShelfData.Doors.Count} 门，名字分别为 {StringUtil.MakePathList(names)} ===");
+
+                // 子参数
+                string param = command.Substring("list book".Length).Trim();
+                if (string.IsNullOrEmpty(param))
+                    text.AppendLine($"下面各门内图书信息");
+                else
+                    text.AppendLine($"下面列出名字 '{param}' 的各门内图书信息");
+
+                // 柜门名字，前方一致。如果为空表示全部柜门
+                int total_count = 0;
+                int door_count = 0;
+                foreach (var door in ShelfData.Doors)
+                {
+                    if (string.IsNullOrEmpty(param) == false
+                        && door.Name.StartsWith(param) == false)
+                        continue;
+
+                    text.AppendLine($"门 {door.Name} ({door.AllEntities.Count}):");
+                    int i = 1;
+                    foreach (var entity in door.AllEntities)
+                    {
+                        text.AppendLine($"    {i++}) {GetString(entity)}");
+                    }
+                    door_count++;
+                    total_count += door.AllEntities.Count;
+                }
+
+                text.AppendLine($"=== {door_count} 门，共 {total_count} 册 ===");
+                await SendMessageAsync(new string[] { groupName },
+text.ToString());
+
+            }
+            catch (Exception ex)
+            {
+                await SendMessageAsync(new string[] { groupName },
+                    $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
+            }
+
+            string GetString(Entity e)
+            {
+                return e.GetOiPii() + " " + e.Title;
+            }
         }
 
 

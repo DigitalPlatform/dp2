@@ -9962,6 +9962,25 @@ out strError);
                         return -1;
                     }
 
+                    // 检查读者权限
+                    // 合成读者记录的最终权限
+                    nRet = GetReaderRights(
+                        readerdom,
+                        out string rights,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "获得读者记录权限时发生错误: " + strError;
+                        return -1;
+                    }
+
+                    // 2021/8/2
+                    if (StringUtil.IsInList("denyresetmypassword", rights))
+                    {
+                        strError = "读者权限中包含 denyresetmypassword，不允许重设密码";
+                        return -1;
+                    }
+
                     // 观察 password 元素的 lastResetTime 属性，需在规定的时间长度以外才能再次进行重设
 #if NO
                     // 观察在 password 元素 tempPasswordExpire 属性中残留的失效期，必须在这个时间以后才能进行本次操作
