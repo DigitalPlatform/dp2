@@ -306,7 +306,7 @@ namespace DigitalPlatform.LibraryServer
         // Application通用锁。可以用来管理GlobalCfgDom等
         public ReaderWriterLock m_lock = new ReaderWriterLock();
         //public ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
-        public static int m_nLockTimeout = 5000;	// 5000=5秒
+        public static int m_nLockTimeout = 10*1000;	// 5000=5秒 2021/8/3 从 5 秒改为 10 秒
 
         // 读者记录锁。避免多线程改写同一读者记录造成的故障
         public RecordLockCollection ReaderLocks = new RecordLockCollection();

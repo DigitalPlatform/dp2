@@ -4917,6 +4917,8 @@ Culture=neutral, PublicKeyToken=null
                 if (StringUtil.CompareVersion(this.ServerVersion, "2.47") < 0)
                     return 0;
 
+                int nRedoCount = 0;
+                REDO_GET:
                 string strValue = "";
                 long lRet = channel.GetSystemParameter(Stop,
                     "arrived",
@@ -4925,6 +4927,13 @@ Culture=neutral, PublicKeyToken=null
                     out strError);
                 if (lRet == -1)
                 {
+                    // 2021/8/3
+                    if (channel.ErrorCode == ErrorCode.ServerTimeout
+                        && nRedoCount < 3)
+                    {
+                        nRedoCount++;
+                        goto REDO_GET;
+                    }
                     strError = "针对服务器 " + channel.Url + " 获得预约到书库名过程发生错误：" + strError;
                     goto ERROR1;
                 }

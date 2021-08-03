@@ -897,11 +897,19 @@ namespace DigitalPlatform.LibraryServer
                     //      ""      找到了前缀，并且 level 部分为空
                     //      其他     返回 level 部分
                     string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
-                    if (write_level == null
-                        || string.IsNullOrEmpty(write_level) == false)
+                    if (write_level == null)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "删除读者记录操作被拒绝。不具备 setreaderinfo (全部字段)权限。";
+                        result.ErrorInfo = "删除读者记录操作被拒绝。不具备 setreaderinfo (全部字段)权限 或 包含 r_delete 的 setreaderinfo: 权限";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    if (string.IsNullOrEmpty(write_level) == false
+                        && StringUtil.IsInList("r_delete", write_level.Replace("|", ",")) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "删除读者记录操作被拒绝。不具备包含 r_delete 的 setreaderinfo: 权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1788,6 +1796,18 @@ strLibraryCode);    // 读者所在的馆代码
                 }
                 else if (strAction == "delete")
                 {
+                    // 2021/8/3
+
+                    string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+                    if (string.IsNullOrEmpty(write_level) == false)
+                    {
+                        // 微调一下，让 element_names 中增加包含 libraryCode 和 oi 这两个原本是服务器自动维护的元素
+                        element_names = StringUtil.Append(_reader_element_names, new string[] { "libraryCode", "oi" });
+                        
+                        var names = GetElementNames(write_level);
+                        element_names = element_names.Intersect(names).ToArray();
+                    }
+
                     // return:
                     //      -2  记录中有流通信息，不能删除
                     //      -1  出错
@@ -2402,6 +2422,22 @@ root, strLibraryCode);
             {
                 strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
                 goto ERROR1;
+            }
+
+            // 2021/8/3
+            string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+            if (string.IsNullOrEmpty(write_level) == false)
+            {
+                var outof_names = GetOutofElements(domExist,
+                    element_names,
+                    new string[] { "password" });
+                if (outof_names.Count > 0)
+                {
+                    strError = $"删除读者记录被拒绝。记录中下列元素超过当前用户可修改权限范围: {StringUtil.MakePathList(outof_names)}";
+                    kernel_errorcode = ErrorCodeValue.AccessDenied;
+                    domOperLog = null;  // 表示不必写入日志
+                    return -1;
+                }
             }
 
             byte[] output_timestamp = null;
@@ -6964,6 +7000,8 @@ out strError);
                         throw new Exception($"不存在名为 '{part}' 的元素组");
                     results.AddRange(results);
                 }
+                else if (part.StartsWith("r_"))
+                    continue;
                 else
                 {
                     // 2021/7/23
@@ -7075,14 +7113,14 @@ out strError);
             foreach (string r2 in list2)
             {
                 string prefix = GetPrefix(r2);
-                foreach(string r1 in list1)
+                foreach (string r1 in list1)
                 {
                     if (r1 == prefix || r1.Contains(prefix + ":"))
                         delete_list.Add(r1);
                 }
             }
 
-            foreach(var right in delete_list)
+            foreach (var right in delete_list)
             {
                 list1.Remove(right);
             }
@@ -7099,6 +7137,38 @@ out strError);
             if (index == -1)
                 return text;
             return text.Substring(0, index);
+        }
+
+        // 获得数据中存在的 element_names 以外的元素名列表
+        // 指根元素下的元素，和所有位置的 dprms:file 元素
+        // parameters:
+        //      element_names   元素名集合
+        //      exclude_names   判断时要忽视的元素名
+        static List<string> GetOutofElements(XmlDocument readerdom,
+            string[] element_names,
+            string[] exclude_names)
+        {
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            List<string> results = new List<string>();
+            var nodes = readerdom.DocumentElement.SelectNodes("* | //dprms:file", nsmgr);
+            //List<XmlNode> nodes = new List<XmlNode>(readerdom.DocumentElement.SelectNodes("*").Cast<XmlNode>());
+            //nodes.AddRange(readerdom.DocumentElement.SelectNodes("//dprms:file").Cast<XmlNode>());
+            foreach (XmlElement element in nodes)
+            {
+                string name = GetMyName(element);
+
+                // 忽略判断一些保留字段
+                if (Array.IndexOf(exclude_names, name) != -1)
+                    continue;
+
+                if (Array.IndexOf(element_names, name) == -1)
+                    results.Add(name);
+            }
+
+            StringUtil.RemoveDupNoSort(ref results);
+            return results;
         }
     }
 }
