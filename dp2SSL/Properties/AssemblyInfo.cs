@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.38")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.38.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.39")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.39.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -123,3 +123,4 @@ using System.Windows;
 //      1.8.36 (2021/7/21) 针对 getreaderinfo:n 和 setreaderinfo:n 权限做了适配
 //      1.8.37 (2021/7/27) shelf.xml 中可以用参数 <key name="读者信息屏蔽" value="barcode:1|0,name,department"/> 定义读者信息区如何屏蔽字段文字
 //      1.8.38 (2021/8/2) 新版本
+//      1.8.39 (2021/8/4) 远程命令 list book xxx 其中 xxx 部分支持带有星号的通配符用法。如果没有通配符则要求精确一致匹配

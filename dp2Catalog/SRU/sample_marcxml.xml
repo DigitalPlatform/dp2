@@ -1,0 +1,556 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<searchRetrieveResponse xmlns="http://www.loc.gov/zing/srw/">
+  <version>1.2</version>
+  <numberOfRecords>239392</numberOfRecords>
+  <records>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     naa  22      i 4500</leader>
+          <controlfield tag="001">9911676899703961</controlfield>
+          <controlfield tag="005">20201211182147.0</controlfield>
+          <controlfield tag="008">201210s                          e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">9911676899703961</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">·附录· “中国近代史上的民族主义”国际学术研讨会综述</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="b">社会科学文献出版社</subfield>
+            <subfield code="c">2012</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVE">
+            <subfield code="8">53450029640003961</subfield>
+            <subfield code="c">61445461100003961</subfield>
+            <subfield code="e">Available</subfield>
+            <subfield code="m">皮书数据库</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>9911676899703961</recordIdentifier>
+      <recordPosition>1</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     nam  22      i 4500</leader>
+          <controlfield tag="001">990006328110203961</controlfield>
+          <controlfield tag="005">20180624052758.0</controlfield>
+          <controlfield tag="008">100622s2008           d          e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">978-7-04-024765-7</subfield>
+            <subfield code="c">CNY29.00</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">990006328110203961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">(aleph)000632811BNU03</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">HTST</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="2" tag="040">
+            <subfield code="a">BNU</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'08中国改革跟踪报告</subfield>
+            <subfield code="c">国家发展和改革委员会经济体制与管理研究所课题组编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="a">北京</subfield>
+            <subfield code="b">高等教育出版社</subfield>
+            <subfield code="c">2008</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">233页</subfield>
+            <subfield code="c">23cm</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVA">
+            <subfield code="0">990006328110203961</subfield>
+            <subfield code="8">22196328920003961</subfield>
+            <subfield code="a">86BNU_INST</subfield>
+            <subfield code="b">MDMP</subfield>
+            <subfield code="c">中文书—A-H(主馆四层)</subfield>
+            <subfield code="d">D61 bnu201</subfield>
+            <subfield code="e">available</subfield>
+            <subfield code="f">2</subfield>
+            <subfield code="g">0</subfield>
+            <subfield code="j">BCPLA</subfield>
+            <subfield code="k">8</subfield>
+            <subfield code="p">1</subfield>
+            <subfield code="q">总馆普通文献</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVA">
+            <subfield code="0">990006328110203961</subfield>
+            <subfield code="8">22196328890003961</subfield>
+            <subfield code="a">86BNU_INST</subfield>
+            <subfield code="b">MDMP</subfield>
+            <subfield code="c">中文库本书—A-H(主馆六层)</subfield>
+            <subfield code="d">D61 bnu201</subfield>
+            <subfield code="e">available</subfield>
+            <subfield code="f">1</subfield>
+            <subfield code="g">0</subfield>
+            <subfield code="j">BCPSA</subfield>
+            <subfield code="k">8</subfield>
+            <subfield code="p">2</subfield>
+            <subfield code="q">总馆普通文献</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>990006328110203961</recordIdentifier>
+      <recordPosition>2</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     nam  22      i 4500</leader>
+          <controlfield tag="001">9910666685103961</controlfield>
+          <controlfield tag="005">20190611122003.0</controlfield>
+          <controlfield tag="008">190611s########                  e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">7-5639-1624-5</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">9910666685103961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">CXEBK11520129</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">BNU</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'2005中国小说排行榜</subfield>
+            <subfield code="h">电子资源</subfield>
+            <subfield code="c">《小说选刊》杂志社编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="b">北京工业大学出版社</subfield>
+            <subfield code="c">2006</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">在线资源(414页)</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVE">
+            <subfield code="8">53366422830003961</subfield>
+            <subfield code="c">61350263510003961</subfield>
+            <subfield code="e">Available</subfield>
+            <subfield code="m">超星电子图书</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>9910666685103961</recordIdentifier>
+      <recordPosition>3</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     nam  22      i 4500</leader>
+          <controlfield tag="001">9910698661303961</controlfield>
+          <controlfield tag="005">20190628125105.0</controlfield>
+          <controlfield tag="008">190628s########                  e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">7-5639-1737-3</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">9910698661303961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">CXEBK11796202</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">BNU</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'2006中国散文排行榜</subfield>
+            <subfield code="h">电子资源</subfield>
+            <subfield code="c">周明，王宗仁主编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="b">北京工业大学出版社</subfield>
+            <subfield code="c">2007</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">在线资源(281页)</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">周明</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">王宗仁</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVE">
+            <subfield code="8">53377600100003961</subfield>
+            <subfield code="c">61350263510003961</subfield>
+            <subfield code="e">Available</subfield>
+            <subfield code="m">超星电子图书</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>9910698661303961</recordIdentifier>
+      <recordPosition>4</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     nam  22      i 4500</leader>
+          <controlfield tag="001">9910679586503961</controlfield>
+          <controlfield tag="005">20190611124123.0</controlfield>
+          <controlfield tag="008">190611s########                  e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">7-5639-1735-7</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">9910679586503961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">CXEBK11773881</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">BNU</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'2006中国随笔排行榜</subfield>
+            <subfield code="h">电子资源</subfield>
+            <subfield code="c">张秀枫主编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="b">北京工业大学出版社</subfield>
+            <subfield code="c">2007</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">在线资源(263页)</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">张秀枫</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVE">
+            <subfield code="8">53371561000003961</subfield>
+            <subfield code="c">61350263510003961</subfield>
+            <subfield code="e">Available</subfield>
+            <subfield code="m">超星电子图书</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>9910679586503961</recordIdentifier>
+      <recordPosition>5</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     nam  22      i 4500</leader>
+          <controlfield tag="001">9910679562303961</controlfield>
+          <controlfield tag="005">20190611124124.0</controlfield>
+          <controlfield tag="008">190611s########                  e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">7-5639-1736-5</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">9910679562303961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">CXEBK11773970</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">BNU</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'2006中国小说排行榜</subfield>
+            <subfield code="h">电子资源</subfield>
+            <subfield code="c">《小说选刊》杂志社编选</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="b">北京工业大学出版社</subfield>
+            <subfield code="c">2007</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">在线资源(332页)</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVE">
+            <subfield code="8">53371600950003961</subfield>
+            <subfield code="c">61350263510003961</subfield>
+            <subfield code="e">Available</subfield>
+            <subfield code="m">超星电子图书</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>9910679562303961</recordIdentifier>
+      <recordPosition>6</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     nam  22      i 4500</leader>
+          <controlfield tag="001">9910679562203961</controlfield>
+          <controlfield tag="005">20190611124117.0</controlfield>
+          <controlfield tag="008">190611s########                  e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">7-5639-1738-1</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">9910679562203961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">CXEBK11773991</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">BNU</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'2006中国杂文排行榜</subfield>
+            <subfield code="h">电子资源</subfield>
+            <subfield code="c">蒋元明编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="b">北京工业大学出版社</subfield>
+            <subfield code="c">2007</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">在线资源(263页)</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">蒋元明</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVE">
+            <subfield code="8">53371583100003961</subfield>
+            <subfield code="c">61350263510003961</subfield>
+            <subfield code="e">Available</subfield>
+            <subfield code="m">超星电子图书</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>9910679562203961</recordIdentifier>
+      <recordPosition>7</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     cam  22     -- 4500</leader>
+          <controlfield tag="001">990000742440203961</controlfield>
+          <controlfield tag="005">20180625021326.0</controlfield>
+          <controlfield tag="008">921022s1992           d          e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">7-5426-0585-2</subfield>
+            <subfield code="c">CNY11.50</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">990000742440203961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">(aleph)000074244BNU03</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">BSD</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="2" tag="040">
+            <subfield code="a">BSD</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'90中国犹太学研究总汇</subfield>
+            <subfield code="c">朱威烈,金应忠编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="a">上海</subfield>
+            <subfield code="b">三联书店上海分店</subfield>
+            <subfield code="c">1992.8</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">314页</subfield>
+            <subfield code="c">20cm</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">朱威烈</subfield>
+            <subfield code="4">编</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">金应忠</subfield>
+            <subfield code="4">编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVA">
+            <subfield code="0">990000742440203961</subfield>
+            <subfield code="8">22237621790003961</subfield>
+            <subfield code="a">86BNU_INST</subfield>
+            <subfield code="b">MDMP</subfield>
+            <subfield code="c">中文库本书—IJKZ(主馆七层)</subfield>
+            <subfield code="d">K18 7</subfield>
+            <subfield code="e">available</subfield>
+            <subfield code="f">1</subfield>
+            <subfield code="g">0</subfield>
+            <subfield code="j">BCPSZ</subfield>
+            <subfield code="k">8</subfield>
+            <subfield code="p">1</subfield>
+            <subfield code="q">总馆普通文献</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVA">
+            <subfield code="0">990000742440203961</subfield>
+            <subfield code="8">22237621810003961</subfield>
+            <subfield code="a">86BNU_INST</subfield>
+            <subfield code="b">MDMP</subfield>
+            <subfield code="c">中文预约书—1986-1995(主馆地下二层戊区)</subfield>
+            <subfield code="d">K18 7</subfield>
+            <subfield code="e">available</subfield>
+            <subfield code="f">1</subfield>
+            <subfield code="g">0</subfield>
+            <subfield code="j">BCPH8</subfield>
+            <subfield code="k">8</subfield>
+            <subfield code="p">2</subfield>
+            <subfield code="q">总馆普通文献</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>990000742440203961</recordIdentifier>
+      <recordPosition>8</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     nam  22      i 4500</leader>
+          <controlfield tag="001">9910694470203961</controlfield>
+          <controlfield tag="005">20190627190421.0</controlfield>
+          <controlfield tag="008">190627s########                  e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">7-221-02968-7</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">9910694470203961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">CXEBK11025789</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">BNU</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'92中国备忘</subfield>
+            <subfield code="h">电子资源</subfield>
+            <subfield code="c">房方，周晓农编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="b">贵州人民出版社</subfield>
+            <subfield code="c">1993</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">在线资源(385页)</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">房方</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">周晓农</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVE">
+            <subfield code="8">53375879850003961</subfield>
+            <subfield code="c">61350263510003961</subfield>
+            <subfield code="e">Available</subfield>
+            <subfield code="m">超星电子图书</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>9910694470203961</recordIdentifier>
+      <recordPosition>9</recordPosition>
+    </record>
+    <record>
+      <recordSchema>marcxml</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>     nam  22      i 4500</leader>
+          <controlfield tag="001">990002072570203961</controlfield>
+          <controlfield tag="005">20180625022608.0</controlfield>
+          <controlfield tag="008">010915s1993           d          e chi^^</controlfield>
+          <datafield ind1=" " ind2=" " tag="020">
+            <subfield code="a">7-221-02968-7</subfield>
+            <subfield code="c">CNY7.70</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">990002072570203961</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="035">
+            <subfield code="a">(aleph)000207257BNU03</subfield>
+          </datafield>
+          <datafield ind1=" " ind2="0" tag="040">
+            <subfield code="a">BNU</subfield>
+          </datafield>
+          <datafield ind1="1" ind2=" " tag="245">
+            <subfield code="a">'92中国备忘</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="260">
+            <subfield code="a">贵阳</subfield>
+            <subfield code="b">贵州人民出版社</subfield>
+            <subfield code="c">1993.3</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="300">
+            <subfield code="a">385,[10]页</subfield>
+            <subfield code="b">照片</subfield>
+            <subfield code="c">20cm</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">房方</subfield>
+            <subfield code="4">编</subfield>
+          </datafield>
+          <datafield ind1="0" ind2=" " tag="700">
+            <subfield code="a">周晓农</subfield>
+            <subfield code="4">编</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVA">
+            <subfield code="0">990002072570203961</subfield>
+            <subfield code="8">22230115580003961</subfield>
+            <subfield code="a">86BNU_INST</subfield>
+            <subfield code="b">MDMP</subfield>
+            <subfield code="c">中文库本书—A-H(主馆六层)</subfield>
+            <subfield code="d">I25 955</subfield>
+            <subfield code="e">available</subfield>
+            <subfield code="f">1</subfield>
+            <subfield code="g">0</subfield>
+            <subfield code="j">BCPSA</subfield>
+            <subfield code="k">8</subfield>
+            <subfield code="p">1</subfield>
+            <subfield code="q">总馆普通文献</subfield>
+          </datafield>
+          <datafield ind1=" " ind2=" " tag="AVA">
+            <subfield code="0">990002072570203961</subfield>
+            <subfield code="8">22230115630003961</subfield>
+            <subfield code="a">86BNU_INST</subfield>
+            <subfield code="b">MDMP</subfield>
+            <subfield code="c">中文预约书—1986-1995(主馆地下二层戊区)</subfield>
+            <subfield code="d">I25 955</subfield>
+            <subfield code="e">available</subfield>
+            <subfield code="f">1</subfield>
+            <subfield code="g">0</subfield>
+            <subfield code="j">BCPH8</subfield>
+            <subfield code="k">8</subfield>
+            <subfield code="p">2</subfield>
+            <subfield code="q">总馆普通文献</subfield>
+          </datafield>
+        </record>
+      </recordData>
+      <recordIdentifier>990002072570203961</recordIdentifier>
+      <recordPosition>10</recordPosition>
+    </record>
+  </records>
+  <nextRecordPosition>11</nextRecordPosition>
+  <extraResponseData xmlns:xb="http://www.exlibris.com/repository/search/xmlbeans/">
+    <xb:exact>false</xb:exact>
+    <xb:responseDate>2021-08-04T11:08:33+0800</xb:responseDate>
+  </extraResponseData>
+</searchRetrieveResponse>

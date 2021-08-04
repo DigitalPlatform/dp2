@@ -582,6 +582,8 @@ string strError)
                     this.MenuItem_openZBatchSearchForm_Click(this, null);	// 打开一个ZBatchSearchForm检索窗
                 else if (strType == "dp2Catalog.AmazonSearchForm")
                     this.MenuItem_openAmazonSearchForm_Click(this, null);	// 打开一个AmaxonSearchForm检索窗
+                else if (strType == "dp2Catalog.SruSearchForm")
+                    this.MenuItem_openSruSearchForm_Click(this, null);	// 打开一个AmaxonSearchForm检索窗
                 else
                     continue;
 
@@ -1213,6 +1215,12 @@ string strError)
                 else if (this.ActiveMdiChild is AmazonSearchForm)
                 {
                     AmazonSearchForm search = (AmazonSearchForm)this.ActiveMdiChild;
+
+                    search.NextBatch();
+                }
+                else if (this.ActiveMdiChild is SruSearchForm)
+                {
+                    var search = (SruSearchForm)this.ActiveMdiChild;
 
                     search.NextBatch();
                 }

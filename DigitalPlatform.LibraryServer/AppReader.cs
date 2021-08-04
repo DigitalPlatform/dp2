@@ -1803,7 +1803,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         // 微调一下，让 element_names 中增加包含 libraryCode 和 oi 这两个原本是服务器自动维护的元素
                         element_names = StringUtil.Append(_reader_element_names, new string[] { "libraryCode", "oi" });
-                        
+
                         var names = GetElementNames(write_level);
                         element_names = element_names.Intersect(names).ToArray();
                     }
@@ -7014,6 +7014,47 @@ out strError);
 
             // 去掉重复元素
             StringUtil.RemoveDupNoSort(ref results);
+
+            // 2021/8/4
+            // 去除发生冲突的名字。比如 ?name 和后方的 name 冲突了，?name 应予删除
+            results = RemoveConflictName(results);
+
+            return results;
+        }
+
+        // 去除发生冲突的名字。比如 ?name 和后方的 name 冲突了，?name 应予删除
+        public static List<string> RemoveConflictName(List<string> names)
+        {
+            List<string> results = new List<string>(names);
+            for (int i = 0; i < results.Count; i++)
+            {
+                string name = results[i];
+                if (name.StartsWith("?") == false)
+                    continue;
+                name = name.Substring(1);
+                for (int j = 0; j < results.Count; j++)
+                {
+                    if (j == i)
+                        continue;
+                    if (j > i)
+                    {
+                        if (name == results[j])
+                        {
+                            results.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (name == results[j])
+                        {
+                            results.RemoveAt(j);
+                            j--;
+                        }
+                    }
+                }
+            }
 
             return results;
         }

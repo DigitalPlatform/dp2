@@ -186,7 +186,7 @@ namespace RfidTool
         public void BeginVerifyEnvironment()
         {
             Task.Run(() => {
-                if (EntityStoreage.GetCount() == 0)
+                if (UseLocalStoreage() && EntityStoreage.GetCount() == 0)
                 {
                     string text = "尚未导入脱机册信息";
                     ShowMessage(text);

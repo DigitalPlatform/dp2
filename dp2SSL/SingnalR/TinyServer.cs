@@ -28,6 +28,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
 using dp2SSL.Models;
+using System.Text.RegularExpressions;
 
 namespace dp2SSL
 {
@@ -1553,6 +1554,13 @@ update
             return true;
         }
 
+        // https://stackoverflow.com/questions/30299671/matching-strings-with-wildcard
+        // If you want to implement both "*" and "?"
+        private static String WildCardToRegular(String value)
+        {
+            return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
+        }
+
         // 列出书柜中的现有图书
         static async Task ListBookAsync(string command, string groupName)
         {
@@ -1577,7 +1585,7 @@ update
                 foreach (var door in ShelfData.Doors)
                 {
                     if (string.IsNullOrEmpty(param) == false
-                        && door.Name.StartsWith(param) == false)
+                        && Regex.IsMatch(door.Name, WildCardToRegular(param)) == false /*door.Name.StartsWith(param) == false*/)
                         continue;
 
                     text.AppendLine($"门 {door.Name} ({door.AllEntities.Count}):");

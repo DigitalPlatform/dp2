@@ -52,29 +52,44 @@ namespace dp2Catalog
 
         public async Task<string> BuildSearchUrl(string server_name,
             string word,
-            string use_name)
+            string use_name,
+            string recordSchema,
+            string start_id,
+            string maximumRecords)
         {
             var targets = this.ListTargets(server_name);
             if (targets.Count == 0)
             {
-                throw new Exception( $"配置中没有找到名为 '{server_name}' 的服务器对象");
+                throw new Exception($"配置中没有找到名为 '{server_name}' 的服务器对象");
             }
 
             var target = targets[0];
             string use_value = await GetUseValue(target, use_name).ConfigureAwait(false);
 
+            string result = "";
             // &startRecord=1&maximumRecords=5
             if (string.IsNullOrEmpty(target.Version))
-                return $"{target.BaseUrl}?operation=searchRetrieve&recordSchema=marcxml&query={use_value}={word}";
+                result = $"{target.BaseUrl}?operation=searchRetrieve&query={use_value}={word}";
+            else
+                result = $"{target.BaseUrl}?version={target.Version}&operation=searchRetrieve&query={use_value}={word}";
 
-            return $"{target.BaseUrl}?version={target.Version}&operation=searchRetrieve&recordSchema=marcxml&query={use_value}={word}";
+            if (string.IsNullOrEmpty(recordSchema) == false)
+                result += $"&recordSchema={recordSchema}";
+
+            if (string.IsNullOrEmpty(start_id) == false)
+                result += $"&startRecord={start_id}";
+
+            if (string.IsNullOrEmpty(maximumRecords) == false)
+                result += $"&maximumRecords={maximumRecords}";
+
+            return result;
         }
 
         // 根据 use 的名称，获得可用于 API 的 use 值
         public async Task<string> GetUseValue(SruTarget target, string use_name)
         {
             var lines = await ListUses(target).ConfigureAwait(false);
-            foreach(var line in lines)
+            foreach (var line in lines)
             {
                 if (line.Name == use_name)
                     return line.Value;

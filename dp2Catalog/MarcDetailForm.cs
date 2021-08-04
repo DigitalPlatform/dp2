@@ -5442,6 +5442,34 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 strProtocol = "localfile";
                 goto BEGIN;
             }
+            else if (strProtocol.ToLower() == "sru")
+            {
+                if (this.CurrentRecord == null)
+                {
+                    this.m_autogenDataAssembly = null;
+                    this.m_detailHostObj = null;
+                    strError = "CurrentRecord为空，Assembly被清除";
+                    return -2;
+                }
+
+                string strCfgFileName = "dp2catalog_marc_autogen.cs";
+
+                string strMarcSyntaxOID = "";
+
+                strMarcSyntaxOID = this.GetCurrentMarcSyntaxOID(out strError);
+                if (String.IsNullOrEmpty(strMarcSyntaxOID) == true)
+                {
+                    strError = "因为: " + strError + "，无法获得配置文件 '" + strCfgFileName + "'";
+                    goto ERROR1;
+                }
+
+
+                strAutogenDataCfgFilename = this.MainForm.DataDir + "\\" + strMarcSyntaxOID.Replace(".", "_") + "\\" + strCfgFileName;
+                strAutogenDataCfgRefFilename = this.MainForm.DataDir + "\\" + strMarcSyntaxOID.Replace(".", "_") + "\\" + strCfgFileName + ".ref";
+
+                strProtocol = "localfile";
+                goto BEGIN;
+            }
             else
             {
                 strError = "暂不支持来自 '" + strProtocol + "'  协议的数据自动创建功能";

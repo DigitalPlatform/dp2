@@ -88,6 +88,7 @@
     <Compile Include="TestMergeRights.cs" />
     <Compile Include="TestPassword.cs" />
     <Compile Include="TestPatronBinding.cs" />
+    <Compile Include="TestRemoveConflictName.cs" />
     <Compile Include="TestRfid.cs" />
     <Compile Include="TestString.cs" />
   </ItemGroup>
