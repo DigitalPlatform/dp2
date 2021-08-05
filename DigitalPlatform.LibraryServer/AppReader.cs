@@ -1054,6 +1054,12 @@ namespace DigitalPlatform.LibraryServer
             if (domNewRec.DocumentElement != null)
                 domNewRec.DocumentElement.RemoveAttribute("importantFields");
 
+            // 2021/8/5
+            string data_fields = domNewRec.DocumentElement?.GetAttribute("dataFields");
+            if (domNewRec.DocumentElement != null)
+                domNewRec.DocumentElement.RemoveAttribute("dataFields");
+
+
             // return:
             //      -1  出错
             //      0   相等
@@ -1752,6 +1758,14 @@ strLibraryCode);    // 读者所在的馆代码
                         element_names = element_names.Intersect(names).ToArray();
                     }
 
+                    // 2021/8/5
+                    // 根据 data_fields 进行元素范围限定
+                    if (string.IsNullOrEmpty(data_fields) == false)
+                    {
+                        var names = StringUtil.SplitList(data_fields);
+                        element_names = element_names.Intersect(names).ToArray();
+                    }
+
                     // DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue errorcode;
                     // 执行"change"操作
                     // 1) 操作成功后, NewRecord中有实际保存的新记录，NewTimeStamp为新的时间戳
@@ -1805,6 +1819,14 @@ strLibraryCode);    // 读者所在的馆代码
                         element_names = StringUtil.Append(_reader_element_names, new string[] { "libraryCode", "oi" });
 
                         var names = GetElementNames(write_level);
+                        element_names = element_names.Intersect(names).ToArray();
+                    }
+
+                    // 2021/8/5
+                    // 根据 data_fields 进行元素范围限定
+                    if (string.IsNullOrEmpty(data_fields) == false)
+                    {
+                        var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
                     }
 

@@ -4196,18 +4196,19 @@ start_time_1,
             if (string.IsNullOrEmpty(strItemXml) == true)
                 return 0;
 
-            string strSubType = "";
-            string strType = "";
+            // 取出字段名列表参数到 name_list。注意是用的竖线分隔。例如 name|department
             StringUtil.ParseTwoPart(strFormat,
                 ":",
-                out strType,
-                out strSubType);
+                out string strType,
+                out string name_list);
 
-            if (string.IsNullOrEmpty(strSubType) == true)
+            /*
+            if (string.IsNullOrEmpty(name_list) == true)
             {
                 strResultXml = strItemXml;
                 return 0;
             }
+            */
 
             XmlDocument dom = new XmlDocument();
             try
@@ -4225,6 +4226,10 @@ start_time_1,
                 strResultXml = strItemXml;
                 return 0;
             }
+
+            // 2021/8/5
+            if (string.IsNullOrEmpty(name_list) == false)
+                FilterByLevel(dom, name_list);
 
             // ??
             // 去掉 <borrowHistory> 的下级元素
@@ -15870,7 +15875,7 @@ start_time_1,
             }
 
             // DateTime now = app.Clock.UtcNow;  //  今天  当下
-            
+
             // 2021/7/7
             // 操作时间
             DateTime now = DateTimeUtil.FromRfc1123DateTimeString(strOperTime);
@@ -17641,7 +17646,7 @@ start_time_1,
                 // 加入借阅册信息
                 nodeBorrow = readerdom.CreateElement("borrow");
                 nodeBorrow = (XmlElement)DomUtil.InsertFirstChild(root, nodeBorrow); // 2006/12/24 changed，2015/1/12 增加等号左边的部分 
-                                                                         // nodeBorrow = root.AppendChild(nodeBorrow);
+                                                                                     // nodeBorrow = root.AppendChild(nodeBorrow);
             }
 
             //

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.74.*")]
-[assembly: AssemblyFileVersion("3.74.0.0")]
+[assembly: AssemblyVersion("3.75.*")]
+[assembly: AssemblyFileVersion("3.75.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -266,3 +266,5 @@ ItemCanReturn()
 //		3.72 (2021/8/2) ResetPassword() API 做了改进，当读者记录的权限(由 reader 账户权限和读者记录 rights 元素合成而来)中包含 denyresetmypassword 时，不允许重设该读者的密码
 //		3.73 (2021/8/3) SetReaderInfo() API 除了原先的具有 setreaderinfo 权限的用户具有删除读者记录的权限外，新增允许具有 setreaderinfo:xxx|r_delete 权限的用户删除读者记录，不过还有一个限定条件是拟删除的读者记录中包含的数据元素不超过此用户的可修改字段范围
 //		3.74 (2021/8/4) 对 getreaderinfo:xxx 权限中 xxx 部分元素名序列中，处理好 ?name 和 name 互相覆盖的情况
+//		3.75 (2021/8/5) GetReaderInfo() API 的 formats 参数中可以使用 xml:name|department 这样的格式来限定返回的 XML 元素。元素名列表的用法，和权限字符串中 getreaderinfo 冒号后面的用法一样
+//						SetReaderInfo() API 提交保存的读者 XML 记录中，根元素的 dataFields 属性可指定元素名列表(逗号间隔)，表示 XML 记录中只有这些元素才是提交保存的内容，此外的其它元素都不会被保存时采用。这样可以提交很少的内容但避免了删除不该删除的字段。如果 dataFields 属性缺省，表示不进行这种限定，那么效果就是请求所提交的 XML 记录中所有元素都会被保存考虑，例如 XML 记录中未包含的元素会被当作删除此元素
