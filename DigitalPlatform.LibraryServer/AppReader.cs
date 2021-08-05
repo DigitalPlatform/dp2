@@ -1059,7 +1059,6 @@ namespace DigitalPlatform.LibraryServer
             if (domNewRec.DocumentElement != null)
                 domNewRec.DocumentElement.RemoveAttribute("dataFields");
 
-
             // return:
             //      -1  出错
             //      0   相等
@@ -1072,9 +1071,15 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 goto ERROR1;
 
+            // 注意: oldDom 是前端提供过来的，显然前端可能会说谎，那么这个比较新旧条码号的结果就堪忧了。改进的办法可以是这里真正从读者库取出来，然后进行比较 
+            bool bBarcodeChanged = false;
+            if (nRet == 1)
+                bBarcodeChanged = true;
+
             // 对读者身份的附加判断
             if (strAction == "change" && sessioninfo.UserType == "reader")
             {
+#if NO
                 /*
                 // 暂时不允许读者自己修改任何读者的信息
                 // 今后修改为：读者只能修改自己的记录，而且只能修改某些字段（其他修改被忽略）。
@@ -1091,15 +1096,9 @@ namespace DigitalPlatform.LibraryServer
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
-
+#endif
                 element_names = _selfchangeable_reader_element_names;
             }
-
-            // 注意: oldDom 是前端提供过来的，显然前端可能会说谎，那么这个比较新旧条码号的结果就堪忧了。改进的办法可以是这里真正从读者库取出来，然后进行比较 
-            bool bBarcodeChanged = false;
-            if (nRet == 1)
-                bBarcodeChanged = true;
-
 
             // return:
             //      -1  出错
@@ -1155,13 +1154,14 @@ namespace DigitalPlatform.LibraryServer
                 // 检查空条码号
                 if (// bBarcodeChanged == true &&
      (strAction == "new"
-        || strAction == "change"
+        /*|| strAction == "change"
         || strAction == "changestate"
         || strAction == "changeforegift"
-        || strAction == "changereaderbarcode")
+        || strAction == "changereaderbarcode"*/)
     && String.IsNullOrEmpty(strNewBarcode) == true
     )
                 {
+                    // 注: change 情况已经在 DoReaderChange() 中检查了
                     if (this.AcceptBlankReaderBarcode == false)
                     {
                         result.Value = -1;
@@ -1174,55 +1174,13 @@ namespace DigitalPlatform.LibraryServer
                 // 对读者证条码号查重，如果必要，并获得strRecPath
                 if ( // bBarcodeChanged == true &&
                     (strAction == "new"
-                        || strAction == "change"
+                        /*|| strAction == "change"
                         || strAction == "changestate"
                         || strAction == "changeforegift"
-                        || strAction == "changereaderbarcode")
+                        || strAction == "changereaderbarcode"*/)
                     && String.IsNullOrEmpty(strNewBarcode) == false
                     )
                 {
-#if NO
-                    // 验证条码号
-                    if (this.VerifyBarcode == true)
-                    {
-                        // return:
-                        //	0	invalid barcode
-                        //	1	is valid reader barcode
-                        //	2	is valid item barcode
-                        int nResultValue = 0;
-
-                        // return:
-                        //      -2  not found script
-                        //      -1  出错
-                        //      0   成功
-                        nRet = this.DoVerifyBarcodeScriptFunction(
-                            null,
-                            sessioninfo.LibraryCodeList,
-                            strNewBarcode,
-                            out nResultValue,
-                            out strError);
-                        if (nRet == -2 || nRet == -1 || nResultValue != 1)
-                        {
-                            if (nRet == -2)
-                                strError = "library.xml 中没有配置条码号验证函数，无法进行条码号验证";
-                            else if (nRet == -1)
-                            {
-                                strError = "验证读者证条码号的过程中出错"
-                                    + (string.IsNullOrEmpty(strError) == true ? "" : ": " + strError);
-                            }
-                            else if (nResultValue != 1)
-                            {
-                                strError = "条码号 '" + strNewBarcode + "' 经验证发现不是一个合法的读者证条码号"
-                                    + (string.IsNullOrEmpty(strError) == true ? "" : "(" + strError + ")");
-                            }
-                            result.Value = -1;
-                            result.ErrorInfo = strError + "。保存操作失败";
-                            result.ErrorCode = ErrorCode.InvalidReaderBarcode;
-                            return result;
-                        }
-                    }
-#endif
-
 
                     // 本函数只负责查重, 并不获得记录体
                     // return:
@@ -1323,38 +1281,16 @@ namespace DigitalPlatform.LibraryServer
                         strRecPath = first_dbname + "/?";
                     }
 
-                    // 注：要在 strRecPath 决定后再进行此调用
-                    // return:
-                    //      -3  条码号错误
-                    //      -2  not found script
-                    //      -1  出错
-                    //      0   成功
-                    nRet = this.DoVerifyReaderFunction(
-                        sessioninfo,
-                        strAction,
-                        strRecPath,
-                        domNewRec,
-                        bForce ? "dontVerifyBarcode" : "", // 2020/4/17 强制保存的时候不进行读者证条码号规则校验
-                        out strError);
-                    if (nRet != 0)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError + "。保存操作失败";
-                        if (nRet == -1)
-                            result.ErrorCode = ErrorCode.InvalidReaderBarcode;
-                        else
-                            result.ErrorCode = ErrorCode.SystemError;
-                        return result;
-                    }
+                    // doverifyreaderfunction 原来在这里
                 }
 
                 // 对显示名检查和查重
                 if (bDisplayNameChanged == true
-                    && (strAction == "new"
+                    && (strAction == "new" /*
                         || strAction == "change"
                         || strAction == "changestate"
                         || strAction == "changeforegift"
-                        || strAction == "changereaderbarcode")
+                        || strAction == "changereaderbarcode"*/)
                     && String.IsNullOrEmpty(strNewDisplayName) == false
                     )
                 {
@@ -1492,15 +1428,6 @@ namespace DigitalPlatform.LibraryServer
         "style", "force");
                 }
 
-#if NO
-                RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
-                if (channel == null)
-                {
-                    strError = "get channel error";
-                    goto ERROR1;
-                }
-#endif
-
                 // 兑现一个命令
                 if (strAction == "new")
                 {
@@ -1610,6 +1537,30 @@ namespace DigitalPlatform.LibraryServer
                     // 给 domNewRec 中添加 libraryCode 元素
                     {
                         DomUtil.SetElementText(domNewRec.DocumentElement, "libraryCode", strLibraryCode);
+                    }
+
+                    // 注：要在 strRecPath 决定后再进行此调用
+                    // return:
+                    //      -3  条码号错误
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    nRet = this.DoVerifyReaderFunction(
+                        sessioninfo,
+                        strAction,
+                        strRecPath,
+                        domNewRec,
+                        bForce ? "dontVerifyBarcode" : "", // 2020/4/17 强制保存的时候不进行读者证条码号规则校验
+                        out strError);
+                    if (nRet != 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError + "。保存操作失败";
+                        if (nRet == -1)
+                            result.ErrorCode = ErrorCode.InvalidReaderBarcode;
+                        else
+                            result.ErrorCode = ErrorCode.SystemError;
+                        return result;
                     }
 
                     // 2014/7/4
@@ -1774,6 +1725,7 @@ strLibraryCode);    // 读者所在的馆代码
                     //      -1  出错
                     //      0   成功
                     nRet = DoReaderChange(
+                        sessioninfo,
                         sessioninfo.LibraryCodeList,
                         element_names,
                         important_fields,
@@ -1790,21 +1742,24 @@ strLibraryCode);    // 读者所在的馆代码
                         out strSavedXml,    // strNewRecord,
                         out baNewTimestamp,
                         out strError,
+                        out ErrorCode library_errorcode,
                         out kernel_errorcode);
                     if (nRet == -1)
                     {
+                        // 2021/8/5
+                        if (library_errorcode != ErrorCode.SystemError)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = library_errorcode;
+                            return result;
+                        }
                         // 失败
                         domOperLog = null;  // 表示不必写入日志
                         goto ERROR1;
                     }
 
                     this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
-
-                    // 2016/9/9
-                    if (bBarcodeChanged
-                        && this.ChargingOperDatabase != null
-                        && this.ChargingOperDatabase.Enabled)
-                        this.ChargingOperDatabase.ChangePatronBarcode(strOldBarcode, strNewBarcode);
 
                     strSavedRecPath = strRecPath;   // 保存过程不会改变记录路径
                 }
@@ -1930,7 +1885,7 @@ strLibraryCode);    // 读者所在的馆代码
             return result;
         }
 
-        #region SetReaderInfo() 下级函数
+#region SetReaderInfo() 下级函数
 
         // 当路径整个为空的时候，自动选用第一个读者库
         // parameters:
@@ -2557,6 +2512,7 @@ root, strLibraryCode);
         //      -1  出错
         //      0   成功
         int DoReaderChange(
+            SessionInfo sessioninfo,
             string strCurrentLibraryCode,
             string[] element_names,
             string importantFields,
@@ -2573,12 +2529,14 @@ root, strLibraryCode);
             out string strNewRecord,
             out byte[] baNewTimestamp,
             out string strError,
+            out ErrorCode library_errorcode,
             out DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue errorcode)
         {
             strError = "";
             strExistingRecord = "";
             strNewRecord = "";
             baNewTimestamp = null;
+            library_errorcode = ErrorCode.SystemError;
             errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
 
             int nRedoCount = 0;
@@ -2641,31 +2599,90 @@ root, strLibraryCode);
                 goto ERROR1;
             }
 
+            // 2021/8/5
+            // 先合并新旧记录，得到真正保存的新记录内容状态。后面再进行新旧比较
+            if (bForce == false)
+            {
+                nRet = MergeTwoReaderXml(
+                element_names,
+                strAction,
+                domExist,
+                domNewRec,
+                importantFields == null || string.IsNullOrEmpty(importantFields) ? null : importantFields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
+                // out string strNewXml,
+                out XmlDocument domMerged,
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                /*
+                domNewRec = new XmlDocument();
+                try
+                {
+                    domNewRec.LoadXml(strNewXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "(1)读者记录装入 XMLDOM 时出错: " + ex.Message;
+                    return -1;
+                }
+                */
+                domNewRec = domMerged;
+            }
+
+
             bool bChangeReaderBarcode = false;
 
             string strOldBarcode = "";
             string strNewBarcode = "";
 
+            // 比较新旧记录的条码号是否有改变
+            // return:
+            //      -1  出错
+            //      0   相等
+            //      1   不相等
+            nRet = CompareTwoBarcode(domExist,
+                domNewRec,
+                out strOldBarcode,
+                out strNewBarcode,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // 注意: oldDom 是前端提供过来的，显然前端可能会说谎，那么这个比较新旧条码号的结果就堪忧了。改进的办法可以是这里真正从读者库取出来，然后进行比较 
+            bool bBarcodeChanged = false;
+            if (nRet == 1)
+                bBarcodeChanged = true;
+
+            // 对读者身份的附加判断
+            if (/*strAction == "change" && */sessioninfo.UserType == "reader")
+            {
+                if (sessioninfo.Account.Barcode != strNewBarcode)
+                {
+                    strError = "修改读者信息被拒绝。作为读者不能修改其他读者的读者记录";
+                    library_errorcode = ErrorCode.AccessDenied;
+                    return -1;
+                }
+
+                // element_names = _selfchangeable_reader_element_names;
+            }
+
+            // 2016/9/9
+            if (bBarcodeChanged
+                && this.ChargingOperDatabase != null
+                && this.ChargingOperDatabase.Enabled)
+                this.ChargingOperDatabase.ChangePatronBarcode(strOldBarcode, strNewBarcode);
+
+
             if (bExist == true) // 2008/5/29 
             {
-                // 比较新旧记录的条码号是否有改变
-                // return:
-                //      -1  出错
-                //      0   相等
-                //      1   不相等
-                nRet = CompareTwoBarcode(domExist,
-                    domNewRec,
-                    out strOldBarcode,
-                    out strNewBarcode,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+
 
                 string strDetailInfo = "";  // 关于读者记录里面是否有流通信息的详细提示文字
                 bool bHasCirculationInfo = false;   // 读者记录里面是否有流通信息
                 bool bDetectCiculationInfo = false; // 是否已经探测过读者记录中的流通信息
 
-                if (nRet == 1)  // 读者证条码号有改变
+                if (bBarcodeChanged)  // 读者证条码号有改变
                 {
                     // 观察已经存在的记录是否有流通信息
                     bHasCirculationInfo = IsReaderHasCirculationInfo(domExist,
@@ -2741,6 +2758,249 @@ root, strLibraryCode);
                 }
             }
 
+            string new_barcode = DomUtil.GetElementText(domNewRec.DocumentElement, "barcode");
+            // 检查空条码号
+            {
+                if (string.IsNullOrEmpty(new_barcode)
+                    && this.AcceptBlankReaderBarcode == false)
+                {
+                    strError = strError + "证条码号不能为空。保存操作失败";
+                    library_errorcode = ErrorCode.InvalidReaderBarcode;
+                    return -1;
+                }
+            }
+
+            // 对证条码号进行查重
+            if (bBarcodeChanged
+                && string.IsNullOrEmpty(new_barcode) == false)
+            {
+                // 本函数只负责查重, 并不获得记录体
+                // return:
+                //      -1  error
+                //      其他    命中记录条数(不超过nMax规定的极限)
+                nRet = this.SearchReaderRecDup(
+                    // sessioninfo.Channels,
+                    channel,
+                    new_barcode,
+                    100,
+                    out List<string> aPath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                bool bDup = false;
+                if (nRet == 0)
+                {
+                    bDup = false;
+                }
+                else if (nRet == 1) // 命中一条
+                {
+                    Debug.Assert(aPath.Count == 1, "");
+
+                    // 如果输入参数中没有指定strRecPath
+                    if (String.IsNullOrEmpty(strRecPath) == true)
+                    {
+                        if (strAction == "new") // 2006/12/23 add
+                            bDup = true;
+                        else
+                            strRecPath = aPath[0];
+                    }
+                    else
+                    {
+                        if (aPath[0] == strRecPath) // 正好是自己
+                        {
+                            bDup = false;
+                        }
+                        else
+                        {
+                            // 别的记录中已经使用了这个条码号
+                            bDup = true;
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.Assert(nRet > 1, "");
+                    bDup = true;
+                }
+
+                // 报错
+                if (bDup == true)
+                {
+                    /*
+                    if (String.IsNullOrEmpty(strNewDisplayName) == false)
+                        strError = "证条码号 '" + strNewBarcode + "' 或 显示名 '" + strNewDisplayName + "' 已经被下列读者记录使用了: " + StringUtil.MakePathList(aPath) + "。操作失败。";
+                    else
+                    */
+                    strError = "证条码号 '" + strNewBarcode + "' 已经被下列读者记录使用了: " + StringUtil.MakePathList(aPath) + "。操作失败。";
+
+                    library_errorcode = ErrorCode.ReaderBarcodeDup;
+                    return -1;
+                }
+            }
+
+            // 校验读者记录
+            {
+                // 注：要在 strRecPath 决定后再进行此调用
+                // return:
+                //      -3  条码号错误
+                //      -2  not found script
+                //      -1  出错
+                //      0   成功
+                nRet = this.DoVerifyReaderFunction(
+                    sessioninfo,
+                    strAction,
+                    strRecPath,
+                    domNewRec,
+                    bForce ? "dontVerifyBarcode" : "", // 2020/4/17 强制保存的时候不进行读者证条码号规则校验
+                    out strError);
+                if (nRet != 0)
+                {
+                    strError = strError + "。保存操作失败";
+                    if (nRet == -1)
+                        library_errorcode = ErrorCode.InvalidReaderBarcode;
+                    else
+                        library_errorcode = ErrorCode.SystemError;
+                    return -1;
+                }
+            }
+
+            // return:
+            //      -1  出错
+            //      0   相等
+            //      1   不相等
+            nRet = CompareTwoDisplayName(domOldRec,
+                domNewRec,
+                out string strOldDisplayName,
+                out string strNewDisplayName,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            bool bDisplayNameChanged = false;
+            if (nRet == 1)
+                bDisplayNameChanged = true;
+            // 对显示名检查和查重
+            if (bDisplayNameChanged == true
+                && (strAction == "change"
+                    || strAction == "changestate"
+                    || strAction == "changeforegift"
+                    || strAction == "changereaderbarcode")
+                && String.IsNullOrEmpty(strNewDisplayName) == false
+                )
+            {
+                {
+                    int nResultValue = -1;
+                    // 检查名字空间。
+                    // return:
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    nRet = this.DoVerifyBarcodeScriptFunction(
+                        null,
+                        "",
+                        strNewDisplayName,
+                        out nResultValue,
+                        out strError);
+                    if (nRet == -2)
+                    {
+                        // 没有校验条码号功能，所以无法校验用户名和条码号名字空间的冲突
+                        goto SKIP_VERIFY;
+                    }
+                    if (nRet == -1)
+                    {
+                        strError = "校验显示名 '" + strNewDisplayName + "' 和证条码号(空间)潜在冲突过程中(调用函数DoVerifyBarcodeScriptFunction()时)发生错误: " + strError;
+                        goto ERROR1;
+                    }
+
+                    Debug.Assert(nRet == 0, "");
+
+                    if (nResultValue == -1)
+                    {
+                        strError = "校验显示名 '" + strNewDisplayName + "' 和证条码号(空间)潜在冲突过程中发生错误: " + strError;
+                        goto ERROR1;
+                    }
+
+                    if (nResultValue == 1)
+                    {
+                        // TODO: 需要多语种
+                        strError = "显示名 '" + strNewDisplayName + "' 和读者证条码号名字空间发生冲突，不能作为显示名。";
+                        goto ERROR1;
+                    }
+                }
+
+            SKIP_VERIFY:
+                List<string> aPath = null;
+
+                // 防止和其他读者的显示名相重复
+                // 本函数只负责查重, 并不获得记录体
+                // return:
+                //      -1  error
+                //      其他    命中记录条数(不超过nMax规定的极限)
+                nRet = SearchReaderDisplayNameDup(
+                    // sessioninfo.Channels,
+                    channel,
+                    strNewDisplayName,
+                    100,
+                    out aPath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                bool bDup = false;
+                if (nRet == 0)
+                {
+                    bDup = false;
+                }
+                else if (nRet == 1) // 命中一条
+                {
+                    Debug.Assert(aPath.Count == 1, "");
+
+                    // 如果输入参数中没有指定strRecPath
+                    if (String.IsNullOrEmpty(strRecPath) == true)
+                    {
+                        if (strAction == "new")
+                            bDup = true;
+                        else
+                            strRecPath = aPath[0];
+                    }
+                    else
+                    {
+                        if (aPath[0] == strRecPath) // 正好是自己
+                        {
+                            bDup = false;
+                        }
+                        else
+                        {
+                            // 别的记录中已经使用了这个条码号
+                            bDup = true;
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.Assert(nRet > 1, "");
+                    bDup = true;
+                }
+
+                // 报错
+                if (bDup == true)
+                {
+                    strError = "显示名 '" + strNewDisplayName + "' 已经被下列读者记录使用了: " + StringUtil.MakePathList(aPath) + "。操作失败。";
+
+                    library_errorcode = ErrorCode.ReaderBarcodeDup;
+                    return -1;
+                }
+
+                // 对工作人员帐户名进行查重。虽然不是强制性的，但是可以避免大部分误会
+                // 注：工作人员依然可以创建和读者显示名相重的帐户名
+                if (SearchUserNameDup(strNewDisplayName) == true)
+                {
+                    strError = "显示名 '" + strNewDisplayName + "' 已经被工作人员帐户使用。操作失败。";
+                    library_errorcode = ErrorCode.ReaderBarcodeDup;
+                    return -1;
+                }
+            }
+
             // 观察时间戳是否发生变化
             nRet = ByteArray.Compare(baOldTimestamp, exist_timestamp);
             if (nRet != 0)
@@ -2786,34 +3046,7 @@ root, strLibraryCode);
 
             // TODO: 当strAction==changestate时，只允许<state>和<comment>两个元素内容发生变化
 
-            if (bForce == false)
-            {
-                nRet = MergeTwoReaderXml(
-                    element_names,
-                    strAction,
-                    domExist,
-                    domNewRec,
-                    importantFields == null || string.IsNullOrEmpty(importantFields) ? null : importantFields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
-                    // out string strNewXml,
-                    out XmlDocument domMerged,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                /*
-                domNewRec = new XmlDocument();
-                try
-                {
-                    domNewRec.LoadXml(strNewXml);
-                }
-                catch (Exception ex)
-                {
-                    strError = "(1)读者记录装入 XMLDOM 时出错: " + ex.Message;
-                    return -1;
-                }
-                */
-                domNewRec = domMerged;
-            }
+            // 原来 MergeTwo 在这里
 
             // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
             if (this.IsCurrentChangeableReaderPath(strRecPath,
@@ -3386,7 +3619,7 @@ root, strLibraryCode);
         }
 
 
-        #endregion
+#endregion
 
 
         // 为读者XML添加附加信息

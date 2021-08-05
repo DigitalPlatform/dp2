@@ -14,6 +14,447 @@ namespace DigitalPlatform.Marc
     {
         static readonly string CRLF = "\n";
 
+
+        #region
+
+        static string Link(string s1, string sep, string s2)
+        {
+            if (string.IsNullOrEmpty(s2))
+                return s1;
+            if (string.IsNullOrEmpty(s1))
+                return s2;
+            return s1 + sep + s2;
+        }
+
+        static string GetText(XmlNodeList nodes, string sep)
+        {
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach (XmlNode node in nodes)
+            {
+                if (i > 0)
+                    text.Append(sep);
+                text.Append(node.Value);
+                i++;
+            }
+
+            return text.ToString();
+        }
+
+        /* // https://en.wikipedia.org/wiki/International_Standard_Bibliographic_Description
+0: Content form and media type area
+1: Title and statement of responsibility area, consisting of 
+1.1 Title proper
+1.2 Parallel title
+1.3 Other title information
+1.4 Statement of responsibility
+2: Edition area
+3: Material or type of resource specific area (e.g., the scale of a map or the numbering of a periodical)
+4: Publication, production, distribution, etc., area
+5: Material description area (e.g., number of pages in a book or number of CDs issued as a unit)
+6: Series area
+7: Notes area
+8: Resource identifier and terms of availability area (e.g., ISBN, ISSN)
+ * */
+        // parameters:
+        //     strStyle    创建结果的风格。如果为 "" 表示创建所有大项和题名拼音、数字资源。
+        public static int ScriptDC(
+            string strRecPath,
+            string strXml,
+            string strStyle,
+            XmlElement maps_container,
+            out List<NameValueLine> results,
+            out string strError)
+        {
+            strError = "";
+            results = new List<NameValueLine>();
+
+            if (strStyle == null)
+                strStyle = "";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            if (dom.DocumentElement == null)
+                return 0;
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dc", "http://purl.org/dc/elements/1.1/");
+            nsmgr.AddNamespace("srw_dc", "info:srw/schema/1/dc-schema");
+
+            if (StringUtil.IsInList("*", strStyle)
+                || string.IsNullOrEmpty(strStyle))
+                strStyle += ",areas,coverimageurl,titlepinyin,object,summary,subjects,classes";
+
+            /*
+* content_form_area
+* title_area
+* edition_area
+* material_specific_area
+* publication_area
+* material_description_area
+* series_area
+* notes_area
+* resource_identifier_area
+* * */
+
+            /*
+            if (StringUtil.IsInList("coverimageurl", strStyle))
+            {
+                string imageUrl = ScriptUtil.GetCoverImageUrl(strMARC, "LargeImage");
+                if (string.IsNullOrEmpty(imageUrl) == false)
+                    results.Add(new NameValueLine("_coverImage", imageUrl, "coverimageurl"));
+            }
+
+            // 题名拼音
+            // 200 字段
+            if (StringUtil.IsInList("titlepinyin", strStyle))
+            {
+                MarcNodeList subfields = record.select("field[@name='200']/subfield[@name='9']");
+                if (subfields.count == 0)
+                    subfields = record.select("field[@name='200']/subfield[@name='A']");    // 兼容 CALIS 习惯
+                if (subfields.count > 0)
+                {
+                    List<string> texts = new List<string>();
+                    subfields.Contents.ForEach((o) => { texts.Add(o); });
+                    if (texts.Count > 0)
+                        results.Add(new NameValueLine("题名与责任说明拼音", StringUtil.MakePathList(texts, " ; "), "titlepinyin"));
+                }
+            }
+            */
+
+            // 1: Title and statement of responsibility area
+            // title contributor
+            if (StringUtil.IsInList("areas,title_area", strStyle))
+            {
+                var titles = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:title/@text", nsmgr);
+                var authors = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:contributor/@text", nsmgr);
+                var text = Link(GetText(titles, "; "), " / ", GetText(authors, "; "));
+
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("题名与责任者", text, "title_area"));
+            }
+
+            // 题名
+            if (StringUtil.IsInList("title", strStyle))
+            {
+                var titles = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:title/@text", nsmgr);
+                var text = GetText(titles, "; ");
+
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("题名", text, "title"));
+            }
+
+            // 作者
+            if (StringUtil.IsInList("author", strStyle))
+            {
+                var authors = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:contributor/@text", nsmgr);
+                var text = GetText(authors, "; ");
+
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("责任者", text, "author"));
+            }
+
+            // 责任者检索点
+            if (StringUtil.IsInList("author_accesspoint", strStyle))
+            {
+                var authors = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:contributor/@text", nsmgr);
+                var text = GetText(authors, "; ");
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("责任者检索点",
+                        text,
+                        "author_accesspoint"));
+            }
+
+            /*
+            // 2: Edition area
+            // 205 字段
+            if (StringUtil.IsInList("areas,edition_area", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='205']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("版本项", BuildUnimarcFields(fields), "edition_area"));
+            }
+            */
+
+            /*
+            // 资料特殊细节
+            // 3: Material or type of resource specific area(e.g., the scale of a map or the numbering of a periodical)
+            // 206 207 208 字段
+            if (StringUtil.IsInList("areas,material_specific_area", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='206' or @name='207' or @name='208']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("资料特殊细节项", BuildUnimarcFields(fields), "material_specific_area"));
+            }
+            */
+
+            // 出版发行项
+            // 4: Publication, production, distribution, etc., area
+            if (StringUtil.IsInList("areas,publication_area", strStyle))
+            {
+                //var authors = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:publisher/@text", nsmgr);
+                //var text = GetText(authors, " ");
+
+                //if (string.IsNullOrEmpty(text) == false)
+                //    results.Add(new NameValueLine("出版发行项", text, "publication_area"));
+            }
+
+            // 出版者
+            // publisher
+            if (StringUtil.IsInList("publisher", strStyle))
+            {
+                var publishers = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:publisher/@text", nsmgr);
+                var text = GetText(publishers, " ");
+
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("出版者", text, "publisher"));
+            }
+
+            // 出版时间
+            // date
+            if (StringUtil.IsInList("publishtime", strStyle))
+            {
+                var dates = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:date/@text", nsmgr);
+                var text = GetText(dates, " ");
+
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("出版时间", text, "publishtime"));
+            }
+
+            /*
+            // 载体形态项
+            // 215 字段
+            // 5: Material description area(e.g., number of pages in a book or number of CDs issued as a unit)
+            if (StringUtil.IsInList("areas,material_description_area", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='215']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("载体形态项", BuildUnimarcFields(fields), "material_description_area"));
+            }
+            */
+
+            /*
+            // 页数
+            if (StringUtil.IsInList("pages", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='215']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("页数",
+                        BuildUnimarcFields(fields, "a").Trim().Trim(new char[] { ',' }),
+                        "pages"));
+            }
+            */
+
+            /*
+            // 丛编项
+            // 6: Series area
+            // 225 字段
+            if (StringUtil.IsInList("areas,series_area", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='225']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("丛编项", BuildUnimarcFields(fields), "series_area"));
+            }
+            */
+
+            /*
+            // 附注
+            // 7: Notes area
+            // 300 304 312 314 320 324 326 327 字段
+            if (StringUtil.IsInList("areas,notes_area", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='300' or @name='304' or @name='312' or @name='314'  or @name='320'  or @name='324'  or @name='326'  or @name='327']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("附注项", BuildUnimarcFields(fields), "notes_area,notes"));
+            }
+            */
+
+            // 获得方式
+            // 8: resource_identifier_area
+            // 8: Resource identifier and terms of availability area(e.g., ISBN, ISSN)
+            if (StringUtil.IsInList("areas,resource_identifier_area", strStyle))
+            {
+                // identifier
+                var identifiers = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:identifier/@text", nsmgr);
+                var text = GetText(identifiers, "; ");
+
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("获得方式项", text, "resource_identifier_area"));
+            }
+
+            /*
+            // ISBN
+            if (StringUtil.IsInList("isbn", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='010']/subfield[@name='a' or @name='z']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                        if (o.Name == "z")
+                            text.Append("(错误的)");
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("ISBN", text.ToString(), "isbn"));
+            }
+            */
+
+            /*
+            // ISSN
+            if (StringUtil.IsInList("issn", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='011']/subfield[@name='a' or @name='z']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                        if (o.Name == "z")
+                            text.Append("(错误的)");
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("ISSN", text.ToString(), "issn"));
+            }
+            */
+
+            /*
+            // 价格
+            if (StringUtil.IsInList("price", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='010' or @name='011' or @name='091']/subfield[@name='d']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("价格", text.ToString(), "price"));
+            }
+            */
+
+            // 提要文摘
+            // description
+            if (StringUtil.IsInList("summary", strStyle))
+            {
+                var descriptions = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:description/@text", nsmgr);
+                var text = GetText(descriptions, "; ");
+
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("提要文摘", text, "summary"));
+            }
+
+            // 主题分析项
+            // subject
+            if (StringUtil.IsInList("subjects", strStyle))
+            {
+                var subjects = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:subject/@text", nsmgr);
+                var text = GetText(subjects, "; ");
+
+                if (string.IsNullOrEmpty(text))
+                    results.Add(new NameValueLine("主题分析", text, "subjects"));
+            }
+
+            /*
+            // 分类号
+            // 69x 字段
+            if (StringUtil.IsInList("classes", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='690' or @name='692' or @name='694']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("分类号", BuildUnimarcFields(fields), "classes"));
+            }
+
+            // 中图法分类号
+            if (StringUtil.IsInList("clc_class", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='690']/subfield[@name='a']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("中图法分类号", text.ToString(), "clc_class"));
+            }
+
+            // 科图法分类号
+            if (StringUtil.IsInList("ktf_class", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='692']/subfield[@name='a']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("科图法分类号", text.ToString(), "ktf_class"));
+            }
+
+            // 人大法分类号
+            if (StringUtil.IsInList("rdf_class", strStyle))
+            {
+                StringBuilder text = new StringBuilder();
+                record.select("field[@name='694']/subfield[@name='a']")
+                    .List.ForEach((o) =>
+                    {
+                        if (text.Length > 0)
+                            text.Append(CRLF);
+                        text.Append(o.Content);
+                    });
+                if (text.Length > 0)
+                    results.Add(new NameValueLine("人大法分类号", text.ToString(), "rdf_class"));
+            }
+            */
+
+            /*
+            // 相关题名
+            if (StringUtil.IsInList("other_titles", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='500' or @name='501' or @name='503'  or @name='512' or @name='513' or @name='514' or @name='515' or @name='516' or @name='520' or @name='530' or @name='531' or @name='532' or @name='540' or @name='541']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("相关题名", BuildUnimarcFields(fields), "other_titles"));
+            }
+            */
+
+            /*
+            // 数字资源
+            if (StringUtil.IsInList("object", strStyle))
+            {
+
+                string objectTable = ScriptUtil.BuildObjectXmlTable(strMARC,
+                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template | BuildObjectHtmlTableStyle.TemplateMultiHit : BuildObjectHtmlTableStyle.None,
+                    "unimarc",
+                    strRecPath,
+                    maps_container);
+                //if (string.IsNullOrEmpty(objectTable) == false)
+                //    results.Add(new NameValueLine("数字资源", objectTable, "object"));
+
+                // 2018/11/5
+                if (string.IsNullOrEmpty(objectTable) == false)
+                {
+                    var line = new NameValueLine("数字资源", "", "object");
+                    line.Xml = objectTable;
+                    results.Add(line);
+                }
+            }
+            */
+
+            return 0;
+        }
+
+
+        #endregion
+
         #region UNIMARC
 
         /* // https://en.wikipedia.org/wiki/International_Standard_Bibliographic_Description
