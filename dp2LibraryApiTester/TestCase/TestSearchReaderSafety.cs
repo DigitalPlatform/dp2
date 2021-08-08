@@ -198,7 +198,6 @@ namespace dp2LibraryApiTester
 
                 {
                     DataModel.SetMessage($"正在创建测试用读者库 '{_globalPatronDbName}'...");
-                    // 创建一个书目库
                     // parameters:
                     // return:
                     //      -1  出错
@@ -218,7 +217,6 @@ namespace dp2LibraryApiTester
 
                 {
                     DataModel.SetMessage($"正在创建测试用读者库 '{_haidianPatronDbName}'...");
-                    // 创建一个书目库
                     // parameters:
                     // return:
                     //      -1  出错
@@ -238,7 +236,6 @@ namespace dp2LibraryApiTester
 
                 {
                     DataModel.SetMessage($"正在创建测试用读者库 '{_xichengPatronDbName}'...");
-                    // 创建一个书目库
                     // parameters:
                     // return:
                     //      -1  出错

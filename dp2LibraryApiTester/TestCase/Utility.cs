@@ -42,5 +42,59 @@ namespace dp2LibraryApiTester
             return 0;
         }
 
+        // 设置条码号校验规则
+        public static int SetBarcodeValidation(
+            string validation_innerxml,
+            out string strError)
+        {
+            strError = "";
+
+            LibraryChannel channel = DataModel.GetChannel();
+
+            try
+            {
+                long lRet = channel.SetSystemParameter(null,
+    "circulation",
+    "barcodeValidation",
+    validation_innerxml,
+    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return 0;
+            }
+            finally
+            {
+                DataModel.ReturnChannel(channel);
+            }
+        }
+
+        // 设置借阅权限表
+        public static int SetRightsTable(
+            string innerxml,
+            out string strError)
+        {
+            strError = "";
+
+            LibraryChannel channel = DataModel.GetChannel();
+
+            try
+            {
+                long lRet = channel.SetSystemParameter(null,
+    "circulation",
+    "rightsTable",
+    innerxml,
+    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return 0;
+            }
+            finally
+            {
+                DataModel.ReturnChannel(channel);
+            }
+        }
+
     }
 }

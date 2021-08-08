@@ -21,9 +21,9 @@ namespace dp2LibraryApiTester
             }
         }
 
-        public static void SetMessage(string text)
+        public static void SetMessage(string text, string style = "")
         {
-            MainForm.AppendString(text + "\r\n");
+            MainForm.AppendString(text + "\r\n", style);
         }
 
         public static void SetHtml(string text)

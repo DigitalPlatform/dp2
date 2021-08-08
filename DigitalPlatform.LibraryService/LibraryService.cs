@@ -11398,6 +11398,98 @@ true);
                 // 读者权限
                 if (strCategory == "circulation")
                 {
+                    // 2021/8/6
+                    // 临时修改内存中的 app.AcceptBlankReaderBarcode 值
+                    if (strName == "?AcceptBlankReaderBarcode")
+                    {
+                        app.AcceptBlankReaderBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.AcceptBlankItemBarcode 值
+                    if (strName == "?AcceptBlankItemBarcode")
+                    {
+                        app.AcceptBlankItemBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.VerifyBarcode 值
+                    if (strName == "?VerifyBarcode")
+                    {
+                        app.VerifyBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.UpperCaseItemBarcode 值
+                    if (strName == "?UpperCaseItemBarcode")
+                    {
+                        app.UpperCaseItemBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.UpperCaseReaderBarcode 值
+                    if (strName == "?UpperCaseReaderBarcode")
+                    {
+                        app.UpperCaseReaderBarcode = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.VerifyBookType 值
+                    if (strName == "?VerifyBookType")
+                    {
+                        app.VerifyBookType = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.VerifyReaderType 值
+                    if (strName == "?VerifyReaderType")
+                    {
+                        app.VerifyReaderType = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.BorrowCheckOverdue 值
+                    if (strName == "?BorrowCheckOverdue")
+                    {
+                        app.BorrowCheckOverdue = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.CirculationNotifyTypes 值
+                    if (strName == "?CirculationNotifyTypes")
+                    {
+                        app.CirculationNotifyTypes = strValue;
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.AcceptBlankRoomName 值
+                    if (strName == "?AcceptBlankRoomName")
+                    {
+                        app.AcceptBlankRoomName = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.VerifyRegisterNoDup 值
+                    if (strName == "?VerifyRegisterNoDup")
+                    {
+                        app.AcceptBlankRoomName = DomUtil.IsBooleanTrue(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.PatronAdditionalFroms 值
+                    if (strName == "?PatronAdditionalFroms")
+                    {
+                        app.PatronAdditionalFroms = StringUtil.SplitList(strValue);
+                        goto END1;
+                    }
+
+                    // 临时修改内存中的 app.PatronAdditionalFields 值
+                    if (strName == "?PatronAdditionalFields")
+                    {
+                        app.PatronAdditionalFields = StringUtil.SplitList(strValue);
+                        goto END1;
+                    }
+
                     // 设置<valueTables>元素
                     // strValue中是下级片断定义，没有<valueTables>元素作为根。
                     if (strName == "valueTables")

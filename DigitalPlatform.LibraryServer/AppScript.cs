@@ -1855,6 +1855,7 @@ namespace DigitalPlatform.LibraryServer
         //      -2  not found script
         //      -1  出错
         //      0   成功
+        //      1   校验发现错误(非条码号的其它错误)
         public int DoVerifyReaderFunction(
             SessionInfo sessioninfo,
             string strAction,
@@ -1922,6 +1923,11 @@ namespace DigitalPlatform.LibraryServer
             // 执行函数
             try
             {
+                // return:
+                //      -3  条码号错误
+                //      -1  调用出错
+                //      0   校验正确
+                //      1   校验发现错误(非条码号的其它错误)
                 return host.VerifyReader(
                     sessioninfo,
                     strAction,
@@ -1965,7 +1971,7 @@ namespace DigitalPlatform.LibraryServer
         //      -3  条码号错误
         //      -1  调用出错
         //      0   校验正确
-        //      1   校验发现错误
+        //      1   校验发现错误(非条码号的其它错误)
         public virtual int VerifyReader(
             SessionInfo sessioninfo,
             string strAction,
@@ -1995,7 +2001,7 @@ namespace DigitalPlatform.LibraryServer
                         if (strNewBarcode.ToUpper() != strNewBarcode)
                         {
                             strError = "读者证条码号 '" + strNewBarcode + "' 中的字母应为大写";
-                            return 1;
+                            return -3;
                         }
                     }
 

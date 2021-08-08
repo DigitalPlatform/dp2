@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -44,7 +45,9 @@ namespace dp2LibraryApiTester
                 return;
             }
 
-            ClearForPureTextOutputing(this.webBrowser1);
+            // ClearForPureTextOutputing(this.webBrowser1);
+            ClearHtml(this.webBrowser1);
+
             AppendString("Form1_Load\r\n");
 
             LoadSettings();
@@ -133,7 +136,8 @@ string style = "")
 
         private void MenuItem_test_searchReaderSafety_Click(object sender, EventArgs e)
         {
-            Task.Run(()=> {
+            Task.Run(() =>
+            {
                 try
                 {
                     TestSearchReaderSafety.TestCross();
@@ -150,6 +154,33 @@ string style = "")
 
 
         #region console
+
+        /// <summary>
+        /// 清除已有的 HTML 显示
+        /// </summary>
+        public void ClearHtml(WebBrowser webBrowser)
+        {
+            string strCssUrl = Path.Combine(ClientInfo.DataDir, "history.css");
+
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+
+            string strJs = "";
+
+            {
+                HtmlDocument doc = webBrowser.Document;
+
+                if (doc == null)
+                {
+                    webBrowser.Navigate("about:blank");
+                    doc = webBrowser.Document;
+                }
+                doc = doc.OpenNew(true);
+            }
+
+            WriteHtml(webBrowser,
+                "<html><head>" + strLink + strJs + "</head><body>");
+        }
+
 
         /// <summary>
         /// 将浏览器控件中已有的内容清除，并为后面输出的纯文本显示做好准备
@@ -241,8 +272,11 @@ string style = "")
         }
 
         // 线程安全
-        public void AppendString(string strText)
+        // parameters:
+        //      style 为 begin end warning error green 之一
+        public void AppendString(string strText, string style = "")
         {
+            /*
             if (this.webBrowser1.InvokeRequired)
             {
                 this.webBrowser1.Invoke(new Action<string>(AppendString), strText);
@@ -250,6 +284,14 @@ string style = "")
             }
             this.WriteTextToConsole(strText);
             ScrollToEnd();
+            */
+            strText = strText.Replace("\r", "\n");
+            strText = strText.TrimEnd(new char[] { '\n' });
+            string[] lines = strText.Split(new char[] { '\n' });
+            foreach (string line in lines)
+            {
+                AppendHtml($"<div class='debug {style}'>" + HttpUtility.HtmlEncode(line).Replace(" ","&nbsp;") + "</div>");
+            }
         }
 
         // 线程安全
@@ -274,7 +316,8 @@ string style = "")
 
         private void MenuItem_test_searchBiblioSafety_Click(object sender, EventArgs e)
         {
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 try
                 {
                     NormalResult result = TestSearchBiblioSafety.PrepareEnvironment();
@@ -311,7 +354,8 @@ string style = "")
 
         private void MenuItem_test_searchItemSafety_Click(object sender, EventArgs e)
         {
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 try
                 {
                     TestSearchItemSafety.TestAll("item");
@@ -325,6 +369,21 @@ string style = "")
                 }
             });
 
+        }
+
+        private void MenuItem_test_setReaderInfoApi_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    TestSetReaderInfoApi.TestAll();
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
         }
     }
 }

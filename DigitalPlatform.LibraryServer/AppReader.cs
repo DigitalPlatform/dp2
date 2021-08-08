@@ -316,12 +316,32 @@ namespace DigitalPlatform.LibraryServer
             List<string> error_names = new List<string>();
             foreach (var strElementName in outof_names)
             {
+                /*
                 string old_outerXml = GetOuterXml(domExistParam, strElementName);
-
                 string new_outerXml = GetOuterXml(domNew, strElementName);
 
                 if (old_outerXml != new_outerXml)
                     error_names.Add(strElementName);
+                */
+                // 如果是 fingerprint face palmprint 元素，则只比较 InnerText
+                if (strElementName == "fingerprint"
+                    || strElementName == "face"
+                    || strElementName == "palmprint")
+                {
+                    string old_innerText = DomUtil.GetElementText(domExistParam.DocumentElement, strElementName);
+                    string new_innerText = DomUtil.GetElementText(domNew.DocumentElement, strElementName);
+
+                    if (old_innerText != new_innerText)
+                        error_names.Add(strElementName);
+                }
+                else
+                {
+                    string old_outerXml = GetOuterXml(domExistParam, strElementName);
+                    string new_outerXml = GetOuterXml(domNew, strElementName);
+
+                    if (old_outerXml != new_outerXml)
+                        error_names.Add(strElementName);
+                }
             }
 
             if (error_names.Count > 0)
@@ -581,6 +601,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有实质性修改
         //      1   发生了实质性修改
         int BuildNewReaderRecord(XmlDocument domNewRec,
+            string[] important_fields,
             string rights,
             out string strXml,
             out string strError)
@@ -697,6 +718,42 @@ namespace DigitalPlatform.LibraryServer
             {
                 DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
                 bChanged = true;
+            }
+
+            // 检查重要元素是否兑现创建
+            if (important_fields != null && important_fields.Length > 0)
+            {
+                // 2021/8/8
+                // 实际发生了内容修改的、超出权限的元素名集合
+                List<string> error_names = new List<string>();
+                foreach (var strElementName in important_fields)
+                {
+                    // 如果是 fingerprint face palmprint 元素，则只比较 InnerText
+                    if (strElementName == "fingerprint"
+                        || strElementName == "face"
+                        || strElementName == "palmprint")
+                    {
+                        string old_innerText = DomUtil.GetElementText(domNewRec.DocumentElement, strElementName);
+                        string new_innerText = DomUtil.GetElementText(dom.DocumentElement, strElementName);
+
+                        if (old_innerText != new_innerText)
+                            error_names.Add(strElementName);
+                    }
+                    else
+                    {
+                        string old_outerXml = GetOuterXml(domNewRec, strElementName);
+                        string new_outerXml = GetOuterXml(dom, strElementName);
+
+                        if (old_outerXml != new_outerXml)
+                            error_names.Add(strElementName);
+                    }
+                }
+
+                if (error_names.Count > 0)
+                {
+                    strError = $"创建读者记录被拒绝。下列元素超过当前用户权限: '{StringUtil.MakePathList(error_names)}'";
+                    return -1;
+                }
             }
 
             strXml = dom.OuterXml;
@@ -1058,6 +1115,13 @@ namespace DigitalPlatform.LibraryServer
             string data_fields = domNewRec.DocumentElement?.GetAttribute("dataFields");
             if (domNewRec.DocumentElement != null)
                 domNewRec.DocumentElement.RemoveAttribute("dataFields");
+
+            // 2021/8/8
+            if (strAction == "new" && string.IsNullOrEmpty(data_fields) == false)
+            {
+                strError = "当 action 为 'new' 时，读者记录 XML 根元素不应包含 dataFields 元素";
+                goto ERROR1;
+            }
 
             // return:
             //      -1  出错
@@ -1499,6 +1563,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
                         nRet = BuildNewReaderRecord(domNewRec,
+                            string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                             sessioninfo.RightsOrigin,
                             out string xml,
                             out strError);
@@ -1545,6 +1610,7 @@ namespace DigitalPlatform.LibraryServer
                     //      -2  not found script
                     //      -1  出错
                     //      0   成功
+                    //      1   校验发现错误(非条码号的其它错误)
                     nRet = this.DoVerifyReaderFunction(
                         sessioninfo,
                         strAction,
@@ -1556,7 +1622,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         result.Value = -1;
                         result.ErrorInfo = strError + "。保存操作失败";
-                        if (nRet == -1)
+                        if (nRet == -3) // 2021/8/6
                             result.ErrorCode = ErrorCode.InvalidReaderBarcode;
                         else
                             result.ErrorCode = ErrorCode.SystemError;
@@ -1798,7 +1864,7 @@ strLibraryCode);    // 读者所在的馆代码
                         bForce,
                         channel,
                         strRecPath,
-                        strOldXml,
+                        // strOldXml,
                         baOldTimestamp,
                         strOldBarcode,
                         // strNewBarcode,
@@ -1806,10 +1872,21 @@ strLibraryCode);    // 读者所在的馆代码
                         ref strExistingXml,
                         ref baNewTimestamp,
                         ref domOperLog,
+                        out ErrorCode library_errorcode,
                         ref kernel_errorcode,
                         out strError);
                     if (nRet == -1)
+                    {
+                        // 2021/8/5
+                        if (library_errorcode != ErrorCode.SystemError)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = library_errorcode;
+                            return result;
+                        }
                         goto ERROR1;
+                    }
                     if (nRet == -2)
                     {
                         result.Value = -1;
@@ -2175,7 +2252,7 @@ root, strLibraryCode);
             bool bForce,
             RmsChannel channel,
             string strRecPath,
-            string strOldXml,
+            // string strOldXml,
             byte[] baOldTimestamp,
             string strOldBarcode,
             // string strNewBarcode,
@@ -2183,11 +2260,12 @@ root, strLibraryCode);
             ref string strExistingXml,
             ref byte[] baNewTimestamp,
             ref XmlDocument domOperLog,
-            ref DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode,
+            out ErrorCode library_errorcode,
+            ref ErrorCodeValue kernel_errorcode,
             out string strError)
         {
             strError = "";
-
+            library_errorcode = ErrorCode.SystemError;
             int nRedoCount = 0;
             int nRet = 0;
             long lRet = 0;
@@ -2220,10 +2298,10 @@ root, strLibraryCode);
                 {
                     strError = "证条码号为 '" + strOldBarcode + "' 的读者记录已不存在";
                     kernel_errorcode = ErrorCodeValue.NotFound;
+                    library_errorcode = ErrorCode.ReaderBarcodeNotFound;
                     // goto ERROR1;
                     return 0;   // 2009/7/17 changed
                 }
-
 
                 if (nRet > 1)
                 {
@@ -2240,12 +2318,14 @@ root, strLibraryCode);
                         if (aPath.IndexOf(strRecPath) == -1)
                         {
                             strError = "证条码号 '" + strOldBarcode + "' 已经被下列多条读者记录使用了: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/ + "'，但并不包括strRecPath所指的路径 '" + strRecPath + "'。删除操作失败。";
+                            library_errorcode = ErrorCode.ReaderBarcodeDup;
                             goto ERROR1;
                         }
                     }
                     else
                     {
                         strError = "证条码号 '" + strOldBarcode + "' 已经被下列多条读者记录使用了: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/ + "'，在未指定记录路径的情况下，无法定位和删除。";
+                        library_errorcode = ErrorCode.ReaderBarcodeDup;
                         goto ERROR1;
                     }
                 }
@@ -2276,25 +2356,24 @@ root, strLibraryCode);
 
             // Debug.Assert(strReaderDbName != "", "");
 
-            byte[] exist_timestamp = null;
-            string strOutputPath = "";
-            string strMetaData = "";
+            // byte[] exist_timestamp = null;
+            // string strOutputPath = "";
+            // string strMetaData = "";
 
         REDOLOAD:
-
-
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(strRecPath,
                 out strExistingXml,
-                out strMetaData,
-                out exist_timestamp,
-                out strOutputPath,
+                out string strMetaData,
+                out byte [] exist_timestamp,
+                out string strOutputPath,
                 out strError);
             if (lRet == -1)
             {
                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                 {
                     kernel_errorcode = channel.OriginErrorCode;
+                    library_errorcode = ErrorCode.NotFound;
                     goto ERROR1;
                 }
                 else
@@ -2307,7 +2386,6 @@ root, strLibraryCode);
 
             // 把记录装入DOM
             XmlDocument domExist = new XmlDocument();
-
             try
             {
                 domExist.LoadXml(strExistingXml);
@@ -2345,6 +2423,7 @@ root, strLibraryCode);
                 if (bHasCirculationInfo == true)
                 {
                     strError = "删除操作被拒绝。因拟删除的读者记录 '" + strRecPath + "' 中包含有 " + strDetailInfo + "";
+                    library_errorcode = ErrorCode.HasCirculationInfo;
                     goto ERROR2;
                 }
             }
@@ -2359,6 +2438,7 @@ root, strLibraryCode);
                 {
                     strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
                     kernel_errorcode = ErrorCodeValue.TimestampMismatch;
+                    library_errorcode = ErrorCode.TimestampMismatch;
                     baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
                     goto ERROR1;
                 }
@@ -2367,7 +2447,9 @@ root, strLibraryCode);
                 // 功能做的精细一点，需要比较strOldXml和strExistingXml中要害字段是否被改变了，如果没有改变，是不必报错的
 
                 // 如果前端给出了旧记录，就有和库中记录进行比较的基础
-                if (String.IsNullOrEmpty(strOldXml) == false)
+                // if (String.IsNullOrEmpty(strOldXml) == false)
+                if (domOldRec != null && domOldRec.DocumentElement != null
+                    && domOldRec.DocumentElement.HasChildNodes)
                 {
                     // 比较两个记录, 看看和读者静态信息有关的字段是否发生了变化
                     // return:
@@ -2382,7 +2464,7 @@ root, strLibraryCode);
 
                         strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
                         kernel_errorcode = ErrorCodeValue.TimestampMismatch;
-
+                        library_errorcode = ErrorCode.TimestampMismatch;    // TODO: 建议给一个专门的错误码表示“期间原记录已经被修改”
                         baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
                         goto ERROR1;
                     }
@@ -2398,6 +2480,7 @@ root, strLibraryCode);
                 out string strLibraryCode) == false)
             {
                 strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
+                library_errorcode = ErrorCode.AccessDenied;
                 goto ERROR1;
             }
 
@@ -2407,23 +2490,32 @@ root, strLibraryCode);
             {
                 var outof_names = GetOutofElements(domExist,
                     element_names,
-                    new string[] { "password" });
+                    new string[] { "password",
+                        "libraryCode",
+                        "refID",
+                        "oi",
+                        "info",
+                        "borrows",
+                        "overdues",
+                        "reservations",
+                        "outofReservations" }); // 注: 把系统自己管理的一些元素从检测范围排除
                 if (outof_names.Count > 0)
                 {
                     strError = $"删除读者记录被拒绝。记录中下列元素超过当前用户可修改权限范围: {StringUtil.MakePathList(outof_names)}";
                     kernel_errorcode = ErrorCodeValue.AccessDenied;
+                    library_errorcode = ErrorCode.AccessDenied;
                     domOperLog = null;  // 表示不必写入日志
                     return -1;
                 }
             }
 
-            byte[] output_timestamp = null;
+            // byte[] output_timestamp = null;
 
             Debug.Assert(strRecPath != "", "");
 
             lRet = channel.DoDeleteRes(strRecPath,
                 baOldTimestamp,
-                out output_timestamp,
+                out byte [] output_timestamp,
                 out strError);
             if (lRet == -1)
             {
@@ -2432,6 +2524,7 @@ root, strLibraryCode);
                 {
                     strError = "证条码号为 '" + strOldBarcode + "' 的读者记录(在删除的时候发现)已不存在";
                     kernel_errorcode = ErrorCodeValue.NotFound;
+                    library_errorcode = ErrorCode.NotFound;
                     return 0;
                 }
 
@@ -2442,6 +2535,7 @@ root, strLibraryCode);
                         strError = "反复删除均遇到时间戳冲突, 超过10次重试仍然失败";
                         baNewTimestamp = output_timestamp;
                         kernel_errorcode = channel.OriginErrorCode;
+                        library_errorcode = ErrorCode.TimestampMismatch;
                         goto ERROR1;
                     }
                     // 发现时间戳不匹配
@@ -2530,14 +2624,14 @@ root, strLibraryCode);
             out byte[] baNewTimestamp,
             out string strError,
             out ErrorCode library_errorcode,
-            out DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue errorcode)
+            out ErrorCodeValue kernel_errorcode)
         {
             strError = "";
             strExistingRecord = "";
             strNewRecord = "";
             baNewTimestamp = null;
             library_errorcode = ErrorCode.SystemError;
-            errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
+            kernel_errorcode = ErrorCodeValue.NoError;
 
             int nRedoCount = 0;
             bool bExist = true;    // strRecPath所指的记录是否存在?
@@ -2582,7 +2676,7 @@ root, strLibraryCode);
                 else
                 {
                     strError = "保存操作发生错误, 在读入原有记录阶段:" + strError;
-                    errorcode = channel.OriginErrorCode;
+                    kernel_errorcode = channel.OriginErrorCode;
                     return -1;
                 }
             }
@@ -2667,17 +2761,8 @@ root, strLibraryCode);
                 // element_names = _selfchangeable_reader_element_names;
             }
 
-            // 2016/9/9
-            if (bBarcodeChanged
-                && this.ChargingOperDatabase != null
-                && this.ChargingOperDatabase.Enabled)
-                this.ChargingOperDatabase.ChangePatronBarcode(strOldBarcode, strNewBarcode);
-
-
             if (bExist == true) // 2008/5/29 
             {
-
-
                 string strDetailInfo = "";  // 关于读者记录里面是否有流通信息的详细提示文字
                 bool bHasCirculationInfo = false;   // 读者记录里面是否有流通信息
                 bool bDetectCiculationInfo = false; // 是否已经探测过读者记录中的流通信息
@@ -2847,6 +2932,7 @@ root, strLibraryCode);
                 //      -2  not found script
                 //      -1  出错
                 //      0   成功
+                //      1   校验发现错误(非条码号的其它错误)
                 nRet = this.DoVerifyReaderFunction(
                     sessioninfo,
                     strAction,
@@ -2857,7 +2943,7 @@ root, strLibraryCode);
                 if (nRet != 0)
                 {
                     strError = strError + "。保存操作失败";
-                    if (nRet == -1)
+                    if (nRet == -3) // 2021/8/6
                         library_errorcode = ErrorCode.InvalidReaderBarcode;
                     else
                         library_errorcode = ErrorCode.SystemError;
@@ -3010,7 +3096,7 @@ root, strLibraryCode);
                     // 2008/5/29 
                     // 在强制修改模式下，时间戳不一致意义重大，直接返回出错，而不进行要害字段的比对判断
                     strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
-                    errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
+                    kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
                     return -1;  // timestamp mismatch
                 }
 
@@ -3037,7 +3123,7 @@ root, strLibraryCode);
                     else
                         strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
 
-                    errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
+                    kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
                     return -1;  // timestamp mismatch
                 }
 
@@ -3172,7 +3258,7 @@ root, strLibraryCode);
                 }
 
                 strError = "保存操作发生错误:" + strError;
-                errorcode = channel.OriginErrorCode;
+                kernel_errorcode = channel.OriginErrorCode;
                 return -1;
             }
             else // 成功
@@ -3209,7 +3295,7 @@ root, strLibraryCode);
                 }
 
                 strError = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
-                errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
+                kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
 
                 /// 
                 {
@@ -3245,6 +3331,13 @@ root, strLibraryCode);
                 }
             }
 
+            // 2016/9/9
+            // 修改出纳历史库里面的全部证条码号
+            if (bBarcodeChanged
+                && this.ChargingOperDatabase != null
+                && this.ChargingOperDatabase.Enabled)
+                this.ChargingOperDatabase.ChangePatronBarcode(strOldBarcode, strNewBarcode);
+
             // 注：bForce 为 true 时，效果是允许直接修改读者记录而并不修改相关册记录里的回链证条码号。这是为备份恢复而准备的功能。在备份恢复操作中，后面自然有人去操心恢复册记录，不必劳烦这里去操心联动修改了
             if (bChangeReaderBarcode && bForce == false)
             {
@@ -3266,7 +3359,7 @@ root, strLibraryCode);
 
             return 0;
         ERROR1:
-            errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.CommonError;
+            // kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.CommonError;
             return -1;
         }
 
