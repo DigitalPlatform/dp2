@@ -2317,6 +2317,43 @@ namespace RfidDrivers.First
     </function>
   </device>
 
+  <!-- 2021/8/10 -->
+  <device product='URL105'>
+    <basic>
+      <id>900005</id>
+      <driver>691200</driver>
+      <type>reader</type>
+      <communication com='true' usb='true'/>
+      <description>UR105</description>
+      <picture>UR105.jpg</picture>
+      <range>long</range>
+      <cfg_antenna auto_check='true' antenna_cnt='36'/>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count><!-- 0 -->
+    </basic>
+
+    <protocol>
+      <UHF ISO18000P6C='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='false'></upgrade>
+
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output enable='true'>
+          <port id='1' name='URL105_o1' />
+        </set_output>
+        <RF_Operation>true</RF_Operation>
+        <reset_sys>true</reset_sys>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+  </device>
+
 </all_device>";
 
 
