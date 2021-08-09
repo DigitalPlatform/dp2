@@ -334,6 +334,18 @@ namespace DigitalPlatform.LibraryServer
                     if (old_innerText != new_innerText)
                         error_names.Add(strElementName);
                 }
+                else if (strElementName == "refID")
+                {
+                    // 2021/8/9
+                    string old_innerText = DomUtil.GetElementText(domExistParam.DocumentElement, strElementName);
+                    string new_innerText = DomUtil.GetElementText(domNew.DocumentElement, strElementName);
+                    // 如果现有记录中 refID 为非空，则不允许修改它
+                    if (string.IsNullOrEmpty(old_innerText) == false)
+                        new_innerText = old_innerText;
+
+                    if (old_innerText != new_innerText)
+                        error_names.Add(strElementName);
+                }
                 else
                 {
                     string old_outerXml = GetOuterXml(domExistParam, strElementName);
@@ -402,6 +414,15 @@ namespace DigitalPlatform.LibraryServer
                     // <foregift>元素内容不让SetReaderInfo() API的change action修改
                     if (strElementName == "foregift")
                         continue;
+
+                    // 2021/8/9
+                    // 如果现有记录中 refID 为非空，则不允许修改它 
+                    if (strElementName == "refID")
+                    {
+                        string old_refID = DomUtil.GetElementText(domExist.DocumentElement, "refID");
+                        if (string.IsNullOrEmpty(old_refID) == false)
+                            continue;
+                    }
 
                     // 2021/7/23
                     // string old_outerXml = domExist.DocumentElement.SelectSingleNode(strElementName)?.OuterXml;
@@ -1962,7 +1983,7 @@ strLibraryCode);    // 读者所在的馆代码
             return result;
         }
 
-#region SetReaderInfo() 下级函数
+        #region SetReaderInfo() 下级函数
 
         // 当路径整个为空的时候，自动选用第一个读者库
         // parameters:
@@ -2354,18 +2375,18 @@ root, strLibraryCode);
                 }
             }
 
-            // Debug.Assert(strReaderDbName != "", "");
+        // Debug.Assert(strReaderDbName != "", "");
 
-            // byte[] exist_timestamp = null;
-            // string strOutputPath = "";
-            // string strMetaData = "";
+        // byte[] exist_timestamp = null;
+        // string strOutputPath = "";
+        // string strMetaData = "";
 
         REDOLOAD:
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(strRecPath,
                 out strExistingXml,
                 out string strMetaData,
-                out byte [] exist_timestamp,
+                out byte[] exist_timestamp,
                 out string strOutputPath,
                 out strError);
             if (lRet == -1)
@@ -2498,7 +2519,8 @@ root, strLibraryCode);
                         "borrows",
                         "overdues",
                         "reservations",
-                        "outofReservations" }); // 注: 把系统自己管理的一些元素从检测范围排除
+                        "outofReservations",
+                        "borrowHistory"}); // 注: 把系统自己管理的一些元素从检测范围排除
                 if (outof_names.Count > 0)
                 {
                     strError = $"删除读者记录被拒绝。记录中下列元素超过当前用户可修改权限范围: {StringUtil.MakePathList(outof_names)}";
@@ -2515,7 +2537,7 @@ root, strLibraryCode);
 
             lRet = channel.DoDeleteRes(strRecPath,
                 baOldTimestamp,
-                out byte [] output_timestamp,
+                out byte[] output_timestamp,
                 out strError);
             if (lRet == -1)
             {
@@ -3712,7 +3734,7 @@ root, strLibraryCode);
         }
 
 
-#endregion
+        #endregion
 
 
         // 为读者XML添加附加信息

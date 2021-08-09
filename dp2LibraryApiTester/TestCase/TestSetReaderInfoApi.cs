@@ -24,6 +24,7 @@ namespace dp2LibraryApiTester
             result = PrepareEnvironment();
             if (result.Value == -1) return result;
 
+
             result = TestDeleteReaderRecord("limitFields4");
             if (result.Value == -1) return result;
 
@@ -39,6 +40,18 @@ namespace dp2LibraryApiTester
             result = TestDeleteReaderRecord("");
             if (result.Value == -1) return result;
 
+            result = TestChangeReaderRecord_limitFields("refID1");
+            if (result.Value == -1) return result;
+
+            result = TestChangeReaderRecord_limitFields("refID2");
+            if (result.Value == -1) return result;
+
+            result = TestChangeReaderRecord_limitFields("refID3");
+            if (result.Value == -1) return result;
+
+            result = TestChangeReaderRecord_limitFields("refID4");
+            if (result.Value == -1) return result;
+
             result = TestChangeReaderRecord_limitFields("dataFields");
             if (result.Value == -1) return result;
 
@@ -49,6 +62,15 @@ namespace dp2LibraryApiTester
             if (result.Value == -1) return result;
 
             result = TestChangeReaderRecord_limitFields("");
+            if (result.Value == -1) return result;
+
+            result = TestCreateReaderRecord_limitFields("refID3");
+            if (result.Value == -1) return result;
+
+            result = TestCreateReaderRecord_limitFields("refID2");
+            if (result.Value == -1) return result;
+
+            result = TestCreateReaderRecord_limitFields("refID1");
             if (result.Value == -1) return result;
 
             result = TestCreateReaderRecord_limitFields("dataFields");
@@ -1243,47 +1265,55 @@ namespace dp2LibraryApiTester
         //                  importantFields1 -- 失败
         //                  importantFields2 -- 成功
         //                  dataFields -- 失败。因为 action 为 new 时，不允许使用 dataFields 属性
+        //                  refID1 -- 字段权限不包含 refID，但前端提交的记录中包含 refID 元素
+        //                  refID2 -- 字段权限包含 refID，但前端提交的记录中不包含 refID 元素
+        //                  refID3 -- 字段权限包含 refID，前端提交的记录中包含 refID 元素
         public static NormalResult TestCreateReaderRecord_limitFields(string test_case)
         {
             string strError = "";
 
             // *** 第一步，创建测试用的账户 test_level
+            LibraryChannel manage_channel = DataModel.GetChannel();
+            try
             {
-                LibraryChannel manage_channel = DataModel.GetChannel();
-                try
-                {
-                    var user_names = new List<string>() { "test_level" };
-                    DataModel.SetMessage($"正在删除可能存在的用户 {StringUtil.MakePathList(user_names, ",")} ...");
-                    int nRet = Utility.DeleteUsers(manage_channel,
-                        user_names,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                var user_names = new List<string>() { "test_level" };
+                DataModel.SetMessage($"正在删除可能存在的用户 {StringUtil.MakePathList(user_names, ",")} ...");
+                int nRet = Utility.DeleteUsers(manage_channel,
+                    user_names,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-                    DataModel.SetMessage("正在创建用户 test_level ...");
-                    long lRet = manage_channel.SetUser(null,
-                        "new",
-                        new UserInfo
-                        {
-                            UserName = "test_level",
-                            Rights = "setreaderinfo:name|readerType,getreaderinfo",
-                        },
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
+                DataModel.SetMessage("正在创建用户 test_level ...");
+                string rights = "setreaderinfo:name|readerType,getreaderinfo";
+                if (test_case == "refID2")
+                    rights = "setreaderinfo:name|readerType|refID,getreaderinfo";
+                else if (test_case == "refID3")
+                    rights = "setreaderinfo:name|readerType|refID,getreaderinfo";
 
-                    // 要校验条码号
-                    lRet = manage_channel.SetSystemParameter(null,
-                        "circulation",
-                        "?VerifyBarcode",
-                        "true",
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
+                long lRet = manage_channel.SetUser(null,
+                    "new",
+                    new UserInfo
+                    {
+                        UserName = "test_level",
+                        Rights = rights,
+                    },
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
 
-                    // 设置条码号校验规则
-                    int ret = Utility.SetBarcodeValidation(
-                        @"<validator location=',流通库,测试库,智能书柜,阅览室,保存本库'>
+                // 要校验条码号
+                lRet = manage_channel.SetSystemParameter(null,
+                    "circulation",
+                    "?VerifyBarcode",
+                    "true",
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 设置条码号校验规则
+                int ret = Utility.SetBarcodeValidation(
+                    @"<validator location=',流通库,测试库,智能书柜,阅览室,保存本库'>
         <patron>
             <CMIS />
             <range value='G0000001-G9999999' />
@@ -1301,13 +1331,13 @@ namespace dp2LibraryApiTester
             <range value='X0000001-X9999999' />
         </patron>
     </validator>",
-                        out strError);
-                    if (ret == -1)
-                        goto ERROR1;
+                    out strError);
+                if (ret == -1)
+                    goto ERROR1;
 
-                    // 设置借还权限。这样读者类型和图书类型就都定下来了
-                    ret = Utility.SetRightsTable(
-                        @"    <type reader='本科生'>
+                // 设置借还权限。这样读者类型和图书类型就都定下来了
+                ret = Utility.SetRightsTable(
+                    @"    <type reader='本科生'>
         <param name='可借总册数' value='10' />
         <param name='可预约册数' value='5' />
         <param name='以停代金因子' value='1.0' />
@@ -1470,133 +1500,196 @@ namespace dp2LibraryApiTester
         <item>教学参考</item>
         <item>原版西文</item>
     </bookTypes>",
-                        out strError);
-                    if (ret == -1)
-                        goto ERROR1;
-                }
-                finally
-                {
-                    DataModel.ReturnChannel(manage_channel);
-                }
-            }
-
-            {
-                string userName = "test_level";
-                LibraryChannel channel = DataModel.NewChannel(userName, "");
-                TimeSpan old_timeout = channel.Timeout;
-                channel.Timeout = TimeSpan.FromMinutes(10);
-
-                try
-                {
-                    DataModel.SetMessage($"正在以用户 {userName} 身份创建读者记录 ...");
-                    long lRet = 0;
-
-                    string path = _globalPatronDbName + "/?";
-
-                    string _xml = "";
-                    if (string.IsNullOrEmpty(test_case))
-                        _xml = @"<root>
-<barcode>G0000001</barcode>
-<name>张三</name>
-<readerType>本科生</readerType>
-<department>数学系</department>
-</root>";
-                    else if (test_case == "importantFields1")
-                        _xml = @"<root importantFields='barcode,name'>
-<barcode>G0000001</barcode>
-<name>张三</name>
-<readerType>本科生</readerType>
-<department>数学系</department>
-</root>";
-                    else if (test_case == "importantFields2")
-                        _xml = @"<root importantFields='name,readerType'>
-<barcode>G0000001</barcode>
-<name>张三</name>
-<readerType>本科生</readerType>
-<department>数学系</department>
-</root>";
-                    else if (test_case == "dataFields")
-                        _xml = @"<root dataFields='barcode,name,readerType'>
-<barcode>G0000001</barcode>
-<name>张三</name>
-<readerType>本科生</readerType>
-<department>数学系</department>
-</root>";
-                    else
-                        throw new Exception($"未知的 test_case '{test_case}'");
-
-                    DataModel.SetMessage($"正在创建读者记录 {path}");
-                    lRet = channel.SetReaderInfo(null,
-                        "new",
-                        path,
-                        _xml,
-                        null,
-                        null,
-                        out string existing_xml,
-                        out string saved_xml,
-                        out string saved_recpath,
-                        out byte[] new_timestamp,
-                        out ErrorCodeValue kernel_errorcode,
-                        out strError);
-                    if (string.IsNullOrEmpty(test_case))
-                    {
-                        if (lRet == -1)
-                            goto ERROR1;
-                    }
-                    else if (test_case == "importantFields1")
-                    {
-                        if (lRet == -1)
-                            DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{channel.ErrorCode}");
-                        else
-                        {
-                            strError = $"期待 SetReaderInfo() 返回出错，但返回了成功";
-                            goto ERROR1;
-                        }
-                    }
-                    else if (test_case == "importantFields2")
-                    {
-                        if (lRet == -1)
-                            goto ERROR1;
-                    }
-                    else if (test_case == "dataFields")
-                    {
-                        if (lRet == -1)
-                            DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{channel.ErrorCode}");
-                        else
-                        {
-                            strError = $"期待 SetReaderInfo() 返回出错，但返回了成功";
-                            goto ERROR1;
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(test_case)
-                        || test_case == "importantFields2")
-                    {
-                        // 验证读者记录是否创建成功
-                        lRet = channel.GetReaderInfo(null,
-                    "@path:" + saved_recpath,
-                    "xml",
-                    out string[] results,
                     out strError);
-                        if (lRet == -1 || lRet == 0)
+                if (ret == -1)
+                    goto ERROR1;
+
+                {
+                    string userName = "test_level";
+                    LibraryChannel test_channel = DataModel.NewChannel(userName, "");
+                    TimeSpan old_timeout = test_channel.Timeout;
+                    test_channel.Timeout = TimeSpan.FromMinutes(10);
+
+                    try
+                    {
+                        DataModel.SetMessage($"正在以用户 {userName} 身份创建读者记录 ...");
+
+                        string path = _globalPatronDbName + "/?";
+
+                        string _xml = "";
+                        if (string.IsNullOrEmpty(test_case))
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "importantFields1")
+                            _xml = @"<root importantFields='barcode,name'>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "importantFields2")
+                            _xml = @"<root importantFields='name,readerType'>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "dataFields")
+                            _xml = @"<root dataFields='barcode,name,readerType'>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "refID1")
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+<refID>1234</refID>
+</root>";
+                        else if (test_case == "refID2")
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "refID3")
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+<refID>1234</refID>
+</root>";
+                        else
+                            throw new Exception($"未知的 test_case '{test_case}'");
+
+                        DataModel.SetMessage($"正在创建读者记录 {path}");
+                        lRet = test_channel.SetReaderInfo(null,
+                            "new",
+                            path,
+                            _xml,
+                            null,
+                            null,
+                            out string existing_xml,
+                            out string saved_xml,
+                            out string saved_recpath,
+                            out byte[] new_timestamp,
+                            out ErrorCodeValue kernel_errorcode,
+                            out strError);
+                        if (string.IsNullOrEmpty(test_case))
                         {
-                            strError = $"读者记录 '{saved_recpath}' 验证获取时出错: {strError}";
-                            goto ERROR1;
+                            if (lRet == -1)
+                                goto ERROR1;
+                        }
+                        else if (test_case == "importantFields1")
+                        {
+                            if (lRet == -1)
+                                DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{test_channel.ErrorCode}");
+                            else
+                            {
+                                strError = $"期待 SetReaderInfo() 返回出错，但返回了成功";
+                                goto ERROR1;
+                            }
+                        }
+                        else if (test_case == "importantFields2")
+                        {
+                            if (lRet == -1)
+                                goto ERROR1;
+                        }
+                        else if (test_case == "dataFields")
+                        {
+                            if (lRet == -1)
+                                DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{test_channel.ErrorCode}");
+                            else
+                            {
+                                strError = $"期待 SetReaderInfo() 返回出错，但返回了成功";
+                                goto ERROR1;
+                            }
+                        }
+                        else if (test_case == "refID1")
+                        {
+                            if (lRet == -1)
+                                goto ERROR1;
+                        }
+                        else if (test_case == "refID2")
+                        {
+                            if (lRet == -1)
+                                goto ERROR1;
+                        }
+                        else if (test_case == "refID3")
+                        {
+                            if (lRet == -1)
+                                goto ERROR1;
                         }
 
-                        string xml = results[0];
-
-                        // 验证
+                        if (string.IsNullOrEmpty(test_case)
+                            || test_case == "importantFields2"
+                            || test_case == "refID1"
+                            || test_case == "refID2"
+                            || test_case == "refID3")
                         {
-                            xml = DomUtil.GetIndentXml(xml);
-                            DataModel.SetMessage($"path={saved_recpath}");
-                            DataModel.SetMessage($"xml=\r\n{xml}");
+                            // 验证读者记录是否创建成功
+                            lRet = manage_channel.GetReaderInfo(null,
+                        "@path:" + saved_recpath,
+                        "xml",
+                        out string[] results,
+                        out strError);
+                            if (lRet == -1 || lRet == 0)
+                            {
+                                strError = $"读者记录 '{saved_recpath}' 验证获取时出错: {strError}";
+                                goto ERROR1;
+                            }
 
-                        }
+                            string xml = results[0];
 
-                        LibraryChannel manage_channel = DataModel.GetChannel();
-                        try
-                        {
+                            // 验证
+                            {
+                                xml = DomUtil.GetIndentXml(xml);
+                                DataModel.SetMessage($"path={saved_recpath}");
+                                DataModel.SetMessage($"xml=\r\n{xml}");
+                                XmlDocument dom = new XmlDocument();
+                                dom.LoadXml(xml);
+
+                                if (test_case == "refID1")
+                                {
+                                    string refID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+                                    DataModel.SetMessage($"refID 为 '{refID}'");
+                                    if (refID == "1234")
+                                    {
+                                        strError = "refID 元素应该由服务器发生，不应该为 '1234'";
+                                        goto ERROR1;
+                                    }
+                                }
+                                else if (test_case == "refID2")
+                                {
+                                    string refID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+                                    DataModel.SetMessage($"refID 为 '{refID}'");
+                                    if (string.IsNullOrEmpty(refID))
+                                    {
+                                        strError = "refID 元素应该由服务器发生，不应该为空";
+                                        goto ERROR1;
+                                    }
+                                }
+                                else if (test_case == "refID3")
+                                {
+                                    string refID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+                                    DataModel.SetMessage($"refID 为 '{refID}'");
+                                    if (refID != "1234")
+                                    {
+                                        strError = "refID 元素应该符合前端提交的值 '1234'";
+                                        goto ERROR1;
+                                    }
+                                }
+                            }
+
                             // 删除读者记录
                             lRet = manage_channel.SetReaderInfo(null,
             "delete",
@@ -1613,37 +1706,37 @@ namespace dp2LibraryApiTester
                             if (lRet == -1)
                                 goto ERROR1;
                         }
-                        finally
+
+                        /*
+                        if (errors.Count > 0)
                         {
-                            DataModel.ReturnChannel(manage_channel);
+                            Utility.DisplayErrors(errors);
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                            };
                         }
+                        */
+                        DataModel.SetMessage("正确", "green");
+                        return new NormalResult();
                     }
-
-                    /*
-                    if (errors.Count > 0)
+                    catch (Exception ex)
                     {
-                        Utility.DisplayErrors(errors);
-                        return new NormalResult
-                        {
-                            Value = -1,
-                            ErrorInfo = StringUtil.MakePathList(errors, "; ")
-                        };
+                        strError = "TestCreateReaderRecord_limitFields() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                        goto ERROR1;
                     }
-                    */
-                    DataModel.SetMessage("正确", "green");
-                    return new NormalResult();
-                }
-                catch (Exception ex)
-                {
-                    strError = "TestCreateReaderRecord_limitFields() Exception: " + ExceptionUtil.GetExceptionText(ex);
-                    goto ERROR1;
-                }
-                finally
-                {
-                    channel.Timeout = old_timeout;
-                    DataModel.DeleteChannel(channel);
-                }
+                    finally
+                    {
+                        test_channel.Timeout = old_timeout;
+                        DataModel.DeleteChannel(test_channel);
+                    }
 
+                }
+            }
+            finally
+            {
+                DataModel.ReturnChannel(manage_channel);
             }
         ERROR1:
             DataModel.SetMessage($"TestCreateReaderRecord_limitFields() error: {strError}", "error");
@@ -2054,6 +2147,7 @@ namespace dp2LibraryApiTester
                 string rights = "";
                 if (string.IsNullOrEmpty(test_case))
                 {
+                    // 一般性测试
                     rights = "setreaderinfo:barcode|name|readerType,getreaderinfo";
                 }
                 else if (test_case == "importantFields1")
@@ -2070,6 +2164,26 @@ namespace dp2LibraryApiTester
                 {
                     // 注: 包含 barcode 元素
                     rights = "setreaderinfo:barcode|name|readerType,getreaderinfo";
+                }
+                else if (test_case == "refID1")
+                {
+                    // 在没有 refID 元素权限的情况下修改 refID 元素
+                    rights = "setreaderinfo:barcode|name|readerType,getreaderinfo";
+                }
+                else if (test_case == "refID2")
+                {
+                    // 在没有 refID 元素权限的情况下删除 refID 元素
+                    rights = "setreaderinfo:barcode|name|readerType,getreaderinfo";
+                }
+                else if (test_case == "refID3")
+                {
+                    // 在有 refID 元素权限的情况下修改 refID 元素
+                    rights = "setreaderinfo:barcode|name|readerType|refID,getreaderinfo";
+                }
+                else if (test_case == "refID4")
+                {
+                    // 在有 refID 元素权限的情况下删除 refID 元素
+                    rights = "setreaderinfo:barcode|name|readerType|refID,getreaderinfo";
                 }
                 else
                     throw new Exception($"未知的 test_case '{test_case}'");
@@ -2322,9 +2436,30 @@ namespace dp2LibraryApiTester
                     if (lRet == -1)
                         goto ERROR1;
 
+                    // 保存刚创建时的读者记录
+                    string created_xml = saved_xml;
+                    string created_refID = "";
+                    {
+                        XmlDocument created_dom = new XmlDocument();
+                        created_dom.LoadXml(created_xml);
+                        created_refID = DomUtil.GetElementText(created_dom.DocumentElement, "refID");
+                    }
+
+                    // (用测试者身份)重新获得读者记录，用于修改保存
+                    lRet = test_channel.GetReaderInfo(null,
+"@path:" + saved_recpath,
+"xml",
+out string[] results,
+out strError);
+                    if (lRet == -1 || lRet == 0)
+                    {
+                        strError = $"读者记录 '{saved_recpath}' 重新获取时出错: {strError}";
+                        goto ERROR1;
+                    }
+
                     // 制造一个改变了条码号的记录
                     XmlDocument dom = new XmlDocument();
-                    dom.LoadXml(saved_xml);
+                    dom.LoadXml(results[0]);
 
                     DomUtil.SetElementText(dom.DocumentElement, "barcode", "G0000002");
 
@@ -2346,6 +2481,22 @@ namespace dp2LibraryApiTester
 
                         // 申明 barcode 元素并不在传递的元素之列。这样避免了后面修改保存时 barcode 元素被删除
                         dom.DocumentElement.SetAttribute("dataFields", "name,readerType");
+                    }
+                    else if (test_case == "refID1")
+                    {
+                        DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                    }
+                    else if (test_case == "refID2")
+                    {
+                        DomUtil.DeleteElement(dom.DocumentElement, "refID");
+                    }
+                    else if (test_case == "refID3")
+                    {
+                        DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                    }
+                    else if (test_case == "refID4")
+                    {
+                        DomUtil.DeleteElement(dom.DocumentElement, "refID");
                     }
 
                     DataModel.SetMessage($"正在修改读者记录 {saved_recpath}。记录中条码号字段被修改");
@@ -2381,17 +2532,40 @@ namespace dp2LibraryApiTester
                         if (lRet == -1)
                             goto ERROR1;
                     }
-
+                    else if (test_case == "refID1")
+                    {
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
+                    else if (test_case == "refID2")
+                    {
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
+                    else if (test_case == "refID3")
+                    {
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
+                    else if (test_case == "refID4")
+                    {
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
 
                     if (string.IsNullOrEmpty(test_case)
     || test_case == "importantFields2"
-    || test_case == "dataFields")
+    || test_case == "dataFields"
+    || test_case == "refID1"
+    || test_case == "refID2"
+    || test_case == "refID3"
+    || test_case == "refID4")
                     {
                         // 验证读者记录是否修改成功
                         lRet = manage_channel.GetReaderInfo(null,
                         "@path:" + saved_recpath,
                         "xml",
-                        out string[] results,
+                        out results,
                         out strError);
                         if (lRet == -1 || lRet == 0)
                         {
@@ -2399,25 +2573,35 @@ namespace dp2LibraryApiTester
                             goto ERROR1;
                         }
 
-                        string xml = results[0];
+                        // 修改后的 XML。注意这是用管理员账户取出来的，这样它里面就包含了全部元素
+                        string changed_xml = results[0];
 
                         // 验证
                         {
-                            xml = DomUtil.GetIndentXml(xml);
+                            changed_xml = DomUtil.GetIndentXml(changed_xml);
                             DataModel.SetMessage($"path={saved_recpath}");
-                            DataModel.SetMessage($"xml=\r\n{xml}");
+                            DataModel.SetMessage($"xml=\r\n{changed_xml}");
 
                             XmlDocument changed_dom = new XmlDocument();
-                            changed_dom.LoadXml(xml);
+                            changed_dom.LoadXml(changed_xml);
 
                             if (string.IsNullOrEmpty(test_case))
                             {
+                                // 验证 barcode
                                 string barcode = DomUtil.GetElementText(changed_dom.DocumentElement, "barcode");
                                 if (barcode == "G0000002")
                                     DataModel.SetMessage("修改后的记录验证正确");
                                 else
                                 {
                                     strError = $"修改后的读者记录，条码号期待为 'G0000002' 但却为 '{barcode}'";
+                                    goto ERROR1;
+                                }
+
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
                                     goto ERROR1;
                                 }
                             }
@@ -2440,6 +2624,46 @@ namespace dp2LibraryApiTester
                                 else
                                 {
                                     strError = $"修改后的读者记录，条码号期待为 'G0000001'(也就是说条码号没有变化) 但实际上却为 '{barcode}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "refID1")
+                            {
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "refID2")
+                            {
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "refID3")
+                            {
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "refID4")
+                            {
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
                                     goto ERROR1;
                                 }
                             }

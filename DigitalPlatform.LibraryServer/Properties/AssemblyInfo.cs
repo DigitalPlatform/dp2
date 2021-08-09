@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.76.*")]
-[assembly: AssemblyFileVersion("3.76.0.0")]
+[assembly: AssemblyVersion("3.78.*")]
+[assembly: AssemblyFileVersion("3.78.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -269,3 +269,6 @@ ItemCanReturn()
 //		3.75 (2021/8/5) GetReaderInfo() API 的 formats 参数中可以使用 xml:name|department 这样的格式来限定返回的 XML 元素。元素名列表的用法，和权限字符串中 getreaderinfo 冒号后面的用法一样
 //						SetReaderInfo() API 提交保存的读者 XML 记录中，根元素的 dataFields 属性可指定元素名列表(逗号间隔)，表示 XML 记录中只有这些元素才是提交保存的内容，此外的其它元素都不会被保存时采用。这样可以提交很少的内容但避免了删除不该删除的字段。如果 dataFields 属性缺省，表示不进行这种限定，那么效果就是请求所提交的 XML 记录中所有元素都会被保存考虑，例如 XML 记录中未包含的元素会被当作删除此元素
 //		3.76 (2021/8/6) SetReaderInfo() API 重构。将一些校验数据的过程移到合并好记录以后的阶段进行
+//		3.77 (2021/8/8) SetReaderInfo() API 继续重构。完善删除功能
+//		3.78 (2021/8/9) SetReaderInfo() API 对于前端提交的 refID 元素，如果最终合成的记录里面没有 refID，会采纳前端提交的 refID。如果这时前端并没有提供 refID，则服务器会随机发生一个 refID
+//						GetReaderInfo() API 一般情况下返回的读者 XML 记录中会包含完整的 borrowHistory 元素。(此前的版本会滤除 borrowHistory 元素的 InnerXml)

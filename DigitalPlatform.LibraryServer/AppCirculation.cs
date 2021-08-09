@@ -4231,6 +4231,9 @@ start_time_1,
             if (string.IsNullOrEmpty(name_list) == false)
                 FilterByLevel(dom, name_list);
 
+            // 2021/8/9
+            // 不太明白为何这里要去掉 borrowHistory 的下级元素。暂时注释掉
+            /*
             // ??
             // 去掉 <borrowHistory> 的下级元素
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrowHistory/*");
@@ -4238,6 +4241,7 @@ start_time_1,
             {
                 node.ParentNode.RemoveChild(node);
             }
+            */
 
             // 2021/3/4
             AddPatronOI(dom, libraryCode);
