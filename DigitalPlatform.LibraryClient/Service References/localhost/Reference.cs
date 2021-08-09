@@ -500,6 +500,15 @@ namespace DigitalPlatform.LibraryClient.localhost {
         PasswordExpired = 41,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        BarcodeDup = 42,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DisplayNameDup = 43,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RefIdDup = 44,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

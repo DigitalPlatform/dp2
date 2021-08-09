@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.78.*")]
-[assembly: AssemblyFileVersion("3.78.0.0")]
+[assembly: AssemblyVersion("3.79.*")]
+[assembly: AssemblyFileVersion("3.79.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -272,3 +272,5 @@ ItemCanReturn()
 //		3.77 (2021/8/8) SetReaderInfo() API 继续重构。完善删除功能
 //		3.78 (2021/8/9) SetReaderInfo() API 对于前端提交的 refID 元素，如果最终合成的记录里面没有 refID，会采纳前端提交的 refID。如果这时前端并没有提供 refID，则服务器会随机发生一个 refID
 //						GetReaderInfo() API 一般情况下返回的读者 XML 记录中会包含完整的 borrowHistory 元素。(此前的版本会滤除 borrowHistory 元素的 InnerXml)
+//		3.79 (2021/8/9) SetReaderInfo() API 兑现了对 refID 的查重；另外修正了各处重复情况下的 ErrorCode 用法
+//						前端请求中提交的读者 XML 记录根元素的属性 dataFields="" 等同于 dataFields="[none]" 效果。dataField 属性缺乏才等于缺省效果，逻辑上相当于 dataFields="[all]" 效果，其中 [all] 代表全部可用的元素

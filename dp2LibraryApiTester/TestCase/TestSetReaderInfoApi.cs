@@ -24,6 +24,29 @@ namespace dp2LibraryApiTester
             result = PrepareEnvironment();
             if (result.Value == -1) return result;
 
+            result = TestChangeReaderRecord_dup("displayName2");
+            if (result.Value == -1) return result;
+
+            result = TestChangeReaderRecord_dup("displayName1");
+            if (result.Value == -1) return result;
+
+            result = TestChangeReaderRecord_dup("barcode");
+            if (result.Value == -1) return result;
+
+            result = TestChangeReaderRecord_dup("refID");
+            if (result.Value == -1) return result;
+
+            result = TestCreateReaderRecord_dup("displayName2");
+            if (result.Value == -1) return result;
+
+            result = TestCreateReaderRecord_dup("displayName1");
+            if (result.Value == -1) return result;
+
+            result = TestCreateReaderRecord_dup("barcode");
+            if (result.Value == -1) return result;
+
+            result = TestCreateReaderRecord_dup("refID");
+            if (result.Value == -1) return result;
 
             result = TestDeleteReaderRecord("limitFields4");
             if (result.Value == -1) return result;
@@ -712,6 +735,507 @@ namespace dp2LibraryApiTester
             };
         }
 
+
+        // 创建读者记录，refID 查重
+        // parameters:
+        //          test_case   refID
+        //                      barcode
+        //                      displayName1 -- displayName 和 displayName 重复了
+        //                      displayName2 -- displayName 和工作人员账户名重复了
+        public static NormalResult TestCreateReaderRecord_dup(string test_case)
+        {
+            string strError = "";
+
+            // *** 第一步，创建测试用的账户 test_level
+            LibraryChannel manage_channel = DataModel.GetChannel();
+            try
+            {
+                var user_names = new List<string>() { "test_level" };
+                DataModel.SetMessage($"正在删除可能存在的用户 {StringUtil.MakePathList(user_names, ",")} ...");
+                int nRet = Utility.DeleteUsers(manage_channel,
+                    user_names,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                DataModel.SetMessage("正在创建用户 test_level ...");
+                string rights = "setreaderinfo,getreaderinfo";
+                if (test_case == "refID")
+                    rights = "setreaderinfo,getreaderinfo";
+                else if (test_case == "barcode")
+                    rights = "setreaderinfo,getreaderinfo";
+                else if (test_case == "displayName1")
+                    rights = "setreaderinfo,getreaderinfo";
+                else if (test_case == "displayName2")
+                    rights = "setreaderinfo,getreaderinfo";
+
+                long lRet = manage_channel.SetUser(null,
+                    "new",
+                    new UserInfo
+                    {
+                        UserName = "test_level",
+                        Rights = rights,
+                    },
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 要校验条码号
+                lRet = manage_channel.SetSystemParameter(null,
+                    "circulation",
+                    "?VerifyBarcode",
+                    "true",
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 设置条码号校验规则
+                int ret = Utility.SetBarcodeValidation(
+                    @"<validator location=',流通库,测试库,智能书柜,阅览室,保存本库'>
+        <patron>
+            <CMIS />
+            <range value='G0000001-G9999999' />
+        </patron>
+    </validator>
+    <validator location='海淀分馆*' >
+        <patron>
+            <CMIS />
+            <range value='H0000001-H9999999' />
+        </patron>
+    </validator>
+    <validator location='西城分馆*' >
+        <patron>
+            <CMIS />
+            <range value='X0000001-X9999999' />
+        </patron>
+    </validator>",
+                    out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                // 设置借还权限。这样读者类型和图书类型就都定下来了
+                ret = Utility.SetRightsTable(
+                    @"    <type reader='本科生'>
+        <param name='可借总册数' value='10' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='2' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <type reader='硕士生'>
+        <param name='可借总册数' value='15' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='3' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <type reader='博士生'>
+        <param name='可借总册数' value='20' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='4' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <type reader='讲师'>
+        <param name='可借总册数' value='20' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='5' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <type reader='教授'>
+        <param name='可借总册数' value='30' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='6' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <readerTypes>
+        <item>本科生</item>
+        <item>硕士生</item>
+        <item>博士生</item>
+        <item>讲师</item>
+        <item>教授</item>
+    </readerTypes>
+    <bookTypes>
+        <item>普通</item>
+        <item>教材</item>
+        <item>教学参考</item>
+        <item>原版西文</item>
+    </bookTypes>",
+                    out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+
+                string userName = "test_level";
+                LibraryChannel test_channel = DataModel.NewChannel(userName, "");
+                TimeSpan old_timeout = test_channel.Timeout;
+                test_channel.Timeout = TimeSpan.FromMinutes(10);
+
+                try
+                {
+                    DataModel.SetMessage($"正在以用户 {userName} 身份创建读者记录 ...");
+
+                    string path = _globalPatronDbName + "/?";
+
+                    // *** 创建第一条读者记录
+                    string first_recpath = "";
+                    byte[] first_timestamp = null;
+                    {
+                        string _xml = "";
+                        if (test_case == "refID")
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+<refID>1234</refID>
+</root>";
+                        else if (test_case == "barcode")
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "displayName1")
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<displayName>昵称</displayName>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "displayName2")
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<displayName>昵称</displayName>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+
+                        DataModel.SetMessage($"正在创建第一条读者记录");
+                        lRet = test_channel.SetReaderInfo(null,
+                            "new",
+                            path,
+                            _xml,
+                            null,
+                            null,
+                            out string existing_xml,
+                            out string saved_xml,
+                            out first_recpath,
+                            out first_timestamp,
+                            out ErrorCodeValue kernel_errorcode,
+                            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+
+
+                        // 验证读者记录是否创建成功
+                        lRet = manage_channel.GetReaderInfo(null,
+                            "@path:" + first_recpath,
+                            "xml",
+                            out string[] results,
+                            out strError);
+                        if (lRet == -1 || lRet == 0)
+                        {
+                            strError = $"读者记录 '{first_recpath}' 验证获取时出错: {strError}";
+                            goto ERROR1;
+                        }
+
+                        string xml = results[0];
+
+                        // 验证
+                        {
+                            xml = DomUtil.GetIndentXml(xml);
+                            DataModel.SetMessage($"path={first_recpath}");
+                            DataModel.SetMessage($"xml=\r\n{xml}");
+
+                            XmlDocument dom = new XmlDocument();
+                            dom.LoadXml(xml);
+
+                            if (test_case == "refID")
+                            {
+                                string refID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+                                if (refID != "1234")
+                                {
+                                    strError = "第一条读者记录的 refID 不正确。应为 '1234'";
+                                    goto ERROR1;
+                                }
+                            }
+
+                        }
+                    }
+
+
+                    // *** 创建第二条读者记录
+                    string second_recpath = "";
+                    byte[] second_timestamp = null;
+                    {
+                        string _xml = "";
+                        if (test_case == "refID")
+                            _xml = @"<root>
+<barcode>G0000002</barcode>
+<name>李四</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+<refID>1234</refID>
+</root>";
+                        else if (test_case == "barcode")
+                            _xml = @"<root>
+<barcode>G0000001</barcode>
+<name>李四</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "displayName1")
+                            _xml = @"<root>
+<barcode>G0000002</barcode>
+<name>李四</name>
+<displayName>昵称</displayName>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                        else if (test_case == "displayName2")
+                            _xml = @"<root>
+<barcode>G0000002</barcode>
+<name>李四</name>
+<displayName>test_level</displayName>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+
+                        DataModel.SetMessage($"正在创建第二条读者记录");
+                        lRet = test_channel.SetReaderInfo(null,
+                            "new",
+                            path,
+                            _xml,
+                            null,
+                            null,
+                            out string existing_xml,
+                            out string saved_xml,
+                            out second_recpath,
+                            out second_timestamp,
+                            out ErrorCodeValue kernel_errorcode,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            var expected = ErrorCode.ReaderBarcodeDup;
+                            if (test_case == "refID")
+                                expected = ErrorCode.RefIdDup;
+                            else if (test_case == "barcode")
+                                expected = ErrorCode.ReaderBarcodeDup;
+                            else if (test_case == "displayName1" || test_case == "displayName2")
+                                expected = ErrorCode.DisplayNameDup;
+
+
+                            {
+                                if (test_channel.ErrorCode == expected)
+                                    DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{test_channel.ErrorCode}");
+                                else
+                                {
+                                    strError = $"错误码 {test_channel.ErrorCode} 不符合期待的错误码";
+                                    goto ERROR1;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            strError = $"创建第二条读者记录理应失败。但却成功了";
+                            goto ERROR1;
+                        }
+                    }
+
+
+                    // 删除读者记录
+                    lRet = test_channel.SetReaderInfo(null,
+        "delete",
+        first_recpath,
+        "", // _globalPatronXml,
+        null,
+        first_timestamp,
+        out string _,
+        out string _,
+        out string _,
+        out byte[] _,
+        out ErrorCodeValue _,
+        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    if (string.IsNullOrEmpty(second_recpath) == false)
+                    {
+                        lRet = test_channel.SetReaderInfo(null,
+    "delete",
+    second_recpath,
+    "", // _globalPatronXml,
+    null,
+    second_timestamp,
+    out string _,
+    out string _,
+    out string _,
+    out byte[] _,
+    out ErrorCodeValue _,
+    out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
+
+                    /*
+                    if (errors.Count > 0)
+                    {
+                        Utility.DisplayErrors(errors);
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                        };
+                    }
+                    */
+                    DataModel.SetMessage("正确", "green");
+                    return new NormalResult();
+                }
+                catch (Exception ex)
+                {
+                    strError = "TestCreateReaderRecord_dup() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                    goto ERROR1;
+                }
+                finally
+                {
+                    test_channel.Timeout = old_timeout;
+                    DataModel.DeleteChannel(test_channel);
+                }
+            }
+            finally
+            {
+                DataModel.ReturnChannel(manage_channel);
+            }
+
+        ERROR1:
+            DataModel.SetMessage($"TestCreateReaderRecord_dup() error: {strError}", "error");
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
+        }
 
         // 测试创建读者记录，空条码号情况
         public static NormalResult TestCreateReaderRecord_blankBarcode(string userName)
@@ -2724,6 +3248,690 @@ out strError);
                 ErrorInfo = strError
             };
         }
+
+        // 测试修改读者记录，查重的情况
+        // parameters:
+        //          test_case   refID
+        //                      barcode
+        //                      displayName1 -- displayName 和 displayName 重复了
+        //                      displayName2 -- displayName 和工作人员账户名重复了
+        public static NormalResult TestChangeReaderRecord_dup(string test_case)
+        {
+            string strError = "";
+
+            // *** 第一步，创建测试用的账户 test_level
+            LibraryChannel manage_channel = DataModel.GetChannel();
+            try
+            {
+                var user_names = new List<string>() { "test_level" };
+                DataModel.SetMessage($"正在删除可能存在的用户 {StringUtil.MakePathList(user_names, ",")} ...");
+                int nRet = Utility.DeleteUsers(manage_channel,
+                    user_names,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                string rights = "";
+                if (test_case == "refID")
+                {
+                    rights = "setreaderinfo,getreaderinfo";
+                }
+                else if (test_case == "barcode")
+                {
+                    rights = "setreaderinfo,getreaderinfo";
+                }
+                else if (test_case == "displayName1")
+                {
+                    // 注: 缺少 barcode 元素
+                    rights = "setreaderinfo,getreaderinfo";
+                }
+                else if (test_case == "displayName2")
+                {
+                    rights = "setreaderinfo,getreaderinfo";
+                }
+                else
+                    throw new Exception($"未知的 test_case '{test_case}'");
+
+                DataModel.SetMessage("正在创建用户 test_level ...");
+                long lRet = manage_channel.SetUser(null,
+                    "new",
+                    new UserInfo
+                    {
+                        UserName = "test_level",
+                        Rights = rights,
+                    },
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 要校验条码号
+                lRet = manage_channel.SetSystemParameter(null,
+                    "circulation",
+                    "?VerifyBarcode",
+                    "true",
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 设置条码号校验规则
+                int ret = Utility.SetBarcodeValidation(
+                    @"<validator location=',流通库,测试库,智能书柜,阅览室,保存本库'>
+        <patron>
+            <CMIS />
+            <range value='G0000001-G9999999' />
+        </patron>
+    </validator>
+    <validator location='海淀分馆*' >
+        <patron>
+            <CMIS />
+            <range value='H0000001-H9999999' />
+        </patron>
+    </validator>
+    <validator location='西城分馆*' >
+        <patron>
+            <CMIS />
+            <range value='X0000001-X9999999' />
+        </patron>
+    </validator>",
+                    out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+                // 设置借还权限。这样读者类型和图书类型就都定下来了
+                ret = Utility.SetRightsTable(
+                    @"    <type reader='本科生'>
+        <param name='可借总册数' value='10' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='2' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <type reader='硕士生'>
+        <param name='可借总册数' value='15' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='3' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <type reader='博士生'>
+        <param name='可借总册数' value='20' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='4' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <type reader='讲师'>
+        <param name='可借总册数' value='20' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='5' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <type reader='教授'>
+        <param name='可借总册数' value='30' />
+        <param name='可预约册数' value='5' />
+        <param name='以停代金因子' value='1.0' />
+        <param name='工作日历名' value='基本日历' />
+        <type book='普通'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教材'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='教学参考'>
+            <param name='可借册数' value='10' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='1.5' />
+        </type>
+        <type book='原版西文'>
+            <param name='可借册数' value='6' />
+            <param name='借期' value='31day,15day' />
+            <param name='超期违约金因子' value='CNY1.0/day' />
+            <param name='丢失违约金因子' value='3.0' />
+        </type>
+    </type>
+    <readerTypes>
+        <item>本科生</item>
+        <item>硕士生</item>
+        <item>博士生</item>
+        <item>讲师</item>
+        <item>教授</item>
+    </readerTypes>
+    <bookTypes>
+        <item>普通</item>
+        <item>教材</item>
+        <item>教学参考</item>
+        <item>原版西文</item>
+    </bookTypes>",
+                    out strError);
+                if (ret == -1)
+                    goto ERROR1;
+
+
+                string userName = "test_level";
+                LibraryChannel test_channel = DataModel.NewChannel(userName, "");
+                TimeSpan old_timeout = test_channel.Timeout;
+                test_channel.Timeout = TimeSpan.FromMinutes(10);
+
+                try
+                {
+                    DataModel.SetMessage($"正在以用户 {userName} 身份修改读者记录(空证条码号) ...");
+
+                    string path = _globalPatronDbName + "/?";
+                    string _xml1 = "";
+                    if (test_case == "refID")
+                        _xml1 = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+<refID></refID>
+</root>";
+                    else if (test_case == "barcode")
+                        _xml1 = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                    else if (test_case == "displayName1")
+                        _xml1 = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<displayName>昵称1</displayName>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                    else if (test_case == "displayName2")
+                        _xml1 = @"<root>
+<barcode>G0000001</barcode>
+<name>张三</name>
+<displayName>昵称1</displayName>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+
+                    DataModel.SetMessage($"正在创建第一条读者记录。这是为后面修改做准备");
+                    lRet = manage_channel.SetReaderInfo(null,
+                        test_case == "refID" ? "forcenew" : "new",
+                        path,
+                        _xml1,
+                        null,
+                        null,
+                        out string existing_xml1,
+                        out string saved_xml1,
+                        out string saved_recpath1,
+                        out byte[] new_timestamp1,
+                        out ErrorCodeValue _,
+                        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    string _xml2 = "";
+                    if (test_case == "refID")
+                        _xml2 = @"<root>
+<barcode>G0000002</barcode>
+<name>李四</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+<refID>5678</refID>
+</root>";
+                    else if (test_case == "barcode")
+                        _xml2 = @"<root>
+<barcode>G0000002</barcode>
+<name>李四</name>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                    else if (test_case == "displayName1")
+                        _xml2 = @"<root>
+<barcode>G0000002</barcode>
+<name>李四</name>
+<displayName>昵称2</displayName>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+                    else if (test_case == "displayName2")
+                        _xml2 = @"<root>
+<barcode>G0000002</barcode>
+<name>李四</name>
+<displayName>昵称2</displayName>
+<readerType>本科生</readerType>
+<department>数学系</department>
+</root>";
+
+                    DataModel.SetMessage($"正在创建第二条读者记录。这是为修改后产生重复做好准备");
+                    lRet = manage_channel.SetReaderInfo(null,
+                        "new",
+                        path,
+                        _xml2,
+                        null,
+                        null,
+                        out string existing_xml2,
+                        out string saved_xml2,
+                        out string saved_recpath2,
+                        out byte[] new_timestamp2,
+                        out ErrorCodeValue _,
+                        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    // 保存刚创建时的第一条读者记录
+                    string created_xml = saved_xml1;
+                    string created_refID = "";
+                    {
+                        XmlDocument created_dom = new XmlDocument();
+                        created_dom.LoadXml(created_xml);
+                        created_refID = DomUtil.GetElementText(created_dom.DocumentElement, "refID");
+                    }
+
+                    // (用测试者身份)重新获得读者记录，用于修改保存
+                    lRet = test_channel.GetReaderInfo(null,
+"@path:" + saved_recpath1,
+"xml",
+out string[] results,
+out strError);
+                    if (lRet == -1 || lRet == 0)
+                    {
+                        strError = $"读者记录 '{saved_recpath1}' 重新获取时出错: {strError}";
+                        goto ERROR1;
+                    }
+
+                    // 制造一个改变了内容的记录
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(results[0]);
+
+
+                    if (test_case == "refID")
+                    {
+                        DomUtil.SetElementText(dom.DocumentElement, "refID", "5678");
+                    }
+                    else if (test_case == "barcode")
+                    {
+                        DomUtil.SetElementText(dom.DocumentElement, "barcode", "G0000002");
+                    }
+                    else if (test_case == "displayName1")
+                    {
+                        DomUtil.SetElementText(dom.DocumentElement, "displayName", "昵称2");
+                    }
+                    else if (test_case == "displayName2")
+                    {
+                        DomUtil.SetElementText(dom.DocumentElement, "displayName", "test_level");
+                    }
+
+                    DataModel.SetMessage($"正在修改读者记录 {saved_recpath1}。记录中条码号字段被修改");
+                    lRet = test_channel.SetReaderInfo(null,
+                        "change",
+                        saved_recpath1,
+                        dom.OuterXml,
+                        null,
+                        new_timestamp1,
+                        out string _,
+                        out saved_xml1,
+                        out string _,
+                        out new_timestamp1,
+                        out ErrorCodeValue _,
+                        out strError);
+                    if (test_case == "refID")
+                    {
+                        if (lRet == -1)
+                        {
+                            if (test_channel.ErrorCode == ErrorCode.RefIdDup)
+                                DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{test_channel.ErrorCode}");
+                            else
+                            {
+                                strError = $"错误码 {test_channel.ErrorCode} 不符合期待的错误码";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = $"修改第一条读者记录理应失败。但却成功了";
+                            goto ERROR1;
+                        }
+                    }
+                    else if (test_case == "barcode")
+                    {
+                        if (lRet == -1)
+                        {
+                            if (test_channel.ErrorCode == ErrorCode.ReaderBarcodeDup)
+                                DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{test_channel.ErrorCode}");
+                            else
+                            {
+                                strError = $"错误码 {test_channel.ErrorCode} 不符合期待的错误码";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = $"期待 SetReaderInfo() 返回出错，但返回了成功";
+                            goto ERROR1;
+                        }
+                    }
+                    else if (test_case == "displayName1")
+                    {
+                        if (lRet == -1)
+                        {
+                            if (test_channel.ErrorCode == ErrorCode.DisplayNameDup)
+                                DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{test_channel.ErrorCode}");
+                            else
+                            {
+                                strError = $"错误码 {test_channel.ErrorCode} 不符合期待的错误码";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = $"期待 SetReaderInfo() 返回出错，但返回了成功";
+                            goto ERROR1;
+                        }
+                    }
+                    else if (test_case == "displayName2")
+                    {
+                        if (lRet == -1)
+                        {
+                            if (test_channel.ErrorCode == ErrorCode.DisplayNameDup)
+                                DataModel.SetMessage($"期待中的返回出错。{strError} errorCode:{test_channel.ErrorCode}");
+                            else
+                            {
+                                strError = $"错误码 {test_channel.ErrorCode} 不符合期待的错误码";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = $"期待 SetReaderInfo() 返回出错，但返回了成功";
+                            goto ERROR1;
+                        }
+                    }
+
+#if REMOVED
+                    if (test_case == "refID"
+    || test_case == "barcode"
+    || test_case == "displayName1"
+    || test_case == "displayName2"
+    )
+                    {
+                        // 验证读者记录是否修改成功
+                        lRet = manage_channel.GetReaderInfo(null,
+                        "@path:" + saved_recpath1,
+                        "xml",
+                        out results,
+                        out strError);
+                        if (lRet == -1 || lRet == 0)
+                        {
+                            strError = $"读者记录 '{saved_recpath1}' 验证获取时出错: {strError}";
+                            goto ERROR1;
+                        }
+
+                        // 修改后的 XML。注意这是用管理员账户取出来的，这样它里面就包含了全部元素
+                        string changed_xml = results[0];
+
+                        // 验证
+                        {
+                            changed_xml = DomUtil.GetIndentXml(changed_xml);
+                            DataModel.SetMessage($"path={saved_recpath1}");
+                            DataModel.SetMessage($"xml=\r\n{changed_xml}");
+
+                            XmlDocument changed_dom = new XmlDocument();
+                            changed_dom.LoadXml(changed_xml);
+
+                            if (test_case == "refID")
+                            {
+                                // 验证 barcode
+                                string barcode = DomUtil.GetElementText(changed_dom.DocumentElement, "barcode");
+                                if (barcode == "G0000002")
+                                    DataModel.SetMessage("修改后的记录验证正确");
+                                else
+                                {
+                                    strError = $"修改后的读者记录，条码号期待为 'G0000002' 但却为 '{barcode}'";
+                                    goto ERROR1;
+                                }
+
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "importantFields2")
+                            {
+                                string barcode = DomUtil.GetElementText(changed_dom.DocumentElement, "barcode");
+                                if (barcode == "G0000001")
+                                    DataModel.SetMessage("修改后的记录验证正确(也就是说条码号没有变化)");
+                                else
+                                {
+                                    strError = $"修改后的读者记录，条码号期待为 'G0000001'(也就是说条码号没有变化) 但实际上却为 '{barcode}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "dataFields")
+                            {
+                                string barcode = DomUtil.GetElementText(changed_dom.DocumentElement, "barcode");
+                                if (barcode == "G0000001")
+                                    DataModel.SetMessage("修改后的记录验证正确(也就是说条码号没有变化)");
+                                else
+                                {
+                                    strError = $"修改后的读者记录，条码号期待为 'G0000001'(也就是说条码号没有变化) 但实际上却为 '{barcode}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "refID1")
+                            {
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "refID2")
+                            {
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "refID3")
+                            {
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (test_case == "refID4")
+                            {
+                                // 验证 refID
+                                string refID = DomUtil.GetElementText(changed_dom.DocumentElement, "refID");
+                                if (refID != created_refID)
+                                {
+                                    strError = $"修改后的读者记录里面的 refID 为 '{refID}'，不同于刚创建时候的 refID '{created_refID}'";
+                                    goto ERROR1;
+                                }
+                            }
+                        }
+                    }
+
+#endif
+
+                    // 删除读者记录
+                    lRet = manage_channel.SetReaderInfo(null,
+        "delete",
+        saved_recpath1,
+        "", // _globalPatronXml,
+        null,
+        new_timestamp1,
+        out string _,
+        out string _,
+        out string _,
+        out byte[] _,
+        out ErrorCodeValue _,
+        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    lRet = manage_channel.SetReaderInfo(null,
+"delete",
+saved_recpath2,
+"", // _globalPatronXml,
+null,
+new_timestamp2,
+out string _,
+out string _,
+out string _,
+out byte[] _,
+out ErrorCodeValue _,
+out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    /*
+                    if (errors.Count > 0)
+                    {
+                        Utility.DisplayErrors(errors);
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                        };
+                    }
+                    */
+                    DataModel.SetMessage("正确", "green");
+                    return new NormalResult();
+                }
+                catch (Exception ex)
+                {
+                    strError = "TestCreateReaderRecord_dup() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                    goto ERROR1;
+                }
+                finally
+                {
+                    test_channel.Timeout = old_timeout;
+                    DataModel.DeleteChannel(test_channel);
+                }
+            }
+            finally
+            {
+                DataModel.ReturnChannel(manage_channel);
+            }
+
+        ERROR1:
+            DataModel.SetMessage($"TestCreateReaderRecord_dup() error: {strError}", "error");
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
+        }
+
 
         // 测试删除读者记录，特别是限制字段权限情况
         public static NormalResult TestDeleteReaderRecord(string test_case)

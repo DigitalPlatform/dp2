@@ -6684,6 +6684,7 @@ out strError);
         }
          * */
 
+#if REMOVED
         // 根据读者证条码号对读者库进行查重
         // 本函数只负责查重, 并不获得记录体
         // parameters:
@@ -6864,6 +6865,164 @@ out strError);
             if (lRet == 0)
             {
                 strError = "显示名 '" + strDisplayName + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            lRet = channel.DoGetSearchResult(
+                strResultSetName,
+                0,
+                nMax,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error 和前面已经命中的条件矛盾";
+                goto ERROR1;
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+#endif
+
+        // 根据读者证条码号对读者库进行查重
+        // 本函数只负责查重, 并不获得记录体
+        // parameters:
+        //      strBarcode  读者证条码号
+        // return:
+        //      -1  error
+        //      其他    命中记录条数(不超过nMax规定的极限)
+        public int SearchReaderRecDup(
+            RmsChannel channel,
+            string strBarcode,
+            int nMax,
+            out List<string> aPath,
+            out string strError)
+        {
+            return SearchReaderDup(
+                channel,
+                strBarcode,
+                "证条码",
+                nMax,
+                out aPath,
+                out strError);
+        }
+
+        // TODO: 判断strDisplayName是否为空
+        // 根据显示名对读者库进行查重
+        // 本函数只负责查重, 并不获得记录体
+        // parameters:
+        //      strBarcode  读者证条码号
+        // return:
+        //      -1  error
+        //      其他    命中记录条数(不超过nMax规定的极限)
+        public int SearchReaderDisplayNameDup(
+            RmsChannel channel,
+            string strDisplayName,
+            int nMax,
+            out List<string> aPath,
+            out string strError)
+        {
+            return SearchReaderDup(
+    channel,
+    strDisplayName,
+    "显示名",
+    nMax,
+    out aPath,
+    out strError);
+        }
+
+        // return:
+        //      -1  error
+        //      其他    命中记录条数(不超过nMax规定的极限)
+        public int SearchReaderRefIdDup(
+            RmsChannel channel,
+            string strRefID,
+            int nMax,
+            out List<string> aPath,
+            out string strError)
+        {
+            return SearchReaderDup(
+    channel,
+    strRefID,
+    "参考ID",
+    nMax,
+    out aPath,
+    out strError);
+        }
+
+        // parameters:
+        //      strFrom 显示名/证条码/参考ID
+        public int SearchReaderDup(
+    RmsChannel channel,
+    string strDisplayName,
+    string strFrom,
+    int nMax,
+    out List<string> aPath,
+    out string strError)
+        {
+            strError = "";
+            aPath = new List<string>();
+
+            LibraryApplication app = this;
+
+            Debug.Assert(String.IsNullOrEmpty(strDisplayName) == false, "");
+
+            // 构造检索式
+            // 查重要针对全部读者库进行
+            string strQueryXml = "";
+            int nCount = 0;
+            for (int i = 0; i < app.ReaderDbs.Count; i++)
+            {
+                string strDbName = app.ReaderDbs[i].DbName;
+
+                Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                if (nCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                string strOneDbQuery = "<target list='"
+        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom/*"显示名"*/)
+        + "'><item><word>"
+        + StringUtil.GetXmlStringSimple(strDisplayName)
+        + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+                nCount++;
+
+                strQueryXml += strOneDbQuery;
+            }
+
+            if (nCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            string strResultSetName = "search_reader_dup_001";
+
+            // TODO: 两种检索点的结果不会产生重复吧，需要测试验证
+
+            long lRet = channel.DoSearch(strQueryXml,
+                strResultSetName,
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = $"{strFrom} '{ strDisplayName }' 没有找到";
                 return 0;
             }
 
@@ -15879,7 +16038,7 @@ strLibraryCode);    // 读者所在的馆代码
         // ChangePartDenied = 13,    // 部分修改被拒绝
         ItemBarcodeDup = 14,    // 册条码号重复
         Hangup = 15,    // 系统挂起
-        ReaderBarcodeDup = 16,  // 读者证条码号重复
+        ReaderBarcodeDup = 16,  // 读者证条码号重复(以后将改用 BarcodeDup)
         HasCirculationInfo = 17,    // 包含流通信息(不能删除)
         SourceReaderBarcodeNotFound = 18,  // 源读者证条码号不存在
         TargetReaderBarcodeNotFound = 19,  // 目标读者证条码号不存在
@@ -15905,6 +16064,9 @@ strLibraryCode);    // 读者所在的馆代码
         AlreadyBorrowedByOther = 39,    // 已经被其他读者借阅 2020/3/26
         SyncDenied = 40,    // 同步操作被拒绝(因为实际操作时间之后又发生过借还操作) 2020/3/27
         PasswordExpired = 41,   // 密码已经失效 2021/7/4
+        BarcodeDup = 42,        // 条码号重复了 2021/8/9
+        DisplayNameDup = 43,  // 显示名重复了 2021/8/9
+        RefIdDup = 44,    // 参考 ID 重复了 2021/8/9
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容

@@ -5173,6 +5173,10 @@ out strError);
 
                     // 合并新旧记录
                     // string strNewXml = "";
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    //      1   成功，并且 refID 元素是利用上了 domNew 里面的 refID 元素
                     nRet = MergeTwoReaderXml(
                         element_names,
                         "change",

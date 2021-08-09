@@ -262,6 +262,10 @@ namespace DigitalPlatform.LibraryServer
         // 合并新旧记录
         // parameters:
         //      important_fields    重要的字段名列表。要检查这些字段是否没有被采纳，如果没有被采纳要报错
+        // return:
+        //      -1  出错
+        //      0   成功
+        //      1   成功，并且 refID 元素是利用上了 domNew 里面的 refID 元素
         public static int MergeTwoReaderXml(
             string[] element_names,
             string strAction,
@@ -275,6 +279,8 @@ namespace DigitalPlatform.LibraryServer
             domMerged = null;
             // strMergedXml = "";
             strError = "";
+
+            bool useClientRefID = false;
 
             if (strAction == "changestate")
             {
@@ -417,9 +423,10 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2021/8/9
                     // 如果现有记录中 refID 为非空，则不允许修改它 
+                    string old_refID = "";
                     if (strElementName == "refID")
                     {
-                        string old_refID = DomUtil.GetElementText(domExist.DocumentElement, "refID");
+                        old_refID = DomUtil.GetElementText(domExist.DocumentElement, "refID");
                         if (string.IsNullOrEmpty(old_refID) == false)
                             continue;
                     }
@@ -498,6 +505,17 @@ namespace DigitalPlatform.LibraryServer
                         DomUtil.SetElementOuterXml(domExist.DocumentElement,
                             strElementName,
                             strTextNew);
+
+                    }
+
+                    if (strElementName == "refID")
+                    {
+                        string new_refID = DomUtil.GetElementText(domExist.DocumentElement, "refID");
+                        if (old_refID != new_refID)
+                        {
+                            // 说明利用上了前端发来的 refID，触发查重
+                            useClientRefID = true;
+                        }
                     }
 
                     /*
@@ -580,6 +598,9 @@ namespace DigitalPlatform.LibraryServer
 
             // strMergedXml = domExist.OuterXml;
             domMerged = domExist;
+
+            if (useClientRefID)
+                return 1;
             return 0;
         }
 
@@ -617,6 +638,8 @@ namespace DigitalPlatform.LibraryServer
 
         // 构造出适合保存的新读者记录
         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
+        // parameters:
+        //          useClientRefID  [out]是否使用了前端给出的 RefID?
         // return:
         //      -1  出错
         //      0   没有实质性修改
@@ -624,11 +647,14 @@ namespace DigitalPlatform.LibraryServer
         int BuildNewReaderRecord(XmlDocument domNewRec,
             string[] important_fields,
             string rights,
+            out bool useClientRefID,
             out string strXml,
             out string strError)
         {
             strError = "";
             strXml = "";
+
+            useClientRefID = false;
 
             // 流通元素名列表
             string[] remove_element_names = new string[] {
@@ -739,6 +765,11 @@ namespace DigitalPlatform.LibraryServer
             {
                 DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
                 bChanged = true;
+            }
+            else
+            {
+                // 这是前端给出的记录中就有的 refID 内容，需要触发查重
+                useClientRefID = true;
             }
 
             // 检查重要元素是否兑现创建
@@ -1132,13 +1163,26 @@ namespace DigitalPlatform.LibraryServer
             if (domNewRec.DocumentElement != null)
                 domNewRec.DocumentElement.RemoveAttribute("importantFields");
 
+            // 如果属性不存在，返回 null；如果属性存在，则不会返回 null，最低限度也是 ""
+            string GetAttribute(XmlElement el, string attr)
+            {
+                if (el == null)
+                    return null;
+                if (el.HasAttribute(attr) == false)
+                    return null;
+                var value = el.GetAttribute(attr);
+                if (value == null)
+                    return "";
+                return value;
+            }
+
             // 2021/8/5
-            string data_fields = domNewRec.DocumentElement?.GetAttribute("dataFields");
+            string data_fields = GetAttribute(domNewRec.DocumentElement, "dataFields");
             if (domNewRec.DocumentElement != null)
                 domNewRec.DocumentElement.RemoveAttribute("dataFields");
 
             // 2021/8/8
-            if (strAction == "new" && string.IsNullOrEmpty(data_fields) == false)
+            if (strAction == "new" && data_fields != null/*string.IsNullOrEmpty(data_fields) == false*/)
             {
                 strError = "当 action 为 'new' 时，读者记录 XML 根元素不应包含 dataFields 元素";
                 goto ERROR1;
@@ -1480,7 +1524,7 @@ namespace DigitalPlatform.LibraryServer
 
                         result.Value = -1;
                         result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.ReaderBarcodeDup;
+                        result.ErrorCode = ErrorCode.DisplayNameDup;
                         return result;
                     }
 
@@ -1491,7 +1535,7 @@ namespace DigitalPlatform.LibraryServer
                         strError = "显示名 '" + strNewDisplayName + "' 已经被工作人员帐户使用。操作失败。";
                         result.Value = -1;
                         result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.ReaderBarcodeDup;
+                        result.ErrorCode = ErrorCode.DisplayNameDup;
                         return result;
                     }
                 }
@@ -1583,15 +1627,55 @@ namespace DigitalPlatform.LibraryServer
                     if (bForce == false)
                     {
                         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
+                        // parameters:
+                        //          useClientRefID  [out]是否使用了前端给出的 RefID?
+                        // return:
+                        //      -1  出错
+                        //      0   没有实质性修改
+                        //      1   发生了实质性修改
                         nRet = BuildNewReaderRecord(domNewRec,
                             string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                             sessioninfo.RightsOrigin,
+                            out bool useClientRefID,
                             out string xml,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
                         domNewRec.LoadXml(xml);
+
+                        if (useClientRefID)
+                        {
+                            string refID = DomUtil.GetElementText(domNewRec.DocumentElement, "refID");
+                            if (string.IsNullOrEmpty(refID) == false)
+                            {
+                                // return:
+                                //      -1  error
+                                //      其他    命中记录条数(不超过nMax规定的极限)
+                                nRet = this.SearchReaderRefIdDup(
+                                    channel,
+                                    refID,
+                                    100,
+                                    out List<string> aPath,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                bool dup = false;
+                                if (nRet > 1)
+                                    dup = true;
+                                else if (nRet == 1 && aPath[0] != strRecPath)
+                                    dup = true;
+
+                                if (dup == true)
+                                {
+                                    result.Value = -1;
+                                    result.ErrorInfo = $"参考 ID '{refID}' 和其它读者记录发生重复了";
+                                    result.ErrorCode = ErrorCode.RefIdDup;
+                                    return result;
+                                }
+                            }
+                        }
+
                     }
                     else
                     {
@@ -1798,7 +1882,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                     // 2021/8/5
                     // 根据 data_fields 进行元素范围限定
-                    if (string.IsNullOrEmpty(data_fields) == false)
+                    if (data_fields != null/*string.IsNullOrEmpty(data_fields) == false*/)
                     {
                         var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
@@ -1866,7 +1950,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                     // 2021/8/5
                     // 根据 data_fields 进行元素范围限定
-                    if (string.IsNullOrEmpty(data_fields) == false)
+                    if (data_fields != null/*string.IsNullOrEmpty(data_fields) == false*/)
                     {
                         var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
@@ -2719,6 +2803,10 @@ root, strLibraryCode);
             // 先合并新旧记录，得到真正保存的新记录内容状态。后面再进行新旧比较
             if (bForce == false)
             {
+                // return:
+                //      -1  出错
+                //      0   成功
+                //      1   成功，并且 refID 元素是利用上了 domNew 里面的 refID 元素
                 nRet = MergeTwoReaderXml(
                 element_names,
                 strAction,
@@ -2730,6 +2818,38 @@ root, strLibraryCode);
                 out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                // 查重 refID
+                if (nRet == 1)
+                {
+                    string refID = DomUtil.GetElementText(domMerged.DocumentElement, "refID");
+                    if (string.IsNullOrEmpty(refID) == false)
+                    {
+                        // return:
+                        //      -1  error
+                        //      其他    命中记录条数(不超过nMax规定的极限)
+                        nRet = this.SearchReaderRefIdDup(
+                            channel,
+                            refID,
+                            100,
+                            out List<string> aPath,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        bool dup = false;
+                        if (nRet > 1)
+                            dup = true;
+                        else if (nRet == 1 && aPath[0] != strRecPath)
+                            dup = true;
+
+                        if (dup == true)
+                        {
+                            library_errorcode = ErrorCode.RefIdDup;
+                            strError = $"参考 ID '{refID}' 和其它读者记录发生重复了";
+                            return -1;
+                        }
+                    }
+                }
 
                 /*
                 domNewRec = new XmlDocument();
@@ -3095,7 +3215,7 @@ root, strLibraryCode);
                 {
                     strError = "显示名 '" + strNewDisplayName + "' 已经被下列读者记录使用了: " + StringUtil.MakePathList(aPath) + "。操作失败。";
 
-                    library_errorcode = ErrorCode.ReaderBarcodeDup;
+                    library_errorcode = ErrorCode.DisplayNameDup;
                     return -1;
                 }
 
@@ -3104,7 +3224,7 @@ root, strLibraryCode);
                 if (SearchUserNameDup(strNewDisplayName) == true)
                 {
                     strError = "显示名 '" + strNewDisplayName + "' 已经被工作人员帐户使用。操作失败。";
-                    library_errorcode = ErrorCode.ReaderBarcodeDup;
+                    library_errorcode = ErrorCode.DisplayNameDup;
                     return -1;
                 }
             }
