@@ -127,8 +127,8 @@ namespace DigitalPlatform.Marc
             // title contributor
             if (StringUtil.IsInList("areas,title_area", strStyle))
             {
-                var titles = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:title/@text", nsmgr);
-                var authors = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:contributor/@text", nsmgr);
+                var titles = dom.SelectNodes("//srw_dc:dc/dc:title/text()", nsmgr);
+                var authors = dom.SelectNodes("//srw_dc:dc/dc:contributor/text()", nsmgr);
                 var text = Link(GetText(titles, "; "), " / ", GetText(authors, "; "));
 
                 if (string.IsNullOrEmpty(text) == false)
@@ -138,7 +138,7 @@ namespace DigitalPlatform.Marc
             // 题名
             if (StringUtil.IsInList("title", strStyle))
             {
-                var titles = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:title/@text", nsmgr);
+                var titles = dom.SelectNodes("//srw_dc:dc/dc:title/text()", nsmgr);
                 var text = GetText(titles, "; ");
 
                 if (string.IsNullOrEmpty(text) == false)
@@ -148,7 +148,7 @@ namespace DigitalPlatform.Marc
             // 作者
             if (StringUtil.IsInList("author", strStyle))
             {
-                var authors = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:contributor/@text", nsmgr);
+                var authors = dom.SelectNodes("//srw_dc:dc/dc:contributor/text()", nsmgr);
                 var text = GetText(authors, "; ");
 
                 if (string.IsNullOrEmpty(text) == false)
@@ -158,7 +158,7 @@ namespace DigitalPlatform.Marc
             // 责任者检索点
             if (StringUtil.IsInList("author_accesspoint", strStyle))
             {
-                var authors = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:contributor/@text", nsmgr);
+                var authors = dom.SelectNodes("//srw_dc:dc/dc:contributor/text()", nsmgr);
                 var text = GetText(authors, "; ");
                 if (string.IsNullOrEmpty(text) == false)
                     results.Add(new NameValueLine("责任者检索点",
@@ -193,18 +193,19 @@ namespace DigitalPlatform.Marc
             // 4: Publication, production, distribution, etc., area
             if (StringUtil.IsInList("areas,publication_area", strStyle))
             {
-                //var authors = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:publisher/@text", nsmgr);
-                //var text = GetText(authors, " ");
+                var publishers = dom.SelectNodes("//srw_dc:dc/dc:publisher/text()", nsmgr);
+                // var dates = dom.SelectNodes("//srw_dc:dc/dc:date/text()", nsmgr);
+                var text = GetText(publishers, "; ");
 
-                //if (string.IsNullOrEmpty(text) == false)
-                //    results.Add(new NameValueLine("出版发行项", text, "publication_area"));
+                if (string.IsNullOrEmpty(text) == false)
+                    results.Add(new NameValueLine("出版发行项", text, "publication_area"));
             }
 
             // 出版者
             // publisher
             if (StringUtil.IsInList("publisher", strStyle))
             {
-                var publishers = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:publisher/@text", nsmgr);
+                var publishers = dom.SelectNodes("//srw_dc:dc/dc:publisher/text()", nsmgr);
                 var text = GetText(publishers, " ");
 
                 if (string.IsNullOrEmpty(text) == false)
@@ -215,7 +216,7 @@ namespace DigitalPlatform.Marc
             // date
             if (StringUtil.IsInList("publishtime", strStyle))
             {
-                var dates = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:date/@text", nsmgr);
+                var dates = dom.SelectNodes("//srw_dc:dc/dc:date/text()", nsmgr);
                 var text = GetText(dates, " ");
 
                 if (string.IsNullOrEmpty(text) == false)
@@ -276,7 +277,7 @@ namespace DigitalPlatform.Marc
             if (StringUtil.IsInList("areas,resource_identifier_area", strStyle))
             {
                 // identifier
-                var identifiers = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:identifier/@text", nsmgr);
+                var identifiers = dom.SelectNodes("//srw_dc:dc/dc:identifier/text()", nsmgr);
                 var text = GetText(identifiers, "; ");
 
                 if (string.IsNullOrEmpty(text) == false)
@@ -342,7 +343,7 @@ namespace DigitalPlatform.Marc
             // description
             if (StringUtil.IsInList("summary", strStyle))
             {
-                var descriptions = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:description/@text", nsmgr);
+                var descriptions = dom.SelectNodes("//srw_dc:dc/dc:description/text()", nsmgr);
                 var text = GetText(descriptions, "; ");
 
                 if (string.IsNullOrEmpty(text) == false)
@@ -353,7 +354,7 @@ namespace DigitalPlatform.Marc
             // subject
             if (StringUtil.IsInList("subjects", strStyle))
             {
-                var subjects = dom.DocumentElement.SelectNodes("//srw_dc:dc/dc:subject/@text", nsmgr);
+                var subjects = dom.SelectNodes("//srw_dc:dc/dc:subject/text()", nsmgr);
                 var text = GetText(subjects, "; ");
 
                 if (string.IsNullOrEmpty(text))

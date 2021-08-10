@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<searchRetrieveResponse xmlns="http://www.loc.gov/zing/srw/">
+  <version>1.2</version>
+  <numberOfRecords>42</numberOfRecords>
+  <records>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>'94中国发展报告</dc:title>
+          <dc:contributor>叶震 主编</dc:contributor>
+          <dc:contributor>李强 主编</dc:contributor>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1994</dc:date>
+          <dc:date>1994</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990002180740203961</dc:identifier>
+          <dc:identifier>(aleph)000218074BNU03</dc:identifier>
+          <dc:identifier>7-5037-1744-0</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990002180740203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990002180740203961</recordIdentifier>
+      <recordPosition>1</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>'95中国发展报告</dc:title>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1995</dc:date>
+          <dc:date>1995</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990002181190203961</dc:identifier>
+          <dc:identifier>(aleph)000218119BNU03</dc:identifier>
+          <dc:identifier>7-5037-2020-4</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990002181190203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990002181190203961</recordIdentifier>
+      <recordPosition>2</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>'96 中国发展报告 中国的“八五”</dc:title>
+          <dc:contributor>张塞 主编</dc:contributor>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1996</dc:date>
+          <dc:date>1996</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990002181050203961</dc:identifier>
+          <dc:identifier>(aleph)000218105BNU03</dc:identifier>
+          <dc:identifier>7-5037-2291-6</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990002181050203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990002181050203961</recordIdentifier>
+      <recordPosition>3</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>'97中国发展报告 电子资源</dc:title>
+          <dc:type>text</dc:type>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1997</dc:date>
+          <dc:date>####</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>9910637057203961</dc:identifier>
+          <dc:identifier>CXEBK10344696</dc:identifier>
+          <dc:identifier>7-5037-2623-7</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/9910637057203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>9910637057203961</recordIdentifier>
+      <recordPosition>4</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>'97中国发展报告</dc:title>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1997</dc:date>
+          <dc:date>1997</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990001379280203961</dc:identifier>
+          <dc:identifier>(aleph)000137928BNU03</dc:identifier>
+          <dc:identifier>7-5037-2623-7</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990001379280203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990001379280203961</recordIdentifier>
+      <recordPosition>5</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>'98中国发展报告</dc:title>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1998</dc:date>
+          <dc:date>1998</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990001379150203961</dc:identifier>
+          <dc:identifier>(aleph)000137915BNU03</dc:identifier>
+          <dc:identifier>7-5037-2790-X</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990001379150203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990001379150203961</recordIdentifier>
+      <recordPosition>6</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>'99中国发展报告</dc:title>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1999</dc:date>
+          <dc:date>1999</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990001379140203961</dc:identifier>
+          <dc:identifier>(aleph)000137914BNU03</dc:identifier>
+          <dc:identifier>7-5037-2899-X</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990001379140203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990001379140203961</recordIdentifier>
+      <recordPosition>7</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>’92中国发展报告</dc:title>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1993</dc:date>
+          <dc:date>1993</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990002264090203961</dc:identifier>
+          <dc:identifier>(aleph)000226409BNU03</dc:identifier>
+          <dc:identifier>7-5037-0758-5</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990002264090203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990002264090203961</recordIdentifier>
+      <recordPosition>8</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>`93中国发展报告</dc:title>
+          <dc:contributor>张塞 主编</dc:contributor>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>中国统计出版社</dc:publisher>
+          <dc:date>1994</dc:date>
+          <dc:date>1994</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990000953830203961</dc:identifier>
+          <dc:identifier>(aleph)000095383BNU03</dc:identifier>
+          <dc:identifier>7-5037-1425-5</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990000953830203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990000953830203961</recordIdentifier>
+      <recordPosition>9</recordPosition>
+    </record>
+    <record>
+      <recordSchema>dcx</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <dc:record xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <dc:title>1999 年中国发展状况与趋势</dc:title>
+          <dc:contributor>季野 主编</dc:contributor>
+          <dc:contributor>张西明 主编</dc:contributor>
+          <dc:contributor>曲克敏 主编</dc:contributor>
+          <dc:type>text</dc:type>
+          <dc:publisher>北京</dc:publisher>
+          <dc:publisher>经济日报出版社</dc:publisher>
+          <dc:date>1999</dc:date>
+          <dc:date>1999</dc:date>
+          <dc:language>chi</dc:language>
+          <dc:identifier>990004545720203961</dc:identifier>
+          <dc:identifier>(aleph)000454572BNU03</dc:identifier>
+          <dc:identifier>7-80127-555-1</dc:identifier>
+          <dc:identifier>alma:86BNU_INST/bibs/990004545720203961</dc:identifier>
+        </dc:record>
+      </recordData>
+      <recordIdentifier>990004545720203961</recordIdentifier>
+      <recordPosition>10</recordPosition>
+    </record>
+  </records>
+  <nextRecordPosition>11</nextRecordPosition>
+  <extraResponseData xmlns:xb="http://www.exlibris.com/repository/search/xmlbeans/">
+    <xb:exact>true</xb:exact>
+    <xb:responseDate>2021-08-10T11:49:27+0800</xb:responseDate>
+  </extraResponseData>
+</searchRetrieveResponse>

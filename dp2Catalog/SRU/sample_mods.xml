@@ -1,0 +1,498 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<searchRetrieveResponse xmlns="http://www.loc.gov/zing/srw/">
+  <version>1.2</version>
+  <numberOfRecords>42</numberOfRecords>
+  <records>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>'94中国发展报告</title>
+          </titleInfo>
+          <name type="personal">
+            <namePart>叶震</namePart>
+            <role>
+              <roleTerm authority="marcrelator" type="code">主编</roleTerm>
+            </role>
+          </name>
+          <name type="personal">
+            <namePart>李强</namePart>
+            <role>
+              <roleTerm authority="marcrelator" type="code">主编</roleTerm>
+            </role>
+          </name>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1994</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>320页 图 27cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">adolescent</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-1744-0</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordContentSource authority="marcorg">BSD</recordContentSource>
+            <recordCreationDate encoding="marc">020204</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180625022747.0</recordChangeDate>
+            <recordIdentifier>990002180740203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990002180740203961</recordIdentifier>
+      <recordPosition>1</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>'95中国发展报告</title>
+          </titleInfo>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <genre authority="marcgt">government publication</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1995</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>306页 27cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">adolescent</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-2020-4</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">020204</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180625022745.0</recordChangeDate>
+            <recordIdentifier>990002181190203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990002181190203961</recordIdentifier>
+      <recordPosition>2</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>'96 中国发展报告</title>
+            <subTitle>中国的“八五”</subTitle>
+          </titleInfo>
+          <name type="personal">
+            <namePart>张塞</namePart>
+            <role>
+              <roleTerm authority="marcrelator" type="code">主编</roleTerm>
+            </role>
+          </name>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1996</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>422,图版[40]页 照片 27cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">adolescent</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-2291-6</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">020204</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180625022747.0</recordChangeDate>
+            <recordIdentifier>990002181050203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990002181050203961</recordIdentifier>
+      <recordPosition>3</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>'97中国发展报告</title>
+          </titleInfo>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <originInfo>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1997</dateIssued>
+            <dateIssued encoding="marc">####</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <form authority="gmd">电子资源</form>
+            <extent>在线资源(393页)</extent>
+          </physicalDescription>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-2623-7</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">190611</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20190611112950.0</recordChangeDate>
+            <recordIdentifier>9910637057203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>9910637057203961</recordIdentifier>
+      <recordPosition>4</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>'97中国发展报告</title>
+          </titleInfo>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1997</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>393页 27x21cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">adolescent</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-2623-7</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">BSD</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">980926</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180625021905.0</recordChangeDate>
+            <recordIdentifier>990001379280203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990001379280203961</recordIdentifier>
+      <recordPosition>5</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>'98中国发展报告</title>
+          </titleInfo>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1998</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>397页 26cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">specialized</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-2790-X</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">WUL</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">990513</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180625021908.0</recordChangeDate>
+            <recordIdentifier>990001379150203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990001379150203961</recordIdentifier>
+      <recordPosition>6</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>'99中国发展报告</title>
+          </titleInfo>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1999</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>387页 27cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">adolescent</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-2899-X</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">TL</recordContentSource>
+            <recordContentSource authority="marcorg">BGDL</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">010912</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180625021906.0</recordChangeDate>
+            <recordIdentifier>990001379140203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990001379140203961</recordIdentifier>
+      <recordPosition>7</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>’92中国发展报告</title>
+          </titleInfo>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1993</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>350页 26cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">adolescent</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-0758-5</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">020422</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180624035216.0</recordChangeDate>
+            <recordIdentifier>990002264090203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990002264090203961</recordIdentifier>
+      <recordPosition>8</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>`93中国发展报告</title>
+          </titleInfo>
+          <name type="personal">
+            <namePart>张塞</namePart>
+            <role>
+              <roleTerm authority="marcrelator" type="code">主编</roleTerm>
+            </role>
+          </name>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <genre authority="marcgt">government publication</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>中国统计出版社</publisher>
+            <dateIssued>1994</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>277页 26cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">adolescent</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">国家统计局编</note>
+          <identifier type="isbn">7-5037-1425-5</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordContentSource authority="marcorg">BSD</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">010912</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180625021447.0</recordChangeDate>
+            <recordIdentifier>990000953830203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990000953830203961</recordIdentifier>
+      <recordPosition>9</recordPosition>
+    </record>
+    <record>
+      <recordSchema>mods</recordSchema>
+      <recordPacking>xml</recordPacking>
+      <recordData>
+        <mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+          <titleInfo>
+            <title>1999 年中国发展状况与趋势</title>
+          </titleInfo>
+          <name type="personal">
+            <namePart>季野</namePart>
+            <role>
+              <roleTerm authority="marcrelator" type="code">主编</roleTerm>
+            </role>
+          </name>
+          <name type="personal">
+            <namePart>张西明</namePart>
+            <role>
+              <roleTerm authority="marcrelator" type="code">主编</roleTerm>
+            </role>
+          </name>
+          <name type="personal">
+            <namePart>曲克敏</namePart>
+            <role>
+              <roleTerm authority="marcrelator" type="code">主编</roleTerm>
+            </role>
+          </name>
+          <typeOfResource>text</typeOfResource>
+          <genre authority="marcgt">essay</genre>
+          <originInfo>
+            <place>
+              <placeTerm type="text">北京</placeTerm>
+            </place>
+            <publisher>经济日报出版社</publisher>
+            <dateIssued>1999</dateIssued>
+            <issuance>monographic</issuance>
+          </originInfo>
+          <language>
+            <languageTerm authority="iso639-2b" type="code">chi</languageTerm>
+          </language>
+          <physicalDescription>
+            <form authority="marcform">print</form>
+            <extent>10, 374页 21cm</extent>
+          </physicalDescription>
+          <targetAudience authority="marctarget">adolescent</targetAudience>
+          <note altRepGroup="00" type="statement of responsibility">主编季野, 张西明, 张弢...[等]</note>
+          <identifier type="isbn">7-80127-555-1</identifier>
+          <recordInfo>
+            <recordContentSource authority="marcorg">TL</recordContentSource>
+            <recordContentSource authority="marcorg">BNU</recordContentSource>
+            <recordCreationDate encoding="marc">060323</recordCreationDate>
+            <recordChangeDate encoding="iso8601">20180624044239.0</recordChangeDate>
+            <recordIdentifier>990004545720203961</recordIdentifier>
+            <recordOrigin>
+              Converted from MARCXML to MODS version 3.5 using MARC21slim2MODS3-5.xsl
+              (Revision 1.112 2018/06/21)
+            </recordOrigin>
+          </recordInfo>
+        </mods>
+      </recordData>
+      <recordIdentifier>990004545720203961</recordIdentifier>
+      <recordPosition>10</recordPosition>
+    </record>
+  </records>
+  <nextRecordPosition>11</nextRecordPosition>
+  <extraResponseData xmlns:xb="http://www.exlibris.com/repository/search/xmlbeans/">
+    <xb:exact>true</xb:exact>
+    <xb:responseDate>2021-08-10T11:51:41+0800</xb:responseDate>
+  </extraResponseData>
+</searchRetrieveResponse>

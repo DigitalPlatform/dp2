@@ -364,7 +364,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (error_names.Count > 0)
             {
-                strError = $"下列元素超过当前用户权限: '{StringUtil.MakePathList(error_names)}'";
+                strError = $"下列元素越过当前元素集范围: '{StringUtil.MakePathList(error_names)}'";
                 return -1;
             }
 
@@ -803,7 +803,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (error_names.Count > 0)
                 {
-                    strError = $"创建读者记录被拒绝。下列元素超过当前用户权限: '{StringUtil.MakePathList(error_names)}'";
+                    strError = $"创建读者记录被拒绝。下列元素越出 importantFields 元素集范围: '{StringUtil.MakePathList(error_names)}'";
                     return -1;
                 }
             }
@@ -1859,6 +1859,13 @@ strLibraryCode);    // 读者所在的馆代码
                     || strAction == "changeforegift"
                     || strAction == "changereaderbarcode")
                 {
+                    StringBuilder comment = new StringBuilder();
+                    int count = 0;
+                    Append(comment, "(基础集合:", element_names, ")");
+                    void Append(StringBuilder s, string prefix, string[] a, string postfix)
+                    {
+                        s.Append(prefix + string.Join("|", a) + postfix);
+                    }
                     // 限定 element_names 集合，根据当前账户权限中 getreaderinfo:n 和 setreaderinfo:n 中的级别 n
 
                     // 2021/7/15
@@ -1871,6 +1878,8 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         var names = GetElementNames(read_level);
                         element_names = element_names.Intersect(names).ToArray();
+                        Append(comment, "-(读集合:", names.ToArray(), ")");
+                        count++;
                     }
 
                     string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
@@ -1878,6 +1887,8 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         var names = GetElementNames(write_level);
                         element_names = element_names.Intersect(names).ToArray();
+                        Append(comment, "-(写集合:", names.ToArray(), ")");
+                        count++;
                     }
 
                     // 2021/8/5
@@ -1886,7 +1897,12 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
+                        Append(comment, "-(dataFields 集合:", names.ToArray(), ")");
+                        count++;
                     }
+
+                    if (count > 0)
+                        Append(comment, "=(", element_names.ToArray(), ")");
 
                     // DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue errorcode;
                     // 执行"change"操作
@@ -1899,6 +1915,7 @@ strLibraryCode);    // 读者所在的馆代码
                         sessioninfo,
                         sessioninfo.LibraryCodeList,
                         element_names,
+                        comment.ToString(),
                         important_fields,
                         strAction,
                         bForce,
@@ -1974,7 +1991,7 @@ strLibraryCode);    // 读者所在的馆代码
                         strOldBarcode,
                         // strNewBarcode,
                         domOldRec,
-                        ref strExistingXml,
+                        out strExistingXml,
                         ref baNewTimestamp,
                         ref domOperLog,
                         out ErrorCode library_errorcode,
@@ -2362,7 +2379,7 @@ root, strLibraryCode);
             string strOldBarcode,
             // string strNewBarcode,
             XmlDocument domOldRec,
-            ref string strExistingXml,
+            out string strExistingRecord,
             ref byte[] baNewTimestamp,
             ref XmlDocument domOperLog,
             out ErrorCode library_errorcode,
@@ -2370,6 +2387,7 @@ root, strLibraryCode);
             out string strError)
         {
             strError = "";
+            strExistingRecord = "";
             library_errorcode = ErrorCode.SystemError;
             int nRedoCount = 0;
             int nRet = 0;
@@ -2378,7 +2396,6 @@ root, strLibraryCode);
             // 如果记录路径为空, 则先获得记录路径
             if (String.IsNullOrEmpty(strRecPath) == true)
             {
-
                 if (String.IsNullOrEmpty(strOldBarcode) == true)
                 {
                     strError = "strOldXml中的<barcode>元素中的证条码号，和strRecPath参数值，不能同时为空。";
@@ -2459,6 +2476,16 @@ root, strLibraryCode);
                 }
             }
 
+            // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+            if (this.IsCurrentChangeableReaderPath(strRecPath,
+                strCurrentLibraryCode,
+                out string strLibraryCode) == false)
+            {
+                strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
+                library_errorcode = ErrorCode.AccessDenied;
+                goto ERROR1;
+            }
+
         // Debug.Assert(strReaderDbName != "", "");
 
         // byte[] exist_timestamp = null;
@@ -2468,7 +2495,7 @@ root, strLibraryCode);
         REDOLOAD:
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(strRecPath,
-                out strExistingXml,
+                out string strExistingXml,
                 out string strMetaData,
                 out byte[] exist_timestamp,
                 out string strOutputPath,
@@ -2497,12 +2524,29 @@ root, strLibraryCode);
             }
             catch (Exception ex)
             {
-                strError = "strExistXml装载进入DOM时发生错误: " + ex.Message;
+                strError = "strExistXml 装载进入 DOM 时发生错误: " + ex.Message;
                 goto ERROR1;
             }
 
-            string strExistingBarcode = DomUtil.GetElementText(domExist.DocumentElement, "barcode");
+            // 2021/8/10
+            // 从 strExistingRecord 中去除 password 元素，和当前用户不具备读权限的元素
+            {
+                XmlDocument temp_dom = new XmlDocument();
+                temp_dom.LoadXml(strExistingXml);
 
+                AddPatronOI(temp_dom, strLibraryCode);
+
+                // return:
+                //      null    没有找到 getreaderinfo 前缀
+                //      ""      找到了前缀，并且 level 部分为空
+                //      其他     返回 level 部分
+                string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                FilterByLevel(temp_dom, read_level);
+
+                strExistingRecord = temp_dom.OuterXml;
+            }
+
+            string strExistingBarcode = DomUtil.GetElementText(domExist.DocumentElement, "barcode");
 
             // 观察已经存在的记录中，证条码号是否和strOldBarcode一致
             if (String.IsNullOrEmpty(strOldBarcode) == false)
@@ -2579,16 +2623,6 @@ root, strLibraryCode);
                 baNewTimestamp = exist_timestamp;   // 让前端知道库中记录实际上发生过变化
             }
 
-            // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
-            if (this.IsCurrentChangeableReaderPath(strRecPath,
-                strCurrentLibraryCode,
-                out string strLibraryCode) == false)
-            {
-                strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
-                library_errorcode = ErrorCode.AccessDenied;
-                goto ERROR1;
-            }
-
             // 2021/8/3
             string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
             if (string.IsNullOrEmpty(write_level) == false)
@@ -2607,7 +2641,7 @@ root, strLibraryCode);
                         "borrowHistory"}); // 注: 把系统自己管理的一些元素从检测范围排除
                 if (outof_names.Count > 0)
                 {
-                    strError = $"删除读者记录被拒绝。记录中下列元素超过当前用户可修改权限范围: {StringUtil.MakePathList(outof_names)}";
+                    strError = $"删除读者记录被拒绝。记录中下列元素越过当前用户可修改权限范围: {StringUtil.MakePathList(outof_names)}";
                     kernel_errorcode = ErrorCodeValue.AccessDenied;
                     library_errorcode = ErrorCode.AccessDenied;
                     domOperLog = null;  // 表示不必写入日志
@@ -2715,6 +2749,7 @@ root, strLibraryCode);
             SessionInfo sessioninfo,
             string strCurrentLibraryCode,
             string[] element_names,
+            string elementset_comment,
             string importantFields,
             string strAction,
             bool bForce,
@@ -2817,7 +2852,10 @@ root, strLibraryCode);
                 out XmlDocument domMerged,
                 out strError);
                 if (nRet == -1)
+                {
+                    strError += "。" + elementset_comment;
                     goto ERROR1;
+                }
 
                 // 查重 refID
                 if (nRet == 1)
@@ -3229,6 +3267,15 @@ root, strLibraryCode);
                 }
             }
 
+            // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+            if (this.IsCurrentChangeableReaderPath(strRecPath,
+                strCurrentLibraryCode,
+                out string strLibraryCode) == false)
+            {
+                strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
+                goto ERROR1;
+            }
+
             // 观察时间戳是否发生变化
             nRet = ByteArray.Compare(baOldTimestamp, exist_timestamp);
             if (nRet != 0)
@@ -3257,7 +3304,23 @@ root, strLibraryCode);
                 if (nRet == 1)
                 {
                     // 错误信息中, 返回了修改过的原记录和新时间戳
-                    strExistingRecord = strExistXml;
+                    // strExistingRecord = strExistXml;
+
+                    // 2021/8/10
+                    // 从 strExistingRecord 中去除 password 元素，和当前用户不具备读权限的元素
+                    {
+                        AddPatronOI(domExist, strLibraryCode);
+
+                        // return:
+                        //      null    没有找到 getreaderinfo 前缀
+                        //      ""      找到了前缀，并且 level 部分为空
+                        //      其他     返回 level 部分
+                        string read_level = GetReaderInfoLevel("getreaderinfo", rights);
+                        FilterByLevel(domExist, read_level);
+
+                        strExistingRecord = domExist.OuterXml;
+                    }
+
                     baNewTimestamp = exist_timestamp;
 
                     if (bExist == false)
@@ -3276,14 +3339,7 @@ root, strLibraryCode);
 
             // 原来 MergeTwo 在这里
 
-            // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
-            if (this.IsCurrentChangeableReaderPath(strRecPath,
-                strCurrentLibraryCode,
-                out string strLibraryCode) == false)
-            {
-                strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
-                goto ERROR1;
-            }
+
 
             // 2020/3/2
             // 给 domNewRec 中添加 libraryCode 元素
@@ -3435,6 +3491,24 @@ root, strLibraryCode);
 
                     strNewRecord = domNewRec.OuterXml;
                 }
+
+                // 成功返回的时候，strExistingRecord 里面并不返回内容
+                /*
+                // 2021/8/10
+                // 从 strExistingRecord 中去除 password 元素，和当前用户不具备读权限的元素
+                {
+                    AddPatronOI(domExist, strLibraryCode);
+
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    string read_level = GetReaderInfoLevel("getreaderinfo", rights);
+                    FilterByLevel(domExist, read_level);
+
+                    strExistingRecord = domExist.OuterXml;
+                }
+                */
 
                 strError = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
                 kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;

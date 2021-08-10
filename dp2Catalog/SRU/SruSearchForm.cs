@@ -154,50 +154,67 @@ namespace dp2Catalog
             XmlNodeList records = dom.DocumentElement.SelectNodes("//srw:record", nsmgr);
             foreach (XmlElement record in records)
             {
+                string schema = record.SelectSingleNode("srw:recordSchema", nsmgr)?.InnerText;
+                string packing = record.SelectSingleNode("srw:recordPacking", nsmgr)?.InnerText;
 
                 string id = record.SelectSingleNode("srw:recordIdentifier", nsmgr)?.InnerText;
                 string pos = record.SelectSingleNode("srw:recordPosition", nsmgr)?.InnerText;
-                string marcxml = record.SelectSingleNode("//marc21:record", nsmgr).OuterXml;
-
-                XmlDocument marcxml_dom = new XmlDocument();
-                marcxml_dom.LoadXml(marcxml);
-
-                int nRet = MarcUtil.Xml2Marc(marcxml_dom,
-    true,
-    null,
-    out string marcSyntax,
-    out string strMARC,
-    out string strError);
-                if (nRet == -1)
-                    throw new Exception(strError);
 
                 List<DigitalPlatform.Marc.NameValueLine> results = null;
 
-                if (marcSyntax == "usmarc")
-                    nRet = MarcTable.ScriptMarc21("",
-                        strMARC,
-                        "",
+                if (schema == "dc")
+                {
+                    string dcxml = record.SelectSingleNode("//srw_dc:dc", nsmgr).OuterXml;
+                    int nRet = MarcTable.ScriptDC("",
+                        dcxml,
+                        "title,author,publication_area",
                         null,
                         out results,
-                        out strError);
-                else if (marcSyntax == "unimarc")
-                    nRet = MarcTable.ScriptUnimarc("",
-                        strMARC,
-                        "",
-                        null,
-                        out results,
-                        out strError);
-                else
-                    throw new Exception($"未知的 MARC 格式 '{marcSyntax}'");
+                        out string strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);
+                }
+                else if (schema == "marcxml")
+                {
+                    string marcxml = record.SelectSingleNode("//marc21:record", nsmgr).OuterXml;
 
-                if (nRet == -1)
-                    throw new Exception(strError);
+                    XmlDocument marcxml_dom = new XmlDocument();
+                    marcxml_dom.LoadXml(marcxml);
+
+                    int nRet = MarcUtil.Xml2Marc(marcxml_dom,
+        true,
+        null,
+        out string marcSyntax,
+        out string strMARC,
+        out string strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);
+
+
+                    if (marcSyntax == "usmarc")
+                        nRet = MarcTable.ScriptMarc21("",
+                            strMARC,
+                            "title,author,publication_area",
+                            null,
+                            out results,
+                            out strError);
+                    else if (marcSyntax == "unimarc")
+                        nRet = MarcTable.ScriptUnimarc("",
+                            strMARC,
+                            "title,author,publication_area",
+                            null,
+                            out results,
+                            out strError);
+                    else
+                        throw new Exception($"未知的 MARC 格式 '{marcSyntax}'");
+
+                    if (nRet == -1)
+                        throw new Exception(strError);
+                }
 
                 ListViewItem item = new ListViewItem();
                 ListViewUtil.ChangeItemText(item, 0, pos);
                 {
-                    string schema = record.SelectSingleNode("srw:recordSchema", nsmgr)?.InnerText;
-                    string packing = record.SelectSingleNode("srw:recordPacking", nsmgr)?.InnerText;
                     string data = record.SelectSingleNode("srw:recordData", nsmgr)?.OuterXml;
 
                     item.Tag = new RecordData
