@@ -478,6 +478,7 @@ namespace DigitalPlatform.LibraryServer
 
 
         // 执行脚本函数VerifyBarcode
+        // 旧的 C# 校验脚本，和新的校验规则(XML 格式)都能兼容
         // parameters:
         //      host    如果为空，则函数内部会 new 一个此类型的对象；如果不为空，则直接使用
         //      strLibraryCodeList  当前操作者管辖的馆代码列表 2014/9/27
@@ -2122,6 +2123,7 @@ namespace DigitalPlatform.LibraryServer
                 //	2	is valid item barcode
                 int nResultValue = 0;
 
+                // 旧的 C# 校验脚本，和新的校验规则(XML 格式)都能兼容
                 // return:
                 //      -2  not found script
                 //      -1  出错
@@ -2495,6 +2497,7 @@ strRoom1);
                 //	2	is valid item barcode
                 int nResultValue = 0;
 
+                // 旧的 C# 校验脚本，和新的校验规则(XML 格式)都能兼容
                 // return:
                 //      -2  not found script
                 //      -1  出错

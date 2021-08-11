@@ -10702,6 +10702,7 @@ true);
                 }
 #endif
                 int nRet = 0;
+                // TODO: 注意这里可能会面临新的 XML 校验规则判断
                 if (app.BarcodeValidation == false) // 2019/7/12
                 {
                     // 当前是否定义了脚本?
@@ -10724,6 +10725,7 @@ true);
                 if (string.IsNullOrEmpty(strAction)
                     || strAction == "verify" || strAction == "VerifyBarcode")
                 {
+                    // 旧的 C# 校验脚本，和新的校验规则(XML 格式)都能兼容
                     // return:
                     //      -2  not found script
                     //      -1  出错

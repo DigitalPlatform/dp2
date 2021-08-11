@@ -356,7 +356,9 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // TODO: 改为用 SearchReaderRecDup() 查重
             int nResultValue = -1;
+            // 旧的 C# 校验脚本，和新的校验规则(XML 格式)都能兼容
             // 检查名字空间。
             // return:
             //      -2  not found script
@@ -1547,7 +1549,7 @@ out strError);
                         DomUtil.SetElementOuterXml(nodeAccount, strOldOuterXml);
                         return -1;
                     }
-                    
+
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
                     SetPasswordValue(nodeAccount, strHashed);
 

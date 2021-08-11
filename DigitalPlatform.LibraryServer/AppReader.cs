@@ -636,6 +636,11 @@ namespace DigitalPlatform.LibraryServer
             return StringUtil.MakePathList(oldOuterXmls, "\r\n");
         }
 
+        static void Append(StringBuilder s, string prefix, string[] a, string postfix)
+        {
+            s.Append(prefix + string.Join("|", a) + postfix);
+        }
+
         // 构造出适合保存的新读者记录
         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
         // parameters:
@@ -665,6 +670,7 @@ namespace DigitalPlatform.LibraryServer
                 "outofReservations",
                 "hire", // 2008/11/11 
                 "foregift", // 2008/11/11 
+                "password", // 2021/8/11。注：除了本函数里面的删除敏感元素机制，其实稍早的 FilterByLevel() 也会把 password 元素删除
             };
 
             // TODO: 需要测试本函数，看看<hire>元素的属性值真能去掉么?
@@ -676,6 +682,7 @@ namespace DigitalPlatform.LibraryServer
             RenameBirthday(dom);
 
             bool bChanged = false;
+
 
             // *** 滤掉 setreaderinfo:n 权限不包含的那些字段
             // 2021/7/15
@@ -803,7 +810,18 @@ namespace DigitalPlatform.LibraryServer
 
                 if (error_names.Count > 0)
                 {
-                    strError = $"创建读者记录被拒绝。下列元素越出 importantFields 元素集范围: '{StringUtil.MakePathList(error_names)}'";
+                    StringBuilder comment = new StringBuilder();
+                    {
+                        var element_names = GetElementNames(write_level);
+                        Append(comment, "(写集合:", element_names.ToArray(), ")");
+
+                        element_names = new List<string>(element_names.Except(remove_element_names));
+                        Append(comment, "-(保留集合:", remove_element_names.ToArray(), ")");
+
+                        Append(comment, "=(", element_names.ToArray(), ")");
+                    }
+
+                    strError = $"创建读者记录被拒绝。下列元素 '{StringUtil.MakePathList(error_names, "|")}' 越出当前元素集范围 {comment.ToString()}";
                     return -1;
                 }
             }
@@ -1423,9 +1441,13 @@ namespace DigitalPlatform.LibraryServer
                     && String.IsNullOrEmpty(strNewDisplayName) == false
                     )
                 {
+                    // 检查显示名是否和证条码号的名字空间发生冲突。
+                    // 注意这不是查重，而是检查显示名是否落入证条码号可使用的范围。
+                    // 和查重的区别在于，可能存在修改条码规则以前保存的证条码号，这些号码实际上和显示名重复了，也不会校验被发现
                     {
                         int nResultValue = -1;
                         // 检查名字空间。
+                        // 旧的 C# 校验脚本，和新的校验规则(XML 格式)都能兼容
                         // return:
                         //      -2  not found script
                         //      -1  出错
@@ -1464,6 +1486,29 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                 SKIP_VERIFY:
+                    /*
+                    // 2021/8/11
+                    // 将显示名针对证条码号进行查重
+                    nRet = SearchReaderRecDup(channel,
+                        strNewDisplayName,
+                        100,
+                        out List<string> paths,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet > 1
+                        || (nRet == 1 && paths[0] != strRecPath))
+                    {
+                        // strError = "显示名 '" + strNewDisplayName + "' 和下列读者记录的证条码号重复了: " + StringUtil.MakePathList(paths) + "。操作失败";
+                        strError = "修改被拒绝。因为显示名 '" + strNewDisplayName + "' 和已有的读者证条码号重复了";
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.DisplayNameDup;
+                        return result;
+                    }
+                    */
+
+                    // SKIP_VERIFY:
                     List<string> aPath = null;
 
                     // 防止和其他读者的显示名相重复
@@ -1862,10 +1907,7 @@ strLibraryCode);    // 读者所在的馆代码
                     StringBuilder comment = new StringBuilder();
                     int count = 0;
                     Append(comment, "(基础集合:", element_names, ")");
-                    void Append(StringBuilder s, string prefix, string[] a, string postfix)
-                    {
-                        s.Append(prefix + string.Join("|", a) + postfix);
-                    }
+
                     // 限定 element_names 集合，根据当前账户权限中 getreaderinfo:n 和 setreaderinfo:n 中的级别 n
 
                     // 2021/7/15
@@ -1878,7 +1920,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         var names = GetElementNames(read_level);
                         element_names = element_names.Intersect(names).ToArray();
-                        Append(comment, "-(读集合:", names.ToArray(), ")");
+                        Append(comment, "AND(读集合:", names.ToArray(), ")");
                         count++;
                     }
 
@@ -1887,7 +1929,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         var names = GetElementNames(write_level);
                         element_names = element_names.Intersect(names).ToArray();
-                        Append(comment, "-(写集合:", names.ToArray(), ")");
+                        Append(comment, "AND(写集合:", names.ToArray(), ")");
                         count++;
                     }
 
@@ -1897,7 +1939,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
-                        Append(comment, "-(dataFields 集合:", names.ToArray(), ")");
+                        Append(comment, "AND(dataFields 集合:", names.ToArray(), ")");
                         count++;
                     }
 
@@ -3154,6 +3196,9 @@ root, strLibraryCode);
                 && String.IsNullOrEmpty(strNewDisplayName) == false
                 )
             {
+                // 检查显示名是否和证条码号的名字空间发生冲突。
+                // 注意这不是查重，而是检查显示名是否落入证条码号可使用的范围。
+                // 和查重的区别在于，可能存在修改条码规则以前保存的证条码号，这些号码实际上和显示名重复了，也不会校验被发现
                 {
                     int nResultValue = -1;
                     // 检查名字空间。
@@ -3195,6 +3240,27 @@ root, strLibraryCode);
                 }
 
             SKIP_VERIFY:
+                /*
+                // 2021/8/11
+                // 将显示名针对证条码号进行查重
+                nRet = SearchReaderRecDup(channel,
+                    strNewDisplayName,
+                    100,
+                    out List<string> paths,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet > 1
+                    || (nRet == 1 && paths[0] != strRecPath))
+                {
+                    // strError = "显示名 '" + strNewDisplayName + "' 和下列读者记录的证条码号重复了: " + StringUtil.MakePathList(paths) + "。操作失败";
+                    strError = "修改被拒绝。因为显示名 '" + strNewDisplayName + "' 和已有的读者证条码号重复了";
+                    library_errorcode = ErrorCode.DisplayNameDup;
+                    return -1;
+                }
+                */
+
+                // SKIP_VERIFY:
                 List<string> aPath = null;
 
                 // 防止和其他读者的显示名相重复
