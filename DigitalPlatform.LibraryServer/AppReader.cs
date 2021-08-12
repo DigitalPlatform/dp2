@@ -1146,6 +1146,21 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 2021/8/12
+            // 检查账户权限中的 getreaderinfo:xxx 和 setreaderinfo:xxx 之间的关系
+            if (strAction == "new"
+                || strAction == "change"
+                || strAction == "changestate"
+                || strAction == "changeforegift"
+                || strAction == "changereaderbarcode"
+                || strAction == "delete")
+            {
+                nRet = VerifyReadWriteSet(sessioninfo,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
             // 把旧记录装载到DOM
             XmlDocument domOldRec = new XmlDocument();
             try
@@ -1909,13 +1924,13 @@ strLibraryCode);    // 读者所在的馆代码
                     Append(comment, "(基础集合:", element_names, ")");
 
                     // 限定 element_names 集合，根据当前账户权限中 getreaderinfo:n 和 setreaderinfo:n 中的级别 n
-
                     // 2021/7/15
                     // return:
                     //      null    没有找到 getreaderinfo 前缀
                     //      ""      找到了前缀，并且 level 部分为空
                     //      其他     返回 level 部分
                     string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                    /*
                     if (string.IsNullOrEmpty(read_level) == false)
                     {
                         var names = GetElementNames(read_level);
@@ -1923,6 +1938,7 @@ strLibraryCode);    // 读者所在的馆代码
                         Append(comment, "AND(读集合:", names.ToArray(), ")");
                         count++;
                     }
+                    */
 
                     string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
                     if (string.IsNullOrEmpty(write_level) == false)
@@ -1932,6 +1948,8 @@ strLibraryCode);    // 读者所在的馆代码
                         Append(comment, "AND(写集合:", names.ToArray(), ")");
                         count++;
                     }
+
+                    // 
 
                     // 2021/8/5
                     // 根据 data_fields 进行元素范围限定
@@ -2124,6 +2142,38 @@ strLibraryCode);    // 读者所在的馆代码
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 2021/8/12
+        // 检查用户权限中的 getreaderinfo:xxx 和 setreaderinfo:xxx 之间的元素集包含关系
+        // TODO: 可以考虑在 xxx 中增加一个 s_bypassverifyset 来故意越过这种检查
+        static int VerifyReadWriteSet(SessionInfo sessioninfo,
+            out string strError)
+        {
+            // return:
+            //      null    没有找到 getreaderinfo 前缀
+            //      ""      找到了前缀，并且 level 部分为空
+            //      其他     返回 level 部分
+            string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+            string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
+
+            strError = "";
+
+            if (string.IsNullOrEmpty(write_level) == false
+                && string.IsNullOrEmpty(read_level) == false)
+            {
+                var write_names = GetElementNames(write_level);
+                var read_names = GetElementNames(read_level);
+                var overflow_names = write_names.Except(read_names).ToArray();
+                if (overflow_names.Count() > 0)
+                {
+                    strError = $"用户权限定义不合法。当前用户对读者记录的可写元素集中下列部分元素越出了可读元素集范围: '{string.Join("|", overflow_names)}'。请修改账户权限，让可读元集完全包含可写元素集";
+                    return -1;
+                }
+
+            }
+
+            return 0;
         }
 
         #region SetReaderInfo() 下级函数
