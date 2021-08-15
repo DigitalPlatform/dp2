@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.25.*")]
-[assembly: AssemblyFileVersion("3.25.0.0")]
+[assembly: AssemblyVersion("3.26.*")]
+[assembly: AssemblyFileVersion("3.26.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -92,3 +92,4 @@ using System.Runtime.InteropServices;
 // 3.25 2021/7/23 读者窗保存 XML 记录的时候，必要时会发送 importantFields 参数，这样当 <dprms:file> 元素发生了修改，但当前账户不具备修改 file 元素的权限时会明确报错。(以前版本这里实际上保存不会成功，但没有明确报错，会让操作者以为操作成功了)
 //                  用户窗增加指定私有账户的功能，可以方便那些需要频繁修改不同账户权限然而又不想退出内务的操作
 //                  读者窗装载空白内容按钮功能，增加了从 dp2library 服务器获取当前用户可修改的元素的能力，能让读者编辑器呈现出合适的字段 enable/disable 状态
+// 3.26 2021/8/13 MessageHub::dp2MServerUrl 会自动将 "http://dp2003.com:8083/dp2MServer" 处理为 https 开头

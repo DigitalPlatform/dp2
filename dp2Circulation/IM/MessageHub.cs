@@ -153,9 +153,16 @@ false);
             get
             {
                 // dp2MServer URL
-                return Program.MainForm.AppInfo.GetString("config",
+                string value = Program.MainForm.AppInfo.GetString("config",
                     "im_server_url",
-                    "http://dp2003.com:8083/dp2MServer");
+                    "https://dp2003.com:8083/dp2MServer");  // 2021/8/12 改为 https
+
+                // 2021/8/12
+                // 进行兼容性处理
+                if (value == "http://dp2003.com:8083/dp2MServer")
+                    value = "https://dp2003.com:8083/dp2MServer";
+
+                return value;
             }
             set
             {

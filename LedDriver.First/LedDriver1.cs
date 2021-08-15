@@ -17,6 +17,9 @@ namespace LedDriver.First
     {
         LedProperty _ledProperty = new LedProperty();
 
+        // 是否完成了初始化
+        bool _initialized = false;
+
         public LedProperty LedProperty
         {
             get
@@ -31,17 +34,21 @@ namespace LedDriver.First
         public NormalResult InitializeDriver(LedProperty property,
             string style)
         {
+            _initialized = false;
+
             _ledProperty = property;
 
             var verify_result = VerifyLedProperty(_ledProperty);
             if (verify_result.Value == -1)
                 return verify_result;
 
+            _initialized = true;
             return new NormalResult();
         }
 
         public NormalResult ReleaseDriver()
         {
+            _initialized = false;
             return new NormalResult();
         }
 
@@ -57,6 +64,15 @@ namespace LedDriver.First
             DisplayStyle property,
             string style)
         {
+            // 2021/8/13
+            if (_initialized == false)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "LED 驱动尚未初始化",
+                    ErrorCode = "uninitialized"
+                };
+
             int fontSize = DEFAULT_FONT_SIZE;
             if (string.IsNullOrEmpty(property.FontSize) == false)
             {

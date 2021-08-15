@@ -16,7 +16,9 @@ namespace DigitalPlatform.RFID
         NormalResult ReleaseDriver();
 
         // parameters:
-        //      style   附加的子参数 
+        //      style   附加的子参数
+        // result.ErrorCode
+        //      "uninitialized" LED 驱动尚未初始化
         NormalResult Display(
             string ledName,
             string text, 

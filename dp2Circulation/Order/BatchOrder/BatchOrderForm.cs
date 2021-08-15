@@ -917,7 +917,6 @@ namespace dp2Circulation
 
             AppendHtml(text.ToString(), false);
             text.Clear();
-
         }
 
         void OutputEnd()

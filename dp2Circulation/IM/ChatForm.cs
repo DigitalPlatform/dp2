@@ -30,15 +30,22 @@ namespace dp2Circulation
         const int COLUMN_GROUPNAME = 1;
         const int COLUMN_NEWMESSAGECOUNT = 2;
 
+        ChatHost _host = new ChatHost();
+
         public ChatForm()
         {
             InitializeComponent();
 
             this.webBrowser1.Width = 300;
             this.panel_input.Width = 300;
+
+            {
+                _host.ChatForm = this;
+                webBrowser1.ObjectForScripting = _host;
+            }
         }
 
-        private async void IMForm_Load(object sender, EventArgs e)
+        private void IMForm_Load(object sender, EventArgs e)
         {
             if (Program.MainForm != null)
             {
@@ -55,8 +62,7 @@ namespace dp2Circulation
             }
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-            // Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, "", true));
-            await DoLoadMessage(_currentGroupName, "", true);
+            // await DoLoadMessage(_currentGroupInfo.GroupName, "", true);
         }
 
         string[] default_groups = new string[] {
@@ -111,13 +117,13 @@ namespace dp2Circulation
             _currentUrl = Program.MainForm.MessageHub.dp2MServerUrl;
 
             string strLastTime = "";
-            if (_lastMessage != null && bUrlChanged == false)
-                strLastTime = _lastMessage.publishTime.ToString("G");
+            if (_currentGroupInfo.LastMessage != null && bUrlChanged == false)
+                strLastTime = _currentGroupInfo.LastMessage.publishTime.ToString("G");
 
-            _edgeRecord = _lastMessage;
+            _edgeRecord = _currentGroupInfo.LastMessage;
 
             // Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, strLastTime + "~", bUrlChanged));
-            await DoLoadMessage(_currentGroupName, strLastTime + "~", bUrlChanged);
+            await DoLoadMessage(_currentGroupInfo.GroupName, strLastTime + "~", bUrlChanged);
             // TODO: 填充消息的时候，如果和上次最末一条同样时间，则要从返回结果集合中和上次最末一条 ID 匹配的后一条开始填充
         }
 
@@ -131,8 +137,8 @@ namespace dp2Circulation
         void AddTimeLine(MessageRecord record)
         {
             DateTime lastTime = new DateTime(0);
-            if (_lastMessage != null)
-                lastTime = _lastMessage.publishTime;
+            if (_currentGroupInfo.LastMessage != null)
+                lastTime = _currentGroupInfo.LastMessage.publishTime;
 
             if (lastTime.Date != record.publishTime.Date    // 不是同一天
     )
@@ -221,7 +227,7 @@ namespace dp2Circulation
                 int index = GroupNameIndexOf(names.ToArray(), name);
                 if (index != -1)
                 {
-                    if (name != _currentGroupName)
+                    if (name != _currentGroupInfo.GroupName)
                     {
                         string old_value = row[COLUMN_NEWMESSAGECOUNT].Text;
                         this.Invoke((Action)(() =>
@@ -278,7 +284,7 @@ namespace dp2Circulation
                 UpdateGroupNameList(record.groups);
 
                 // 忽略不是当前群组的消息
-                if (GroupNameContains(record.groups, _currentGroupName) == false)
+                if (GroupNameContains(record.groups, _currentGroupInfo.GroupName) == false)
                     continue;
 
                 AddTimeLine(record);
@@ -289,7 +295,7 @@ namespace dp2Circulation
                     string.IsNullOrEmpty(record.userName) ? GetShortUserName(record.creator) : record.userName,
                     record.data);
 
-                _lastMessage = record;
+                _currentGroupInfo.LastMessage = record;
             }
         }
 
@@ -433,17 +439,30 @@ namespace dp2Circulation
 
         void AddTimeLine(string strContent)
         {
+            /*
             string strText = "<div class='item'>"
 + "<div class='item_line'>"
 + " <div class='time'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>") + "</div>"
 + "</div>"
 + " <div class='clear'></div>"
 + "</div>";
-            AppendHtml(strText);
+            */
+            AppendHtml(BuildTimeLine(strContent));
+        }
+
+        static string BuildTimeLine(string strContent)
+        {
+            return "<div class='item'>"
++ "<div class='item_line'>"
++ " <div class='time'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>") + "</div>"
++ "</div>"
++ " <div class='clear'></div>"
++ "</div>";
         }
 
         void AddMessageLine(string left, string strName, string strContent)
         {
+            /*
             if (strName == null)
                 strName = "";
             if (strContent == null)
@@ -456,28 +475,60 @@ namespace dp2Circulation
 + "</div>"
 + " <div class='clear'></div>"
 + "</div>";
+            */
+            var strText = BuildMessageLine(left, strName, strContent);
             AppendHtml(strText);
+        }
+
+        static string BuildMessageLine(string left, string strName, string strContent)
+        {
+            if (strName == null)
+                strName = "";
+            if (strContent == null)
+                strContent = "";
+
+            return "<div class='item'>"
++ "<div class='item_line_" + left + "'>"
++ " <div class='item_prefix_text_" + left + "'>" + HttpUtility.HtmlEncode(strName).Replace("\r\n", "<br/>") + "</div>"
++ " <div class='item_summary_" + left + "'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>").Replace(" ", "&nbsp;") + "</div>"
++ "</div>"
++ " <div class='clear'></div>"
++ "</div>";
         }
 
         void AddErrorLine(string strContent)
         {
-            string strText = "<div class='item error'>"
+            AppendHtml(BuildErrorLine(strContent));
+        }
+
+        static string BuildErrorLine(string strContent)
+        {
+            return "<div class='item error'>"
 + "<div class='item_line'>"
 + " <div class='item_summary'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>") + "</div>"
 + "</div>"
 + " <div class='clear'></div>"
 + "</div>";
-            AppendHtml(strText);
         }
 
+        void ExpandErrorLine(string strContent)
+        {
+            webBrowser1.Document.InvokeScript("insertHtml",
+                new object[] { BuildErrorLine(strContent) });
+        }
 
         /// 清除已有的 HTML 显示
         public void ClearHtml()
         {
+            string strBinDir = Program.MainForm.UserDir;
+
             string strCssUrl = Path.Combine(Program.MainForm.DataDir, "message.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
-            string strJs = "";
-
+            string strJs = Path.Combine(Program.MainForm.DataDir, "IM\\chat.js");
+            string strScriptHead = "\r\n<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\" ></script>"
+    + "\r\n<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\" ></script>"
++ "\r\n<script type=\"text/javascript\" charset='UTF-8' src=\"" + strJs + "\" ></script>";  // 
+            string buttons = "<div class='buttons'><button class='expand' onclick='window.external.expand();'>查看更早的消息</button></div>";
             {
                 HtmlDocument doc = webBrowser1.Document;
 
@@ -490,7 +541,12 @@ namespace dp2Circulation
             }
 
             Global.WriteHtml(this.webBrowser1,
-                "<html><head>" + strLink + strJs + "</head><body>");
+                // "<html><head>" 
+                "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head>"
+                + strLink
+                + strScriptHead.Replace("%bindir%", strBinDir)
+                + "</head><body>"
+                + buttons);
         }
 
         // parameters:
@@ -510,7 +566,8 @@ namespace dp2Circulation
             {
                 string strGifFileName = Path.Combine(Program.MainForm.DataDir, "ajax-loader3.gif");
                 AppendHtml("<h2 id='waiting1' align='center'><img src='" + strGifFileName + "' /></h2>"
-                    + "<h2 id='waiting2' align='center'>" + HttpUtility.HtmlEncode(strText) + "</h2>");
+                    + "<h2 id='waiting2' align='center'>" + HttpUtility.HtmlEncode(strText) + "</h2>",
+                    false);
             }
         }
 
@@ -519,20 +576,24 @@ namespace dp2Circulation
         /// 向 IE 控件中追加一段 HTML 内容
         /// </summary>
         /// <param name="strText">HTML 内容</param>
-        public void AppendHtml(string strText)
+        /// <param name="scrollToEnd">是否要卷滚到视图末尾</param>
+        public void AppendHtml(string strText, bool scrollToEnd = true)
         {
             if (this.InvokeRequired)
             {
-                this.BeginInvoke(new Action<string>(AppendHtml), strText);
+                this.BeginInvoke(new Action<string, bool>(AppendHtml), strText, scrollToEnd);
                 return;
             }
 
             Global.WriteHtml(this.webBrowser1,
                 strText);
 
-            // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
-            this.webBrowser1.Document.Window.ScrollTo(0,
-                this.webBrowser1.Document.Body.ScrollRectangle.Height);
+            if (scrollToEnd)
+            {
+                // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
+                this.webBrowser1.Document.Window.ScrollTo(0,
+                    this.webBrowser1.Document.Body.ScrollRectangle.Height);
+            }
         }
 
         private void button_send_Click(object sender, EventArgs e)
@@ -548,7 +609,7 @@ namespace dp2Circulation
                 MessageBox.Show(this, "尚未输入文字");
                 return;
             }
-            Task.Factory.StartNew(() => SendMessage(_currentGroupName,
+            Task.Factory.StartNew(() => SendMessage(_currentGroupInfo.GroupName,
                 this.textBox_input.Text));
         }
 
@@ -585,7 +646,7 @@ namespace dp2Circulation
 
         int _inGetMessage = 0;  // 防止因为 ConnectionStateChange 事件导致重入
 
-        // 装载已经存在的消息记录
+        // 装载已经存在的消息记录，追加到窗口后面
         async Task DoLoadMessage(string strGroupName,
             string strTimeRange,
             bool bClearAll)
@@ -625,7 +686,7 @@ namespace dp2Circulation
                 if (bClearAll)
                 {
                     this.Invoke((Action)(() => this.ClearHtml()));
-                    _lastMessage = null;
+                    _currentGroupInfo.LastMessage = null;
                 }
                 this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "正在获取消息，请等待 ...")));
 
@@ -648,17 +709,18 @@ namespace dp2Circulation
                             FillMessage,
                             new TimeSpan(0, 1, 0),
                             cancel_token);
-#if NO
-                    this.Invoke(new Action(() =>
-                    {
-                        SetTextString(this.webBrowser1, ToString(result));
-                    }));
-#endif
                         if (result.Value == -1)
                         {
                             //strError = result.ErrorInfo;
                             //goto ERROR1;
                             this.AddErrorLine(result.ErrorInfo);
+                        }
+
+                        // 2021/8/15
+                        // 如果一行 message 也没有填入，要补加一个时间行
+                        if (_currentGroupInfo.LastMessage == null)
+                        {
+                            AddTimeLine(_currentGroupInfo.StartDate);
                         }
 
                         // 把左侧列表中当前群名行的新消息数字清除
@@ -690,13 +752,158 @@ namespace dp2Circulation
             }
         }
 
+        public void BeginExpandMessage()
+        {
+            DateTime.TryParse(_currentGroupInfo.StartDate, out DateTime time);
+            time = time.AddDays(-1);
+            var range = time.ToString("yyyy-MM-dd") + "~" + _currentGroupInfo.StartDate;
+
+            _ = ExpandMessageAsync(_currentGroupInfo.GroupName, range);
+        }
+
+        // 在窗口前面插入消息
+        async Task ExpandMessageAsync(string strGroupName,
+            string strTimeRange)
+        {
+            if (_inGetMessage > 0)
+                return;
+
+            _inGetMessage++;
+            try
+            {
+                string strError = "";
+
+                if (Program.MainForm == null)
+                    return;
+
+                // TODO: 如果当前 Connection 尚未连接，则要促使它连接，然后重试 load
+                if (Program.MainForm.MessageHub.IsConnected == false)
+                {
+                    if (_redoLoadMesssageCount < 5)
+                    {
+                        AddErrorLine("当前点对点连接尚未建立。重试操作中 ...");
+                        Program.MainForm.MessageHub.Connect();
+                        Thread.Sleep(5000);
+                        _redoLoadMesssageCount++;
+                        // await Task.Factory.StartNew(() => DoLoadMessage(strGroupName, strTimeRange, bClearAll));
+                        await ExpandMessageAsync(strGroupName, strTimeRange);
+                        return;
+                    }
+                    else
+                    {
+                        AddErrorLine("当前点对点连接尚未建立。停止重试。消息装载失败。");
+                        _redoLoadMesssageCount = 0; // 以后再调用本函数，就重新计算重试次数
+                        return;
+                    }
+                }
+
+                this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "正在获取消息，请等待 ...")));
+
+                EnableControls(false);
+                try
+                {
+                    CancellationToken cancel_token = new CancellationToken();
+
+                    string id = Guid.NewGuid().ToString();
+                    GetMessageRequest request = new GetMessageRequest(id,
+                        strGroupName, // "<default>" 表示默认群组
+                        "",
+                        strTimeRange,
+                        0,
+                        -1);
+                    try
+                    {
+                        List<MessageRecord> messages = new List<MessageRecord>();
+                        MessageResult result = await Program.MainForm.MessageHub.GetMessageAsync(
+                            request,
+                            (long totalCount,
+    long start,
+    IList<MessageRecord> records,
+    string errorInfo,
+    string errorCode) =>
+                            {
+                                if (records != null)
+                                    messages.AddRange(records);
+                            },
+                            new TimeSpan(0, 1, 0),
+                            cancel_token);
+                        if (result.Value == -1)
+                        {
+                            // 在前部插入错误行
+                            this.ExpandErrorLine(result.ErrorInfo);
+                            return;
+                        }
+
+                        StringBuilder text = new StringBuilder();
+                        int timeline_count = 0;
+                        foreach (var record in messages)
+                        {
+                            if (timeline_count == 0)
+                            {
+                                text.Append(BuildTimeLine(record.publishTime.ToString()));
+                                timeline_count++;
+                            }
+
+                            // creator 要替换为用户名
+                            text.Append(BuildMessageLine(
+                                IsMe(record) ? "right" : "left",
+                                string.IsNullOrEmpty(record.userName) ? GetShortUserName(record.creator) : record.userName,
+                                record.data));
+                        }
+
+                        // 更新起始日期
+                        {
+                            var parts = StringUtil.ParseTwoPart(strTimeRange, "~");
+                            _currentGroupInfo.StartDate = parts[0];
+                        }
+
+                        if (timeline_count == 0)
+                            text.Append(BuildTimeLine(_currentGroupInfo.StartDate));
+
+                        webBrowser1.Document.InvokeScript("insertHtml", new object[] { text.ToString() });
+
+                        // 把左侧列表中当前群名行的新消息数字清除
+                        ClearNewCount(strGroupName);
+                    }
+                    catch (AggregateException ex)
+                    {
+                        strError = MessageConnection.GetExceptionText(ex);
+                        goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = ex.Message;
+                        goto ERROR1;
+                    }
+                    return;
+                }
+                finally
+                {
+                    EnableControls(true);
+                    this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "")));
+                }
+            ERROR1:
+                this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+            }
+            finally
+            {
+                _inGetMessage--;
+            }
+        }
+
+        public void InsertHtml(string html)
+        {
+            webBrowser1.Document.InvokeScript("insertHtml", new object[] { html });
+        }
+
+
         // 增量获取时候的起点边界时间。要在这个 publishTime 的若干条记录中找到一条 id 为 的，它前面的记录要忽略
         MessageRecord _edgeRecord = null;
         List<MessageRecord> _edgeRecords = new List<MessageRecord>();
 
         string _currentUrl = "";
-        string _currentGroupName = "";  // "<default>";
-        MessageRecord _lastMessage = null;   // 当前消息显示界面中最后一条消息
+        // string _currentGroupName = "";  // "<default>";
+        // MessageRecord _lastMessage = null;   // 当前消息显示界面中最后一条消息
 
         // return:
         //      true    这条记录已经被缓存，暂时不加入显示
@@ -746,7 +953,7 @@ namespace dp2Circulation
                         string.IsNullOrEmpty(record.userName) ? GetShortUserName(record.creator) : record.userName,
                         record.data);
 
-                    _lastMessage = record;
+                    _currentGroupInfo.LastMessage = record;
                 }
             }
         }
@@ -784,7 +991,7 @@ namespace dp2Circulation
                     List<MessageRecord> temp = new List<MessageRecord>() { record };
                     FillMessage(temp);
 
-                    _lastMessage = record;
+                    _currentGroupInfo.LastMessage = record;
                 }
             }
         }
@@ -832,8 +1039,25 @@ namespace dp2Circulation
 #endif
         }
 
+        class GroupInfo
+        {
+            public string GroupName { get; set; }
+            string _startDate = DateTime.Now.ToString("yyyy-MM-dd");
+            public string StartDate
+            {
+                get { return _startDate; }
+                set { _startDate = value; }
+            }
+            public MessageRecord LastMessage { get; set; }
+        }
+
+        GroupInfo _currentGroupInfo = null;
+
+        // string _startDate = DateTime.Now.ToString("yyyy-MM-dd");
+
         private void dpTable_groups_SelectionChanged(object sender, EventArgs e)
         {
+#if REMOVED
             string oldGroupName = _currentGroupName;
             string newGroupName = "";
             if (this.dpTable_groups.SelectedRows.Count == 1)
@@ -851,9 +1075,38 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, "", true));
+                    // 2021/8/13
+                    var range = _startDate + "~";
+
+                    _ = Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, range, true));
                 }
             }
+#endif
+            var oldGroupInfo = _currentGroupInfo;
+            GroupInfo newGroupInfo = null;
+            if (this.dpTable_groups.SelectedRows.Count == 1)
+            {
+                newGroupInfo = this.dpTable_groups.SelectedRows[0].Tag as GroupInfo;
+                Debug.Assert(newGroupInfo != null);
+            }
+
+            if (newGroupInfo != _currentGroupInfo)
+            {
+                _currentGroupInfo = newGroupInfo;
+                if (string.IsNullOrEmpty(_currentGroupInfo?.GroupName))
+                {
+                    ClearHtml();
+                    _currentGroupInfo.LastMessage = null;
+                }
+                else
+                {
+                    // 2021/8/13
+                    var range = _currentGroupInfo.StartDate + "~";
+
+                    _ = Task.Factory.StartNew(() => DoLoadMessage(_currentGroupInfo.GroupName, range, true));
+                }
+            }
+
         }
 
         private void dpTable_groups_MouseUp(object sender, MouseEventArgs e)
@@ -902,6 +1155,7 @@ namespace dp2Circulation
             row.Add(new DpCell());
             row.Add(new DpCell { Text = name });
             row.Add(new DpCell { Text = new_message_count });
+            row.Tag = new GroupInfo { GroupName = name };
             this.dpTable_groups.Rows.Add(row);
             return row;
         }

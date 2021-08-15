@@ -1488,13 +1488,27 @@ update
                 }
             }
 
-            var result = RfidManager.LedDisplay(ledName,
-                text,
-                x,
-                y,
-                property,
-                style);
-            await SendMessageAsync(groupName == null ? null : new string[] { groupName }, result.Value == -1 ? result.ErrorInfo : $"'{text}' 已成功显示在 LED 屏上");
+            // 2021/8/13
+            // 最多重试 5 次，耗费 10 秒钟
+            NormalResult result = null;
+            for (int i = 0; i < 5; i++)
+            {
+                if (i > 0)
+                    await Task.Delay(TimeSpan.FromSeconds(2));
+
+                result = RfidManager.LedDisplay(ledName,
+                    text,
+                    x,
+                    y,
+                    property,
+                    style);
+                if (result.Value != -1)
+                    break;
+
+                // if (result.Value == -1 && result.ErrorCode == "uninitialized")
+            }
+
+            await SendMessageAsync(groupName == null ? null : new string[] { groupName }, result.Value == -1 ? $"{result.ErrorInfo} errorCode='{result.ErrorCode}'" : $"'{text}' 已成功显示在 LED 屏上");
         }
 
         static string Unescape(string text)

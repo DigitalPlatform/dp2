@@ -488,9 +488,8 @@ namespace dp2SSL
 
                 InitialRfidManager();
 
-
-
                 // 首次显示以前遗留的 LED 文字
+                // 注意 RfidCenter 有可能还没有来得及完全就绪，比如 RfidCenter 需要初始化好 LED 控制卡的 COM 端口
                 if (string.IsNullOrEmpty(App.LedText) == false)
                 {
                     try

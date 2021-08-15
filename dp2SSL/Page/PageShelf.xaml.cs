@@ -4819,9 +4819,9 @@ namespace dp2SSL
             this.doorControl.AnimateDoors();
 
             {
-                var name = $"读者 {_patron.PatronName} ({_patron.Barcode}, {_patron.Department})";
+                var name = $"读者 {_patron.PatronNameMasked} ({_patron.BarcodeMasked}, {_patron.DepartmentMasked})";
                 if (Operator.IsPatronBarcodeWorker(_patron.Barcode))
-                    name = $"工作人员 {_patron.Barcode}";
+                    name = $"工作人员 {_patron.BarcodeMasked}";
 
                 var style = _patron.Protocol;
                 if (_patron.Protocol == InventoryInfo.ISO14443A)

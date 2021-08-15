@@ -1808,7 +1808,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        const string default_dp2mserver_url = "http://dp2003.com:8083/dp2MServer";
+        const string default_dp2mserver_url = "https://dp2003.com:8083/dp2MServer";  // 2021/8/12 改为 https
 
         private void button_message_setDefaultUrl_Click(object sender, EventArgs e)
         {

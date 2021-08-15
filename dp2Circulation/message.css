@@ -241,6 +241,18 @@ DIV.item_line .item_location {
     padding: 2px 4px 2px 4px;
 }
 
+DIV.buttons {
+    width: 100%;
+    text-align: center;
+}
+
+DIV.buttons button {
+    padding: 6px;
+    border-width: 1px;
+    background-color: #444444;
+    color: lightgray;
+}
+
 TABLE.amerce_item {
     font-size: 9pt;
     width: 100%;

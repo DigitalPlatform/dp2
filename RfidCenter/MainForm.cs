@@ -2316,6 +2316,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             */
         }
 
+        // 初始化 LED 文字屏驱动
         void InitializeLedDriver()
         {
             string strError = "";
