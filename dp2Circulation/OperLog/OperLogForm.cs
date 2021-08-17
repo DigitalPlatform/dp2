@@ -33,6 +33,7 @@ using DigitalPlatform.LibraryServer;
 using dp2Circulation.OperLog;
 using static dp2Circulation.OperLog.OperLogReport;
 using DigitalPlatform.dp2.Statis;
+using Z.Expressions;
 
 namespace dp2Circulation
 {
@@ -380,7 +381,7 @@ namespace dp2Circulation
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -2219,7 +2220,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement, "borrowPeriod");
             string strReturningDate = DomUtil.GetElementText(dom.DocumentElement, "returningDate");
             string strOldBorrowInfo = DomUtil.GetElementOuterXml(dom.DocumentElement, "borrow");
-            
+
             strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("操作类型", strOperation + " -- 调整超额") +
@@ -4167,7 +4168,7 @@ FileShare.ReadWrite))
             }
             return true;
 
-            ERROR1:
+        ERROR1:
             foreach (string error in errors)
             {
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
@@ -4362,7 +4363,7 @@ FileShare.ReadWrite))
 
             Program.MainForm.StatusBarMessage = "总共耗费时间: " + this.estimate.GetTotalTime().ToString();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -4816,7 +4817,7 @@ FileShare.ReadWrite))
 
             MessageBox.Show(this, "修复完成。\r\n\r\n共丢弃 " + nRet.ToString() + " 个段落。\r\n\r\n修复后的内容已经写入目标文件 " + this.textBox_repair_targetFilename.Text);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5378,7 +5379,7 @@ FileShare.ReadWrite))
             MessageBox.Show(this, "验证完成。\r\n\r\n共验证 " + nFileCount + " 个日志文件，其中有 " + nRet.ToString() + " 个日志文件发现格式错误。\r\n\r\n"
                 + StringUtil.MakePathList(errorfilenames, "\r\n"));
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5680,7 +5681,7 @@ FileShare.ReadWrite))
             }
             this.textBox_filenames.Text = strText;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5809,7 +5810,7 @@ FileShare.ReadWrite))
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, "DoViewOperlog() 出错: " + strError);
         }
 
@@ -5846,6 +5847,13 @@ FileShare.ReadWrite))
 
             menuItem = new MenuItem("筛选(&I) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_filter_Click);
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("智能筛选(&S) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_script_filter_Click);
             if (this.listView_records.SelectedItems.Count == 0
                 || this._processing == true)
                 menuItem.Enabled = false;
@@ -6068,7 +6076,7 @@ MessageBoxDefaultButton.Button1);
                         MessageBox.Show(this, "移动 " + strOldRecPath + " --> " + strRecPath + " 的过程中出现警告：" + strError);
                     }
 
-                    CONTINUE:
+                CONTINUE:
                     stop.SetProgressValue(i + 1);
                     i++;
                 }
@@ -6090,7 +6098,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6262,7 +6270,7 @@ MessageBoxDefaultButton.Button1);
                 this.ReturnChannel(channel);
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6315,7 +6323,7 @@ MessageBoxDefaultButton.Button1);
                 writer.WriteEndDocument();
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6404,7 +6412,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6709,7 +6717,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7041,7 +7049,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.AppInfo.UnlinkFormState(printform);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7058,6 +7066,97 @@ MessageBoxDefaultButton.Button1);
             else
                 e.Summary = "不支持的命令 '" + e.Command + "'";
         }
+
+        // 脚本筛选
+        void menu_script_filter_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            OperLogScriptDialog dlg = new OperLogScriptDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.Text = "脚本筛选";
+
+            Program.MainForm.AppInfo.LinkFormState(dlg, "operlogform_scriptdialog_formstate");
+            dlg.UiState = Program.MainForm.AppInfo.GetString("OperLogForm", "scriptDialog_ui_state", "");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.SetString("OperLogForm", "scriptDialog_ui_state", dlg.UiState);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            int nRemoveCount = 0;
+
+            this.ShowMessage("正在筛选 ...");
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+
+            try
+            {
+                List<ListViewItem> reserves = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.Items)
+                {
+                    if (item.Selected == false)
+                    {
+                        reserves.Add(item);
+                        continue;
+                    }
+
+                    string strLogFileName = ListViewUtil.GetItemText(item, COLUMN_FILENAME);
+                    string strIndex = ListViewUtil.GetItemText(item, COLUMN_INDEX);
+
+                    this.ShowMessage($"正在筛选 {strLogFileName} {strIndex}");
+
+                    // 从服务器获得
+                    // return:
+                    //      -1  出错
+                    //      0   正常
+                    //      1   用户中断
+                    int nRet = GetXml(item,
+            out string strXml,
+            out strError);
+                    if (nRet == 1)
+                        return;
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(strXml);
+
+                    string strOperation = ListViewUtil.GetItemText(item, COLUMN_OPERATION);
+
+                    var ret = Eval.Execute<bool>(dlg.Script, new { dom = dom, col_operation = strOperation });
+
+                    if (ret)
+                        reserves.Add(item);
+                }
+
+                nRemoveCount = this.listView_records.Items.Count - reserves.Count;
+                this.listView_records.Items.Clear();
+                this.listView_records.BeginUpdate();
+                foreach (ListViewItem item in reserves)
+                {
+                    this.listView_records.Items.Add(item);
+                }
+                this.listView_records.EndUpdate();
+            }
+            catch(Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                this.Cursor = oldCursor;
+
+                this.ClearMessage();
+            }
+            MessageBox.Show(this, "共移走 '" + nRemoveCount.ToString() + "' 项");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
 
         // 筛选
         void menu_filter_Click(object sender, EventArgs e)
@@ -7300,7 +7399,7 @@ Keys keyData)
 
             Program.MainForm.StatusBarMessage = "操作类型为 '" + m_strFindOperations + "' 的日志记录没有找到";
             return;
-            FOUND:
+        FOUND:
             ListViewUtil.ClearSelection(this.listView_records);
             found_item.Selected = true;
             found_item.EnsureVisible();
@@ -8563,7 +8662,7 @@ MessageBoxDefaultButton.Button1);
 
             lProgressValue += lFileSize;
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
         #endregion
@@ -8631,7 +8730,7 @@ MessageBoxDefaultButton.Button1);
                 this.EnableControls(true);
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9125,9 +9224,9 @@ MessageBoxDefaultButton.Button1);
                     string strOutputPath = "";
                     byte[] baNewTimestamp = null;
 
-                    // TODO: 是否先探测一下书目记录是否存在？已经存在最好给出特殊的提示和警告
+                // TODO: 是否先探测一下书目记录是否存在？已经存在最好给出特殊的提示和警告
 
-                    REDO:
+                REDO:
                     stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
                     if (data.DbType == "biblio")
@@ -9225,7 +9324,7 @@ MessageBoxDefaultButton.Button1);
                         goto REDO;
                     }
 
-                    CONTINUE:
+                CONTINUE:
                     i++;
                     stop.SetProgressValue(i);
                 }
@@ -9245,7 +9344,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9349,7 +9448,7 @@ MessageBoxDefaultButton.Button1);
                     // 收尾 dprms:record 元素
                     writer.WriteEndElement();
 
-                    CONTINUE:
+                CONTINUE:
                     i++;
                     stop.SetProgressValue(i);
                 }
@@ -9376,7 +9475,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9425,7 +9524,7 @@ MessageBoxDefaultButton.Button1);
             // FillRecoverList();
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9761,7 +9860,7 @@ MessageBoxDefaultButton.Button1);
 
                         if (string.IsNullOrEmpty(old_xml))
                         {
-                            REDO_INPUT:
+                        REDO_INPUT:
                             // TODO: 请求操作者提供一条起始记录。可以提供一种选项，让程序试探从当前读者库中获取这条记录
                             string result = EditDialog.GetInput(this,
     "请指定读者记录的起始内容状态",
@@ -10226,7 +10325,7 @@ strHtml2 +
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, "DoViewRecover() 出错: " + strError);
         }
 

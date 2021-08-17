@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.27.*")]
-[assembly: AssemblyFileVersion("3.27.0.0")]
+[assembly: AssemblyVersion("3.28.*")]
+[assembly: AssemblyFileVersion("3.28.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -95,3 +95,4 @@ using System.Runtime.InteropServices;
 // 3.26 2021/8/13 MessageHub::dp2MServerUrl 会自动将 "http://dp2003.com:8083/dp2MServer" 处理为 https 开头
 // 3.27 2021/8/16 聊天窗口增加“查看更早的消息”按钮。每个群组独立保存消息起点时间。窗口刚打开的时候，每个群组的消息起点时间是当天
 //                  改善断网以后重新联网，再切换群组时的确保重连 dp2mserver
+// 3.28 2021/8/18 日志窗增加智能筛选功能。可以用临时输入的 C# 脚本代码来筛选日志记录
