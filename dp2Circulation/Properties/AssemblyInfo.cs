@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.26.*")]
-[assembly: AssemblyFileVersion("3.26.0.0")]
+[assembly: AssemblyVersion("3.27.*")]
+[assembly: AssemblyFileVersion("3.27.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -93,3 +93,5 @@ using System.Runtime.InteropServices;
 //                  用户窗增加指定私有账户的功能，可以方便那些需要频繁修改不同账户权限然而又不想退出内务的操作
 //                  读者窗装载空白内容按钮功能，增加了从 dp2library 服务器获取当前用户可修改的元素的能力，能让读者编辑器呈现出合适的字段 enable/disable 状态
 // 3.26 2021/8/13 MessageHub::dp2MServerUrl 会自动将 "http://dp2003.com:8083/dp2MServer" 处理为 https 开头
+// 3.27 2021/8/16 聊天窗口增加“查看更早的消息”按钮。每个群组独立保存消息起点时间。窗口刚打开的时候，每个群组的消息起点时间是当天
+//                  改善断网以后重新联网，再切换群组时的确保重连 dp2mserver

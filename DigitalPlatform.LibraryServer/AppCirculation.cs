@@ -16453,12 +16453,7 @@ start_time_1,
              * */
             return_info.Location = strLocation;
 
-            if (bOverdue == true
-                || strAction == "lost")
-            {
-                strError = strOverdueMessage;
-                return 1;
-            }
+            // ??
 
             return_info.ItemBarcode = strItemBarcode;
             // 2020/8/26
@@ -16466,6 +16461,15 @@ start_time_1,
 
             if (domOperLog != null)
                 DomUtil.SetElementText(domOperLog.DocumentElement, "borrowID", borrowID);
+            
+            // 2021/8/17
+            // bug: 原先在 ?? 点，现在移动到末尾
+            if (bOverdue == true
+                || strAction == "lost")
+            {
+                strError = strOverdueMessage;
+                return 1;
+            }            
             return 0;
         }
 

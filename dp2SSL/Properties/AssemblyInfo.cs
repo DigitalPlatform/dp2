@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.40")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.40.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.41")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.41.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -126,3 +126,4 @@ using System.Windows;
 //      1.8.39 (2021/8/4) 远程命令 list book xxx 其中 xxx 部分支持带有星号的通配符用法。如果没有通配符则要求精确一致匹配
 //      1.8.40 (2021/8/4) dp2ssl 自动发送到点对点群中的读者刷卡开门的信息字符串中的姓名、证条码号和单位都根据 shelf.xml 中 “读者信息屏蔽” 参数，发送前做了脱敏处理
 //                          dp2ssl 首次启动时向 LED 文字屏发送文字的时候如果遇到报错，会自动重试最多 5 次，一共耗费 10 秒。这是因为 RfidCenter 初始化 LED 驱动可能需要一定时间，如果 dp2ssl 启动过快会遇到报错
+//      1.8.41 (2021/8/17) 远程查询功能增加修改 LinkID 字段的子功能

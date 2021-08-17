@@ -164,7 +164,7 @@ namespace dp2ManageCenter.Message
                     this.button_stop.Enabled = !bEnable;
                 }));
             }
-            catch(InvalidOperationException)
+            catch (InvalidOperationException)
             {
                 // 可能是因为窗口被摧毁后调用的原因
             }
@@ -310,7 +310,7 @@ namespace dp2ManageCenter.Message
                         else
                             returning_date = $"时间字符串 '{borrow_info.LatestReturnTime}' 格式错误";
                     }
-                    action_info = $"应还时间: {returning_date}";
+                    action_info = $"应还时间: {returning_date} BorrowID={borrow_info.BorrowID}";
                 }
             }
             else
@@ -463,23 +463,36 @@ namespace dp2ManageCenter.Message
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            menuItem = new MenuItem("复制(&C)");
+            menuItem.Click += new System.EventHandler(this.menu_copyJSONtoClipboard);
+            if (this.listView_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             /*
             menuItem = new MenuItem("全选(&A)");
             menuItem.Tag = this.listView_operLogTasks;
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
+            */
 
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
-            */
 
             menuItem = new MenuItem("修改状态 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&M)");
+            menuItem.Tag = "state";
             menuItem.Click += new System.EventHandler(this.MenuItem_modifyState_Click);
             if (this.listView_records.SelectedItems.Count != 1)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("修改 “关联 ID” [" + this.listView_records.SelectedItems.Count.ToString() + "] (&L)");
+            menuItem.Tag = "linkID";
+            menuItem.Click += new System.EventHandler(this.MenuItem_modifyState_Click);
+            if (this.listView_records.SelectedItems.Count != 1)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
 
             // ---
             menuItem = new MenuItem("-");
@@ -495,6 +508,29 @@ namespace dp2ManageCenter.Message
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
 
+        void menu_copyJSONtoClipboard(object sender, System.EventArgs e)
+        {
+            string strError;
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择要复制的事项 ...";
+                goto ERROR1;
+            }
+
+            StringBuilder text = new StringBuilder();
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                RequestItem tag = item.Tag as RequestItem;
+                string value = JsonConvert.SerializeObject(tag, Formatting.Indented);
+                text.AppendLine(value);
+            }
+
+            Clipboard.SetText(text.ToString());
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
 
         // 修改状态
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
@@ -502,7 +538,19 @@ namespace dp2ManageCenter.Message
         {
             string strError = "";
 
-            string new_state = InputDlg.GetInput(this, "修改状态", "新状态值", "dontsync", this.Font);
+            string field = (sender as MenuItem).Tag as string;
+
+            string new_state = null;
+            if (field == "state")
+                new_state = InputDlg.GetInput(this, "修改状态", "新状态值", "dontsync", this.Font);
+            else if (field == "linkID")
+                new_state = InputDlg.GetInput(this, "修改 关联 ID", "新“关联 ID”值", "borrowID=xxx", this.Font);
+            else
+            {
+                strError = $"未知的 field 值 '{field}'";
+                goto ERROR1;
+            }
+
             if (new_state == null)
                 return;
             try
@@ -514,11 +562,21 @@ namespace dp2ManageCenter.Message
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
                     RequestItem tag = item.Tag as RequestItem;
-                    tag.State = new_state;
+                    if (field == "state")
+                        tag.State = new_state;
+                    else if (field == "linkID")
+                    {
+                        if (tag.Action != "borrow")
+                        {
+                            strError = "只允许针对 Action 为 'borrow' 的行修改 linkID";
+                            goto ERROR1;
+                        }
+                        tag.LinkID = new_state;
+                    }
                     Record record = new Record { Data = JsonConvert.SerializeObject(tag) };
                     request.Entities.Add(new Entity
                     {
-                        Action = "change:state",
+                        Action = $"change:{field}",
                         NewRecord = record
                     });
                 }

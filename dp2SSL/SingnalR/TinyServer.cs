@@ -3615,6 +3615,27 @@ result);
                     item.State = new_value;
                     changed = true;
                 }
+                else if (fields.IndexOf("linkID") != -1) // 2021/8/17
+                {
+                    count++;
+                    string new_value = record.LinkID;
+                    if (new_value == "[null]")
+                        new_value = null;
+                    /*
+                    if (isLinkIDValid(new_value) == false)
+                    {
+                        return new ChangeResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"要修改为新的 State 值 '{new_value}' 不合法。修改操作被拒绝"
+                        };
+                    }
+                    */
+
+                    // TODO: 是否自动写入一个附注字段内容，记载修改前的内容，和修改的原因(comment=xxx)？
+                    item.LinkID = new_value;
+                    changed = true;
+                }
 
                 if (count == 0)
                 {

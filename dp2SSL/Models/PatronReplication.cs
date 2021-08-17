@@ -732,6 +732,12 @@ out string strError);
                     {
                         await ShelfData.ChangeDatabaseBorrowStateAsync(borrowID);
                     }
+                    else
+                    {
+                        // 2021/8/17
+                        // 提醒手动处理
+                        WpfClientInfo.WriteErrorLog($"*** dp2library 操作日志 return 记录缺乏 borrowID 元素，请手动检查处理，在 dp2ssl 本地动作库内消除对应的借阅动作的在借状态");
+                    }
                 }
 
                 return new NormalResult();

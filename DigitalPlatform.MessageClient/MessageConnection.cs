@@ -76,10 +76,8 @@ namespace DigitalPlatform.MessageClient
 
             if (string.IsNullOrEmpty(this.dp2MServerUrl) == false)
             {
-                // this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
-                ConnectAsync(
-                    // this.dp2MServerUrl
-                    );
+                // 不等待返回
+                _ = ConnectAsync();
             }
         }
 
@@ -92,7 +90,7 @@ namespace DigitalPlatform.MessageClient
                 this.Connection.State == Microsoft.AspNet.SignalR.Client.ConnectionState.Disconnected)
             {
                 AddInfoLine("自动重新连接 ...");
-                this.Connect();
+                _ = this.EnsureConnectAsync();
             }
         }
 
@@ -105,14 +103,12 @@ namespace DigitalPlatform.MessageClient
         }
 
         // 确保连接和登录
-        public void Connect()
+        public async Task EnsureConnectAsync()
         {
             if (string.IsNullOrEmpty(this.dp2MServerUrl) == false
                 && (this.Connection == null || this.Connection.State == Microsoft.AspNet.SignalR.Client.ConnectionState.Disconnected))
             {
-                // this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
-                ConnectAsync(//this.dp2MServerUrl
-                    );
+                await ConnectAsync();
             }
         }
 
@@ -154,9 +150,7 @@ namespace DigitalPlatform.MessageClient
 
         // 连接 server
         // 要求调用前设置好 this.ServerUrl this.UserName this.Password this.Parameters
-        private void ConnectAsync(
-            // string strServerUrl
-            )
+        private async Task ConnectAsync()
         {
             AddInfoLine("正在连接服务器 " + this.dp2MServerUrl + " ...");
 
@@ -238,7 +232,7 @@ namespace DigitalPlatform.MessageClient
 #endif
             try
             {
-                Connection.Start()  // new ServerSentEventsTransport()
+                await Connection.Start()  // new ServerSentEventsTransport()
                     .ContinueWith((antecendent) =>
                     {
                         if (antecendent.IsFaulted == true)

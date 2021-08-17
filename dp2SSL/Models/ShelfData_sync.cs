@@ -588,6 +588,7 @@ TaskScheduler.Default);
                         // request.State = "dontsync";
 
                         // 表示这个借书动作已经发生了还书
+                        // TODO: 可否这里改为注释文字，标明遵从同步的日期和原因
                         request.LinkID = $"borrowID={borrowID}";
                         context.SaveChanges();
                     }

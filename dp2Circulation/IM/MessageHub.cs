@@ -926,7 +926,7 @@ strError);
                         this.CloseConnection();
 
                         this.RefreshUserName();
-                        this.Connect();
+                        _ = this.EnsureConnectAsync();
                     }
                 }
             }

@@ -1493,7 +1493,7 @@ Stack:
         }
 
         // 系统参数配置
-        private void MenuItem_configuration_Click(object sender, EventArgs e)
+        private async void MenuItem_configuration_Click(object sender, EventArgs e)
         {
             _expireVersionChecked = false;
 
@@ -1579,7 +1579,7 @@ Stack:
 
                 // TODO: 如果没有 Connect，要先 Connect
                 this.MessageHub.RefreshUserName();
-                this.MessageHub.Connect();
+                await this.MessageHub.EnsureConnectAsync();
 #if NO
                 if (bOldShareBiblio != this.MessageHub.ShareBiblio)
                     this.MessageHub.Login();    // 重新登录
@@ -9324,7 +9324,7 @@ Keys keyData)
         }
 
         // 点对点通讯的用户管理功能
-        private void toolStripButton_messageHub_userManage_Click(object sender, EventArgs e)
+        private async void toolStripButton_messageHub_userManage_Click(object sender, EventArgs e)
         {
             UserManageDialog dlg = new UserManageDialog();
             MainForm.SetControlFont(dlg, this.DefaultFont);
@@ -9335,17 +9335,17 @@ Keys keyData)
             {
                 this.MessageHub.CloseConnection();
 
-                this.MessageHub.Connect();
+                await this.MessageHub.EnsureConnectAsync();
                 // this.MessageHub.Login();
             }
         }
 
-        private void toolStripButton_messageHub_relogin_Click(object sender, EventArgs e)
+        private async void toolStripButton_messageHub_relogin_Click(object sender, EventArgs e)
         {
             this.MessageHub.CloseConnection();
 
             this.MessageHub.RefreshUserName();
-            this.MessageHub.Connect();
+            await this.MessageHub.EnsureConnectAsync();
             // this.MessageHub.Login();
         }
 

@@ -111,20 +111,24 @@ namespace dp2Circulation
         {
             // 补充获取先前在没有连接时间段的消息
             bool bUrlChanged = Program.MainForm.MessageHub.dp2MServerUrl != _currentUrl;
-            //if (bUrlChanged == true)
-            //    _lastMessage = null;
 
             _currentUrl = Program.MainForm.MessageHub.dp2MServerUrl;
 
+            /*
             string strLastTime = "";
             if (_currentGroupInfo.LastMessage != null && bUrlChanged == false)
                 strLastTime = _currentGroupInfo.LastMessage.publishTime.ToString("G");
+
 
             _edgeRecord = _currentGroupInfo.LastMessage;
 
             // Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, strLastTime + "~", bUrlChanged));
             await DoLoadMessage(_currentGroupInfo.GroupName, strLastTime + "~", bUrlChanged);
             // TODO: 填充消息的时候，如果和上次最末一条同样时间，则要从返回结果集合中和上次最末一条 ID 匹配的后一条开始填充
+            */
+
+            var range = _currentGroupInfo.StartDate + "~";
+            await DoLoadMessage(_currentGroupInfo.GroupName, range, true);
         }
 
         async void MessageHub_AddMessage(object sender, AddMessageEventArgs e)
@@ -668,7 +672,8 @@ namespace dp2Circulation
                     if (_redoLoadMesssageCount < 5)
                     {
                         AddErrorLine("当前点对点连接尚未建立。重试操作中 ...");
-                        Program.MainForm.MessageHub.Connect();
+                        Program.MainForm.MessageHub.CloseConnection();
+                        await Program.MainForm.MessageHub.EnsureConnectAsync();
                         Thread.Sleep(5000);
                         _redoLoadMesssageCount++;
                         // await Task.Factory.StartNew(() => DoLoadMessage(strGroupName, strTimeRange, bClearAll));
@@ -782,7 +787,8 @@ namespace dp2Circulation
                     if (_redoLoadMesssageCount < 5)
                     {
                         AddErrorLine("当前点对点连接尚未建立。重试操作中 ...");
-                        Program.MainForm.MessageHub.Connect();
+                        Program.MainForm.MessageHub.CloseConnection();
+                        await Program.MainForm.MessageHub.EnsureConnectAsync();
                         Thread.Sleep(5000);
                         _redoLoadMesssageCount++;
                         // await Task.Factory.StartNew(() => DoLoadMessage(strGroupName, strTimeRange, bClearAll));
@@ -1103,7 +1109,8 @@ namespace dp2Circulation
                     // 2021/8/13
                     var range = _currentGroupInfo.StartDate + "~";
 
-                    _ = Task.Factory.StartNew(() => DoLoadMessage(_currentGroupInfo.GroupName, range, true));
+                    // _ = Task.Factory.StartNew(() => DoLoadMessage(_currentGroupInfo.GroupName, range, true));
+                    _ = DoLoadMessage(_currentGroupInfo.GroupName, range, true);
                 }
             }
 

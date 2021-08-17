@@ -463,7 +463,7 @@ namespace DigitalPlatform.CirculationClient
             string strError;
             if (listView1.SelectedIndices.Count == 0)
             {
-                strError = "尚未选择要刷新 UID 的事项 ...";
+                strError = "尚未选择要复制的事项 ...";
                 goto ERROR1;
             }
 
