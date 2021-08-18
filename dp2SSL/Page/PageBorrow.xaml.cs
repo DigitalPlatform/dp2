@@ -4083,8 +4083,8 @@ string usage)
             // 2021/7/29
             // 遮盖显示内容
             var mask_def = ShelfData.GetPatronMask();
-            name = Patron.Mask(mask_def, name, "name");
-            department = Patron.Mask(mask_def, department, "department");
+            name = dp2StringUtil.Mask(mask_def, name, "name");
+            department = dp2StringUtil.Mask(mask_def, department, "department");
 
             FlowDocument doc = new FlowDocument();
 

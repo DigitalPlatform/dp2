@@ -3545,7 +3545,7 @@ namespace dp2Library
                     }
                 }
 
-                var changed = LibraryApplication.FilterByLevel(domNewRec, read_level);
+                var changed = LibraryApplication.FilterByLevel(domNewRec, read_level, "read", app.PatronMaskDefinition);
                 record.RecordBody.Xml = domNewRec.DocumentElement == null ? domNewRec.OuterXml : domNewRec.DocumentElement.OuterXml;
 
                 if (changed)

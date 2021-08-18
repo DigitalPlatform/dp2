@@ -306,7 +306,7 @@ namespace DigitalPlatform.LibraryServer
         // Application通用锁。可以用来管理GlobalCfgDom等
         public ReaderWriterLock m_lock = new ReaderWriterLock();
         //public ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
-        public static int m_nLockTimeout = 10*1000;	// 5000=5秒 2021/8/3 从 5 秒改为 10 秒
+        public static int m_nLockTimeout = 10 * 1000;	// 5000=5秒 2021/8/3 从 5 秒改为 10 秒
 
         // 读者记录锁。避免多线程改写同一读者记录造成的故障
         public RecordLockCollection ReaderLocks = new RecordLockCollection();
@@ -453,6 +453,13 @@ namespace DigitalPlatform.LibraryServer
         // 册记录中的扩展字段
         // 不要试图在运行中途修改它。它不会回写到 library.xml 中
         public List<string> ItemAdditionalFields = new List<string>();
+
+        // 2021/8/18
+        // 针对读者记录字段进行马赛克的方法定义
+        public string PatronMaskDefinition = null;
+
+        // 缺省的 读者记录马赛克方法
+        public static string DefaultPatronMaskDefinition = "name:1|0,tel:3|3,*:2|0";
 
         // 构造函数
         public LibraryApplication()
@@ -1027,6 +1034,11 @@ namespace DigitalPlatform.LibraryServer
                         this.AcceptBlankRoomName = DomUtil.GetBooleanParam(node, "acceptBlankRoomName", false);
 
                         this.VerifyRegisterNoDup = DomUtil.GetBooleanParam(node, "verifyRegisterNoDup", true);
+
+                        if (node.HasAttribute("patronMaskDefinition"))
+                            this.PatronMaskDefinition = node.GetAttribute("patronMaskDefinition");
+                        else
+                            this.PatronMaskDefinition = DefaultPatronMaskDefinition;
                     }
                     else
                     {
@@ -1052,6 +1064,8 @@ namespace DigitalPlatform.LibraryServer
 
                         this.ItemAdditionalFroms = new List<string>();
                         this.ItemAdditionalFields = new List<string>();
+
+                        this.PatronMaskDefinition = DefaultPatronMaskDefinition;
                     }
 
                     // <channel>

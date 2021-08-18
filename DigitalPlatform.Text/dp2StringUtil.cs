@@ -693,6 +693,64 @@ out string strPureName);
             public const string dpdc = "http://dp2003.com/dpdc";
             public const string unimarcxml = "http://dp2003.com/UNIMARC";
         }
+
+        #region 对字段内容进行马赛克处理
+
+        public static string Mask(string maskDefinition,
+    string text,
+    string element_name)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            if (string.IsNullOrEmpty(maskDefinition))
+                return text;
+            // 找到 mask 方法
+            var method = StringUtil.GetParameterByPrefix(maskDefinition, element_name);
+            if (method == null) // 没有定义此元素
+            {
+                // 2021/8/19
+                // 再尝试一下找 *
+                method = StringUtil.GetParameterByPrefix(maskDefinition, "*");
+                if (method == null)
+                    return text;
+            }
+            if (method == "" || method == "mask")   // 默认的 mask 方法: 全部替换为星号
+                return new string('*', text.Length);
+
+            if (method == "clear")
+                return "";
+
+            // 2|3 表示保留前 2 字符和末尾 3 字符，中间部分全部替换为星号
+            if (method.Contains("|"))
+                return Method1(method, text);
+            return $"error: 无法识别的 method '{method}'";
+        }
+
+        static string Method1(string def, string text)
+        {
+            var parts = StringUtil.ParseTwoPart(def, "|");
+            string left = parts[0];
+            string right = parts[1];
+            if (string.IsNullOrEmpty(left))
+                left = "0";
+            if (string.IsNullOrEmpty(right))
+                right = "0";
+            if (Int32.TryParse(left, out int left_chars) == false)
+                return $"error: '{def}' 定义不合法。竖线左侧应该是一个数字";
+            if (Int32.TryParse(right, out int right_chars) == false)
+                return $"error: '{def}' 定义不合法。竖线右侧应该是一个数字";
+            if (left_chars + right_chars >= text.Length
+                || left_chars >= text.Length
+                || right_chars >= text.Length)
+                return text;
+            string left_text = text.Substring(0, left_chars);
+            string right_text = text.Substring(text.Length - right_chars, right_chars);
+            int middle_chars = text.Length - left_chars - right_chars;
+            return left_text + new string('*', middle_chars) + right_text;
+        }
+
+
+        #endregion
     }
 
 

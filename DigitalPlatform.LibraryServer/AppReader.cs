@@ -691,7 +691,7 @@ namespace DigitalPlatform.LibraryServer
             //      ""      找到了前缀，并且 level 部分为空
             //      其他     返回 level 部分
             string write_level = GetReaderInfoLevel("setreaderinfo", rights);
-            if (FilterByLevel(dom, write_level, "write") == true)
+            if (FilterByLevel(dom, write_level, "write", this.PatronMaskDefinition) == true)
                 bChanged = true;
 
             // 删除一些敏感元素
@@ -1882,7 +1882,7 @@ namespace DigitalPlatform.LibraryServer
                             //      ""      找到了前缀，并且 level 部分为空
                             //      其他     返回 level 部分
                             string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
-                            FilterByLevel(domNewRec, read_level);
+                            FilterByLevel(domNewRec, read_level, "read", this.PatronMaskDefinition);
 
                             strSavedXml = domNewRec.OuterXml;
                         }
@@ -2633,7 +2633,7 @@ root, strLibraryCode);
                 //      ""      找到了前缀，并且 level 部分为空
                 //      其他     返回 level 部分
                 string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
-                FilterByLevel(temp_dom, read_level);
+                FilterByLevel(temp_dom, read_level, "read", this.PatronMaskDefinition);
 
                 strExistingRecord = temp_dom.OuterXml;
             }
@@ -3432,7 +3432,7 @@ root, strLibraryCode);
                         //      ""      找到了前缀，并且 level 部分为空
                         //      其他     返回 level 部分
                         string read_level = GetReaderInfoLevel("getreaderinfo", rights);
-                        FilterByLevel(domExist, read_level);
+                        FilterByLevel(domExist, read_level, "read", this.PatronMaskDefinition);
 
                         strExistingRecord = domExist.OuterXml;
                     }
@@ -3603,7 +3603,7 @@ root, strLibraryCode);
                     //      ""      找到了前缀，并且 level 部分为空
                     //      其他     返回 level 部分
                     string read_level = GetReaderInfoLevel("getreaderinfo", rights);
-                    FilterByLevel(domNewRec, read_level);
+                    FilterByLevel(domNewRec, read_level, "read", this.PatronMaskDefinition);
 
                     strNewRecord = domNewRec.OuterXml;
                 }
@@ -5911,7 +5911,7 @@ out strError);
                 filtered_readerdom.LoadXml(readerdom.OuterXml);
             else
                 filtered_readerdom.LoadXml(strXml);
-            FilterByLevel(filtered_readerdom, level);
+            FilterByLevel(filtered_readerdom, level, "read", this.PatronMaskDefinition);
 
             string[] result_types = strResultTypeList.Split(new char[] { ',' });
             //results = new string[result_types.Length];
@@ -7541,7 +7541,8 @@ out strError);
         // 注: 无论如何都要删除读者记录中的 password 元素
         public static bool FilterByLevel(XmlDocument readerdom,
             string level,
-            string style = "read")
+            string style = "read",
+            string maskDefinition = null)
         {
             if (string.IsNullOrEmpty(level))
             {
@@ -7581,7 +7582,11 @@ out strError);
                 {
                     if (read)
                     {
-                        element.InnerText = Mask(element.InnerText);
+                        if (string.IsNullOrEmpty(maskDefinition) == true)
+                            element.InnerText = Mask(element.InnerText);
+                        else
+                            element.InnerText = dp2StringUtil.Mask(maskDefinition, element.InnerText, myname);
+
                         changed = true;
                         continue;
                     }

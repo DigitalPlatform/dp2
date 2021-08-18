@@ -4183,6 +4183,8 @@ start_time_1,
             + "$";
         }
 
+        // parameters:
+        //      strFormat   格式字符串。例如 xml:noborrowhistory 或者 xml:name|department
         int GetPatronXml(string strItemXml,
     string strFormat,
     string libraryCode,
@@ -4227,21 +4229,32 @@ start_time_1,
                 return 0;
             }
 
+            // 2021/8/18
+            bool noborrowhistory = false;
+            var list = name_list.Replace("|", ",");
+            if (StringUtil.IsInList("noborrowhistory", list))
+            {
+                noborrowhistory = true;
+                StringUtil.RemoveFromInList("noborrowhistory", true, ref list);
+                name_list = list.Replace(",", "|");
+            }
+
             // 2021/8/5
             if (string.IsNullOrEmpty(name_list) == false)
-                FilterByLevel(dom, name_list);
+                FilterByLevel(dom, name_list, "read", this.PatronMaskDefinition);
 
-            // 2021/8/9
-            // 不太明白为何这里要去掉 borrowHistory 的下级元素。暂时注释掉
-            /*
-            // ??
-            // 去掉 <borrowHistory> 的下级元素
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrowHistory/*");
-            foreach (XmlNode node in nodes)
+            if (noborrowhistory)
             {
-                node.ParentNode.RemoveChild(node);
+                // 2021/8/9
+                // 不太明白为何这里要去掉 borrowHistory 的下级元素。暂时注释掉
+                // ??
+                // 去掉 <borrowHistory> 的下级元素
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrowHistory/*");
+                foreach (XmlNode node in nodes)
+                {
+                    node.ParentNode.RemoveChild(node);
+                }
             }
-            */
 
             // 2021/3/4
             AddPatronOI(dom, libraryCode);
@@ -16461,7 +16474,7 @@ start_time_1,
 
             if (domOperLog != null)
                 DomUtil.SetElementText(domOperLog.DocumentElement, "borrowID", borrowID);
-            
+
             // 2021/8/17
             // bug: 原先在 ?? 点，现在移动到末尾
             if (bOverdue == true
@@ -16469,7 +16482,7 @@ start_time_1,
             {
                 strError = strOverdueMessage;
                 return 1;
-            }            
+            }
             return 0;
         }
 

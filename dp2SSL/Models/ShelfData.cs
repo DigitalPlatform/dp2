@@ -7332,7 +7332,7 @@ TaskScheduler.Default);
             get
             {
                 var def = ShelfData.GetPatronMask();
-                return Patron.Mask(def, PatronName, "name");
+                return dp2StringUtil.Mask(def, PatronName, "name");
             }
         }
 
@@ -7342,7 +7342,7 @@ TaskScheduler.Default);
             get
             {
                 var def = ShelfData.GetPatronMask();
-                return Patron.Mask(def, PatronBarcode, "barcode");
+                return dp2StringUtil.Mask(def, PatronBarcode, "barcode");
             }
         }
 

@@ -310,7 +310,7 @@ namespace dp2ManageCenter.Message
                         else
                             returning_date = $"时间字符串 '{borrow_info.LatestReturnTime}' 格式错误";
                     }
-                    action_info = $"应还时间: {returning_date} BorrowID={borrow_info.BorrowID}";
+                    action_info = $"应还时间: {returning_date} borrowID={borrow_info.BorrowID}";
                 }
             }
             else
@@ -538,13 +538,28 @@ namespace dp2ManageCenter.Message
         {
             string strError = "";
 
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择要修改的事项";
+                goto ERROR1;
+            }
+
             string field = (sender as MenuItem).Tag as string;
 
             string new_state = null;
             if (field == "state")
                 new_state = InputDlg.GetInput(this, "修改状态", "新状态值", "dontsync", this.Font);
             else if (field == "linkID")
-                new_state = InputDlg.GetInput(this, "修改 关联 ID", "新“关联 ID”值", "borrowID=xxx", this.Font);
+            {
+                var item = this.listView_records.SelectedItems[0];
+                var action_info = ListViewUtil.GetItemText(item, COLUMN_ACTIONINFO);
+                int index = action_info.IndexOf("borrowID");
+                string default_value = "borrowID=xxx";
+                if (index != -1)
+                    default_value = action_info.Substring(index).Trim();
+
+                new_state = InputDlg.GetInput(this, "修改 关联 ID", "新“关联 ID”值", default_value, this.Font);
+            }
             else
             {
                 strError = $"未知的 field 值 '{field}'";
