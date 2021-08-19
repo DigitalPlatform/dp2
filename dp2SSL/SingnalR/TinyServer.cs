@@ -2033,10 +2033,16 @@ text.ToString());
 
             public static string GetDisplayString(RequestItem item)
             {
+                // 马赛克处理
+                var operator1 = JsonConvert.DeserializeObject<Operator>(item.OperatorString);
+                operator1.PatronName = operator1.PatronNameMasked;
+                if (Operator.IsPatronBarcodeWorker(operator1.PatronBarcode) == false)
+                    operator1.PatronBarcode = operator1.PatronBarcodeMasked;
+                
                 DisplayRequestItem result = new DisplayRequestItem
                 {
                     ID = item.ID,
-                    OperatorID = item.OperatorID,
+                    OperatorID = item.GetMaskedOperatorID(),
                     LinkID = item.LinkID,
                     SyncOperTime = item.SyncOperTime,
                     PII = item.PII,
@@ -2046,7 +2052,7 @@ text.ToString());
                     SyncErrorCode = item.SyncErrorCode,
                     SyncErrorInfo = item.SyncErrorInfo,
                     SyncCount = item.SyncCount,
-                    Operator = JsonConvert.DeserializeObject<Operator>(item.OperatorString),
+                    Operator = operator1,   // JsonConvert.DeserializeObject<Operator>(item.OperatorString),
                     Entity = JsonConvert.DeserializeObject<Entity>(item.EntityString),
                     TransferDirection = item.TransferDirection,
                     Location = item.Location,

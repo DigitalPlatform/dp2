@@ -54,6 +54,7 @@
                     <MenuItem x:Name="importOfflineEntity" Header="导入脱机册记录和书目摘要" HorizontalAlignment="Left" Width="Auto" Click="importOfflineEntity_Click"/>
                     <MenuItem x:Name="backupRequests" Header="备份本地动作库" HorizontalAlignment="Left" Width="Auto" Click="backupRequests_Click"/>
                     <MenuItem x:Name="restoreRequests" Header="恢复本地动作库" HorizontalAlignment="Left" Width="Auto" Click="restoreRequests_Click"/>
+                    <MenuItem x:Name="importRequests" Header="导入本地动作库" HorizontalAlignment="Left" Width="Auto" Click="importRequests_Click"/>
                 </MenuItem>
                 <MenuItem Header="_小票打印">
                     <MenuItem x:Name="posPrint_clearMemory" Header="清空缓冲区" HorizontalAlignment="Left" Width="Auto" Click="posPrint_clearMemory_Click"/>

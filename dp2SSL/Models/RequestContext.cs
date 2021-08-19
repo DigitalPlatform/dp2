@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 using DigitalPlatform.WPF;
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -59,6 +60,16 @@ namespace dp2SSL
         public override string ToString()
         {
             return $"ID={ID},PII={PII},Action={Action},OperTime={OperTime},State={State},OperatorID={OperatorID},LinkID={LinkID},SyncOperTime={SyncOperTime},SyncErrorInfo={SyncErrorInfo},SyncErrorCode={SyncErrorCode},SyncCount={SyncCount},OperatorString={OperatorString},EntityString={EntityString},TransferDirection={TransferDirection},Location={Location},CurrentShelfNo={CurrentShelfNo},BatchNo={BatchNo},ActionString={ActionString}";
+        }
+
+        // 返回脱敏以后的 OperatorID
+        public string GetMaskedOperatorID()
+        {
+            if (Operator.IsPatronBarcodeWorker(OperatorID))
+                return OperatorID;
+
+            var maskDefinition = ShelfData.GetPatronMask();
+            return dp2StringUtil.Mask(maskDefinition, OperatorID, "barcode");
         }
     }
 

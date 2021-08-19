@@ -364,9 +364,26 @@ TaskScheduler.Default);
         // 注意要处理好 XML 文件中字段比当前表定义的字段多或者少的情况，和字段改名的情况
         public static async Task<NormalResult> RestoreRequestsDatabaseAsync(
             string strInputFileName,
+            bool clearBefore,
             Delegate_displayText func_displayText,
             CancellationToken token)
         {
+            if (clearBefore == false)
+            {
+                // 统计 XML 文件中动作记录 ID 最大值
+                var result = await DetectLargestIdAsync(
+                    strInputFileName,
+                    token);
+                if (result.Value == -1)
+                    return result;
+
+                result = await IncIdDatabaseAsync(result.Value + 1000,
+                    func_displayText,
+                    token);
+                if (result.Value == -1)
+                    return result;
+            }
+
             int count = 0;
             using (var releaser = await _databaseLimit.EnterAsync())
             {
@@ -394,7 +411,9 @@ TaskScheduler.Default);
                     using (var context = new RequestContext())
                     using (var connection = context.Database.GetDbConnection())
                     {
-                        context.Database.EnsureDeleted();
+                        if (clearBefore)
+                            context.Database.EnsureDeleted();
+
                         context.Database.EnsureCreated();
 
                         await connection.OpenAsync();
@@ -528,6 +547,109 @@ TaskScheduler.Default);
 
             return new NormalResult { Value = count };
         }
+
+        // 统计 XML 文件中动作记录 ID 最大值
+        public static async Task<NormalResult> DetectLargestIdAsync(
+    string strInputFileName,
+    CancellationToken token)
+        {
+            int count = 0;
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.Async = true;
+
+            int max_id = 1;
+            using (XmlReader reader = XmlReader.Create(strInputFileName, settings))
+            {
+                // 定位到 collection 元素
+                while (true)
+                {
+                    bool bRet = await reader.ReadAsync();
+                    if (bRet == false)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "文件 " + strInputFileName + " 没有根元素"
+                        };
+                    }
+                    if (reader.NodeType == XmlNodeType.Element)
+                        break;
+                }
+
+                while (await reader.ReadAsync())
+                {
+                    if (token.IsCancellationRequested)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "用户中断",
+                            ErrorCode = "abort"
+                        };
+
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        string record_xml = await reader.ReadOuterXmlAsync();
+                        XmlDocument dom = new XmlDocument();
+                        dom.LoadXml(record_xml);
+
+                        var id_string = dom.DocumentElement.SelectSingleNode("field[@name='ID']").InnerText;
+                        if (Int32.TryParse(id_string, out int id_value) == false)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"ID 字符串 '{id_string}' 格式不正确。应为一个数字"
+                            };
+                        if (id_value > max_id)
+                            max_id = id_value;
+                        count++;
+                    }
+                }
+            }
+
+            return new NormalResult { Value = max_id };
+        }
+
+
+        // 为所有动作记录的 ID 增加一个量
+        public static async Task<NormalResult> IncIdDatabaseAsync(
+            int delta,
+            Delegate_displayText func_displayText,
+            CancellationToken token)
+        {
+            int count = 0;
+            using (var releaser = await _databaseLimit.EnterAsync())
+            using (var context = new RequestContext())
+            {
+                List<RequestItem> items = new List<RequestItem>();
+                items.AddRange(context.Requests);
+                // 先删除
+                context.Requests.RemoveRange(items);
+                await context.SaveChangesAsync();
+
+                foreach (var item in items)
+                {
+                    item.ID += delta;
+                    if (StringUtil.IsPureNumber(item.LinkID))
+                    {
+                        if (Int32.TryParse(item.LinkID, out int link_id) == false)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"LinkID 值 '{item.LinkID}' 格式错误"
+                            };
+                        item.LinkID = (link_id + delta).ToString();
+                    }
+
+                    func_displayText?.Invoke($"已处理记录 {count}");
+                    count++;
+                }
+                context.Requests.AddRange(items);
+                count = await context.SaveChangesAsync();
+            }
+
+            return new NormalResult { Value = count };
+        }
+
 
         // static object _syncRoot_database = new object();
 
@@ -679,7 +801,7 @@ TaskScheduler.Default);
                     context.Database.EnsureCreated();
                     {
                         var items = context.Requests.Where(
-                            o=> o.State == "dontsync" 
+                            o => o.State == "dontsync"
                             && string.IsNullOrEmpty(o.SyncErrorCode)
                             && string.IsNullOrEmpty(o.SyncErrorInfo)
                             && o.SyncCount == 0)

@@ -22,6 +22,8 @@ namespace TestDp2Library
         [InlineData("?name", "?name")]
         [InlineData("?name,1", "?name,1")]
         [InlineData("1,?name,2", "1,?name,2")]
+        [InlineData("libraryCode,readerType,barcode,cardNumber,refID,oi,info,borrows,overdues,reservations,outofReservations,state,createDate,expireDate,name,namePinyin,displayName,gender,nation,comment,department,post,address,tel,email,rights,access,personalLibrary,friends,idCardNumber,dateOfBirth,borrowHistory,preference,hire,foregift,fingerprint,palmprint,face,http://dp2003.com/dprms:file,?name,?tel,?department,r_delete", 
+            "libraryCode,readerType,barcode,cardNumber,refID,oi,info,borrows,overdues,reservations,outofReservations,state,createDate,expireDate,namePinyin,displayName,gender,nation,comment,post,address,email,rights,access,personalLibrary,friends,idCardNumber,dateOfBirth,borrowHistory,preference,hire,foregift,fingerprint,palmprint,face,http://dp2003.com/dprms:file,?name,?tel,?department,r_delete")]
         public void TestRemoveConflictName_01(string input, string result)
         {
             var input_list = StringUtil.SplitList(input);

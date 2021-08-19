@@ -7736,6 +7736,7 @@ out strError);
                         {
                             results.RemoveAt(j);
                             j--;
+                            i--;
                         }
                     }
                 }
