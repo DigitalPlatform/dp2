@@ -528,7 +528,7 @@ password);
             ItemInfo item_info = (ItemInfo)this.listView_users.Items[this.m_nCurrentItemIndex].Tag;
             item_info.UserInfo.UserName = this.textBox_userName.Text;
             item_info.UserInfo.Type = this.textBox_userType.Text;
-            item_info.UserInfo.Rights = this.textBox_userRights.Text;
+            item_info.UserInfo.Rights = this.textBox_userRights.Text.Replace("\r", "\n").Replace("\n", "");
             item_info.UserInfo.LibraryCode = this.checkedComboBox_libraryCode.Text; //  this.textBox_libraryCode.Text;
             item_info.UserInfo.Access = this.textBox_access.Text;
             item_info.UserInfo.Binding = this.textBox_binding.Text;
@@ -848,7 +848,7 @@ password);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.Text = "用户 '" + this.textBox_userName.Text + "' 的权限";
-            dlg.PropertyString = this.textBox_userRights.Text;
+            dlg.PropertyString = this.textBox_userRights.Text.Replace("\r", "\n").Replace("\n", "");
             dlg.CfgFileName = Program.MainForm.DataDir + "\\userrightsdef.xml";
             if (bControl)
             {
@@ -1168,7 +1168,7 @@ password);
 
             info.UserName = this.textBox_userName.Text;
             info.Type = this.textBox_userType.Text;
-            info.Rights = this.textBox_userRights.Text;
+            info.Rights = this.textBox_userRights.Text.Replace("\r", "\n").Replace("\n", "");
             info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
             info.Access = this.textBox_access.Text;
             info.Binding = this.textBox_binding.Text;
@@ -1231,7 +1231,7 @@ password);
 
             info.UserName = this.textBox_userName.Text;
             info.Type = this.textBox_userType.Text;
-            info.Rights = this.textBox_userRights.Text;
+            info.Rights = this.textBox_userRights.Text.Replace("\r", "\n").Replace("\n", "");
             info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
             info.Access = this.textBox_access.Text;
             info.Binding = this.textBox_binding.Text;

@@ -10,6 +10,9 @@ using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Linq;
+
+using Newtonsoft.Json;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
@@ -23,8 +26,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
-using Newtonsoft.Json;
-using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {

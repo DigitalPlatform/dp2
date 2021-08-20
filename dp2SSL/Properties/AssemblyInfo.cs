@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.42")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.42.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.44")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.44.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -128,3 +128,6 @@ using System.Windows;
 //                          dp2ssl 首次启动时向 LED 文字屏发送文字的时候如果遇到报错，会自动重试最多 5 次，一共耗费 10 秒。这是因为 RfidCenter 初始化 LED 驱动可能需要一定时间，如果 dp2ssl 启动过快会遇到报错
 //      1.8.41 (2021/8/17) 远程查询功能增加修改 LinkID 字段的子功能
 //      1.8.42 (2021/8/19) 远程查询功能结果发送前对 RequestItem.OperatorID 和 OperatorString 进行了 dp2ssl 的本地脱敏(按照shelf.xml 中“读者信息屏蔽”参数)
+//      1.8.43 (2021/8/20) 设置画面增加"导入本地动作库"功能，可以从备份的 XML 文件中导入记录插入到当前动作库记录的前面，并且自动增量原有动作库记录的 ID 号码。
+//                          “备份本地动作库”和“恢复本地动作库”功能做了改进
+//      1.8.44 (2021/8/20) 修复一处和 CompactLog 有关的 bug

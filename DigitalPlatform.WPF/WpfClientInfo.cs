@@ -240,6 +240,8 @@ namespace DigitalPlatform.WPF
             WriteLog("debug", strText);
         }
 
+        public static event WriteLogEventHandler WriteLogEvent = null;
+
         // 写入错误日志文件
         // parameters:
         //      level   info/error
@@ -261,6 +263,17 @@ namespace DigitalPlatform.WPF
                     _log.Error(strText);
             }
 #endif
+            // 2021/8/20
+            if (WriteLogEvent != null)
+            {
+                WriteLogEventArgs e = new WriteLogEventArgs { Level = level, Message = strText };
+                WriteLogEvent?.Invoke(null, e);
+                if (e.Cancelled)
+                {
+                    return;
+                }
+            }
+
             if (level == "info")
                 Log.Information(strText);
             else if (level == "debug")
@@ -528,4 +541,13 @@ namespace DigitalPlatform.WPF
 
     }
 
+    public delegate void WriteLogEventHandler(object sender,
+WriteLogEventArgs e);
+
+    public class WriteLogEventArgs : EventArgs
+    {
+        public string Level { get; set; }
+        public string Message { get; set; }
+        public bool Cancelled { get; set; }    // [out]
+    }
 }

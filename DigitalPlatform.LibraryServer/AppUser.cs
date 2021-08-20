@@ -1865,6 +1865,20 @@ out strError);
             out string strError)
         {
             error_code = ErrorCode.NoError;
+
+            // 2021/8/20
+            // 检查 info 内容合法性
+            if (info != null)
+            {
+                if (info.Rights != null
+                    && info.Rights.IndexOfAny(new char[] { '\r', '\n' }) != -1)
+                {
+                    error_code = ErrorCode.InvalidParameter;
+                    strError = $"info.Rights 内容 '{info.Rights}' 不合法：含有回车或者换行字符";
+                    return -1;
+                }
+            }
+
             if (strAction == "new")
             {
                 return this.CreateUser(strLibraryCodeList,
