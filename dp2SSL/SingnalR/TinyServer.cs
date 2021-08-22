@@ -13,6 +13,7 @@ using System.Deployment.Application;
 using System.IO;
 using System.Reflection;
 using System.Windows.Navigation;
+using System.Text.RegularExpressions;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
@@ -28,7 +29,6 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
 using dp2SSL.Models;
-using System.Text.RegularExpressions;
 
 namespace dp2SSL
 {
@@ -123,7 +123,7 @@ namespace dp2SSL
                                     App.SetError("sendMessage", $"同步发送消息出错: {result.ErrorInfo}");
 
                                     // TODO: 错误日志中要写入消息内容
-                                    WpfClientInfo.WriteErrorLog($"SetMessageAsync() 出错(本条消息已被跳过，不会再重试发送): {result.ErrorInfo}");
+                                    WpfClientInfo.WriteLogInternal("error", $"SetMessageAsync() 出错(本条消息已被跳过，不会再重试发送): {result.ErrorInfo}");
                                     break;
                                 }
                                 else
@@ -1693,6 +1693,26 @@ text.ToString());
             // 目前子参数为 PII
             param = param.ToUpper();
 
+            StringBuilder text = new StringBuilder();
+            var result = await ShelfData.VerifyBookAsync(null, param);
+            if (result.Value == -1)
+                text.Append("检查过程出错:" + result.ErrorInfo);
+            else if (result.Infos.Count == 0)
+                text.Append("没有实际处理任何记录");
+            else
+            {
+                text.AppendLine($"检查共返回 {result.Infos.Count} 条信息(其中 error 开头的代表错误):");
+                int i = 0;
+                foreach (var s in result.Infos)
+                {
+                    text.AppendLine($"{++i}) {s}");
+                }
+            }
+
+            await SendMessageAsync(new string[] { groupName }, text.ToString());
+
+
+            /*
             // TODO: 用一段文字描述这一册的总体状态。特别是是否同步成功，本地库最新状态和 dp2library 一端是否吻合
 
             using (var context = new RequestContext())
@@ -1742,18 +1762,9 @@ text.ToString());
                     text.AppendLine($"{i++}\r\n{SimpleRequestItem.GetDisplayString(item)}");
                 }
 
-
-                /*
-                // 获得 dp2library 中的册记录
-                var result = await LibraryChannelUtil.GetEntityDataAsync(param);
-                if (result.Value == -1 || result.Value == 0)
-                    text.AppendLine($"尝试获得册记录时出错: {result.ErrorInfo}");
-                else
-                    text.AppendLine($"册记录:\r\n{DomUtil.GetIndentXml(result.ItemXml)}");
-                    */
-
                 await SendMessageAsync(new string[] { groupName }, text.ToString());
             }
+            */
         }
 
         class EntityTemplate
@@ -1842,6 +1853,25 @@ text.ToString());
             // 目前子参数为 PII
             param = param.ToUpper();
 
+            StringBuilder text = new StringBuilder();
+            var result = await ShelfData.VerifyBookAsync(param, null);
+            if (result.Value == -1)
+                text.Append("检查过程出错:" + result.ErrorInfo);
+            else if (result.Infos.Count == 0)
+                text.Append("没有实际处理任何记录");
+            else
+            {
+                text.AppendLine($"检查共返回 {result.Infos.Count} 条信息(其中 error 开头的代表错误):");
+                int i = 0;
+                foreach(var s in result.Infos)
+                {
+                    text.AppendLine($"{++i}) {s}");
+                }
+            }
+
+            await SendMessageAsync(new string[] { groupName }, text.ToString());
+
+            /*
             // TODO: 用一段文字描述这一册的总体状态。特别是是否同步成功，本地库最新状态和 dp2library 一端是否吻合
 
             using (var context = new RequestContext())
@@ -1866,6 +1896,7 @@ text.ToString());
 
                 await SendMessageAsync(new string[] { groupName }, text.ToString());
             }
+            */
         }
 
         // 修改操作历史
@@ -2038,7 +2069,7 @@ text.ToString());
                 operator1.PatronName = operator1.PatronNameMasked;
                 if (Operator.IsPatronBarcodeWorker(operator1.PatronBarcode) == false)
                     operator1.PatronBarcode = operator1.PatronBarcodeMasked;
-                
+
                 DisplayRequestItem result = new DisplayRequestItem
                 {
                     ID = item.ID,
@@ -2202,8 +2233,16 @@ text.ToString());
             int nRet = strText.IndexOf("-");
             if (nRet == -1)
             {
-                strError = "'" + strText + "' 中缺乏破折号 '-'";
-                return -1;
+                //strError = "'" + strText + "' 中缺乏破折号 '-'";
+                //return -1;
+                if (strText.Length != 8)
+                {
+                    strError = "时间字符串 '" + strText + "' 不是8字符 (注：用法为 20200101-20211231 或 20200101)";
+                    return -1;
+                }
+
+                // 变为 xxxxxxxx-xxxxxxxx 形态继续处理
+                strText = strText + "-" + strText;
             }
 
             string strStart = strText.Substring(0, nRet).Trim();
@@ -2963,7 +3002,6 @@ strError,
                             error_code = "SystemError";
                             lRet = -1;
                         }
-
                     }
                     else
                     {
@@ -2996,7 +3034,7 @@ strError,
                     if (send == 0)
                     {
                         result.Metadata = strMetadata;
-                        if (StringUtil.IsInList("timestamp", param.Style) == true)
+                        if (StringUtil.IsInList("timestamp,md5", param.Style) == true)
                             result.Timestamp = ByteArray.GetHexTimeStampString(baOutputTimestamp);
                     }
                     result.ErrorInfo = strError;
@@ -3104,8 +3142,7 @@ result);
             {
                 try
                 {
-                    // Wait(new TimeSpan(0, 0, 0, 0, 50)); // 50
-                    await Task.Delay(TimeSpan.FromMilliseconds(50));
+                    // await Task.Delay(TimeSpan.FromMilliseconds(50));
 
                     MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseGetRes",
                         new GetResResponse(

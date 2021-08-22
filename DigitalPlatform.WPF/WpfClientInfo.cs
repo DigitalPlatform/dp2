@@ -242,12 +242,33 @@ namespace DigitalPlatform.WPF
 
         public static event WriteLogEventHandler WriteLogEvent = null;
 
-        // 写入错误日志文件
+        // 写入错误日志文件。触发事件，和写入物理文件
         // parameters:
-        //      level   info/error
+        //      level   info/error/debug
         // Exception:
         //      可能会抛出异常
         public static void WriteLog(string level, string strText)
+        {
+            // 2021/8/20
+            if (WriteLogEvent != null)
+            {
+                WriteLogEventArgs e = new WriteLogEventArgs { Level = level, Message = strText };
+                WriteLogEvent?.Invoke(null, e);
+                if (e.Cancelled)
+                {
+                    return;
+                }
+            }
+
+            WriteLogInternal(level, strText);
+        }
+
+        // 写入错误日志文件。写入物理文件
+        // parameters:
+        //      level   info/error/debug
+        // Exception:
+        //      可能会抛出异常
+        public static void WriteLogInternal(string level, string strText)
         {
             // Console.WriteLine(strText);
 
@@ -263,16 +284,6 @@ namespace DigitalPlatform.WPF
                     _log.Error(strText);
             }
 #endif
-            // 2021/8/20
-            if (WriteLogEvent != null)
-            {
-                WriteLogEventArgs e = new WriteLogEventArgs { Level = level, Message = strText };
-                WriteLogEvent?.Invoke(null, e);
-                if (e.Cancelled)
-                {
-                    return;
-                }
-            }
 
             if (level == "info")
                 Log.Information(strText);

@@ -22,6 +22,7 @@ using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
+using DigitalPlatform.Xml;
 
 namespace dp2SSL
 {
@@ -187,6 +188,9 @@ namespace dp2SSL
                         int total = actions.Count;
                         foreach (var group in groups)
                         {
+                            // 2021/8/21
+                            token.ThrowIfCancellationRequested();
+
                             int current_count = group.Count;    // 当前 group 包含的动作数量
 
                             var result = await SubmitCheckInOutAsync(
@@ -679,7 +683,7 @@ TaskScheduler.Default);
         }
 
         // 2020/8/26
-        // 把本地动作库中符合指定 borrowID 的状态修改为 “dontsync”
+        // 把本地动作库中符合指定 borrowID 的 borrow 动作的 LinkID 修改表示已经还回的内容
         internal static async Task ChangeDatabaseBorrowStateAsync(string borrowID)
         {
             using (var releaser = await _databaseLimit.EnterAsync())
@@ -718,6 +722,135 @@ TaskScheduler.Default);
             }
         }
 
+        public class VerifyBookResult : NormalResult
+        {
+            public List<string> Infos { get; set; }
+        }
+
+        // 2021/8/22
+        // parameters:
+        //          entity_pii     要校验的册的 PII。如果为空，表示校验所有册记录
+        //          operator_id     要校验的(动作记录中的操作者)读者 ID。如果为空，表示校验所有读者
+        // return.Value
+        //          -1      检查过程本身出错(意味着检查没有完成)
+        //          其它      检查出的信息的个数
+        public static async Task<VerifyBookResult> VerifyBookAsync(
+            string entity_pii,
+            string operator_id)
+        {
+            var token = App.CancelToken;
+
+            List<RequestItem> items = new List<RequestItem>();
+            using (var releaser = await _databaseLimit.EnterAsync())
+            {
+                using (var context = new RequestContext())
+                {
+                    // 选择处于未还书状态的 borrow 动作
+                    items = context.Requests
+                        .Where(
+                        o => o.Action == "borrow"
+                        && o.LinkID == null
+                        && (string.IsNullOrEmpty(entity_pii) || o.PII == entity_pii || o.PII.Contains("." + entity_pii))
+                        && (string.IsNullOrEmpty(operator_id) || o.OperatorID == operator_id)
+                        && string.IsNullOrEmpty(o.ActionString) == false)
+                        .ToList();
+                }
+            }
+
+            List<string> infos = new List<string>();
+            foreach (var item in items)
+            {
+                token.ThrowIfCancellationRequested();
+
+                /*
+                if (string.IsNullOrEmpty(entity_pii) == false
+                    && !(item.PII == entity_pii || item.PII.Contains("." + entity_pii)))
+                    continue;
+                */
+
+                infos.Add($"检查本地动作记录 {item.ID}");
+
+                string borrow_id = "";
+                try
+                {
+                    var borrow_info = JsonConvert.DeserializeObject<BorrowInfo>(item.ActionString);
+                    borrow_id = borrow_info.BorrowID;
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"解析动作记录 '{item.ID}' borrow_info 字符串 '{item.ActionString}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    infos.Add($"error:解析动作记录 '{item.ID}' borrow_info 字符串 '{item.ActionString}' 时出现异常: {ex.Message}");
+                    continue;
+                }
+
+                // 从 dp2library 获得册记录
+                // parameters:
+                //      style   风格。
+                //              network 表示只从网络获取册记录；否则优先从本地获取，本地没有再从网络获取册记录。无论如何，书目摘要都是尽量从本地获取
+                //              offline 表示指从本地获取册记录和书目记录
+                // .Value
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                var result = await LibraryChannelUtil.GetEntityDataAsync(item.PII, "skip_biblio,network");
+                if (result.Value == -1 || result.Value == 0)
+                {
+                    infos.Add($"error:从 dp2library 获得 PII 为 '{item.PII}' 的册记录时出错: {result.ErrorInfo}");
+                    continue;
+                }
+
+                XmlDocument itemdom = new XmlDocument();
+                try
+                {
+                    itemdom.LoadXml(result.ItemXml);
+                }
+                catch (Exception ex)
+                {
+                    infos.Add($"error:从 dp2library 获得 PII 为 '{item.PII}' 的册记录装入 XMLDOM 时出错: {ex.Message}");
+                    continue;
+                }
+
+                // 检查 borrowID
+                string item_borrow_id = DomUtil.GetElementText(itemdom.DocumentElement, "borrowID");
+                if (borrow_id != item_borrow_id)
+                {
+                    infos.Add($"error:从 dp2library 获得 PII 为 '{item.PII}' 的册记录中，borrowID '{item_borrow_id}' 和 dp2ssl 本地记录 {item.ID} 中的 '{borrow_id}' 不吻合");
+                    continue;
+                }
+
+                string item_borrower = DomUtil.GetElementText(itemdom.DocumentElement, "borrower");
+                if (item.OperatorID != item_borrower)
+                {
+                    infos.Add($"error:从 dp2library 获得 PII 为 '{item.PII}' 的册记录中，borrower '{item_borrower}' 和 dp2ssl 本地记录 {item.ID} 中的 OperatorID '{item.OperatorID}' 不吻合");
+                    continue;
+                }
+
+                string text = infos[infos.Count - 1];
+                infos.RemoveAt(infos.Count - 1);
+                infos.Add($"{text} 没有发现问题");
+                /*
+                // 检查 checkInOutDate
+                string lastDate = DomUtil.GetElementText(itemdom.DocumentElement, "checkInOutDate");
+                if (string.IsNullOrEmpty(lastDate))
+                    return 0;
+                if (DateTimeUtil.TryParseRfc1123DateTimeString(lastDate,
+        out DateTime lastTime) == false)
+                {
+                    strError = $"册记录内 checkInOutDate 元素包含的时间字符串 '{lastDate}' 不合法。应为 RFC1123 格式";
+                    return -1;
+                }
+
+                // 2020/4/17
+                lastTime = lastTime.ToLocalTime();
+                */
+            }
+
+            return new VerifyBookResult
+            {
+                Value = infos.Count,
+                Infos = infos
+            };
+        }
 
         static async Task ChangeDatabaseActionStateAsync(int id, ActionInfo action)
         {

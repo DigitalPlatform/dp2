@@ -12,6 +12,7 @@ using Microsoft.AspNet.SignalR.Client;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
+using System.IO;
 
 namespace dp2ManageCenter.Message
 {
@@ -922,6 +923,158 @@ CancellationToken token)
 
         #endregion
 
+
+        #region GetRes() API
+
+        public delegate void Delegate_setProgress(long totalLength, long current);
+
+        // 2021/8/21
+        // 写入流版本
+        // 返回结果中 result.Data 不会使用，为 null
+        public async Task<GetResResponse> GetResAsyncLite(
+            string strRemoteUserName,
+            GetResRequest request,
+            Stream stream,
+            Delegate_setProgress func_setProgress,
+            TimeSpan timeout,
+            CancellationToken token)
+        {
+            long lTail = -1;    // -1 表示尚未使用
+            long count = 0;
+            List<string> errors = new List<string>();
+            List<string> codes = new List<string>();
+
+            GetResResponse result = new GetResResponse();
+
+            if (string.IsNullOrEmpty(request.TaskID) == true)
+                request.TaskID = Guid.NewGuid().ToString();
+
+            using (WaitEvents wait_events = new WaitEvents())    // 表示中途数据到来
+            {
+                using (var handler = HubProxy.On<GetResResponse>(
+                    "responseGetRes",
+                    (responseParam) =>
+                    {
+                        try
+                        {
+                            if (responseParam.TaskID != request.TaskID)
+                                return;
+
+                            Debug.WriteLine("handler called. responseParam\r\n***\r\n" + responseParam.Dump() + "***\r\n");
+
+                            // 装载命中结果
+                            if (responseParam.TotalLength == -1 && responseParam.Start == -1)
+                            {
+                                if (func_setProgress != null && result.TotalLength >= 0)
+                                    func_setProgress(result.TotalLength, lTail);
+
+                                result.ErrorInfo = StringUtil.MakePathList(errors, "; ");
+                                result.ErrorCode = StringUtil.MakePathList(codes, ",");
+
+                                Debug.WriteLine("finish_event.Set() 1");
+                                wait_events.finish_event.Set();
+                                return;
+                            }
+
+                            result.TotalLength = responseParam.TotalLength;
+                            if (string.IsNullOrEmpty(responseParam.Metadata) == false)
+                                result.Metadata = responseParam.Metadata;
+                            if (string.IsNullOrEmpty(responseParam.Timestamp) == false)
+                                result.Timestamp = responseParam.Timestamp;
+                            if (string.IsNullOrEmpty(responseParam.Path) == false)
+                                result.Path = responseParam.Path;
+
+                            // TODO: 检查一下和上次的最后位置是否连续
+                            if (lTail != -1 && responseParam.Start != lTail)
+                            {
+                                errors.Add("GetResAsync 接收数据过程出现不连续的批次 lTail=" + lTail + " param.Start=" + responseParam.Start);
+                                result.ErrorInfo = StringUtil.MakePathList(errors, "; ");
+                                result.TotalLength = -1;
+                                // 向服务器发送 CancelSearch 请求
+                                _ = CancelSearchAsync(responseParam.TaskID);
+                                wait_events.finish_event.Set();
+                                return;
+                            }
+
+                            if (responseParam.Data != null
+                                && responseParam.Data.Length > 0
+                                && stream != null)
+                            {
+                                stream.Write(responseParam.Data,
+                                    0,
+                                    responseParam.Data.Length);
+                                lTail = responseParam.Start + responseParam.Data.Length;
+                            }
+
+                            if (func_setProgress != null && result.TotalLength >= 0 && (count++ % 10) == 0)
+                                func_setProgress(result.TotalLength, lTail);
+
+                            if (string.IsNullOrEmpty(responseParam.ErrorInfo) == false
+                                && errors.IndexOf(responseParam.ErrorInfo) == -1)
+                            {
+                                errors.Add(responseParam.ErrorInfo);
+                                result.ErrorInfo = StringUtil.MakePathList(errors, "; ");
+                            }
+                            if (string.IsNullOrEmpty(responseParam.ErrorCode) == false
+                                && codes.IndexOf(responseParam.ErrorCode) == -1)
+                            {
+                                codes.Add(responseParam.ErrorCode);
+                                result.ErrorCode = StringUtil.MakePathList(codes, ",");
+                            }
+
+                            Debug.WriteLine("active_event activate");
+                            wait_events.active_event.Set();
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add("GetResAsync handler 内出现异常: " + ExceptionUtil.GetDebugText(ex));
+                            result.ErrorInfo = StringUtil.MakePathList(errors, "; ");
+                            if (!(ex is ObjectDisposedException))
+                                wait_events.finish_event.Set();
+                            // 向服务器发送 CancelSearch 请求
+                            _ = CancelSearchAsync(responseParam.TaskID);
+                        }
+
+                    }))
+                {
+                    MessageResult message = await HubProxy.Invoke<MessageResult>(
+        "RequestGetRes",
+        strRemoteUserName,
+        request).ConfigureAwait(false);
+                    if (message.Value == -1 || message.Value == 0)
+                    {
+                        result.ErrorInfo = message.ErrorInfo;
+                        result.TotalLength = -1;
+                        result.ErrorCode = message.String;
+                        Debug.WriteLine("return pos 1");
+                        return result;
+                    }
+
+                    try
+                    {
+                        await WaitAsync(
+        request.TaskID,
+        wait_events,
+        timeout,
+        token).ConfigureAwait(false);
+                    }
+                    catch (TimeoutException)
+                    {
+                        // 超时的时候实际上有结果了
+                        if (lTail != -1)
+                        {
+                            result.ErrorCode += ",_timeout";    // 附加一个错误码，表示虽然返回了结果，但是已经超时
+                            return result;
+                        }
+                        throw;
+                    }
+
+                    return result;
+                }
+            }
+        }
+
+        #endregion
     }
 
     public class SearchResult

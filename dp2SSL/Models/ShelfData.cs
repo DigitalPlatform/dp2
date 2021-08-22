@@ -497,7 +497,7 @@ namespace dp2SSL
                 {
                     WpfClientInfo.WriteInfoLog("物理开灯");
                     var result = RfidManager.TurnShelfLamp("*", "turnOn");
-                    if (result.Value == -1)
+                    if (result.Value == -1 && result.ErrorCode != "notFound")
                     {
                         WpfClientInfo.WriteErrorLog($"RfidManager.TurnShelfLamp(turnOn) 出错: {result.ErrorInfo}");
                     }
@@ -516,7 +516,7 @@ namespace dp2SSL
                 {
                     WpfClientInfo.WriteInfoLog("物理关灯");
                     var result = RfidManager.TurnShelfLamp("*", "turnOff");
-                    if (result.Value == -1)
+                    if (result.Value == -1 && result.ErrorCode != "notFound")
                     {
                         WpfClientInfo.WriteErrorLog($"RfidManager.TurnShelfLamp(turnOff) 出错: {result.ErrorInfo}");
                     }
@@ -657,7 +657,7 @@ namespace dp2SSL
                         ShelfData.SetSoftClock(result.DeltaTicks);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"初始化本地软时钟时出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -3421,13 +3421,13 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 // TODO: 注意里面也包含了读者卡，需要过滤一下
 #endif
 
-                WpfClientInfo.WriteErrorLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
+                WpfClientInfo.WriteInfoLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
                 foreach (var tag in books)
                 {
                     if (func_cancelled() == true)
                         return new InitialShelfResult();
 
-                    WpfClientInfo.WriteErrorLog($" tag={tag.ToString()}");
+                    WpfClientInfo.WriteInfoLog($" tag={tag.ToString()}");
 
                     // 跳过读者读卡器上的标签
                     if (tag.OneTag.ReaderName == _patronReaderName)
@@ -4353,7 +4353,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 {
                     if (entity.UID == uid)
                     {
-                        entity.SetData(entity.ItemRecPath, 
+                        entity.SetData(entity.ItemRecPath,
                             entity_xml,
                             ShelfData.Now);
                     }
@@ -6887,6 +6887,54 @@ out string block_map);
                 WpfClientInfo.WriteErrorLog($"SaveSoftClock() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
+
+        #endregion
+
+        // 构建一个表达当前所有标签的字符串集合。用于比对
+        public static List<string> BuildCurrentTagLines()
+        {
+            List<string> results = new List<string>();
+            foreach (var entity in _all)
+            {
+                results.Add($"{entity.GetOiPii(true)}|{entity.ReaderName}:{entity.Antenna}");
+            }
+
+            return results;
+        }
+
+        #region 标签集合比对相关
+
+        public static string BuildTagLineJsonString()
+        {
+            var lines = BuildCurrentTagLines();
+            return JsonConvert.SerializeObject(lines);
+        }
+
+        public static List<string> ParseTagLineString(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return new List<string>();
+            return JsonConvert.DeserializeObject<List<string>>(value);
+        }
+
+        // 记忆本次启动阶段写入动作库的时间
+        public static void SetWriteTime(DateTime time)
+        {
+            string value = JsonConvert.SerializeObject(time);
+            WpfClientInfo.Config?.Set("actions", "initialWriteTime", value);
+        }
+
+        // 获得上次启动阶段写入动作库的时间
+        public static DateTime GetWriteTime()
+        {
+            string value = WpfClientInfo.Config?.Get("actions", "initialWriteTime");
+            if (string.IsNullOrEmpty(value))
+                return DateTime.MinValue;
+            return JsonConvert.DeserializeObject<DateTime>(value);
+        }
+
+        // 间隔多少时间必须在初始化阶段写入动作库至少一次
+        public static TimeSpan ForceWriteLength = TimeSpan.FromDays(30);
 
         #endregion
 

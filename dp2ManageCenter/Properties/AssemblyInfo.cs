@@ -34,7 +34,7 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 // https://stackoverflow.com/questions/53782085/visual-studio-assemblyversion-with-dont-work
-[assembly: AssemblyVersion("1.4.1")]
+[assembly: AssemblyVersion("1.4.2")]
 [assembly: AssemblyFileVersion("1.4.0.0")]
 
 // v1.1 (2020/2/25) 获取 MD5 采用了新的任务方式。会检查 dp2library 的版本号是否为 3.23 以上
@@ -50,4 +50,6 @@ using System.Runtime.InteropServices;
 //      (2020/2/29) LibraryChannelPool 里面 GetChannel() 加锁算法进行了改进。分为两个阶段加锁，第一阶段加了读锁，如果必要在第二阶段再加写锁。这样当 pool 中有闲置通道的时候，只需要加读锁就可以了，尽量不影响其他 GetChannel() 和 ReturnChannel() 的并发性能
 //                  大备份和日备份过程中，每当完成针对一个服务器的任务时，会自动释放闲置的 LibraryChannel 通道。这样能减轻 ChannelPool 执行时加锁的压力
 // V1.4 (2020/4/23) 增加点对点消息窗，和书架查询窗
-// V1.4.1 (2021/8/16) 书柜查询窗的列表上下文菜单增加了 修改 关联 ID 的命令
+//      1.4.1 (2021/8/16) 书柜查询窗的列表上下文菜单增加了 修改 关联 ID 的命令
+//      1.4.2 (2021/8/22) 增加获取文件对话框
+//                      书柜查询窗的时间范围值可以输入类似 20200101 这样的表示一天范围的值了

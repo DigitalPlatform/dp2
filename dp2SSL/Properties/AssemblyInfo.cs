@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.44")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.44.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.45")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.45.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -131,3 +131,8 @@ using System.Windows;
 //      1.8.43 (2021/8/20) 设置画面增加"导入本地动作库"功能，可以从备份的 XML 文件中导入记录插入到当前动作库记录的前面，并且自动增量原有动作库记录的 ID 号码。
 //                          “备份本地动作库”和“恢复本地动作库”功能做了改进
 //      1.8.44 (2021/8/20) 修复一处和 CompactLog 有关的 bug
+//      1.8.45 (2021/8/22) 远程命令 check book 和 check patron 的功能改为检查本地动作记录的合法性
+//                          书柜查询命令中的时间范围可以用 8 字符的单独时间(会被自动扩展为长度一天的时间范围检索)
+//                          WpfClientInfo.WriteErrorLog() 会在配置了 dp2mserver url 的情况下也自动发给 robot 聊天群
+//                          dp2managecenter 增加获取文件对话框。是用点对点 getRes() API 实现的
+//                          当重新启动 dp2ssl 过程中书柜内的图书标签没有发生变化的情况下，初始化过程不会向本地动作库写入盘点(和尝试还书)动作。但每 30 天之外重启 dp2ssl 会至少有一轮启动时向本地动作库中写入盘点动作

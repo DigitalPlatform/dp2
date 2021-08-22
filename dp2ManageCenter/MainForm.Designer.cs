@@ -80,6 +80,7 @@
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage_history = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.toolStripMenuItem_getFile = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -228,6 +229,7 @@
             // 
             this.toolStripMenuItem_message.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_searchShelf,
+            this.toolStripMenuItem_getFile,
             this.toolStripSeparator3,
             this.ToolStripMenuItem_messageAccounts,
             this.ToolStripMenuItem_chat});
@@ -545,6 +547,13 @@
             this.webBrowser1.Size = new System.Drawing.Size(962, 450);
             this.webBrowser1.TabIndex = 3;
             // 
+            // toolStripMenuItem_getFile
+            // 
+            this.toolStripMenuItem_getFile.Name = "toolStripMenuItem_getFile";
+            this.toolStripMenuItem_getFile.Size = new System.Drawing.Size(315, 40);
+            this.toolStripMenuItem_getFile.Text = "获取文件(&G)";
+            this.toolStripMenuItem_getFile.Click += new System.EventHandler(this.toolStripMenuItem_getFile_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
@@ -635,6 +644,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_messageAccounts;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_chat;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_getFile;
     }
 }
 

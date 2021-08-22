@@ -5531,5 +5531,34 @@ MessageBoxDefaultButton.Button2);
             dlg.Show(this);
             */
         }
+
+        private void toolStripMenuItem_getFile_Click(object sender, EventArgs e)
+        {
+            GetFileDialog dlg = new GetFileDialog();
+            dlg.FormClosed += (s1, e1) =>
+            {
+                ClientInfo.Config.Set(
+"GetFileDialog",
+"ui_state",
+dlg.UiState);
+                var state = FormProperty.GetProperty(dlg);
+                ClientInfo.Config.Set("GetFileDialog", "state", state);
+
+            };
+            dlg.StartPosition = FormStartPosition.CenterParent;
+
+            dlg.UiState = ClientInfo.Config.Get(
+                "GetFileDialog",
+                "ui_state",
+                "");
+            dlg.Show(this);
+            {
+                var state = ClientInfo.Config.Get("GetFileDialog", "state", "");
+                if (string.IsNullOrEmpty(state) == false)
+                {
+                    FormProperty.SetProperty(state, dlg);
+                }
+            }
+        }
     }
 }

@@ -60,6 +60,7 @@
             this.columnHeader_toShelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_toLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_transferDirection = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.button_getFile = new System.Windows.Forms.Button();
             this.panel_query.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -341,11 +342,22 @@
             this.columnHeader_transferDirection.Text = "典藏移交方向";
             this.columnHeader_transferDirection.Width = 180;
             // 
+            // button_getFile
+            // 
+            this.button_getFile.Location = new System.Drawing.Point(732, 174);
+            this.button_getFile.Name = "button_getFile";
+            this.button_getFile.Size = new System.Drawing.Size(164, 41);
+            this.button_getFile.TabIndex = 4;
+            this.button_getFile.Text = "获取文件 ...";
+            this.button_getFile.UseVisualStyleBackColor = true;
+            this.button_getFile.Click += new System.EventHandler(this.button_getFile_Click);
+            // 
             // ShelfSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(908, 559);
+            this.Controls.Add(this.button_getFile);
             this.Controls.Add(this.button_stop);
             this.Controls.Add(this.button_search);
             this.Controls.Add(this.listView_records);
@@ -397,5 +409,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader_actionInfo;
         private System.Windows.Forms.ColumnHeader columnHeader_name;
         private System.Windows.Forms.ColumnHeader columnHeader_bookTitle;
+        private System.Windows.Forms.Button button_getFile;
     }
 }

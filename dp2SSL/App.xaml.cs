@@ -178,6 +178,24 @@ namespace dp2SSL
             try
             {
                 WpfClientInfo.Initial("dp2SSL");
+
+                // 2021/8/21
+                // 把错误日志同时也发送给 dp2mserver
+                WpfClientInfo.WriteLogEvent += (o1, e1) => {
+                    try
+                    {
+                        if (string.IsNullOrEmpty(App.messageServerUrl) == false
+                        && e1 != null
+                        && e1.Level == "error")
+                        {
+                            PageShelf.TrySetMessage(null, "*** ERROR *** " + e1.Message);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        WpfClientInfo.WriteLogInternal("error", $"WriteLogEvent 内发生异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                };
             }
             catch (Exception ex)
             {
@@ -568,7 +586,7 @@ namespace dp2SSL
                     TinyServer.CloseConnection();
                     var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
                     if (result.Value == -1)
-                        WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+                        WpfClientInfo.WriteLogInternal("error", $"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
                     else
                     {
                         /*
@@ -924,6 +942,12 @@ namespace dp2SSL
             // 保存软时钟
             ShelfData.SaveSoftClock();
 
+            // 2021/8/21
+            {
+                var path = Path.Combine(WpfClientInfo.UserDir, "tagLines.json");
+                File.WriteAllText(path, ShelfData.BuildTagLineJsonString());
+            }
+
             WaitAllTaskFinish();
             WpfClientInfo.Finish(GrantAccess);
             WpfClientInfo.WriteDebugLog("End WpfClientInfo.Finish()");
@@ -969,6 +993,12 @@ namespace dp2SSL
 
             // 保存软时钟
             ShelfData.SaveSoftClock();
+
+            // 2021/8/21
+            {
+                var path = Path.Combine(WpfClientInfo.UserDir, "tagLines.json");
+                File.WriteAllText(path, ShelfData.BuildTagLineJsonString());
+            }
 
             try
             {

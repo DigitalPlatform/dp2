@@ -33,7 +33,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>37</ApplicationRevision>
+    <ApplicationRevision>38</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -216,6 +216,12 @@
       <DependentUpon>ChatForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Message\ConnectionPool.cs" />
+    <Compile Include="Message\GetFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Message\GetFileDialog.Designer.cs">
+      <DependentUpon>GetFileDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Message\MessageAccountForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -246,6 +252,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Message\ChatForm.resx">
       <DependentUpon>ChatForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Message\GetFileDialog.resx">
+      <DependentUpon>GetFileDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Message\MessageAccountForm.resx">
       <DependentUpon>MessageAccountForm.cs</DependentUpon>

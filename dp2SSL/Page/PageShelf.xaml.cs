@@ -2387,29 +2387,29 @@ namespace dp2SSL
 
                         // TODO: 填充 RFID 图书标签信息
                         var initial_result = await ShelfData.newVersion_InitialShelfEntitiesAsync(
-                        new List<DoorItem> { door },
-                        silently,
+                            new List<DoorItem> { door },
+                            silently,
                         /*
                         (s) =>
                         {
                             DisplayMessage(progress, s, "green");
                         },
                         */
-                        (double min, double max, double value, string text) =>
-                        {
-                            if (min != -1 || max != -1 || value != -1)
-                                App.Invoke(new Action(() =>
-                                {
-                                    if (min != -1)
-                                        progress.ProgressBar.Minimum = min;
-                                    if (max != -1)
-                                        progress.ProgressBar.Maximum = max;
-                                    if (value != -1)
-                                        progress.ProgressBar.Value = value;
-                                }));
-                            if (text != null)
-                                DisplayMessage(progress, text);
-                        },
+                            (double min, double max, double value, string text) =>
+                            {
+                                if (min != -1 || max != -1 || value != -1)
+                                    App.Invoke(new Action(() =>
+                                    {
+                                        if (min != -1)
+                                            progress.ProgressBar.Minimum = min;
+                                        if (max != -1)
+                                            progress.ProgressBar.Maximum = max;
+                                        if (value != -1)
+                                            progress.ProgressBar.Value = value;
+                                    }));
+                                if (text != null)
+                                    DisplayMessage(progress, text);
+                            },
                         () =>
                         {
                             return _initialCancelled;
@@ -2719,7 +2719,17 @@ namespace dp2SSL
                 {
                     // *** 断网情况
                     // 将尚未同步的信息写入本地历史数据库
-                    await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+                    if (isTagsSame() == false
+                        || DateTime.Now - ShelfData.GetWriteTime() > ShelfData.ForceWriteLength)
+                    {
+                        await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+                        ShelfData.SetWriteTime(DateTime.Now);
+                    }
+                    else
+                    {
+                        var lines = ShelfData.BuildCurrentTagLines();
+                        WpfClientInfo.WriteInfoLog($"因为重启 dp2ssl 前后标签没有发生变化，所以下列 {lines.Count} 个标签没有在本地动作库中加入盘点动作:\r\n{StringUtil.MakePathList(lines, "\r\n")}");
+                    }
 
                     // 2021/5/12
                     // 断网状态下特殊显示
@@ -2782,9 +2792,19 @@ namespace dp2SSL
                     DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");
                     await ShelfData.SaveActionsToDatabaseAsync(actions);
                 */
-                    DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");
-                    // 2021/5/17
-                    await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+                    if (isTagsSame() == false
+                        || DateTime.Now - ShelfData.GetWriteTime() > ShelfData.ForceWriteLength)
+                    {
+                        DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");
+                        // 2021/5/17
+                        await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+                        ShelfData.SetWriteTime(DateTime.Now);
+                    }
+                    else
+                    {
+                        var lines = ShelfData.BuildCurrentTagLines();
+                        WpfClientInfo.WriteInfoLog($"因为重启 dp2ssl 前后标签没有发生变化，所以下列 {lines.Count} 个标签没有在本地动作库中加入盘点动作:\r\n{StringUtil.MakePathList(lines, "\r\n")}");
+                    }
                 }
 
                 // 启动重试任务。此任务长期在后台运行
@@ -2909,6 +2929,39 @@ namespace dp2SSL
             }
         }
 
+        // 和上次的 tags 对比，看看是否有变化
+        static bool isTagsSame()
+        {
+            try
+            {
+                var path = Path.Combine(WpfClientInfo.UserDir, "tagLines.json");
+                var text = "";
+                if (File.Exists(path))
+                {
+                    text = File.ReadAllText(path);
+                    File.Delete(path);
+                }
+                var last_lines = ShelfData.ParseTagLineString(text);
+
+                var current_lines = ShelfData.BuildCurrentTagLines();
+                if (current_lines.Count != last_lines.Count)
+                    return false;
+                current_lines.Sort();
+                last_lines.Sort();
+                for (int i = 0; i < current_lines.Count; i++)
+                {
+                    if (current_lines[i] != last_lines[i])
+                        return false;
+                }
+
+                return true;
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"isTagsSame() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                return false;
+            }
+        }
 #if NO
         // 故意选择用到的天线编号加一的天线(用 GetTagInfo() 实现)
         string SelectAntenna()
