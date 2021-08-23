@@ -1229,7 +1229,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 违约金
                     // 元素<amerce>
-                    // 属性dbname/overdueStyle
+                    // 属性 @dbname @overdueStyle
                     node = dom.DocumentElement.SelectSingleNode("amerce") as XmlElement;
                     if (node != null)
                     {

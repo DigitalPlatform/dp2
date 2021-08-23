@@ -654,6 +654,82 @@ TaskScheduler.Default);
             return new NormalResult { Value = count };
         }
 
+        // 2021/8/23
+        // 根据 return 动作修复相关的 borrow 动作的 LinkID
+        public static async Task<NormalResult> FixLinkIdAsync()
+        {
+            WpfClientInfo.WriteInfoLog("FixLinkIdAsync() 开始");
+            try
+            {
+                int count = 0;
+                using (var releaser = await _databaseLimit.EnterAsync())
+                {
+                    using (var context = new RequestContext())
+                    {
+                        context.Database.EnsureCreated();
+
+                        var returnRequests = context.Requests.Where(o => o.Action == "return").ToList();
+                        foreach (var return_request in returnRequests)
+                        {
+                            string borrow_id = "";
+                            if (string.IsNullOrEmpty(return_request.ActionString) == false)
+                            {
+                                try
+                                {
+                                    var return_info = JsonConvert.DeserializeObject<ReturnInfo>(return_request.ActionString);
+                                    borrow_id = return_info.BorrowID;
+                                    if (string.IsNullOrEmpty(borrow_id))
+                                        continue;
+                                }
+                                catch (Exception ex)
+                                {
+                                    WpfClientInfo.WriteErrorLog($"解析动作记录 '{return_request.ID}' return_info 字符串 '{return_request.ActionString}' 时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                                    continue;
+                                }
+                            }
+
+                            // 如果是还书动作，需要更新它之前的全部同 PII 的、同 BorrowID 的借书动作的 LinkID 字段
+                            if (return_request.Action == "return")
+                            {
+                                var borrowRequests = context.Requests.
+                                    Where(o => o.ID < return_request.ID && o.PII == return_request.PII && o.Action == "borrow" && o.LinkID == null)
+                                    .ToList();
+                                foreach (var borrow_request in borrowRequests)
+                                {
+                                    // 再用 ActionString 严格筛选
+                                    if (string.IsNullOrEmpty(borrow_request.ActionString))
+                                        continue;
+                                    var borrow_info = JsonConvert.DeserializeObject<BorrowInfo>(borrow_request.ActionString);
+                                    if (borrow_info.BorrowID != borrow_id)
+                                        continue;
+
+                                    borrow_request.LinkID = return_request.ID.ToString();
+                                    context.Requests.Update(borrow_request);
+                                    await context.SaveChangesAsync();
+                                    WpfClientInfo.WriteInfoLog($"为动作记录 {borrow_request.ID} 的 LinkID 字段添加内容 '{return_request.ID}'。发起的 return 动作为 {return_request.ID}，borrowID 为 '{borrow_id}'");
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return new NormalResult { Value = count };
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"FixLinkIdAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"FixLinkIdAsync() 出现异常: {ex.Message}"
+                };
+            }
+            finally
+            {
+                WpfClientInfo.WriteInfoLog("FixLinkIdAsync() 结束");
+            }
+        }
 
         // static object _syncRoot_database = new object();
 

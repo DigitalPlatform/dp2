@@ -278,3 +278,4 @@ ItemCanReturn()
 //		3.81 (2021/8/17) 先前版本的 Return() API 当册有超期情况时不会在日志记录中写入 borrowID。这一 bug 已经修正
 //						先前版本 GetReaderInfo() API 在处理 formats 为 xml:noborrowhistory 时有 bug，已经修正
 //		3.82 (2021/8/19) library.xml 中增加 circulation/@patronMaskDefinition 定义读者记录马赛克的方法。该属性的缺省值相当于 "name:1|0,tel:3|3,*:2|0"
+//						(重申说明)library.xml 中 circulation/@borrowCheckOverdue 属性定义 Borrow() API 借书的时候，是否检查读者记录中未还超期册。这个属性缺省值为 "true"，表示要“检查”，意思就是说如果读者记录中有未还超期册，那么不允许借其它图书。注：如果读者记录中有未了结的交费事项无论如何是不允许外借的，需要先处理这些交费

@@ -45,6 +45,7 @@
 
                     <MenuItem x:Name="pauseShelfSync" Header="* 暂停书柜同步" HorizontalAlignment="Left" Width="Auto" Click="pauseShelfSync_Click"/>
                     <MenuItem x:Name="clearDontsyncState" Header="* 清除动作记录的 dontsync 状态" HorizontalAlignment="Left" Width="Auto" Click="clearDontsyncState_Click"/>
+                    <MenuItem x:Name="fixLinkID" Header="* 修复已还 borrow 动作的 LinkID" HorizontalAlignment="Left" Width="Auto" Click="fixLinkID_Click"/>
 
                 </MenuItem>
                 <MenuItem Header="_维护">

@@ -2243,6 +2243,8 @@ text.ToString());
 
                 // 变为 xxxxxxxx-xxxxxxxx 形态继续处理
                 strText = strText + "-" + strText;
+                nRet = strText.IndexOf("-");
+                Debug.Assert(nRet != -1);
             }
 
             string strStart = strText.Substring(0, nRet).Trim();

@@ -1383,5 +1383,19 @@ MessageBoxOptions.DefaultDesktopOnly);
                 $"处理完成。修改记录 {count} 条",
                 "green");
         }
+
+        // 修复已还 borrow 动作的 LinkID
+        private async void fixLinkID_Click(object sender, RoutedEventArgs e)
+        {
+            var result = await ShelfData.FixLinkIdAsync();
+            if (result.Value == -1)
+                App.ErrorBox("修复已还 borrow 动作记录的 LinkID",
+    $"处理出错: {result.ErrorInfo}",
+    "red");
+            else
+                App.ErrorBox("修复已还 borrow 动作记录的 LinkID",
+                    $"处理完成。修改记录 {result.Value} 条",
+                    "green");
+        }
     }
 }
