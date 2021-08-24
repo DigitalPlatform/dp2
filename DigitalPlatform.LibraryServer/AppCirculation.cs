@@ -18039,9 +18039,21 @@ start_time_1,
                 DomUtil.SetAttr(nodeBorrow, "denyPeriod",
                    strThisDenyPeriod);
 
-            string borrowID = Guid.NewGuid().ToString();
-            // 2020/8/26
-            DomUtil.SetAttr(nodeBorrow, "borrowID", borrowID);
+            string borrowID = "";
+            if (bRenew == false)
+            {
+                borrowID = Guid.NewGuid().ToString();
+                // 2020/8/26
+                DomUtil.SetAttr(nodeBorrow, "borrowID", borrowID);
+            }
+            else
+            {
+                // 2021/8/24
+                // 不修改前一次借阅时候的 borrowID
+                borrowID = DomUtil.GetElementText(itemdom.DocumentElement, "borrowID");
+                if (string.IsNullOrEmpty(borrowID))
+                    borrowID = Guid.NewGuid().ToString();
+            }
 
             // 2014/11/14
             // returningDate

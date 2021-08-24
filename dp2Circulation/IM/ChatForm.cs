@@ -12,15 +12,15 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using System.Collections;
+
 using Microsoft.Win32;
 
 using Newtonsoft.Json;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -822,11 +822,12 @@ namespace dp2Circulation
                         List<MessageRecord> messages = new List<MessageRecord>();
                         MessageResult result = await Program.MainForm.MessageHub.GetMessageAsync(
                             request,
-                            (long totalCount,
-    long start,
-    IList<MessageRecord> records,
-    string errorInfo,
-    string errorCode) =>
+                            (StringBuilder c,
+                            long totalCount,
+                            long start,
+                            IList<MessageRecord> records,
+                            string errorInfo,
+                            string errorCode) =>
                             {
                                 if (records != null)
                                     messages.AddRange(records);
@@ -841,6 +842,7 @@ namespace dp2Circulation
                         }
 
                         StringBuilder text = new StringBuilder();
+                        StringBuilder cache = new StringBuilder();  // 用于拼接不完整消息文字
                         int timeline_count = 0;
                         foreach (var record in messages)
                         {
@@ -850,11 +852,29 @@ namespace dp2Circulation
                                 timeline_count++;
                             }
 
-                            // creator 要替换为用户名
-                            text.Append(BuildMessageLine(
+                            if (string.IsNullOrEmpty(record.id)
+&& cache.Length < MAX_MESSAGE_DATA_LENGTH)
+                            {
+                                cache.Append(record.data);
+                                continue;
+                            }
+                            else
+                            {
+                                if (cache.Length > 0)
+                                {
+                                    cache.Append(record.data);
+                                    string data = cache.ToString();
+                                    cache.Clear();
+
+                                    record.data = data;
+                                }
+
+                                // creator 要替换为用户名
+                                text.Append(BuildMessageLine(
                                 IsMe(record) ? "right" : "left",
                                 string.IsNullOrEmpty(record.userName) ? GetShortUserName(record.creator) : record.userName,
                                 record.data));
+                            }
                         }
 
                         // 更新起始日期
@@ -914,7 +934,9 @@ namespace dp2Circulation
         // return:
         //      true    这条记录已经被缓存，暂时不加入显示
         //      false   函数返回后继续处理，加入显示
-        bool ProcessEdge(MessageRecord record)
+        bool ProcessEdge(
+            StringBuilder cache,
+            MessageRecord record)
         {
             if (_edgeRecord != null)
             {
@@ -939,13 +961,18 @@ namespace dp2Circulation
                 _edgeRecords.Clear();
 
                 // results 加入显示
-                FillMessage(results);
+                FillMessage(cache, results);
             }
 
             return false;
         }
 
-        void FillMessage(IList<MessageRecord> records)
+        // 拼接后 data 的最大长度
+        const int MAX_MESSAGE_DATA_LENGTH = 1024 * 1024;
+
+        void FillMessage(
+            StringBuilder cache,
+            IList<MessageRecord> records)
         {
             if (records != null)
             {
@@ -953,11 +980,29 @@ namespace dp2Circulation
                 {
                     AddTimeLine(record);
 
-                    // creator 要替换为用户名
-                    this.AddMessageLine(
+                    if (string.IsNullOrEmpty(record.id)
+    && cache.Length < MAX_MESSAGE_DATA_LENGTH)
+                    {
+                        cache.Append(record.data);
+                        continue;
+                    }
+                    else
+                    {
+                        if (cache.Length > 0)
+                        {
+                            cache.Append(record.data);
+                            string data = cache.ToString();
+                            cache.Clear();
+
+                            record.data = data;
+                        }
+
+                        // creator 要替换为用户名
+                        this.AddMessageLine(
                         IsMe(record) ? "right" : "left",
                         string.IsNullOrEmpty(record.userName) ? GetShortUserName(record.creator) : record.userName,
                         record.data);
+                    }
 
                     _currentGroupInfo.LastMessage = record;
                 }
@@ -965,16 +1010,18 @@ namespace dp2Circulation
         }
 
         // 回调函数，用消息填充浏览器控件
-        void FillMessage(long totalCount,
-    long start,
-    IList<MessageRecord> records,
-    string errorInfo,
-    string errorCode)
+        void FillMessage(
+            StringBuilder cache,
+            long totalCount,
+            long start,
+            IList<MessageRecord> records,
+            string errorInfo,
+            string errorCode)
         {
             if (this.webBrowser1.InvokeRequired)
             {
-                this.webBrowser1.Invoke(new Action<long, long, IList<MessageRecord>, string, string>(FillMessage),
-                    totalCount, start, records, errorInfo, errorCode);
+                this.webBrowser1.Invoke(new Action<StringBuilder, long, long, IList<MessageRecord>, string, string>(FillMessage),
+                    cache, totalCount, start, records, errorInfo, errorCode);
                 return;
             }
 
@@ -982,7 +1029,7 @@ namespace dp2Circulation
             {
                 foreach (MessageRecord record in records)
                 {
-                    if (ProcessEdge(record))
+                    if (ProcessEdge(cache, record))
                         continue;
 
 
@@ -995,7 +1042,7 @@ namespace dp2Circulation
                         record.data);
 #endif
                     List<MessageRecord> temp = new List<MessageRecord>() { record };
-                    FillMessage(temp);
+                    FillMessage(cache, temp);
 
                     _currentGroupInfo.LastMessage = record;
                 }

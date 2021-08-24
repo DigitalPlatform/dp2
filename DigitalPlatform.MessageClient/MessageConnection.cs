@@ -1020,10 +1020,11 @@ errorInfo);
         }
 
 
-        static bool IsComplete(long requestStart,
-    long requestCount,
-    long totalCount,
-    long recordsCount)
+        static bool IsComplete(
+            long requestStart,
+            long requestCount,
+            long totalCount,
+            long recordsCount)
         {
             long tail = 0;
             if (requestCount != -1)
@@ -1036,7 +1037,9 @@ errorInfo);
             return false;
         }
 
-        public delegate void Delegate_outputMessage(long totalCount,
+        public delegate void Delegate_outputMessage(
+            StringBuilder cache,    // 2021/8/24
+            long totalCount,
             long start,
             IList<MessageRecord> records,
             string errorInfo,
@@ -1057,6 +1060,7 @@ errorInfo);
                         request.TaskID = Guid.NewGuid().ToString();
 
                     long recieved = 0;
+                    StringBuilder cache = new StringBuilder();
 
                     using (WaitEvents wait_events = new WaitEvents())    // 表示中途数据到来
                     {
@@ -1085,7 +1089,8 @@ errorInfo);
                                     return;
                                 }
 
-                                proc(resultCount,
+                                proc(cache,
+                                    resultCount,
                                     start,
                                     records,
                                     errorInfo,

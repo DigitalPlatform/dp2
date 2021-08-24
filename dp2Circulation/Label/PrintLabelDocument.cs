@@ -328,7 +328,7 @@ namespace dp2Circulation
                 if (strLine == null)
                     return 1;
 
-                if (strLine == "***")
+                if (strLine?.Trim() == "***")   // 2021/8/24 增加的 ?.Trim()
                 {
                     if (_sr.EndOfStream == true)
                         return 1;

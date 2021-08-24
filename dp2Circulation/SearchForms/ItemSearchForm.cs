@@ -2998,7 +2998,7 @@ out strError);
 
                 if (this.DbType == "item")
                 {
-                    subMenuItem = new MenuItem("到书目转储文件 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
+                    subMenuItem = new MenuItem("到书目转储(.bdf)文件 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
                     subMenuItem.Click += new System.EventHandler(this.menu_exportBiblioDumpFile_Click);
                     if (nPathItemCount == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
@@ -10244,6 +10244,8 @@ dlg.UiState);
             stop.BeginLoop();
 
             LibraryChannel channel = this.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
             try
             {
                 using (XmlTextWriter w = new XmlTextWriter(
@@ -10264,6 +10266,9 @@ dlg.UiState);
                     if (nRet == -1)
                         goto ERROR1;
 
+                    // 2021/8/24
+                    stop?.SetProgressRange(0, biblioRecPathList.Count);
+                    int i = 0;
                     foreach (string strBiblioRecPath in biblioRecPathList)
                     {
                         Application.DoEvents();
@@ -10278,7 +10283,7 @@ dlg.UiState);
                         byte[] baTimestamp = null;
 
                         stop.SetMessage("正在获取书目记录 " + strBiblioRecPath);
-
+                    REDO_GETBIBLIOINFO:
                         long lRet = channel.GetBiblioInfos(
                             stop,
                             strBiblioRecPath,
@@ -10288,9 +10293,25 @@ dlg.UiState);
                             out baTimestamp,
                             out strError);
                         if (lRet == 0)
-                            goto ERROR1;
+                        {
+                            // goto ERROR1;
+
+                            // TODO: 是否允许没有书目记录的册记录导出？
+                            MainForm.WriteErrorLog($"获得书目记录 '{strBiblioRecPath}' 时没有找到: {strError}");
+                            goto CONTINUE;
+                        }
+
                         if (lRet == -1)
-                            goto ERROR1;
+                        {
+                            // TODO: 有没有办法选择“跳过此条继续处理后面的记录”？
+                            DialogResult result = AutoCloseMessageBox.Show(this,
+strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+20 * 1000,
+"ItemSearchForm");
+                            if (result == DialogResult.Cancel)
+                                goto ERROR1;
+                            goto REDO_GETBIBLIOINFO;
+                        }
 
                         if (results == null || results.Length == 0)
                         {
@@ -10324,7 +10345,7 @@ dlg.UiState);
                         List<string> item_recpaths = (List<string>)groupTable[strBiblioRecPath];
                         foreach (string item_recpath in item_recpaths)
                         {
-
+                        REDO_GETRECORD:
                             string strItemXml = "";
                             byte[] baItemTimestamp = null;
                             // 获得一条记录
@@ -10339,7 +10360,24 @@ dlg.UiState);
             out baItemTimestamp,
             out strError);
                             if (nRet == -1)
-                                goto ERROR1;
+                            {
+                                DialogResult result = AutoCloseMessageBox.Show(this,
+strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+20 * 1000,
+"ItemSearchForm");
+                                if (result == DialogResult.Cancel)
+                                    goto ERROR1;
+
+                                goto REDO_GETRECORD;
+                            }
+
+                            // 2021/8/24
+                            // TODO: 写入错误日志
+                            if (nRet == 0 || string.IsNullOrEmpty(strItemXml))
+                            {
+                                MainForm.WriteErrorLog($"获取册记录 '{item_recpath} 时没有找到: {strError}'");
+                                goto CONTINUE;
+                            }
 
                             XmlDocument item_dom = new XmlDocument();
                             item_dom.LoadXml(strItemXml);
@@ -10355,6 +10393,10 @@ dlg.UiState);
 
                         // 收尾 dprms:record 元素
                         w.WriteEndElement();
+
+                    CONTINUE:
+                        i++;
+                        stop?.SetProgressValue(i);
                     }
 
                     w.WriteEndElement();
@@ -10363,6 +10405,7 @@ dlg.UiState);
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 stop.EndLoop();

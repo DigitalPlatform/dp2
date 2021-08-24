@@ -9160,6 +9160,7 @@ message,
                             goto ERROR1;
                         }
 
+                        REDO_OUTPUTENTITIES:
                         nRet = 0;
                         if (string.IsNullOrEmpty(prop.OrderDbName) == false
                             && dlg.IncludeOrders)
@@ -9223,14 +9224,20 @@ message,
                             if (stop != null && stop.State != 0)
                                 goto ERROR1;
 
+                            // 注: OutputEntities() 函数内部已经做了重试处理
+                            /*
                             DialogResult temp_result = MessageBox.Show(this,
-        strError + "\r\n\r\n是否继续处理?",
+        strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的下级对象，但继续后面的处理; Cancel: 放弃全部处理)",
         "BiblioSearchForm",
-        MessageBoxButtons.OKCancel,
+        MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                            if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                                goto REDO_OUTPUTENTITIES;
                             if (temp_result == DialogResult.Cancel)
                                 goto ERROR1;
+                            */
+                            goto ERROR1;
                         }
                     }
 
