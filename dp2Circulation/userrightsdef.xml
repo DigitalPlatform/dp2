@@ -405,4 +405,8 @@
     <comment lang='zh'>前端允许进行模拟借还操作</comment>
     <comment lang='en'>Client Simulate Borrow</comment>
   </property>
+  <property name='client_multiplecharging'>
+    <comment lang='zh'>前端允许进行复选借还操作</comment>
+    <comment lang='en'>Client Multiple Charging</comment>
+  </property>
 </root>

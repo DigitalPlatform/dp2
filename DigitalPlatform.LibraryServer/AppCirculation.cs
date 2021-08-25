@@ -1546,16 +1546,24 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     XmlDocument domOperLog = new XmlDocument();
-                    domOperLog.LoadXml("<root />");
-                    DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "libraryCode",
-                        strLibraryCode);    // 读者所在的馆代码
-                    DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "operation",
-                        "borrow");
-                    DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "action",
-                        bRenew == true ? "renew" : "borrow");
+                    {
+                        domOperLog.LoadXml("<root />");
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "libraryCode",
+                            strLibraryCode);    // 读者所在的馆代码
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "operation",
+                            "borrow");
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "action",
+                            bRenew == true ? "renew" : "borrow");
+
+                        // 2021/8/25
+                        // 前端给出的注释
+                        var comment = StringUtil.GetParameterByPrefix(strStyle, "comment");
+                        if (string.IsNullOrEmpty(comment) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "clientComment", comment);
+                    }
 
                     string strOperTime = this.Clock.GetClock();
                     // 如果有 operTime 子参数，直接用它作为操作时间
@@ -7241,12 +7249,20 @@ start_time_1,
                     }
 
                     XmlDocument domOperLog = new XmlDocument();
-                    domOperLog.LoadXml("<root />");
-                    DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "libraryCode",
-                        strLibraryCode);    // 读者所在的馆代码
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "operation", "return");
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "action", strAction);
+                    {
+                        domOperLog.LoadXml("<root />");
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "libraryCode",
+                            strLibraryCode);    // 读者所在的馆代码
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "operation", "return");
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "action", strAction);
+
+                        // 2021/8/25
+                        // 前端给出的注释
+                        var comment = StringUtil.GetParameterByPrefix(strStyle, "comment");
+                        if (string.IsNullOrEmpty(comment) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "clientComment", comment);
+                    }
 
                     // 从读者信息中, 找到读者类型
                     string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,

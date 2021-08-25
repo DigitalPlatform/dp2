@@ -90,9 +90,12 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripMenuItem_inventoryFromFile = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_openEasForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_testSync = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_multipleItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_multiReturn = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_multiRenew = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_selectLibraryCode = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_selectTargetLocation = new System.Windows.Forms.ToolStripButton();
-            this.ToolStripMenuItem_testSync = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -299,7 +302,7 @@
             // 
             this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_main.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(5);
             this.splitContainer_main.Name = "splitContainer_main";
             // 
             // splitContainer_main.Panel1
@@ -334,7 +337,7 @@
             // 
             this.webBrowser_reader.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_reader.Location = new System.Drawing.Point(5, 5);
-            this.webBrowser_reader.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.webBrowser_reader.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_reader.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser_reader.Name = "webBrowser_reader";
             this.webBrowser_reader.Size = new System.Drawing.Size(584, 530);
@@ -378,7 +381,7 @@
             this.tableLayoutPanel_right.Controls.Add(this.toolStrip_main, 0, 2);
             this.tableLayoutPanel_right.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_right.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_right.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tableLayoutPanel_right.Margin = new System.Windows.Forms.Padding(5);
             this.tableLayoutPanel_right.Name = "tableLayoutPanel_right";
             this.tableLayoutPanel_right.RowCount = 4;
             this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -399,7 +402,7 @@
             this.panel_input.Controls.Add(this.pictureBox_action);
             this.panel_input.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_input.Location = new System.Drawing.Point(5, 407);
-            this.panel_input.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.panel_input.Margin = new System.Windows.Forms.Padding(5);
             this.panel_input.Name = "panel_input";
             this.panel_input.Size = new System.Drawing.Size(474, 143);
             this.panel_input.TabIndex = 1;
@@ -410,7 +413,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.colorSummaryControl1.ColorList = "";
             this.colorSummaryControl1.Location = new System.Drawing.Point(0, 121);
-            this.colorSummaryControl1.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.colorSummaryControl1.Margin = new System.Windows.Forms.Padding(7);
             this.colorSummaryControl1.Name = "colorSummaryControl1";
             this.colorSummaryControl1.Size = new System.Drawing.Size(474, 17);
             this.colorSummaryControl1.TabIndex = 5;
@@ -424,7 +427,7 @@
             this.textBox_input.Font = new System.Drawing.Font("宋体", 22F);
             this.textBox_input.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_input.Location = new System.Drawing.Point(5, 44);
-            this.textBox_input.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_input.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_input.Name = "textBox_input";
             this.textBox_input.Size = new System.Drawing.Size(326, 66);
             this.textBox_input.TabIndex = 1;
@@ -475,7 +478,7 @@
             this.pictureBox_action.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox_action.ContextMenuStrip = this.contextMenuStrip_selectFunc;
             this.pictureBox_action.Location = new System.Drawing.Point(350, 0);
-            this.pictureBox_action.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.pictureBox_action.Margin = new System.Windows.Forms.Padding(5);
             this.pictureBox_action.Name = "pictureBox_action";
             this.pictureBox_action.Size = new System.Drawing.Size(125, 117);
             this.pictureBox_action.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -508,7 +511,7 @@
             this.dpTable_tasks.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.dpTable_tasks.LineDistance = 10;
             this.dpTable_tasks.Location = new System.Drawing.Point(5, 5);
-            this.dpTable_tasks.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.dpTable_tasks.Margin = new System.Windows.Forms.Padding(5);
             this.dpTable_tasks.MaxTextHeight = 200;
             this.dpTable_tasks.Name = "dpTable_tasks";
             this.dpTable_tasks.Padding = new System.Windows.Forms.Padding(15, 14, 15, 14);
@@ -608,12 +611,14 @@
             this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem_inventoryFromFile,
             this.ToolStripMenuItem_openEasForm,
-            this.ToolStripMenuItem_testSync});
+            this.ToolStripMenuItem_testSync,
+            this.ToolStripMenuItem_multipleItem});
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
             this.toolStripDropDownButton1.Size = new System.Drawing.Size(48, 29);
             this.toolStripDropDownButton1.Text = "...";
+            this.toolStripDropDownButton1.DropDownOpening += new System.EventHandler(this.toolStripDropDownButton1_DropDownOpening);
             // 
             // toolStripMenuItem_inventoryFromFile
             // 
@@ -628,6 +633,36 @@
             this.ToolStripMenuItem_openEasForm.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_openEasForm.Text = "打开 EAS 窗";
             this.ToolStripMenuItem_openEasForm.Click += new System.EventHandler(this.ToolStripMenuItem_openEasForm_Click);
+            // 
+            // ToolStripMenuItem_testSync
+            // 
+            this.ToolStripMenuItem_testSync.CheckOnClick = true;
+            this.ToolStripMenuItem_testSync.Name = "ToolStripMenuItem_testSync";
+            this.ToolStripMenuItem_testSync.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_testSync.Text = "测试同步";
+            // 
+            // ToolStripMenuItem_multipleItem
+            // 
+            this.ToolStripMenuItem_multipleItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_multiReturn,
+            this.ToolStripMenuItem_multiRenew});
+            this.ToolStripMenuItem_multipleItem.Name = "ToolStripMenuItem_multipleItem";
+            this.ToolStripMenuItem_multipleItem.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_multipleItem.Text = "复选操作";
+            // 
+            // ToolStripMenuItem_multiReturn
+            // 
+            this.ToolStripMenuItem_multiReturn.Name = "ToolStripMenuItem_multiReturn";
+            this.ToolStripMenuItem_multiReturn.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_multiReturn.Text = "还书";
+            this.ToolStripMenuItem_multiReturn.Click += new System.EventHandler(this.ToolStripMenuItem_multiReturn_Click);
+            // 
+            // ToolStripMenuItem_multiRenew
+            // 
+            this.ToolStripMenuItem_multiRenew.Name = "ToolStripMenuItem_multiRenew";
+            this.ToolStripMenuItem_multiRenew.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_multiRenew.Text = "续借";
+            this.ToolStripMenuItem_multiRenew.Click += new System.EventHandler(this.ToolStripMenuItem_multiRenew_Click);
             // 
             // toolStripDropDownButton_selectLibraryCode
             // 
@@ -650,20 +685,13 @@
             this.toolStripButton_selectTargetLocation.Text = "选择调拨去向";
             this.toolStripButton_selectTargetLocation.Click += new System.EventHandler(this.toolStripButton_selectTransferTargetLocation_Click);
             // 
-            // ToolStripMenuItem_testSync
-            // 
-            this.ToolStripMenuItem_testSync.CheckOnClick = true;
-            this.ToolStripMenuItem_testSync.Name = "ToolStripMenuItem_testSync";
-            this.ToolStripMenuItem_testSync.Size = new System.Drawing.Size(315, 40);
-            this.ToolStripMenuItem_testSync.Text = "测试同步";
-            // 
             // QuickChargingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1093, 590);
             this.Controls.Add(this.splitContainer_main);
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "QuickChargingForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -749,5 +777,8 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_rfid;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_rfid_restartRfidCenter;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_testSync;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_multipleItem;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_multiReturn;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_multiRenew;
     }
 }

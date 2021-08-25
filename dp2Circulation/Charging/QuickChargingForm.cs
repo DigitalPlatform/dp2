@@ -221,9 +221,9 @@ namespace dp2Circulation
 
             // 2019/9/4 增加
             // 首次设置输入焦点
-            Task.Run(() =>
+            _ = Task.Run(async () =>
             {
-                Task.Delay(500).Wait();
+                await Task.Delay(500);
                 this.Invoke((Action)(() =>
                 {
                     this.textBox_input.Focus();
@@ -2271,7 +2271,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 }
             }
 
-            FREE:
+        FREE:
 
             if (WillLoadReaderInfo == true)
             {
@@ -2324,6 +2324,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 task.ItemBarcode = GetContent(strText);
                 task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "renew";
+                task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.VerifyRenew)
             {
@@ -4655,6 +4656,93 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             }
             _lastInputTime = time;
             return DateTimeUtil.Rfc1123DateTimeStringEx(time);
+        }
+
+        // 多册 还书
+        private void ToolStripMenuItem_multiReturn_Click(object sender, EventArgs e)
+        {
+            // 检查 dp2library 版本
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.84") < 0)
+            {
+                MessageBox.Show(this, "本功能需要 dp2library 版本在 3.84 以上");
+                return;
+            }
+
+            // 检查前端权限
+            if (StringUtil.IsInList("client_multiplecharging", this.CurrentRights) == false)
+            {
+                MessageBox.Show(this, "当前用户不具备 client_multiplecharging 权限，无法进行复选还书的操作");
+                return;
+            }
+
+            string list = this.webBrowser_reader.Document.InvokeScript("getSelectedBarcodes") as string;
+
+            DialogResult result = MessageBox.Show(this,
+$"确实要对下列册进行还书操作?\r\n\r\n{list}\r\n请仔细核对上述册条码号",
+"QuickChargingForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+                return;
+
+            // MessageBox.Show(this, $"result='{result}'");
+            var barcodes = StringUtil.SplitList(list);
+            MultipleOperate(barcodes, FuncState.Return);
+        }
+
+        // 多册 续借
+        private void ToolStripMenuItem_multiRenew_Click(object sender, EventArgs e)
+        {
+            // 检查 dp2library 版本
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.84") < 0)
+            {
+                MessageBox.Show(this, "本功能需要 dp2library 版本在 3.84 以上");
+                return;
+            }
+
+            // 检查前端权限
+            if (StringUtil.IsInList("client_multiplecharging", this.CurrentRights) == false)
+            {
+                MessageBox.Show(this, "当前用户不具备 client_multiplecharging 权限，无法进行复选续借的操作");
+                return;
+            }
+
+            string list = this.webBrowser_reader.Document.InvokeScript("getSelectedBarcodes") as string;
+
+            DialogResult result = MessageBox.Show(this,
+$"确实要对下列册进行 续借 操作?\r\n\r\n{list}\r\n请仔细核对上述册条码号",
+"QuickChargingForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+                return;
+
+            var barcodes = StringUtil.SplitList(list);
+            MultipleOperate(barcodes, FuncState.Renew);
+        }
+
+        void MultipleOperate(List<string> barcodes, FuncState func)
+        {
+            // 先切换到这个功能状态，避免用户困惑
+            if (this.FuncState != func)
+                this.FuncState = func;
+            foreach (var text in barcodes)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_input.Text = text;
+                }));
+
+                AsyncDoAction(func, text, "", "comment:当前册是从内务快捷出纳窗界面勾选的，图书实物未经扫入册条码验证");
+            }
+        }
+
+        private void toolStripDropDownButton1_DropDownOpening(object sender, EventArgs e)
+        {
+            string list = this.webBrowser_reader.Document.InvokeScript("getSelectedBarcodes") as string;
+            this.ToolStripMenuItem_multipleItem.Enabled = !string.IsNullOrEmpty(list);
         }
     }
 

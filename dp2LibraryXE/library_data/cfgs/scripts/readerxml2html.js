@@ -1,6 +1,16 @@
 ﻿/* last-modified: 2011-9-8 */
+/* 2021/8/25 */
 
-$(document).ready(function () { Tasks(); });
+$(document).ready(function () {
+ 	Tasks(); 
+	$(".sel").change(function() {
+		var color = "transparent";
+    		if (this.checked) {
+        		color = "#9999ff";
+    		}
+		$(this).parent().css({"background-color": color});
+	});
+});
 
 function Tasks() {
     MoveWarningText();
@@ -75,4 +85,17 @@ function DoHover() {
     catch (e) {
     }
 }
+
+function getSelectedBarcodes() {
+	var result = "";
+        $(".sel:checked").each(function (index) {
+		var barcode = $(this).data("barcode");
+		if (result)
+			result += ",";
+		result += barcode;
+        });
+	return result;
+}
+
+
 

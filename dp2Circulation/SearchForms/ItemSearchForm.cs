@@ -6126,16 +6126,20 @@ Program.MainForm.DefaultFont);
         {
             string strError = "";
 
-            // 2021/7/27
+            // 2021/8/25
+            // 是否强制删除册记录。强制的意思是即便册记录包含在借信息也会被删除
             var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
-            if (control == false
-                && StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.42") < 0)
+            if (/*control == false
+                && */StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.42") < 0)
             {
+                /*
                 //		dp2library 3.41 (2020/12/21) SetEntities() API 的 delete action 功能，style 可以包含使用 "force_clear_keys"，用于删除 XML 结构已经被破坏的册记录，作用是提醒 dp2kernel 层(根据记录 id)强制删除册记录的检索点 key
+                */
                 //		dp2library 3.42 (2020/12/23) 进一步巩固检索和删除册记录过程中遇到的 XML 部分被破坏(对象文件删除)场景下的功能完整性
                 strError = "本功能只能和 dp2library 3.42 及以上版本配套使用";
                 goto ERROR1;
             }
+
 
             DialogResult result = MessageBox.Show(this,
     "确实要从数据库中删除所选定的 " + this.listView_records.SelectedItems.Count.ToString() + " 个" + this.DbTypeCaption + "记录?\r\n\r\n(OK 删除；Cancel 取消)",
@@ -6164,6 +6168,8 @@ Program.MainForm.DefaultFont);
             stop.BeginLoop();
 
             LibraryChannel channel = this.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
 
             this.EnableControls(false);
             this.listView_records.Enabled = false;
@@ -6185,8 +6191,7 @@ Program.MainForm.DefaultFont);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null
-                        && stop.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -6221,6 +6226,10 @@ Program.MainForm.DefaultFont);
                         }
                     }
 
+                    // 2021/8/25
+                    if (control)
+                        entity.Style += ",force";
+
 #if NO
                     entity.RefID = "";
 
@@ -6228,13 +6237,13 @@ Program.MainForm.DefaultFont);
                         entity.RefID = BookItem.GenRefID();
 #endif
 
-                    stop.SetMessage("正在删除" + this.DbTypeCaption + "记录 " + info.RecPath);
+                    stop.SetMessage($"正在{(control ? "强制" : "")}删除{this.DbTypeCaption}记录 {info.RecPath}");
 
                     string strBiblioRecPath = "";
                     EntityInfo[] errorinfos = null;
 
                     long lRet = 0;
-
+                REDO_DELETE:
                     if (this.DbType == "item")
                     {
                         lRet = channel.SetEntities(
@@ -6277,16 +6286,34 @@ Program.MainForm.DefaultFont);
                         goto ERROR1;
                     }
 
+                    bool hasError = false;
                     if (lRet == -1)
-                        goto ERROR1;
-                    if (errorinfos != null)
+                        hasError = true;
+                    else if (errorinfos != null)
                     {
                         foreach (EntityInfo error in errorinfos)
                         {
                             if (error.ErrorCode != ErrorCodeValue.NoError)
+                            {
                                 strError += error.ErrorInfo;
-                            goto ERROR1;
+                                hasError = true;
+                            }
                         }
+                    }
+
+                    if (hasError)
+                    {
+                        if (stop != null && stop.State != 0)
+                            goto ERROR1;
+
+                        DialogResult dialog_result = AutoCloseMessageBox.Show(this,
+strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+20 * 1000,
+"ItemSearchForm");
+                        if (dialog_result == DialogResult.Cancel)
+                            goto ERROR1;
+
+                        goto REDO_DELETE;
                     }
 
                     stop.SetProgressValue(i);
@@ -6300,6 +6327,7 @@ Program.MainForm.DefaultFont);
                 this.EnableControls(true);
                 this.listView_records.Enabled = true;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 stop.EndLoop();
@@ -10303,6 +10331,9 @@ dlg.UiState);
 
                         if (lRet == -1)
                         {
+                            if (stop != null && stop.State != 0)
+                                goto ERROR1;
+
                             // TODO: 有没有办法选择“跳过此条继续处理后面的记录”？
                             DialogResult result = AutoCloseMessageBox.Show(this,
 strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
@@ -10361,6 +10392,9 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
             out strError);
                             if (nRet == -1)
                             {
+                                if (stop != null && stop.State != 0)
+                                    goto ERROR1;
+
                                 DialogResult result = AutoCloseMessageBox.Show(this,
 strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
 20 * 1000,

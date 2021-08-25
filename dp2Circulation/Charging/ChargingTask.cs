@@ -829,6 +829,10 @@ namespace dp2Circulation
             if (Program.MainForm.ChargingNeedReturnItemXml)
                 strStyle += ",item";
 
+            // 2021/8/25
+            if (string.IsNullOrEmpty(task.Parameters) == false)
+                strStyle += "," + task.Parameters;
+
             //if (this.Container.MainForm.TestMode == true)
             //    strStyle += ",testmode";
             times.Add(DateTime.Now);

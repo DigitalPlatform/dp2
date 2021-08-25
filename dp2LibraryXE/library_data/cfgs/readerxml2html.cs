@@ -26,6 +26,7 @@
 // 2017/5/22    	册信息显示增加了 卷册 列
 // 2020/9/17    使用读者照片的顺序改为先看有没有 "face" 用途的，如果没有再看 "photo" 用途的
 // 2020/9/27    显示在借册信息的行数最多限制 100，多出来的会被略去
+// 2021/8/23	在借册行左侧增加 checkbox
 
 using System;
 using System.Collections.Generic;
@@ -367,7 +368,7 @@ public class MyConverter : ReaderConverter
 
         if (nodes.Count > 0)
         {
-            strResult.Append( "<tr class='columntitle'><td>册条码号</td><td>摘要</td><td>卷册</td><td>价格</td><td>续借次</td><td>借阅日期</td><td>期限</td><td>操作者</td><td>应还日期</td><td>续借注</td></tr>");
+            strResult.Append( "<tr class='columntitle'><td></td><td>册条码号</td><td>摘要</td><td>卷册</td><td>价格</td><td>续借次</td><td>借阅日期</td><td>期限</td><td>操作者</td><td>应还日期</td><td>续借注</td></tr>");
 
             for (int i = 0; i < Math.Min(nodes.Count, 100); i++)
             {
@@ -384,7 +385,7 @@ public class MyConverter : ReaderConverter
                 string strPrice = DomUtil.GetAttr(node, "price");
                 string strTimeReturning = DomUtil.GetAttr(node, "timeReturning");
 
-		        string strVolume = DomUtil.GetAttr(node, "volume");
+		string strVolume = DomUtil.GetAttr(node, "volume");
 
 #if NO
                 string strOverDue = "";
@@ -467,6 +468,7 @@ public class MyConverter : ReaderConverter
                     strResult.Append( "<tr class='content overdue'>");
                 else
                     strResult.Append( "<tr class='content'>");
+                strResult.Append( "<td class='checkbox' nowrap><input class='sel' type='checkbox' data-barcode='"+strBarcode+"'></input></td>");
                 strResult.Append( "<td class='barcode' nowrap>" + strBarcodeLink + "</td>");
                 strResult.Append( "<td class='summary pending'><br/>BC:" + strBarcode + "|" + strConfirmItemRecPath 
                     + (string.IsNullOrEmpty(strBiblioRecPath) == true ? "" : "|" + strBiblioRecPath) + "</td>");
