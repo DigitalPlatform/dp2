@@ -3454,6 +3454,13 @@ Keys keyData)
         /// 移交
         /// </summary>
         Transfer = 13,  // 移交 2017/1/12
+
+        /// <summary>
+        /// 特殊借阅
+        /// </summary>
+        SpecialBorrow = 14, // 2021/8/26
+
+        SpecialRenew = 15,  // 2021/8/26
     }
 
     /*public*/

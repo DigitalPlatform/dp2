@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.29.*")]
-[assembly: AssemblyFileVersion("3.29.0.0")]
+[assembly: AssemblyVersion("3.31.*")]
+[assembly: AssemblyFileVersion("3.31.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -97,4 +97,6 @@ using System.Runtime.InteropServices;
 //                  改善断网以后重新联网，再切换群组时的确保重连 dp2mserver
 // 3.28 2021/8/18 日志窗增加智能筛选功能。可以用临时输入的 C# 脚本代码来筛选日志记录
 // 3.29 2021/8/25 实体查询窗上下文菜单批处理删除选择的册记录功能，增加了一个按住 Ctrl 键使用时是强制删除记录的新能力
-// 3.30 2021/8/25 快捷出纳窗增加复选还书和续借的功能。要求和 dp2library 3.84 以上配套使用，并且当前账户具有 client_multiplecharging 权限
+// 3.30 2021/8/25 快捷出纳窗增加复选还书和续借的功能。要求和 dp2library 3.84 以上配套使用，并且当前账户具有 client_multiplecharging 权限(注意这个权限仅对内务前端有限制作用)
+// 3.31 2021/8/26 快捷出纳窗增加特殊借阅功能。要求和 dp2library 3.85 以上配套使用，并且当前账户具有 specialcharging 权限
+//                  快捷出纳窗增加复选特殊续借功能。特殊的意思是即便当前读者有未还超期册，也允许续借。值得注意的是，如果要续借的册本来就在已经超期状态了，那么续借后反而就变得不超期了，等于把前一次借书的超期给抹了

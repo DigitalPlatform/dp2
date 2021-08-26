@@ -1489,6 +1489,7 @@ namespace DigitalPlatform.LibraryServer
                         bRenew,
                         strLibraryCode, // 读者记录所在读者库的馆代码
                         strAccessParameters,
+                        strStyle,
                         strOutputReaderRecPath,
                         ref readerdom,
                         strOutputItemRecPath,
@@ -1563,6 +1564,12 @@ namespace DigitalPlatform.LibraryServer
                         var comment = StringUtil.GetParameterByPrefix(strStyle, "comment");
                         if (string.IsNullOrEmpty(comment) == false)
                             DomUtil.SetElementText(domOperLog.DocumentElement, "clientComment", comment);
+
+                        // 2021/8/26
+                        // strStyle 中包含 ",special:xxx|xxx"
+                        var special = StringUtil.GetParameterByPrefix(strStyle, "special");
+                        if (string.IsNullOrEmpty(special) == false)
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "special", special);
                     }
 
                     string strOperTime = this.Clock.GetClock();
@@ -4802,6 +4809,7 @@ start_time_1,
             bool bRenew,
             string strLibraryCode,
             string strAccessParameters,
+            string strStyle,
             string reader_recpath,
 
             ref XmlDocument readerdom,
@@ -5175,20 +5183,42 @@ start_time_1,
                 return -1;
             }
 
-            // 检查是否已经有记载了的<overdue>字段
-            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
-            if (nodes.Count > 0)
+            // 2021/8/26
+            var special = StringUtil.GetParameterByPrefix(strStyle, "special");
+            if (string.IsNullOrEmpty(special) == false
+                && StringUtil.IsInList("specialcharging", account.RightsOrigin) == false)
             {
-                // text-level: 用户提示
-                strError = string.Format(this.GetString("该读者当前有s个已还违约记录尚未处理"), // "该读者当前有 {0} 个已还违约记录尚未处理，因此{1}操作被拒绝。请读者尽快办理违约后相关手续（如交纳违约金），然后方可进行{2}。"
-                    nodes.Count.ToString(),
-                    strOperName,
-                    strOperName);
-                // "该读者当前有 " + Convert.ToString(nodes.Count) + " 个已还违约记录尚未处理，因此" + strOperName + "操作被拒绝。请读者尽快办理违约后相关手续（如交纳违约金），然后方可进行" + strOperName + "。";
+                strError = "special:xxx|xxx 特性要求当前账户具有 specialcharging 权限";
                 return 0;
             }
 
-            if (this.BorrowCheckOverdue == true)
+            bool checkAmerce = true;
+            if (special != null && StringUtil.IsInList("dontCheckAmerce", special.Replace("|", ",")) == true)
+                checkAmerce = false;
+
+            if (checkAmerce == true)
+            {
+                // 检查是否已经有记载了的<overdue>字段(待交费信息)
+                XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
+                if (nodes.Count > 0)
+                {
+                    // text-level: 用户提示
+                    strError = string.Format(this.GetString("该读者当前有s个已还违约记录尚未处理"), // "该读者当前有 {0} 个已还违约记录尚未处理，因此{1}操作被拒绝。请读者尽快办理违约后相关手续（如交纳违约金），然后方可进行{2}。"
+                        nodes.Count.ToString(),
+                        strOperName,
+                        strOperName);
+                    // "该读者当前有 " + Convert.ToString(nodes.Count) + " 个已还违约记录尚未处理，因此" + strOperName + "操作被拒绝。请读者尽快办理违约后相关手续（如交纳违约金），然后方可进行" + strOperName + "。";
+                    return 0;
+                }
+            }
+
+            // 检查 strStyle 中是否有 ,special:dontCheckOverdue|xxx,
+            bool checkOverdue = true;
+            if (special != null && StringUtil.IsInList("dontCheckOverdue", special.Replace("|", ",")) == true)
+                checkOverdue = false;
+
+            if (this.BorrowCheckOverdue == true
+                && checkOverdue == true)
             {
                 // 检查当前是否有潜在的超期册
                 // return:
@@ -5248,7 +5278,7 @@ start_time_1,
             if (bRenew == false)
             {
                 // 从读者信息中，找出该读者以前已经借阅过的同类图书的册数
-                nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow[@type='" + strBookType + "']");
+                var nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow[@type='" + strBookType + "']");
 
                 int nThisTypeCount = nodes.Count;
 

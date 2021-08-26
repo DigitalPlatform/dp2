@@ -943,10 +943,13 @@ namespace dp2SSL
             ShelfData.SaveSoftClock();
 
             // 2021/8/21
+            /*
             {
                 var path = Path.Combine(WpfClientInfo.UserDir, "tagLines.json");
                 File.WriteAllText(path, ShelfData.BuildTagLineJsonString());
             }
+            */
+            SaveTagLines();
 
             WaitAllTaskFinish();
             WpfClientInfo.Finish(GrantAccess);
@@ -995,10 +998,13 @@ namespace dp2SSL
             ShelfData.SaveSoftClock();
 
             // 2021/8/21
+            /*
             {
                 var path = Path.Combine(WpfClientInfo.UserDir, "tagLines.json");
                 File.WriteAllText(path, ShelfData.BuildTagLineJsonString());
             }
+            */
+            SaveTagLines();
 
             try
             {
@@ -1055,6 +1061,20 @@ namespace dp2SSL
             WpfClientInfo.WriteInfoLog("物理关灯 OnExit()");
 
             base.OnExit(e);
+        }
+
+        // 保存当前标签信息到 tagLines.json 文件
+        void SaveTagLines()
+        {
+            try
+            {
+                var path = Path.Combine(WpfClientInfo.UserDir, "tagLines.json");
+                File.WriteAllText(path, ShelfData.BuildTagLineJsonString());
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"SaveTagLines() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+            }
         }
 
         void WaitAllTaskFinish()

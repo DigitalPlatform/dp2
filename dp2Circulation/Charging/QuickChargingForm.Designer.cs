@@ -44,6 +44,7 @@
             this.contextMenuStrip_selectFunc = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem_borrow = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_continueBorrow = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_specialBorrow = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_return = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_verifyReturn = new System.Windows.Forms.ToolStripMenuItem();
@@ -94,8 +95,10 @@
             this.ToolStripMenuItem_multipleItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_multiReturn = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_multiRenew = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_special_multiRenew = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_selectLibraryCode = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_selectTargetLocation = new System.Windows.Forms.ToolStripButton();
+            this.toolStripMenuItem_specialRenew = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -123,12 +126,14 @@
             this.contextMenuStrip_selectFunc.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem_borrow,
             this.toolStripMenuItem_continueBorrow,
+            this.toolStripMenuItem_specialBorrow,
             this.toolStripSeparator1,
             this.toolStripMenuItem_return,
             this.toolStripMenuItem_verifyReturn,
             this.toolStripSeparator2,
             this.toolStripMenuItem_renew,
             this.toolStripMenuItem_verifyRenew,
+            this.toolStripMenuItem_specialRenew,
             this.toolStripSeparator3,
             this.toolStripMenuItem_lost,
             this.toolStripMenuItem_verifyLost,
@@ -140,122 +145,129 @@
             this.toolStripSeparator5,
             this.toolStripMenuItem_read});
             this.contextMenuStrip_selectFunc.Name = "contextMenuStrip_selectFunc";
-            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(211, 476);
+            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(271, 582);
             this.contextMenuStrip_selectFunc.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_selectFunc_Opening);
             // 
             // toolStripMenuItem_borrow
             // 
             this.toolStripMenuItem_borrow.Name = "toolStripMenuItem_borrow";
-            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_borrow.Text = "借";
             this.toolStripMenuItem_borrow.Click += new System.EventHandler(this.toolStripMenuItem_borrow_Click);
             // 
             // toolStripMenuItem_continueBorrow
             // 
             this.toolStripMenuItem_continueBorrow.Name = "toolStripMenuItem_continueBorrow";
-            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_continueBorrow.Text = "同一读者借";
             this.toolStripMenuItem_continueBorrow.Click += new System.EventHandler(this.toolStripMenuItem_continueBorrow_Click);
+            // 
+            // toolStripMenuItem_specialBorrow
+            // 
+            this.toolStripMenuItem_specialBorrow.Name = "toolStripMenuItem_specialBorrow";
+            this.toolStripMenuItem_specialBorrow.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_specialBorrow.Text = "特殊借";
+            this.toolStripMenuItem_specialBorrow.Click += new System.EventHandler(this.toolStripMenuItem_specialBorrow_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(207, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(267, 6);
             // 
             // toolStripMenuItem_return
             // 
             this.toolStripMenuItem_return.Name = "toolStripMenuItem_return";
-            this.toolStripMenuItem_return.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_return.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_return.Text = "还";
             this.toolStripMenuItem_return.Click += new System.EventHandler(this.toolStripMenuItem_return_Click);
             // 
             // toolStripMenuItem_verifyReturn
             // 
             this.toolStripMenuItem_verifyReturn.Name = "toolStripMenuItem_verifyReturn";
-            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_verifyReturn.Text = "验证还";
             this.toolStripMenuItem_verifyReturn.Click += new System.EventHandler(this.toolStripMenuItem_verifyReturn_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(207, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(267, 6);
             // 
             // toolStripMenuItem_renew
             // 
             this.toolStripMenuItem_renew.Name = "toolStripMenuItem_renew";
-            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_renew.Text = "续借";
             this.toolStripMenuItem_renew.Click += new System.EventHandler(this.toolStripMenuItem_renew_Click);
             // 
             // toolStripMenuItem_verifyRenew
             // 
             this.toolStripMenuItem_verifyRenew.Name = "toolStripMenuItem_verifyRenew";
-            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_verifyRenew.Text = "验证续借";
             this.toolStripMenuItem_verifyRenew.Click += new System.EventHandler(this.toolStripMenuItem_verifyRenew_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(207, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(267, 6);
             // 
             // toolStripMenuItem_lost
             // 
             this.toolStripMenuItem_lost.Name = "toolStripMenuItem_lost";
-            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_lost.Text = "丢失";
             this.toolStripMenuItem_lost.Click += new System.EventHandler(this.toolStripMenuItem_lost_Click);
             // 
             // toolStripMenuItem_verifyLost
             // 
             this.toolStripMenuItem_verifyLost.Name = "toolStripMenuItem_verifyLost";
-            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_verifyLost.Text = "验证丢失";
             this.toolStripMenuItem_verifyLost.Click += new System.EventHandler(this.toolStripMenuItem_verifyLost_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(207, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(267, 6);
             // 
             // toolStripMenuItem_loadPatronInfo
             // 
             this.toolStripMenuItem_loadPatronInfo.Name = "toolStripMenuItem_loadPatronInfo";
-            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_loadPatronInfo.Text = "装载读者信息";
             this.toolStripMenuItem_loadPatronInfo.Click += new System.EventHandler(this.toolStripMenuItem_loadPatronInfo_Click);
             // 
             // toolStripMenuItem_inventoryBook
             // 
             this.toolStripMenuItem_inventoryBook.Name = "toolStripMenuItem_inventoryBook";
-            this.toolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_inventoryBook.Text = "盘点图书";
             this.toolStripMenuItem_inventoryBook.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryBook_Click);
             // 
             // toolStripMenuItem_boxing
             // 
             this.toolStripMenuItem_boxing.Name = "toolStripMenuItem_boxing";
-            this.toolStripMenuItem_boxing.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_boxing.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_boxing.Text = "配书";
             this.toolStripMenuItem_boxing.Click += new System.EventHandler(this.ToolStripMenuItem_boxing_Click);
             // 
             // toolStripMenuItem_transfer
             // 
             this.toolStripMenuItem_transfer.Name = "toolStripMenuItem_transfer";
-            this.toolStripMenuItem_transfer.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_transfer.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_transfer.Text = "调拨";
             this.toolStripMenuItem_transfer.Click += new System.EventHandler(this.ToolStripMenuItem_move_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(207, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(267, 6);
             // 
             // toolStripMenuItem_read
             // 
             this.toolStripMenuItem_read.Name = "toolStripMenuItem_read";
-            this.toolStripMenuItem_read.Size = new System.Drawing.Size(210, 34);
+            this.toolStripMenuItem_read.Size = new System.Drawing.Size(270, 34);
             this.toolStripMenuItem_read.Text = "读过";
             this.toolStripMenuItem_read.Click += new System.EventHandler(this.ToolStripMenuItem_read_Click);
             // 
@@ -645,7 +657,8 @@
             // 
             this.ToolStripMenuItem_multipleItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_multiReturn,
-            this.ToolStripMenuItem_multiRenew});
+            this.ToolStripMenuItem_multiRenew,
+            this.ToolStripMenuItem_special_multiRenew});
             this.ToolStripMenuItem_multipleItem.Name = "ToolStripMenuItem_multipleItem";
             this.ToolStripMenuItem_multipleItem.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_multipleItem.Text = "复选操作";
@@ -664,6 +677,13 @@
             this.ToolStripMenuItem_multiRenew.Text = "续借";
             this.ToolStripMenuItem_multiRenew.Click += new System.EventHandler(this.ToolStripMenuItem_multiRenew_Click);
             // 
+            // ToolStripMenuItem_special_multiRenew
+            // 
+            this.ToolStripMenuItem_special_multiRenew.Name = "ToolStripMenuItem_special_multiRenew";
+            this.ToolStripMenuItem_special_multiRenew.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_special_multiRenew.Text = "特殊续借";
+            this.ToolStripMenuItem_special_multiRenew.Click += new System.EventHandler(this.ToolStripMenuItem_special_multiRenew_Click);
+            // 
             // toolStripDropDownButton_selectLibraryCode
             // 
             this.toolStripDropDownButton_selectLibraryCode.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -681,9 +701,16 @@
             this.toolStripButton_selectTargetLocation.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectTargetLocation.Image")));
             this.toolStripButton_selectTargetLocation.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectTargetLocation.Name = "toolStripButton_selectTargetLocation";
-            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(142, 32);
+            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(142, 29);
             this.toolStripButton_selectTargetLocation.Text = "选择调拨去向";
             this.toolStripButton_selectTargetLocation.Click += new System.EventHandler(this.toolStripButton_selectTransferTargetLocation_Click);
+            // 
+            // toolStripMenuItem_specialRenew
+            // 
+            this.toolStripMenuItem_specialRenew.Name = "toolStripMenuItem_specialRenew";
+            this.toolStripMenuItem_specialRenew.Size = new System.Drawing.Size(270, 34);
+            this.toolStripMenuItem_specialRenew.Text = "特殊续借";
+            this.toolStripMenuItem_specialRenew.Click += new System.EventHandler(this.toolStripMenuItem_specialRenew_Click);
             // 
             // QuickChargingForm
             // 
@@ -780,5 +807,8 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_multipleItem;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_multiReturn;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_multiRenew;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_specialBorrow;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_special_multiRenew;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_specialRenew;
     }
 }

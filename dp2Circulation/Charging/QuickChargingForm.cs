@@ -1073,12 +1073,14 @@ namespace dp2Circulation
 
             MainForm.SetControlFont(dlg, this.Font, false);
             if (func == dp2Circulation.FuncState.Borrow
-                || func == dp2Circulation.FuncState.ContinueBorrow)
+                || func == dp2Circulation.FuncState.ContinueBorrow
+                || func == FuncState.SpecialBorrow)
             {
                 dlg.FunctionType = "borrow";
                 dlg.Text = "请选择要借阅的册";
             }
-            else if (func == dp2Circulation.FuncState.Renew)
+            else if (func == dp2Circulation.FuncState.Renew
+                || func == FuncState.SpecialRenew)
             {
                 dlg.FunctionType = "renew";
                 dlg.Text = "请选择要续借的册";
@@ -2294,12 +2296,26 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 task.ReaderBarcode = GetContent(strText);   // strText
                 task.Action = "load_reader_info";
             }
-            else if (func == dp2Circulation.FuncState.Borrow)
+            else if (func == dp2Circulation.FuncState.Borrow
+                || func == FuncState.SpecialBorrow)
             {
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = GetContent(strText);
                 task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "borrow";
+                if (func == FuncState.SpecialBorrow)
+                {
+                    // 检查 dp2library 版本号
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.85") < 0)
+                    {
+                        MessageBox.Show(this, "本功能需要 dp2library 版本在 3.85 以上");
+                        this.textBox_input.SelectAll();
+                        this.textBox_input.Focus();
+                        return;
+                    }
+
+                    task.Parameters += ",special:dontCheckOverdue";
+                }
             }
             else if (func == dp2Circulation.FuncState.ContinueBorrow)
             {
@@ -2318,13 +2334,27 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "borrow";
             }
-            else if (func == dp2Circulation.FuncState.Renew)
+            else if (func == dp2Circulation.FuncState.Renew
+                || func == FuncState.SpecialRenew)
             {
                 // task.ReaderBarcode = "";
                 task.ItemBarcode = GetContent(strText);
                 task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "renew";
                 task.Parameters = strParameters;
+                if (func == FuncState.SpecialRenew)
+                {
+                    // 检查 dp2library 版本号
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.85") < 0)
+                    {
+                        MessageBox.Show(this, "本功能需要 dp2library 版本在 3.85 以上");
+                        this.textBox_input.SelectAll();
+                        this.textBox_input.Focus();
+                        return;
+                    }
+
+                    task.Parameters += ",special:dontCheckOverdue";
+                }
             }
             else if (func == dp2Circulation.FuncState.VerifyRenew)
             {
@@ -2849,6 +2879,8 @@ false);
                 this.toolStripMenuItem_read.Checked = false;
                 this.toolStripMenuItem_boxing.Checked = false;
                 this.toolStripMenuItem_transfer.Checked = false;
+                this.toolStripMenuItem_specialBorrow.Checked = false;
+                this.toolStripMenuItem_specialRenew.Checked = false;
 
                 if (this.AutoClearTextbox == true)
                 {
@@ -2865,6 +2897,10 @@ false);
                     //this.pictureBox_action.Image = this.imageList_func_large.Images[0];
                     this.toolStripMenuItem_continueBorrow.Checked = true;
                     WillLoadReaderInfo = false;
+                }
+                else if (_funcstate == FuncState.SpecialBorrow)
+                {
+                    this.toolStripMenuItem_specialBorrow.Checked = true;
                 }
                 else if (_funcstate == FuncState.Return)
                 {
@@ -2889,6 +2925,12 @@ false);
                 {
                     // this.pictureBox_action.Image = this.imageList_func_large.Images[2];
                     this.toolStripMenuItem_verifyRenew.Checked = true;
+                }
+                else if (_funcstate == FuncState.SpecialRenew)
+                {
+                    this.toolStripMenuItem_specialRenew.Checked = true;
+
+                    WillLoadReaderInfo = false;
                 }
                 else if (_funcstate == FuncState.Lost)
                 {
@@ -2926,7 +2968,7 @@ false);
                 {
                     this.toolStripMenuItem_transfer.Checked = true;
                     WillLoadReaderInfo = false;
-                    Task.Run(() =>
+                    _ = Task.Run(() =>
                     {
                         this.Invoke((Action)(() =>
                         {
@@ -4222,19 +4264,23 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             if (_funcstate == FuncState.Borrow)
                 strText = "借";
             else if (_funcstate == FuncState.ContinueBorrow)
-                strText = "借";
+                strText = "同借";
+            else if (_funcstate == FuncState.SpecialBorrow)
+                strText = "特借";
             else if (_funcstate == FuncState.Return)
                 strText = "还";
             else if (_funcstate == FuncState.VerifyReturn)
-                strText = "还";
+                strText = "验还";
             else if (_funcstate == FuncState.Renew)
                 strText = "续";
             else if (_funcstate == FuncState.VerifyRenew)
-                strText = "续";
+                strText = "验续";
+            else if (_funcstate == FuncState.SpecialRenew)
+                strText = "特续";
             else if (_funcstate == FuncState.Lost)
                 strText = "丢";
             else if (_funcstate == FuncState.VerifyLost)
-                strText = "丢";
+                strText = "验丢";
             else if (_funcstate == FuncState.LoadPatronInfo)
                 strText = "人";
             else if (_funcstate == FuncState.Auto)
@@ -4250,7 +4296,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             else
                 strText = "?";
 
-            using (Font font = new System.Drawing.Font(this.Font.FontFamily, (float)this.pictureBox_action.Size.Height * (float)0.8, FontStyle.Bold, GraphicsUnit.Pixel))
+            int char_count = strText.Length;
+            using (Font font = new System.Drawing.Font(this.Font.FontFamily, (float)this.pictureBox_action.Size.Height * (float)0.8 / (float)char_count, FontStyle.Bold, GraphicsUnit.Pixel))
             {
                 StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
                 format.FormatFlags |= StringFormatFlags.FitBlackBox;
@@ -4743,6 +4790,53 @@ MessageBoxDefaultButton.Button2);
         {
             string list = this.webBrowser_reader.Document.InvokeScript("getSelectedBarcodes") as string;
             this.ToolStripMenuItem_multipleItem.Enabled = !string.IsNullOrEmpty(list);
+        }
+
+        private void toolStripMenuItem_specialBorrow_Click(object sender, EventArgs e)
+        {
+            SmartSetFuncState(FuncState.SpecialBorrow,
+true,
+false);
+        }
+
+        // 多册 特殊续借
+        private void ToolStripMenuItem_special_multiRenew_Click(object sender, EventArgs e)
+        {
+            // 检查 dp2library 版本
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.84") < 0)
+            {
+                MessageBox.Show(this, "本功能需要 dp2library 版本在 3.84 以上");
+                return;
+            }
+
+            // 检查前端权限
+            if (StringUtil.IsInList("client_multiplecharging", this.CurrentRights) == false)
+            {
+                MessageBox.Show(this, "当前用户不具备 client_multiplecharging 权限，无法进行复选特殊续借的操作");
+                return;
+            }
+
+            string list = this.webBrowser_reader.Document.InvokeScript("getSelectedBarcodes") as string;
+
+            DialogResult result = MessageBox.Show(this,
+$"确实要对下列册进行 特殊续借 操作?\r\n\r\n{list}\r\n请仔细核对上述册条码号",
+"QuickChargingForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+                return;
+
+            var barcodes = StringUtil.SplitList(list);
+            MultipleOperate(barcodes, FuncState.SpecialRenew);
+
+        }
+
+        private void toolStripMenuItem_specialRenew_Click(object sender, EventArgs e)
+        {
+            SmartSetFuncState(FuncState.SpecialRenew,
+true,
+false);
         }
     }
 

@@ -1536,7 +1536,9 @@ end_time);
             else
             {
                 // 不是测试状态也带有 operTime 子参数
-                additional = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
+                // additional = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
+                
+                // 让服务器自己填写时间 2021/8/26
             }
 
             if (string.IsNullOrEmpty(additional) == false)

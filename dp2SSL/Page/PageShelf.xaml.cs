@@ -2958,7 +2958,7 @@ namespace dp2SSL
             }
             catch(Exception ex)
             {
-                WpfClientInfo.WriteErrorLog($"isTagsSame() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                WpfClientInfo.WriteErrorLog($"isTagsSame() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return false;
             }
         }
