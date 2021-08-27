@@ -194,7 +194,7 @@ namespace DigitalPlatform.LibraryServer
                         if (lRet == -1)
                         {
                             // 配置文件不存在，怎么返回错误码的?
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            if (channel.IsEqualNotFound())
                                 continue;
                             return -1;
                         }
@@ -282,7 +282,7 @@ namespace DigitalPlatform.LibraryServer
             long lRet = channel.DoDeleteDB(strDbName, out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode != ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound() == false)
                     return -1;
             }
 
@@ -4454,7 +4454,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化小书目库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4471,7 +4471,7 @@ out strError);
                             strEntityDbName,
                             strLogFileName,
                             out strError);
-                        if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                        if (lRet == -1 && channel.IsEqualNotFound() == false)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
                             return -1;
@@ -4487,7 +4487,7 @@ out strError);
                             strOrderDbName,
                             strLogFileName,
                             out strError);
-                        if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                        if (lRet == -1 && channel.IsEqualNotFound() == false)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
                             return -1;
@@ -4503,7 +4503,7 @@ out strError);
                             strIssueDbName,
                             strLogFileName,
                             out strError);
-                        if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                        if (lRet == -1 && channel.IsEqualNotFound() == false)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
                             return -1;
@@ -4519,7 +4519,7 @@ out strError);
                             strCommentDbName,
                             strLogFileName,
                             out strError);
-                        if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                        if (lRet == -1 && channel.IsEqualNotFound() == false)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 时发生错误: " + strError;
                             return -1;
@@ -4552,7 +4552,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化实体库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4585,7 +4585,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化订购库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4618,7 +4618,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化期库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4651,7 +4651,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化评注库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4692,7 +4692,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化读者库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4726,7 +4726,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化规范库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4751,7 +4751,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化预约到书库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4774,7 +4774,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化违约金库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4798,7 +4798,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化发票库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4822,7 +4822,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化消息库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4846,7 +4846,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化拼音库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4870,7 +4870,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化著者号码库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -4900,7 +4900,7 @@ out strError);
                         strName,
                         strLogFileName,
                         out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError = "初始化实用库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
@@ -7663,7 +7663,7 @@ out strError);
                 string strError_1 = "";
 
                 long lRet = channel.DoDeleteDB(strDbName, out strError_1);
-                if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                if (lRet == -1 && channel.IsEqualNotFound() == false)
                     continue;
                 if (lRet == -1)
                     error_deleting_dbnames.Add(strDbName + "[错误:" + strError_1 + "]");
@@ -8251,7 +8251,7 @@ out strError);
                         if (lRet == -1)
                         {
                             // 配置文件不存在，怎么返回错误码的?
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            if (channel.IsEqualNotFound())
                             {
                                 timestamp = null;
                                 goto DO_CREATE;
@@ -9656,7 +9656,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strEntityDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除实体库 '" + strEntityDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9669,7 +9669,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strOrderDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除订购库 '" + strOrderDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9682,7 +9682,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strIssueDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除期库 '" + strIssueDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9695,7 +9695,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strBiblioDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除小书目库 '" + strBiblioDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9713,7 +9713,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除读者库 '" + strDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9729,7 +9729,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strArrivedDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除预约到书库 '" + strArrivedDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9746,7 +9746,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strAmerceDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除违约金库 '" + strAmerceDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9762,7 +9762,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strInvoiceDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除发票库 '" + strInvoiceDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9778,7 +9778,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strMessageDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除消息库 '" + strMessageDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -9796,7 +9796,7 @@ out strError);
                 {
                     lRet = channel.DoDeleteDB(strDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    if (lRet == -1 && channel.IsEqualNotFound() == false)
                     {
                         strError += "删除类型为 " + strType + " 的实用库 '" + strDbName + "' 内数据时发生错误：" + strTempError + "; ";
                     }
@@ -9809,5 +9809,7 @@ out strError);
 
             return 0;
         }
+
+
     }
 }

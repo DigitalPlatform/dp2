@@ -1700,6 +1700,111 @@ request).Result;
 
     #endregion
 
+    #region Circulation() 有关
+
+    public class CirculationRequest
+    {
+        public string TaskID { get; set; }    // 本次检索的任务 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
+        public LoginInfo LoginInfo { get; set; }    // 登录信息 2016/10/22
+        public string Operation { get; set; }   // 操作名。
+        public string Patron { get; set; }  // strReaderBarcode
+        public string Item { get; set; }   // strItemBarcode 和 strConfirmItemRecPath 都包含
+        public string Style { get; set; }     // 
+        public string PatronFormatList { get; set; }
+        public string ItemFormatList { get; set; }  // 
+        public string BiblioFormatList { get; set; }
+
+        public CirculationRequest()
+        {
+
+        }
+
+        public CirculationRequest(string taskID,
+            LoginInfo loginInfo,
+            string operation,
+            string patron,
+            string item,
+            string style,
+            string outputPatronFormatList,
+            string outputItemFormatList,
+            string outputBiblioFormatList)
+        {
+            this.TaskID = taskID;
+            this.LoginInfo = loginInfo;
+            this.Operation = operation;
+            this.Patron = patron;
+            this.Item = item;
+            this.Style = style;
+            this.PatronFormatList = outputPatronFormatList;
+            this.ItemFormatList = outputItemFormatList;
+            this.BiblioFormatList = outputBiblioFormatList;
+        }
+    }
+
+    public class CirculationResult : MessageResult
+    {
+        public List<string> PatronResults { get; set; }
+        public List<string> ItemResults { get; set; }
+        public List<string> BiblioResults { get; set; }
+        public List<string> DupPaths { get; set; }
+
+        public string PatronBarcode { get; set; }
+        public BorrowInfo BorrowInfo { get; set; }
+        public ReturnInfo ReturnInfo { get; set; }
+    }
+
+    public class BorrowInfo
+    {
+        // 应还日期/时间
+        public string LatestReturnTime { get; set; }   // RFC1123格式，GMT时间
+
+        // 借书期限。例如“20day”
+        public string Period { get; set; }
+
+        // 当前为续借的第几次？0表示初次借阅
+        public long BorrowCount { get; set; }
+
+        // 借书操作者
+        public string BorrowOperator { get; set; }
+    }
+
+    // 还书成功后的信息
+    public class ReturnInfo
+    {
+        // 借阅日期/时间
+        public string BorrowTime { get; set; }  // RFC1123格式，GMT时间
+
+        // 应还日期/时间
+        public string LatestReturnTime { get; set; }   // RFC1123格式，GMT时间
+
+        // 原借书期限。例如“20day”
+        public string Period { get; set; }
+
+        // 当前为续借的第几次？0表示初次借阅
+        public long BorrowCount { get; set; }
+
+        // 违约金描述字符串。XML格式
+        public string OverdueString { get; set; }
+
+        // 借书操作者
+        public string BorrowOperator { get; set; }
+
+        // 还书操作者
+        public string ReturnOperator { get; set; }
+
+        /// <summary>
+        /// 所还的册的图书类型
+        /// </summary>
+        public string BookType { get; set; }
+
+        /// <summary>
+        /// 所还的册的馆藏地点
+        /// </summary>
+        public string Location { get; set; }
+    }
+
+    #endregion
+
 
     #region Close() 相关
 

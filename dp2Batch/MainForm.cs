@@ -4559,7 +4559,7 @@ this.checkBox_import_fastMode.Checked);
 
                         if (lRet == -1)
                         {
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            if (channel.IsEqualNotFound())
                             {
                                 if (bFirst == true)
                                 {
@@ -5603,7 +5603,7 @@ this.checkBox_import_fastMode.Checked);
                 out strError0);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     strStartID = strInputStartNo;
                     bStartNotFound = true;
@@ -5644,7 +5644,7 @@ this.checkBox_import_fastMode.Checked);
                 out strError0);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     strEndID = strInputEndNo;
                     bEndNotFound = true;
@@ -6562,7 +6562,7 @@ this.checkBox_import_fastMode.Checked);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            if (channel.IsEqualNotFound())
                             {
                                 if (bFirst == true)
                                 {

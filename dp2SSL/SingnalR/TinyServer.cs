@@ -361,6 +361,17 @@ TaskScheduler.Default);
                     _handlers.Add(handler);
                 }
 
+                /*
+                // 2021/8/27
+                // *** circulation
+                {
+                    var handler = HubProxy.On<CirculationRequest>("circulation",
+                    (param) => OnCirculationRecieved(param)
+                    );
+                    _handlers.Add(handler);
+                }
+                */
+
                 // 2020/9/29
                 // *** close
                 {
@@ -1863,7 +1874,7 @@ text.ToString());
             {
                 text.AppendLine($"检查共返回 {result.Infos.Count} 条信息(其中 error 开头的代表错误):");
                 int i = 0;
-                foreach(var s in result.Infos)
+                foreach (var s in result.Infos)
                 {
                     text.AppendLine($"{++i}) {s}");
                 }
@@ -3557,6 +3568,52 @@ result);
             public List<DigitalPlatform.MessageClient.Entity> ResultEntities { get; set; }
         }
 
+        // 写入 RFID 标签
+        async static Task<ChangeHistoryResult> WriteRfidTagAsync(List<DigitalPlatform.MessageClient.Entity> actions)
+        {
+            List<DigitalPlatform.MessageClient.Entity> results = new List<DigitalPlatform.MessageClient.Entity>();
+
+            foreach (var action in actions)
+            {
+                string action_string = action.Action;
+                // 分离冒号左右部分
+                var parts = StringUtil.ParseTwoPart(action_string, ":");
+                string command = parts[0];
+                string parameters = parts[1];
+
+                if (command == "write")
+                {
+                    var result = await WriteRfidTagAsync(action.NewRecord.Data, parameters);
+                    var result_entity = new DigitalPlatform.MessageClient.Entity();
+                    result_entity.Action = action.Action;
+                    result_entity.OldRecord = null;
+                    result_entity.ErrorCode = result.ErrorCode;
+                    result_entity.ErrorInfo = result.ErrorInfo;
+
+                    if (result.Value == 1)
+                    {
+                        result_entity.NewRecord = new Record();
+                        result_entity.NewRecord.Data = result.ChangedRecord;
+                    }
+
+                    results.Add(result_entity);
+                }
+            }
+
+            return new ChangeHistoryResult { ResultEntities = results };
+        }
+
+
+        // 写入一个 RFID 标签
+        // parameters:
+        //      text        一条 JSON 记录
+        //      parameters  参数列表
+        static async Task<ChangeResult> WriteRfidTagAsync(string text,
+            string parameters)
+        {
+            return new ChangeResult();
+        }
+
         // 对操作历史记录进行修改
         async static Task<ChangeHistoryResult> ChangeHistoryAsync(List<DigitalPlatform.MessageClient.Entity> actions)
         {
@@ -3720,6 +3777,8 @@ result);
                 ChangeHistoryResult result = null;
                 if (param.Operation == "setHistory")
                     result = await ChangeHistoryAsync(param.Entities);
+                else if (param.Operation == "writeRfidTag")
+                    result = await WriteRfidTagAsync(param.Entities);
                 else
                 {
                     strError = "无法识别的 param.Operation 值 '" + param.Operation + "'";

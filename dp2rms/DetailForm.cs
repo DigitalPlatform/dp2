@@ -1045,7 +1045,7 @@ namespace dp2rms
                             MessageBox.Show(this, strError);
                             goto CONTINUELOAD;
                         }
-                        else if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        else if (channel.IsEqualNotFound())
                         {
                             if (strExtStyle == "prev")
                                 strError = "到头";
@@ -3005,7 +3005,7 @@ namespace dp2rms
 
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.IsEqualNotFound())
                         return 0;
 
                     strError = "获得配置文件 '" + strPath + "' 时出错：" + strError;
@@ -3758,7 +3758,7 @@ namespace dp2rms
 
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.IsEqualNotFound())
                     {
                         e.ErrorInfo = "";
                         return;
@@ -3846,7 +3846,7 @@ namespace dp2rms
 
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.IsEqualNotFound())
                     {
                         e.ErrorInfo = "";
                         return;

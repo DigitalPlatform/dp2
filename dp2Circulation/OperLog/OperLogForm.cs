@@ -9193,6 +9193,17 @@ MessageBoxDefaultButton.Button1);
         void menu_recover_saveToDatabase_Click(object sender, EventArgs e)
         {
             string strError = "";
+            /*
+            ListViewItem history_item = (sender as MenuItem)?.Tag as ListViewItem;
+            if (history_item != null
+                && this.listView_restoreList.SelectedItems.Count != 1)
+            {
+                strError = "当从下方 ListView 触发命令时，上方 ListView 的 SelectedItems.Count 必须为 1";
+                goto ERROR1;
+            }
+            */
+            // Ctrl 用于弹出对话框选择用哪个 XML 来写回数据库
+            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
             LibraryChannel channel = this.GetChannel();
 
@@ -9219,6 +9230,26 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
                     }
 
+                    string xml = data.GetLastXml();
+                    /*
+                    // 如果是从 history list 中触发的本命令
+                    if (history_item != null)
+                    {
+                        int index = this.listView_recover_history.Items.IndexOf(history_item);
+                        if (index == -1)
+                        {
+                            strError = "index == -1";
+                            goto ERROR1;
+                        }
+                        xml = data.GetSelectedHistoryXml(index);
+                        if (string.IsNullOrEmpty(xml))
+                        {
+                            strError = "xml is empty";
+                            goto ERROR1;
+                        }
+                    }
+                    */
+
                     long lRet = 0;
                     byte[] timestamp = null;
                     string strOutputPath = "";
@@ -9235,7 +9266,7 @@ MessageBoxDefaultButton.Button1);
                         "change",
                         strBiblioRecPath,
                         "xml",
-                        data.Xml,
+                        xml,
                         timestamp,
                         "",
                         out strOutputPath,
@@ -9248,7 +9279,7 @@ MessageBoxDefaultButton.Button1);
                             stop,
                             "forcechange",
                             strBiblioRecPath,
-                            data.Xml,
+                            xml,
                             "",
                             timestamp,
                             out string strExistingXml,
@@ -9310,7 +9341,7 @@ MessageBoxDefaultButton.Button1);
                         }
 
                         DialogResult result = MessageBox.Show(this,
-$"保存{data.DbType}记录 {strBiblioRecPath} 时出错: {strError}。\r\n\r\n请问是否重试保存操作? \r\n\r\n(Yes 重试保存；\r\nNo 放弃保存、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
+$"保存{data.DbType}记录 {strBiblioRecPath} 时出错: {strError}\r\nold_timestamp={ByteArray.GetHexTimeStampString(timestamp)}, new_timestamp={ByteArray.GetHexTimeStampString(baNewTimestamp)}。\r\n\r\n请问是否重试保存操作? \r\n\r\n(Yes 重试保存；\r\nNo 放弃保存、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
 "OperLogForm",
 MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
@@ -9420,7 +9451,7 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
                     }
 
-                    if (string.IsNullOrEmpty(data.Xml))
+                    if (string.IsNullOrEmpty(data.GetLastXml()))
                     {
                         MessageBox.Show(this, "data.Xml 为空");
                         goto CONTINUE;
@@ -9540,9 +9571,37 @@ MessageBoxDefaultButton.Button1);
 
             public string DbType { get; set; }  // 数据库类型。biblio/patron 之一
 
-            public string Xml { get; set; } // 最后恢复的数据库记录
+            // public string Xml { get; set; } // 最后恢复的数据库记录
 
             public ListViewItem ListViewItem { get; set; }
+
+            public List<string> Xmls { get; set; }
+
+            public void AddXml(string xml)
+            {
+                if (this.Xmls == null)
+                    this.Xmls = new List<string>();
+
+                this.Xmls.Add(xml);
+            }
+
+            public string GetLastXml()
+            {
+                if (this.Xmls == null || this.Xmls.Count == 0)
+                    return null;
+                return this.Xmls[this.Xmls.Count - 1];
+            }
+            /*
+            public string GetSelectedHistoryXml(int index)
+            {
+                if (HistoryList == null)
+                    throw new Exception("HistoryList == null");
+                if (index < 0 || index >= HistoryList.Count)
+                    throw new ArgumentException($"index 超过范围");
+                var item = this.HistoryList[index];
+                return item.Xml;
+            }
+            */
         }
 
         const int COLUMN_RECOVER_NO = 0;
@@ -9799,7 +9858,7 @@ MessageBoxDefaultButton.Button1);
             RecoverData data = (RecoverData)_recoverTable[recpath];
             if (data == null)
                 return null;
-            return data.Xml;
+            return data.GetLastXml();
         }
 
         // 从 borrow/return 日志记录中获得恢复信息
@@ -10089,7 +10148,11 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 if (string.IsNullOrEmpty(record.Xml) == false)
-                    data.Xml = record.Xml;  // TODO: clipping 时用合并算法
+                {
+                    // data.Xml = record.Xml;  // TODO: clipping 时用合并算法
+                    data.AddXml(record.Xml);
+                }
+
                 if (data.HistoryList == null)
                     data.HistoryList = new List<OperLogItem>();
                 data.HistoryList.Add(history_item);
@@ -10181,7 +10244,7 @@ MessageBoxDefaultButton.Button1);
                 string strBiblioRecPath = "";
                 {
                     ListViewItem item = null;
-                    if (this.listView_restoreList.SelectedItems.Count > 0)
+                    if (this.listView_restoreList.SelectedItems.Count == 1)
                     {
                         item = this.listView_restoreList.SelectedItems[0];
 
@@ -10200,7 +10263,6 @@ MessageBoxDefaultButton.Button1);
                     FillHistoryList(data.HistoryList);
                 }
             }
-
         }
 
         void DoViewRecover(bool bOpenWindow)
@@ -10237,7 +10299,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
-            strXml = data.Xml;
+            strXml = data.GetLastXml();
 
             string strOldMARC = "";
             string strOldFragmentXml = "";
@@ -10334,7 +10396,6 @@ strHtml2 +
             this.listView_recover_history.Items.Clear();
             foreach (OperLogItem history_item in history_list)
             {
-
                 OperLogItemInfo info = new OperLogItemInfo();
                 {
                     info.Hint = -1;
@@ -10360,6 +10421,40 @@ strHtml2 +
         {
             DoViewOperlog(this.listView_recover_history, false);
         }
+
+        private void listView_recover_history_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            /*
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_recoverHistory_selectAllLines_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+            */
+
+            /*
+            ListViewItem selected_item = null;
+            if (this.listView_recover_history.SelectedItems.Count > 0)
+                selected_item = this.listView_recover_history.SelectedItems[0];
+            menuItem = new MenuItem("保存回数据库(&S) [" + this.listView_recover_history.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_recover_saveToDatabase_Click);
+            if (this.listView_recover_history.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            menuItem.Tag = selected_item;
+            contextMenu.MenuItems.Add(menuItem);
+            */
+
+            contextMenu.Show(this.listView_recover_history, new Point(e.X, e.Y));
+        }
+
     }
 
     /// <summary>

@@ -231,7 +231,7 @@ namespace dp2Circulation
             //      1   文件存在
             //      2   读入的内容不是全部
             int nRet = FileUtil.ReadTextFileContent(this.textBox_xmlEditor_xmlFilename.Text,
-                100 * 1024, // 100K
+                1024 * 1024, // 1024K
                 out strContent,
                 out encoding,
                 out strError);

@@ -546,7 +546,7 @@ namespace dp2Circulation
                     // 处理浏览结果
                     this.listView_records.BeginUpdate();
                     // for (int i = 0; i < searchresults.Length; i++)
-                    foreach(var record in searchresults)
+                    foreach (var record in searchresults)
                     {
                         // string xml = record.RecordBody.Xml;
 
@@ -1407,8 +1407,10 @@ out strError);
         // 删除所选定的读者记录
         void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
         {
+            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
             DialogResult result = MessageBox.Show(this,
-"确实要从数据库中删除所选定的 " + this.listView_records.SelectedItems.Count.ToString() + " 个读者记录?\r\n\r\n(警告：读者记录被删除后，无法恢复)\r\n\r\n(OK 删除；Cancel 取消)",
+$"确实要从数据库中{(control ? "强制" : "")}删除所选定的 { this.listView_records.SelectedItems.Count.ToString() } 个读者记录?\r\n\r\n(警告：读者记录被删除后，无法恢复)\r\n\r\n(OK 删除；Cancel 取消)",
 "ReaderSearchForm",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
@@ -1488,7 +1490,7 @@ MessageBoxDefaultButton.Button2);
                     // channel.Timeout = new TimeSpan(0, 5, 0);
                     lRet = this.Channel.SetReaderInfo(
                         stop,
-                        "delete",
+                        control ? "forcedelete" : "delete",
                         strRecPath,
                         "", // strNewXml
                         "", // strOldXml,
@@ -3858,7 +3860,7 @@ MessageBoxDefaultButton.Button1);
                             if (dlg.UsageFileExtension)
                                 extensionStyles.Add("usageFileExtension");
 
-                        REDO_WRITEOBJECTS:
+                            REDO_WRITEOBJECTS:
                             // 将记录中的对象资源写入外部文件
                             nRet = BiblioSearchForm.WriteObjectFiles(stop,
                     channel,

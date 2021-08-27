@@ -568,7 +568,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     if (bFirst == true)
                     {
@@ -696,7 +696,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     if (bFirst == true)
                     {
@@ -940,7 +940,7 @@ out string strError)
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             if (bFirst == true)
                             {
@@ -1150,7 +1150,7 @@ out string strError)
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             if (bFirst == true)
                             {
@@ -1368,7 +1368,7 @@ out string strError)
                 out strError0);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     strStartID = strInputStartNo;
                     bStartNotFound = true;
@@ -1410,8 +1410,7 @@ out string strError)
                 out strError0);
             if (lRet == -1)
             {
-
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     strEndID = strInputEndNo;
                     bEndNotFound = true;

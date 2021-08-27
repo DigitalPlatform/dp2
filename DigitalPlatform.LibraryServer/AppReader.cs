@@ -876,9 +876,9 @@ namespace DigitalPlatform.LibraryServer
                     element_names[i]);
                  * */
                 // 2006/11/29 changed
-                string strText1 = DomUtil.GetElementOuterXml(dom1.DocumentElement,
+                string strText1 = GetElementOuterXml(dom1.DocumentElement,
                     element_names[i]);
-                string strText2 = DomUtil.GetElementOuterXml(dom2.DocumentElement,
+                string strText2 = GetElementOuterXml(dom2.DocumentElement,
                     element_names[i]);
 
 
@@ -887,6 +887,36 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        static string GetElementOuterXml(XmlElement element,
+            string path)
+        {
+            // 2021/8/27
+            if (path.Contains(":"))
+            {
+                int index = path.LastIndexOf(":");
+
+                string uri = path.Substring(0, index);
+                string name = path.Substring(index + 1);
+
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+                nsmgr.AddNamespace("dprms", uri);
+
+                XmlNode node = element.SelectSingleNode($"dprms:{name}", nsmgr);
+                if (node == null)
+                    return "";
+
+                return node.OuterXml;
+            }
+
+            {
+                XmlNode node = element.SelectSingleNode(path);
+                if (node == null)
+                    return "";
+
+                return node.OuterXml;
+            }
         }
 
         // 修改读者记录
@@ -2595,17 +2625,25 @@ root, strLibraryCode);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (bForce == true)
                 {
-                    kernel_errorcode = channel.OriginErrorCode;
-                    library_errorcode = ErrorCode.NotFound;
-                    goto ERROR1;
+                    strExistingXml = "<root />";
                 }
                 else
                 {
-                    strError = "删除操作发生错误, 在读入原有记录阶段:" + strError;
-                    kernel_errorcode = channel.OriginErrorCode;
-                    goto ERROR1;
+                    if (channel.IsEqualNotFound())    // 2021/8/27
+                    {
+
+                        kernel_errorcode = channel.OriginErrorCode;
+                        library_errorcode = ErrorCode.NotFound;
+                        goto ERROR1;
+                    }
+                    else
+                    {
+                        strError = "删除操作发生错误, 在读入原有记录阶段:" + strError;
+                        kernel_errorcode = channel.OriginErrorCode;
+                        goto ERROR1;
+                    }
                 }
             }
 
@@ -2613,30 +2651,45 @@ root, strLibraryCode);
             XmlDocument domExist = new XmlDocument();
             try
             {
-                domExist.LoadXml(strExistingXml);
+                if (string.IsNullOrEmpty(strExistingXml?.Trim()) == true)
+                    domExist.LoadXml("<root />");
+                else
+                    domExist.LoadXml(strExistingXml);
             }
             catch (Exception ex)
             {
-                strError = "strExistXml 装载进入 DOM 时发生错误: " + ex.Message;
-                goto ERROR1;
+                if (bForce == false)
+                {
+                    strError = "strExistingXml 装载进入 DOM 时发生错误: " + ex.Message;
+                    goto ERROR1;
+                }
+                else
+                    domExist.LoadXml("<root />");
             }
 
             // 2021/8/10
             // 从 strExistingRecord 中去除 password 元素，和当前用户不具备读权限的元素
             {
                 XmlDocument temp_dom = new XmlDocument();
-                temp_dom.LoadXml(strExistingXml);
+                try
+                {
+                    temp_dom.LoadXml(strExistingXml);
 
-                AddPatronOI(temp_dom, strLibraryCode);
+                    AddPatronOI(temp_dom, strLibraryCode);
 
-                // return:
-                //      null    没有找到 getreaderinfo 前缀
-                //      ""      找到了前缀，并且 level 部分为空
-                //      其他     返回 level 部分
-                string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
-                FilterByLevel(temp_dom, read_level, "read", this.PatronMaskDefinition);
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    string read_level = GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+                    FilterByLevel(temp_dom, read_level, "read", this.PatronMaskDefinition);
 
-                strExistingRecord = temp_dom.OuterXml;
+                    strExistingRecord = temp_dom.OuterXml;
+                }
+                catch
+                {
+                    strExistingRecord = "";
+                }
             }
 
             string strExistingBarcode = DomUtil.GetElementText(domExist.DocumentElement, "barcode");
@@ -2753,7 +2806,7 @@ root, strLibraryCode);
             if (lRet == -1)
             {
                 // 2009/7/17 
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     strError = "证条码号为 '" + strOldBarcode + "' 的读者记录(在删除的时候发现)已不存在";
                     kernel_errorcode = ErrorCodeValue.NotFound;
@@ -2897,8 +2950,7 @@ root, strLibraryCode);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound
-                    || channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile)    // 2019/6/12
+                if (channel.IsEqualNotFound())    // 2019/6/12
                 {
                     bObjectNotFound = channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile;
                     // 如果记录不存在, 则构造一条空的记录
@@ -2919,12 +2971,20 @@ root, strLibraryCode);
             XmlDocument domExist = new XmlDocument();
             try
             {
-                domExist.LoadXml(strExistXml);
+                if (string.IsNullOrEmpty(strExistXml?.Trim()) == true)
+                    domExist.LoadXml("<root />");
+                else
+                    domExist.LoadXml(strExistXml);
             }
             catch (Exception ex)
             {
-                strError = "strExistXml装载进入DOM时发生错误: " + ex.Message;
-                goto ERROR1;
+                if (bForce)
+                    domExist.LoadXml("<root />");
+                else
+                {
+                    strError = "strExistXml 装载进入 DOM 时发生错误: " + ex.Message;
+                    goto ERROR1;
+                }
             }
 
             // 2021/8/5
@@ -3399,6 +3459,10 @@ root, strLibraryCode);
             {
                 if (bForce == true)
                 {
+                    // 2021/8/27
+                    // 虽然本次会报错，但返回新的时间戳给前端，便于前端重试请求成功
+                    baNewTimestamp = exist_timestamp;
+
                     // 2008/5/29 
                     // 在强制修改模式下，时间戳不一致意义重大，直接返回出错，而不进行要害字段的比对判断
                     strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
@@ -4643,7 +4707,7 @@ root, strLibraryCode);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             if (strCommand == "prev")
                                 strError = "到头";
@@ -5148,7 +5212,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             result.Value = 0;
                             if (strCommand == "prev")
@@ -6358,7 +6422,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     strError = "源记录 '" + strSourceRecPath + "' 不存在";
                     // errorcode = channel.OriginErrorCode;
@@ -6488,7 +6552,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             // 如果记录不存在, 说明不会造成覆盖态势
                         }

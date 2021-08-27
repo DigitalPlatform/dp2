@@ -807,7 +807,7 @@ namespace dp2Manager
             if (nRet == -1)
             {
                 strError = "获取注册用户库记录体时出错: " + strError;
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                     return 0;
                 return -1;
             }

@@ -240,6 +240,8 @@ namespace DigitalPlatform.LibraryServer
         // public HangupReason HangupReason = HangupReason.None;
         public List<string> HangupList = new List<string>();    // 具体的挂起原因。因为初始化和各种环节，可能会有不止一种令系统挂起的原因。如果在重试某些操作以后希望解除挂起状态，则需要检查是否消除了全部因素，才能决定是否解除
 
+        public List<string> SystemMessages = new List<string>();    // 系统消息。希望前端看到的报错或者通知消息
+
         public bool PauseBatchTask = false; // 是否暂停后台任务
 
         public string DataDir = "";
@@ -1993,7 +1995,11 @@ namespace DigitalPlatform.LibraryServer
             }
 
             if (bReload == true)
+            {
                 app.WriteErrorLog("LibraryService 重新装载 " + this.m_strFileName + " 的过程发生严重错误 [" + strError + "]，服务处于残缺状态，请及时排除故障后重新启动");
+                // 2021/8/27
+                // TODO: 要想办法让前端可以感知错误，但不影响修改 kernel 配置文件的 API 执行
+            }
             else
             {
                 // app.HangupReason = LibraryServer.HangupReason.StartingError;

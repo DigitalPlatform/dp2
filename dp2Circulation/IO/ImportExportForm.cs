@@ -195,7 +195,7 @@ strStringTable);
 
             this.SetNextButtonEnable();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -265,10 +265,13 @@ strStringTable);
                 {
                     return this.checkBox_convert_addBiblioToItemOnMerging.Checked;
                 }));
+
                 info.OverwriteBiblio = (bool)this.Invoke(new Func<bool>(() =>
                 {
-                    return this.checkBox_target_restoreOldID.Checked;
+                    return this.checkBox_target_biblioRestoreOldID.Checked;
                 }));
+
+
 
                 info.DontChangeOperations = (bool)this.Invoke(new Func<bool>(() =>
                 {
@@ -278,6 +281,17 @@ strStringTable);
                 {
                     return this.checkBox_target_suppressOperLog.Checked;
                 }));
+
+                // 2021/8/27
+                info.RestoreMode = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.comboBox_target_restore.Text;
+                }));
+                info.OverwriteSubrecord = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_subrecordRestoreOldID.Checked;
+                }));
+
                 info.DontSearchDup = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_target_dontSearchDup.Checked;
@@ -514,7 +528,7 @@ Program.MainForm.ActivateFixPage("history")
                     ));
             }
 
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }
@@ -770,12 +784,28 @@ Program.MainForm.ActivateFixPage("history")
                     styles.Add("nocheckdup");
                 if (info.SuppressOperLog)
                     styles.Add("noeventlog");
+                /*
+                if (info.RestoreMode.Contains("书目"))
+                    styles.Add("force");
+                */
             }
             string strStyle = StringUtil.MakePathList(styles);
 
-            if (info.Collect == true)
+            // 2021/8/27
+            string restoreMode = info.RestoreMode;
+            bool writeBiblio = restoreMode != "[不适用]" && string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("书目");
+
+            if (info.Collect == true
+                || writeBiblio == false)
             {
                 string strMessage = "采集数据 '" + strOldPath + "'";
+
+                // 2021/8/27
+                if (writeBiblio == false)
+                {
+                    info.BiblioRecPath = strPath;
+                    strMessage = "越过写入 '" + strPath + "' (不影响写入下级记录)";
+                }
 
                 this.ShowMessage(strMessage);
                 this.OutputText(strMessage, 0);
@@ -783,7 +813,7 @@ Program.MainForm.ActivateFixPage("history")
             else
             {
                 int nRedoCount = 0;
-                REDO:
+            REDO:
                 // 创建或者覆盖书目记录
                 string strError = "";
                 long lRet = info.Channel.SetBiblioInfo(
@@ -968,7 +998,7 @@ out strError);
                     }
                 }
 
-                CONTINUE:
+            CONTINUE:
                 info.BiblioRecPath = strOutputPath;
 
                 {
@@ -982,7 +1012,9 @@ out strError);
             }
 
             // 上传书目记录的数字对象
-            if (info.IncludeSubObjects && info.Collect == false)
+            if (info.IncludeSubObjects
+                && info.Collect == false
+                && writeBiblio == true)
                 UploadObjects(info, info.BiblioRecPath, info.BiblioXml);
 
             return true;
@@ -1141,7 +1173,7 @@ out strError);
             string strOutputPath = "";
             byte[] baNewTimestamp = null;
             int nRedoCount = 0;
-            REDO:
+        REDO:
             long lRet = info.Channel.SetBiblioInfo(
 info.stop,
 info.Simulate ? "simulate_" + strAction : strAction,
@@ -1419,6 +1451,9 @@ new string[] { "重试", "跳过", "中断" });
                     styles.Add("nocheckdup");
                 if (info.SuppressOperLog)
                     styles.Add("noeventlog");
+                if (info.RestoreMode != null
+                    && info.RestoreMode.Contains("下级记录"))
+                    styles.Add("force");
             }
 
             // 2017/1/4
@@ -1455,6 +1490,31 @@ new string[] { "重试", "跳过", "中断" });
                 EntityInfo item = new EntityInfo();
 
                 string strRefID = DomUtil.GetElementText(item_dom.DocumentElement, "refID");
+
+                string strNewPath = "";
+                if (info.OverwriteSubrecord == true)
+                {
+                    string dbName = Global.GetDbName(GetShortPath(strPath));
+                    if (string.IsNullOrEmpty(dbName))
+                        throw new Exception($"下级记录在 bdf 文件中记载的原始路径为 '{strPath}'，无法获得库名部分");
+                    string id = Global.GetRecordID(GetShortPath(strPath));
+                    if (string.IsNullOrEmpty(id))
+                        throw new Exception($"下级记录在 bdf 文件中记载的原始路径为 '{strPath}'，无法获得 ID 部分");
+
+                    string current_dbName = Program.MainForm.GetItemDbName(Global.GetDbName(info.BiblioRecPath));
+                    if (dbName != current_dbName)
+                    {
+                        throw new Exception($"下级记录在 bdf 文件中记载的原始路径为 '{strPath}'，其中的库名部分 '{dbName}' 和即将导入的库名 '{current_dbName}' 不吻合，因此无法实现覆盖回原始 ID 的效果 ");
+                    }
+                    strNewPath = current_dbName + "/" + id;
+                }
+                else
+                {
+                    /*
+                    // 注意 strPath 是长路径 "http://xxxx/dp2library?中文图书实体/1"
+                    strNewPath = Global.GetDbName(GetShortPath(strPath)) + "/?";
+                    */
+                }
 
                 if (strRootElementName == "item")
                 {
@@ -1612,6 +1672,7 @@ new string[] { "重试", "跳过", "中断" });
 
                 item.Action = "new";
 
+                item.NewRecPath = strNewPath;
                 item.NewRecord = strXml;
                 item.NewTimestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
 
@@ -1632,8 +1693,13 @@ new string[] { "重试", "跳过", "中断" });
 
             info.UploadedSubItems += entityArray.Count;
 
+            // 2021/8/27
+            string restoreMode = info.RestoreMode;
+            bool writeSubrecords = restoreMode != "[不适用]" && string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("下级记录");
+
             if (info.Collect == false
-                && entityArray.Count > 0)
+                && entityArray.Count > 0
+                && writeSubrecords == true)
             {
                 WriteEntities(
     info,
@@ -1890,10 +1956,16 @@ new string[] { "继续", "中断" });
             public bool OverwriteBiblio = false;
             public string TargetBiblioDbName = "";  // 目标书目库名
 
+            // 2021/8/27
+            // 下级记录恢复到原先的 ID
+            public bool OverwriteSubrecord = false;
+
             public bool DontChangeOperations = false;
             public bool SuppressOperLog = false;
             public bool DontSearchDup = false;
             public bool AutoPostfix = false;
+
+            public string RestoreMode = "";
 
             public bool IncludeSubItems = true;
             public bool IncludeSubOrders = true;
@@ -2045,7 +2117,7 @@ new string[] { "继续", "中断" });
 
                 controls.Add(this.comboBox_target_targetBiblioDbName);
                 controls.Add(this.checkBox_target_randomItemBarcode);
-                controls.Add(this.checkBox_target_restoreOldID);
+                controls.Add(this.checkBox_target_biblioRestoreOldID);
 
                 controls.Add(this.checkBox_target_dontSearchDup);
                 controls.Add(this.checkBox_target_suppressOperLog);
@@ -2078,7 +2150,7 @@ new string[] { "继续", "中断" });
 
                 controls.Add(this.comboBox_target_targetBiblioDbName);
                 controls.Add(this.checkBox_target_randomItemBarcode);
-                controls.Add(this.checkBox_target_restoreOldID);
+                controls.Add(this.checkBox_target_biblioRestoreOldID);
 
                 controls.Add(this.checkBox_target_dontSearchDup);
                 controls.Add(this.checkBox_target_suppressOperLog);
@@ -2207,6 +2279,7 @@ new string[] { "继续", "中断" });
                     this.checkBox_target_suppressOperLog.Visible = value;
                     this.checkBox_target_dontSearchDup.Visible = value;
                     this.checkBox_target_dontChangeOperations.Visible = value;
+                    this.comboBox_target_restore.Visible = value;
                 }
             }
         }

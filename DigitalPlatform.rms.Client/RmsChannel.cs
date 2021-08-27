@@ -165,6 +165,14 @@ namespace DigitalPlatform.rms.Client
                 this.m_ws.Close();
         }
 
+        public bool IsEqualNotFound()
+        {
+            if (this.ErrorCode == ChannelErrorCode.NotFound
+                || this.ErrorCode == ChannelErrorCode.NotFoundObjectFile)
+                return true;
+            return false;
+        }
+
         static void SetTimeout(System.ServiceModel.Channels.Binding binding)
         {
             binding.SendTimeout = new TimeSpan(0, 20, 0);

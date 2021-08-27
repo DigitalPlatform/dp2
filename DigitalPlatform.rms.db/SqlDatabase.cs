@@ -10358,6 +10358,7 @@ handle.CancelTokenSource.Token).Result;
                 }
 
                 // return:
+                //      -2  出错。strOldXml 结构不合法
                 //      -1  出错
                 //      0   成功
                 nRet = this.MergeKeys(info.ID,
@@ -10369,7 +10370,7 @@ handle.CancelTokenSource.Token).Result;
                     out XmlDocument newDom,
                     out XmlDocument oldDom,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1) // 注: -2 当作正确情况处理
                 {
                     // return -1;
 
@@ -10518,6 +10519,7 @@ handle.CancelTokenSource.Token).Result;
 
 
                 // return:
+                //      -2  出错。strOldXml 结构不合法
                 //      -1  出错
                 //      0   成功
                 nRet = this.MergeKeys(info.ID,
@@ -10531,6 +10533,9 @@ handle.CancelTokenSource.Token).Result;
                     out strError);
                 if (nRet == -1)
                     return -1;
+                // 2021/8/27
+                if (nRet == -2)
+                    bDeleteKeys = true;
                 total_oldkeys.AddRange(oldKeys);
             }
 
@@ -13217,6 +13222,7 @@ handle.CancelTokenSource.Token).Result;
                             DateTime start_time_mergekeys = DateTime.Now;
 
                             // return:
+                            //      -2  出错。strOldXml 结构不合法
                             //      -1  出错
                             //      0   成功
                             nRet = this.MergeKeys(strID,
@@ -13230,6 +13236,9 @@ handle.CancelTokenSource.Token).Result;
                                 out strError);
                             if (nRet == -1)
                                 return -1;
+                            // 2021/8/27
+                            if (nRet == -2)
+                                bForceDeleteKeys = true;
 
                             WriteTimeUsed(
         time_lines,
@@ -19317,6 +19326,7 @@ handle.CancelTokenSource.Token).Result;
                                 // 1.删除检索点
 
                                 // return:
+                                //      -2  出错。strOldXml 结构不合法
                                 //      -1  出错
                                 //      0   成功
                                 nRet = this.MergeKeys(strRecordID,
@@ -19333,6 +19343,9 @@ handle.CancelTokenSource.Token).Result;
                                     strError = "删除中构造检索点阶段出错： " + strError;
                                     return -1;
                                 }
+                                // 2021/8/27
+                                if (nRet == -2)
+                                    strStyle += ",forcedeleteoldkeys";
                             }
 
                             if (oldDom != null
@@ -19596,6 +19609,7 @@ handle.CancelTokenSource.Token).Result;
                         // TODO: 是否可以两次操作用一个command字符串实现？
 
                         // return:
+                        //      -2  出错。strOldXml 结构不合法
                         //      -1  出错
                         //      0   成功
                         nRet = this.MergeKeys(strRecordID,
@@ -19609,6 +19623,9 @@ handle.CancelTokenSource.Token).Result;
                             out strError);
                         if (nRet == -1)
                             return -1;
+                        // 2021/8/27
+                        if (nRet == -2)
+                            strStyle += ",forcedeleteoldkeys";
 
                         if (StringUtil.IsInList("forcedeleteoldkeys", strStyle) == true)
                         {

@@ -149,7 +149,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.IsEqualNotFound())
                     {
                         // 为了避免以后再次从网络获取耗费时间, 需要在本地写一个0字节的文件
                         using(FileStream fs = File.Create(strLocalPath))

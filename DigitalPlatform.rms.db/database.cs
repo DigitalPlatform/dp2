@@ -2268,6 +2268,7 @@ namespace DigitalPlatform.rms
         //      strOldXml   旧记录的XML。可以为""或者null
         //      bOutputDom  是否利用newDom/oldDom顺便输出DOM?
         // return:
+        //      -2  strOldXml 结构不合法。但其实所有 out 参数均已按照 strOldXml 为空处理到位
         //      -1  出错
         //      0   成功
         public int MergeKeys(string strID,
@@ -2330,6 +2331,9 @@ namespace DigitalPlatform.rms
                 }
             }
 
+            // strOldXml 结构出错，专门出错信息
+            string strOldError = "";
+
             oldKeys = new KeyCollection();
 
             if (String.IsNullOrEmpty(strOldXml) == false
@@ -2344,8 +2348,11 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "加载旧数据到dom时出错。" + ex.Message;
-                    return -1;
+                    strOldError = "加载旧数据到dom时出错。" + ex.Message;
+
+                    // 2021/8/27
+                    // TODO: 写入错误日志
+                    oldDom.LoadXml("<root />");
                 }
 
                 if (keysCfg != null)
@@ -2374,6 +2381,9 @@ namespace DigitalPlatform.rms
                 newDom = null;
                 oldDom = null;
             }
+
+            if (string.IsNullOrEmpty(strOldError) == false)
+                return -2;
             return 0;
         }
 

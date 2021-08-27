@@ -263,7 +263,7 @@ namespace DigitalPlatform.Library
 
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.IsEqualNotFound())
                         return 0;	// not found
                     return -1;
                 }
@@ -861,7 +861,7 @@ namespace DigitalPlatform.Library
                 if (lRet == -1)
                 {
                     strError = "获取 '" + strPath + "' 记录体时出错: " + strError;
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.IsEqualNotFound())
                     {
                         return 0;
                     }

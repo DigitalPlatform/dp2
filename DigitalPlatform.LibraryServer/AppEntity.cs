@@ -542,7 +542,7 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            if (channel.IsEqualNotFound())
                                 continue;
 
                             strError = "获取实体记录 '" + record.Path + "' 时发生错误: " + strError;
@@ -925,7 +925,7 @@ namespace DigitalPlatform.LibraryServer
                          out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                             continue;
                         strError = "复制实体记录 '" + info.RecPath + "' 时发生错误: " + strError;
                         goto ERROR1;
@@ -1165,7 +1165,7 @@ namespace DigitalPlatform.LibraryServer
                          out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                             continue;
                         strError = "复制实体记录 '" + info.RecPath + "' 时发生错误: " + strError;
                         goto ERROR1;
@@ -1253,7 +1253,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                             continue;
 
                         // 如果不重试，让时间戳出错暴露出来。
@@ -1282,7 +1282,7 @@ namespace DigitalPlatform.LibraryServer
                                 out strError_1);
                             if (lRet == -1)
                             {
-                                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                                if (channel.IsEqualNotFound())
                                     continue;
 
                                 strError = "在删除实体记录 '" + info.RecPath + "' 时发生时间戳冲突，于是自动重新获取记录，但又发生错误: " + strError_1;
@@ -2487,7 +2487,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.IsEqualNotFound())
                     {
                         result.ErrorCode = ErrorCodeValue.NotFound;
                         goto ERROR1;
@@ -3539,7 +3539,8 @@ out strError);
                             }
 
                             // 2014/7/3
-                            if (this.VerifyBookType == true)
+                            if (this.VerifyBookType == true
+                                && bForce == false) // 2021/8/27
                             {
                                 string strEntityDbName = ResPath.GetDbName(info.NewRecPath);
                                 if (String.IsNullOrEmpty(strEntityDbName) == true)
@@ -4539,7 +4540,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     error = new EntityInfo(info);
                     error.ErrorInfo = "册条码号为 '" + strOldBarcode + "' 的册记录 '" + info.NewRecPath + "' 已不存在";
@@ -4865,7 +4866,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     // 如果记录不存在, 则构造一条空的记录
                     bExist = false;
@@ -5670,7 +5671,7 @@ out strError);
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.IsEqualNotFound())
                     {
                         // 如果记录不存在, 说明不会造成覆盖态势
                         /*
@@ -5710,7 +5711,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                 {
                     /*
                     // 如果记录不存在, 则构造一条空的记录
@@ -6565,7 +6566,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                             continue;
 
                         // 如果不重试，让时间戳出错暴露出来。
@@ -6593,7 +6594,7 @@ out strError);
                                 out strError_1);
                             if (lRet == -1)
                             {
-                                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                                if (channel.IsEqualNotFound())
                                     continue;
 
                                 strError = "在修改实体记录 '" + info.RecPath + "' 时发生时间戳冲突，于是自动重新获取记录，但又发生错误: " + strError_1;
@@ -6715,7 +6716,7 @@ out strError);
     out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.IsEqualNotFound())
                     return 0;
                 return -1;
             }

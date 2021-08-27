@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.85.*")]
-[assembly: AssemblyFileVersion("3.85.0.0")]
+[assembly: AssemblyVersion("3.86.*")]
+[assembly: AssemblyFileVersion("3.86.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -282,3 +282,4 @@ ItemCanReturn()
 //		3.83 (2021/8/24) Borrow() API 在续借的时候，以前版本会重设册记录的 borrowID 元素为新值。现在改为不改变 borrowID 原值。但倘若册记录中 borrowID 元素续借时候如果不存在，则会自动创建一个 borrowID 元素赋予一个新的 GUID 值(这种情况会出现在很久以前的版本 Borrow() API 借书产生的册记录中。不过这只是理论推测。一旦时间很久了没有还，可能会超期，就没法续借了，所以这种续借时候发现册记录中 borrowID 元素不存在的情况遇到的概率也不是很大)
 //		3.84 (2021/8/25) Borrow() 和 Return() API 支持在 strStyle 参数中使用 ",comment:xxxx"，以便在操作日志记录中写入 clientComment 元素
 //		3.85 (2021/8/26) Borrow() API 的 strStyle 参数内可以使用 ",special:dontCheckOverdue|dontCheckAmerce" 特性，效果分别是“不检查潜在超期册”和“不检查待交费信息”。不过这两项特性都需要当前账户具有 specialcharging 权限。操作日志记录中会写入 special 元素，元素文本内容是 strStyle 参数中 ",special:xxx|xxx" 片段的 xxx|xxx 部分
+//		3.86 (2021/8/27) 巩固 SetReaderInfo() API。force change 情况下，如果从数据库中读出的 XML 不合法，不会报错。也就是说可以用 force change 来强制修改一条读者记录

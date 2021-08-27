@@ -4928,7 +4928,7 @@ namespace dp2Library
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             result.Value = 0;
                             return result;
@@ -5775,7 +5775,7 @@ namespace dp2Library
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            if (channel.IsEqualNotFound())
                             {
                                 result.Value = 0;
                                 if (strCommand == "prev")
@@ -6062,7 +6062,7 @@ namespace dp2Library
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             result.ErrorInfo = "书目记录 " + strBiblioRecPath + " 不存在";
                             return result;
@@ -6879,7 +6879,7 @@ namespace dp2Library
     out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             result.Value = 0;
                             if (strCommand == "prev")
@@ -7358,7 +7358,7 @@ namespace dp2Library
         out strError);
                         if (lRet == -1)
                         {
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            if (channel.IsEqualNotFound())
                             {
                                 result.Value = 0;
                                 if (strCommand == "prev")
@@ -8390,7 +8390,7 @@ namespace dp2Library
     out strError);
                     if (lRet == -1)
                     {
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        if (channel.IsEqualNotFound())
                         {
                             result.Value = 0;
                             if (strCommand == "prev")
@@ -14311,7 +14311,7 @@ Stack:
     out strError);
                         if (lRet == -1)
                         {
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            if (channel.IsEqualNotFound())
                             {
                                 result.Value = 0;
                                 if (strCommand == "prev")
