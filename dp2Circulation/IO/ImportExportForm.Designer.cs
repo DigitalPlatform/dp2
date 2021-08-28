@@ -54,8 +54,9 @@
             this.checkBox_convert_refreshRefID = new System.Windows.Forms.CheckBox();
             this.checkBox_target_randomItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_target = new System.Windows.Forms.TabPage();
+            this.checkBox_target_subrecordRestoreOldID = new System.Windows.Forms.CheckBox();
             this.comboBox_target_restore = new System.Windows.Forms.ComboBox();
-            this.label7 = new System.Windows.Forms.Label();
+            this.label_target_restore = new System.Windows.Forms.Label();
             this.checkBox_target_autoPostfix = new System.Windows.Forms.CheckBox();
             this.textBox_target_dbNameList = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -69,7 +70,6 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.checkBox_target_subrecordRestoreOldID = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -347,7 +347,7 @@
             this.panel_map.Location = new System.Drawing.Point(5, 275);
             this.panel_map.Margin = new System.Windows.Forms.Padding(5);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(826, 213);
+            this.panel_map.Size = new System.Drawing.Size(796, 213);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -390,7 +390,7 @@
             this.tabPage_target.AutoScroll = true;
             this.tabPage_target.Controls.Add(this.checkBox_target_subrecordRestoreOldID);
             this.tabPage_target.Controls.Add(this.comboBox_target_restore);
-            this.tabPage_target.Controls.Add(this.label7);
+            this.tabPage_target.Controls.Add(this.label_target_restore);
             this.tabPage_target.Controls.Add(this.checkBox_target_autoPostfix);
             this.tabPage_target.Controls.Add(this.textBox_target_dbNameList);
             this.tabPage_target.Controls.Add(this.label6);
@@ -410,6 +410,17 @@
             this.tabPage_target.Text = "目标库";
             this.tabPage_target.UseVisualStyleBackColor = true;
             // 
+            // checkBox_target_subrecordRestoreOldID
+            // 
+            this.checkBox_target_subrecordRestoreOldID.AutoSize = true;
+            this.checkBox_target_subrecordRestoreOldID.Location = new System.Drawing.Point(17, 340);
+            this.checkBox_target_subrecordRestoreOldID.Margin = new System.Windows.Forms.Padding(5);
+            this.checkBox_target_subrecordRestoreOldID.Name = "checkBox_target_subrecordRestoreOldID";
+            this.checkBox_target_subrecordRestoreOldID.Size = new System.Drawing.Size(321, 25);
+            this.checkBox_target_subrecordRestoreOldID.TabIndex = 12;
+            this.checkBox_target_subrecordRestoreOldID.Text = "下级记录恢复到原先的记录 ID";
+            this.checkBox_target_subrecordRestoreOldID.UseVisualStyleBackColor = true;
+            // 
             // comboBox_target_restore
             // 
             this.comboBox_target_restore.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -425,15 +436,15 @@
             this.comboBox_target_restore.Size = new System.Drawing.Size(330, 29);
             this.comboBox_target_restore.TabIndex = 11;
             // 
-            // label7
+            // label_target_restore
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(10, 275);
-            this.label7.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(202, 21);
-            this.label7.TabIndex = 10;
-            this.label7.Text = "恢复模式(危险)(&R):";
+            this.label_target_restore.AutoSize = true;
+            this.label_target_restore.Location = new System.Drawing.Point(10, 275);
+            this.label_target_restore.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label_target_restore.Name = "label_target_restore";
+            this.label_target_restore.Size = new System.Drawing.Size(202, 21);
+            this.label_target_restore.TabIndex = 10;
+            this.label_target_restore.Text = "恢复模式(危险)(&R):";
             // 
             // checkBox_target_autoPostfix
             // 
@@ -576,17 +587,6 @@
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
-            // checkBox_target_subrecordRestoreOldID
-            // 
-            this.checkBox_target_subrecordRestoreOldID.AutoSize = true;
-            this.checkBox_target_subrecordRestoreOldID.Location = new System.Drawing.Point(17, 340);
-            this.checkBox_target_subrecordRestoreOldID.Margin = new System.Windows.Forms.Padding(5);
-            this.checkBox_target_subrecordRestoreOldID.Name = "checkBox_target_subrecordRestoreOldID";
-            this.checkBox_target_subrecordRestoreOldID.Size = new System.Drawing.Size(321, 25);
-            this.checkBox_target_subrecordRestoreOldID.TabIndex = 12;
-            this.checkBox_target_subrecordRestoreOldID.Text = "下级记录恢复到原先的记录 ID";
-            this.checkBox_target_subrecordRestoreOldID.UseVisualStyleBackColor = true;
-            // 
             // ImportExportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -656,7 +656,7 @@
         private System.Windows.Forms.CheckBox checkBox_target_randomItemRegisterNo;
         private System.Windows.Forms.CheckBox checkBox_target_autoPostfix;
         private System.Windows.Forms.ComboBox comboBox_target_restore;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label_target_restore;
         private System.Windows.Forms.CheckBox checkBox_target_subrecordRestoreOldID;
     }
 }

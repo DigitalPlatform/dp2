@@ -848,7 +848,6 @@ MessageBoxDefaultButton.Button1);
 
                 return;
             }
-
         }
 
         // 将本地字符串匹配序列号

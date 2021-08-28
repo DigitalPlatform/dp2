@@ -5364,11 +5364,14 @@ namespace DigitalPlatform.LibraryServer
                 }
                 */
                 // 2021/6/29
-                string value = GetPasswordValue(node as XmlElement);
+                string value = GetPasswordValue(node as XmlElement, out string type);
                 if (string.IsNullOrEmpty(value))
                     account.Password = "";
                 else
                     account.Password = value;
+
+                // 2021/8/29
+                account.PasswordType = type;
             }
             catch
             {
@@ -9411,6 +9414,7 @@ out strError);
         //          5) 如果以"CN:"开头，表示利用证件号码进行检索
         //          6) 否则用证条码号进行检索
         //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
+        //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
         // return:
         //      -2  当前没有配置任何读者库，或者可以操作的读者库
         //      -1  error
@@ -10544,6 +10548,9 @@ out strError);
             return strRight;
         }
 
+        // parameters:
+        //      strStyle 时间范围风格。 空 / day / month / year
+        //              空等于 day
         public static string GetTimeRangeByStyle(string strStyle)
         {
             if (string.IsNullOrEmpty(strStyle) == true)
@@ -10563,6 +10570,7 @@ out strError);
             return DateTimeUtil.DateTimeToString8(DateTime.Now);
         }
 
+        // 获得一个 token
         // TODO: 要解决 localhost 和 127.0.0.1 和 ::1 和具体四段 IP 地址之间的等同关系判断问题
         // 创建 token
         public static int MakeToken(string strClientIP,
@@ -10813,6 +10821,7 @@ out strError);
             //          5) 如果以"CN:"开头，表示利用证件号码进行检索
             //          6) 否则用证条码号进行检索
             //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
+            //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
             // return:
             //      -2  当前没有配置任何读者库，或者可以操作的读者库
             //      -1  error
@@ -11800,8 +11809,12 @@ out strError);
             }
 
             // 验证密码
+            string type = null;
             string strSha1Text = DomUtil.GetElementText(readerdom.DocumentElement,
-                "password");
+                "password",
+                out XmlNode node);
+            if (node != null)
+                type = (node as XmlElement).GetAttribute("type");
 
             if (StringUtil.HasHead(strPassword, "token:") == true)
             {
@@ -11815,6 +11828,7 @@ out strError);
                     out strError);
             }
 
+            /*
             // 允许读者记录中有明文空密码
             if (String.IsNullOrEmpty(strSha1Text) == true)
             {
@@ -11844,6 +11858,18 @@ out strError);
             }
 
             return 1;
+            */
+            // 2021/8/28
+            // return:
+            //      -1  出错
+            //      0   不匹配
+            //      1   匹配
+            return LibraryServerUtil.MatchUserPassword(
+                type,
+                strPassword,
+                strSha1Text,
+                true,
+                out strError);
         }
 
         // 验证读者临时密码
@@ -11890,7 +11916,7 @@ out strError);
             // 验证密码
             string strSha1Text = DomUtil.GetAttr(node,
                 "tempPassword");
-
+            /*
             // 允许读者记录中有明文空密码
             if (String.IsNullOrEmpty(strSha1Text) == true)
             {
@@ -11920,6 +11946,18 @@ out strError);
             }
 
             return 1;
+            */
+            // 2021/8/28
+            // return:
+            //      -1  出错
+            //      0   不匹配
+            //      1   匹配
+            return LibraryServerUtil.MatchUserPassword(
+                null,
+                strPassword,
+                strSha1Text,
+                true,
+                out strError);
         }
 
         // 修改读者密码
@@ -11941,6 +11979,7 @@ out strError);
                 return -1;
             }
 
+            /*
             try
             {
                 strNewPassword = Cryptography.GetSHA1(strNewPassword);
@@ -11950,6 +11989,19 @@ out strError);
                 strError = "内部错误";
                 return -1;
             }
+            */
+            string new_type = "bcrypt";
+            // 2021/8/28
+            // return:
+            //      -1  出错
+            //      0   成功
+            int nRet = LibraryServerUtil.SetUserPassword(
+                new_type,
+                strNewPassword,
+                out strNewPassword,
+                out strError);
+            if (nRet == -1)
+                return -1;
 
             XmlElement node = DomUtil.SetElementText(readerdom.DocumentElement,
                 "password", strNewPassword);
@@ -11959,6 +12011,8 @@ out strError);
                 // 清理临时密码
                 DomUtil.SetAttr(node, "tempPassword", null);
                 // 但失效期不清除
+
+                node.SetAttribute("type", new_type);
             }
 
             // 2021/7/4
@@ -12042,6 +12096,7 @@ out strError);
         {
             strError = "";
 
+            /*
             try
             {
                 strTempPassword = Cryptography.GetSHA1(strTempPassword);
@@ -12051,6 +12106,19 @@ out strError);
                 strError = "内部错误";
                 return -1;
             }
+            */
+            string type = null;
+            // 2021/8/28
+            // return:
+            //      -1  出错
+            //      0   成功
+            int nRet = LibraryServerUtil.SetUserPassword(
+                type,
+                strTempPassword,
+                out strTempPassword,
+                out strError);
+            if (nRet == -1)
+                return -1;
 
             XmlElement node = readerdom.DocumentElement.SelectSingleNode("password") as XmlElement;
             if (node == null)
@@ -13254,7 +13322,7 @@ strLibraryCode);    // 读者所在的馆代码
                 if (check_old_password)
                 {
                     // 和当前存在的旧密码比较
-                    var old_password_hashed = GetPasswordValue(root);
+                    var old_password_hashed = GetPasswordValue(root, out string type);
                     if (string.IsNullOrEmpty(old_password_hashed) == false)
                     {
                         // 验证密码
@@ -13263,8 +13331,10 @@ strLibraryCode);    // 读者所在的馆代码
                         //      0   不匹配
                         //      1   匹配
                         int nRet = LibraryServerUtil.MatchUserPassword(
+                            type,
                             password,
                             old_password_hashed,
+                            true,
                             out _);
                         if (nRet == 1)
                             errors.Add("密码不能和旧密码相同");
@@ -16153,6 +16223,10 @@ strLibraryCode);    // 读者所在的馆代码
 
         private string password = "";
         public string Password { get => password; set => password = value; }
+
+        // 2021/8/29
+        private string passwordType = "";
+        public string PasswordType { get => passwordType; set => passwordType = value; }
 
         // 2021/7/3
         private DateTime passwordExpire = DateTime.MaxValue;

@@ -7140,7 +7140,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 this.listView_records.EndUpdate();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 goto ERROR1;
@@ -9177,6 +9177,14 @@ MessageBoxDefaultButton.Button1);
             menuItem.Click += new System.EventHandler(this.menu_recover_saveToDatabase_Click);
             if (this.listView_restoreList.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
+            menuItem.Tag = true;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("保存回数据库[自动选择](&S) [" + this.listView_restoreList.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_recover_saveToDatabase_Click);
+            if (this.listView_restoreList.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            menuItem.Tag = false;
             contextMenu.MenuItems.Add(menuItem);
 
 
@@ -9193,17 +9201,16 @@ MessageBoxDefaultButton.Button1);
         void menu_recover_saveToDatabase_Click(object sender, EventArgs e)
         {
             string strError = "";
-            /*
-            ListViewItem history_item = (sender as MenuItem)?.Tag as ListViewItem;
-            if (history_item != null
-                && this.listView_restoreList.SelectedItems.Count != 1)
+
+            if (this.listView_restoreList.SelectedItems.Count == 0)
             {
-                strError = "当从下方 ListView 触发命令时，上方 ListView 的 SelectedItems.Count 必须为 1";
+                strError = "尚未选择要保存的事项";
                 goto ERROR1;
             }
-            */
+            var control = (bool)((sender as MenuItem)?.Tag);
+
             // Ctrl 用于弹出对话框选择用哪个 XML 来写回数据库
-            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            // var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
             LibraryChannel channel = this.GetChannel();
 
@@ -9215,10 +9222,10 @@ MessageBoxDefaultButton.Button1);
             this.EnableControls(false);
             try
             {
-                stop.SetProgressRange(0, this.listView_restoreList.Items.Count);
+                stop.SetProgressRange(0, this.listView_restoreList.SelectedItems.Count);
 
                 int i = 0;
-                foreach (ListViewItem item in this.listView_restoreList.Items)
+                foreach (ListViewItem item in this.listView_restoreList.SelectedItems)
                 {
                     string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_RECOVER_RECPATH);
                     if (string.IsNullOrEmpty(strBiblioRecPath))
@@ -9231,6 +9238,48 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     string xml = data.GetLastXml();
+
+                    if (control)
+                    {
+                        if (data.Xmls == null || data.Xmls.Count == 0)
+                        {
+                            MessageBox.Show(this, $"路径为 '{strBiblioRecPath}' 的 XML 记录为空，无法写回。点“确定”继续处理其它记录");
+                            goto CONTINUE;
+                        }
+                        using (SelectXmlDialog dlg = new SelectXmlDialog())
+                        {
+                            dlg.Font = this.Font;
+                            dlg.Text = $"请选择要写回 {strBiblioRecPath} 的 XML 记录";
+                            dlg.Xmls = data.Xmls;
+
+                            dlg.UiState = Program.MainForm.AppInfo.GetString(
+    "OperLogForm",
+    "SelectXmlDialog_uiState",
+    "");
+                            Program.MainForm.AppInfo.LinkFormState(dlg, "SelectXmlDialog_state");
+                            dlg.ShowDialog(this);
+
+                            Program.MainForm.AppInfo.SetString(
+"OperLogForm",
+"SelectXmlDialog_uiState",
+dlg.UiState);
+
+                            if (dlg.DialogResult == DialogResult.Cancel)
+                            {
+                                strError = "中断处理";
+                                goto ERROR1;
+                            }
+
+                            xml = dlg.SelectedXml;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(xml))
+                    {
+                        MessageBox.Show(this, $"路径为 '{strBiblioRecPath}' 的 XML 记录为空，无法写回。点“确定”继续处理其它记录");
+                        goto CONTINUE;
+                    }
+
                     /*
                     // 如果是从 history list 中触发的本命令
                     if (history_item != null)
@@ -9460,7 +9509,7 @@ MessageBoxDefaultButton.Button1);
                     stop.SetMessage("正在保存书目记录 " + strBiblioRecPath + " 到 .bdf 文件");
 
                     XmlDocument biblio_dom = new XmlDocument();
-                    biblio_dom.LoadXml(data.Xml);
+                    biblio_dom.LoadXml(data.GetLastXml());
 
                     // 写入 dprms:record 元素
                     writer.WriteStartElement("dprms", "record", DpNs.dprms);
@@ -10050,7 +10099,8 @@ MessageBoxDefaultButton.Button1);
 
             if (strAction.IndexOf("delete") != -1
                 || strAction.IndexOf("copy") != -1
-                || strAction.IndexOf("move") != -1)
+                || strAction.IndexOf("move") != -1
+                || strAction.IndexOf("change") != -1)
             {
                 XmlNode node = dom.DocumentElement.SelectSingleNode("oldRecord/@recPath");
                 if (node != null)
@@ -10061,11 +10111,14 @@ MessageBoxDefaultButton.Button1);
                     {
                         strXml = DomUtil.GetElementText(dom.DocumentElement, "oldRecord");
 
-                        RecoverBiblioItem record = new RecoverBiblioItem();
-                        record.Type = GetDbType(strBiblioRecPath);
-                        record.BiblioRecPath = strBiblioRecPath;
-                        record.Xml = strXml;
-                        records.Add(record);
+                        if (string.IsNullOrEmpty(strXml) == false)
+                        {
+                            RecoverBiblioItem record = new RecoverBiblioItem();
+                            record.Type = GetDbType(strBiblioRecPath);
+                            record.BiblioRecPath = strBiblioRecPath;
+                            record.Xml = strXml;
+                            records.Add(record);
+                        }
                     }
                 }
             }
@@ -10080,11 +10133,14 @@ MessageBoxDefaultButton.Button1);
                     {
                         strXml = DomUtil.GetElementText(dom.DocumentElement, "record");
 
-                        RecoverBiblioItem record = new RecoverBiblioItem();
-                        record.Type = GetDbType(strBiblioRecPath);
-                        record.BiblioRecPath = strBiblioRecPath;
-                        record.Xml = strXml;
-                        records.Add(record);
+                        if (string.IsNullOrEmpty(strXml) == false)
+                        {
+                            RecoverBiblioItem record = new RecoverBiblioItem();
+                            record.Type = GetDbType(strBiblioRecPath);
+                            record.BiblioRecPath = strBiblioRecPath;
+                            record.Xml = strXml;
+                            records.Add(record);
+                        }
                     }
                 }
             }

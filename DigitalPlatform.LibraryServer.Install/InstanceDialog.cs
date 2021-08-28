@@ -2841,7 +2841,11 @@ MessageBoxDefaultButton.Button2);
                 else if (version < 3.0)
                 {
                     // 新的密码存储策略
-                    nRet = LibraryServerUtil.SetUserPassword(this.SupervisorPassword, out string strHashed, out strError);
+                    nRet = LibraryServerUtil.SetUserPassword(
+                        null,
+                        this.SupervisorPassword,
+                        out string strHashed,
+                        out strError);
                     if (nRet == -1)
                     {
                         strError = "SetUserPassword() error: " + strError;
@@ -2853,13 +2857,20 @@ MessageBoxDefaultButton.Button2);
                 {
                     // 2021/7/14
                     // >= 3.0
-                    nRet = LibraryServerUtil.SetUserPassword(this.SupervisorPassword, out string strHashed, out strError);
+                    string new_type = "bcrypt";
+                    nRet = LibraryServerUtil.SetUserPassword(
+                        new_type,
+                        this.SupervisorPassword, 
+                        out string strHashed,
+                        out strError);
                     if (nRet == -1)
                     {
                         strError = "SetUserPassword() error: " + strError;
                         return -1;
                     }
-                    LibraryServerUtil.SetPasswordValue(nodeSupervisor, strHashed);
+                    LibraryServerUtil.SetPasswordValue(nodeSupervisor,
+                        new_type,
+                        strHashed);
                 }
             }
             if (this.SupervisorRights != null)

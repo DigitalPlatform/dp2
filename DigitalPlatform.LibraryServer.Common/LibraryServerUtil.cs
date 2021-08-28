@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
+using static BCrypt.Net.BCrypt;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -333,7 +334,11 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     string strHashed = "";
-                    int nRet = SetUserPassword(strPlainText, out strHashed, out strError);
+                    int nRet = SetUserPassword(
+                        null,
+                        strPlainText,
+                        out strHashed,
+                        out strError);
                     if (nRet == -1)
                     {
                         strError = "SetUserPassword() error: " + strError;
@@ -341,13 +346,16 @@ namespace DigitalPlatform.LibraryServer
                     }
                     // user.SetAttribute("password", strHashed);
                     // 2021/7/14
-                    SetPasswordValue(user, strHashed);
+                    SetPasswordValue(user,
+                        null,
+                        strHashed);
                 }
             }
 
             return 0;
         }
 
+        /*
         // 2021/6/29
         public static void SetPasswordValue(XmlElement account, string password_text)
         {
@@ -359,26 +367,48 @@ namespace DigitalPlatform.LibraryServer
             }
             password_element.InnerText = password_text;
         }
+        */
+
+        // 2021/6/29
+        public static void SetPasswordValue(XmlElement account,
+            string type,
+            string password_text)
+        {
+            XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
+            if (password_element == null)
+            {
+                password_element = account.OwnerDocument.CreateElement("password");
+                password_element = account.AppendChild(password_element) as XmlElement;
+            }
+
+            // 2021/8/26
+            if (string.IsNullOrEmpty(type))
+                password_element.RemoveAttribute("type");
+            else
+                password_element.SetAttribute("type", type);
+            password_element.InnerText = password_text;
+        }
 
         // 2015/5/20 新的密码存储策略
         // 验证密码
         // parameters:
-        //      strPasswordStyle    强密码规则。如果不打算进行密码强度检查，可使用 null 调用本函数
+        //      allowEmptyHashed    是否允许空的 hashed
         // return:
         //      -1  出错
         //      0   不匹配
         //      1   匹配
         public static int MatchUserPassword(
+            string type,
             string strPassword,
             string strHashed,
-            // string strPasswordStyle,
+            bool allowEmptyHashed,
             out string strError)
         {
             strError = "";
             // int nRet = 0;
 
             // 允许明文空密码
-            if (String.IsNullOrEmpty(strHashed) == true)
+            if (allowEmptyHashed && String.IsNullOrEmpty(strHashed) == true)
             {
                 if (strPassword != strHashed)
                 {
@@ -389,20 +419,44 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             }
 
-            try
+            if (type == "bcrypt")
             {
-                strPassword = Cryptography.GetSHA1(strPassword);
+                try
+                {
+                    if (Verify(strPassword, strHashed) == false)
+                    {
+                        strError = "密码不正确";
+                        return 0;
+                    }
+                }
+                catch
+                {
+                    strError = "内部错误";
+                    return -1;
+                }
             }
-            catch
+            else if (type == "sha1" || string.IsNullOrEmpty(type))
             {
-                strError = "内部错误";
-                return -1;
-            }
+                try
+                {
+                    strPassword = Cryptography.GetSHA1(strPassword);
+                }
+                catch
+                {
+                    strError = "内部错误";
+                    return -1;
+                }
 
-            if (strPassword != strHashed)
+                if (strPassword != strHashed)
+                {
+                    strError = "密码不正确";
+                    return 0;
+                }
+            }
+            else
             {
-                strError = "密码不正确";
-                return 0;
+                strError = $"未知的 type '{type}'";
+                return -1;
             }
 
             return 1;
@@ -410,10 +464,13 @@ namespace DigitalPlatform.LibraryServer
 
         // 2015/5/20 新的密码存储策略
         // 准备用于存储的密码
+        // parameters:
+        //      type    密码算法。如果为 null，表示 SHA1
         // return:
         //      -1  出错
         //      0   成功
         public static int SetUserPassword(
+            string type,
             string strNewPassword,
             out string strHashed,
             out string strError)
@@ -421,13 +478,33 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             strHashed = "";
 
-            try
+            if (type == "bcrypt")
             {
-                strHashed = Cryptography.GetSHA1(strNewPassword);
+                try
+                {
+                    strHashed = HashPassword(strNewPassword);
+                }
+                catch
+                {
+                    strError = "内部错误";
+                    return -1;
+                }
             }
-            catch
+            else if (type == "sha1" || string.IsNullOrEmpty(type))
             {
-                strError = "内部错误";
+                try
+                {
+                    strHashed = Cryptography.GetSHA1(strNewPassword);
+                }
+                catch
+                {
+                    strError = "内部错误";
+                    return -1;
+                }
+            }
+            else
+            {
+                strError = $"未知的 type '{type}'";
                 return -1;
             }
 

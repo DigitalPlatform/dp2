@@ -59,25 +59,37 @@ namespace DigitalPlatform.IO
             }
         }
 
-        // 改名
-        public void FileMove(string strSourceFileName,
+        // 改名(移动)
+        // return:
+        //      false   strSrouceFileName 不存在，没有发生移动
+        //      true    已成功移动
+        public bool FileMove(string strSourceFileName,
             string strFileName,
             bool auto_retry)
         {
             this.ClearItems(strSourceFileName);
             this.ClearItems(strFileName);
             if (auto_retry == false)
+            {
                 File.Move(strSourceFileName, strFileName);
+                return true;
+            }
             else
             {
                 try
                 {
                     File.Move(strSourceFileName, strFileName);
+                    return true;
+                }
+                catch (FileNotFoundException)
+                {
+                    return false;
                 }
                 catch (System.IO.IOException)
                 {
                     File.Delete(strFileName);
                     File.Move(strSourceFileName, strFileName);
+                    return true;
                 }
             }
         }

@@ -386,8 +386,11 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  出错
                 //      0   不匹配
                 //      1   匹配
-                nRet = LibraryServerUtil.MatchUserPassword(dlg.Password,
+                nRet = LibraryServerUtil.MatchUserPassword(
+                    info.SupervisorPasswordType,
+                    dlg.Password,
                     info.SupervisorPassword,
+                    true,
                     out strError);
                 if (nRet == -1)
                 {
@@ -477,8 +480,11 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  出错
                 //      0   不匹配
                 //      1   匹配
-                nRet = LibraryServerUtil.MatchUserPassword(dlg.Password,
+                nRet = LibraryServerUtil.MatchUserPassword(
+                    info.SupervisorPasswordType,
+                    dlg.Password,
                     info.SupervisorPassword,
+                    true,
                     out strError);
                 if (nRet == -1)
                 {
@@ -751,6 +757,16 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
                     // 得到 supervisor 密码的明文
+                }
+
+                // 2021/8/20
+                // 3.0 以后密码是存储在 password 元素正文
+                if (info.Version >= 3.0)
+                {
+                    var element = nodeSupervisor.SelectSingleNode("password") as XmlElement;
+
+                    info.SupervisorPassword = element?.InnerText;
+                    info.SupervisorPasswordType = element?.GetAttribute("type");
                 }
             }
 
@@ -1818,7 +1834,8 @@ RestoreLibraryParam param
         public string DataDir = "";
         public string SupervisorUserName = "";
         public string SupervisorPassword = "";  // 这是 hash 以后的密码，不是明文
-
+        public string SupervisorPasswordType = null;    // 2021/8/29
+        
         public bool InitialDatabase = false;
 
         // 2015/5/20

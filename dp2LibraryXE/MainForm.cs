@@ -2754,7 +2754,10 @@ TaskScheduler.Default);
                 {
                     // 新的密码存储策略
                     string strHashed = "";
-                    nRet = LibraryServerUtil.SetUserPassword(strSupervisorPassword, out strHashed, out strError);
+                    nRet = LibraryServerUtil.SetUserPassword(
+                        null,
+                        strSupervisorPassword, 
+                        out strHashed, out strError);
                     if (nRet == -1)
                     {
                         strError = "SetUserPassword() error: " + strError;

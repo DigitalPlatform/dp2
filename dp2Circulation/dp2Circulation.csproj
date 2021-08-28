@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>150</ApplicationRevision>
+    <ApplicationRevision>151</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -793,6 +793,12 @@
       <DependentUpon>OperLogScriptDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="OperLog\OperLogReport.cs" />
+    <Compile Include="OperLog\SelectXmlDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperLog\SelectXmlDialog.Designer.cs">
+      <DependentUpon>SelectXmlDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Order\BatchOrder\BatchOrderForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -2021,6 +2027,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="OperLog\OperLogScriptDialog.resx">
       <DependentUpon>OperLogScriptDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperLog\SelectXmlDialog.resx">
+      <DependentUpon>SelectXmlDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Order\BatchOrder\BatchOrderForm.resx">
       <DependentUpon>BatchOrderForm.cs</DependentUpon>

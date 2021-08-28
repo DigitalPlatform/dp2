@@ -469,7 +469,12 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
 
-                    nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out string strHashed, out strError);
+                    string type = "bcrypt";
+                    nRet = LibraryServerUtil.SetUserPassword(
+                        type,
+                        userinfo.Password,
+                        out string strHashed,
+                        out strError);
                     if (nRet == -1)
                     {
                         // 删除刚创建的 account 元素
@@ -478,7 +483,9 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
-                    SetPasswordValue(nodeAccount, strHashed);
+                    LibraryServerUtil.SetPasswordValue(nodeAccount, 
+                        type,
+                        strHashed);
                 }
 
                 // 注: 无论是否明确要求设置密码(也就是说可能会创建空密码)，都要为密码设置失效期
@@ -583,13 +590,18 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 2021/6/29
-        public static string GetPasswordValue(XmlElement account)
+        public static string GetPasswordValue(XmlElement account,
+            out string type)
         {
+            type = (account.SelectSingleNode("password") as XmlElement)?.GetAttribute("type");
             return account.SelectSingleNode("password")?.InnerText;
         }
 
+        /* 已经移动到 LibraryServerUtil 中
         // 2021/6/29
-        public static void SetPasswordValue(XmlElement account, string password_text)
+        public static void SetPasswordValue(XmlElement account,
+            string type,
+            string password_text)
         {
             XmlElement password_element = account.SelectSingleNode("password") as XmlElement;
             if (password_element == null)
@@ -597,8 +609,15 @@ namespace DigitalPlatform.LibraryServer
                 password_element = account.OwnerDocument.CreateElement("password");
                 password_element = account.AppendChild(password_element) as XmlElement;
             }
+
+            // 2021/8/26
+            if (string.IsNullOrEmpty(type))
+                password_element.RemoveAttribute("type");
+            else
+                password_element.SetAttribute("type", type);
             password_element.InnerText = password_text;
         }
+        */
 
         // 2021/7/2
         // parameters:
@@ -804,7 +823,7 @@ namespace DigitalPlatform.LibraryServer
                 if (check_old_password)
                 {
                     // 和当前存在的旧密码比较
-                    var old_password_hashed = GetPasswordValue(account);
+                    var old_password_hashed = GetPasswordValue(account, out string type);
                     if (string.IsNullOrEmpty(old_password_hashed) == false)
                     {
                         // 验证密码
@@ -813,8 +832,10 @@ namespace DigitalPlatform.LibraryServer
                         //      0   不匹配
                         //      1   匹配
                         int nRet = LibraryServerUtil.MatchUserPassword(
+                            type,
                             password,
                             old_password_hashed,
+                            true,
                             out _);
                         if (nRet == 1)
                             errors.Add("密码不能和旧密码相同");
@@ -997,7 +1018,7 @@ out strError);
                     return -1;
 
                 // string strExistPassword = DomUtil.GetAttr(node, "password");
-                string strExistPassword = GetPasswordValue(nodeAccount);
+                string strExistPassword = GetPasswordValue(nodeAccount, out string old_type);
 
                 // 注：这里故意不检查密码是否失效。因为即便密码失效，也要允许修改密码
 
@@ -1005,7 +1026,12 @@ out strError);
                 //      -1  出错
                 //      0   不匹配
                 //      1   匹配
-                nRet = LibraryServerUtil.MatchUserPassword(strOldPassword, strExistPassword, out strError);
+                nRet = LibraryServerUtil.MatchUserPassword(
+                    old_type,
+                    strOldPassword, 
+                    strExistPassword, 
+                    true, 
+                    out strError);
                 if (nRet == -1)
                     return -1;
 
@@ -1042,11 +1068,18 @@ out strError);
 
                 // 设置新密码
                 string strHashed = "";
-                nRet = LibraryServerUtil.SetUserPassword(strNewPassword, out strHashed, out strError);
+                string new_type = "bcrypt";
+                nRet = LibraryServerUtil.SetUserPassword(
+                    new_type,
+                    strNewPassword,
+                    out strHashed,
+                    out strError);
                 if (nRet == -1)
                     return -1;
                 // DomUtil.SetAttr(node, "password", strHashed);
-                SetPasswordValue(nodeAccount, strHashed);
+                LibraryServerUtil.SetPasswordValue(nodeAccount, 
+                    new_type,
+                    strHashed);
                 if (LibraryServerUtil.IsSpecialUserName(strUserName) == false)
                     SetPasswordExpire(nodeAccount, _passwordExpirePeriod, DateTime.Now);
 
@@ -1542,7 +1575,12 @@ out strError);
                     }
 
                     string strHashed = "";
-                    nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out strHashed, out strError);
+                    string type = "bcrypt";
+                    nRet = LibraryServerUtil.SetUserPassword(
+                        type,
+                        userinfo.Password, 
+                        out strHashed, 
+                        out strError);
                     if (nRet == -1)
                     {
                         // 撤销全部修改
@@ -1551,7 +1589,9 @@ out strError);
                     }
 
                     // DomUtil.SetAttr(nodeAccount, "password", strHashed);
-                    SetPasswordValue(nodeAccount, strHashed);
+                    LibraryServerUtil.SetPasswordValue(nodeAccount,
+                        type,
+                        strHashed);
 
                     if (neverExpire == false
                         && LibraryServerUtil.IsSpecialUserName(userinfo.UserName) == false)
@@ -1716,11 +1756,18 @@ out strError);
                     return -1;
 
                 // 强制修改密码。无需验证旧密码
-                nRet = LibraryServerUtil.SetUserPassword(strNewPassword, out strHashedPassword, out strError);
+                string type = "bcrypt";
+                nRet = LibraryServerUtil.SetUserPassword(
+                    type,
+                    strNewPassword,
+                    out strHashedPassword,
+                    out strError);
                 if (nRet == -1)
                     return -1;
                 // DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
-                SetPasswordValue(nodeAccount, strHashedPassword);
+                LibraryServerUtil.SetPasswordValue(nodeAccount,
+                    type,
+                    strHashedPassword);
                 if (LibraryServerUtil.IsSpecialUserName(strUserName) == false)
                     SetPasswordExpire(nodeAccount, _passwordExpirePeriod, DateTime.Now);
                 this.Changed = true;

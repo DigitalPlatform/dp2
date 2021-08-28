@@ -465,7 +465,11 @@ namespace DigitalPlatform.LibraryServer
                             passwordExpired = true;
                     }
 
-                    nRet = LibraryServerUtil.MatchUserPassword(strPassword, account.Password, out strError);
+                    nRet = LibraryServerUtil.MatchUserPassword(
+                        account.PasswordType,
+                        strPassword, 
+                        account.Password,
+                        true, out strError);
                     if (nRet == -1)
                     {
                         strError = "MatchUserPassword() error: " + strError;

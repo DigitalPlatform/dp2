@@ -2280,6 +2280,7 @@ new string[] { "继续", "中断" });
                     this.checkBox_target_dontSearchDup.Visible = value;
                     this.checkBox_target_dontChangeOperations.Visible = value;
                     this.comboBox_target_restore.Visible = value;
+                    this.label_target_restore.Visible = value;
                 }
             }
         }

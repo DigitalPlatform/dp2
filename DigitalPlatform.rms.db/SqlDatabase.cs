@@ -8931,7 +8931,7 @@ handle.CancelTokenSource.Token).Result;
                     }
 
                     int nRedoCount = 0;
-                    REDO:
+                REDO:
                     FileInfo fi = new FileInfo(strObjectFilename);
                     // 2020/3/1
                     fi.Refresh();
@@ -9759,7 +9759,7 @@ handle.CancelTokenSource.Token).Result;
             }
             strError = "未知的 connection 类型 '" + connection.SqlServerType.ToString() + "'";
             return -1;
-            END1:
+        END1:
             int nBufferLength = 0;
             if (destBuffer != null)
                 nBufferLength = destBuffer.Length;
@@ -11515,7 +11515,7 @@ handle.CancelTokenSource.Token).Result;
             }
 
             int nRedoCount = 0;
-            REDO:
+        REDO:
             try
             {
                 StreamItem item = _streamCache.GetWriteStream(strFileName, true);
@@ -11814,7 +11814,7 @@ handle.CancelTokenSource.Token).Result;
                                     dr.GetBytes(12, 0, row_info.NewData, 0, (int)row_info.newdata_length);
                                 }
                             }
-                            CONTINUE:
+                        CONTINUE:
                             row_infos.Add(row_info);
                         }
                     }
@@ -13392,7 +13392,7 @@ handle.CancelTokenSource.Token).Result;
                     + "\r\n");
             }
             return 0;
-            ERROR2:
+        ERROR2:
             if (bDelete == true)
             {
                 string strError1 = "";
@@ -14362,7 +14362,7 @@ handle.CancelTokenSource.Token).Result;
                     }
 
                     int nRedoCount = 0;
-                    REDO:
+                REDO:
                     try
                     {
 #if NO
@@ -14513,15 +14513,18 @@ handle.CancelTokenSource.Token).Result;
                         if (string.IsNullOrEmpty(row_info.FileName) == false)
                         {
                             strDeletedFilename = GetObjectFileName(row_info.FileName);
+                            if (File.Exists(strDeletedFilename))
+                            {
+                                // this._streamCache.FileDelete(strDeletedFilename);   // 删除原有的正式文件
 
-                            // this._streamCache.FileDelete(strDeletedFilename);   // 删除原有的正式文件
+                                string strBackFileName = strDeletedFilename + ".bak";
 
-                            string strBackFileName = strDeletedFilename + ".bak";
-
-                            this._streamCache.FileMove(strDeletedFilename,
-                                strBackFileName,
-                                true);   // 对原有的正式文件改名
-                            temp_filename = strBackFileName;    // 记忆，在最后会删除这个文件
+                                var moved = this._streamCache.FileMove(strDeletedFilename,
+                                    strBackFileName,
+                                    true);   // 对原有的正式文件改名
+                                if (moved)
+                                    temp_filename = strBackFileName;    // 记忆，在最后会删除这个文件
+                            }
                         }
 
                         // 正式文件名重新命名
@@ -15150,7 +15153,7 @@ handle.CancelTokenSource.Token).Result;
             strError = "";
 
             int nRedoCount = 0;
-            REDO:
+        REDO:
             try
             {
                 StreamItem item = _streamCache.GetWriteStream(strFileName, true);
@@ -17334,7 +17337,7 @@ handle.CancelTokenSource.Token).Result;
                                 strError = "处理记录路径为 '" + this.GetCaption("zh") + "/" + strID + "' 的子文件发生错误:" + ex.Message + ",sql命令:\r\n" + strCommand;
                                 return -1;
                             }
-                            CONTINUE_1:
+                        CONTINUE_1:
                             command.Parameters.Clear();
                         }
                     }
@@ -17386,9 +17389,9 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-            #endregion // Oracle
+        #endregion // Oracle
 
-            DELETE_OBJECTFILE:
+        DELETE_OBJECTFILE:
             // 删除对象文件
             foreach (string strShortFilename in filenames)
             {

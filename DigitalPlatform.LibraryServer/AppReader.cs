@@ -7002,7 +7002,11 @@ out strError);
                             }
                         }
 
-                        nRet = LibraryServerUtil.MatchUserPassword(strPassword, account.Password, out strError);
+                        nRet = LibraryServerUtil.MatchUserPassword(
+                            account.PasswordType,
+                            strPassword, 
+                            account.Password,
+                            true, out strError);
                         if (nRet == -1)
                         {
                             strError = "匹配过程出现错误";

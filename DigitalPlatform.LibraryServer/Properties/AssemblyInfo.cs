@@ -283,3 +283,4 @@ ItemCanReturn()
 //		3.84 (2021/8/25) Borrow() 和 Return() API 支持在 strStyle 参数中使用 ",comment:xxxx"，以便在操作日志记录中写入 clientComment 元素
 //		3.85 (2021/8/26) Borrow() API 的 strStyle 参数内可以使用 ",special:dontCheckOverdue|dontCheckAmerce" 特性，效果分别是“不检查潜在超期册”和“不检查待交费信息”。不过这两项特性都需要当前账户具有 specialcharging 权限。操作日志记录中会写入 special 元素，元素文本内容是 strStyle 参数中 ",special:xxx|xxx" 片段的 xxx|xxx 部分
 //		3.86 (2021/8/27) 巩固 SetReaderInfo() API。force change 情况下，如果从数据库中读出的 XML 不合法，不会报错。也就是说可以用 force change 来强制修改一条读者记录
+//			 (2021/8/28) 继续巩固 SetReaderInfo() API 和 dp2kernel 模块中的相关功能，确保对象文件被损坏或者物理删除的读者记录，可以被 SetReaderInfo() API 的 delete 和 (force)change 功能删除和修改

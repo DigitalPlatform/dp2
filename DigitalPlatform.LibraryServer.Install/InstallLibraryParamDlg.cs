@@ -417,8 +417,6 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 获得用户库名
-
-
                 string strRecPath = "";
                 string strXml = "";
                 byte[] baTimeStamp = null;
@@ -606,6 +604,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 重设一条 dp2kernel 用户 XML 记录中的密码
         int ResetUserRecordPassword(ref string strXml,
     out string strError)
         {
@@ -622,10 +621,9 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-
             // 密码
             DomUtil.SetElementText(UserRecDom.DocumentElement,
-               "password",
+                "password",
                 Cryptography.GetSHA1(this.textBox_managePassword.Text));
 
             /*
@@ -678,6 +676,7 @@ namespace DigitalPlatform.LibraryServer
             e.Result = 1;
         }
 
+        // 构造一条 dp2kernel 的用户 XML 记录
         int BuildUserRecord(out string strXml,
     out string strError)
         {
