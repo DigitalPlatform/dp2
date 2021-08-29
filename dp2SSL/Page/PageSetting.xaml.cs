@@ -1397,5 +1397,12 @@ MessageBoxOptions.DefaultDesktopOnly);
                     $"处理完成。修改记录 {result.Value} 条",
                     "green");
         }
+
+        // 测试写入 RFID 标签
+        private void testWriteRfidTag_Click(object sender, RoutedEventArgs e)
+        {
+            WriteTagWindow dlg = new WriteTagWindow();
+            dlg.ShowDialog();
+        }
     }
 }

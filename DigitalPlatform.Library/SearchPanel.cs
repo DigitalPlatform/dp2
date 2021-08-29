@@ -259,11 +259,9 @@ namespace DigitalPlatform.Library
 
                 this.EndLoop();
 
-
-
                 if (lRet == -1)
                 {
-                    if (channel.IsEqualNotFound())
+                    if (channel.IsNotFound())
                         return 0;	// not found
                     return -1;
                 }
@@ -860,12 +858,12 @@ namespace DigitalPlatform.Library
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "获取 '" + strPath + "' 记录体时出错: " + strError;
-                    if (channel.IsEqualNotFound())
+                    if (channel.IsNotFound())
                     {
                         return 0;
                     }
 
+                    strError = "获取 '" + strPath + "' 记录体时出错: " + strError;
                     return -1;
                 }
 

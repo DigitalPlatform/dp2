@@ -4555,11 +4555,9 @@ this.checkBox_import_fastMode.Checked);
                             out baOutputTimeStamp,
                             out strOutputPath,
                             out strError);
-
-
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                             {
                                 if (bFirst == true)
                                 {
@@ -5603,7 +5601,7 @@ this.checkBox_import_fastMode.Checked);
                 out strError0);
             if (lRet == -1)
             {
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     strStartID = strInputStartNo;
                     bStartNotFound = true;
@@ -5644,7 +5642,7 @@ this.checkBox_import_fastMode.Checked);
                 out strError0);
             if (lRet == -1)
             {
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     strEndID = strInputEndNo;
                     bEndNotFound = true;
@@ -6562,7 +6560,7 @@ this.checkBox_import_fastMode.Checked);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                             {
                                 if (bFirst == true)
                                 {

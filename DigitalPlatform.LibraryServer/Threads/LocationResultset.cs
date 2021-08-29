@@ -177,7 +177,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (lHitCount == -1)
                 {
-                    if (channel.IsEqualNotFound())
+                    if (channel.IsNotFound())
                         return false;
                     return false;
                 }

@@ -6062,7 +6062,7 @@ namespace dp2Library
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                         {
                             result.ErrorInfo = "书目记录 " + strBiblioRecPath + " 不存在";
                             return result;
@@ -6879,7 +6879,7 @@ namespace dp2Library
     out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                         {
                             result.Value = 0;
                             if (strCommand == "prev")

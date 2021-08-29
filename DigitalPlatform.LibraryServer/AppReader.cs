@@ -2631,9 +2631,8 @@ root, strLibraryCode);
                 }
                 else
                 {
-                    if (channel.IsEqualNotFound())    // 2021/8/27
+                    if (channel.IsNotFound())    // 2021/8/27
                     {
-
                         kernel_errorcode = channel.OriginErrorCode;
                         library_errorcode = ErrorCode.NotFound;
                         goto ERROR1;
@@ -2806,7 +2805,7 @@ root, strLibraryCode);
             if (lRet == -1)
             {
                 // 2009/7/17 
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     strError = "证条码号为 '" + strOldBarcode + "' 的读者记录(在删除的时候发现)已不存在";
                     kernel_errorcode = ErrorCodeValue.NotFound;
@@ -2950,7 +2949,7 @@ root, strLibraryCode);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.IsEqualNotFound())    // 2019/6/12
+                if (channel.IsNotFoundOrDamaged())    // 2019/6/12
                 {
                     bObjectNotFound = channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile;
                     // 如果记录不存在, 则构造一条空的记录
@@ -4707,7 +4706,7 @@ root, strLibraryCode);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                         {
                             if (strCommand == "prev")
                                 strError = "到头";
@@ -5212,7 +5211,8 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        // 注意 this.ErrorCode == ChannelErrorCode.NotFoundObjectFile 算是一种错误，要让前端意识到存在错误并去修复
+                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
                         {
                             result.Value = 0;
                             if (strCommand == "prev")
@@ -6422,7 +6422,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     strError = "源记录 '" + strSourceRecPath + "' 不存在";
                     // errorcode = channel.OriginErrorCode;
@@ -6552,7 +6552,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFoundOrDamaged())
                         {
                             // 如果记录不存在, 说明不会造成覆盖态势
                         }

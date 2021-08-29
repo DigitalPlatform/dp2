@@ -1454,7 +1454,6 @@ MessageBoxDefaultButton.Button2);
                     byte[] baTimestamp = null;
                     string strOutputPath = "";
 
-
                     stop.SetMessage("正在删除读者记录 " + strRecPath);
 
                     long lRet = this.Channel.GetReaderInfo(

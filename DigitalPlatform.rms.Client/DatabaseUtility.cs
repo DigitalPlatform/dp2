@@ -98,7 +98,7 @@ namespace DigitalPlatform.rms.Client
                     long lRet = channel.DoDeleteDB(strDatabaseName, out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound() == false)
+                        if (channel.IsNotFound() == false)
                             return -1;
                     }
                 }
@@ -212,7 +212,7 @@ namespace DigitalPlatform.rms.Client
                     lRet = channel.DoDeleteDB(strDatabaseName, out string strError1);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound() == false)
+                        if (channel.IsNotFound() == false)
                         {
                             strError += "\r\n尝试删除刚创建的此数据库时又遇到出错: " + strError1;
                             return -1;

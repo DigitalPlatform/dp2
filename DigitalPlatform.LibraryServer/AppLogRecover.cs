@@ -2649,7 +2649,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 return 0;   // 记录本来就不存在
 
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
@@ -2688,7 +2688,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                             return 0;   // 记录本来就不存在
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
@@ -2795,7 +2795,7 @@ out strError);
                         if (lRet == -1)
                         {
                             // 容错
-                            if (channel.IsEqualNotFound()
+                            if (channel.IsNotFoundOrDamaged()
                                 && level == RecoverLevel.LogicAndSnapshot)
                             {
                                 // 如果记录不存在, 则构造一条空的记录
@@ -3468,7 +3468,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                             return 0;   // 记录本来就不存在
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
@@ -3612,7 +3612,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 return 0;   // 记录本来就不存在
 
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
@@ -3653,7 +3653,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                             return 0;   // 记录本来就不存在
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
@@ -3755,7 +3755,7 @@ out strError);
                         if (lRet == -1)
                         {
                             // 容错
-                            if (channel.IsEqualNotFound()
+                            if (channel.IsNotFoundOrDamaged()
                                 && level == RecoverLevel.LogicAndSnapshot)
                             {
                                 // 如果记录不存在, 则构造一条空的记录
@@ -3999,7 +3999,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 return 0;   // 记录本来就不存在
 
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
@@ -4040,7 +4040,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                             return 0;   // 记录本来就不存在
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
@@ -4144,7 +4144,7 @@ out strError);
                         if (lRet == -1)
                         {
                             // 容错
-                            if (channel.IsEqualNotFound()
+                            if (channel.IsNotFoundOrDamaged()
                                 && level == RecoverLevel.LogicAndSnapshot)
                             {
                                 // 如果记录不存在, 则构造一条空的记录
@@ -4385,7 +4385,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 return 0;   // 记录本来就不存在
 
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
@@ -4426,7 +4426,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                             return 0;   // 记录本来就不存在
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
@@ -4529,7 +4529,7 @@ out strError);
                         if (lRet == -1)
                         {
                             // 容错
-                            if (channel.IsEqualNotFound()
+                            if (channel.IsNotFoundOrDamaged()
                                 && level == RecoverLevel.LogicAndSnapshot)
                             {
                                 // 如果记录不存在, 则构造一条空的记录
@@ -4970,7 +4970,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                             return 0;   // 记录本来就不存在
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
@@ -5034,7 +5034,7 @@ out strError);
                     if (lRet == -1)
                     {
                         // 源记录本来就不存在。进行容错处理
-                        if (channel.IsEqualNotFound()
+                        if (channel.IsNotFoundOrDamaged()
                             && level_param == RecoverLevel.Robust)
                         {
                             // 优先用最新的记录内容复原。实在没有才用旧的记录内容
@@ -5125,7 +5125,7 @@ out strError);
                         if (lRet == -1)
                         {
                             // 容错
-                            if (channel.IsEqualNotFound()
+                            if (channel.IsNotFoundOrDamaged()
                                 && level == RecoverLevel.LogicAndSnapshot)
                             {
                                 // 如果记录不存在, 则构造一条空的记录
@@ -5410,7 +5410,7 @@ out strError);
                             out strError0);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 continue;   // 记录本来就不存在
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                             {
@@ -5704,7 +5704,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 continue;   // 记录本来就不存在
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                             {
@@ -6419,7 +6419,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFoundOrDamaged())
                             {
                                 bSourceExist = false;
                             }
@@ -6543,7 +6543,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                             {
                                 // 记录本来就不存在
                             }
@@ -6590,7 +6590,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 goto DO_DELETE_CHILD_ENTITYRECORDS;   // 记录本来就不存在
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                             {
@@ -6627,7 +6627,7 @@ out strError);
                                 out strError);
                             if (lRet == -1)
                             {
-                                if (channel.IsEqualNotFound())
+                                if (channel.IsNotFound())
                                     continue;   // 记录本来就不存在
                                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                                 {
@@ -6659,7 +6659,7 @@ out strError);
                                 out strError);
                             if (lRet == -1)
                             {
-                                if (channel.IsEqualNotFound())
+                                if (channel.IsNotFound())
                                     continue;   // 记录本来就不存在
                                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                                 {
@@ -6691,7 +6691,7 @@ out strError);
                                 out strError);
                             if (lRet == -1)
                             {
-                                if (channel.IsEqualNotFound())
+                                if (channel.IsNotFound())
                                     continue;   // 记录本来就不存在
                                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                                 {
@@ -6762,7 +6762,7 @@ out strError);
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 goto DO_DELETE_CHILD_ENTITYRECORDS;   // 记录本来就不存在
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                             {
@@ -6898,7 +6898,7 @@ out strError);
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.IsEqualNotFound())
+                    if (channel.IsNotFound())
                         continue;   // 是否报错?
 
                     strError = "获取下级记录 '" + strSourceRecPath + "' 时发生错误: " + strError;
@@ -7470,7 +7470,7 @@ API: Settlement()
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                             return 0;   // 记录本来就不存在
 
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)

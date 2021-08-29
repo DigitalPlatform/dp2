@@ -45,7 +45,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strEntityDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除实体库 '" + strEntityDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -58,7 +58,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strOrderDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除订购库 '" + strOrderDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -71,7 +71,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strIssueDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除期库 '" + strIssueDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -85,7 +85,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strCommentDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除评注库 '" + strCommentDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -98,7 +98,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strBiblioDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除小书目库 '" + strBiblioDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -116,7 +116,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除读者库 '" + strDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -132,7 +132,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strArrivedDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除预约到书库 '" + strArrivedDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -148,7 +148,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strAmerceDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除违约金库 '" + strAmerceDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -164,7 +164,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strMessageDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除消息库 '" + strMessageDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
@@ -182,7 +182,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     lRet = channel.DoDeleteDB(strDbName,
                         out strTempError);
-                    if (lRet == -1 && channel.IsEqualNotFound() == false)
+                    if (lRet == -1 && channel.IsNotFound() == false)
                     {
                         strError += "删除类型为 " + strType + " 的实用库 '" + strDbName + "' 内数据时发生错误：" + strTempError + "; ";
                     }
@@ -1297,7 +1297,7 @@ RestoreLibraryParam param
 
                 long lRet = channel.DoDeleteDB(dbname,
     out strError);
-                if (lRet == -1 && channel.IsEqualNotFound() == false)
+                if (lRet == -1 && channel.IsNotFound() == false)
                 {
                     errors.Add("删除数据库 '" + dbname + "' 时发生错误：" + strError);
                 }

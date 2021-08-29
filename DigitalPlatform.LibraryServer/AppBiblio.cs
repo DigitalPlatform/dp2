@@ -542,7 +542,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                         {
                             if (commands.Count == 1)
                             {
@@ -2153,7 +2153,7 @@ return result;
             if (lRet == -1)
             {
                 strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     result.Value = -1;
                     result.ErrorInfo = strError;
@@ -5042,7 +5042,7 @@ out strError);
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.IsEqualNotFound())    // 2019/5/28
+                    if (channel.IsNotFoundOrDamaged())    // 2019/5/28
                     {
                         if (strAction == "checkunique")
                             goto SKIP_MEMO_OLDRECORD;
@@ -6144,7 +6144,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound()
+                        if (channel.IsNotFound()
                             && (entityinfos.Count > 0 || orderinfos.Count > 0 || issueinfos.Count > 0)
                             )
                         {
@@ -6730,7 +6730,7 @@ out strError);
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.IsEqualNotFound())
+                    if (channel.IsNotFoundOrDamaged())
                     {
                         // 2017/5/20 即便源记录不存在，也要在日志记录里面记载 oldRecord 元素
                         XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -7017,7 +7017,7 @@ out strError);
                                         baTimestamp,
                                         out baOutputTimestamp,
                                         out strError_1);
-                                    if (lRet == -1 && !channel.IsEqualNotFound())
+                                    if (lRet == -1 && !channel.IsNotFound())
                                     {
                                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
                                             && nRedoCount < 10)
@@ -7644,7 +7644,7 @@ out strError);
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.IsEqualNotFound())
+                    if (channel.IsNotFoundOrDamaged())
                     {
                         // 如果记录不存在, 说明不会造成覆盖态势
                         /*

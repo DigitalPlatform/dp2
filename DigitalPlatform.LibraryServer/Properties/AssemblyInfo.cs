@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.86.*")]
-[assembly: AssemblyFileVersion("3.86.0.0")]
+[assembly: AssemblyVersion("3.87.*")]
+[assembly: AssemblyFileVersion("3.87.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -284,3 +284,4 @@ ItemCanReturn()
 //		3.85 (2021/8/26) Borrow() API 的 strStyle 参数内可以使用 ",special:dontCheckOverdue|dontCheckAmerce" 特性，效果分别是“不检查潜在超期册”和“不检查待交费信息”。不过这两项特性都需要当前账户具有 specialcharging 权限。操作日志记录中会写入 special 元素，元素文本内容是 strStyle 参数中 ",special:xxx|xxx" 片段的 xxx|xxx 部分
 //		3.86 (2021/8/27) 巩固 SetReaderInfo() API。force change 情况下，如果从数据库中读出的 XML 不合法，不会报错。也就是说可以用 force change 来强制修改一条读者记录
 //			 (2021/8/28) 继续巩固 SetReaderInfo() API 和 dp2kernel 模块中的相关功能，确保对象文件被损坏或者物理删除的读者记录，可以被 SetReaderInfo() API 的 delete 和 (force)change 功能删除和修改
+//		3.87 (2021/8/29) 工作人员账户密码，和读者 XML 记录中的密码，新增了 bcrypt 算法类型。读者 XML 记录中的临时密码继续沿用 SHA1 算法

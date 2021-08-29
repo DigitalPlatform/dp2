@@ -165,10 +165,17 @@ namespace DigitalPlatform.rms.Client
                 this.m_ws.Close();
         }
 
-        public bool IsEqualNotFound()
+        public bool IsNotFoundOrDamaged()
         {
             if (this.ErrorCode == ChannelErrorCode.NotFound
                 || this.ErrorCode == ChannelErrorCode.NotFoundObjectFile)
+                return true;
+            return false;
+        }
+
+        public bool IsNotFound()
+        {
+            if (this.ErrorCode == ChannelErrorCode.NotFound)
                 return true;
             return false;
         }

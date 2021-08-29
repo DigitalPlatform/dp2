@@ -263,7 +263,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (lRet == -1)
                     {
-                        if (channel.IsEqualNotFound())
+                        if (channel.IsNotFound())
                         {
                             if (bFirst == true)
                             {

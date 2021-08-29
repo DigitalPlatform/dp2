@@ -1323,7 +1323,7 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFoundOrDamaged())
                             {
                                 bSourceExist = false;
                             }
@@ -1441,7 +1441,7 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                             {
                                 // 记录本来就不存在
                             }
@@ -1499,7 +1499,7 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (lRet == -1)
                         {
-                            if (channel.IsEqualNotFound())
+                            if (channel.IsNotFound())
                                 goto DO_DELETE_CHILD_ENTITYRECORDS;   // 记录本来就不存在
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                             {

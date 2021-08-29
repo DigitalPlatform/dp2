@@ -568,7 +568,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     if (bFirst == true)
                     {
@@ -592,7 +592,6 @@ out strError);
 
                         return 0;
                     }
-
                 }
                 else if (channel.ErrorCode == ChannelErrorCode.EmptyRecord)
                 {
@@ -696,7 +695,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     if (bFirst == true)
                     {
@@ -1368,7 +1367,7 @@ out string strError)
                 out strError0);
             if (lRet == -1)
             {
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     strStartID = strInputStartNo;
                     bStartNotFound = true;
@@ -1410,7 +1409,7 @@ out string strError)
                 out strError0);
             if (lRet == -1)
             {
-                if (channel.IsEqualNotFound())
+                if (channel.IsNotFound())
                 {
                     strEndID = strInputEndNo;
                     bEndNotFound = true;
