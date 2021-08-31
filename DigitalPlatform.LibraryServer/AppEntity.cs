@@ -2728,6 +2728,21 @@ out strError);
                 goto ERROR1;
             }
 
+            /*
+            // 2021/8/31
+            // 检查书目记录 ID
+            if (string.IsNullOrEmpty(strBiblioRecId))
+            {
+                strError = $"书目记录路径 '{strBiblioRecPath}' 中的 ID 部分不合法。ID 不允许为空";
+                goto ERROR1;
+            }
+            if (strBiblioRecId == "?")
+            {
+                strError = $"书目记录路径 '{strBiblioRecPath}' 中的 ID 部分不合法。ID 不允许为 '?'";
+                goto ERROR1;
+            }
+            */
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -3591,6 +3606,12 @@ out strError);
                                     if (nRet == -1)
                                         goto ERROR1;
                                 }
+                            }
+
+                            // 2021/8/31
+                            if (CheckParent(strNewXml, out strError) != 1)
+                            {
+                                goto ERROR1;
                             }
 
                             lRet = channel.DoSaveTextRes(info.NewRecPath,
@@ -5392,6 +5413,12 @@ out strError);
             }
             else
             {
+                // 2021/8/31
+                if (CheckParent(strNewXml, out strError) != 1)
+                {
+                    goto ERROR1;
+                }
+
                 lRet = channel.DoSaveTextRes(info.NewRecPath,
         strNewXml,
         false,   // include preamble?
@@ -5465,6 +5492,44 @@ out strError);
             error.ErrorCode = ErrorCodeValue.CommonError;
             ErrorInfos.Add(error);
             return -1;
+        }
+
+        // 2021/8/31
+        // 检查下级记录的 parent 元素
+        // return:
+        //      -1  检查过程出错
+        //      0   不合法
+        //      1   合法
+        static int CheckParent(string xml,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+            }
+            catch (Exception ex)
+            {
+                strError = $"CheckParent() 时出错，XML 装入 XMLDOM 时出现异常: {ex.Message}";
+                return -1;
+            }
+
+            string parent = DomUtil.GetElementText(dom.DocumentElement, "parent");
+            if (string.IsNullOrEmpty(parent))
+            {
+                strError = "parent 元素缺乏";
+                return 0;
+            }
+
+            if (StringUtil.IsPureNumber(parent) == false)
+            {
+                strError = $"parent 元素内容 '{parent}' 不合法。应为一个纯数字字符串";
+                return 0;
+            }
+
+            return 1;
         }
 
         // 清除原有的操作记载

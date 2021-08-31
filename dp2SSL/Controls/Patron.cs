@@ -789,6 +789,7 @@ readerType);
             }
         }
 
+        // Exception: 可能会抛出异常
         public void SetPatronXml(string recpath, string xml, byte[] timestamp)
         {
             if (string.IsNullOrEmpty(xml))

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.87.*")]
-[assembly: AssemblyFileVersion("3.87.0.0")]
+[assembly: AssemblyVersion("3.88.*")]
+[assembly: AssemblyFileVersion("3.88.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -285,3 +285,4 @@ ItemCanReturn()
 //		3.86 (2021/8/27) 巩固 SetReaderInfo() API。force change 情况下，如果从数据库中读出的 XML 不合法，不会报错。也就是说可以用 force change 来强制修改一条读者记录
 //			 (2021/8/28) 继续巩固 SetReaderInfo() API 和 dp2kernel 模块中的相关功能，确保对象文件被损坏或者物理删除的读者记录，可以被 SetReaderInfo() API 的 delete 和 (force)change 功能删除和修改
 //		3.87 (2021/8/29) 工作人员账户密码，和读者 XML 记录中的密码，新增了 bcrypt 算法类型。读者 XML 记录中的临时密码继续沿用 SHA1 算法
+//		3.88 (2021/8/31) SetEntities() API 中增加了检查保存到实体库的 XML 记录中 parent 元素的步骤，要求 parent 元素内容必须是一个纯数字

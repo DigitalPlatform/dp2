@@ -648,17 +648,20 @@ Stack:
 
         public bool FillFinished { get; set; }
 
-        public void SetData(string item_recpath, 
+        // TODO: 检查所有引用的位置，增加处理 result.Value == -1 的代码逻辑
+        public NormalResult SetData(string item_recpath,
             string xml,
             DateTime now)
         {
+            List<string> errors = new List<string>();
+
             this.ItemRecPath = item_recpath;
 
             // FontAwesome.WPF.FontAwesomeIcon.HandGrabOutline
             if (string.IsNullOrEmpty(xml))
             {
                 this.State = null;
-                return;
+                return new NormalResult();
             }
 
             XmlDocument dom = new XmlDocument();
@@ -708,20 +711,25 @@ Stack:
             bool isOverdue = false;
             if (string.IsNullOrEmpty(returningDate) == false)
             {
-                DateTime time = DateTimeUtil.FromRfc1123DateTimeString(returningDate);
-                TimeSpan delta = /*DateTime.Now*/now - time.ToLocalTime();
-                if (period.IndexOf("hour") != -1)
-                {
-                    // TODO: 如果没有册条码号则用 refID 代替
-                    if (delta.Hours > 0)
-                        isOverdue = true;
-                    // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Hours} 小时");
-                }
+                // DateTime time = DateTimeUtil.FromRfc1123DateTimeString(returningDate);
+                if (TryParseRfc1123(returningDate, out DateTime time) == false)
+                    errors.Add($"returningDate:'{returningDate}' 时间字符串不合法");
                 else
                 {
-                    if (delta.Days > 0)
-                        isOverdue = true;
-                    // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Days} 天");
+                    TimeSpan delta = /*DateTime.Now*/now - time.ToLocalTime();
+                    if (period.IndexOf("hour") != -1)
+                    {
+                        // TODO: 如果没有册条码号则用 refID 代替
+                        if (delta.Hours > 0)
+                            isOverdue = true;
+                        // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Hours} 小时");
+                    }
+                    else
+                    {
+                        if (delta.Days > 0)
+                            isOverdue = true;
+                        // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Days} 天");
+                    }
                 }
             }
 
@@ -731,14 +739,96 @@ Stack:
             string overflow = DomUtil.GetElementText(dom.DocumentElement, "overflow");
             if (string.IsNullOrEmpty(overflow) == false)
                 this.State += ",overflow";
+
+            if (errors.Count > 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = StringUtil.MakePathList(errors, "; ")
+                };
+
+            return new NormalResult();
+        }
+
+        // 2021/8/31
+        public static bool TryParseRfc1123(string rfc1123, out DateTime time)
+        {
+            try
+            {
+                time = DateTimeUtil.FromRfc1123DateTimeString(rfc1123);
+                return true;
+            }
+            catch
+            {
+                time = DateTime.MinValue;
+                return false;
+            }
+        }
+
+        public static bool IsOverdue(
+            DateTime now,
+            string borrowDate,
+            string returningDate,
+            string period)
+        {
+            string strBorrowInfo = "";
+
+            List<string> errors = new List<string>();
+            /*
+            string borrowDate = DomUtil.GetElementText(dom.DocumentElement, "borrowDate");
+            string returningDate = DomUtil.GetElementText(dom.DocumentElement, "returningDate");
+            string period = DomUtil.GetElementText(dom.DocumentElement, "borrowPeriod");
+            */
+            if (string.IsNullOrEmpty(borrowDate))
+                strBorrowInfo = null;
+            else
+            {
+                strBorrowInfo = $"借书日期:\t{ToDate(borrowDate)}\n期限:\t\t{period}\n应还日期:\t{ToDate(returningDate)}";
+            }
+
+            // 2019/11/9
+            // 判断是否超期
+            bool isOverdue = false;
+            if (string.IsNullOrEmpty(returningDate) == false)
+            {
+                // DateTime time = DateTimeUtil.FromRfc1123DateTimeString(returningDate);
+                if (TryParseRfc1123(returningDate, out DateTime time) == false)
+                    errors.Add($"returningDate:'{returningDate}' 时间字符串不合法");
+                else
+                {
+                    TimeSpan delta = /*DateTime.Now*/now - time.ToLocalTime();
+                    if (period.IndexOf("hour") != -1)
+                    {
+                        // TODO: 如果没有册条码号则用 refID 代替
+                        if (delta.Hours > 0)
+                            isOverdue = true;
+                    }
+                    else
+                    {
+                        if (delta.Days > 0)
+                            isOverdue = true;
+                    }
+                }
+            }
+
+            return isOverdue;
         }
 
         public static string ToDate(string strTime)
         {
-            if (string.IsNullOrEmpty(strTime))
-                return "";
-            // TODO: 还可以优化为 (今天) 之类的简略说法
-            return DateTimeUtil.FromRfc1123DateTimeString(strTime).ToLocalTime().ToString("d");
+            // throw new Exception("test");
+            try
+            {
+                if (string.IsNullOrEmpty(strTime))
+                    return "";
+                // TODO: 还可以优化为 (今天) 之类的简略说法
+                return DateTimeUtil.FromRfc1123DateTimeString(strTime).ToLocalTime().ToString("d");
+            }
+            catch (Exception ex)
+            {
+                // 2021/8/31
+                return $"error:RFC1123 时间字符串 '{strTime}' 不合法: {ex.Message}";
+            }
         }
 
         // 修改内存中和 EAS 有关的状态

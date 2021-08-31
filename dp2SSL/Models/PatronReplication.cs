@@ -522,6 +522,7 @@ out string strError);
                             else if (strOperation == "borrow" || strOperation == "return")
                             {
                                 var trace_result = await TraceBorrowOrReturn(
+                                    item,
                                     dom,
                                     info);
                                 if (trace_result.Value == -1)
@@ -687,8 +688,9 @@ out string strError);
 
          * */
         static async Task<NormalResult> TraceBorrowOrReturn(
-    XmlDocument domLog,
-    ProcessInfo info)
+            OperLogItem item,
+            XmlDocument domLog,
+            ProcessInfo info)
         {
             try
             {
@@ -736,7 +738,7 @@ out string strError);
                     {
                         // 2021/8/17
                         // 提醒手动处理
-                        WpfClientInfo.WriteErrorLog($"*** dp2library 操作日志 return 记录缺乏 borrowID 元素，请手动检查处理，在 dp2ssl 本地动作库内消除对应的借阅动作的在借状态");
+                        WpfClientInfo.WriteErrorLog($"*** dp2library 操作日志({item.Date} {item.Index}) return 记录缺乏 borrowID 元素，请手动检查处理，在 dp2ssl 本地动作库内消除对应的借阅动作的在借状态");
                     }
                 }
 

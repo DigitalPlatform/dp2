@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.46")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.46.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.48")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.48.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -137,3 +137,5 @@ using System.Windows;
 //                          dp2managecenter 增加获取文件对话框。是用点对点 getRes() API 实现的
 //                          当重新启动 dp2ssl 过程中书柜内的图书标签没有发生变化的情况下，初始化过程不会向本地动作库写入盘点(和尝试还书)动作。但每 30 天之外重启 dp2ssl 会至少有一轮启动时向本地动作库中写入盘点动作
 //      1.8.46 (2021/8/23) 设置页面增加菜单命令“修复已还 borrow 动作的 LinkID”
+//      1.8.47 (2021/8/30) 书柜界面，读者刷卡时候右侧读者信息区显示的在借册，册行的“超期”状态原来版本是由本地缓存的册记录决定的，会不准确，新版本改为由读者 XML 记录中的 borrow 元素(的 returningDate 属性)决定
+//      1.8.48 (2021/8/31) 书柜界面，增加 UI 线程未捕获的异常集中处理功能，会显示在底部错误条上

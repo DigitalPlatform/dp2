@@ -128,6 +128,31 @@ namespace dp2SSL
 
         #endregion
 
+        /*
+        // https://blog.danskingdom.com/Catch-and-display-unhandled-exceptions-in-your-WPF-app/
+        public App() : base()
+        {
+            TaskScheduler.UnobservedTaskException += (sender, args) =>
+                {
+                    AddErrors("global", new List<string> { args.Exception.Message });
+                };
+            Dispatcher.UnhandledException += Dispatcher_UnhandledException;
+            Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+        }
+
+        private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            AddErrors("global", new List<string> { e.Exception.Message });
+            e.Handled = true;
+        }
+
+        private void Dispatcher_UnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            AddErrors("global", new List<string> { e.Exception.Message });
+            e.Handled = true;
+        }
+        */
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
         protected async override void OnStartup(StartupEventArgs e)
         {
@@ -437,6 +462,8 @@ namespace dp2SSL
             if (App.Function == "智能书柜")
             {
                 RfidManager.ReaderNameList = "";
+
+                // TODO: 先要设法确定 RfidCenter 已经启动完成。这里有可能因为 RfidCenter 启动较慢，导致对它的 API 请求报错
 
                 // 补一次。先前可能有失败的开关灯动作
                 ShelfData.TurnLamp("", "refresh");
@@ -854,7 +881,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                this.AddErrors("global", new List<string> { $"清除上次遗留的临时文件时出现异常: {ex.Message}" });
+                App.AddErrors("global", new List<string> { $"清除上次遗留的临时文件时出现异常: {ex.Message}" });
             }
         }
 
@@ -1834,7 +1861,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         #endregion
 
-        public void AddErrors(string type, List<string> errors)
+        public static void AddErrors(string type, List<string> errors)
         {
             DateTime now = DateTime.Now;
             List<string> results = new List<string>();
@@ -2434,7 +2461,16 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             });
             */
 
-            Current.Dispatcher?.Invoke(action);
+            try
+            {
+                Current.Dispatcher?.Invoke(action);
+            }
+            catch(Exception ex)
+            {
+                // 2021/8/31
+                WpfClientInfo.WriteErrorLog($"UI 异常: {ExceptionUtil.GetDebugText(ex)}");
+                SetError("UI Exception: ", ex.Message);
+            }
         }
 
         public static void ErrorBox(

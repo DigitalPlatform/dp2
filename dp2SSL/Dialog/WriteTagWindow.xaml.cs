@@ -17,6 +17,7 @@ using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.WPF;
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -28,6 +29,8 @@ namespace dp2SSL
         // 要执行的任务信息
         public WriteTagTask TaskInfo { get; set; }
 
+        public bool Finished { get; set; }
+
         public WriteTagWindow()
         {
             InitializeComponent();
@@ -38,6 +41,30 @@ namespace dp2SSL
             this.Unloaded += WriteTagWindow_Unloaded;
         }
 
+        public string Comment
+        {
+            get
+            {
+                return this.comment.Text;
+            }
+            set
+            {
+                this.comment.Text = value;
+            }
+        }
+
+        public string TitleText
+        {
+            get
+            {
+                return this.title.Text;
+            }
+            set
+            {
+                this.title.Text = value;
+            }
+        }
+
         private void WriteTagWindow_Unloaded(object sender, RoutedEventArgs e)
         {
             App.PatronTagChanged -= App_PatronTagChanged;
@@ -45,6 +72,11 @@ namespace dp2SSL
 
         private void WriteTagWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            if (this.TaskInfo != null)
+                this.Comment = $"准备写入 RFID 标签。PII={this.TaskInfo.PII}";
+
+            this.booksControl.EmptyComment = "请在读写器上放空白标签 ...";
+
             App.PatronTagChanged += App_PatronTagChanged;
             _ = InitialEntities();
         }
@@ -97,7 +129,7 @@ namespace dp2SSL
                 }
             }
 
-            await TryWriteTag(update_entities,
+            await TryWriteTagAsync(update_entities,
                 this.TaskInfo);
         }
 
@@ -146,7 +178,7 @@ namespace dp2SSL
             if (update_entities.Count > 0)
                 changed = true;
 
-            await TryWriteTag(update_entities,
+            await TryWriteTagAsync(update_entities,
     this.TaskInfo);
         }
 
@@ -319,9 +351,12 @@ out string strError);
             return new FindBlankTagResult();
         }
 
-        async Task<NormalResult> TryWriteTag(List<Entity> entities,
+        async Task<NormalResult> TryWriteTagAsync(List<Entity> entities,
             WriteTagTask task_info)
         {
+            if (this.Finished)
+                return new NormalResult { Value = 0 };
+
             var result = await FindBlankTagAsync(entities, task_info);
             if (result.Value == -1)
                 return new NormalResult { Value = 0 };
@@ -333,7 +368,7 @@ out string strError);
                 int nRet = SaveNewChip(result.ResultEntity.ReaderName,
                     result.ResultEntity.TagInfo,
                     chip,
-                    out _,
+                    out TagInfo new_tag_info,
                     out string strError);
                 if (nRet == -1)
                     return new NormalResult
@@ -342,6 +377,22 @@ out string strError);
                         ErrorInfo = strError
                     };
                 // 语音播报成功，自动关闭窗口
+                this.Finished = true;
+                App.CurrentApp.SpeakSequence($"写入完成");
+                App.Invoke(new Action(() =>
+                {
+                    this.Comment = $"写入完成。PII={result.ResultEntity.PII}, UID={new_tag_info.UID}";
+                    this.Background = new SolidColorBrush(Colors.DarkGreen);
+                }));
+
+                // 3 秒以后自动关闭对话框
+                _ = Task.Run(async ()=> {
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    App.Invoke(new Action(() =>
+                    {
+                        this.Close();
+                    }));
+                });
                 return new NormalResult { Value = 1 };
             }
 
@@ -533,5 +584,8 @@ OI的校验，总长度不超过16位。
         public string OI { get; set; }
         // 索取号
         public string AccessNo { get; set; }
+
+        // 任务完成时是否自动关闭对话框
+        public bool AutoCloseDialog { get; set; }
     }
 }

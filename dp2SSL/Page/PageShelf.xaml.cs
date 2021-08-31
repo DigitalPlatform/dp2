@@ -1797,7 +1797,7 @@ namespace dp2SSL
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
                         GetEntityDataResult result = await GetEntityDataAsync(entity.GetOiPii(!loose_oi),
-                            ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
+                            ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline"); // 2021/8/30 如果网络条件好，就 "network" 优先从 dp2library 服务器获得册记录？或者先从 local 得到，然后马上安排一个后台任务去获得最新的册记录进入本地缓存
                         // 2021/5/17
                         if (result.Value == -1
                             && result.ErrorCode == "RequestError"
@@ -1816,6 +1816,8 @@ namespace dp2SSL
 
                         string old_borrowInfo = entity.BorrowInfo;
                         bool old_overflow = PatronControl.IsState(entity, "overflow");
+                        // 2021/8/30
+                        bool old_overdue = PatronControl.IsState(entity, "overdue");
 
                         entity.SetData(result.ItemRecPath,
                             result.ItemXml,
@@ -1831,6 +1833,7 @@ namespace dp2SSL
                         {
                             entity.BorrowInfo = old_borrowInfo;
                             PatronControl.SetState(entity, "overflow", old_overflow);
+                            PatronControl.SetState(entity, "overdue", old_overdue);
                         }
                     }
 
@@ -2956,7 +2959,7 @@ namespace dp2SSL
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"isTagsSame() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return false;
@@ -3349,8 +3352,8 @@ namespace dp2SSL
             Delegate_welcome func_welcome,
             bool force = false)
         {
-            List<string> debug_infos = new List<string>();
-            debug_infos.Add($"进入函数时刻(注意这是本地硬件时钟时间): {GetNowString()}");
+            List<string> debug_infos = null;    //  new List<string>();
+            debug_infos?.Add($"进入函数时刻(注意这是本地硬件时钟时间): {GetNowString()}");
             _patron.Waiting = true;
             try
             {
@@ -3446,7 +3449,7 @@ namespace dp2SSL
 
                 // TODO: 先显示等待动画
 
-                debug_infos.Add($"开始 GetReaderInfo(): {GetNowString()}");
+                debug_infos?.Add($"开始 GetReaderInfo(): {GetNowString()}");
 
                 // return.Value:
                 //      -1  出错
@@ -3529,7 +3532,7 @@ namespace dp2SSL
                         }
                     }).ConfigureAwait(false);
 
-                debug_infos.Add($"结束 GetReaderInfo(): {GetNowString()}");
+                debug_infos?.Add($"结束 GetReaderInfo(): {GetNowString()}");
 
                 if (result.Value != 1)
                 {
@@ -3554,19 +3557,29 @@ namespace dp2SSL
                 if (force)
                     _patron.PhotoPath = "";
 
-                debug_infos.Add($"开始 SetPatronXml(): {GetNowString()}");
-
+                debug_infos?.Add($"开始 SetPatronXml(): {GetNowString()}");
 
                 // string old_photopath = _patron.PhotoPath;
                 App.Invoke(new Action(() =>
                 {
-                    _patron.MaskDefinition = ShelfData.GetPatronMask();
-                    _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
-                    this.patronControl.SetBorrowed(result.ReaderXml);
+                    try
+                    {
+                        _patron.MaskDefinition = ShelfData.GetPatronMask();
+                        _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
+
+                        this.patronControl.SetBorrowed(result.ReaderXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        // 2021/8/31
+                        _patron.SetError(ex.Message);
+                        WpfClientInfo.WriteErrorLog($"SetBorrowed() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        SetGlobalError("patron", $"SetBorrowed() 出现异常: {ex.Message}");
+                        // TODO: 如何让 .Invoke() 以外感知到异常
+                    }
                 }));
 
-                debug_infos.Add($"结束 SetPatronXml(): {GetNowString()}");
-
+                debug_infos?.Add($"结束 SetPatronXml(): {GetNowString()}");
 
                 // 成功时调用 Welcome
                 func_welcome?.Invoke();
@@ -3609,7 +3622,7 @@ namespace dp2SSL
                     */
 
                     // 在一个独立的线程里面刷新在借册，这样本函数可以尽早返回，从而听到欢迎的语音
-                    debug_infos.Add($"开始 FillBookFieldsAsync(): {GetNowString()}");
+                    debug_infos?.Add($"开始 FillBookFieldsAsync(): {GetNowString()}");
                     _ = Task.Run(async () =>
                     {
                         try
@@ -3637,7 +3650,7 @@ namespace dp2SSL
                             // return new NormalResult { Value = -1, ErrorInfo = error };
                         }
                     });
-                    debug_infos.Add($"结束 FillBookFieldsAsync(): {GetNowString()}");
+                    debug_infos?.Add($"结束 FillBookFieldsAsync(): {GetNowString()}");
                 }
 #if NO
             // 装载图象
@@ -3650,12 +3663,24 @@ namespace dp2SSL
 #endif
                 return new NormalResult { Value = 1 };
             }
+            catch (Exception ex)
+            {
+                // 2021/8/31
+                WpfClientInfo.WriteErrorLog($"FillPatronDetailAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                SetGlobalError("patron", $"FillPatronDetailAsync() 出现异常: {ex.Message}");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"FillPatronDetailAsync() 出现异常: {ex.Message}"
+                };
+            }
             finally
             {
                 _patron.Waiting = false;
-                debug_infos.Add($"退出函数时刻: {GetNowString()}");
+                debug_infos?.Add($"退出函数时刻: {GetNowString()}");
 
-                WpfClientInfo.WriteInfoLog($"FillPatronDetailAsync() 时间耗费情况:\r\n{StringUtil.MakePathList(debug_infos, "\r\n")}");
+                if (debug_infos != null)
+                    WpfClientInfo.WriteInfoLog($"FillPatronDetailAsync() 时间耗费情况:\r\n{StringUtil.MakePathList(debug_infos, "\r\n")}");
             }
         }
 

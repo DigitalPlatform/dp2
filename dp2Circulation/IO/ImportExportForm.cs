@@ -287,6 +287,13 @@ strStringTable);
                 {
                     return this.comboBox_target_restore.Text;
                 }));
+
+                // 2021/8/31
+                // 修正 OverwriteBiblio
+                // 注：当只导入下级记录的时候，书目记录路径只能用原来的，无法用追加形态
+                if (info.RestoreMode == "下级记录")
+                    info.OverwriteBiblio = true;
+
                 info.OverwriteSubrecord = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_target_subrecordRestoreOldID.Checked;
@@ -1665,8 +1672,14 @@ new string[] { "重试", "跳过", "中断" });
                 item.RefID = strRefID;
                 DomUtil.SetElementText(item_dom.DocumentElement, "refID", strRefID);
 
+                // 2021/8/31
+                var parent_id = Global.GetRecordID(info.BiblioRecPath);
+                // 检查 ID 是否合法
+                if (StringUtil.IsPureNumber(parent_id) == false)
+                    throw new Exception($"书目记录 '{info.BiblioRecPath}' 中的 ID 部分 '{parent_id}' 不合法，应为纯数字");
+
                 DomUtil.SetElementText(item_dom.DocumentElement,
-                    "parent", Global.GetRecordID(info.BiblioRecPath));
+                    "parent", parent_id);
 
                 string strXml = item_dom.DocumentElement.OuterXml;
 
@@ -2275,6 +2288,8 @@ new string[] { "继续", "中断" });
             {
                 _specialState = value;
 
+                this.groupBox_danger.Visible = value;
+                /*
                 {
                     this.checkBox_target_suppressOperLog.Visible = value;
                     this.checkBox_target_dontSearchDup.Visible = value;
@@ -2282,7 +2297,16 @@ new string[] { "继续", "中断" });
                     this.comboBox_target_restore.Visible = value;
                     this.label_target_restore.Visible = value;
                 }
+                */
             }
+        }
+
+        private void comboBox_target_restore_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.comboBox_target_restore.Text == "下级记录")
+                this.checkBox_target_biblioRestoreOldID.Enabled = false;
+            else
+                this.checkBox_target_biblioRestoreOldID.Enabled = true;
         }
     }
 }

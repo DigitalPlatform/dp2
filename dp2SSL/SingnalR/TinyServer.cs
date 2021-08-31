@@ -29,6 +29,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
 using dp2SSL.Models;
+using System.Security.Cryptography;
 
 namespace dp2SSL
 {
@@ -3516,10 +3517,25 @@ result);
                 }
                 else
 #endif
-                outputTimestamp = FileUtil.GetFileMd5(strFilePath);
+                outputTimestamp = GetFileMd5(strFilePath);
             }
 
             return lTotalLength;
+        }
+
+        public static byte[] GetFileMd5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.Open(
+                        filename,
+                        FileMode.Open,
+                        FileAccess.Read, // 改过
+                        FileShare.ReadWrite))
+                {
+                    return md5.ComputeHash(stream);
+                }
+            }
         }
 
         // 得到 newdata 字段对应的文件名

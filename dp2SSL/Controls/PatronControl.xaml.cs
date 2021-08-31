@@ -78,6 +78,8 @@ namespace dp2SSL
             }
         }
 
+        // Exception: 可能会抛出异常
+        // 设置在借册列表
         // SetBorrowed("") 可以清除列表
         public void SetBorrowed(string patron_xml)
         {
@@ -101,6 +103,7 @@ namespace dp2SSL
                     string overflow = borrow.GetAttribute("overflow");
 
                     // 2020/7/26
+                    bool isOverdue = false;
                     string borrowInfo = null;
                     {
                         string borrowDate = borrow.GetAttribute("borrowDate");
@@ -110,6 +113,13 @@ namespace dp2SSL
                             borrowInfo = null;
                         else
                             borrowInfo = $"借书日期:\t{Entity.ToDate(borrowDate)}\n期限:\t\t{period}\n应还日期:\t{Entity.ToDate(returningDate)}";
+
+                        // 2021/8/30
+                        isOverdue = Entity.IsOverdue(
+                            ShelfData.Now,
+                            borrowDate,
+                            returningDate,
+                            period);
                     }
 
                     var new_entity = new Entity
@@ -128,6 +138,9 @@ namespace dp2SSL
                     }
                     else
                         _borrowedEntities.Add(new_entity);
+
+                    // 2021/8/30
+                    SetState(new_entity, "overdue", isOverdue);
                 }
             }
         }

@@ -181,6 +181,26 @@ namespace dp2SSL
             this.Renewable = renewable_count.ToString();
         }
 
+
+        public string EmptyComment
+        {
+            get
+            {
+                return this.emptyComment.Text;
+            }
+            set
+            {
+                this.emptyComment.Text = value;
+            }
+        }
+
+        public void ShowEmptyComment(bool show)
+        {
+            if (show)
+                this.emptyComment.Visibility = Visibility.Visible;
+            else
+                this.emptyComment.Visibility = Visibility.Hidden;
+        }
     }
 
 }

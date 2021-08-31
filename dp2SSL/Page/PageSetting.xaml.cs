@@ -1402,6 +1402,13 @@ MessageBoxOptions.DefaultDesktopOnly);
         private void testWriteRfidTag_Click(object sender, RoutedEventArgs e)
         {
             WriteTagWindow dlg = new WriteTagWindow();
+            dlg.TaskInfo = new WriteTagTask
+            {
+                PII = "B0000001",
+                OI = "CN-0000001-ZG",
+                AccessNo = "I247.5/1234"
+            };
+            dlg.Owner = Application.Current.MainWindow;
             dlg.ShowDialog();
         }
     }

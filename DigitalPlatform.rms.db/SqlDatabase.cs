@@ -7949,7 +7949,10 @@ handle.CancelTokenSource.Token).Result;
                 out long lOutputLength,
                 out strError);
                 if (nRet == -1)
+                {
+                    // strError = $"GetPageImagePart() GetRealLengthNew() error: {strError}。strRecPath:{strRecPath}, strPartCmd:{strPartCmd}, lStart:{lStart}, nReadLength:{nReadLength}, nMaxLength:{nMaxLength}";
                     return -1;
+                }
 
                 Debug.Assert(lOutputLength < Int32.MaxValue && lOutputLength > Int32.MinValue, "");
 

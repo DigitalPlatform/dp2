@@ -1525,9 +1525,19 @@ namespace dp2SSL
                 // string old_photopath = _patron.PhotoPath;
                 App.Invoke(new Action(() =>
                 {
-                    _patron.MaskDefinition = ShelfData.GetPatronMask();
-                    _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
-                    this.patronControl.SetBorrowed(result.ReaderXml);
+                    try
+                    {
+                        _patron.MaskDefinition = ShelfData.GetPatronMask();
+                        _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
+                        this.patronControl.SetBorrowed(result.ReaderXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        // 2021/8/31
+                        _patron.SetError(ex.Message);
+                        WpfClientInfo.WriteErrorLog($"SetBorrowed() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        SetGlobalError("patron", $"SetBorrowed() 出现异常: {ex.Message}");
+                    }
                 }));
 
                 // 显示在借图书列表
@@ -2425,7 +2435,7 @@ out string strError);
             }
 
             entity.Title = GetCaption(result.Title);
-            entity.SetData(result.ItemRecPath, 
+            entity.SetData(result.ItemRecPath,
                 result.ItemXml,
                 DateTime.Now);
         }

@@ -15,13 +15,17 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <TextBlock Name="title" Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="Title"/>
-            <local:EntityListControl x:Name="booksControl" Grid.Row="1"/>
-            <Button Name="okButton" Grid.Row="2"
+            <TextBlock Name="comment" Grid.Row="1"
+                       Background="Transparent" Foreground="LightGray" FontSize="24" TextAlignment="Center"
+                    Text="Comment"/>
+            <local:EntityListControl x:Name="booksControl" Grid.Row="2"/>
+            <Button Name="okButton" Grid.Row="3"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
