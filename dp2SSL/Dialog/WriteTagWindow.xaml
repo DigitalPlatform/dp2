@@ -25,12 +25,40 @@
                        Background="Transparent" Foreground="LightGray" FontSize="24" TextAlignment="Center"
                     Text="Comment"/>
             <local:EntityListControl x:Name="booksControl" Grid.Row="2"/>
-            <Button Name="okButton" Grid.Row="3"
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Name="writeButton" Margin="10,0,10,0"
+                        IsEnabled="False"
+                    Width="120" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                    Click="writeButton_Click">
+                    <Button.Resources>
+                        <ResourceDictionary>
+                            <ResourceDictionary.MergedDictionaries>
+                                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+                                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
+                                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Purple.xaml" />
+                            </ResourceDictionary.MergedDictionaries>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource SecondaryAccentBrush}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ResourceDictionary>
+                    </Button.Resources>
+                    写入</Button>
+                <Button Name="okButton"  Margin="10,0,10,0"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                     Click="OkButton_Click">关闭</Button>
+
+            </StackPanel>
         </Grid>
     </Border>
 </Window>

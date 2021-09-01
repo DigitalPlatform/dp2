@@ -408,7 +408,7 @@ out string strError);
 
             LibraryChannel channel = App.CurrentApp.GetChannel();
             var old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
+            channel.Timeout = TimeSpan.FromSeconds(20);
 
             try
             {

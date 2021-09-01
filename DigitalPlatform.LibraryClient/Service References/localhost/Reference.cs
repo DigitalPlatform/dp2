@@ -2183,6 +2183,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string BorrowTimeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string BorrowerField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ItemBarcodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -2274,6 +2277,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.BorrowTimeField, value) != true)) {
                     this.BorrowTimeField = value;
                     this.RaisePropertyChanged("BorrowTime");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Borrower {
+            get {
+                return this.BorrowerField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.BorrowerField, value) != true)) {
+                    this.BorrowerField = value;
+                    this.RaisePropertyChanged("Borrower");
                 }
             }
         }

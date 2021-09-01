@@ -42,6 +42,10 @@ namespace dp2SSL.Models
             _eventMonitor.Set();
         }
 
+        // 2021/9/1
+        // 是否要返回一次更新的结果给 TrySetMessage()
+        public static bool ReturnUpateResult { get; set; }
+
         // 启动一般监控任务
         public static void StartMonitorTask()
         {
@@ -126,6 +130,15 @@ namespace dp2SSL.Models
                                     _needReboot = true;
                                     App.TriggerUpdated("重启计算机可使用新版本");
                                     PageShelf.TrySetMessage(null, "dp2SSL 升级文件已经下载成功，下次重启计算机时可自动升级到新版本");
+                                }
+                                else
+                                {
+                                    // 告知一次 update 结果
+                                    if (ReturnUpateResult)
+                                    {
+                                        ReturnUpateResult = false;
+                                        PageShelf.TrySetMessage(null, "没有发现新版本");
+                                    }
                                 }
                             }
                             _lastUpdateTime = DateTime.Now;

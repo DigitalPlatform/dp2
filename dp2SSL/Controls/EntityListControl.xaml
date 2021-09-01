@@ -164,7 +164,9 @@
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   Background="Transparent"
-                  Foreground="White" BorderThickness="0">
+                  Foreground="White" BorderThickness="0"
+                      SelectionChanged="listView_SelectionChanged"
+                      >
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" IsItemsHost="True"

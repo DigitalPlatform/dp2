@@ -13,18 +13,20 @@ using System.Windows.Forms;
 using System.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
+using static dp2Circulation.OperLogForm;
 
 namespace dp2Circulation.OperLog
 {
     public partial class SelectXmlDialog : Form
     {
         public const int COLUMN_NO = 0;
-        public const int COLUMN_SIZE = 1;
-        public const int COLUMN_ERRORINFO = 2;
+        public const int COLUMN_SOURCE = 1;
+        public const int COLUMN_SIZE = 2;
+        public const int COLUMN_ERRORINFO = 3;
 
-        public List<string> Xmls { get; set; }
+        public List<RecoverBiblioItem> Xmls { get; set; }
 
-        public string SelectedXml { get; set; }
+        public RecoverBiblioItem SelectedXml { get; set; }
 
         public SelectXmlDialog()
         {
@@ -56,7 +58,7 @@ namespace dp2Circulation.OperLog
             }
 
             var item = this.listView_browse.SelectedItems[0];
-            this.SelectedXml = item.Tag as string;
+            this.SelectedXml = item.Tag as RecoverBiblioItem;
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -81,10 +83,11 @@ namespace dp2Circulation.OperLog
             {
                 ListViewItem item = new ListViewItem();
                 ListViewUtil.ChangeItemText(item, COLUMN_NO, (++i).ToString());
-                ListViewUtil.ChangeItemText(item, COLUMN_SIZE, xml == null ? "0" : xml.Length.ToString());
+                ListViewUtil.ChangeItemText(item, COLUMN_SOURCE, xml.Date + ":" + xml.Index.ToString().PadLeft(5, ' '));
+                ListViewUtil.ChangeItemText(item, COLUMN_SIZE, xml.Xml == null ? "0" : xml.Xml?.Length.ToString());
 
                 string errorInfo = "";
-                if (IsValid(xml) == false)
+                if (IsValid(xml.Xml) == false)
                     errorInfo = "XML 结构不合法";
                 ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, errorInfo);
                 item.Tag = xml;
@@ -101,7 +104,7 @@ namespace dp2Circulation.OperLog
             }
         }
 
-        static bool IsValid(string xml)
+        public static bool IsValid(string xml)
         {
             if (string.IsNullOrEmpty(xml))
                 return false;
@@ -127,17 +130,17 @@ namespace dp2Circulation.OperLog
 
             var item = this.listView_browse.SelectedItems[0];
 
-            var xml = item.Tag as string;
+            var xml = item.Tag as RecoverBiblioItem;
 
-            if (IsValid(xml) == false)
+            if (xml != null && IsValid(xml.Xml) == false)
             {
-                if (xml == null)
-                    xml = "";
+                if (xml.Xml == null)
+                    xml.Xml = "";
                 // webBrowser1.DocumentText = $"<html><body><div>{"错误: XML 结构不合法："}</div><div>{HttpUtility.HtmlEncode(xml).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>")}</div></body></html>";
-                webBrowser1.DocumentText = $"<html><body><div>{"错误: XML 结构不合法："}</div><code>{HttpUtility.HtmlEncode(xml)}</code></body></html>";
+                webBrowser1.DocumentText = $"<html><body><div>{"错误: XML 结构不合法："}</div><code>{HttpUtility.HtmlEncode(xml.Xml)}</code></body></html>";
             }
             else
-                this.SetXmlToWebbrowser(this.webBrowser1, xml);
+                this.SetXmlToWebbrowser(this.webBrowser1, xml?.Xml);
         }
 
         void ClearHtml()

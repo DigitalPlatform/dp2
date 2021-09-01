@@ -39,6 +39,18 @@ namespace dp2SSL
 
             this.Loaded += WriteTagWindow_Loaded;
             this.Unloaded += WriteTagWindow_Unloaded;
+
+            this.booksControl.SelectionChanged += BooksControl_SelectionChanged;
+
+            ShelfData.PatronTagList.EnableTagCache = false;
+        }
+
+        private void BooksControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.booksControl.SelectedItems.Count > 0)
+                this.writeButton.IsEnabled = true;
+            else
+                this.writeButton.IsEnabled = false;
         }
 
         public string Comment
@@ -129,8 +141,15 @@ namespace dp2SSL
                 }
             }
 
-            await TryWriteTagAsync(update_entities,
+            var write_result = await TryWriteTagAsync(update_entities,
                 this.TaskInfo);
+            if (write_result.Value == -1)
+            {
+                App.ErrorBox("写标签时出错", 
+                    write_result.ErrorInfo, 
+                    "red",
+                    "auto_close");
+            }
         }
 
         // 跟随事件动态更新列表
@@ -178,8 +197,15 @@ namespace dp2SSL
             if (update_entities.Count > 0)
                 changed = true;
 
-            await TryWriteTagAsync(update_entities,
+            var write_result = await TryWriteTagAsync(update_entities,
     this.TaskInfo);
+            if (write_result.Value == -1)
+            {
+                App.ErrorBox("写标签时出错",
+                    write_result.ErrorInfo,
+                    "red",
+                    "auto_close");
+            }
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
@@ -351,6 +377,7 @@ out string strError);
             return new FindBlankTagResult();
         }
 
+        // 尝试寻找一个空白标签写入
         async Task<NormalResult> TryWriteTagAsync(List<Entity> entities,
             WriteTagTask task_info)
         {
@@ -363,6 +390,12 @@ out string strError);
 
             if (result.ResultEntity != null)
             {
+                var write_result = WriteEntity(result.ResultEntity,
+                    task_info);
+                if (write_result.Value == -1)
+                    return write_result;
+
+#if REMOVED
                 // 写入
                 var chip = BuildChip(task_info);
                 int nRet = SaveNewChip(result.ResultEntity.ReaderName,
@@ -393,10 +426,50 @@ out string strError);
                         this.Close();
                     }));
                 });
+#endif
+
                 return new NormalResult { Value = 1 };
             }
 
             return new NormalResult { Value = 0 };
+        }
+
+        // 写入指定的 Entity 所代表的标签
+        NormalResult WriteEntity(Entity entity,
+            WriteTagTask task_info)
+        {
+            // 写入
+            var chip = BuildChip(task_info);
+            int nRet = SaveNewChip(entity.ReaderName,
+                entity.TagInfo,
+                chip,
+                out TagInfo new_tag_info,
+                out string strError);
+            if (nRet == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            // 语音播报成功，自动关闭窗口
+            this.Finished = true;
+            App.CurrentApp.SpeakSequence($"写入完成");
+            App.Invoke(new Action(() =>
+            {
+                this.Comment = $"写入完成。PII={entity.PII}, UID={new_tag_info.UID}";
+                this.Background = new SolidColorBrush(Colors.DarkGreen);
+            }));
+
+            // 3 秒以后自动关闭对话框
+            _ = Task.Run(async () => {
+                await Task.Delay(TimeSpan.FromSeconds(3));
+                App.Invoke(new Action(() =>
+                {
+                    this.Close();
+                }));
+            });
+
+            return new NormalResult { Value = 1};
         }
 
         public static LogicChip BuildChip(WriteTagTask task)
@@ -467,7 +540,9 @@ out string strError);
     readerName,
     tagInfo,
     new_tag_info);
-                TagList.ClearTagTable(new_tag_info.UID);
+                ShelfData.PatronTagList.ClearTagTable(new_tag_info.UID);
+                // 迫使所有标签都重新获取和显示一次
+                ShelfData.PatronTagList.Clear();
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -513,7 +588,7 @@ out string strError);
             return chip.IsBlank();
         }
 
-        #region
+#region
 
         /*
 OI的校验，总长度不超过16位。
@@ -572,7 +647,19 @@ OI的校验，总长度不超过16位。
         }
 
 
-        #endregion
+#endregion
+
+        private void writeButton_Click(object sender, RoutedEventArgs e)
+        {
+            Entity entity = this.booksControl.SelectedItem as Entity;
+
+            var write_result = WriteEntity(entity,
+                this.TaskInfo);
+            if (write_result.Value == -1)
+            {
+                App.ErrorBox("写标签时出错", write_result.ErrorInfo);
+            }
+        }
     }
 
     // 任务信息

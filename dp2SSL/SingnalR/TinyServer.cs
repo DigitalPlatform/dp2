@@ -1200,7 +1200,8 @@ update
             // 立即更新版本
             if (command.StartsWith("update"))
             {
-                Models.GlobalMonitor.ActivateUpdate();
+                GlobalMonitor.ReturnUpateResult = true; // 2021/9/1
+                GlobalMonitor.ActivateUpdate();
                 return;
             }
 

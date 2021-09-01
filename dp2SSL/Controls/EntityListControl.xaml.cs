@@ -1,11 +1,12 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -200,6 +201,29 @@ namespace dp2SSL
                 this.emptyComment.Visibility = Visibility.Visible;
             else
                 this.emptyComment.Visibility = Visibility.Hidden;
+        }
+
+        private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SelectionChanged?.Invoke(sender, e);
+        }
+
+        public event SelectionChangedEventHandler SelectionChanged;
+
+        public System.Collections.IList SelectedItems
+        {
+            get
+            {
+                return this.listView.SelectedItems;
+            }
+        }
+
+        public object SelectedItem
+        {
+            get
+            {
+                return this.listView.SelectedItem;
+            }
         }
     }
 

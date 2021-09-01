@@ -1537,7 +1537,7 @@ end_time);
             {
                 // 不是测试状态也带有 operTime 子参数
                 // additional = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
-                
+
                 // 让服务器自己填写时间 2021/8/26
             }
 
@@ -1596,6 +1596,10 @@ end_time);
             if (lRet != 0)
                 task.ErrorInfo = strError;
 
+            // 2021/9/1
+            if (return_info != null
+                && string.IsNullOrEmpty(return_info.Borrower) == false)
+                this.CurrentReaderBarcode = return_info?.Borrower;
 
             if (eas_changed == true && lRet == -1)
             {
@@ -1694,7 +1698,6 @@ end_time);
             if (lRet != -1
     && strAction == "transfer")
                 task.Parameters += ",direction:" + return_info?.Location;
-
 
             if (lRet == -1)
                 goto ERROR1;

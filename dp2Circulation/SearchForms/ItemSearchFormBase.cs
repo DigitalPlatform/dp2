@@ -583,6 +583,10 @@ namespace dp2Circulation
             }
             else
             {
+                // 2021/9/1
+                if (cols != null)
+                    ListViewUtil.EnsureColumns(item.ListView, cols.Length + 1);
+
                 int c = 0;
                 for (; c < cols.Length; c++)
                 {
@@ -1208,7 +1212,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
             object o = m_tableSummaryColIndex[strItemDbName];
             if (o == null)
             {
-                if (Program.MainForm.NormalDbProperties == null)
+                if (Program.MainForm.NormalDbProperties == null
+                    || Program.MainForm.NormalDbProperties.Count == 0)
                 {
                     strError = "普通数据库属性尚未初始化。这通常是因为刚进入内务时候初始化阶段出现错误导致的。请退出内务重新进入，并注意正确登录";
                     return -1;

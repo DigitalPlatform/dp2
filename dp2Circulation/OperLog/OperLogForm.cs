@@ -9237,7 +9237,7 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
                     }
 
-                    string xml = data.GetLastXml();
+                    string xml = data.GetLastXml()?.Xml;
 
                     if (control)
                     {
@@ -9270,7 +9270,7 @@ dlg.UiState);
                                 goto ERROR1;
                             }
 
-                            xml = dlg.SelectedXml;
+                            xml = dlg.SelectedXml?.Xml;
                         }
                     }
 
@@ -9500,35 +9500,42 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
                     }
 
-                    if (string.IsNullOrEmpty(data.GetLastXml()))
+                    if (string.IsNullOrEmpty(data.GetLastXml()?.Xml))
                     {
-                        MessageBox.Show(this, "data.Xml 为空");
+                        MessageBox.Show(this, "data.GetLastXml() 为空");
                         goto CONTINUE;
                     }
 
                     stop.SetMessage("正在保存书目记录 " + strBiblioRecPath + " 到 .bdf 文件");
 
-                    XmlDocument biblio_dom = new XmlDocument();
-                    biblio_dom.LoadXml(data.GetLastXml());
+                    if (data.Xmls != null)
+                        foreach (var xml in data.Xmls)
+                        {
+                            if (SelectXmlDialog.IsValid(xml?.Xml) == false)
+                                continue;
 
-                    // 写入 dprms:record 元素
-                    writer.WriteStartElement("dprms", "record", DpNs.dprms);
+                            XmlDocument biblio_dom = new XmlDocument();
+                            biblio_dom.LoadXml(xml?.Xml);
 
-                    {
-                        // 写入 dprms:biblio 元素
-                        writer.WriteStartElement("dprms", "biblio", DpNs.dprms);
+                            // 写入 dprms:record 元素
+                            writer.WriteStartElement("dprms", "record", DpNs.dprms);
 
-                        writer.WriteAttributeString("path", Program.MainForm.LibraryServerUrl + "?" + strBiblioRecPath);
-                        // writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));
+                            {
+                                // 写入 dprms:biblio 元素
+                                writer.WriteStartElement("dprms", "biblio", DpNs.dprms);
 
-                        biblio_dom.DocumentElement.WriteTo(writer);
-                        writer.WriteEndElement();
-                    }
+                                writer.WriteAttributeString("path", Program.MainForm.LibraryServerUrl + "?" + strBiblioRecPath);
+                                // writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));
 
-                    // 收尾 dprms:record 元素
-                    writer.WriteEndElement();
+                                biblio_dom.DocumentElement.WriteTo(writer);
+                                writer.WriteEndElement();
+                            }
 
-                CONTINUE:
+                            // 收尾 dprms:record 元素
+                            writer.WriteEndElement();
+                        }
+
+                    CONTINUE:
                     i++;
                     stop.SetProgressValue(i);
                 }
@@ -9624,6 +9631,33 @@ MessageBoxDefaultButton.Button1);
 
             public ListViewItem ListViewItem { get; set; }
 
+            public List<RecoverBiblioItem> Xmls { get; set; }
+
+            public void AddXml(RecoverBiblioItem xml)
+            {
+                if (this.Xmls == null)
+                    this.Xmls = new List<RecoverBiblioItem>();
+
+                this.Xmls.Add(xml);
+            }
+
+            // 获得最后一个 XML。指最后一个结构合法的 XML
+            public RecoverBiblioItem GetLastXml()
+            {
+                if (this.Xmls == null || this.Xmls.Count == 0)
+                    return null;
+                List<RecoverBiblioItem> xmls = new List<RecoverBiblioItem>();
+                foreach (var xml in this.Xmls)
+                {
+                    if (SelectXmlDialog.IsValid(xml.Xml))
+                        xmls.Add(xml);
+                }
+                if (xmls.Count == 0)
+                    return null;
+                return xmls[xmls.Count - 1];
+            }
+
+#if REMOVED
             public List<string> Xmls { get; set; }
 
             public void AddXml(string xml)
@@ -9634,23 +9668,23 @@ MessageBoxDefaultButton.Button1);
                 this.Xmls.Add(xml);
             }
 
+            // 获得最后一个 XML。指最后一个结构合法的 XML
             public string GetLastXml()
             {
                 if (this.Xmls == null || this.Xmls.Count == 0)
                     return null;
-                return this.Xmls[this.Xmls.Count - 1];
+                List<string> xmls = new List<string>();
+                foreach(string xml in this.Xmls)
+                {
+                    if (SelectXmlDialog.IsValid(xml))
+                        xmls.Add(xml);
+                }
+                if (xmls.Count == 0)
+                    return null;
+                return xmls[xmls.Count - 1];
             }
-            /*
-            public string GetSelectedHistoryXml(int index)
-            {
-                if (HistoryList == null)
-                    throw new Exception("HistoryList == null");
-                if (index < 0 || index >= HistoryList.Count)
-                    throw new ArgumentException($"index 超过范围");
-                var item = this.HistoryList[index];
-                return item.Xml;
-            }
-            */
+
+#endif
         }
 
         const int COLUMN_RECOVER_NO = 0;
@@ -9720,7 +9754,7 @@ MessageBoxDefaultButton.Button1);
             return StringUtil.MakePathList(list);
         }
 
-        class RecoverBiblioItem
+        public class RecoverBiblioItem
         {
             public string Type { get; set; }    // 类型。biblio/patron
 
@@ -9728,6 +9762,11 @@ MessageBoxDefaultButton.Button1);
             public string Xml { get; set; }
 
             public bool IsClipped { get; set; }
+
+            // 在哪个日志文件中？
+            public string Date { get; set; }
+            // 操作日志记录在日志文件中的序号
+            public long Index { get; set; }
         }
 
         int RecoverFromOperLogs(List<string> dates,
@@ -9907,7 +9946,7 @@ MessageBoxDefaultButton.Button1);
             RecoverData data = (RecoverData)_recoverTable[recpath];
             if (data == null)
                 return null;
-            return data.GetLastXml();
+            return data.GetLastXml()?.Xml;
         }
 
         // 从 borrow/return 日志记录中获得恢复信息
@@ -10034,6 +10073,8 @@ MessageBoxDefaultButton.Button1);
 
                     RecoverBiblioItem record = new RecoverBiblioItem
                     {
+                        Date = item.Date,
+                        Index = item.Index,
                         Type = "patron",
                         BiblioRecPath = strBiblioRecPath,
                         Xml = strXml,
@@ -10114,6 +10155,8 @@ MessageBoxDefaultButton.Button1);
                         if (string.IsNullOrEmpty(strXml) == false)
                         {
                             RecoverBiblioItem record = new RecoverBiblioItem();
+                            record.Date = item.Date;
+                            record.Index = item.Index;
                             record.Type = GetDbType(strBiblioRecPath);
                             record.BiblioRecPath = strBiblioRecPath;
                             record.Xml = strXml;
@@ -10136,6 +10179,8 @@ MessageBoxDefaultButton.Button1);
                         if (string.IsNullOrEmpty(strXml) == false)
                         {
                             RecoverBiblioItem record = new RecoverBiblioItem();
+                            record.Date = item.Date;
+                            record.Index = item.Index;
                             record.Type = GetDbType(strBiblioRecPath);
                             record.BiblioRecPath = strBiblioRecPath;
                             record.Xml = strXml;
@@ -10153,6 +10198,8 @@ MessageBoxDefaultButton.Button1);
                     recpath_table.ContainsKey(strBiblioRecPath) == true)
                 {
                     RecoverBiblioItem record = new RecoverBiblioItem();
+                    record.Date = item.Date;
+                    record.Index = item.Index;
                     record.Type = GetDbType(strBiblioRecPath);
                     record.BiblioRecPath = strBiblioRecPath;
                     record.Xml = "";
@@ -10206,12 +10253,14 @@ MessageBoxDefaultButton.Button1);
                 if (string.IsNullOrEmpty(record.Xml) == false)
                 {
                     // data.Xml = record.Xml;  // TODO: clipping 时用合并算法
-                    data.AddXml(record.Xml);
+                    data.AddXml(record);
                 }
 
                 if (data.HistoryList == null)
                     data.HistoryList = new List<OperLogItem>();
-                data.HistoryList.Add(history_item);
+
+                if (data.HistoryList.IndexOf(history_item) == -1)   // 去掉重复
+                    data.HistoryList.Add(history_item);
 
                 if (data.ListViewItem == null)
                 {
@@ -10326,7 +10375,7 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
             string strError = "";
             string strHtml = "";
-            string strXml = "";
+            // string strXml = "";
 
             // 优化，避免无谓地进行服务器调用
             if (bOpenWindow == false)
@@ -10355,16 +10404,18 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
-            strXml = data.GetLastXml();
+            string strLastXml = data.GetLastXml()?.Xml;
+
+            // TODO: 实现读者记录的 HTML 显示
 
             string strOldMARC = "";
             string strOldFragmentXml = "";
-            if (string.IsNullOrEmpty(strXml) == false)
+            if (string.IsNullOrEmpty(strLastXml) == false)
             {
                 string strOutMarcSyntax = "";
                 // 将XML格式转换为MARC格式
                 // 自动从数据记录中获得MARC语法
-                nRet = MarcUtil.Xml2Marc(strXml,
+                nRet = MarcUtil.Xml2Marc(strLastXml,
                     MarcUtil.Xml2MarcStyle.Warning | MarcUtil.Xml2MarcStyle.OutputFragmentXml,
                     "",
                     out strOutMarcSyntax,
@@ -10409,7 +10460,7 @@ strHtml2 +
 
             m_operlogViewer.Text = "数据库记录 '" + strRecPath + "'";
             m_operlogViewer.HtmlString = (string.IsNullOrEmpty(strHtml) == true ? NOTSUPPORT : strHtml);
-            m_operlogViewer.XmlString = strXml;
+            m_operlogViewer.XmlString = strLastXml;
             m_operlogViewer.FormClosed -= new FormClosedEventHandler(m_viewer_FormClosed);
             m_operlogViewer.FormClosed += new FormClosedEventHandler(m_viewer_FormClosed);
 

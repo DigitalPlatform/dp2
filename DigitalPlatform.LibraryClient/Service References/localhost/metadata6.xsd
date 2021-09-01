@@ -1073,6 +1073,7 @@
       <xs:element minOccurs="0" name="BorrowID" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="BorrowOperator" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="BorrowTime" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Borrower" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="ItemBarcode" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="LatestReturnTime" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Location" nillable="true" type="xs:string" />

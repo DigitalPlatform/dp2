@@ -32,6 +32,7 @@ namespace dp2Circulation.OperLog
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.listView_browse = new System.Windows.Forms.ListView();
             this.columnHeader_no = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_source = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_size = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_errorInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
@@ -69,6 +70,7 @@ namespace dp2Circulation.OperLog
             // 
             this.listView_browse.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_no,
+            this.columnHeader_source,
             this.columnHeader_size,
             this.columnHeader_errorInfo});
             this.listView_browse.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -89,6 +91,11 @@ namespace dp2Circulation.OperLog
             // 
             this.columnHeader_no.Text = "序号";
             this.columnHeader_no.Width = 100;
+            // 
+            // columnHeader_source
+            // 
+            this.columnHeader_source.Text = "来源";
+            this.columnHeader_source.Width = 200;
             // 
             // columnHeader_size
             // 
@@ -171,5 +178,6 @@ namespace dp2Circulation.OperLog
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.ColumnHeader columnHeader_size;
         private System.Windows.Forms.ColumnHeader columnHeader_errorInfo;
+        private System.Windows.Forms.ColumnHeader columnHeader_source;
     }
 }

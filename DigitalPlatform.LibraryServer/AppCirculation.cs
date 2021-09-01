@@ -16517,6 +16517,8 @@ start_time_1,
             return_info.ItemBarcode = strItemBarcode;
             // 2020/8/26
             return_info.BorrowID = borrowID;
+            // 2021/9/1
+            return_info.Borrower = strBorrower;
 
             if (domOperLog != null)
                 DomUtil.SetElementText(domOperLog.DocumentElement, "borrowID", borrowID);
@@ -23084,6 +23086,11 @@ start_time_1,
         // 本次还书所针对的借书事务 ID
         [DataMember]
         public string BorrowID = "";
+
+        // 2021/9/1
+        // 所还图书的借者
+        [DataMember]
+        public string Borrower = "";
     }
 
 }

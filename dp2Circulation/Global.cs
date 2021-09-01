@@ -2660,14 +2660,23 @@ namespace dp2Circulation
         }
          * */
 
+        // 兼容以前版本
+        public static string GetReaderSummary(string strReaderXml)
+        {
+            return GetReaderSummary(strReaderXml, out string _);
+        }
+
         // 
         /// <summary>
         /// 获得读者摘要信息
         /// </summary>
         /// <param name="strReaderXml">读者记录 XML</param>
+        /// <param name="strReaderBarcode">返回读者证条码号</param>
         /// <returns>读者摘要</returns>
-        public static string GetReaderSummary(string strReaderXml)
+        public static string GetReaderSummary(string strReaderXml,
+            out string strReaderBarcode)
         {
+            strReaderBarcode = "";
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -2678,6 +2687,15 @@ namespace dp2Circulation
                 return "读者记录XML装入DOM时出错: " + ex.Message;
             }
 
+            // 2021/9/1
+            strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
+                "barcode");
+            if (string.IsNullOrEmpty(strReaderBarcode))
+            {
+                var refID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+                if (string.IsNullOrEmpty(refID) == false)
+                    strReaderBarcode = $"@refID:{refID}";
+            }
             return DomUtil.GetElementText(dom.DocumentElement,
                 "name");
         }
