@@ -3466,6 +3466,7 @@ root, strLibraryCode);
                     // 在强制修改模式下，时间戳不一致意义重大，直接返回出错，而不进行要害字段的比对判断
                     strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
                     kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
+                    library_errorcode = ErrorCode.TimestampMismatch;    // 2021/9/2
                     return -1;  // timestamp mismatch
                 }
 
@@ -3509,6 +3510,7 @@ root, strLibraryCode);
                         strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 在编辑期间原记录已发生过修改(保存时发现提交的时间戳和原记录不匹配)";
 
                     kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
+                    library_errorcode = ErrorCode.TimestampMismatch;    // 2021/9/2
                     return -1;  // timestamp mismatch
                 }
 

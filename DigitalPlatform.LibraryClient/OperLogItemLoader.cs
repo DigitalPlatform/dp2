@@ -744,7 +744,7 @@ FileShare.ReadWrite);
 
                                 // 2017/10/9
                                 if (this.ReplicationLevel == true)
-                                    strStyle += ",supervisor";  // 注：当前账户中还应该包含 replicatoin 权限才能真正获得日志记录中的密码字段
+                                    strStyle += ",supervisor";  // 注：当前账户中还应该包含 replication 权限才能真正获得日志记录中的密码字段
 
                                 if (string.IsNullOrEmpty(this.ServerVersion) == false
                                     && StringUtil.CompareVersion(this.ServerVersion, "3.17") >= 0)

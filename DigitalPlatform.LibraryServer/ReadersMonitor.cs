@@ -1091,6 +1091,10 @@ namespace DigitalPlatform.LibraryServer
 
             XmlElement password_element = readerdom.DocumentElement.SelectSingleNode("password") as XmlElement;
             
+            // 2021/9/2
+            if (password_element == null)
+                return false;
+
             // 设置密码失效期
             return LibraryApplication.SetPatronPasswordExpire(password_element,
                 expireLength,   // _patronPasswordExpirePeriod,

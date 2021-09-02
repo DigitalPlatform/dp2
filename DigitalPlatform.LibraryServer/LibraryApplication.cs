@@ -315,6 +315,7 @@ namespace DigitalPlatform.LibraryServer
 
         private XmlDocument _libraryCfgDom = null;   // library.xml配置文件内容
         internal ReaderWriterLockSlim _lockLibraryCfgDom = new ReaderWriterLockSlim();
+        int _libraryCfgDomFullInitialCount = 0; // library.xml 完整装载的次数
 
         public XmlDocument LibraryCfgDom
         {
@@ -1960,6 +1961,9 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
+                // 增量完整装载次数
+                if (bReload == false)
+                    _libraryCfgDomFullInitialCount++;
                 return 0;
             }
             catch (Exception ex)
@@ -2968,7 +2972,7 @@ namespace DigitalPlatform.LibraryServer
                 this.WriteErrorLog("watcher 触发了 LoadCfg() ...");
 
                 nRet = this.LoadCfg(
-                    true,
+                    _libraryCfgDomFullInitialCount == 0 ? false: true,
                     this.DataDir,
                     this.HostDir,
                     out string strError);
@@ -3923,6 +3927,8 @@ namespace DigitalPlatform.LibraryServer
 
         public void Close()
         {
+            this._libraryCfgDomFullInitialCount = 0;
+
             // 切断所有正在请求中的 RmsChannel
             _slowChannelList.Disabled = true;   // 先禁用
             _slowChannelList.Abort();
@@ -3988,7 +3994,6 @@ namespace DigitalPlatform.LibraryServer
             this.WriteErrorLog("LibraryApplication 被停止。停止操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
 
             this.RemoveAppDownDetectFile();	// 删除检测文件
-
             disposed = true;
         }
 
@@ -12017,10 +12022,12 @@ out strError);
 
             // 2021/7/4
             // 设置密码失效期
-            SetPatronPasswordExpire(node,
-                expireLength,   // _patronPasswordExpirePeriod,
-                DateTime.Now,
-                out string strExpireTime);
+            string strExpireTime = "";
+            if (node != null)
+                SetPatronPasswordExpire(node,
+                    expireLength,   // _patronPasswordExpirePeriod,
+                    DateTime.Now,
+                    out strExpireTime);
 
             if (domOperLog != null)
             {
@@ -12031,9 +12038,12 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement,
                     "newPassword", strNewPassword);
 
-                // 2021/7/5
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "expire", strExpireTime);
+                if (string.IsNullOrEmpty(strExpireTime) == false)
+                {
+                    // 2021/7/5
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "expire", strExpireTime);
+                }
             }
 
             return 0;
@@ -12055,6 +12065,10 @@ out strError);
             bool append = false)
         {
             strExpireTime = "";
+
+            // 2021/9/2
+            if (password_element == null)
+                throw new ArgumentException("password_element 不应为 null", "password_element");
 
             bool changed = false;
             if (passwordExpirePeriod == TimeSpan.MaxValue)

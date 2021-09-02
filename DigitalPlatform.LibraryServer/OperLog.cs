@@ -1554,6 +1554,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 过滤日志记录中，读者记录的 password 元素
                 RemoveReaderPassword(ref dom);
+                // 2021/9/2 增加
+                strXml = dom.DocumentElement.OuterXml;
             }
 
             if (nLevel == -1)
@@ -1569,29 +1571,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             {
-#if NO
-                // 也要减少尺寸
-                if (strOperation == "borrow")
-                {
-                    ResizeBorrow(nLevel, ref dom);
-                }
-                else if (strOperation == "return")
-                {
-                    ResizeReturn(nLevel, ref dom);
-                }
-                else if (strOperation == "setEntity")
-                {
-                    ResizeSetEntity(nLevel, ref dom);
-                }
-                else if (strOperation == "setReaderInfo")
-                {
-                    ResizeSetReaderInfo(nLevel, ref dom);
-                }
-                else if (strOperation == "amerce")
-                {
-                    ResizeAmerce(nLevel, ref dom);
-                } 
-#endif
                 // 减少尺寸
                 ResizeXml(strOperation,
                     nLevel,
@@ -1648,6 +1627,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 过滤日志记录中，读者记录的 password 元素
                 RemoveReaderPassword(ref dom);
+                // 2021/9/2 增加
+                strXml = dom.DocumentElement.OuterXml;
             }
 
             // 2013/11/22
@@ -1674,39 +1655,23 @@ out strTargetLibraryCode);
                 if (strOperation == "devolveReaderInfo")
                 {
                     FilterDovolveReaderInfo(ref dom);
+                    // 2021/9/2 增加
+                    strXml = dom.DocumentElement.OuterXml;
                 }
                 else if (strOperation == "setEntity")
                 {
                     FilterSetEntity(// nLevel, 
                         ref dom);
+                    // 2021/9/2 增加
+                    strXml = dom.DocumentElement.OuterXml;
                 }
                 else if (strOperation == "setReaderInfo")
                 {
                     FilterSetReaderInfo(// nLevel, 
                         ref dom);
+                    // 2021/9/2 增加
+                    strXml = dom.DocumentElement.OuterXml;
                 }
-#if NO
-                else if (strOperation == "borrow" && nLevel > 0)
-                {
-                    ResizeBorrow(nLevel, ref dom);
-                }
-                else if (strOperation == "return" && nLevel > 0)
-                {
-                    ResizeReturn(nLevel, ref dom);
-                }
-                else if (strOperation == "setEntity" && nLevel > 0)
-                {
-                    ResizeSetEntity(nLevel, ref dom);
-                }
-                else if (strOperation == "setReaderInfo" && nLevel > 0)
-                {
-                    ResizeSetReaderInfo(nLevel, ref dom);
-                }
-                else if (strOperation == "amerce" && nLevel > 0)
-                {
-                    ResizeAmerce(nLevel, ref dom);
-                }
-#endif
 
                 {
                     // 减少尺寸

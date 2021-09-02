@@ -9224,6 +9224,9 @@ MessageBoxDefaultButton.Button1);
             {
                 stop.SetProgressRange(0, this.listView_restoreList.SelectedItems.Count);
 
+                bool bDontAsk = false;
+                DialogResult timestamp_result = DialogResult.Yes;
+
                 int i = 0;
                 foreach (ListViewItem item in this.listView_restoreList.SelectedItems)
                 {
@@ -9304,8 +9307,9 @@ dlg.UiState);
                     string strOutputPath = "";
                     byte[] baNewTimestamp = null;
 
-                // TODO: 是否先探测一下书目记录是否存在？已经存在最好给出特殊的提示和警告
+                    // TODO: 是否先探测一下书目记录是否存在？已经存在最好给出特殊的提示和警告
 
+                    int nRedoCount = 0;
                 REDO:
                     stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
@@ -9337,6 +9341,11 @@ dlg.UiState);
                             out baNewTimestamp,
                             out ErrorCodeValue kernel_errorcode,
                             out strError);
+                        // 2021/9/2
+                        // 解决旧版本(3.90 以前) dp2library 中这里忘记返回精确的 channel.ErrorCode 的问题
+                        if (kernel_errorcode == ErrorCodeValue.TimestampMismatch
+                            && channel.ErrorCode == ErrorCode.SystemError)
+                            channel.ErrorCode = ErrorCode.TimestampMismatch;
                     }
                     else
                     {
@@ -9387,28 +9396,71 @@ dlg.UiState);
                             nReloadCount++;
                             goto CONTINUE;
 #endif
-                        }
+                            /*
+                            if (timestamp == null
+                                && nRedoCount < 5)
+                            {
+                                timestamp = baNewTimestamp;
+                                nRedoCount++;
+                                goto REDO;
+                            }
+                            */
 
-                        DialogResult result = MessageBox.Show(this,
-$"保存{data.DbType}记录 {strBiblioRecPath} 时出错: {strError}\r\nold_timestamp={ByteArray.GetHexTimeStampString(timestamp)}, new_timestamp={ByteArray.GetHexTimeStampString(baNewTimestamp)}。\r\n\r\n请问是否重试保存操作? \r\n\r\n(Yes 重试保存；\r\nNo 放弃保存、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
+
+                            if (bDontAsk == false || nRedoCount > 5)    // 注：如果重试了 5 次还要重试，那不得不出现对话框给一次选择机会了
+                            {
+                                bDontAsk = false;
+                                timestamp_result = MessageDlg.Show(this,
+                                    $"保存{data.DbType}记录 { strBiblioRecPath} 时遭遇时间戳不匹配: { strError}。这意味着保存的位置原来存在一条记录，本次保存会覆盖这条记录。\r\n\r\n请问是否要重试保存记录? 这个位置确实要被覆盖么? 您了解覆盖前的原记录是什么内容么?\r\n\r\n[重试覆盖] 重试(导致覆盖)；\r\n[跳过] 放弃保存此条、但继续处理后面的记录保存; \r\n[中断] 中断整批保存操作",
+                                    "OperLogForm",
+                                    MessageBoxButtons.YesNoCancel,
+                                    MessageBoxDefaultButton.Button1,
+                                    ref bDontAsk,
+                                    new string[] { "重试覆盖", "跳过", "中断" },
+                                    "下次不再出现本对话框");
+                            }
+
+                            /*
+                            DialogResult result = MessageBox.Show(this,
+$"保存{data.DbType}记录 { strBiblioRecPath} 时遭遇时间戳不匹配: { strError}。\r\n\r\n请问是否要重试保存记录? \r\n\r\n(Yes 重试；\r\nNo 放弃保存此条、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
 "OperLogForm",
 MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
-                        if (result == System.Windows.Forms.DialogResult.Cancel)
-                            goto ERROR1;
-                        if (result == System.Windows.Forms.DialogResult.No)
-                            goto CONTINUE;
+                            */
+                            if (timestamp_result == DialogResult.Cancel)
+                                break;
+                            if (timestamp_result == DialogResult.No)
+                                goto CONTINUE;
 
-                        timestamp = baNewTimestamp;
-                        goto REDO;
+                            timestamp = baNewTimestamp;
+                            nRedoCount++;
+                            goto REDO;
+                        }
+
+                        // TimestampMismatch 以外的其它错误报错
+                        {
+                            DialogResult result = MessageBox.Show(this,
+    $"保存{data.DbType}记录 {strBiblioRecPath} 时出错: {strError}\r\nold_timestamp={ByteArray.GetHexTimeStampString(timestamp)}, new_timestamp={ByteArray.GetHexTimeStampString(baNewTimestamp)}。\r\n\r\n请问是否重试保存操作? \r\n\r\n(Yes 重试保存；\r\nNo 放弃保存、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
+    "OperLogForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                            if (result == System.Windows.Forms.DialogResult.Cancel)
+                                goto ERROR1;
+                            if (result == System.Windows.Forms.DialogResult.No)
+                                goto CONTINUE;
+
+                            timestamp = baNewTimestamp;
+                            nRedoCount++;
+                            goto REDO;
+                        }
                     }
 
                 CONTINUE:
                     i++;
                     stop.SetProgressValue(i);
                 }
-
             }
             finally
             {
