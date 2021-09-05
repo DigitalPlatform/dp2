@@ -98,7 +98,6 @@ namespace dp2Circulation
 
             this.treeView_arrangement.Nodes.Clear();
 
-
             string strArrangementXml = "";
 
             // 获得种次号相关定义

@@ -640,6 +640,10 @@ namespace dp2SSL
         private async void App_LineFeed(object sender, LineFeedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+            // 2021/9/5
+            if (this.Visibility != Visibility.Visible)
+                return;
+
             if ((string.IsNullOrEmpty(App.PatronBarcodeStyle) || App.PatronBarcodeStyle == "禁用")
                 && (string.IsNullOrEmpty(App.WorkerBarcodeStyle) || App.WorkerBarcodeStyle == "禁用"))
             {
@@ -2726,6 +2730,12 @@ namespace dp2SSL
                         || DateTime.Now - ShelfData.GetWriteTime() > ShelfData.ForceWriteLength)
                     {
                         await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+
+                        {
+                            var log_result = ShelfData.WriteInitialLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(all_actions)}");
+                            WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容已写入另一日志文件 {log_result.FileName}，时刻为 {log_result.Time}");
+                        }
+
                         ShelfData.SetWriteTime(DateTime.Now);
                     }
                     else
@@ -2801,6 +2811,12 @@ namespace dp2SSL
                         DisplayMessage(progress, "正在将盘点动作写入本地数据库", "green");
                         // 2021/5/17
                         await ShelfData.SaveActionsToDatabaseAsync(all_actions);
+
+                        {
+                            var log_result = ShelfData.WriteInitialLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(all_actions)}");
+                            WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容已写入另一日志文件 {log_result.FileName}，时刻为 {log_result.Time}");
+                        }
+
                         ShelfData.SetWriteTime(DateTime.Now);
                     }
                     else
@@ -4361,6 +4377,7 @@ namespace dp2SSL
 
                     // 保存到数据库。这样不怕中途断电或者异常退出
                     await ShelfData.SaveActionsToDatabaseAsync(actions);
+                    WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
 
                     // 在这里发出点对点消息比较合适
                     // 发出点对点消息

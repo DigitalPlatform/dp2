@@ -109,6 +109,9 @@ namespace dp2Circulation
 
         async Task FillDeltaMessage()
         {
+            if (_currentGroupInfo == null)
+                return;
+
             // 补充获取先前在没有连接时间段的消息
             bool bUrlChanged = Program.MainForm.MessageHub.dp2MServerUrl != _currentUrl;
 
@@ -1149,7 +1152,8 @@ namespace dp2Circulation
                 if (string.IsNullOrEmpty(_currentGroupInfo?.GroupName))
                 {
                     ClearHtml();
-                    _currentGroupInfo.LastMessage = null;
+                    if (_currentGroupInfo != null)
+                        _currentGroupInfo.LastMessage = null;
                 }
                 else
                 {

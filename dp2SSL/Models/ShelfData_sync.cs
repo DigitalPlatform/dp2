@@ -988,7 +988,7 @@ TaskScheduler.Default);
                             actions[i].ID = requests[i].ID;
                         }
 
-                        WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
+                        // WpfClientInfo.WriteInfoLog($"Actions 保存到本地数据库成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
                     }
                 }
             }

@@ -10,8 +10,7 @@
         WindowStyle="None"
     AllowsTransparency="True"
     ResizeMode="CanResizeWithGrip" ShowInTaskbar="False">
-    <Border BorderThickness="1" BorderBrush="Gray">
-
+    <Border x:Name="border" BorderThickness="1" BorderBrush="Gray">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="20"/>

@@ -1563,7 +1563,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 第一次复制绿色版本
-            Task.Factory.StartNew(() => CopyGreen());
+            _ = Task.Factory.StartNew(() => CopyGreen());
 
             StartPrepareNames(true, true);
 
@@ -2455,6 +2455,16 @@ MessageBoxDefaultButton.Button1);
             if (_initialPropertiesComplete)
                 return true;
             return false;
+        }
+
+        // 2021/9/4
+        // 重新从 dp2library 服务器装载各种属性参数
+        public void BeginRefreshProperties()
+        {
+            _ = Task.Run(() =>
+            {
+                InitialProperties(false, false);
+            });
         }
 
         // 初始化各种参数
@@ -5267,18 +5277,6 @@ Culture=neutral, PublicKeyToken=null
 
             return 0;
         ERROR1:
-            /*
-            DialogResult result = MessageBox.Show(this,
-                strError + "\r\n\r\n是否要继续?",
-                "dp2Circulation",
-                MessageBoxButtons.OKCancel,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-            if (result == DialogResult.OK)
-                return 1;   // 出错，但希望继续后面的操作
-
-            return -1;  // 出错，不希望继续以后的操作
-             * */
             return 1;
         }
 

@@ -3315,6 +3315,26 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return new NormalResult();
         }
 
+        public class WriteInitialLogResult : NormalResult
+        {
+            public string FileName { get; set; }
+            public string Time { get; set; }
+        }
+
+        // 写入详细的初始化信息到一个专门的 .log 文件，避免基本的 .log 文件尺寸太大
+        public static WriteInitialLogResult WriteInitialLog(string text)
+        {
+            DateTime now = DateTime.Now;
+            string path = Path.Combine(WpfClientInfo.UserLogDir, "initial_" + DateTimeUtil.DateTimeToString8(now) + ".txt");
+            string time = now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
+            File.AppendAllText(path, "=== " + time + " ===\r\n" + text);
+            return new WriteInitialLogResult
+            {
+                FileName = path,
+                Time = time
+            };
+        }
+
         public delegate void Delegate_displayText(string text);
         public delegate bool Delegate_cancelled();
 
@@ -3421,13 +3441,13 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 // TODO: 注意里面也包含了读者卡，需要过滤一下
 #endif
 
+                StringBuilder debug_info = new StringBuilder();
                 WpfClientInfo.WriteInfoLog($"books count={books.Count}, ReaderNameList={RfidManager.ReaderNameList}(注：此时门应该都是关闭的，图书读卡器应该是停止盘点状态)");
+                int line = 0;
                 foreach (var tag in books)
                 {
                     if (func_cancelled() == true)
                         return new InitialShelfResult();
-
-                    WpfClientInfo.WriteInfoLog($" tag={tag.ToString()}");
 
                     // 跳过读者读卡器上的标签
                     if (tag.OneTag.ReaderName == _patronReaderName)
@@ -3438,7 +3458,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     var doors = DoorItem.FindDoors(ShelfData.Doors, tag.OneTag.ReaderName, tag.OneTag.AntennaID.ToString());
                     if (doors.Count == 0)
                     {
+                        // 注：这里可能会重复多次报错
                         WpfClientInfo.WriteInfoLog($"tag (UID={tag.OneTag?.UID},Antenna={tag.OneTag.AntennaID}) 不属于任何已经定义的门，没有被加入 _all 集合。\r\ntag 详情：{tag.ToString()}");
+                        debug_info.AppendLine($"tag (UID={tag.OneTag?.UID},Antenna={tag.OneTag.AntennaID}) 不属于任何已经定义的门，没有被加入 _all 集合。\r\ntag 详情：{tag.ToString()}");
                         continue;
                     }
 
@@ -3446,6 +3468,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     if (Cross(doors_param, doors) == false)
                         continue;
 
+                    // WpfClientInfo.WriteInfoLog($" tag={tag.ToString()}");
+                    debug_info.AppendLine($"{++line}) {tag.ToString()}");
 
                     try
                     {
@@ -3498,6 +3522,27 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现读者证标签。门={doors[0].Name},UID={tag.OneTag?.UID} Protocol={tag.OneTag?.Protocol}\r\ntag 详情：{tag.ToString()}");
                     }
                     */
+                }
+
+                if (debug_info.Length > 0)
+                {
+                    var log_result = WriteInitialLog(debug_info.ToString());
+                    WpfClientInfo.WriteInfoLog($"对门 {ToString(doors_param)} 初始化过程中获得的 tag 详细信息已写入另一日志文件 {log_result.FileName}，时刻为 {log_result.Time}");
+                }
+                else
+                {
+                    WpfClientInfo.WriteInfoLog($"对门 {ToString(doors_param)} 初始化过程中没有发现 tag");
+                }
+
+                string ToString(List<DoorItem> door_list)
+                {
+                    List<string> names = new List<string>();
+                    foreach (var door in door_list)
+                    {
+                        names.Add(door.Name);
+                    }
+
+                    return StringUtil.MakePathList(names);
                 }
 
 #if OLD_TAGCHANGED

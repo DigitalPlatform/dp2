@@ -644,7 +644,7 @@ namespace dp2SSL
         */
 
         // 确保连接到消息服务器
-        public static async Task EnsureConnectMessageServerAsync()
+        public static async Task<bool> EnsureConnectMessageServerAsync()
         {
             if (string.IsNullOrEmpty(messageServerUrl) == false
                 && TinyServer.IsDisconnected)
@@ -656,6 +656,7 @@ namespace dp2SSL
                         new object[] { result.ErrorInfo, messageServerUrl, messageUserName, result.ErrorCode });
 
                     // WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+                    return false;
                 }
                 else
                 {
@@ -664,8 +665,10 @@ namespace dp2SSL
                     if (prepare_result.Value == -1)
                         WpfClientInfo.WriteErrorLog($"准备群名失败: {prepare_result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={prepare_result.ErrorCode}");
                         */
+                    return true;
                 }
             }
+            return true;
         }
 
         public static bool IsPageBorrowActive { get; set; }
@@ -1106,7 +1109,8 @@ namespace dp2SSL
 
         void WaitAllTaskFinish()
         {
-            ShelfData.Task?.Wait();
+            // 最多等待 10 秒
+            ShelfData.Task?.Wait(TimeSpan.FromSeconds(10));
         }
 
         public static App CurrentApp

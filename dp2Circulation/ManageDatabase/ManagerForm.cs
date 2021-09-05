@@ -7833,6 +7833,9 @@ namespace dp2Circulation
             else
             {
                 this.ArrangementChanged = false;
+
+                // 2021/9/4
+                Program.MainForm.GetCallNumberInfo();
             }
         }
 

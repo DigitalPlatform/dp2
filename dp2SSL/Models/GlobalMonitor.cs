@@ -115,7 +115,7 @@ namespace dp2SSL.Models
                                 WpfClientInfo.WriteInfoLog($"结束自动检查升级 update_result:{update_result.ToString()}");
 
                             // 2020/9/1
-                            WpfClientInfo.WriteInfoLog($"InstallFromWeb() 调试信息如下:\r\n{update_result.DebugInfo}");
+                            // WpfClientInfo.WriteInfoLog($"InstallFromWeb() 调试信息如下:\r\n{update_result.DebugInfo}");
 
                             if (update_result.Value == 1 || update_result.Value == 2)
                             {

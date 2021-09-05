@@ -14,6 +14,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Navigation;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
@@ -29,7 +30,6 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
 using dp2SSL.Models;
-using System.Security.Cryptography;
 
 namespace dp2SSL
 {
@@ -94,50 +94,53 @@ namespace dp2SSL
                             App.SetError("messageServer", null);
 
                         // 检查和确保连接到消息服务器
-                        await App.EnsureConnectMessageServerAsync();
+                        bool connected = await App.EnsureConnectMessageServerAsync();
 
-                        while (token.IsCancellationRequested == false)
+                        if (connected)
                         {
-                            try
+                            while (token.IsCancellationRequested == false)
                             {
-                                var message = await _queue.PeekAsync(token);
-                                if (message == null)
-                                    break;
-                                var request = JsonConvert.DeserializeObject<SetMessageRequest>(message.GetString());
-
-                                /*
-                                // 2020/4/29
-                                // 对 request 中的 groups 进行必要的变换
-                                foreach(var record in request.Records)
+                                try
                                 {
-                                    if (record.groups == null)
+                                    var message = await _queue.PeekAsync(token);
+                                    if (message == null)
+                                        break;
+                                    var request = JsonConvert.DeserializeObject<SetMessageRequest>(message.GetString());
+
+                                    /*
+                                    // 2020/4/29
+                                    // 对 request 中的 groups 进行必要的变换
+                                    foreach(var record in request.Records)
                                     {
+                                        if (record.groups == null)
+                                        {
 
+                                        }
                                     }
+                                    */
+
+                                    var result = await SetMessageAsync(request);
+                                    if (result.Value == -1)
+                                    {
+                                        // 为了让用户引起警觉，最好显示到界面报错
+                                        App.SetError("sendMessage", $"同步发送消息出错: {result.ErrorInfo}");
+
+                                        // TODO: 错误日志中要写入消息内容
+                                        WpfClientInfo.WriteLogInternal("error", $"SetMessageAsync() 出错(本条消息已被跳过，不会再重试发送): {result.ErrorInfo}");
+                                        break;
+                                    }
+                                    else
+                                        App.SetError("sendMessage", null);
+
+                                    await _queue.PullAsync(token);
                                 }
-                                */
-
-                                var result = await SetMessageAsync(request);
-                                if (result.Value == -1)
+                                catch (Exception ex)
                                 {
-                                    // 为了让用户引起警觉，最好显示到界面报错
-                                    App.SetError("sendMessage", $"同步发送消息出错: {result.ErrorInfo}");
-
-                                    // TODO: 错误日志中要写入消息内容
-                                    WpfClientInfo.WriteLogInternal("error", $"SetMessageAsync() 出错(本条消息已被跳过，不会再重试发送): {result.ErrorInfo}");
+                                    // WpfClientInfo.WriteErrorLog($"发送消息过程中出现异常(不会终止循环): {ExceptionUtil.GetDebugText(ex)}");
+                                    // 避免错误日志太多把错误日志文件塞满
+                                    _ = GlobalMonitor.CompactLog.Add("发送消息过程中出现异常(不会终止循环): {0}", new object[] { ExceptionUtil.GetDebugText(ex) });
                                     break;
                                 }
-                                else
-                                    App.SetError("sendMessage", null);
-
-                                await _queue.PullAsync(token);
-                            }
-                            catch (Exception ex)
-                            {
-                                // WpfClientInfo.WriteErrorLog($"发送消息过程中出现异常(不会终止循环): {ExceptionUtil.GetDebugText(ex)}");
-                                // 避免错误日志太多把错误日志文件塞满
-                                _ = GlobalMonitor.CompactLog.Add("发送消息过程中出现异常(不会终止循环): {0}", new object[] { ExceptionUtil.GetDebugText(ex) });
-                                break;
                             }
                         }
                     }
@@ -568,9 +571,10 @@ IList<MessageRecord> messages)
                     _lastMessage = message;
                 }
             }
-            catch
+            catch(Exception ex)
             {
-                // TODO: 写入错误日志
+                // 写入错误日志
+                WpfClientInfo.WriteErrorLog($"ProcessMessages() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -1086,6 +1090,7 @@ change history
 check book
 check patron
 check tag
+write tag
 set lamp time
 sterilamp
 exit
@@ -1226,10 +1231,17 @@ update
                 return;
             }
 
-            // 检测 RFID 标签
+            // 检测 RFID 标签(以柜门为单位)
             if (command.StartsWith("check tag"))
             {
                 await CheckTagAsync(command, groupName);
+                return;
+            }
+
+            // 写入 RFID 标签
+            if (command.StartsWith("write tag"))
+            {
+                await WriteTagAsync(command, groupName);
                 return;
             }
 
@@ -1399,6 +1411,18 @@ update
 
             await SendMessageAsync(new string[] { groupName }, $"我无法理解这个命令 '{command}'");
         }
+
+        static bool IsInSettingPage()
+        {
+            bool result = false;
+            App.Invoke(new Action(() =>
+            {
+                var nav = (NavigationWindow)App.Current.MainWindow;
+                result = nav.Content.GetType() == typeof(PageSetting);
+            }));
+            return result;
+        }
+
 
         // 当前是否正处在书柜页面
         static bool IsInShelfPage()
@@ -1791,6 +1815,98 @@ text.ToString());
             if (template == null)
                 return "";
             return template.Title;
+        }
+
+        static int _inWriteTag = 0;
+        static List<string> _commandQueue = new List<string>();
+        static object _syncRoot_commandQueue = new object();
+
+        // 写入 RFID 标签
+        static async Task WriteTagAsync(string command, string groupName)
+        {
+            // 检查当前是否正在 SettingPage
+            if (IsInSettingPage() == false)
+            {
+                await SendMessageAsync(new string[] { groupName }, "当前书柜不在设置页面，无法启动写入标签的操作。请先派人到书柜屏幕上，手动进入设置页面，然后再使用本命令");
+                return;
+            }
+
+            _inWriteTag++;
+            try
+            {
+                if (_inWriteTag > 1)
+                {
+                    lock (_syncRoot_commandQueue)
+                    {
+                        _commandQueue.Add(command);
+                    }
+                    await SendMessageAsync(new string[] { groupName }, $"前一次写入 RFID 标签任务尚未完成，本次任务 '{command}' 已加入队列");
+                    return;
+                }
+
+                REDO:
+                // 子参数
+                string param = command.Substring("write tag".Length).Trim();
+
+                // 子参数为图书 PII。为 xxxx.xxxx 或者 xxxx 形态
+                var pii = param;
+
+                /*
+                if (string.IsNullOrEmpty(pii))
+                {
+                    await SendMessageAsync(new string[] { groupName }, $"无法执行命令 '{command}'，因命令中缺乏图书 PII 部分。注: 命令格式为 write tag PII");
+                    goto END;
+                }
+                */
+
+                {
+                    WriteTagWindow dlg = null;
+                    App.Invoke(new Action(() =>
+                    {
+                        dlg = new WriteTagWindow();
+                    }));
+
+                    if (string.IsNullOrEmpty(pii) == false)
+                    {
+                        // 根据 PII 准备好 TaskInfo
+                        var result = await dlg.PrepareTaskAsync(pii);
+                        if (result.Value == -1)
+                        {
+                            await SendMessageAsync(new string[] { groupName }, $"命令 '{command}': 准备 TaskInfo 时出错: {result.ErrorInfo}");
+                            goto END;
+                        }
+                    }
+                    else
+                    {
+                        // 等待扫入条码模式
+                    }
+
+                    await SendMessageAsync(new string[] { groupName }, $"开始命令 '{command}': 对话框打开");
+
+                    App.Invoke(new Action(() =>
+                    {
+                        dlg.Owner = Application.Current.MainWindow;
+                        dlg.ShowDialog();
+                    }));
+                }
+
+                await SendMessageAsync(new string[] { groupName }, $"结束命令 '{command}': 对话框关闭");
+
+                END:
+                lock (_syncRoot_commandQueue)
+                {
+                    if (_commandQueue.Count > 0)
+                    {
+                        command = _commandQueue[0];
+                        _commandQueue.RemoveAt(0);
+                        goto REDO;
+                    }
+                }
+            }
+            finally
+            {
+                _inWriteTag--;
+            }
         }
 
         // 检测标签状态

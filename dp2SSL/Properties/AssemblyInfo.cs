@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.48")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.48.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.49")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.49.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -139,3 +139,4 @@ using System.Windows;
 //      1.8.46 (2021/8/23) 设置页面增加菜单命令“修复已还 borrow 动作的 LinkID”
 //      1.8.47 (2021/8/30) 书柜界面，读者刷卡时候右侧读者信息区显示的在借册，册行的“超期”状态原来版本是由本地缓存的册记录决定的，会不准确，新版本改为由读者 XML 记录中的 borrow 元素(的 returningDate 属性)决定
 //      1.8.48 (2021/8/31) 书柜界面，增加 UI 线程未捕获的异常集中处理功能，会显示在底部错误条上
+//      1.8.49 (2021/9/4) 简化书柜写入错误日志文件的信息。把启动时候的 tag 信息，和动作信息，写入到另外一个 init_xxx.txt 日志文件

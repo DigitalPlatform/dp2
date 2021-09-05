@@ -18,6 +18,7 @@ using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.WPF;
 using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2SSL
 {
@@ -30,6 +31,10 @@ namespace dp2SSL
         public WriteTagTask TaskInfo { get; set; }
 
         public bool Finished { get; set; }
+
+        // 是否要循环写入？
+        // 循环写入的意思是，当前一次写入结束后，不自动关闭对话框，而是继续等待后面扫入册条码号再次进行写入
+        public bool LoopWriting { get; set; }
 
         public WriteTagWindow()
         {
@@ -80,17 +85,88 @@ namespace dp2SSL
         private void WriteTagWindow_Unloaded(object sender, RoutedEventArgs e)
         {
             App.PatronTagChanged -= App_PatronTagChanged;
+            App.LineFeed -= App_LineFeed;
         }
 
         private void WriteTagWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            if (this.TaskInfo != null)
-                this.Comment = $"准备写入 RFID 标签。PII={this.TaskInfo.PII}";
+            BeginComment();
 
-            this.booksControl.EmptyComment = "请在读写器上放空白标签 ...";
-
+            App.LineFeed += App_LineFeed;
             App.PatronTagChanged += App_PatronTagChanged;
-            _ = InitialEntities();
+            _ = InitialEntitiesAsync();
+        }
+
+        void BeginComment()
+        {
+            if (this.TaskInfo != null)
+            {
+                App.CurrentApp.Speak("请放 RFID 标签");
+                this.Comment = $"准备写入 RFID 标签。PII={this.TaskInfo.PII}";
+                this.booksControl.EmptyComment = "请在读写器上放 RFID 标签 ...";
+                this.booksControl.ShowEmptyComment(true);
+            }
+            else
+            {
+                App.CurrentApp.Speak("请扫图书册条码");
+                this.Comment = "请扫入图书册条码 ...";
+                this.booksControl.ShowEmptyComment(false);
+                this.border.Background = new SolidColorBrush(Colors.Transparent);
+            }
+        }
+
+        private async void App_LineFeed(object sender, LineFeedEventArgs e)
+        {
+            // 扫入一个条码
+            string barcode = e.Text;
+
+            // 检查防范空字符串
+            if (string.IsNullOrEmpty(barcode))
+            {
+                App.CurrentApp.Speak("条码不合法");
+                App.ErrorBox("扫入册条码",
+    "条码不合法",
+    "red",
+    "auto_close");
+                return;
+            }
+
+            // 册条码号应该都是大写的
+            barcode = barcode.ToUpper();
+
+            // 根据 PII 准备好 TaskInfo
+            var result = await this.PrepareTaskAsync(barcode);
+            if (result.Value == -1)
+            {
+                App.CurrentApp.Speak(result.ErrorInfo);
+                App.ErrorBox("准备 Task 时出错",
+                    result.ErrorInfo,
+                    "red",
+                    "auto_close");
+                return;
+            }
+            else
+            {
+                App.Invoke(new Action(() =>
+                {
+                    BeginComment();
+                }));
+            }
+
+            if (this.TaskInfo != null
+                && _entities.Count > 0)
+            {
+                var write_result = await TryWriteTagAsync(_entities,
+                    this.TaskInfo);
+                if (write_result.Value == -1)
+                {
+                    App.CurrentApp.Speak(result.ErrorInfo);
+                    App.ErrorBox("写标签时出错",
+                        write_result.ErrorInfo,
+                        "red",
+                        "auto_close");
+                }
+            }
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
@@ -119,7 +195,7 @@ namespace dp2SSL
 
         EntityCollection _entities = new EntityCollection();
 
-        async Task InitialEntities()
+        async Task InitialEntitiesAsync()
         {
             List<Entity> update_entities = new List<Entity>();
             foreach (var tag in ShelfData.PatronTagList.Tags)
@@ -141,14 +217,17 @@ namespace dp2SSL
                 }
             }
 
-            var write_result = await TryWriteTagAsync(update_entities,
-                this.TaskInfo);
-            if (write_result.Value == -1)
+            if (this.TaskInfo != null)
             {
-                App.ErrorBox("写标签时出错", 
-                    write_result.ErrorInfo, 
-                    "red",
-                    "auto_close");
+                var write_result = await TryWriteTagAsync(update_entities,
+                    this.TaskInfo);
+                if (write_result.Value == -1)
+                {
+                    App.ErrorBox("写标签时出错",
+                        write_result.ErrorInfo,
+                        "red",
+                        "auto_close");
+                }
             }
         }
 
@@ -186,25 +265,33 @@ namespace dp2SSL
 
             if (update_entities.Count > 0)
             {
+                App.Invoke(new Action(() =>
+                {
+                    this.booksControl.ShowEmptyComment(false);
+                }));
+
                 await FillBookFieldsAsync(channel, update_entities);
             }
             else if (changed)
             {
                 // 修改 borrowable
-                booksControl.SetBorrowable();
+                // booksControl.SetBorrowable();
             }
 
             if (update_entities.Count > 0)
                 changed = true;
 
-            var write_result = await TryWriteTagAsync(update_entities,
-    this.TaskInfo);
-            if (write_result.Value == -1)
+            if (this.TaskInfo != null)
             {
-                App.ErrorBox("写标签时出错",
-                    write_result.ErrorInfo,
-                    "red",
-                    "auto_close");
+                var write_result = await TryWriteTagAsync(update_entities,
+        this.TaskInfo);
+                if (write_result.Value == -1)
+                {
+                    App.ErrorBox("写标签时出错",
+                        write_result.ErrorInfo,
+                        "red",
+                        "auto_close");
+                }
             }
         }
 
@@ -353,7 +440,7 @@ out string strError);
 
         // 寻找唯一的空标签。如果出现了，而且是唯一一个，则自动向里写入内容
         async Task<FindBlankTagResult> FindBlankTagAsync(
-            List<Entity> entities,
+            IList<Entity> entities,
             WriteTagTask task_info)
         {
             List<Entity> blank_entities = new List<Entity>();
@@ -378,7 +465,7 @@ out string strError);
         }
 
         // 尝试寻找一个空白标签写入
-        async Task<NormalResult> TryWriteTagAsync(List<Entity> entities,
+        async Task<NormalResult> TryWriteTagAsync(IList<Entity> entities,
             WriteTagTask task_info)
         {
             if (this.Finished)
@@ -457,19 +544,33 @@ out string strError);
             App.Invoke(new Action(() =>
             {
                 this.Comment = $"写入完成。PII={entity.PII}, UID={new_tag_info.UID}";
-                this.Background = new SolidColorBrush(Colors.DarkGreen);
+                this.border.Background = new SolidColorBrush(Colors.DarkGreen);
             }));
 
             // 3 秒以后自动关闭对话框
-            _ = Task.Run(async () => {
+            _ = Task.Run(async () =>
+            {
                 await Task.Delay(TimeSpan.FromSeconds(3));
-                App.Invoke(new Action(() =>
+                if (this.LoopWriting == false)
                 {
-                    this.Close();
-                }));
+                    App.Invoke(new Action(() =>
+                    {
+                        this.Close();
+                    }));
+                }
+                else
+                {
+                    // 继续下一轮循环
+                    this.Finished = false;
+                    this.TaskInfo = null;
+                    App.Invoke(new Action(() =>
+                    {
+                        BeginComment();
+                    }));
+                }
             });
 
-            return new NormalResult { Value = 1};
+            return new NormalResult { Value = 1 };
         }
 
         public static LogicChip BuildChip(WriteTagTask task)
@@ -588,7 +689,7 @@ out string strError);
             return chip.IsBlank();
         }
 
-#region
+        #region
 
         /*
 OI的校验，总长度不超过16位。
@@ -647,7 +748,7 @@ OI的校验，总长度不超过16位。
         }
 
 
-#endregion
+        #endregion
 
         private void writeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -660,6 +761,45 @@ OI的校验，总长度不超过16位。
                 App.ErrorBox("写标签时出错", write_result.ErrorInfo);
             }
         }
+
+        // 根据 PII 准备好 TaskInfo
+        public async Task<NormalResult> PrepareTaskAsync(string pii)
+        {
+            // 检索出指定 PII 的图书信息
+            // .Value
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            var get_result = await LibraryChannelUtil.GetEntityDataAsync(pii, "network");
+            if (get_result.Value == -1 || get_result.Value == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = get_result.ErrorInfo
+                };
+
+            this.TaskInfo = BuildWriteTagTask(get_result);
+            return new NormalResult();
+        }
+
+        static WriteTagTask BuildWriteTagTask(LibraryChannelUtil.GetEntityDataResult result)
+        {
+            System.Xml.XmlDocument dom = new System.Xml.XmlDocument();
+            dom.LoadXml(result.ItemXml);
+
+            string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            string oi = DomUtil.GetElementText(dom.DocumentElement, "oi");
+            string accessNo = DomUtil.GetElementText(dom.DocumentElement, "accessNo");
+            WriteTagTask task = new WriteTagTask
+            {
+                PII = pii,
+                OI = oi,
+                AccessNo = accessNo,
+                Title = result.Title,
+            };
+            return task;
+        }
+
     }
 
     // 任务信息
@@ -671,6 +811,8 @@ OI的校验，总长度不超过16位。
         public string OI { get; set; }
         // 索取号
         public string AccessNo { get; set; }
+        // 书名
+        public string Title { get; set; }
 
         // 任务完成时是否自动关闭对话框
         public bool AutoCloseDialog { get; set; }
