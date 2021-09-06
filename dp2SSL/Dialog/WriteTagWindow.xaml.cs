@@ -52,6 +52,12 @@ namespace dp2SSL
 
         private void BooksControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (this.TaskInfo == null)
+            {
+                this.writeButton.IsEnabled = false;
+                return;
+            }
+
             if (this.booksControl.SelectedItems.Count > 0)
                 this.writeButton.IsEnabled = true;
             else
@@ -67,8 +73,33 @@ namespace dp2SSL
             set
             {
                 this.comment.Text = value;
+                if (value != null)
+                {
+                    this.comment.Visibility = Visibility.Visible;
+                    this.richText.Visibility = Visibility.Collapsed;
+                }
             }
         }
+
+        public FlowDocument CommentDocument
+        {
+            get
+            {
+                return richText.Document;
+            }
+            set
+            {
+                richText.Document = value;
+                if (value != null)
+                {
+                    if (this.comment.Visibility != Visibility.Collapsed)
+                        this.comment.Visibility = Visibility.Collapsed;
+                    if (richText.Visibility != Visibility.Visible)
+                        richText.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
 
         public string TitleText
         {
@@ -86,15 +117,18 @@ namespace dp2SSL
         {
             App.PatronTagChanged -= App_PatronTagChanged;
             App.LineFeed -= App_LineFeed;
+
+            PageShelf.TrySetMessage(null, $"写入 RFID 标签对话框关闭");
         }
 
-        private void WriteTagWindow_Loaded(object sender, RoutedEventArgs e)
+        private async void WriteTagWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            BeginComment();
+            PageShelf.TrySetMessage(null, $"写入 RFID 标签对话框打开");
 
             App.LineFeed += App_LineFeed;
             App.PatronTagChanged += App_PatronTagChanged;
-            _ = InitialEntitiesAsync();
+            await InitialEntitiesAsync();
+            BeginComment();
         }
 
         void BeginComment()
@@ -102,9 +136,11 @@ namespace dp2SSL
             if (this.TaskInfo != null)
             {
                 App.CurrentApp.Speak("请放 RFID 标签");
-                this.Comment = $"准备写入 RFID 标签。PII={this.TaskInfo.PII}";
+                // this.Comment = $"准备写入 RFID 标签。PII={this.TaskInfo.PII}";
+                this.CommentDocument = BuildDocument("准备写入 RFID 标签", this.TaskInfo, 18);
                 this.booksControl.EmptyComment = "请在读写器上放 RFID 标签 ...";
-                this.booksControl.ShowEmptyComment(true);
+                if (this.booksControl.ItemCount == 0)
+                    this.booksControl.ShowEmptyComment(true);
             }
             else
             {
@@ -133,6 +169,8 @@ namespace dp2SSL
 
             // 册条码号应该都是大写的
             barcode = barcode.ToUpper();
+
+            PageShelf.TrySetMessage(null, $"扫入册条码号: {barcode}");
 
             // 根据 PII 准备好 TaskInfo
             var result = await this.PrepareTaskAsync(barcode);
@@ -482,6 +520,7 @@ out string strError);
                 if (write_result.Value == -1)
                     return write_result;
 
+                PageShelf.TrySetMessage(null, $"写入 RFID 成功。\r\n{task_info.GetOiPii()}\r\n{task_info?.Title}");
 #if REMOVED
                 // 写入
                 var chip = BuildChip(task_info);
@@ -543,7 +582,8 @@ out string strError);
             App.CurrentApp.SpeakSequence($"写入完成");
             App.Invoke(new Action(() =>
             {
-                this.Comment = $"写入完成。PII={entity.PII}, UID={new_tag_info.UID}";
+                // this.Comment = $"写入完成。PII={entity.PII}, UID={new_tag_info.UID}";
+                this.CommentDocument = BuildDocument("写入完成", this.TaskInfo, 18);
                 this.border.Background = new SolidColorBrush(Colors.DarkGreen);
             }));
 
@@ -752,6 +792,14 @@ OI的校验，总长度不超过16位。
 
         private void writeButton_Click(object sender, RoutedEventArgs e)
         {
+            this.writeButton.IsEnabled = false;
+
+            if (this.TaskInfo == null)
+            {
+                App.ErrorBox("写标签时出错", "请先扫图书册条码，再选择标签写入");
+                return;
+            }
+
             Entity entity = this.booksControl.SelectedItem as Entity;
 
             var write_result = WriteEntity(entity,
@@ -759,7 +807,10 @@ OI的校验，总长度不超过16位。
             if (write_result.Value == -1)
             {
                 App.ErrorBox("写标签时出错", write_result.ErrorInfo);
+                return;
             }
+
+            PageShelf.TrySetMessage(null, $"写入 RFID 成功。\r\n{TaskInfo?.GetOiPii()}\r\n{TaskInfo?.Title}");
         }
 
         // 根据 PII 准备好 TaskInfo
@@ -800,6 +851,56 @@ OI的校验，总长度不超过16位。
             return task;
         }
 
+        static FlowDocument BuildDocument(
+            string comment,
+            WriteTagTask taskInfo,
+            double baseFontSize)
+        {
+            FlowDocument doc = new FlowDocument();
+            {
+                var p = new Paragraph();
+                p.FontFamily = new FontFamily("微软雅黑");
+                p.FontSize = baseFontSize * 1.6F;
+                p.TextAlignment = TextAlignment.Center;
+                p.Margin = new Thickness(baseFontSize * 0.5F);
+                doc.Blocks.Add(p);
+
+                p.Inlines.Add(new Run
+                {
+                    Text = comment,
+                    Foreground = Brushes.LightGray,
+                });
+            }
+
+            {
+                var p = new Paragraph();
+                // p.FontFamily = new FontFamily("Courier New");
+                p.FontSize = baseFontSize;
+                p.TextAlignment = TextAlignment.Left;
+                p.Padding = new Thickness(baseFontSize);
+                p.Background = new SolidColorBrush(Color.FromRgb(60, 60, 60));
+                doc.Blocks.Add(p);
+
+                p.Inlines.Add(new Run
+                {
+                    Text = taskInfo.OI + "." + taskInfo.PII,
+                    FontFamily = new FontFamily("Arial"),
+                    FontWeight = FontWeights.Bold,
+                    FontSize = baseFontSize * 1.2F,
+                    Foreground = Brushes.Yellow,
+                });
+
+                p.Inlines.Add(new Run
+                {
+                    Text = "\r\n" + taskInfo.Title,
+                    FontFamily = new FontFamily("微软雅黑"),
+                    FontSize = baseFontSize * 0.8F,
+                    Foreground = Brushes.White,
+                });
+            }
+
+            return doc;
+        }
     }
 
     // 任务信息
@@ -816,5 +917,12 @@ OI的校验，总长度不超过16位。
 
         // 任务完成时是否自动关闭对话框
         public bool AutoCloseDialog { get; set; }
+
+        public string GetOiPii()
+        {
+            if (string.IsNullOrEmpty(OI))
+                return PII;
+            return OI + "." + PII;
+        }
     }
 }

@@ -1401,6 +1401,7 @@ MessageBoxOptions.DefaultDesktopOnly);
         // 测试写入 RFID 标签
         private void testWriteRfidTag_Click(object sender, RoutedEventArgs e)
         {
+#if REMOVED
             WriteTagWindow dlg = new WriteTagWindow();
             /*
             dlg.TaskInfo = new WriteTagTask
@@ -1410,9 +1411,14 @@ MessageBoxOptions.DefaultDesktopOnly);
                 AccessNo = "I247.5/1234"
             };
             */
+            App.SetSize(dlg, "wide");
+
             dlg.LoopWriting = true;
             dlg.Owner = Application.Current.MainWindow;
             dlg.ShowDialog();
+#endif
+
+            _ = TinyServer.WriteTagAsync("write tag", null);
         }
     }
 }

@@ -194,10 +194,11 @@ namespace DigitalPlatform.CirculationClient
 
         public static void Finish()
         {
-            SaveConfig();
-
             // 2021/3/3
+            // 2021/9/8 调整到 SaveConfig() 之前
             EndWather();
+
+            SaveConfig();
         }
 
         // 获得一个 Service 产品的用户目录

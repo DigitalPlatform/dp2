@@ -107,6 +107,17 @@ namespace dp2SSL
                                         break;
                                     var request = JsonConvert.DeserializeObject<SetMessageRequest>(message.GetString());
 
+                                    // 对 request 中的 groups 进行必要的变换
+                                    foreach (var record in request.Records)
+                                    {
+                                        if (record.groups != null
+                                            && record.groups.Length == 1
+                                            && record.groups[0] == null)
+                                        {
+                                            record.groups = null;
+                                        }
+                                    }
+
                                     /*
                                     // 2020/4/29
                                     // 对 request 中的 groups 进行必要的变换
@@ -165,6 +176,14 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
+        public static async Task SendMessageAsync(string group, string content)
+        {
+            string[] groups = null;
+            if (group != null)
+                groups = new string[] { group };
+            await SendMessageAsync(groups, content);
+        }
+
         // 注意，groups 可能为空。表示当前 dp2mserver 用户所参与的所有群
         public static async Task SendMessageAsync(string[] groups,
             string content)
@@ -172,6 +191,10 @@ TaskScheduler.Default);
             // 2020/8/20
             if (_queue == null)
                 return;
+
+            // 2021/9/6
+            if (groups != null && groups.Length == 1 && groups[0] == null)
+                throw new ArgumentException("groups 参数不允许使用 [0] == null 方式调用", "groups");
 
             SetMessageRequest request = new SetMessageRequest("create", "dontNotifyMe",
                 new List<MessageRecord> {
@@ -571,7 +594,7 @@ IList<MessageRecord> messages)
                     _lastMessage = message;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 写入错误日志
                 WpfClientInfo.WriteErrorLog($"ProcessMessages() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -1049,19 +1072,19 @@ cancellation_token);
 
             if (command.StartsWith("hello"))
             {
-                await SendMessageAsync(new string[] { groupName }, $"hello! 硬件时间:{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff")}");
+                await SendMessageAsync(groupName, $"hello! 硬件时间:{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff")}");
                 return;
             }
 
             if (command.StartsWith("version"))
             {
-                await SendMessageAsync(new string[] { groupName }, $"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
+                await SendMessageAsync(groupName, $"dp2SSL 前端版本: {WpfClientInfo.ClientVersion}");
                 return;
             }
 
             if (command.StartsWith("error"))
             {
-                await SendMessageAsync(new string[] { groupName }, $"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
+                await SendMessageAsync(groupName, $"dp2SSL 当前界面报错: [{App.CurrentApp.Error}]; 书柜初始化是否完成: {ShelfData.FirstInitialized}");
                 return;
             }
 
@@ -1069,13 +1092,13 @@ cancellation_token);
             if (command.StartsWith("checktime"))
             {
                 var result = LibraryChannelUtil.CheckServerClock(TimeSpan.FromSeconds(5));
-                await SendMessageAsync(new string[] { groupName }, $"{result.ErrorInfo}");
+                await SendMessageAsync(groupName, $"{result.ErrorInfo}");
                 return;
             }
 
             if (command.StartsWith("help") || command.StartsWith("?"))
             {
-                await SendMessageAsync(new string[] { groupName },
+                await SendMessageAsync(groupName,
                     @"可用命令如下:
 hello
 version
@@ -1111,9 +1134,9 @@ update
                     press_result = App.PressButton(param);
                 }));
                 if (press_result.Value == -1)
-                    await SendMessageAsync(new string[] { groupName }, $"触发按钮发生错误: {press_result.ErrorInfo}");
+                    await SendMessageAsync(groupName, $"触发按钮发生错误: {press_result.ErrorInfo}");
                 else
-                    await SendMessageAsync(new string[] { groupName }, $"触发按钮成功");
+                    await SendMessageAsync(groupName, $"触发按钮成功");
                 return;
             }
 
@@ -1130,7 +1153,7 @@ update
                     else
                         text = App.FindTextChildren(window);
                 }));
-                await SendMessageAsync(new string[] { groupName }, $"==== 对话框文字 ====\r\n{text}");
+                await SendMessageAsync(groupName, $"==== 对话框文字 ====\r\n{text}");
                 return;
             }
 
@@ -1141,7 +1164,7 @@ update
 
                 App.CurrentApp.SpeakSequence(param);
 
-                await SendMessageAsync(new string[] { groupName }, $"正在朗读: {param}");
+                await SendMessageAsync(groupName, $"正在朗读: {param}");
                 return;
             }
 
@@ -1162,9 +1185,9 @@ update
                 string old_param = LampPerdayTask.GetPerdayTask();
                 var result = LampPerdayTask.ChangePerdayTask(param);
                 if (result.Value == -1)
-                    await SendMessageAsync(new string[] { groupName }, $"设置每日亮灯时间范围时出错: {result.ErrorInfo}");
+                    await SendMessageAsync(groupName, $"设置每日亮灯时间范围时出错: {result.ErrorInfo}");
                 else
-                    await SendMessageAsync(new string[] { groupName }, $"已设置每日亮灯时间范围 {param}。(上次的时间范围是 {old_param})");
+                    await SendMessageAsync(groupName, $"已设置每日亮灯时间范围 {param}。(上次的时间范围是 {old_param})");
                 return;
             }
 
@@ -1179,7 +1202,7 @@ update
                 if (string.IsNullOrEmpty(param))
                 {
                     var state = LampPerdayTask.GetBackLampState();
-                    await SendMessageAsync(new string[] { groupName }, $"当前灯状态为 {(state ? "亮" : "灭")}");
+                    await SendMessageAsync(groupName, $"当前灯状态为 {(state ? "亮" : "灭")}");
                     return;
                 }
 
@@ -1188,7 +1211,7 @@ update
                     LampPerdayTask.TurnBackLampOn();
                 else
                     LampPerdayTask.TurnBackLampOff();
-                await SendMessageAsync(new string[] { groupName }, param == "on" ? "已开灯" : "已关灯");
+                await SendMessageAsync(groupName, param == "on" ? "已开灯" : "已关灯");
                 return;
             }
 
@@ -1197,7 +1220,7 @@ update
             if (command.StartsWith("rebuild patron cache"))
             {
                 ShelfData.RedoReplicatePatron();
-                await SendMessageAsync(new string[] { groupName }, $"已启动重建读者本地缓存任务");
+                await SendMessageAsync(groupName, $"已启动重建读者本地缓存任务");
                 return;
             }
 
@@ -1241,7 +1264,7 @@ update
             // 写入 RFID 标签
             if (command.StartsWith("write tag"))
             {
-                await WriteTagAsync(command, groupName);
+                await WriteTagAsync(command, null/*groupName*/);
                 return;
             }
 
@@ -1267,9 +1290,9 @@ update
                 string old_param = SterilampTask.GetPerdayTask();
                 var result = SterilampTask.ChangePerdayTask(param);
                 if (result.Value == -1)
-                    await SendMessageAsync(new string[] { groupName }, $"设置紫外灯时间时出错: {result.ErrorInfo}");
+                    await SendMessageAsync(groupName, $"设置紫外灯时间时出错: {result.ErrorInfo}");
                 else
-                    await SendMessageAsync(new string[] { groupName }, $"已设置紫外灯时间 {param}。(上次的时间是 {old_param})");
+                    await SendMessageAsync(groupName, $"已设置紫外灯时间 {param}。(上次的时间是 {old_param})");
                 return;
             }
 
@@ -1281,7 +1304,7 @@ update
                 // 若当前为书柜界面，则需要检查是否有打开的门
                 if (IsInShelfPage() && ShelfData.OpeningDoorCount > 0)
                 {
-                    await SendMessageAsync(new string[] { groupName }, $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，因此拒绝执行 sterilamp 命令");
+                    await SendMessageAsync(groupName, $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，因此拒绝执行 sterilamp 命令");
                     return;
                 }
 
@@ -1301,14 +1324,14 @@ update
                     return;
                 }
 
-                await SendMessageAsync(new string[] { groupName }, $"sterilamp 命令无法执行：未知的参数 '{param}'");
+                await SendMessageAsync(groupName, $"sterilamp 命令无法执行：未知的参数 '{param}'");
                 return;
             }
 
             // 退出 dp2ssl
             if (command.StartsWith("exit"))
             {
-                await SendMessageAsync(new string[] { groupName }, $"即将退出 dp2ssl");
+                await SendMessageAsync(groupName, $"即将退出 dp2ssl");
                 App.Invoke(new Action(() =>
                 {
                     WpfClientInfo.WriteInfoLog($"远程命令退出 dp2ssl");
@@ -1323,7 +1346,7 @@ update
                 // 若当前为书柜界面，则需要检查是否有打开的门
                 if (IsInShelfPage() && ShelfData.OpeningDoorCount > 0)
                 {
-                    await SendMessageAsync(new string[] { groupName }, $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，因此拒绝执行 restart 命令");
+                    await SendMessageAsync(groupName, $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，因此拒绝执行 restart 命令");
                     return;
                 }
 
@@ -1355,7 +1378,7 @@ update
                             WpfClientInfo.WriteErrorLog($"接受远程命令重启电脑过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         }
                     });
-                    await SendMessageAsync(new string[] { groupName }, $"Windows 将在一秒后重新启动");
+                    await SendMessageAsync(groupName, $"Windows 将在一秒后重新启动");
                     return;
                 }
 
@@ -1375,18 +1398,18 @@ update
                     WpfClientInfo.WriteInfoLog($"ApplicationDeployment.CurrentDeployment?.UpdatedApplicationFullName='{ApplicationEntryPoint}'");
                     // Process.Start(ApplicationEntryPoint);
                     */
-                    await SendMessageAsync(new string[] { groupName }, $"ClickOnce 版本无法远程重启");
+                    await SendMessageAsync(groupName, $"ClickOnce 版本无法远程重启");
                     return;
                 }
 
                 string greensetup_path = "c:\\dp2ssl\\greensetup.exe";
                 if (File.Exists(greensetup_path) == false)
                 {
-                    await SendMessageAsync(new string[] { groupName }, $"尚未安装绿色启动器 {greensetup_path}，无法对 dp2ssl.exe 进行远程重启");
+                    await SendMessageAsync(groupName, $"尚未安装绿色启动器 {greensetup_path}，无法对 dp2ssl.exe 进行远程重启");
                     return;
                 }
 
-                await SendMessageAsync(new string[] { groupName }, "开始重新启动。请等待至少 30 秒");
+                await SendMessageAsync(groupName, "开始重新启动。请等待至少 30 秒");
                 App.Invoke(new Action(() =>
                 {
                     Application.Current.Shutdown();
@@ -1409,7 +1432,7 @@ update
                 return;
             }
 
-            await SendMessageAsync(new string[] { groupName }, $"我无法理解这个命令 '{command}'");
+            await SendMessageAsync(groupName, $"我无法理解这个命令 '{command}'");
         }
 
         static bool IsInSettingPage()
@@ -1520,7 +1543,7 @@ update
                 }
                 else
                 {
-                    await SendMessageAsync(groupName == null ? null : new string[] { groupName }, $"无法识别子参数名 '{name}'");
+                    await SendMessageAsync(groupName, $"无法识别子参数名 '{name}'");
                     return;
                 }
             }
@@ -1545,7 +1568,7 @@ update
                 // if (result.Value == -1 && result.ErrorCode == "uninitialized")
             }
 
-            await SendMessageAsync(groupName == null ? null : new string[] { groupName }, result.Value == -1 ? $"{result.ErrorInfo} errorCode='{result.ErrorCode}'" : $"'{text}' 已成功显示在 LED 屏上");
+            await SendMessageAsync(groupName, result.Value == -1 ? $"{result.ErrorInfo} errorCode='{result.ErrorCode}'" : $"'{text}' 已成功显示在 LED 屏上");
         }
 
         static string Unescape(string text)
@@ -1650,13 +1673,13 @@ update
                 }
 
                 text.AppendLine($"=== {door_count} 门，共 {total_count} 册 ===");
-                await SendMessageAsync(new string[] { groupName },
+                await SendMessageAsync( groupName ,
 text.ToString());
 
             }
             catch (Exception ex)
             {
-                await SendMessageAsync(new string[] { groupName },
+                await SendMessageAsync(groupName,
                     $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
 
@@ -1704,19 +1727,19 @@ text.ToString());
                         items = context.Requests.Where(o => true)
                             .OrderBy(o => o.ID).ToList();
 
-                    await SendMessageAsync(new string[] { groupName },
+                    await SendMessageAsync(groupName,
                         $"> {command}\r\n当前共有 {items.Count} 个历史事项");
                     int i = 1;
                     foreach (var item in items)
                     {
-                        await SendMessageAsync(new string[] { groupName },
+                        await SendMessageAsync(groupName,
                             $"{i++}\r\n{DisplayRequestItem.GetDisplayString(item)}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                await SendMessageAsync(new string[] { groupName },
+                await SendMessageAsync(groupName,
                     $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
         }
@@ -1746,7 +1769,7 @@ text.ToString());
                 }
             }
 
-            await SendMessageAsync(new string[] { groupName }, text.ToString());
+            await SendMessageAsync(groupName, text.ToString());
 
 
             /*
@@ -1817,34 +1840,45 @@ text.ToString());
             return template.Title;
         }
 
-        static int _inWriteTag = 0;
         static List<string> _commandQueue = new List<string>();
         static object _syncRoot_commandQueue = new object();
 
+        static WriteTagWindow _writeTagDialog = null;
+        static AsyncSemaphore _writeTagLimit = new AsyncSemaphore(1);
+
         // 写入 RFID 标签
-        static async Task WriteTagAsync(string command, string groupName)
+        public static async Task<NormalResult> WriteTagAsync(string command, string groupName)
         {
             // 检查当前是否正在 SettingPage
             if (IsInSettingPage() == false)
             {
-                await SendMessageAsync(new string[] { groupName }, "当前书柜不在设置页面，无法启动写入标签的操作。请先派人到书柜屏幕上，手动进入设置页面，然后再使用本命令");
-                return;
+                await SendMessageAsync(groupName, "当前书柜不在设置页面，无法启动写入标签的操作。请先派人到书柜屏幕上，手动进入设置页面，然后再使用本命令");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "当前书柜不在设置页面，无法启动写入标签的操作",
+                    ErrorCode = "notInSettingPage"
+                };
             }
 
-            _inWriteTag++;
-            try
+            using (var releaser = await _writeTagLimit.EnterAsync().ConfigureAwait(false))
             {
-                if (_inWriteTag > 1)
+                if (_writeTagDialog != null)
                 {
                     lock (_syncRoot_commandQueue)
                     {
                         _commandQueue.Add(command);
                     }
-                    await SendMessageAsync(new string[] { groupName }, $"前一次写入 RFID 标签任务尚未完成，本次任务 '{command}' 已加入队列");
-                    return;
+                    await SendMessageAsync(groupName, $"前一次写入 RFID 标签任务尚未完成，本次任务 '{command}' 已加入队列");
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorInfo = "本次任务已经加入队列",
+                        ErrorCode = "queue"
+                    };
                 }
 
-                REDO:
+            REDO:
                 // 子参数
                 string param = command.Substring("write tag".Length).Trim();
 
@@ -1864,6 +1898,132 @@ text.ToString());
                     App.Invoke(new Action(() =>
                     {
                         dlg = new WriteTagWindow();
+                        App.SetSize(dlg, "wide");
+                    }));
+
+                    dlg.Closed += (o1, e1) =>
+                    {
+                        _writeTagDialog = null;
+
+                        lock (_syncRoot_commandQueue)
+                        {
+                            if (_commandQueue.Count > 0)
+                            {
+                                var c = _commandQueue[0];
+                                _commandQueue.RemoveAt(0);
+                                _ = WriteTagAsync(c, groupName);
+                            }
+                        }
+                    };
+                    _writeTagDialog = dlg;
+
+                    if (string.IsNullOrEmpty(pii) == false)
+                    {
+                        // 根据 PII 准备好 TaskInfo
+                        var result = await dlg.PrepareTaskAsync(pii);
+                        if (result.Value == -1)
+                        {
+                            await SendMessageAsync(groupName, $"命令 '{command}': 准备 TaskInfo 时出错: {result.ErrorInfo}");
+                            App.Invoke(new Action(() =>
+                            {
+                                dlg.Close();
+                            }));
+                            return result;
+                        }
+                    }
+                    else
+                    {
+                        // 等待扫入条码模式
+                    }
+
+                    App.Invoke(new Action(() =>
+                    {
+                        dlg.Owner = Application.Current.MainWindow;
+                        dlg.Show();
+                    }));
+                }
+
+                return new NormalResult { Value = 1 };
+            }
+        }
+
+        /*
+        private static void Dlg_Closed(object sender, EventArgs e)
+        {
+            if (_writeTagDialog != null)
+                _writeTagDialog.Closed -= Dlg_Closed;
+
+            _writeTagDialog = null;
+
+            lock (_syncRoot_commandQueue)
+            {
+                if (_commandQueue.Count > 0)
+                {
+                    var command = _commandQueue[0];
+                    _commandQueue.RemoveAt(0);
+                    _ = WriteTagAsync(command, null);
+                }
+            }
+        }
+        */
+
+#if REMOVED
+        static int _inWriteTag = 0;
+
+        // 写入 RFID 标签
+        static async Task<NormalResult> WriteTagAsync(string command, string groupName)
+        {
+            // 检查当前是否正在 SettingPage
+            if (IsInSettingPage() == false)
+            {
+                await SendMessageAsync(new string[] { groupName }, "当前书柜不在设置页面，无法启动写入标签的操作。请先派人到书柜屏幕上，手动进入设置页面，然后再使用本命令");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "当前书柜不在设置页面，无法启动写入标签的操作",
+                    ErrorCode = "notInSettingPage"
+                };
+            }
+
+            _inWriteTag++;
+            try
+            {
+                if (_inWriteTag > 1)
+                {
+                    lock (_syncRoot_commandQueue)
+                    {
+                        _commandQueue.Add(command);
+                    }
+                    await SendMessageAsync(new string[] { groupName }, $"前一次写入 RFID 标签任务尚未完成，本次任务 '{command}' 已加入队列");
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorInfo = "本次任务已经加入队列",
+                        ErrorCode = "queue"
+                    };
+                }
+
+            REDO:
+                // 子参数
+                string param = command.Substring("write tag".Length).Trim();
+
+                // 子参数为图书 PII。为 xxxx.xxxx 或者 xxxx 形态
+                var pii = param;
+
+                /*
+                if (string.IsNullOrEmpty(pii))
+                {
+                    await SendMessageAsync(new string[] { groupName }, $"无法执行命令 '{command}'，因命令中缺乏图书 PII 部分。注: 命令格式为 write tag PII");
+                    goto END;
+                }
+                */
+
+                {
+                    WriteTagWindow dlg = null;
+                    App.Invoke(new Action(() =>
+                    {
+                        dlg = new WriteTagWindow();
+                        App.SetSize(dlg, "wide");
                     }));
 
                     if (string.IsNullOrEmpty(pii) == false)
@@ -1881,7 +2041,7 @@ text.ToString());
                         // 等待扫入条码模式
                     }
 
-                    await SendMessageAsync(new string[] { groupName }, $"开始命令 '{command}': 对话框打开");
+                    // await SendMessageAsync(new string[] { groupName }, $"开始命令 '{command}': 对话框打开");
 
                     App.Invoke(new Action(() =>
                     {
@@ -1890,9 +2050,9 @@ text.ToString());
                     }));
                 }
 
-                await SendMessageAsync(new string[] { groupName }, $"结束命令 '{command}': 对话框关闭");
+            // await SendMessageAsync(new string[] { groupName }, $"结束命令 '{command}': 对话框关闭");
 
-                END:
+            END:
                 lock (_syncRoot_commandQueue)
                 {
                     if (_commandQueue.Count > 0)
@@ -1902,12 +2062,16 @@ text.ToString());
                         goto REDO;
                     }
                 }
+
+                return new NormalResult { Value = 1 };
             }
             finally
             {
                 _inWriteTag--;
             }
         }
+
+#endif
 
         // 检测标签状态
         static async Task CheckTagAsync(string command, string groupName)
@@ -1919,7 +2083,7 @@ text.ToString());
             var doors = DoorItem.FindDoors(ShelfData.Doors, param);
             if (doors.Count == 0)
             {
-                await SendMessageAsync(new string[] { groupName }, "没有找到符合条件的柜门，无法进行检查");
+                await SendMessageAsync(groupName, "没有找到符合条件的柜门，无法进行检查");
                 return;
             }
 
@@ -1970,7 +2134,7 @@ text.ToString());
             }
 
             text.AppendLine("(结束)");
-            await SendMessageAsync(new string[] { groupName }, text.ToString());
+            await SendMessageAsync(groupName, text.ToString());
         }
 
         // 检查册状态
@@ -1998,7 +2162,7 @@ text.ToString());
                 }
             }
 
-            await SendMessageAsync(new string[] { groupName }, text.ToString());
+            await SendMessageAsync(groupName, text.ToString());
 
             /*
             // TODO: 用一段文字描述这一册的总体状态。特别是是否同步成功，本地库最新状态和 dp2library 一端是否吻合
@@ -2042,7 +2206,7 @@ text.ToString());
                 string id_string = table["id"] as string;
                 if (string.IsNullOrEmpty(id_string))
                 {
-                    await SendMessageAsync(new string[] { groupName },
+                    await SendMessageAsync(groupName,
                         $"> {command}\r\n命令中缺乏 id=xxxx 部分，无法定位要修改的记录");
                     return;
                 }
@@ -2056,7 +2220,7 @@ text.ToString());
                     var item = context.Requests.Where(o => o.ID == id).FirstOrDefault();
                     if (item == null)
                     {
-                        await SendMessageAsync(new string[] { groupName },
+                        await SendMessageAsync(groupName,
                             $"> {command}\r\n没有找到 ID 为 '{id}' 的操作历史记录");
                         return;
                     }
@@ -2067,7 +2231,7 @@ text.ToString());
                         string new_value = table["state"] as string;
                         if (isStateValid(new_value) == false)
                         {
-                            await SendMessageAsync(new string[] { groupName },
+                            await SendMessageAsync(groupName,
                                 $"> {command}\r\n要修改为新的 State 值 '{new_value}' 不合法。修改操作被拒绝");
                             return;
                         }
@@ -2079,17 +2243,17 @@ text.ToString());
                     if (changed == true)
                     {
                         await context.SaveChangesAsync();
-                        await SendMessageAsync(new string[] { groupName },
+                        await SendMessageAsync(groupName,
                             $"> {command}\r\n记录被修改。修改后内容如下:\r\n{DisplayRequestItem.GetDisplayString(item)}");
                     }
                     else
-                        await SendMessageAsync(new string[] { groupName },
+                        await SendMessageAsync(groupName,
                             $"> {command}\r\n记录没有发生修改。记录内容如下:\r\n{DisplayRequestItem.GetDisplayString(item)}");
                 }
             }
             catch (Exception ex)
             {
-                await SendMessageAsync(new string[] { groupName },
+                await SendMessageAsync(groupName,
                     $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
         }
@@ -3688,9 +3852,10 @@ result);
                 {
                     await SetInfoAndResponse(param);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    // 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"SetInfoAndResponse() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -3709,11 +3874,33 @@ result);
             foreach (var action in actions)
             {
                 string action_string = action.Action;
+                /*
                 // 分离冒号左右部分
                 var parts = StringUtil.ParseTwoPart(action_string, ":");
                 string command = parts[0];
                 string parameters = parts[1];
+                */
 
+                if (action_string.StartsWith("write tag"))
+                {
+                    var result = await WriteTagAsync(action_string, null);
+                    var result_entity = new DigitalPlatform.MessageClient.Entity();
+                    result_entity.Action = action.Action;
+                    result_entity.OldRecord = null;
+                    result_entity.ErrorCode = result.ErrorCode;
+                    result_entity.ErrorInfo = result.ErrorInfo;
+
+                    /*
+                    if (result.Value == 1)
+                    {
+                        result_entity.NewRecord = new Record();
+                        // result_entity.NewRecord.Data = result.ChangedRecord;
+                    }
+                    */
+
+                    results.Add(result_entity);
+                }
+                /*
                 if (command == "write")
                 {
                     var result = await WriteRfidTagAsync(action.NewRecord.Data, parameters);
@@ -3731,6 +3918,7 @@ result);
 
                     results.Add(result_entity);
                 }
+                */
             }
 
             return new ChangeHistoryResult { ResultEntities = results };

@@ -15,6 +15,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
@@ -23,8 +24,10 @@
             <TextBlock Name="comment" Grid.Row="1"
                        Background="Transparent" Foreground="LightGray" FontSize="24" TextAlignment="Center"
                     Text="Comment"/>
-            <local:EntityListControl x:Name="booksControl" Grid.Row="2"/>
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <FlowDocumentScrollViewer x:Name="richText" Grid.Row="2" Visibility="Collapsed"
+                                      ScrollViewer.VerticalScrollBarVisibility="Hidden"/>
+            <local:EntityListControl x:Name="booksControl" Grid.Row="3"/>
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="writeButton" Margin="10,0,10,0"
                         IsEnabled="False"
                     Width="120" Height="60" 
