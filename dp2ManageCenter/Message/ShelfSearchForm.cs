@@ -162,6 +162,9 @@ namespace dp2ManageCenter.Message
 
                     this.button_search.Enabled = bEnable;
                     this.button_stop.Enabled = !bEnable;
+
+                    this.button_getFile.Enabled = bEnable;
+                    this.button_command.Enabled = bEnable;
                 }));
             }
             catch (InvalidOperationException)
@@ -695,7 +698,77 @@ dlg.UiState);
                     FormProperty.SetProperty(state, dlg);
                 }
             }
+        }
 
+        // 执行 SetInfo 命令
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:命名样式", Justification = "<挂起>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:避免使用 Async Void 方法", Justification = "<挂起>")]
+        private async void button_command_Click(object sender, EventArgs e)
+        {
+            var command = InputDlg.GetInput(this, "命令", "命令行:", "write tag", null);
+            if (command == null)
+                return;
+
+            string strError = "";
+
+            _cancelSearch = new CancellationTokenSource();
+            CancellationToken token = _cancelSearch.Token;
+
+            EnableSearchButtons(false);
+            try
+            {
+                var get_result = await ConnectionPool.OpenConnectionAsync(this.comboBox_query_myAccount.Text);
+                if (get_result.Value == -1)
+                {
+                    strError = get_result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                var connection = get_result.Connection;
+
+                string remoteUserName = this.comboBox_query_shelfAccount.Text;
+
+                SetInfoRequest request = new SetInfoRequest();
+                request.TaskID = Guid.NewGuid().ToString();
+                request.Operation = "command";
+                request.BiblioRecPath = null;
+                request.Entities = new List<Entity>() { new Entity { Action = command } };
+
+                var result = await connection.SetInfoAsyncLite(remoteUserName,
+                    request,
+                    TimeSpan.FromSeconds(60),
+                    token);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+                if (result.Entities == null || result.Entities.Count == 0)
+                {
+                    strError = "没有返回 Entities 结果";
+                    goto ERROR1;
+                }
+                var result_entity = result.Entities[0];
+                MessageBox.Show(this, $"ErrorInfo={result_entity.ErrorInfo}, ErrorCode={result_entity.ErrorCode}");
+                return;
+            }
+            catch (AggregateException ex)
+            {
+                strError = MessageConnection.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetDebugText(ex);  // ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                EnableSearchButtons(true);
+            }
+
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
     }
 

@@ -71,6 +71,8 @@ namespace dp2SSL
 
         private async void PageSetting_Loaded(object sender, RoutedEventArgs e)
         {
+            InitializeLayer(this.mainGrid);
+
             /*
             try
             {
@@ -1418,7 +1420,7 @@ MessageBoxOptions.DefaultDesktopOnly);
             dlg.ShowDialog();
 #endif
 
-            _ = TinyServer.WriteTagAsync("write tag", null);
+            _ = TinyServer.WriteTagAsync("write tag -loop", null);
         }
     }
 }

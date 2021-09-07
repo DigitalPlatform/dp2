@@ -61,6 +61,7 @@
             this.columnHeader_toLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_transferDirection = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.button_getFile = new System.Windows.Forms.Button();
+            this.button_command = new System.Windows.Forms.Button();
             this.panel_query.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -352,11 +353,22 @@
             this.button_getFile.UseVisualStyleBackColor = true;
             this.button_getFile.Click += new System.EventHandler(this.button_getFile_Click);
             // 
+            // button_command
+            // 
+            this.button_command.Location = new System.Drawing.Point(732, 127);
+            this.button_command.Name = "button_command";
+            this.button_command.Size = new System.Drawing.Size(164, 41);
+            this.button_command.TabIndex = 5;
+            this.button_command.Text = "命令";
+            this.button_command.UseVisualStyleBackColor = true;
+            this.button_command.Click += new System.EventHandler(this.button_command_Click);
+            // 
             // ShelfSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(908, 559);
+            this.Controls.Add(this.button_command);
             this.Controls.Add(this.button_getFile);
             this.Controls.Add(this.button_stop);
             this.Controls.Add(this.button_search);
@@ -410,5 +422,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader_name;
         private System.Windows.Forms.ColumnHeader columnHeader_bookTitle;
         private System.Windows.Forms.Button button_getFile;
+        private System.Windows.Forms.Button button_command;
     }
 }

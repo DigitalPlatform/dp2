@@ -125,9 +125,15 @@ namespace dp2SSL
         {
             PageShelf.TrySetMessage(null, $"写入 RFID 标签对话框打开");
 
+            _tagChanged = false;
             App.LineFeed += App_LineFeed;
             App.PatronTagChanged += App_PatronTagChanged;
-            await InitialEntitiesAsync();
+            while (true)
+            {
+                await InitialEntitiesAsync();
+                if (_tagChanged == false)
+                    break;
+            }
             BeginComment();
         }
 
@@ -216,6 +222,10 @@ namespace dp2SSL
         private async void App_PatronTagChanged(object sender, NewTagChangedEventArgs e)
 #pragma warning restore VSTHRD100 // 避免使用 Async Void 方法
         {
+            _tagChanged = true;
+            if (_inInitializing > 0)
+                return;
+
             // 重置活跃时钟
             PageMenu.MenuPage.ResetActivityTimer();
 
@@ -233,39 +243,53 @@ namespace dp2SSL
 
         EntityCollection _entities = new EntityCollection();
 
+        // 在初始化过程中途 TagChanged 是否到来过
+        bool _tagChanged = false;
+        int _inInitializing = 0;
+
         async Task InitialEntitiesAsync()
         {
-            List<Entity> update_entities = new List<Entity>();
-            foreach (var tag in ShelfData.PatronTagList.Tags)
+            _inInitializing++;
+            try
             {
-                var entity = _entities.Add(tag);
-                update_entities.Add(entity);
-            }
+                _entities.Clear();
 
-            if (update_entities.Count > 0)
-            {
-                BaseChannel<IRfid> channel = RfidManager.GetChannel();
-                try
+                List<Entity> update_entities = new List<Entity>();
+                foreach (var tag in ShelfData.PatronTagList.Tags)
                 {
-                    await FillBookFieldsAsync(channel, update_entities);
+                    var entity = _entities.Add(tag);
+                    update_entities.Add(entity);
                 }
-                finally
+
+                if (update_entities.Count > 0)
                 {
-                    RfidManager.ReturnChannel(channel);
+                    BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                    try
+                    {
+                        await FillBookFieldsAsync(channel, update_entities);
+                    }
+                    finally
+                    {
+                        RfidManager.ReturnChannel(channel);
+                    }
+                }
+
+                if (this.TaskInfo != null)
+                {
+                    var write_result = await TryWriteTagAsync(update_entities,
+                        this.TaskInfo);
+                    if (write_result.Value == -1)
+                    {
+                        App.ErrorBox("写标签时出错",
+                            write_result.ErrorInfo,
+                            "red",
+                            "auto_close");
+                    }
                 }
             }
-
-            if (this.TaskInfo != null)
+            finally
             {
-                var write_result = await TryWriteTagAsync(update_entities,
-                    this.TaskInfo);
-                if (write_result.Value == -1)
-                {
-                    App.ErrorBox("写标签时出错",
-                        write_result.ErrorInfo,
-                        "red",
-                        "auto_close");
-                }
+                _inInitializing--;
             }
         }
 
@@ -273,8 +297,10 @@ namespace dp2SSL
         async Task ChangeEntitiesAsync(BaseChannel<IRfid> channel,
             NewTagChangedEventArgs e)
         {
+            /*
             if (booksControl.Visibility != Visibility.Visible)
                 return;
+            */
 
             bool changed = false;
             List<Entity> update_entities = new List<Entity>();
@@ -577,6 +603,27 @@ out string strError);
                     Value = -1,
                     ErrorInfo = strError
                 };
+
+            {
+                entity.TagInfo = null;
+                entity.PII = null;
+                entity.FillFinished = false;
+
+                // 刷新这一个 entity
+                _ = Task.Run(async () =>
+                {
+                    BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                    try
+                    {
+                        await FillBookFieldsAsync(channel, new List<Entity>() { entity });
+                    }
+                    finally
+                    {
+                        RfidManager.ReturnChannel(channel);
+                    }
+                });
+            }
+
             // 语音播报成功，自动关闭窗口
             this.Finished = true;
             App.CurrentApp.SpeakSequence($"写入完成");
@@ -683,7 +730,8 @@ out string strError);
     new_tag_info);
                 ShelfData.PatronTagList.ClearTagTable(new_tag_info.UID);
                 // 迫使所有标签都重新获取和显示一次
-                ShelfData.PatronTagList.Clear();
+                // ShelfData.PatronTagList.Clear();
+
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -822,13 +870,19 @@ OI的校验，总长度不超过16位。
             //      0   没有找到
             //      1   找到
             var get_result = await LibraryChannelUtil.GetEntityDataAsync(pii, "network");
-            if (get_result.Value == -1 || get_result.Value == 0)
+            if (get_result.Value == -1)
                 return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = get_result.ErrorInfo
                 };
-
+            if (get_result.Value == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"册记录 '{pii}' 没有找到",
+                    ErrorCode = "itemNotFound"
+                };
             this.TaskInfo = BuildWriteTagTask(get_result);
             return new NormalResult();
         }

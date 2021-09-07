@@ -286,6 +286,17 @@ namespace dp2SSL
 
         static PageSetting _pageSetting = null;
 
+        public static PageSetting PageSetting
+        {
+            get
+            {
+                if (_pageSetting == null)
+                    _pageSetting = new PageSetting();
+
+                return _pageSetting;
+            }
+        }
+
         void NavigatePageSetting()
         {
             if (_pageSetting == null)

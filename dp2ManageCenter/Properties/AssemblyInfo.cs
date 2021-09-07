@@ -34,8 +34,8 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 // https://stackoverflow.com/questions/53782085/visual-studio-assemblyversion-with-dont-work
-[assembly: AssemblyVersion("1.4.2")]
-[assembly: AssemblyFileVersion("1.4.0.0")]
+[assembly: AssemblyVersion("1.4.3")]
+[assembly: AssemblyFileVersion("1.4.3.0")]
 
 // v1.1 (2020/2/25) 获取 MD5 采用了新的任务方式。会检查 dp2library 的版本号是否为 3.23 以上
 // v1.2 (2020/2/26) 服务器管理对话框里面增加了 UID 列，新增服务器节点时会检查 UID 是否重复，重复的不允许加入
@@ -53,3 +53,4 @@ using System.Runtime.InteropServices;
 //      1.4.1 (2021/8/16) 书柜查询窗的列表上下文菜单增加了 修改 关联 ID 的命令
 //      1.4.2 (2021/8/22) 增加获取文件对话框
 //                      书柜查询窗的时间范围值可以输入类似 20200101 这样的表示一天范围的值了
+//      1.4.3 (2021/9/7) 书柜查询窗增加命令按钮。可以执行 write tag 命令。用的是点对点 SetInfo() API

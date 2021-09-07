@@ -1673,7 +1673,7 @@ update
                 }
 
                 text.AppendLine($"=== {door_count} 门，共 {total_count} 册 ===");
-                await SendMessageAsync( groupName ,
+                await SendMessageAsync(groupName,
 text.ToString());
 
             }
@@ -1878,12 +1878,51 @@ text.ToString());
                     };
                 }
 
-            REDO:
+            // REDO:
                 // 子参数
                 string param = command.Substring("write tag".Length).Trim();
 
+                // B0000001
                 // 子参数为图书 PII。为 xxxx.xxxx 或者 xxxx 形态
-                var pii = param;
+
+                // -once 表示对话框只执行一次任务就自动关闭
+
+                bool loop = false;
+                string pii = "";
+                List<string> parameters = StringUtil.SplitList(param, " ");
+                foreach (string parameter in parameters)
+                {
+                    string name = "";
+                    string value = "";
+                    if (parameter.StartsWith("-"))
+                    {
+                        var parts = StringUtil.ParseTwoPart(parameter.Substring(1), ":");
+                        name = parts[0].ToLower();
+                        value = parts[1];
+                    }
+                    else
+                    {
+                        name = "barcode";
+                        value = parameter;
+                    }
+
+                    if (name == "loop")
+                        loop = true;
+                    else if (name == "barcode" || name == "pii")
+                    {
+                        pii = Unescape(value);
+                    }
+                    else
+                    {
+                        return new NormalResult
+                        {
+                            Value = 0,
+                            ErrorInfo = $"无法识别子参数名 '{name}'",
+                            ErrorCode = "parameterError"
+                        };
+                    }
+                }
+
 
                 /*
                 if (string.IsNullOrEmpty(pii))
@@ -1901,8 +1940,11 @@ text.ToString());
                         App.SetSize(dlg, "wide");
                     }));
 
+                    dlg.LoopWriting = loop;
                     dlg.Closed += (o1, e1) =>
                     {
+                        PageMenu.PageSetting?.RemoveLayer();
+
                         _writeTagDialog = null;
 
                         lock (_syncRoot_commandQueue)
@@ -1928,7 +1970,12 @@ text.ToString());
                             {
                                 dlg.Close();
                             }));
-                            return result;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = result.ErrorInfo,
+                                ErrorCode = string.IsNullOrEmpty(result.ErrorCode) ? "prepareTaskInfoError" : result.ErrorCode
+                            };
                         }
                     }
                     else
@@ -1940,10 +1987,15 @@ text.ToString());
                     {
                         dlg.Owner = Application.Current.MainWindow;
                         dlg.Show();
+                        PageMenu.PageSetting?.AddLayer();
                     }));
                 }
 
-                return new NormalResult { Value = 1 };
+                return new NormalResult
+                {
+                    Value = 1,
+                    ErrorInfo = "写入标签对话框已打开"
+                };
             }
         }
 
@@ -3867,7 +3919,7 @@ result);
         }
 
         // 写入 RFID 标签
-        async static Task<ChangeHistoryResult> WriteRfidTagAsync(List<DigitalPlatform.MessageClient.Entity> actions)
+        async static Task<ChangeHistoryResult> CommandAsync(List<DigitalPlatform.MessageClient.Entity> actions)
         {
             List<DigitalPlatform.MessageClient.Entity> results = new List<DigitalPlatform.MessageClient.Entity>();
 
@@ -4098,8 +4150,8 @@ result);
                 ChangeHistoryResult result = null;
                 if (param.Operation == "setHistory")
                     result = await ChangeHistoryAsync(param.Entities);
-                else if (param.Operation == "writeRfidTag")
-                    result = await WriteRfidTagAsync(param.Entities);
+                else if (param.Operation == "command")
+                    result = await CommandAsync(param.Entities);
                 else
                 {
                     strError = "无法识别的 param.Operation 值 '" + param.Operation + "'";

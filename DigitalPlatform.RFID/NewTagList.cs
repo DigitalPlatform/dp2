@@ -462,7 +462,7 @@ namespace DigitalPlatform.RFID
 
                 if (clearTagInfo)
                 {
-                    // T要把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
+                    // 把 books 集合中相关 uid 的 TagInfo 设置为 null，迫使后面重新从 RfidCenter 获取
                     ClearTagInfo(null);
                 }
             }
