@@ -31,9 +31,10 @@ namespace DigitalPlatform.CirculationClient
         //      true    初始化成功
         //      false   初始化失败，应立刻退出应用程序
         public static bool Initial(string product_name,
-            Delegate_skipSerialNumberCheck skipCheck = null)
+            Delegate_skipSerialNumberCheck skipCheck = null,
+            string style = "")
         {
-            var ret = ClientInfo.Initial(product_name);
+            var ret = ClientInfo.Initial(product_name, style);
             if (ret == false)
                 return false;
 

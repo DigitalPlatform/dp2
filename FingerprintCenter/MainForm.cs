@@ -252,7 +252,12 @@ bool bClickClose = false)
                     {
                         return false;
                     }
-                });
+                },
+                "debugInfo");
+
+            // 2021/9/9
+            var debugInfo = ClientInfo.Config.DebugInfo;
+            ClientInfo.WriteInfoLog($"settings.xml 文件装载过程:\r\n{debugInfo}");
 
             // 2020/8/30
             if (bRet == false)

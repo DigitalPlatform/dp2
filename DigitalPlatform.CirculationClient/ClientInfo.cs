@@ -305,13 +305,16 @@ namespace DigitalPlatform.CirculationClient
 
         // parameters:
         //      style   风格。如果包含 watcher，表示会启用文件变化监视功能，每当物理文件变化的时候，会自动重装进入 ConfigSetting 内存
+        //              如果包含 debugInfo，表示会再 _config.DebugInfo 中返回装载过程的调试信息
         public static void InitialConfig(string style)
         {
             if (string.IsNullOrEmpty(UserDir))
                 throw new ArgumentException("UserDir 尚未初始化");
 
             string filename = Path.Combine(UserDir, "settings.xml");
-            _config = ConfigSetting.Open(filename, true);
+            _config = ConfigSetting.Open(filename, 
+                true,
+                StringUtil.IsInList("debugInfo", style));
 
 #if NO
             try
