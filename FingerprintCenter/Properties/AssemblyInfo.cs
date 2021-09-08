@@ -31,11 +31,16 @@ using System.Runtime.InteropServices;
 //
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
-[assembly: AssemblyVersion("2.2.*")]
-[assembly: AssemblyFileVersion("2.2.0.0")]
+[assembly: AssemblyVersion("2.2.2")]
+[assembly: AssemblyFileVersion("2.2.2.0")]
 
 // V1.1 2019/2/21 第二个版本
 // V1.2 2019/4/12 采用最新 dp-library submodule 的版本
 // V2.1 2019/7/30 GetVersion() API 返回 2.1，表示从这个版本开始 GetState() API 支持 strStyle 为 "getLibraryServerUID"
 //                  而此前 GetVersion() API 返回的是 2.0 (2.0 的意思是相对于 zkfingerprint 的 1.0)
 // V2.2 2019/9/13 GetFingerprintString() 支持练习模式
+//      2.2.1 (2021/9/8) MainForm 改为 DPI 模式。
+//                      增加打开用户文件夹、数据文件夹、程序文件夹三个菜单命令。
+//                      解决 MainForm::_cancel 中途被 Cancel() 导致 ClientInfo.BeginUpdate() 失效的 bug
+//                      增加“检查升级”菜单
+//      2.2.2 (2021/9/8) 保存和装载 settings.xml 的过程增加了十个 .bak? 文件作为备份。如果遇到 settings.xml 损坏的情况，会自动从 .bak? 文件中找最新的一个进行恢复

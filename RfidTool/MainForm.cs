@@ -354,6 +354,15 @@ bool bClickClose = false)
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            FormClientInfo.SerialNumberMode = "must";
+            var ret = FormClientInfo.Initial("rfidtool",
+                () => StringUtil.IsDevelopMode());
+            if (ret == false)
+            {
+                Application.Exit();
+                return;
+            }
+
             // 2021/4/25
             ClientInfo.BeginUpdate(
 TimeSpan.FromMinutes(2),
@@ -364,15 +373,6 @@ _cancel.Token,
     //      warning_level   警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
     ShowStatusText(text);
 });
-
-            FormClientInfo.SerialNumberMode = "must";
-            var ret = FormClientInfo.Initial("rfidtool",
-                () => StringUtil.IsDevelopMode());
-            if (ret == false)
-            {
-                Application.Exit();
-                return;
-            }
 
             HistoryStoreage.Initialize();
             EntityStoreage.Initialize();

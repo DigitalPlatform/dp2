@@ -849,6 +849,7 @@ cancellation_token);
             DateTime now = DateTime.Now;
             TimeSpan delta = TimeSpan.FromMinutes(5);
 
+            List<string> delete_keys = new List<string>();
             foreach (string key in _instantMessageIDs.Keys)
             {
                 object value = _instantMessageIDs[key];
@@ -856,7 +857,19 @@ cancellation_token);
                     continue;
                 var time = (DateTime)value;
                 if (now - time > delta)
+                {
+                    delete_keys.Add(key);
+                    // _instantMessageIDs.Remove(key);
+                }
+            }
+
+            // 2021/9/8
+            if (delete_keys.Count > 0)
+            {
+                foreach(var key in delete_keys)
+                {
                     _instantMessageIDs.Remove(key);
+                }
             }
 
             // 实在太多了干脆全部清除

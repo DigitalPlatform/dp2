@@ -648,6 +648,10 @@ namespace FingerprintCenter
                     // Thread.Sleep(200);
                 }
             }
+            catch(OperationCanceledException)
+            {
+
+            }
             catch (Exception ex)
             {
                 Log.Error($"*** CaptureThreadMain() Exception: {ExceptionUtil.GetExceptionText(ex)}");

@@ -38,6 +38,7 @@ namespace FingerprintCenter
 
         FloatingMessageForm _floatingMessage = null;
 
+        // 整个 Windows Form 程序退出的信号。注意，中途不会触发 Cancel()
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
         public MainForm()
@@ -189,15 +190,6 @@ bool bClickClose = false)
                 notifyIcon1.ShowBalloonTip(1000);
             }
 
-            ClientInfo.BeginUpdate(
-TimeSpan.FromMinutes(2),
-TimeSpan.FromMinutes(60),
-_cancel.Token,
-(text, level) =>
-{
-OutputHistory(text, level);
-});
-
             FormClientInfo.SetErrorState("retry", "正在启动");
 
             if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
@@ -243,8 +235,7 @@ OutputHistory(text, level);
             var bRet = FormClientInfo.Initial("fingerprintcenter",
                 () =>
                 {
-
-                    this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
+                    LoadSettings();
 
                     if (StringUtil.IsDevelopMode())
                         return true;
@@ -269,6 +260,15 @@ OutputHistory(text, level);
                 Application.Exit();
                 return;
             }
+
+            ClientInfo.BeginUpdate(
+TimeSpan.FromMinutes(2),
+TimeSpan.FromMinutes(60),
+_cancel.Token,
+(text, level) =>
+{
+OutputHistory(text, level);
+});
 
             if (StringUtil.IsDevelopMode() == false)
                 MenuItem_testing.Visible = false;
@@ -434,6 +434,9 @@ OutputHistory(text, level);
         }
 
         private static readonly Object _syncRoot_start = new Object(); // 2019/5/20
+        
+        // 2021/9/8
+        CancellationTokenSource _cancelFingerPrint = new CancellationTokenSource();
 
         NormalResult StartFingerPrint()
         {
@@ -441,10 +444,11 @@ OutputHistory(text, level);
             {
                 DisplayText("StartFingerPrint ...");
 
-                _cancel?.Cancel();
+                _cancelFingerPrint?.Cancel();
 
-                _cancel?.Dispose();
-                _cancel = new CancellationTokenSource();
+                _cancelFingerPrint?.Dispose();
+
+                _cancelFingerPrint = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token);
 
                 DisplayText("正在初始化指纹环境 ...");
                 DisplayText("正在打开指纹设备 ...");
@@ -487,44 +491,6 @@ OutputHistory(text, level);
 
                 DisplayText("Init Cache ...");
 
-#if REMOVED
-            {
-                // 初始化指纹缓存
-                // return:
-                //      -1  出错
-                //      0   没有获得任何数据
-                //      >=1 获得了数据
-                var result = InitFingerprintCache();
-                if (result.Value == -1)
-                {
-
-                    // 开始捕捉指纹
-                    FingerPrint.StartCapture(_cancel.Token);
-                    // 如果是请求 dp2library 服务器出错，则依然要启动 timer，这样可以自动每隔一段时间重试初始化
-                    // TODO: 界面上要出现醒目的警告(或者不停语音提示)，表示请求 dp2library 出错，从而没有任何读者指纹信息可供识别时候利用
-                    if (result.ErrorCode == "RequestError"
-                        || result.ErrorCode == "NotLogin")
-                    {
-                        // TODO: 要提醒用户，此时没有初始化成功，但后面会重试
-                        SetErrorState("retry");
-                        StartTimer();
-                    }
-                    else
-                    {
-                        // TODO: 需要进入警告状态(表示软件后面不会自动重试)，让工作人员明白必须介入
-                        SetErrorState("error");
-                    }
-
-                    return result;
-                }
-                else
-                {
-                    SetErrorState("normal");
-                }
-                if (result.Value == 0)
-                    this.ShowMessage(result.ErrorInfo, "yellow", true);
-            }
-#endif
                 {
                     var result = TryInitFingerprintCache();
                     if (result.Value == -1)
@@ -532,7 +498,7 @@ OutputHistory(text, level);
                 }
 
                 // 开始捕捉指纹
-                FingerPrint.StartCapture(_cancel.Token);
+                FingerPrint.StartCapture(_cancelFingerPrint.Token);
 
                 //
                 StartTimer();
@@ -553,7 +519,7 @@ OutputHistory(text, level);
             {
 
                 // 开始捕捉指纹
-                FingerPrint.StartCapture(_cancel.Token);
+                FingerPrint.StartCapture(_cancelFingerPrint.Token);
                 // 如果是请求 dp2library 服务器出错，则依然要启动 timer，这样可以自动每隔一段时间重试初始化
                 // TODO: 界面上要出现醒目的警告(或者不停语音提示)，表示请求 dp2library 出错，从而没有任何读者指纹信息可供识别时候利用
                 if (result.ErrorCode == "RequestError")
@@ -743,11 +709,32 @@ OutputHistory(text, level);
 #endif
         }
 
+        void LoadSettings()
+        {
+            this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
+
+            // 恢复 MainForm 的显示状态
+            {
+                var state = ClientInfo.Config.Get("mainForm", "state", "");
+                if (string.IsNullOrEmpty(state) == false)
+                {
+                    FormProperty.SetProperty(state, this, ClientInfo.IsMinimizeMode());
+                }
+            }
+        }
+
         void SaveSettings()
         {
             if (this.checkBox_cfg_savePasswordLong.Checked == false)
                 this.textBox_cfg_password.Text = "";
             ClientInfo.Config?.Set("global", "ui_state", this.UiState);
+
+            // 保存 MainForm 的显示状态
+            {
+                var state = FormProperty.GetProperty(this);
+                ClientInfo.Config.Set("mainForm", "state", state);
+            }
+
             ClientInfo.Config?.Set("global", "replication_start", this.textBox_replicationStart.Text);
             ClientInfo.Finish();
         }
@@ -2463,6 +2450,54 @@ MessageBoxDefaultButton.Button2);
             {
                 this.textBox_cfg_recognitionQualityThreshold.ReadOnly = true;
             }
+        }
+
+        private void MenuItem_openUserFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.UserDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openDataFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.DataDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void MenuItem_openProgramFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        // 检查更新
+        private async void MenuItem_checkUpdate_Click(object sender, EventArgs e)
+        {
+            // 立即进行一次更新
+            // result.Value:
+            //      -1  出错
+            //      0   没有发现更新
+            //      1   已经更新，重启可使用新版本
+            var result = await ClientInfo.CheckUpdateAsync(_cancel.Token);
+            MessageBox.Show(this, result.ErrorInfo);
         }
     }
 

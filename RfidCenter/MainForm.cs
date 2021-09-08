@@ -161,15 +161,6 @@ namespace RfidCenter
                 notifyIcon1.ShowBalloonTip(1000);
             }
 
-            ClientInfo.BeginUpdate(
-    TimeSpan.FromMinutes(2),
-    TimeSpan.FromMinutes(60),
-    _cancel.Token,
-    (text, level) =>
-    {
-        OutputHistory(text, level);
-    });
-
             SetErrorState("retry", "正在启动");
 
             if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
@@ -192,6 +183,16 @@ namespace RfidCenter
                 // string userLogDir = ClientInfo.UserLogDir;
                 ClientInfo.SetLoggingLevel(Serilog.Events.LogEventLevel.Debug);
             }
+
+            ClientInfo.BeginUpdate(
+TimeSpan.FromMinutes(2),
+TimeSpan.FromMinutes(60),
+_cancel.Token,
+(text, level) =>
+{
+OutputHistory(text, level);
+});
+
             ClearHtml();
 
             //this.Invoke((Action)(() =>

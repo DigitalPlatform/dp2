@@ -444,7 +444,7 @@ namespace DigitalPlatform.CirculationClient
             long limit_value)
         {
             string today = DateTimeUtil.DateTimeToString8(DateTime.Now);
-            
+
             string value = Config.Get("dailyCounter", counter_name);
             DailyCounter counter = JsonConvert.DeserializeObject<DailyCounter>(value);
             if (counter == null || counter.Date != today)
@@ -520,13 +520,22 @@ namespace DigitalPlatform.CirculationClient
             CancellationToken token,
             delegate_showText func_showText)
         {
+            if (string.IsNullOrEmpty(UserDir))
+                throw new ArgumentException("BeginUpdate() 调用位置不正确，应该在 Initial() 之后调用");
+
+            /*
             if (ApplicationDeployment.IsNetworkDeployed == false)
+            {
+                WriteInfoLog($"BeginUpdate() 因为当前不是 ClickOnce 方式运行，没有启用 ClickOnce 自动更新机制");
                 return;
+            }*/
 
             Task.Factory.StartNew(async () =>
             {
                 try
                 {
+                    WriteInfoLog($"BeginUpdate() 在 ClickOnce 方式运行，自动更新后台任务已经启动");
+
                     // 第一次延迟
                     await Task.Delay(firstDelay, token);
 
@@ -560,10 +569,52 @@ namespace DigitalPlatform.CirculationClient
                 {
                     WriteErrorLog($"后台 ClickOnce 自动更新出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
+                finally
+                {
+                    WriteInfoLog($"BeginUpdate()自动更新后台任务停止");
+                }
             },
     token,
     TaskCreationOptions.LongRunning,
     TaskScheduler.Default);
+        }
+
+        // 立即进行一次更新
+        // result.Value:
+        //      -1  出错
+        //      0   没有发现更新
+        //      1   已经更新，重启可使用新版本
+        public static async Task<NormalResult> CheckUpdateAsync(CancellationToken token)
+        {
+            return await Task.Run<NormalResult>(() =>
+            {
+                try
+                {
+                    //      -1  出错
+                    //      0   没有发现更新
+                    //      1   已经更新，重启可使用新版本
+                    return ClientInfo.InstallUpdateSync();
+                }
+                catch (OperationCanceledException)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "中断",
+                        ErrorCode = "aborted"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    WriteErrorLog($"CheckUpdate() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"CheckUpdate() 出现异常: {ex.Message}",
+                        ErrorCode = ex.GetType().ToString()
+                    };
+                }
+            });
         }
 
         // result.Value:
