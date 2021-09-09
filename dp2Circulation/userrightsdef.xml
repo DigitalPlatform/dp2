@@ -349,6 +349,10 @@
     <comment lang='zh'>管理评注</comment>
     <comment lang='en'>Manage Comment</comment>
   </property>
+  <property name='manageopac'>
+    <comment lang='zh'>管理 OPAC</comment>
+    <comment lang='en'>Manage OPAC</comment>
+  </property>
   <property name='settailnumber'>
     <comment lang='zh'>设置种次号尾号</comment>
     <comment lang='en'>Set Tail Number</comment>

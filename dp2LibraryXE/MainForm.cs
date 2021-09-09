@@ -28,6 +28,7 @@ using DigitalPlatform.Install;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using System.Text;
 
 namespace dp2LibraryXE
 {
@@ -2756,7 +2757,7 @@ TaskScheduler.Default);
                     string strHashed = "";
                     nRet = LibraryServerUtil.SetUserPassword(
                         null,
-                        strSupervisorPassword, 
+                        strSupervisorPassword,
                         out strHashed, out strError);
                     if (nRet == -1)
                     {
@@ -5500,6 +5501,451 @@ MessageBoxDefaultButton.Button2);
             // Process.Start("notepad", fileName);
             Process.Start(fileName);
         }
+
+        // 创建绿色更新包
+        private async void MenuItem_buildGreenUpdatePack_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            var data_dir = this.DataDir;
+            var program_dir = Environment.CurrentDirectory;
+
+            if (data_dir == program_dir)
+            {
+                strError = "此 dp2libraryxe 为非 ClickOnce 安装方式，无法创建绿色更新包";
+                goto ERROR1;
+            }
+
+            var temp_dir = this.TempDir;
+            var data_filename = Path.Combine(this.TempDir, "data.zip");
+            var program_filename = Path.Combine(this.TempDir, "program.zip");
+
+            var final_filename = Path.Combine(this.TempDir, "dp2libraryxe_update.zip");
+
+            NormalResult result = null;
+            this._floatingMessage.Text = "正在创建绿色更新包 ...";
+            try
+            {
+                result = await Task.Run<NormalResult>(() =>
+                {
+
+                    int nRet = CompressDirectory(
+                data_dir,
+                data_dir,
+                data_filename,
+                Encoding.UTF8,
+                out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    nRet = CompressDirectory(
+    program_dir,
+    program_dir,
+    program_filename,
+    Encoding.UTF8,
+    out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    // 再压缩到一个文件
+                    if (File.Exists(final_filename))
+                        File.Delete(final_filename);
+
+                    List<string> filenames = new List<string>();
+                    filenames.Add(data_filename);
+                    filenames.Add(program_filename);
+                    using (ZipFile zip = new ZipFile(Encoding.UTF8))
+                    {
+                        zip.ParallelDeflateThreshold = -1;
+
+                        foreach (string filename in filenames)
+                        {
+                            string strShortFileName = filename.Substring(temp_dir.Length + 1);
+                            string directoryPathInArchive = Path.GetDirectoryName(strShortFileName);
+                            zip.AddFile(filename, directoryPathInArchive);
+                        }
+
+                        zip.UseZip64WhenSaving = Zip64Option.AsNecessary;
+                        zip.Save(final_filename);
+                    }
+
+                    File.Delete(data_filename);
+                    File.Delete(program_filename);
+
+                    return new NormalResult();
+                });
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+
+            // 打开文件夹
+            try
+            {
+                System.Diagnostics.Process.Start(temp_dir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 安装绿色更新包
+        private async void MenuItem_updateByGreenUpdatePack_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Title = "请指定绿色更新包文件名";
+            // dlg.FileName = this.textBox_filename.Text;
+
+            dlg.Filter = "dp2libraryxe_updat.zip|dp2libraryxe_update.zip|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            // 检查文件名
+            if (Path.GetFileName(dlg.FileName) != "dp2libraryxe_update.zip")
+            {
+                strError = "文件名不正确";
+                goto ERROR1;
+            }
+
+            var data_dir = this.DataDir;
+            var program_dir = Environment.CurrentDirectory;
+
+            // testing
+            // data_dir = "c:\\temp\\data_dir";
+            // program_dir = "c:\\temp\\program_dir";
+
+            var temp_dir = this.TempDir;
+            var data_filename = Path.Combine(this.TempDir, "data.zip");
+            var program_filename = Path.Combine(this.TempDir, "program.zip");
+
+            NormalResult result = null;
+            this._floatingMessage.Text = "正在安装绿色更新包 ...";
+            try
+            {
+                result = await Task.Run<NormalResult>(() =>
+                {
+                    // 展开到临时目录
+                    using (ZipFile zip = ZipFile.Read(dlg.FileName))
+                    {
+                        foreach (ZipEntry entry in zip)
+                        {
+                            entry.Extract(temp_dir, ExtractExistingFileAction.OverwriteSilently);
+                        }
+                    }
+
+                    bool need_reboot = false;
+                    // return:
+                    //      -1  出错
+                    //      0   成功。不需要 reboot
+                    //      1   成功。需要 reboot
+                    int nRet = ExtractFile(data_filename,
+                            data_dir,
+                            true,
+                            temp_dir,
+                            out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    if (nRet == 1)
+                        need_reboot = true;
+
+                    nRet = ExtractFile(program_filename,
+            program_dir,
+            true,
+            temp_dir,
+            out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
+                    if (nRet == 1)
+                        need_reboot = true;
+
+                    return new NormalResult { Value = need_reboot ? 1 : 0 };
+                });
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+
+            if (result.Value == 1)
+                MessageBox.Show(this, "请重新启动 Windows，以完成绿色更新包安装");
+            else
+                MessageBox.Show(this, "绿色更新包安装完成");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        #region Compression
+
+        // return:
+        //      -1  出错
+        //      0   成功。不需要 reboot
+        //      1   成功。需要 reboot
+        static int ExtractFile(string strZipFileName,
+            string strTargetDir,
+            bool bAllowDelayOverwrite,
+            string strTempDir,
+            out string strError)
+        {
+            strError = "";
+
+            bool bNeedReboot = false;
+            try
+            {
+                using (ZipFile zip = ZipFile.Read(strZipFileName))
+                {
+                    foreach (ZipEntry e in zip)
+                    {
+                        // e.Extract(this.UserDir, ExtractExistingFileAction.OverwriteSilently);
+                        if ((e.Attributes & FileAttributes.Directory) == 0)
+                        {
+                            if (ExtractFile(e,
+                                strTargetDir,
+                                strTempDir,
+                                bAllowDelayOverwrite) == true)
+                                bNeedReboot = true;
+
+                        }
+                        else
+                            e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+
+            if (bNeedReboot == true)
+                return 1;
+            return 0;
+        }
+
+        // parameters:
+        //      bAllowDelayOverwrite    是否允许延迟到 reboot 后的覆盖
+        // return:
+        //      false   正常结束
+        //      true    发生了 MoveFileEx，需要 reboot 才会发生作用
+        static bool ExtractFile(ZipEntry e,
+            string strTargetDir,
+            string strTempDir,
+            bool bAllowDelayOverwrite)
+        {
+            string strTempPath = Path.Combine(strTempDir, Path.GetFileName(e.FileName));
+            string strTargetPath = Path.Combine(strTargetDir, e.FileName);
+
+            using (FileStream stream = new FileStream(strTempPath, FileMode.Create))
+            {
+                e.Extract(stream);
+            }
+
+            int nErrorCount = 0;
+            for (; ; )
+            {
+                try
+                {
+                    // 确保目标目录已经创建
+                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strTargetPath));
+
+                    File.Copy(strTempPath, strTargetPath, true);
+                    File.SetLastWriteTime(strTargetPath, e.LastModified);
+
+                    // Console.WriteLine("展开文件 " + strTargetPath);
+                }
+                catch (Exception ex)
+                {
+                    if (nErrorCount > 10 || bAllowDelayOverwrite)
+                    {
+                        if (bAllowDelayOverwrite == false)
+                            throw new Exception("复制文件 " + strTempPath + " 到 " + strTargetPath + " 的过程中出现错误: " + ex.Message);
+                        else
+                        {
+                            string strLastFileName = Path.Combine(strTempDir, Guid.NewGuid().ToString());
+                            File.Move(strTempPath, strLastFileName);
+                            strTempPath = "";
+                            if (MoveFileEx(strLastFileName, strTargetPath, MoveFileFlags.DelayUntilReboot | MoveFileFlags.ReplaceExisting) == false)
+                                throw new Exception("MoveFileEx() '" + strLastFileName + "' '" + strTargetPath + "' 失败");
+                            File.SetLastWriteTime(strLastFileName, e.LastModified);
+                            // Console.WriteLine("延迟展开文件 " + strTargetPath);
+                            return true;
+                        }
+                    }
+
+                    nErrorCount++;
+                    Thread.Sleep(1000);
+                    continue;
+                }
+                break;
+            }
+            if (string.IsNullOrEmpty(strTempPath) == false)
+                File.Delete(strTempPath);
+
+            return false;
+        }
+
+        #region MoveFileEx
+
+        [Flags]
+        internal enum MoveFileFlags
+        {
+            None = 0,
+            ReplaceExisting = 1,
+            CopyAllowed = 2,
+            DelayUntilReboot = 4,
+            WriteThrough = 8,
+            CreateHardlink = 16,
+            FailIfNotTrackable = 32,
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        static extern bool MoveFileEx(
+            string lpExistingFileName,
+            string lpNewFileName,
+            MoveFileFlags dwFlags);
+
+        #endregion
+
+        // 压缩一个目录到 .zip 文件
+        // parameters:
+        //      strBase 在 .zip 文件中的文件名要从全路径中去掉的前面部分
+        // Exception:
+        //      如果目标文件目录不存在，会抛出异常
+        static int CompressDirectory(
+            string strDirectory,
+            string strBase,
+            string strZipFileName,
+            Encoding encoding,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(strDirectory);
+                if (di.Exists == false)
+                {
+                    strError = "directory '" + strDirectory + "' not exist";
+                    return -1;
+                }
+                strDirectory = di.FullName;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+
+            if (File.Exists(strZipFileName) == true)
+            {
+                try
+                {
+                    File.Delete(strZipFileName);
+                }
+                catch
+                {
+                }
+            }
+
+            List<string> filenames = GetFileNames(strDirectory);
+
+            if (filenames.Count == 0)
+                return 0;
+
+            // string strHead = Path.GetDirectoryName(strDirectory);
+            // Console.WriteLine("head=["+strHead+"]");
+
+            using (ZipFile zip = new ZipFile(encoding))
+            {
+                // https://stackoverflow.com/questions/21583512/access-denied-to-a-tmp-path
+                // zip.TempFileFolder = System.IO.Path.GetTempPath();
+
+                // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                // https://dotnetzip.codeplex.com/workitem/14087
+                // uncommenting the following line can be used as a work-around
+                zip.ParallelDeflateThreshold = -1;
+
+                foreach (string filename in filenames)
+                {
+                    // string strShortFileName = filename.Substring(strHead.Length + 1);
+                    string strShortFileName = filename.Substring(strBase.Length + 1);
+                    string directoryPathInArchive = Path.GetDirectoryName(strShortFileName);
+                    zip.AddFile(filename, directoryPathInArchive);
+                }
+
+                zip.UseZip64WhenSaving = Zip64Option.AsNecessary;
+
+                // 2020/6/4
+                // Directory.CreateDirectory(Path.GetDirectoryName(strZipFileName));
+
+                zip.Save(strZipFileName);
+            }
+
+            return filenames.Count;
+        }
+
+        // 获得一个目录下的全部文件名。包括子目录中的
+        static List<string> GetFileNames(string strDataDir)
+        {
+            DirectoryInfo di = new DirectoryInfo(strDataDir);
+
+            List<string> result = new List<string>();
+
+            FileInfo[] fis = di.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                result.Add(fi.FullName);
+            }
+
+            // 处理下级目录，递归
+            DirectoryInfo[] dis = di.GetDirectories();
+            foreach (DirectoryInfo subdir in dis)
+            {
+                result.AddRange(GetFileNames(subdir.FullName));
+            }
+
+            return result;
+        }
+
+
+        #endregion
     }
 
     /*
