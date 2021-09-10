@@ -2259,7 +2259,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError += "检索式XML加载到DOM时出错，原因：" + ex.Message + "\r\n"
+                    strError += "检索式 XML 加载到 DOM 时出错，原因：" + ex.Message + "\r\n"
                         + "检索式内容如下:\r\n"
                         + strQuery;
                     return -1;
@@ -2285,6 +2285,20 @@ namespace DigitalPlatform.rms
                     out strError);
                 if (resultSet != null)
                     resultSet.m_strQuery = strQuery;
+
+                // 2021/9/10
+                // 最后按照 strOutputStyle 的要求来对 ID 进行排序
+                if (StringUtil.IsInList("desc", strOutputStyle)
+                    && !(resultSet.Sorted && resultSet.Asc == -1))
+                {
+                    resultSet.Asc = -1;
+                    if (Query.DoSort(resultSet, handle) == true)
+                    {
+                        strError = "前端中断";
+                        return -1;
+                    }
+                    resultSet.Sort();
+                }
 
                 // testing
                 // Thread.Sleep(6000);

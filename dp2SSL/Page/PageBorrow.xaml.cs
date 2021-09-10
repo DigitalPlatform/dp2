@@ -579,6 +579,7 @@ namespace dp2SSL
                         }
                         catch (Exception ex)
                         {
+                            WpfClientInfo.WriteErrorLog($"InitialEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             string error = $"填充图书信息时出现异常: {ex.Message}";
                             SetGlobalError("rfid", error);
                             return new NormalResult { Value = -1, ErrorInfo = error };
@@ -692,7 +693,8 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                SetGlobalError("rfid", $"RefreshPatrons() 出现异常: {ex.Message}");
+                WpfClientInfo.WriteErrorLog($"RefreshPattronsAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                SetGlobalError("rfid", $"RefreshPatronsAsync() 出现异常: {ex.Message}");
             }
             finally
             {
@@ -946,6 +948,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"LoadPhoto() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 SetGlobalError("patron", $"patron exception: {ex.Message}");    // 2019/9/11 增加 patron exception:
             }
         }
@@ -1562,6 +1565,7 @@ namespace dp2SSL
                     }
                     catch (Exception ex)
                     {
+                        WpfClientInfo.WriteErrorLog($"FillPatronDetailAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         string error = $"填充读者信息时出现异常: {ex.Message}";
                         SetGlobalError("rfid", error);
                         return new NormalResult { Value = -1, ErrorInfo = error };
@@ -1766,8 +1770,8 @@ out string strError);
             }
             catch (Exception ex)
             {
-                WpfClientInfo.WriteErrorLog($"FillBookFields() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
-                SetGlobalError("current", $"FillBookFields() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
+                WpfClientInfo.WriteErrorLog($"FillBookFieldsAsync() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
+                SetGlobalError("current", $"FillBookFieldsAsync() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
             }
         }
 
@@ -2365,8 +2369,9 @@ out string strError);
                         {
                             time_string = DateTimeUtil.FromRfc1123DateTimeString(returning_date).ToLocalTime().ToLongDateString();
                         }
-                        catch
+                        catch(Exception ex)
                         {
+                            WpfClientInfo.WriteErrorLog($"PosPrint() FromRfc1123DateTimeString({returning_date}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             time_string = returning_date;
                         }
 
@@ -2465,6 +2470,7 @@ out string strError);
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"SetEAS() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
@@ -2664,9 +2670,9 @@ out string strError);
                         this.NavigationService?.Navigate(PageMenu.MenuPage);
                     }));
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    WpfClientInfo.WriteErrorLog($"TryBackMenuPage() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -3981,9 +3987,9 @@ string usage)
                         }
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"BeginWarningCard() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -4184,6 +4190,8 @@ string usage)
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"Get14443ACardUIDAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                
                 if (token.IsCancellationRequested)
                     return new NormalResult
                     {
@@ -4261,6 +4269,8 @@ string usage)
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"Get14443ACardUIDAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 if (token.IsCancellationRequested)
                     return new NormalResult
                     {
@@ -4412,6 +4422,7 @@ string usage)
                 }
                 catch (Exception ex)
                 {
+                    WpfClientInfo.WriteErrorLog($"BindPatronCardAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     DisplayError(ref progress, $"BindPatronCardAsync() 异常，读者记录 (证条码号:{_patron.Barcode},读者记录路径:{_patron.RecPath}) XML 装载到 XmlDocument 失败: {ex.Message}",
                         "red", "关闭");
                     return;

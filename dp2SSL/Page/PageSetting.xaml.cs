@@ -235,9 +235,9 @@ namespace dp2SSL
                             progress.Close();
                         }));
                     }
-                    catch
+                    catch(Exception ex)
                     {
-                        // TODO: 写入错误日志
+                        WpfClientInfo.WriteErrorLog($"ErrorBox() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 });
             }
@@ -699,6 +699,7 @@ string color = "red")
                     }
                     catch (Exception ex)
                     {
+                        WpfClientInfo.WriteErrorLog($"CheckServerUID() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         errors.Add($"所连接的 RFID 中心版本太低。请升级到最新版本。({ex.Message})");
                     }
                 }
@@ -759,6 +760,7 @@ string color = "red")
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"OpenProgramFolderButton_Click() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 MessageBox.Show(ExceptionUtil.GetAutoText(ex));
             }
         }
@@ -771,6 +773,7 @@ string color = "red")
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"OpenUserFolderButton_Click() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 MessageBox.Show(ExceptionUtil.GetAutoText(ex));
             }
         }
@@ -783,6 +786,7 @@ string color = "red")
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"OpenDataFolderButton_Click() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 MessageBox.Show(ExceptionUtil.GetAutoText(ex));
             }
         }
@@ -868,6 +872,8 @@ string color = "red")
                         }
                         catch (Exception ex)
                         {
+                            WpfClientInfo.WriteErrorLog($"DownloadBingWallPaperAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                             // _dialogs.Add(progress);
                             MemoryDialog(progress);
 
@@ -895,9 +901,9 @@ string color = "red")
                         */
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"DownloadBingWallPaperAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }

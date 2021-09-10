@@ -224,6 +224,8 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"OnStartup() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 StartErrorBox(ex.Message);
                 App.Current.Shutdown();
                 return;
@@ -337,9 +339,9 @@ namespace dp2SSL
                     if (App.Current != null && App.Current.MainWindow != null)
                         InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    WpfClientInfo.WriteErrorLog($"SetPreferredImeState() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             }
 
@@ -372,9 +374,9 @@ namespace dp2SSL
                     // WpfClientInfo.WriteInfoLog($"GetRfidCfg() return {result.ToString()}");
                     LibraryName = result.LibraryName;
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    WpfClientInfo.WriteErrorLog($"GetRfidCfg() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
 
@@ -698,6 +700,8 @@ namespace dp2SSL
                 }
                 catch (Exception ex)
                 {
+                    WpfClientInfo.WriteErrorLog($"InitialSheflCfg() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                     SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
                 }
             }
@@ -884,6 +888,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"DeleteLastTempFiles() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 App.AddErrors("global", new List<string> { $"清除上次遗留的临时文件时出现异常: {ex.Message}" });
             }
         }

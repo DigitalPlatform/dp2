@@ -64,6 +64,8 @@ namespace dp2Circulation
             this.tabComboBox_queryWord = new DigitalPlatform.CommonControl.TabComboBox();
             this.tabPage_logic = new System.Windows.Forms.TabPage();
             this.dp2QueryControl1 = new DigitalPlatform.CommonControl.dp2QueryControl();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_idOrder = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel_main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -143,7 +145,7 @@ namespace dp2Circulation
             this.comboBox_from.Location = new System.Drawing.Point(156, 87);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(318, 29);
+            this.comboBox_from.Size = new System.Drawing.Size(264, 29);
             this.comboBox_from.TabIndex = 9;
             this.comboBox_from.Text = "册条码";
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
@@ -262,7 +264,7 @@ namespace dp2Circulation
             this.comboBox_entityDbName.Name = "comboBox_entityDbName";
             this.comboBox_entityDbName.Padding = new System.Windows.Forms.Padding(4);
             this.comboBox_entityDbName.ReadOnly = false;
-            this.comboBox_entityDbName.Size = new System.Drawing.Size(322, 32);
+            this.comboBox_entityDbName.Size = new System.Drawing.Size(268, 32);
             this.comboBox_entityDbName.TabIndex = 4;
             this.comboBox_entityDbName.DropDown += new System.EventHandler(this.comboBox_entityDbName_DropDown);
             this.comboBox_entityDbName.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.comboBox_entityDbName_ItemChecked);
@@ -332,7 +334,7 @@ namespace dp2Circulation
             this.comboBox_matchStyle.Location = new System.Drawing.Point(156, 126);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(318, 29);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(264, 29);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "精确一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -352,11 +354,11 @@ namespace dp2Circulation
             this.toolStripSeparator3,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(480, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(426, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(208, 42);
+            this.toolStrip_search.Size = new System.Drawing.Size(262, 42);
             this.toolStrip_search.TabIndex = 12;
             this.toolStrip_search.Text = "检索";
             // 
@@ -375,7 +377,9 @@ namespace dp2Circulation
             this.toolStripDropDownButton_searchKeys.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.None;
             this.toolStripDropDownButton_searchKeys.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_searchKeys,
-            this.ToolStripMenuItem_searchKeyID});
+            this.ToolStripMenuItem_searchKeyID,
+            this.toolStripSeparator6,
+            this.toolStripMenuItem_idOrder});
             this.toolStripDropDownButton_searchKeys.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_searchKeys.Image")));
             this.toolStripDropDownButton_searchKeys.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_searchKeys.Name = "toolStripDropDownButton_searchKeys";
@@ -385,14 +389,14 @@ namespace dp2Circulation
             // ToolStripMenuItem_searchKeys
             // 
             this.ToolStripMenuItem_searchKeys.Name = "ToolStripMenuItem_searchKeys";
-            this.ToolStripMenuItem_searchKeys.Size = new System.Drawing.Size(276, 40);
+            this.ToolStripMenuItem_searchKeys.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_searchKeys.Text = "仅获得检索点";
             this.ToolStripMenuItem_searchKeys.Click += new System.EventHandler(this.ToolStripMenuItem_searchKeys_Click);
             // 
             // ToolStripMenuItem_searchKeyID
             // 
             this.ToolStripMenuItem_searchKeyID.Name = "ToolStripMenuItem_searchKeyID";
-            this.ToolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(276, 40);
+            this.ToolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_searchKeyID.Text = "带检索点的检索";
             this.ToolStripMenuItem_searchKeyID.Click += new System.EventHandler(this.ToolStripMenuItem_searchKeyID_Click);
             // 
@@ -485,7 +489,7 @@ namespace dp2Circulation
             this.tabComboBox_queryWord.Location = new System.Drawing.Point(156, 5);
             this.tabComboBox_queryWord.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabComboBox_queryWord.Name = "tabComboBox_queryWord";
-            this.tabComboBox_queryWord.Size = new System.Drawing.Size(318, 32);
+            this.tabComboBox_queryWord.Size = new System.Drawing.Size(264, 32);
             this.tabComboBox_queryWord.TabIndex = 13;
             this.tabComboBox_queryWord.DropDown += new System.EventHandler(this.tabComboBox_queryWord_DropDown);
             this.tabComboBox_queryWord.Enter += new System.EventHandler(this.tabComboBox_queryWord_Enter);
@@ -514,6 +518,18 @@ namespace dp2Circulation
             this.dp2QueryControl1.GetList += new DigitalPlatform.CommonControl.GetListEventHandler(this.dp2QueryControl1_GetList);
             this.dp2QueryControl1.ViewXml += new System.EventHandler(this.dp2QueryControl1_ViewXml);
             this.dp2QueryControl1.AppendMenu += new DigitalPlatform.ApendMenuEventHandler(this.dp2QueryControl1_AppendMenu);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(312, 6);
+            // 
+            // toolStripMenuItem_idOrder
+            // 
+            this.toolStripMenuItem_idOrder.Name = "toolStripMenuItem_idOrder";
+            this.toolStripMenuItem_idOrder.Size = new System.Drawing.Size(315, 40);
+            this.toolStripMenuItem_idOrder.Text = "升序";
+            this.toolStripMenuItem_idOrder.Click += new System.EventHandler(this.toolStripMenuItem_idOrder_Click);
             // 
             // ItemSearchForm
             // 
@@ -588,5 +604,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private DigitalPlatform.CommonControl.dp2QueryControl dp2QueryControl1;
         private DigitalPlatform.CommonControl.TabComboBox tabComboBox_queryWord;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_idOrder;
     }
 }

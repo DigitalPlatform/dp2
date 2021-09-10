@@ -1090,9 +1090,9 @@ namespace dp2SSL
                             progress.Close();
                         }));
                     }
-                    catch
+                    catch(Exception ex)
                     {
-                        // TODO: 写入错误日志
+                        WpfClientInfo.WriteErrorLog($"ErrorBox() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 });
             }
@@ -1849,7 +1849,8 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                SetGlobalError("current", $"FillBookFields exception: {ex.Message}");
+                WpfClientInfo.WriteErrorLog($"FillBookFieldsAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                SetGlobalError("current", $"FillBookFieldsAsync() exception: {ex.Message}");
             }
         }
 
@@ -3113,6 +3114,7 @@ namespace dp2SSL
                 }
                 catch (Exception ex)
                 {
+                    WpfClientInfo.WriteErrorLog($"DetectPatron() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     SetPatronError("patron_tag", $"UID 为 {patrons[0].OneTag.UID} 的标签格式不正确: {ex.Message}");
                     return;
                 }
@@ -3211,6 +3213,7 @@ namespace dp2SSL
                         }
                         catch (Exception ex)
                         {
+                            WpfClientInfo.WriteErrorLog($"RefreshPatronsAsync() 内出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             SetPatronError("patron_tag", $"UID 为 {patrons[0].OneTag.UID} 的标签格式不正确: {ex.Message}");
                             return;
                         }
@@ -3942,6 +3945,7 @@ namespace dp2SSL
                     }
                     catch (Exception ex)
                     {
+                        WpfClientInfo.WriteErrorLog($"LoadPhoto() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         SetGlobalError("patron", ex.Message);
                     }
                 });

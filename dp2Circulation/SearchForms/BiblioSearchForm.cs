@@ -1334,6 +1334,7 @@ Keys keyData)
             bool multiline = this.toolStripButton_multiLine.Checked;
 
             LibraryChannel channel = this.GetChannel();
+            var old_timeout = channel.Timeout;
 
             stop.Style = StopStyle.None;
             stop.OnStop += Stop_OnStop1;
@@ -1409,6 +1410,9 @@ Keys keyData)
                     strOutputStyle = "keyid";
                     // strBrowseStyle = "keyid,id,key,cols";
                 }
+
+                if (_idDesc)
+                    strOutputStyle += ",desc";
 
                 bool bNeedShareSearch = false;
                 if (this.SearchShareBiblio == true
@@ -1487,7 +1491,7 @@ Keys keyData)
                         }
                     }
 
-                    channel.Timeout = new TimeSpan(0, 5, 0);
+                    channel.Timeout = new TimeSpan(0, 15, 0);
 
                     int max_count = MaxSearchResultCount;
                     if (multiline)
@@ -1564,6 +1568,7 @@ Keys keyData)
                             bOutputKeyID,
                             bQuickLoad);
 
+                        channel.Timeout = TimeSpan.FromSeconds(10);
                         ResultSetLoader loader = new ResultSetLoader(channel,
     stop,
     null,
@@ -2024,6 +2029,7 @@ Keys keyData)
                     stop.Style = StopStyle.None;
                 }
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
                 this.EnableControlsInSearching(true);
 
@@ -9161,7 +9167,7 @@ message,
                             goto ERROR1;
                         }
 
-                        REDO_OUTPUTENTITIES:
+                    REDO_OUTPUTENTITIES:
                         nRet = 0;
                         if (string.IsNullOrEmpty(prop.OrderDbName) == false
                             && dlg.IncludeOrders)
@@ -12766,6 +12772,15 @@ message,
         private void toolStripMenuItem_findInList_Click(object sender, EventArgs e)
         {
             ListViewUtil.FindAndSelect(this.listView_records, this.textBox_queryWord.Text);
+        }
+
+        // 命中结果返回前(在 dp2library 一端)是否按照 ID 降序排序
+        bool _idDesc = false;
+
+        private void toolStripMenuItem_idOrder_Click(object sender, EventArgs e)
+        {
+            _idDesc = !_idDesc;
+            this.toolStripMenuItem_idOrder.Text = _idDesc ? "降序" : "升序";
         }
     }
 

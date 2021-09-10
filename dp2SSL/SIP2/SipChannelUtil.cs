@@ -975,9 +975,9 @@ get_result.Result.AE_PersonalName_r);
                     ActivateMonitor();
                     _delayTry = null;
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    WpfClientInfo.WriteErrorLog($"TryDetectSipNetwork() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }

@@ -565,9 +565,9 @@ IList<MessageRecord> messages)
                     if (action == "create")
                         await ProcessMessages(messages);
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"ProcessMessages() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -1692,6 +1692,7 @@ text.ToString());
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"ListBookAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 await SendMessageAsync(groupName,
                     $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
@@ -1752,6 +1753,7 @@ text.ToString());
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"ListHistoryAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 await SendMessageAsync(groupName,
                     $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
@@ -2189,6 +2191,7 @@ text.ToString());
                             }
                             catch (Exception ex)
                             {
+                                WpfClientInfo.WriteErrorLog($"CheckTagAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                                 text.AppendLine($"　　解析 TagInfo 时出错: {ex.Message}");
                             }
                         }
@@ -2318,6 +2321,7 @@ text.ToString());
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"ChangeHistoryAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 await SendMessageAsync(groupName,
                     $"命令 {command} 执行过程出现异常:\r\n{ExceptionUtil.GetDebugText(ex)}");
             }
@@ -2521,9 +2525,9 @@ text.ToString());
                 {
                     SearchAndResponse(param);
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"SearchAndResponse() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -3072,6 +3076,7 @@ records,
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"SearchHistoryAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 strError = ExceptionUtil.GetDebugText(ex);
                 goto ERROR1;
             }
@@ -3529,7 +3534,7 @@ result);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("(retry)ResponseGetRes() exception=" + ex.Message);
+                    // Console.WriteLine("(retry)ResponseGetRes() exception=" + ex.Message);
 
                     if (ex.InnerException is InvalidOperationException)
                     {
@@ -4223,9 +4228,9 @@ strError);
         results,
         errorInfo).ConfigureAwait(false);
             }
-            catch
+            catch(Exception ex)
             {
-
+                WpfClientInfo.WriteErrorLog($"TryResponseSetInfo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 

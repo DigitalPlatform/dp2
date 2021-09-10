@@ -11,9 +11,11 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Media;
 
+using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using static dp2SSL.LibraryChannelUtil;
+using DigitalPlatform.WPF;
+using DigitalPlatform;
 
 namespace dp2SSL
 {
@@ -945,9 +947,9 @@ namespace dp2SSL
                             await ShelfData.FillBookFieldsAsync(door._addEntities, token, style);
                             await ShelfData.FillBookFieldsAsync(door._errorEntities, token, style);
                         }
-                        catch
+                        catch(Exception ex)
                         {
-                            // TODO: 写入错误日志
+                            WpfClientInfo.WriteErrorLog($"DisplayCount() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         }
                     });
                 }

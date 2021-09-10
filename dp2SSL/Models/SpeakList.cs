@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DigitalPlatform;
 using DigitalPlatform.Core;
+using DigitalPlatform.WPF;
 
 namespace dp2SSL
 {
@@ -39,9 +41,9 @@ namespace dp2SSL
                         func(text);
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    WpfClientInfo.WriteErrorLog($"Speak() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }

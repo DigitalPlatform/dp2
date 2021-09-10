@@ -1550,6 +1550,8 @@ namespace DigitalPlatform.ResultSet
             return this.m_streamSmall.Length / 8;
         }
 
+        const int IDLE_COUNT = 10000;
+
         // 调RemoveDup()之前，须先排序
         // 中途会触发Idle事件
         // 2013/2/13 优化
@@ -1569,9 +1571,9 @@ namespace DigitalPlatform.ResultSet
 
             for (int i = 0; i < physicalCount; i++)
             {
-                if (m_nLoopCount++ % 1000 == 0)
+                if (m_nLoopCount++ % IDLE_COUNT == 0)
                 {
-                    Thread.Sleep(1);
+                    // Thread.Sleep(1);
                     if (this.Idle != null)
                     {
                         IdleEventArgs e = new IdleEventArgs();
@@ -3392,9 +3394,9 @@ namespace DigitalPlatform.ResultSet
             else if (lPtr1 < 0 && lPtr2 >= 0)
                 return -1;
 
-            if (m_nLoopCount++ % 1000 == 0)
+            if (m_nLoopCount++ % IDLE_COUNT == 0)
             {
-                Thread.Sleep(1);
+                // Thread.Sleep(1);
                 if (this.Idle != null)
                 {
                     IdleEventArgs e = new IdleEventArgs();

@@ -672,7 +672,7 @@ namespace DigitalPlatform.rms
         // return:
         //      fasle   正常完成
         //      true    中断
-        static bool DoSort(DpResultSet resultset,
+        public static bool DoSort(DpResultSet resultset,
             ChannelHandle handle
             // Delegate_isConnected isConnected
             )

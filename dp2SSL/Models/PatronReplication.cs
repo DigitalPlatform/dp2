@@ -237,6 +237,8 @@ out string strError);
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"DownloadAllPatronRecordAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 // 2020/9/26
                 writeLog?.Invoke($"DownloadAllPatronRecord() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
 
@@ -507,7 +509,6 @@ out string strError);
                                 else
                                 */
                                 throw new ChannelException(channel.ErrorCode, strError);
-
                             }
 
                             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
@@ -617,6 +618,8 @@ out string strError);
             }
             catch (ChannelException ex)
             {
+                WpfClientInfo.WriteErrorLog($"DoReplication() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new ReplicationResult
                 {
                     Value = -1,
@@ -636,6 +639,8 @@ out string strError);
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"DoReplication() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 string strError = "DoReplication() exception: " + ExceptionUtil.GetDebugText(ex);
                 return new ReplicationResult
                 {
@@ -746,6 +751,8 @@ out string strError);
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"TraceBorrowOrReturn() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new NormalResult
                 {
                     Value = -1,
@@ -937,6 +944,8 @@ out string strError);
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"TraceSetReaderInfo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new NormalResult
                 {
                     Value = -1,
@@ -991,6 +1000,8 @@ ProcessInfo info)
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"TraceSetSystemParameter() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new NormalResult
                 {
                     Value = -1,
@@ -1049,6 +1060,8 @@ ProcessInfo info)
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"TraceWriteRes() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new NormalResult
                 {
                     Value = -1,

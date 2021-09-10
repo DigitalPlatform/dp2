@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.90.*")]
-[assembly: AssemblyFileVersion("3.90.0.0")]
+[assembly: AssemblyVersion("3.91.*")]
+[assembly: AssemblyFileVersion("3.91.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -288,3 +288,5 @@ ItemCanReturn()
 //		3.88 (2021/8/31) SetEntities() API 中增加了检查保存到实体库的 XML 记录中 parent 元素的步骤，要求 parent 元素内容必须是一个纯数字
 //		3.89 (2021/9/2) LibraryApplication.LoadCfg() 如果完整装载没有成功，那么当后面文件系统探测到 library.xml 变化，重新装载的时候，会采用完整装载的方式来装载。
 //		3.90 (2021/9/3) 修复 GetOperLogs() 和 GetOperLog() API 中过滤内嵌读者 XML 记录中过滤 password 元素的一处 bug
+//		3.91 (2021/9/10) SearchBiblio() 和 SearchItem() API 的 strOutputStyle 中可以使用 desc 来让命中结果集内的 ID 按照降序排序。缺省为升序。
+//						注: 检索式 XML 中的 order 元素的作用还需要另外评估

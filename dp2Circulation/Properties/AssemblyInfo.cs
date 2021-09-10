@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.34.*")]
-[assembly: AssemblyFileVersion("3.34.0.0")]
+[assembly: AssemblyVersion("3.35.*")]
+[assembly: AssemblyFileVersion("3.35.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -104,3 +104,4 @@ using System.Runtime.InteropServices;
 //                  读者查询窗里面的删除读者记录功能，增加了按住 Ctrl 键变为强制删除的特性。如果一般删除时遇到报错说对象文件不存在无法删除，操作者可以考虑改为尝试强制删除
 // 3.33 2021/9/2 改进日志窗恢复读者记录的功能。选择 XML 记录的时候，列表界面增加了原始来源位置的列(日期:序号)
 // 3.34 2021/9/9 读者窗打印读者账簿里面的失效期，日期格式从 d 改为 yyyy-MM-dd，避免某些机器上出现的 “星期三”字样
+// 3.35 2021/9/10 书目查询窗和实体查询窗增加了“升序/降序”菜单命令

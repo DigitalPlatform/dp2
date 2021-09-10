@@ -742,6 +742,7 @@ out string strError);
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"SaveNewChip() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 strError = "SaveNewChip() 出现异常: " + ex.Message;
                 return -1;
             }

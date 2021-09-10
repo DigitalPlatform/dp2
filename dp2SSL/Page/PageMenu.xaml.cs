@@ -253,9 +253,9 @@ namespace dp2SSL
                 {
                     File.Delete(filename);
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    WpfClientInfo.WriteErrorLog($"DeleteTempFiles() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             }
         }

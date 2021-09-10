@@ -19,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 
+using DigitalPlatform;
 using DigitalPlatform.WPF;
 
 namespace dp2SSL
@@ -971,6 +972,7 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             catch (Exception ex)
             {
                 // TODO: 用一个报错文字图片设定为背景?
+                WpfClientInfo.WriteErrorLog($"SetBackgroundImage() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 

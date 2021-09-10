@@ -13,6 +13,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using DigitalPlatform;
+using DigitalPlatform.WPF;
+
 namespace dp2SSL
 {
     /// <summary>
@@ -77,6 +80,8 @@ namespace dp2SSL
                 }
                 catch(Exception ex)
                 {
+                    WpfClientInfo.WriteErrorLog($"NetworkWindow_loaded() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                     if (token.IsCancellationRequested == false)
                         SelectLocalMode();
                 }

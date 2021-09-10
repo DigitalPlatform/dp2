@@ -51,10 +51,13 @@
             this.ToolStripMenuItem_continueLoad = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_searchKeyID = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_searchKeys = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_idOrder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_searchShareBiblio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_searchZ3950 = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_filterRecords = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_findInList = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_subrecords = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_z3950ServerList = new System.Windows.Forms.ToolStripMenuItem();
@@ -80,7 +83,6 @@
             this.listView_records = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.toolStripMenuItem_findInList = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_biblioDb.SuspendLayout();
             this.tableLayoutPanel_query.SuspendLayout();
             this.toolStrip_search.SuspendLayout();
@@ -315,6 +317,8 @@
             this.ToolStripMenuItem_continueLoad,
             this.toolStripMenuItem_searchKeyID,
             this.toolStripMenuItem_searchKeys,
+            this.toolStripSeparator6,
+            this.toolStripMenuItem_idOrder,
             this.toolStripSeparator4,
             this.ToolStripMenuItem_searchShareBiblio,
             this.toolStripMenuItem_searchZ3950,
@@ -353,6 +357,18 @@
             this.toolStripMenuItem_searchKeys.Text = "仅获得检索点";
             this.toolStripMenuItem_searchKeys.Click += new System.EventHandler(this.toolStripMenuItem_searchKeys_Click);
             // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(324, 6);
+            // 
+            // toolStripMenuItem_idOrder
+            // 
+            this.toolStripMenuItem_idOrder.Name = "toolStripMenuItem_idOrder";
+            this.toolStripMenuItem_idOrder.Size = new System.Drawing.Size(327, 40);
+            this.toolStripMenuItem_idOrder.Text = "升序";
+            this.toolStripMenuItem_idOrder.Click += new System.EventHandler(this.toolStripMenuItem_idOrder_Click);
+            // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
@@ -378,6 +394,13 @@
             this.ToolStripMenuItem_filterRecords.Size = new System.Drawing.Size(327, 40);
             this.ToolStripMenuItem_filterRecords.Text = "筛选 ...";
             this.ToolStripMenuItem_filterRecords.Click += new System.EventHandler(this.ToolStripMenuItem_filterRecords_Click);
+            // 
+            // toolStripMenuItem_findInList
+            // 
+            this.toolStripMenuItem_findInList.Name = "toolStripMenuItem_findInList";
+            this.toolStripMenuItem_findInList.Size = new System.Drawing.Size(327, 40);
+            this.toolStripMenuItem_findInList.Text = "在列表中查找...";
+            this.toolStripMenuItem_findInList.Click += new System.EventHandler(this.toolStripMenuItem_findInList_Click);
             // 
             // toolStripMenuItem_subrecords
             // 
@@ -641,13 +664,6 @@
             this.columnHeader_1.Text = "1";
             this.columnHeader_1.Width = 300;
             // 
-            // toolStripMenuItem_findInList
-            // 
-            this.toolStripMenuItem_findInList.Name = "toolStripMenuItem_findInList";
-            this.toolStripMenuItem_findInList.Size = new System.Drawing.Size(327, 40);
-            this.toolStripMenuItem_findInList.Text = "在列表中查找...";
-            this.toolStripMenuItem_findInList.Click += new System.EventHandler(this.toolStripMenuItem_findInList_Click);
-            // 
             // BiblioSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -733,5 +749,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_multiLine;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_subrecords;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_findInList;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_idOrder;
     }
 }

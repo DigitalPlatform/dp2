@@ -307,6 +307,8 @@ namespace dp2SSL.Models
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"DownloadAllEntityRecordAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 writeLog?.Invoke($"DownloadAllEntityRecordAsync() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
 
                 return new NormalResult
@@ -408,6 +410,8 @@ channel.ErrorCode == ErrorCode.RequestTimeOut)
                     }
                     catch (Exception ex)
                     {
+                        WpfClientInfo.WriteErrorLog($"GetBiblioSummaryAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                         string error = $"GetEntityDataAsync() 中保存 summary 时(PII 为 '{pii}')出现异常:{ExceptionUtil.GetDebugText(ex)}";
                         return new NormalResult
                         {
@@ -462,9 +466,9 @@ channel.ErrorCode == ErrorCode.RequestTimeOut)
                 else
                     item.PII = oi + "." + barcode;
             }
-            catch
+            catch(Exception ex)
             {
-
+                WpfClientInfo.WriteErrorLog($"SetPII() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -598,6 +602,8 @@ strOldRecord);
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"TraceSetEntity() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new NormalResult
                 {
                     Value = -1,

@@ -498,9 +498,9 @@ namespace dp2SSL
                 else
                     item.PII = oi + "." + barcode;
             }
-            catch
+            catch(Exception ex)
             {
-
+                WpfClientInfo.WriteErrorLog($"SetPII() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 
@@ -637,6 +637,8 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"DetectLibraryNetwork() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new NormalResult
                 {
                     Value = -1,
@@ -842,6 +844,8 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"GetReaderInfoFromLocal() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                 return new GetReaderInfoResult
                 {
                     Value = -1,

@@ -8,6 +8,9 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
+using DigitalPlatform;
+using DigitalPlatform.WPF;
+
 namespace dp2SSL
 {
     public class MyPage : Page
@@ -59,9 +62,9 @@ namespace dp2SSL
             {
                 _layer.Add(_adorner);
             }
-            catch
+            catch(Exception ex)
             {
-
+                WpfClientInfo.WriteErrorLog($"AddLayer() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 

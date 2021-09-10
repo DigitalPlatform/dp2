@@ -668,6 +668,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"InitialShelf() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return new NormalResult
                 {
                     Value = -1,
@@ -1347,6 +1348,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 }
                 catch (TagInfoException ex)
                 {
+                    WpfClientInfo.WriteErrorLog($"RefreshInventoryAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                     return new NormalResult
                     {
                         Value = -1,
@@ -1432,6 +1435,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 }
                 catch (TagInfoException ex)
                 {
+                    WpfClientInfo.WriteErrorLog($"TestInventoryAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
                     return new TestInventoryResult
                     {
                         Value = -1,
@@ -2696,8 +2701,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         {
                             borrowTime = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
                         }
-                        catch
+                        catch(Exception ex)
                         {
+                            WpfClientInfo.WriteErrorLog($"AddLocalBorrowItems() FromRfc1123DateTimeString({borrowDate}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             continue;
                         }
 
@@ -2776,9 +2782,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 if (borrow_info.Overflows != null && borrow_info.Overflows.Length > 0)
                                     borrow.SetAttribute("overflow", string.Join("; ", borrow_info.Overflows));
                             }
-                            catch
+                            catch(Exception ex)
                             {
-
+                                WpfClientInfo.WriteErrorLog($"AddLocalBorrowItems() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             }
                         }
 
@@ -2811,8 +2817,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         {
                             borrowTime = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
                         }
-                        catch
+                        catch(Exception ex)
                         {
+                            WpfClientInfo.WriteErrorLog($"GetBorrowItems() FromRfc1123DateTimeString({borrowDate}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             continue;
                         }
 
@@ -4843,9 +4850,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     await FillBookFieldsAsync(l_Removes, token, style);
                     await FillBookFieldsAsync(l_Changes, token, style);
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // TODO: 写入错误日志
+                    WpfClientInfo.WriteErrorLog($"ChangeEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -5454,9 +5461,9 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     if (string.IsNullOrEmpty(text) == false)
                         App.CurrentApp.SpeakSequence(text); // 不打断前面的说话
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    WpfClientInfo.WriteErrorLog($"Sound() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             });
         }
@@ -5530,6 +5537,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     }
                     catch (Exception ex)
                     {
+                        WpfClientInfo.WriteErrorLog($"FillBookFieldsAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                         errors.Add($"解析 RFID 标签(UID:{entity.TagInfo.UID})时出现异常 {ex.Message}");
                         continue;
                     }
@@ -6509,6 +6517,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             }
             catch (Exception ex)
             {
+                WpfClientInfo.WriteErrorLog($"SetEAS() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }

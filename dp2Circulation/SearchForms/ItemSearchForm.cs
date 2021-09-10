@@ -1005,6 +1005,9 @@ bClearList);
                     //strBrowseStyle = "keyid,key,id,cols";
                 }
 
+                if (_idDesc)
+                    strOutputStyle += ",desc";
+
                 long lRet = 0;
 
                 if (this.DbType == "item")
@@ -13489,9 +13492,10 @@ out strError);
                 // 为了在检索词为空的时候，检索出全部的记录
                 strMatchStyle = "left";
 
-                string strOutputStyle = "";
+                string strOutputStyle = "keycount";
 
-                strOutputStyle = "keycount";
+                if (_idDesc)
+                    strOutputStyle += ",desc";
 
                 long lRet = 0;
 
@@ -14079,6 +14083,14 @@ out strError);
             ShowMessageBox(strError);
         }
 
+        // 命中结果返回前(在 dp2library 一端)是否按照 ID 降序排序
+        bool _idDesc = false;
+
+        private void toolStripMenuItem_idOrder_Click(object sender, EventArgs e)
+        {
+            _idDesc = !_idDesc;
+            this.toolStripMenuItem_idOrder.Text = _idDesc ? "降序" : "升序";
+        }
     }
 
     /// <summary>
