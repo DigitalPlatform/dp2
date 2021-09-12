@@ -166,10 +166,15 @@ namespace DigitalPlatform.LibraryServer
                             var db_number = reader.ReadInt16();
                             var id_number = reader.ReadInt64();
 
-                            if (table.TryGetValue(db_number, out string dbName) == false)
-                                throw new Exception($"db_number:{db_number} 在对照表中没有找到对应的字符串");
+                            if (db_number == -1)
+                                results.Add(null);
+                            else
+                            {
+                                if (table.TryGetValue(db_number, out string dbName) == false)
+                                    throw new Exception($"db_number:{db_number} 在对照表中没有找到对应的字符串");
 
-                            results.Add(dbName + "/" + id_number.ToString());
+                                results.Add(dbName + "/" + id_number.ToString());
+                            }
                         }
                         catch (EndOfStreamException)
                         {
@@ -208,6 +213,7 @@ new BinaryWriter(File.Open(FilePath, FileMode.Create)))
                         if (Int64.TryParse(id, out id_number) == false)
                             id_number = -1;
                     }
+
                     binWriter.Write(db_number);
                     binWriter.Write(id_number);
                 }

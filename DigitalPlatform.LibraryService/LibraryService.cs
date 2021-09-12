@@ -3129,10 +3129,20 @@ namespace dp2Library
                     try
                     {
                         // 确保创建本地结果集
-                        app.EnsureCreateLocalResultSet(channel,
+                        // return:
+                        //      false   本地结果集没有创建。这是因为 dp2kernel 一端结果集不存在或者记录数为 0
+                        //      true    本地结果集已经创建
+                        var ret = app.EnsureCreateLocalResultSet(channel,
                             filePath,
                             strResultSetName,
                             strBrowseInfoStyle);
+                        if (ret == false)
+                        {
+                            searchresults = new Record[0];
+                            result.Value = 0;
+                            result.ErrorInfo = "";
+                            return result;
+                        }
                     }
                     finally
                     {

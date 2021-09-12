@@ -5252,6 +5252,10 @@ namespace DigitalPlatform.rms
         // 检查一个路径是否是数据库记录路径
         internal static bool IsRecordPath(string strResPath)
         {
+            // 2021/9/12
+            if (strResPath == null)
+                return false;
+
             string[] paths = strResPath.Split(new char[] { '/' });
             if (paths.Length >= 2)
             {

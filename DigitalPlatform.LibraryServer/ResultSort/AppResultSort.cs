@@ -187,6 +187,7 @@ public static bool IsSessionMemorySetFilePath(
             //      length  要读取多少个。-1 表示尽量多地读取
             var paths = memorySet.GetPaths(lStart, (int)lCount);
 
+            // TODO: paths 中间有空的路径怎么办?
 
             RmsBrowseLoader loader = new RmsBrowseLoader();
             loader.Channel = channel;
@@ -211,14 +212,17 @@ public static bool IsSessionMemorySetFilePath(
         }
 
         // 确保创建内存结果集
-        public void EnsureCreateLocalResultSet(RmsChannel channel,
+        // return:
+        //      false   本地结果集没有创建。这是因为 dp2kernel 一端结果集不存在或者记录数为 0
+        //      true    本地结果集已经创建
+        public bool EnsureCreateLocalResultSet(RmsChannel channel,
             string filePath,
             string resultset_name,
             string browse_style)
         {
             var memorySet = FindMemorySet(filePath);
             if (memorySet != null)
-                return; // 已经存在
+                return true; // 已经存在
             else
             {
                 try
@@ -252,8 +256,20 @@ public static bool IsSessionMemorySetFilePath(
                         throw new ArgumentException($"browse_style 参数值 '{browse_style}' 中 sortmaxcount 子参数值 '{sort_max_count}' 不合法。应为一个整数");
                 }
 
+                // sort:xxx
+                var sort_cols = StringUtil.GetParameterByPrefix(browse_style, "sort");
+
                 // 只传递回来需要排序的列即可
                 StringUtil.SetInList(ref browse_style, "xml", false);
+
+                // 确保这一次需要传递过来 id 列。不然写入磁盘文件的时候没有记录路径
+                StringUtil.SetInList(ref browse_style, "id", true);
+
+                if (sort_cols != null)
+                {
+                    // 确保 sort:xxx 参数中包含的列都在 cols (format:@coldef://parent) 参数中，不然无法排序
+                    StringUtil.SetInList(ref browse_style, "cols", true);
+                }
 
                 SearchResultLoader loader = new SearchResultLoader(
                     channel,
@@ -269,8 +285,13 @@ public static bool IsSessionMemorySetFilePath(
                     memorySet.Append(record.Path, record.Cols);
                 }
 
+                if (loader.ResultCount <= 0)
+                {
+                    RemoveMemorySet(filePath);
+                    return false;
+                }
+
                 // 如果需要排序
-                var sort_cols = StringUtil.GetParameterByPrefix(browse_style, "sort");
                 if (string.IsNullOrEmpty(sort_cols) == false)
                 {
                     var indices = ParseSortCols(sort_cols);
@@ -279,6 +300,7 @@ public static bool IsSessionMemorySetFilePath(
 
                 memorySet.MemoryTotalCount();
                 memorySet.PushToDisk();
+                return true;
             }
             finally
             {

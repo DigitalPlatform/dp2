@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -39,6 +40,9 @@ namespace DigitalPlatform.rms.Client
 
         public IEnumerator GetEnumerator()
         {
+            // browse_style 中是否有 id?
+            var has_id = StringUtil.IsInList("id", this.Format);
+
             List<string> batch = new List<string>();
             for (int index = 0; index < m_recpaths.Count; index++)
             {
@@ -75,12 +79,21 @@ namespace DigitalPlatform.rms.Client
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         Record record = searchresults[i];
-                        if (batch[i] != record.Path)
+                        if (has_id && AreEqual(batch[i],record.Path) == false)
                         {
                             throw new Exception("(1)下标 " + i + " 的 batch 元素 '" + batch[i] + "' 和返回的该下标位置 GetBrowseRecords() 结果路径 '" + record.Path + "' 不匹配");
                         }
-                        Debug.Assert(batch[i] == record.Path, "");
+                        // Debug.Assert(AreEqual(batch[i], record.Path) == true, "");
                         yield return record;
+                    }
+
+                    bool AreEqual(string s1, string s2)
+                    {
+                        if (s1 == null)
+                            s1 = "";
+                        if (s2 == null)
+                            s2 = "";
+                        return s1 == s2;
                     }
 
                     // CONTINUE:

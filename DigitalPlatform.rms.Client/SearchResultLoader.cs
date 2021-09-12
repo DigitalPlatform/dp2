@@ -38,6 +38,10 @@ namespace DigitalPlatform.rms.Client
         // 0 或 -1 都表示不限制
         public long MaxResultCount { get; set; }
 
+        // 2021/9/12
+        // 在 GetSearchResult() 第一次调用以后获得 dp2kernel 一端结果集中实际存在的记录数
+        public long ResultCount { get; set; }
+
         public SearchResultLoader(RmsChannel channel,
             DigitalPlatform.Stop stop,
             string resultsetName,
@@ -55,6 +59,7 @@ namespace DigitalPlatform.rms.Client
         {
             string strError = "";
 
+            this.ResultCount = 0;
             long lHitCount = -1;
             long lStart = 0;
             long nPerCount = this.BatchSize == 0 ? -1 : this.BatchSize;
@@ -83,6 +88,9 @@ namespace DigitalPlatform.rms.Client
                     this.Stop,
                     out searchresults,
                     out strError);
+
+                this.ResultCount = lRet;
+
                 if (lRet == -1)
                     goto ERROR1;
                 // 2017/5/3

@@ -1123,6 +1123,12 @@ out strError);
                     return -1;
                 }
 #endif
+                // 2021/9/12
+                if (string.IsNullOrEmpty(strPath))
+                {
+                    goto CONTINUE;
+                }
+
                 DatabaseCollection.PathInfo info = null;
                 // 解析资源路径
                 // return:
@@ -1273,6 +1279,7 @@ out strError);
                     }
                 }
 
+            CONTINUE:
                 lTotalPackageLength += GetLength(record);
                 if (lTotalPackageLength > QUOTA_SIZE
 && i > 0)
@@ -1282,7 +1289,7 @@ out strError);
                 }
 
                 results.Add(record);
-                Thread.Sleep(0);    // 降低CPU耗用?
+                // Thread.Sleep(0);    // 降低CPU耗用?
             }
             /*
             if (paths.Length <= SessionInfo.MaxRecordsCountPerApi)
