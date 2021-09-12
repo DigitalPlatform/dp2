@@ -45,6 +45,9 @@ namespace DigitalPlatform.LibraryClient
         // 从什么偏移位置开始取
         public long Start { get; set; }
 
+        // 第一次请求后，返回结果集中的记录总数
+        public long ResultCount { get; set; }
+
         public ResultSetLoader(LibraryChannel channel,
             DigitalPlatform.Stop stop,
             string resultsetName,
@@ -67,6 +70,7 @@ namespace DigitalPlatform.LibraryClient
         {
             string strError = "";
 
+            this.ResultCount = 0;
             long lHitCount = -1;
             long lStart = this.Start;
             long nBasePerCount = this.BatchSize == 0 ? -1 : this.BatchSize;
@@ -113,6 +117,7 @@ namespace DigitalPlatform.LibraryClient
                     string.IsNullOrEmpty(this.Lang) ? "zh" : this.Lang,
                     out searchresults,
                     out strError);
+                this.ResultCount = lRet;
 
                 var e2 = new GettedEventArgs
                 {

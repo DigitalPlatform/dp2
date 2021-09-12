@@ -74,9 +74,15 @@ namespace DigitalPlatform.rms
                 return results;
             }
 
-            if (strOutMarcSyntax == "unimarc")
+            if (strOutMarcSyntax == "unimarc"
+                || string.IsNullOrEmpty(strOutMarcSyntax))
             {
                 return BuildUnimarc(strMarc, column_list);
+            }
+            else if (strOutMarcSyntax == "usmarc")
+            {
+                results.Add("error", new MarcColumn("error", "尚未支持 USMARC 的 marc filter"));
+                return results;
             }
 
             return results;

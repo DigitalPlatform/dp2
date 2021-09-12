@@ -73,7 +73,13 @@ namespace DigitalPlatform.LibraryServer
         public RmsChannelCollection Channels = new RmsChannelCollection();
 
         private string m_strTempDir = "";	// 临时文件目录 2008/3/31
-
+        public string TempDir
+        {
+            get
+            {
+                return m_strTempDir;
+            }
+        }
 
         //public string UserName = "";
         //public string Rights = "";
@@ -280,6 +286,9 @@ namespace DigitalPlatform.LibraryServer
                 return;
 
             this._closed = true;
+
+            // 2021/9/12
+            this.App?.RemoveSesssionMemorySet(this);
 
             if (String.IsNullOrEmpty(this.m_strTempDir) == false)
             {

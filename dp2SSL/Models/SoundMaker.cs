@@ -170,7 +170,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                WpfClientInfo.WriteErrorLog($"NexSOund() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                WpfClientInfo.WriteErrorLog($"NextSound() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
         }
 

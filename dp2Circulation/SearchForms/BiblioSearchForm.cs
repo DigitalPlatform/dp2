@@ -1568,7 +1568,8 @@ Keys keyData)
                             bOutputKeyID,
                             bQuickLoad);
 
-                        channel.Timeout = TimeSpan.FromSeconds(10);
+                        // TODO: 改短一点
+                        channel.Timeout = TimeSpan.FromMinutes(15);
                         ResultSetLoader loader = new ResultSetLoader(channel,
     stop,
     null,
@@ -1609,6 +1610,16 @@ Keys keyData)
                             int count = 0;
                             foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in loader)
                             {
+                                // 调整命中数
+                                var new_result_count = loader.ResultCount;
+                                if (new_result_count > 0)
+                                {
+                                    var delta = new_result_count - lHitCount;
+                                    lHitCount = new_result_count;
+                                    this.m_lHitCount = lHitCount;
+                                    lTotalHitCount += delta;
+                                }
+
                                 bool bTempQuickLoad = bQuickLoad;
 
                                 if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
@@ -2050,7 +2061,7 @@ Keys keyData)
 
         }
 
-        static string GetBrowseStyle(bool bOutputKeyCount,
+        string GetBrowseStyle(bool bOutputKeyCount,
             bool bOutputKeyID,
             bool bQuickLoad)
         {
@@ -2080,6 +2091,14 @@ Keys keyData)
                         strBrowseStyle = "id,cols";
                 }
             }
+
+            /*
+            // testing
+            if (_idDesc)
+                strBrowseStyle += ",sort:-1,sortmaxcount:1000";
+            else
+                strBrowseStyle += ",sort:1,sortmaxcount:1000";
+            */
 
             return strBrowseStyle;
         }

@@ -295,6 +295,13 @@ namespace DigitalPlatform.rms
 
                     if (string.IsNullOrEmpty(cache_item.Use) == false)
                     {
+                        // 2021/9/10
+                        if (results == null)
+                        {
+                            strError = "browse 配置文件根元素应当具备属性 filter='marc'";
+                            return -1;
+                        }
+
                         MarcColumn column = null;
                         results.TryGetValue(cache_item.Use, out column);
                         if (column != null && string.IsNullOrEmpty(column.Value) == false)

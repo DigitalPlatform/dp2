@@ -2404,6 +2404,15 @@ namespace dp2Library
                     return result;
                 }
 
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
+                }
+
                 BeginSearch();
                 channel.Idle += new IdleEventHandler(channel_IdleEvent);
                 try
@@ -2835,6 +2844,15 @@ namespace dp2Library
 
                 string strError = "";
 
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
+                }
+
                 BeginSearch();
                 channel.Idle += new IdleEventHandler(channel_IdleEvent);
                 try
@@ -2996,6 +3014,15 @@ namespace dp2Library
                 if (nRet == -1)
                     goto ERROR1;
 
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
+                }
+
                 BeginSearch();
                 channel.Idle += new IdleEventHandler(channel_IdleEvent);
                 try
@@ -3083,19 +3110,60 @@ namespace dp2Library
                 }
 
                 string strError = "";
+                long lRet = 0;
 
                 if (String.IsNullOrEmpty(strResultSetName) == true)
                     strResultSetName = "default";
 
-                long lRet = channel.DoGetSearchResult(
-                    strResultSetName,
-                    lStart,
-                    lCount,
-                    strBrowseInfoStyle,
-                    strLang,
-                    null,
-                    out searchresults,
-                    out strError);
+                var sort_cols = StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "sort");
+
+                if (sort_cols != null)
+                {
+                    // dp2library 本地排序结果集
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    
+                    BeginSearch();  // 如果创建本地结果集的时间太长，前端可以用 Stop() API 中断
+                    channel.Idle += new IdleEventHandler(channel_IdleEvent);
+                    try
+                    {
+                        // 确保创建本地结果集
+                        app.EnsureCreateLocalResultSet(channel,
+                            filePath,
+                            strResultSetName,
+                            strBrowseInfoStyle);
+                    }
+                    finally
+                    {
+                        channel.Idle -= new IdleEventHandler(channel_IdleEvent);
+                        EndSearch();
+                    }
+
+                    lRet = app.GetSearchResult(
+    channel,
+    filePath,
+    lStart,
+    lCount,
+    strBrowseInfoStyle,
+    strLang,
+    out searchresults,
+    out strError);
+                }
+                else
+                {
+                    // dp2kernel 原有功能
+                    lRet = channel.DoGetSearchResult(
+                        strResultSetName,
+                        lStart,
+                        lCount,
+                        strBrowseInfoStyle,
+                        strLang,
+                        null,
+                        out searchresults,
+                        out strError);
+                }
+
                 if (lRet == -1)
                 {
                     result.Value = -1;
@@ -4547,6 +4615,24 @@ namespace dp2Library
                     return result;
                 }
 
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
+                }
+
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
+                }
+
                 BeginSearch();
                 channel.Idle += new IdleEventHandler(channel_IdleEvent);
                 try
@@ -5411,6 +5497,15 @@ namespace dp2Library
                 {
                     strError = "get channel error";
                     goto ERROR1;
+                }
+
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
                 }
 
                 BeginSearch();
@@ -7759,6 +7854,7 @@ namespace dp2Library
                     strError = "get channel error";
                     goto ERROR1;
                 }
+
                 BeginSearch();
                 channel.Idle += new IdleEventHandler(channel_IdleEvent);
                 try
@@ -7935,6 +8031,15 @@ namespace dp2Library
                 {
                     strError = "get channel error";
                     goto ERROR1;
+                }
+
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
                 }
 
                 BeginSearch();
@@ -8765,6 +8870,7 @@ namespace dp2Library
                     strError = "get channel error";
                     goto ERROR1;
                 }
+
                 BeginSearch();
                 channel.Idle += new IdleEventHandler(channel_IdleEvent);
                 try
@@ -9007,6 +9113,15 @@ namespace dp2Library
                 {
                     strError = "get channel error";
                     goto ERROR1;
+                }
+
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
                 }
 
                 BeginSearch();
@@ -12835,6 +12950,7 @@ strLibraryCodeList);
                     strError = "get channel error";
                     goto ERROR1;
                 }
+
                 BeginSearch();
                 channel.Idle += new IdleEventHandler(channel_IdleEvent);
                 try
@@ -14968,6 +15084,15 @@ out strError);
                 {
                     strError = "get channel error";
                     goto ERROR1;
+                }
+
+                // 2021/9/12
+                {
+                    string filePath = app.GetMemorySetFilePath(
+                        sessioninfo,
+                        strResultSetName);
+                    // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
+                    app.RemoveMemorySet(filePath);
                 }
 
                 BeginSearch();

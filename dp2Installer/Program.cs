@@ -12,6 +12,7 @@ using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Installer
 {
@@ -20,7 +21,7 @@ namespace dp2Installer
         /// <summary>
         /// 前端，也就是 dp2installer.exe 的版本号
         /// </summary>
-        public static string ClientVersion { get; set; }
+        // public static string ClientVersion { get; set; }
 
         static bool bExiting = false;
 
@@ -35,7 +36,9 @@ namespace dp2Installer
         [STAThread]
         static void Main()
         {
-            ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
+            ClientInfo.TypeOfProgram = typeof(Program);
+
+            // ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
 
             var wi = WindowsIdentity.GetCurrent();
             var wp = new WindowsPrincipal(wi);

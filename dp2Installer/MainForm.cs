@@ -78,7 +78,7 @@ namespace dp2Installer
         /// <summary>
         /// 配置存储
         /// </summary>
-        public ApplicationInfo AppInfo = null;
+        // public ApplicationInfo AppInfo = null;
 
         public MainForm()
         {
@@ -100,6 +100,13 @@ namespace dp2Installer
         {
             GuiUtil.AutoSetDefaultFont(this);
 
+            var bRet = ClientInfo.Initial("dp2installer_v1");
+            if (bRet == false)
+            {
+                Application.Exit();
+                return;
+            }
+
             ClientInfo.BeginUpdate(
 TimeSpan.FromMinutes(2),
 TimeSpan.FromMinutes(60),
@@ -114,13 +121,24 @@ _cancel.Token,
 (object)this.toolStripProgressBar_main);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(stopManager, true);	// 和容器关联
+            stop.Register(stopManager, true);   // 和容器关联
 
+            /*
             // TODO: 这里 this.UserDir 尚未初始化
             this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "settings.xml"));
             this.AppInfo.LoadFormStates(this,
 "mainformstate",
 FormWindowState.Normal);
+            */
+            // 恢复 MainForm 的显示状态
+            {
+                var state = ClientInfo.Config.Get("mainForm", "state", "");
+                if (string.IsNullOrEmpty(state) == false)
+                {
+                    bool force_minimize = ClientInfo.IsMinimizeMode();
+                    FormProperty.SetProperty(state, this, force_minimize);
+                }
+            }
 
             ClearForPureTextOutputing(this.webBrowser1);
 
@@ -226,7 +244,7 @@ FormWindowState.Normal);
         void DisplayCopyRight()
         {
             AppendString("dp2Installer - dp2 图书馆集成系统 安装实用工具\r\n");
-            AppendString("版本: " + Program.ClientVersion + "\r\n");
+            AppendString("版本: " + ClientInfo.ClientVersion + "\r\n");
             AppendString("(C)2015 版权所有 数字平台(北京)软件有限责任公司\r\n"
                 + "2015 年以 Apache License Version 2.0 方式开源\r\n"
                 + "https://github.com/digitalplatform/dp2\r\n");
@@ -249,6 +267,13 @@ FormWindowState.Normal);
                 stop = null;
             }
 
+            // 保存 MainForm 的显示状态
+            {
+                var state = FormProperty.GetProperty(this);
+                ClientInfo.Config.Set("mainForm", "state", state);
+            }
+
+            /*
             if (this.AppInfo != null)
             {
                 AppInfo.SaveFormStates(this,
@@ -257,9 +282,12 @@ FormWindowState.Normal);
                 AppInfo.Save();
                 AppInfo = null;	// 避免后面再用这个对象
             }
+            */
 
             if (_floatingMessage != null)
                 _floatingMessage.Close();
+
+            ClientInfo.Finish();
         }
 
         #region console
@@ -4599,7 +4627,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 string strLocation = "manager";
                 e.Parameters = "location=" + strLocation;
-                e.Parameters += ",client=dp2installer|" + Program.ClientVersion;
+                e.Parameters += ",client=dp2installer|" + ClientInfo.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
@@ -4629,7 +4657,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             e.Password = dlg.Password;
             e.SavePasswordShort = dlg.SavePasswordShort;
             e.Parameters = "location=" + dlg.OperLocation;
-            e.Parameters += ",client=dp2installer|" + Program.ClientVersion;
+            e.Parameters += ",client=dp2installer|" + ClientInfo.ClientVersion;
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             if (e.LibraryServerUrl != dlg.ServerUrl)
@@ -4669,26 +4697,26 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             dlg.SupervisorMode = true;
 
             dlg.Comment = strComment;
-            dlg.UserName = AppInfo.GetString(
+            dlg.UserName = ClientInfo.Config.Get(
                 "default_account",
                 "username",
                 "supervisor");
 
             dlg.SavePasswordShort =
-    AppInfo.GetBoolean(
-    "default_account",
-    "savepassword_short",
-    false);
+                ClientInfo.Config.GetBoolean(
+                "default_account",
+                "savepassword_short",
+                false);
 
             dlg.SavePasswordLong =
-                AppInfo.GetBoolean(
+                ClientInfo.Config.GetBoolean(
                 "default_account",
                 "savepassword_long",
                 false);
 
             if (dlg.SavePasswordShort == true || dlg.SavePasswordLong == true)
             {
-                dlg.Password = AppInfo.GetString(
+                dlg.Password = ClientInfo.Config.Get(
         "default_account",
         "password",
         "");
@@ -4700,13 +4728,14 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
 
             dlg.IsReader = false;
-            dlg.OperLocation = AppInfo.GetString(
+            dlg.OperLocation = ClientInfo.Config.Get(
                 "default_account",
                 "location",
                 "");
 
-            this.AppInfo.LinkFormState(dlg,
-                "logindlg_state");
+            ClientInfo.MemoryState(dlg, "memory_state", "logindlg_state");
+            //this.AppInfo.LinkFormState(dlg,
+            //    "logindlg_state");
 
             if (fail_contidion == LoginFailCondition.PasswordError
                 && dlg.SavePasswordShort == false
@@ -4715,34 +4744,34 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
             dlg.ShowDialog(owner);
 
-            this.AppInfo.UnlinkFormState(dlg);
+            // this.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == DialogResult.Cancel)
             {
                 return null;
             }
 
-            AppInfo.SetString(
+            ClientInfo.Config.Set(
                 "default_account",
                 "username",
                 dlg.UserName);
-            AppInfo.SetString(
+            ClientInfo.Config.Set(
                 "default_account",
                 "password",
                 (dlg.SavePasswordShort == true || dlg.SavePasswordLong == true) ?
                 this.EncryptPassword(dlg.Password) : "");
 
-            AppInfo.SetBoolean(
+            ClientInfo.Config.SetBoolean(
     "default_account",
     "savepassword_short",
     dlg.SavePasswordShort);
 
-            AppInfo.SetBoolean(
+            ClientInfo.Config.SetBoolean(
                 "default_account",
                 "savepassword_long",
                 dlg.SavePasswordLong);
 
-            AppInfo.SetString(
+            ClientInfo.Config.Set(
                 "default_account",
                 "location",
                 dlg.OperLocation);
@@ -4893,12 +4922,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         // 写入日志文件。每天创建一个单独的日志文件
         public void WriteErrorLog(string strText)
         {
+            /*
             FileUtil.WriteErrorLog(
                 _syncRoot_errorLog,
                 this.UserLogDir,
                 strText,
                 "log_",
                 ".txt");
+            */
+            ClientInfo.WriteErrorLog(strText);
         }
 
         // 启用 MSMQ

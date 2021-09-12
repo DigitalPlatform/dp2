@@ -33,6 +33,11 @@ namespace DigitalPlatform.rms.Client
         // 每批获取最多多少个记录
         public long BatchSize { get; set; }
 
+        // 2021/9/12
+        // 最多获取的记录数。若 HitCount 超过 MaxSize，则只获取 MaxSize 个记录
+        // 0 或 -1 都表示不限制
+        public long MaxResultCount { get; set; }
+
         public SearchResultLoader(RmsChannel channel,
             DigitalPlatform.Stop stop,
             string resultsetName,
@@ -58,10 +63,21 @@ namespace DigitalPlatform.rms.Client
             {
                 Record[] searchresults = null;
 
+                long length = nPerCount;
+
+                // 需要明确限制每批获得的最多记录数，避免超过 MaxSize
+                if (this.MaxResultCount > 0)
+                {
+                    if (length == -1)
+                        length = this.MaxResultCount - lStart;
+                    else if (lStart + length > this.MaxResultCount)
+                        length = this.MaxResultCount - lStart;
+                }
+
                 long lRet = this.Channel.DoGetSearchResult(
                     this.ResultSetName, // "default",
                     lStart,
-                    nPerCount,
+                    length, // nPerCount,
                     this.FormatList,  // "id,xml,timestamp,metadata",
                     string.IsNullOrEmpty(this.Lang) ? "zh" : this.Lang,
                     this.Stop,
@@ -83,6 +99,10 @@ namespace DigitalPlatform.rms.Client
                     goto ERROR1;
                 }
                 lHitCount = lRet;
+
+                // 2021/9/12
+                if (MaxResultCount > 0 && lHitCount > MaxResultCount)
+                    lHitCount = MaxResultCount;
 
                 foreach (Record record in searchresults)
                 {

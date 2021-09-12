@@ -6404,6 +6404,9 @@ out strError);
     /// </summary>
     public class KernelRecord
     {
+        public string[] Cols = null;
+        public Result Result = null;
+
         public string Xml = "";
         public string RecPath = "";
         public string Metadata = "";
@@ -6415,11 +6418,13 @@ out strError);
         {
             KernelRecord result = new KernelRecord();
             result.RecPath = record.Path;
+            result.Cols = record.Cols;
             if (record.RecordBody != null)
             {
                 result.Xml = record.RecordBody.Xml;
                 result.Metadata = record.RecordBody.Metadata;
                 result.Timestamp = record.RecordBody.Timestamp;
+                result.Result = record.RecordBody.Result;
             }
             return result;
         }

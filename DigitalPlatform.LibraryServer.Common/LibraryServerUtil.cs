@@ -429,7 +429,7 @@ namespace DigitalPlatform.LibraryServer
                         return 0;
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     strError = "内部错误";
                     return -1;

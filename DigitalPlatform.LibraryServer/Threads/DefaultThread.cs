@@ -257,6 +257,20 @@ namespace DigitalPlatform.LibraryServer
                     this.App.WriteErrorLog(strErrorText);
                 }
             }
+
+            // 2021/9/12
+            // 清理本地全局结果集
+            {
+                try
+                {
+                    this.App.CleanIdleGlobalMemorySets(TimeSpan.FromHours(24));
+                }
+                catch(Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 清除本地全局结果集时 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
         }
 
         public void ClearRetryDelay()
