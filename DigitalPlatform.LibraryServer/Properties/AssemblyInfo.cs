@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.92.*")]
-[assembly: AssemblyFileVersion("3.92.0.0")]
+[assembly: AssemblyVersion("3.93.*")]
+[assembly: AssemblyFileVersion("3.93.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -291,3 +291,4 @@ ItemCanReturn()
 //		3.91 (2021/9/10) SearchBiblio() 和 SearchItem() API 的 strOutputStyle 中可以使用 desc 来让命中结果集内的 ID 按照降序排序。缺省为升序。
 //						注: 检索式 XML 中的 order 元素的作用还需要另外评估
 //		3.92 (2021/9/12) SearchBiblio() 和 GetSearchResult() API 支持 dp2library 本地结果集排序。用法是 GetSearchResult() API 的 strBrowseStyle 参数内使用 sort:1|2,sortmaxcount=1000 子参数
+//		3.93 (2021/9/13) dp2Kernel 中的 browse 配置文件先前已允许使用 <root filter='marc'> 方式了，最新版扩展了 col/use 元素内容的用法，允许使用逗号间隔的多个名字

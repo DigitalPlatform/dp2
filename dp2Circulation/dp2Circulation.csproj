@@ -53,7 +53,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>156</ApplicationRevision>
+    <ApplicationRevision>158</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -915,6 +915,12 @@
     </Compile>
     <Compile Include="Reader\BindCardNumberDialog.Designer.cs">
       <DependentUpon>BindCardNumberDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ImportPatronForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ImportPatronForm.Designer.cs">
+      <DependentUpon>ImportPatronForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Reader\OpenPatronXmlDialog.cs">
       <SubType>Form</SubType>
@@ -2087,6 +2093,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\BindCardNumberDialog.resx">
       <DependentUpon>BindCardNumberDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ImportPatronForm.resx">
+      <DependentUpon>ImportPatronForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\OpenPatronXmlDialog.resx">
       <DependentUpon>OpenPatronXmlDialog.cs</DependentUpon>

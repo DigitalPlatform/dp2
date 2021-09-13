@@ -66,7 +66,10 @@ namespace DigitalPlatform.rms
             List<string> cols = new List<string>();
             foreach (XmlElement use in nodes)
             {
-                cols.Add(use.InnerText.Trim());
+                // 注 <use>...</use> 中允许使用逗号间隔的多个名字
+                var text = use.InnerText.Trim();
+                var list = StringUtil.SplitList(text);
+                cols.AddRange(list);
             }
 
             return cols;
@@ -302,10 +305,24 @@ namespace DigitalPlatform.rms
                             return -1;
                         }
 
-                        MarcColumn column = null;
-                        results.TryGetValue(cache_item.Use, out column);
-                        if (column != null && string.IsNullOrEmpty(column.Value) == false)
-                            strText += column.Value;
+                        // 看看是否要插入什么分隔符
+                        string strSep = GetSepString(convert_methods);
+                        StringBuilder text = new StringBuilder();
+                        // <use></use> 内的文本允许使用逗号间隔的多个名字
+                        var use_list = StringUtil.SplitList(cache_item.Use, ",");
+                        foreach (var use in use_list)
+                        {
+                            results.TryGetValue(use, out MarcColumn column);
+                            if (column != null && string.IsNullOrEmpty(column.Value) == false)
+                            {
+                                // 加入分隔符号
+                                if (text.Length > 0 && string.IsNullOrEmpty(strSep) == false)
+                                    text.Append(strSep);
+                                text.Append(column.Value);
+                            }
+                        }
+
+                        strText += text.ToString();
                     }
 
                     if (string.IsNullOrEmpty(cache_item.Script) == false)

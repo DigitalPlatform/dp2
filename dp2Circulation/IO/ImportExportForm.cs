@@ -287,6 +287,9 @@ strStringTable);
                 {
                     return this.comboBox_target_restore.Text;
                 }));
+                //2021/9/13
+                if (string.IsNullOrEmpty(info.RestoreMode))
+                    info.RestoreMode = "[不适用]";
 
                 // 2021/8/31
                 // 修正 OverwriteBiblio
@@ -800,7 +803,7 @@ Program.MainForm.ActivateFixPage("history")
 
             // 2021/8/27
             string restoreMode = info.RestoreMode;
-            bool writeBiblio = restoreMode != "[不适用]" && string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("书目");
+            bool writeBiblio = restoreMode == "[不适用]" || ( string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("书目"));
 
             if (info.Collect == true
                 || writeBiblio == false)
@@ -808,7 +811,7 @@ Program.MainForm.ActivateFixPage("history")
                 string strMessage = "采集数据 '" + strOldPath + "'";
 
                 // 2021/8/27
-                if (writeBiblio == false)
+                if (writeBiblio == false && info.Collect == false)
                 {
                     info.BiblioRecPath = strPath;
                     strMessage = "越过写入 '" + strPath + "' (不影响写入下级记录)";
@@ -1708,7 +1711,7 @@ new string[] { "重试", "跳过", "中断" });
 
             // 2021/8/27
             string restoreMode = info.RestoreMode;
-            bool writeSubrecords = restoreMode != "[不适用]" && string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("下级记录");
+            bool writeSubrecords = restoreMode == "[不适用]" || ( string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("下级记录"));
 
             if (info.Collect == false
                 && entityArray.Count > 0

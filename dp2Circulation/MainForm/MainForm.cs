@@ -9774,6 +9774,11 @@ out strError);
         {
             RestartPalmCenter();
         }
+
+        private void MenuItem_importFromPatronXml_Click(object sender, EventArgs e)
+        {
+            OpenWindow<ImportPatronForm>();
+        }
     }
 
     /// <summary>

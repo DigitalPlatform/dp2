@@ -618,9 +618,10 @@ username='@hnb'>
         private void ToolStripMenuItem_new_nlc_Click(object sender, EventArgs e)
         {
             // http://olcc.nlc.cn/news/73.html
+            // 注: 早先为 202.96.31.28
             string server_xml = @"<server 
 name='国图联编(UCS01U)' 
-addr='202.96.31.28' 
+addr='ucs.nlc.cn' 
 port='9991' 
 defaultEncoding='utf-8' 
 queryTermEncoding='utf-8'>
