@@ -54,15 +54,16 @@
             this.checkBox_convert_refreshRefID = new System.Windows.Forms.CheckBox();
             this.checkBox_target_randomItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_target = new System.Windows.Forms.TabPage();
+            this.groupBox_danger = new System.Windows.Forms.GroupBox();
+            this.checkBox_target_dontSearchDup = new System.Windows.Forms.CheckBox();
             this.checkBox_target_subrecordRestoreOldID = new System.Windows.Forms.CheckBox();
+            this.checkBox_target_suppressOperLog = new System.Windows.Forms.CheckBox();
             this.comboBox_target_restore = new System.Windows.Forms.ComboBox();
+            this.checkBox_target_dontChangeOperations = new System.Windows.Forms.CheckBox();
             this.label_target_restore = new System.Windows.Forms.Label();
             this.checkBox_target_autoPostfix = new System.Windows.Forms.CheckBox();
             this.textBox_target_dbNameList = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.checkBox_target_dontChangeOperations = new System.Windows.Forms.CheckBox();
-            this.checkBox_target_suppressOperLog = new System.Windows.Forms.CheckBox();
-            this.checkBox_target_dontSearchDup = new System.Windows.Forms.CheckBox();
             this.checkBox_target_biblioRestoreOldID = new System.Windows.Forms.CheckBox();
             this.button_target_simulateImport = new System.Windows.Forms.Button();
             this.comboBox_target_targetBiblioDbName = new System.Windows.Forms.ComboBox();
@@ -70,13 +71,12 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.groupBox_danger = new System.Windows.Forms.GroupBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
             this.tabPage_target.SuspendLayout();
-            this.tabPage_run.SuspendLayout();
             this.groupBox_danger.SuspendLayout();
+            this.tabPage_run.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -194,6 +194,7 @@
             this.textBox_source_fileName.Name = "textBox_source_fileName";
             this.textBox_source_fileName.Size = new System.Drawing.Size(470, 31);
             this.textBox_source_fileName.TabIndex = 6;
+            this.textBox_source_fileName.TextChanged += new System.EventHandler(this.textBox_source_fileName_TextChanged);
             // 
             // label2
             // 
@@ -349,7 +350,7 @@
             this.panel_map.Location = new System.Drawing.Point(5, 275);
             this.panel_map.Margin = new System.Windows.Forms.Padding(5);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(736, 213);
+            this.panel_map.Size = new System.Drawing.Size(706, 213);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -407,6 +408,35 @@
             this.tabPage_target.Text = "目标库";
             this.tabPage_target.UseVisualStyleBackColor = true;
             // 
+            // groupBox_danger
+            // 
+            this.groupBox_danger.BackColor = System.Drawing.Color.DarkRed;
+            this.groupBox_danger.Controls.Add(this.checkBox_target_dontSearchDup);
+            this.groupBox_danger.Controls.Add(this.checkBox_target_subrecordRestoreOldID);
+            this.groupBox_danger.Controls.Add(this.checkBox_target_suppressOperLog);
+            this.groupBox_danger.Controls.Add(this.comboBox_target_restore);
+            this.groupBox_danger.Controls.Add(this.checkBox_target_dontChangeOperations);
+            this.groupBox_danger.Controls.Add(this.label_target_restore);
+            this.groupBox_danger.ForeColor = System.Drawing.Color.White;
+            this.groupBox_danger.Location = new System.Drawing.Point(17, 178);
+            this.groupBox_danger.Name = "groupBox_danger";
+            this.groupBox_danger.Size = new System.Drawing.Size(376, 235);
+            this.groupBox_danger.TabIndex = 13;
+            this.groupBox_danger.TabStop = false;
+            this.groupBox_danger.Text = "风险操作";
+            // 
+            // checkBox_target_dontSearchDup
+            // 
+            this.checkBox_target_dontSearchDup.AutoSize = true;
+            this.checkBox_target_dontSearchDup.ForeColor = System.Drawing.Color.White;
+            this.checkBox_target_dontSearchDup.Location = new System.Drawing.Point(22, 32);
+            this.checkBox_target_dontSearchDup.Margin = new System.Windows.Forms.Padding(5);
+            this.checkBox_target_dontSearchDup.Name = "checkBox_target_dontSearchDup";
+            this.checkBox_target_dontSearchDup.Size = new System.Drawing.Size(99, 25);
+            this.checkBox_target_dontSearchDup.TabIndex = 4;
+            this.checkBox_target_dontSearchDup.Text = "不查重";
+            this.checkBox_target_dontSearchDup.UseVisualStyleBackColor = true;
+            // 
             // checkBox_target_subrecordRestoreOldID
             // 
             this.checkBox_target_subrecordRestoreOldID.AutoSize = true;
@@ -418,6 +448,18 @@
             this.checkBox_target_subrecordRestoreOldID.TabIndex = 12;
             this.checkBox_target_subrecordRestoreOldID.Text = "下级记录恢复到原先的记录 ID";
             this.checkBox_target_subrecordRestoreOldID.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_target_suppressOperLog
+            // 
+            this.checkBox_target_suppressOperLog.AutoSize = true;
+            this.checkBox_target_suppressOperLog.ForeColor = System.Drawing.Color.White;
+            this.checkBox_target_suppressOperLog.Location = new System.Drawing.Point(22, 67);
+            this.checkBox_target_suppressOperLog.Margin = new System.Windows.Forms.Padding(5);
+            this.checkBox_target_suppressOperLog.Name = "checkBox_target_suppressOperLog";
+            this.checkBox_target_suppressOperLog.Size = new System.Drawing.Size(183, 25);
+            this.checkBox_target_suppressOperLog.TabIndex = 5;
+            this.checkBox_target_suppressOperLog.Text = "不写入操作日志";
+            this.checkBox_target_suppressOperLog.UseVisualStyleBackColor = true;
             // 
             // comboBox_target_restore
             // 
@@ -434,6 +476,18 @@
             this.comboBox_target_restore.Size = new System.Drawing.Size(330, 29);
             this.comboBox_target_restore.TabIndex = 11;
             this.comboBox_target_restore.SelectedIndexChanged += new System.EventHandler(this.comboBox_target_restore_SelectedIndexChanged);
+            // 
+            // checkBox_target_dontChangeOperations
+            // 
+            this.checkBox_target_dontChangeOperations.AutoSize = true;
+            this.checkBox_target_dontChangeOperations.ForeColor = System.Drawing.Color.White;
+            this.checkBox_target_dontChangeOperations.Location = new System.Drawing.Point(22, 102);
+            this.checkBox_target_dontChangeOperations.Margin = new System.Windows.Forms.Padding(5);
+            this.checkBox_target_dontChangeOperations.Name = "checkBox_target_dontChangeOperations";
+            this.checkBox_target_dontChangeOperations.Size = new System.Drawing.Size(262, 25);
+            this.checkBox_target_dontChangeOperations.TabIndex = 6;
+            this.checkBox_target_dontChangeOperations.Text = "不修改 operation 元素";
+            this.checkBox_target_dontChangeOperations.UseVisualStyleBackColor = true;
             // 
             // label_target_restore
             // 
@@ -477,42 +531,6 @@
             this.label6.Size = new System.Drawing.Size(252, 21);
             this.label6.TabIndex = 7;
             this.label6.Text = "自动选择目标数据库顺序:";
-            // 
-            // checkBox_target_dontChangeOperations
-            // 
-            this.checkBox_target_dontChangeOperations.AutoSize = true;
-            this.checkBox_target_dontChangeOperations.ForeColor = System.Drawing.Color.White;
-            this.checkBox_target_dontChangeOperations.Location = new System.Drawing.Point(22, 102);
-            this.checkBox_target_dontChangeOperations.Margin = new System.Windows.Forms.Padding(5);
-            this.checkBox_target_dontChangeOperations.Name = "checkBox_target_dontChangeOperations";
-            this.checkBox_target_dontChangeOperations.Size = new System.Drawing.Size(262, 25);
-            this.checkBox_target_dontChangeOperations.TabIndex = 6;
-            this.checkBox_target_dontChangeOperations.Text = "不修改 operation 元素";
-            this.checkBox_target_dontChangeOperations.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_target_suppressOperLog
-            // 
-            this.checkBox_target_suppressOperLog.AutoSize = true;
-            this.checkBox_target_suppressOperLog.ForeColor = System.Drawing.Color.White;
-            this.checkBox_target_suppressOperLog.Location = new System.Drawing.Point(22, 67);
-            this.checkBox_target_suppressOperLog.Margin = new System.Windows.Forms.Padding(5);
-            this.checkBox_target_suppressOperLog.Name = "checkBox_target_suppressOperLog";
-            this.checkBox_target_suppressOperLog.Size = new System.Drawing.Size(183, 25);
-            this.checkBox_target_suppressOperLog.TabIndex = 5;
-            this.checkBox_target_suppressOperLog.Text = "不写入操作日志";
-            this.checkBox_target_suppressOperLog.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_target_dontSearchDup
-            // 
-            this.checkBox_target_dontSearchDup.AutoSize = true;
-            this.checkBox_target_dontSearchDup.ForeColor = System.Drawing.Color.White;
-            this.checkBox_target_dontSearchDup.Location = new System.Drawing.Point(22, 32);
-            this.checkBox_target_dontSearchDup.Margin = new System.Windows.Forms.Padding(5);
-            this.checkBox_target_dontSearchDup.Name = "checkBox_target_dontSearchDup";
-            this.checkBox_target_dontSearchDup.Size = new System.Drawing.Size(99, 25);
-            this.checkBox_target_dontSearchDup.TabIndex = 4;
-            this.checkBox_target_dontSearchDup.Text = "不查重";
-            this.checkBox_target_dontSearchDup.UseVisualStyleBackColor = true;
             // 
             // checkBox_target_biblioRestoreOldID
             // 
@@ -590,23 +608,6 @@
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
-            // groupBox_danger
-            // 
-            this.groupBox_danger.BackColor = System.Drawing.Color.DarkRed;
-            this.groupBox_danger.Controls.Add(this.checkBox_target_dontSearchDup);
-            this.groupBox_danger.Controls.Add(this.checkBox_target_subrecordRestoreOldID);
-            this.groupBox_danger.Controls.Add(this.checkBox_target_suppressOperLog);
-            this.groupBox_danger.Controls.Add(this.comboBox_target_restore);
-            this.groupBox_danger.Controls.Add(this.checkBox_target_dontChangeOperations);
-            this.groupBox_danger.Controls.Add(this.label_target_restore);
-            this.groupBox_danger.ForeColor = System.Drawing.Color.White;
-            this.groupBox_danger.Location = new System.Drawing.Point(17, 178);
-            this.groupBox_danger.Name = "groupBox_danger";
-            this.groupBox_danger.Size = new System.Drawing.Size(376, 235);
-            this.groupBox_danger.TabIndex = 13;
-            this.groupBox_danger.TabStop = false;
-            this.groupBox_danger.Text = "风险操作";
-            // 
             // ImportExportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -629,9 +630,9 @@
             this.tabPage_convert.PerformLayout();
             this.tabPage_target.ResumeLayout(false);
             this.tabPage_target.PerformLayout();
-            this.tabPage_run.ResumeLayout(false);
             this.groupBox_danger.ResumeLayout(false);
             this.groupBox_danger.PerformLayout();
+            this.tabPage_run.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

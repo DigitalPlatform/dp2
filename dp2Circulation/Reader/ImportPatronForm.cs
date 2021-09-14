@@ -1,4 +1,5 @@
 ﻿using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
@@ -66,6 +67,8 @@ namespace dp2Circulation
                 controls.Add(this.comboBox_appendMode);
                 controls.Add(this.comboBox_targetDbName);
                 controls.Add(this.checkBox_refreshRefID);
+                controls.Add(this.checkBox_object);
+                controls.Add(this.textBox_objectDirectoryName);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -75,6 +78,8 @@ namespace dp2Circulation
                 controls.Add(this.comboBox_appendMode);
                 controls.Add(this.comboBox_targetDbName);
                 controls.Add(this.checkBox_refreshRefID);
+                controls.Add(this.checkBox_object);
+                controls.Add(this.textBox_objectDirectoryName);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -112,19 +117,36 @@ namespace dp2Circulation
         {
             string strError = "";
 
+            if (this.checkBox_object.Checked
+    && string.IsNullOrEmpty(this.textBox_objectDirectoryName.Text))
+            {
+                strError = "尚未指定对象目录";
+                goto ERROR1;
+            }
+
             ProcessInfo info = new ProcessInfo();
-            info.Channel = this.GetChannel();
-            info.stop = stop;
-            info.TargetDbName = this.comboBox_targetDbName.Text;
-            info.AppendMode = this.comboBox_appendMode.Text;
-            info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
             {
-                return this.checkBox_refreshRefID.Checked;
-            }));
-            info.RestoreMode = (bool)this.Invoke(new Func<bool>(() =>
-            {
-                return this.checkBox_restoreMode.Checked;
-            }));
+                info.Channel = this.GetChannel();
+                info.stop = stop;
+                info.TargetDbName = this.comboBox_targetDbName.Text;
+                info.AppendMode = this.comboBox_appendMode.Text;
+                info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_refreshRefID.Checked;
+                }));
+                info.RestoreMode = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_restoreMode.Checked;
+                }));
+                info.IncludeSubObjects = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_object.Checked;
+                }));
+                info.ObjectDirectoryName = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_objectDirectoryName.Text;
+                }));
+            }
 
             var strSourceFileName = this.textBox_patronXmlFileName.Text;
 
@@ -239,6 +261,21 @@ namespace dp2Circulation
             public Stop stop = null;
 
             public long PatronRecCount { get; set; }
+
+            public bool IncludeSubObjects = true;
+            public string ObjectDirectoryName = "";
+
+            // 2021/9/14
+            // 最近一次读者保存出错后对话框选择的结果
+            public DialogResult patron_retry_result = DialogResult.Yes;
+            // 是否选择了不出现读者保存出错对话框(按照上次的选择结果自动处理)
+            public bool patron_dont_display_retry_dialog = false;
+
+
+            // 最近一次对象保存出错后对话框选择的结果
+            public DialogResult object_retry_result = DialogResult.Yes;
+            // 是否选择了不出现实体保存出错对话框(按照上次的选择结果自动处理)
+            public bool object_dont_display_retry_dialog = false;
         }
 
         static string GetShortPath(string strPath)
@@ -272,6 +309,9 @@ namespace dp2Circulation
             if (info.NewRefID)
                 DomUtil.SetElementText(root, "refID", Guid.NewGuid().ToString());
 
+            var barcode = DomUtil.GetElementText(root, "barcode");
+            var name = DomUtil.GetElementText(root, "name");
+
             /*
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -280,8 +320,10 @@ namespace dp2Circulation
             string strOldPath = root.GetAttribute("path", DpNs.dprms);
             string strTimestamp = root.GetAttribute("timestamp", DpNs.dprms);
 
-            string strPath = GetShortPath(strOldPath);
+            root.RemoveAttribute("path", DpNs.dprms);
+            root.RemoveAttribute("timestamp", DpNs.dprms);
 
+            string strPath = GetShortPath(strOldPath);
 
             string strAction = "";
             string strTargetRecPath = "";
@@ -304,6 +346,7 @@ namespace dp2Circulation
                 timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
             }
 
+            REDO:
             long lRet = info.Channel.SetReaderInfo(
     stop,
     strAction,
@@ -318,8 +361,132 @@ namespace dp2Circulation
     out ErrorCodeValue kernel_errorcode,
     out string strError);
             if (lRet == -1)
-                throw new Exception(strError);
+            {
+                // 2021/9/14
+                // 这里很有可能是通讯错误
+                if (info.patron_dont_display_retry_dialog == false)
+                {
+                    string error = $"{strAction} 读者记录 {strTargetRecPath} (证条码号:{barcode},姓名:{name}) 时出错: {strError}";
+                    info.patron_retry_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                    {
+                        return MessageDlg.Show(this,
+error + ", 是否重试？\r\n---\r\n\r\n[重试]重试; [跳过]跳过本条继续后面批处理; [中断]中断批处理",
+"ImportPatronForm",
+MessageBoxButtons.YesNoCancel,
+MessageBoxDefaultButton.Button1,
+ref info.patron_dont_display_retry_dialog,
+new string[] { "重试", "跳过", "中断" },
+"后面不再出现此对话框，按本次选择自动处理");
+                    }));
+                }
+
+                if (info.patron_retry_result == System.Windows.Forms.DialogResult.Cancel)
+                    throw new ChannelException(info.Channel.ErrorCode, strError);
+                if (info.patron_retry_result == DialogResult.Yes)
+                    goto REDO;
+
+                return;
+            }
+
+            // 上传书目记录的数字对象
+            if (info.IncludeSubObjects)
+                UploadObjects(info, strSavedPath, strSavedXml);
         }
+
+        /*
+    <dprms:file id="0" xmlns:dprms="http://dp2003.com/dprms" _timestamp="9d4c3d9950a9d4080000000000000002" _metadataFile="a0b54269-1f2f-4750-911e-1e213f71b238.met" _objectFile="a0b54269-1f2f-4750-911e-1e213f71b238.bin" />
+ * */
+        // 上传数字对象
+        void UploadObjects(ProcessInfo info,
+            string strRecPath,
+            string strXml)
+        {
+            if (string.IsNullOrEmpty(strXml))
+                return;
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);  // info.BiblioXml
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlElement node in nodes)
+            {
+                string strObjectFile = node.GetAttribute("_objectFile");
+                if (string.IsNullOrEmpty(strObjectFile))
+                    continue;
+                string strMetadataFile = node.GetAttribute("_metadataFile");
+                if (string.IsNullOrEmpty(strMetadataFile))
+                    continue;
+                string strTimestamp = node.GetAttribute("_timestamp");
+                if (string.IsNullOrEmpty(strTimestamp))
+                    continue;
+                string strID = node.GetAttribute("id");
+                if (string.IsNullOrEmpty(strID))
+                    continue;
+
+                string strClientFilePath = Path.Combine(info.ObjectDirectoryName, strObjectFile);
+                string strServerFilePath = strRecPath + "/object/" + strID;
+
+                string strMetadata = "";
+                using (StreamReader sr = new StreamReader(Path.Combine(info.ObjectDirectoryName, strMetadataFile)))
+                {
+                    strMetadata = sr.ReadToEnd();
+                }
+
+            REDO:
+                // if (info.Simulate == false)
+                {
+                    // 上传文件到到 dp2lbrary 服务器
+                    // parameters:
+                    //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
+                    //      bRetryOverwiteExisting   是否自动在时间戳不一致的情况下覆盖已经存在的服务器文件。== true，表示当发现时间戳不一致的时候，自动用返回的时间戳重试覆盖
+                    // return:
+                    //		-1	出错
+                    //		0   上传文件成功
+                    int nRet = info.Channel.UploadFile(
+                info.stop,
+                strClientFilePath,
+                strServerFilePath,
+                strMetadata,
+                "", // info.Simulate ? "simulate" : "",
+                ByteArray.GetTimeStampByteArray(strTimestamp),
+                true,
+                out byte[] temp_timestamp,
+                out string strError);
+                    if (nRet == -1)
+                    {
+                        // 2021/9/14
+                        if (info.object_dont_display_retry_dialog == false)
+                        {
+                            string error = strError;
+                            info.object_retry_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                            {
+                                return MessageDlg.Show(this,
+        error + ", 是否重试？\r\n---\r\n\r\n[重试]重试; [跳过]跳过本条继续后面批处理; [中断]中断批处理",
+        "ImportPatronForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxDefaultButton.Button1,
+        ref info.object_dont_display_retry_dialog,
+        new string[] { "重试", "跳过", "中断" },
+        "后面不再出现此对话框，按本次选择自动处理");
+                            }));
+                        }
+
+                        if (info.object_retry_result == System.Windows.Forms.DialogResult.Cancel)
+                            throw new ChannelException(info.Channel.ErrorCode, strError);
+                        if (info.object_retry_result == DialogResult.Yes)
+                            goto REDO;
+
+                        continue;
+
+                        // throw new Exception(strError);  // TODO: 空对象不存在怎么办?
+                    }
+                }
+            }
+        }
+
 
         private void comboBox_targetDbName_DropDown(object sender, EventArgs e)
         {
@@ -333,6 +500,44 @@ namespace dp2Circulation
                     this.comboBox_targetDbName.Items.Add(name);
                 }
             }
+        }
+
+        private void button_getObjectDirectoryName_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
+
+            dir_dlg.Description = "请指定对象文件所在目录:";
+            dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+            dir_dlg.ShowNewFolderButton = false;
+            dir_dlg.SelectedPath = this.textBox_objectDirectoryName.Text;
+
+            if (dir_dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            this.textBox_objectDirectoryName.Text = dir_dlg.SelectedPath;
+        }
+
+        private void checkBox_object_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_object.Checked)
+            {
+                this.textBox_objectDirectoryName.Enabled = true;
+                this.button_getObjectDirectoryName.Enabled = true;
+            }
+            else
+            {
+                this.textBox_objectDirectoryName.Enabled = false;
+                this.textBox_objectDirectoryName.Text = "";
+                this.button_getObjectDirectoryName.Enabled = false;
+            }
+        }
+
+        private void textBox_patronXmlFileName_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(this.textBox_patronXmlFileName.Text) == false)
+                this.textBox_objectDirectoryName.Text = this.textBox_patronXmlFileName.Text + ".object";
+            else
+                this.textBox_objectDirectoryName.Text = "";
         }
     }
 }

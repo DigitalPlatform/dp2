@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using System.Messaging;
 using System.Security.Principal;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 using MongoDB.Driver;
 using MongoDB.Bson;
@@ -30,7 +31,6 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
-using System.Text.RegularExpressions;
 
 namespace DigitalPlatform.LibraryServer
 {

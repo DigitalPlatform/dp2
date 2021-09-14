@@ -3848,7 +3848,6 @@ MessageBoxDefaultButton.Button1);
                         DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, respathtemp.FullPath);
                         DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(timestamp));
 
-                        dom.DocumentElement.WriteTo(writer);
 
                         // 导出对象文件
                         if (dlg.IncludeObjectFile)
@@ -3885,6 +3884,8 @@ MessageBoxDefaultButton.Button1);
                                     return false;
                             }
                         }
+
+                        dom.DocumentElement.WriteTo(writer);
 
                         count++;
                         return true;

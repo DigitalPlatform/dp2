@@ -3454,7 +3454,7 @@ root, strLibraryCode);
 
             // 观察时间戳是否发生变化
             nRet = ByteArray.Compare(baOldTimestamp, exist_timestamp);
-            if (nRet != 0)
+            if (exist_timestamp != null && nRet != 0)
             {
                 if (bForce == true)
                 {

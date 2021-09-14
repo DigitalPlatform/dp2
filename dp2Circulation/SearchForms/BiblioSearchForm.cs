@@ -6964,7 +6964,8 @@ Keys keyData)
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
 
-                    if (string.IsNullOrEmpty(strRecPath) == true)
+                    if (string.IsNullOrEmpty(strRecPath) == true
+                        || IsCmdLine(strRecPath) == true)
                         continue;
 
                     // 观察源记录是否有998$t ?
@@ -8547,13 +8548,10 @@ Keys keyData)
                 stop.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "已中断";
-                            goto ERROR1;
-                        }
+                        strError = "已中断";
+                        goto ERROR1;
                     }
 
                     ListViewItem item = items[i];

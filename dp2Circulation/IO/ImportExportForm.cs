@@ -803,7 +803,7 @@ Program.MainForm.ActivateFixPage("history")
 
             // 2021/8/27
             string restoreMode = info.RestoreMode;
-            bool writeBiblio = restoreMode == "[不适用]" || ( string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("书目"));
+            bool writeBiblio = restoreMode == "[不适用]" || (string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("书目"));
 
             if (info.Collect == true
                 || writeBiblio == false)
@@ -1072,6 +1072,7 @@ out strError);
                     strMetadata = sr.ReadToEnd();
                 }
 
+            REDO:
                 // if (info.Simulate == false)
                 {
                     // 上传文件到到 dp2lbrary 服务器
@@ -1092,7 +1093,33 @@ out strError);
                 out byte[] temp_timestamp,
                 out string strError);
                     if (nRet == -1)
-                        throw new Exception(strError);  // TODO: 空对象不存在怎么办?
+                    {
+                        // 2021/9/14
+                        if (info.object_dont_display_retry_dialog == false)
+                        {
+                            string error = strError;
+                            info.object_retry_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                            {
+                                return MessageDlg.Show(this,
+        error + ", 是否重试？\r\n---\r\n\r\n[重试]重试; [跳过]跳过本条继续后面批处理; [中断]中断批处理",
+        "ImportMarcForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxDefaultButton.Button1,
+        ref info.object_dont_display_retry_dialog,
+        new string[] { "重试", "跳过", "中断" },
+        "后面不再出现此对话框，按本次选择自动处理");
+                            }));
+                        }
+
+                        if (info.object_retry_result == System.Windows.Forms.DialogResult.Cancel)
+                            throw new ChannelException(info.Channel.ErrorCode, strError);
+                        if (info.object_retry_result == DialogResult.Yes)
+                            goto REDO;
+
+                        continue;
+
+                        // throw new Exception(strError);  // TODO: 空对象不存在怎么办?
+                    }
                 }
             }
         }
@@ -1711,7 +1738,7 @@ new string[] { "重试", "跳过", "中断" });
 
             // 2021/8/27
             string restoreMode = info.RestoreMode;
-            bool writeSubrecords = restoreMode == "[不适用]" || ( string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("下级记录"));
+            bool writeSubrecords = restoreMode == "[不适用]" || (string.IsNullOrEmpty(restoreMode) == false && restoreMode.Contains("下级记录"));
 
             if (info.Collect == false
                 && entityArray.Count > 0
@@ -1766,7 +1793,7 @@ int nCount)
                 EntityInfo[] errorinfos = null;
 
                 long lRet = 0;
-
+            REDO:
                 if (strRootElementName == "item")
                     lRet = info.Channel.SetEntities(
                          info.stop,
@@ -1801,7 +1828,33 @@ int nCount)
                     throw new Exception(strError);
                 }
                 if (lRet == -1)
-                    throw new ChannelException(info.Channel.ErrorCode, strError);
+                {
+                    // 2021/9/14
+                    // 这里很有可能是通讯错误
+                    if (info.item_dont_display_retry_dialog == false)
+                    {
+                        string error = strError;
+                        info.item_retry_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                        {
+                            return MessageDlg.Show(this,
+    error + ", 是否重试？\r\n---\r\n\r\n[重试]重试; [跳过]跳过本条继续后面批处理; [中断]中断批处理",
+    "ImportMarcForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxDefaultButton.Button1,
+    ref info.item_dont_display_retry_dialog,
+    new string[] { "重试", "跳过", "中断" },
+    "后面不再出现此对话框，按本次选择自动处理");
+                        }));
+                    }
+
+                    if (info.item_retry_result == System.Windows.Forms.DialogResult.Cancel)
+                        throw new ChannelException(info.Channel.ErrorCode, strError);
+                    if (info.item_retry_result == DialogResult.Yes)
+                        goto REDO;
+
+                    // throw new ChannelException(info.Channel.ErrorCode, strError);
+                    continue;
+                }
 
                 if (errorinfos == null || errorinfos.Length == 0)
                     continue;
@@ -1827,6 +1880,8 @@ int nCount)
                     info.ItemErrorCount++;
                 }
 
+                // 这里是每一条册记录保存中的具体报错。肯定不是通讯出错
+                // 这里只能选择继续(也就是跳过的意思)或者中断。不提供“重试”的选项
                 if (text.Length > 0)
                 {
                     strError = "在为书目记录 '" + info.BiblioRecPath + "' 导入下属 '" + strRootElementName + "' 记录的阶段出现错误:\r\n" + text.ToString();
@@ -1837,7 +1892,6 @@ int nCount)
                     if (AskContinue(info, strError) == false)
                         throw new Exception(strError);
                 }
-
             }
 
             // 上载对象
@@ -2030,6 +2084,17 @@ new string[] { "继续", "中断" });
             public bool HideBiblioMessageBox = false; // 是否隐藏报错对话框
             public DialogResult LastBiblioDialogResult = DialogResult.No;   // 最近一次书目保存出错以后显示的对话框的选择结果
 
+            // 2021/9/14
+            // 最近一次实体保存出错后对话框选择的结果
+            public DialogResult item_retry_result = DialogResult.Yes;
+            // 是否选择了不出现实体保存出错对话框(按照上次的选择结果自动处理)
+            public bool item_dont_display_retry_dialog = false;
+
+            // 最近一次对象保存出错后对话框选择的结果
+            public DialogResult object_retry_result = DialogResult.Yes;
+            // 是否选择了不出现实体保存出错对话框(按照上次的选择结果自动处理)
+            public bool object_dont_display_retry_dialog = false;
+
             // *** 以下变量在整个处理过程中持久
             public List<TwoString> LocationMapTable = new List<TwoString>(); // 馆藏地转换表
 
@@ -2060,9 +2125,10 @@ new string[] { "继续", "中断" });
 
             this.textBox_source_fileName.Text = dlg.FileName;
 
+            /*
             if (string.IsNullOrEmpty(this.textBox_objectDirectoryName.Text))
                 this.textBox_objectDirectoryName.Text = this.textBox_source_fileName.Text + ".object";
-
+            */
         }
 
         private void button_getObjectDirectoryName_Click(object sender, EventArgs e)
@@ -2310,6 +2376,14 @@ new string[] { "继续", "中断" });
                 this.checkBox_target_biblioRestoreOldID.Enabled = false;
             else
                 this.checkBox_target_biblioRestoreOldID.Enabled = true;
+        }
+
+        private void textBox_source_fileName_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(this.textBox_source_fileName.Text) == false)
+                this.textBox_objectDirectoryName.Text = this.textBox_source_fileName.Text + ".object";
+            else
+                this.textBox_objectDirectoryName.Text = "";
         }
     }
 }
