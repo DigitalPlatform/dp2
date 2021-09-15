@@ -3796,6 +3796,18 @@ MessageBoxDefaultButton.Button1);
             if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
 
+            if (File.Exists(dlg.FileName))
+            {
+                DialogResult result = MessageBox.Show(this,
+$"文件 {dlg.FileName} 已经存在。\r\n\r\n继续处理将会覆盖它。要继续处理么? (是：继续; 否: 放弃处理)",
+"ReaderSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == System.Windows.Forms.DialogResult.No)
+                    return;
+            }
+
             // 观察对象目录中是否已经存在文件
             if (dlg.IncludeObjectFile)
             {
@@ -3809,6 +3821,18 @@ MessageBoxDefaultButton.Button1);
         MessageBoxDefaultButton.Button2);
                     if (result == System.Windows.Forms.DialogResult.No)
                         return;
+                }
+            }
+            else
+            {
+                // 2021/9/15
+                // 即便本次不打算创建对象目录，但如果按照名字规则这个目录已经存在话，为了避免后面发生误会，还是要删除这个目录。或者要求处理前这个目录不存在。
+                string related_dir = dlg.GetRelatedObjectDirectoryName();
+                if (string.IsNullOrEmpty(related_dir) == false
+                    && Directory.Exists(related_dir))
+                {
+                    strError = $"和当前导出文件名 {dlg.FileName} 关联的对象目录 {related_dir} 已经存在，但并不打算导出任何对象，这容易引起误会。若确需这样导出，请先删除目录 {related_dir}，再进行导出";
+                    goto ERROR1;
                 }
             }
 

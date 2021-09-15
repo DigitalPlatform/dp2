@@ -246,7 +246,7 @@ namespace DigitalPlatform.rms
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -444,7 +444,7 @@ namespace DigitalPlatform.rms
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -765,7 +765,7 @@ namespace DigitalPlatform.rms
 
             this.textBox_bindings.Text = string.Join("\r\n", dlg.Urls);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -1042,6 +1042,16 @@ MessageBoxDefaultButton.Button1);
         {
             if (m_nDisableTextChange == 0)
                 this.textBox_sqlDef.Text = "";
+        }
+
+        // 2021/9/15
+        private void textBox_instanceName_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (InstallHelper.IsValidInstanceName(this.textBox_instanceName.Text) == false)
+            {
+                MessageBox.Show(this, $"实例名 '{this.textBox_instanceName.Text}' 中出现了非法字符");
+                e.Cancel = true;
+            }
         }
 
     }

@@ -234,7 +234,7 @@ new BinaryWriter(File.Open(FilePath, FileMode.Create)))
 
         // 按照一列 Cols 排序
         // parameters:
-        //      indices 要参与排序的列 index。0 表示 Path, 从 1 开始表示 Cols 的列。负数表示倒序
+        //      indices 要参与排序的列 index。1 表示 Path, 从 2 开始表示 Cols 的列。负数表示倒序
         public void Sort(int [] indices)
         {
             _sortItems.Sort((a, b) => {
@@ -244,22 +244,25 @@ new BinaryWriter(File.Open(FilePath, FileMode.Create)))
         }
 
         // parameters:
-        //      indices 要参与排序的列 index。0 表示 Path, 从 1 开始表示 Cols 的列。负数表示倒序
+        //      indices 要参与排序的列 index。1 表示 Path, 从 2 开始表示 Cols 的列。负数表示倒序
         static int CompareItems(SortItem item1, 
             SortItem item2,
             int [] indices)
         {
             foreach(int index_param in indices)
             {
-                // 0 表示 Path
                 if (index_param == 0)
+                    throw new ArgumentException("indices 中元素不允许出现 0。必须是从 1 (或者 -1)开始的值");
+
+                // 1 表示 Path
+                if (index_param == 1 || index_param == -1)
                 {
                     int ret = ComparePath(item1.Path, item2.Path);
                     if (ret != 0)
-                        return ret;
+                        return index_param * ret;
                 }
 
-                int index = Math.Abs(index_param) - 1;
+                int index = Math.Abs(index_param) - 2;
                 string s1 = "";
                 if (item1.Cols != null && index < item1.Cols.Length)
                     s1 = item1.Cols[index];

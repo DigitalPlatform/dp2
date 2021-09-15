@@ -93,12 +93,14 @@ namespace dp2Circulation
             // 
             this.comboBox_appendMode.FormattingEnabled = true;
             this.comboBox_appendMode.Items.AddRange(new object[] {
-            "覆盖到原有ID",
-            "追加"});
+            "追加",
+            "覆盖到原有路径",
+            "覆盖到原有ID"});
             this.comboBox_appendMode.Location = new System.Drawing.Point(131, 195);
             this.comboBox_appendMode.Name = "comboBox_appendMode";
             this.comboBox_appendMode.Size = new System.Drawing.Size(302, 29);
             this.comboBox_appendMode.TabIndex = 4;
+            this.comboBox_appendMode.SelectedIndexChanged += new System.EventHandler(this.comboBox_appendMode_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -117,6 +119,7 @@ namespace dp2Circulation
             this.comboBox_targetDbName.Size = new System.Drawing.Size(302, 29);
             this.comboBox_targetDbName.TabIndex = 6;
             this.comboBox_targetDbName.DropDown += new System.EventHandler(this.comboBox_targetDbName_DropDown);
+            this.comboBox_targetDbName.SelectedIndexChanged += new System.EventHandler(this.comboBox_targetDbName_SelectedIndexChanged);
             // 
             // button_begin
             // 

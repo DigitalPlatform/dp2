@@ -31,6 +31,22 @@ namespace DigitalPlatform.Install
 {
     public class InstallHelper
     {
+        // 检测实例名里面的字符是否合法
+        // 合法的字符指：数字，或者字母，下划线
+        public static bool IsValidInstanceName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return true;
+
+            foreach (var ch in name)
+            {
+                if (!(char.IsLetterOrDigit(ch) || ch == '_'))
+                    return false;
+            }
+
+            return true;
+        }
+
         // 1056 调用前已经启动了
         // 1060 service 尚未安装
         // 1062 调用前已经停止了

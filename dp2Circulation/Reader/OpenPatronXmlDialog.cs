@@ -132,6 +132,15 @@ namespace dp2Circulation
             }
         }
 
+        // 2021/9/15
+        // 根据文件名获得对象目录名。注：对象目录可能并没有输入，本函数是获得理论上的(和文件名配套的)对象目录路径
+        public string GetRelatedObjectDirectoryName()
+        {
+            if (string.IsNullOrEmpty(this.textBox_xmlFileName.Text) == false)
+                return this.textBox_xmlFileName.Text + ".object";
+            return "";
+        }
+
         private void button_getObjectDirectoryName_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog dir_dlg = new FolderBrowserDialog();

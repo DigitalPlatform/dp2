@@ -1303,5 +1303,15 @@ MessageBoxDefaultButton.Button1);
                 this.ForeColor = SystemColors.ControlText;
             }
         }
+
+        // 2021/9/15
+        private void textBox_instanceName_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (InstallHelper.IsValidInstanceName(this.textBox_instanceName.Text) == false)
+            {
+                MessageBox.Show(this, $"实例名 '{this.textBox_instanceName.Text}' 中出现了非法字符");
+                e.Cancel = true;
+            }
+        }
     }
 }

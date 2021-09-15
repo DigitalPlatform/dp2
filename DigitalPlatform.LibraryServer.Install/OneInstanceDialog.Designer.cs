@@ -78,6 +78,7 @@
             this.textBox_instanceName.TabIndex = 1;
             this.textBox_instanceName.TextChanged += new System.EventHandler(this.textBox_instanceName_TextChanged);
             this.textBox_instanceName.Leave += new System.EventHandler(this.textBox_instanceName_Leave);
+            this.textBox_instanceName.Validating += new System.ComponentModel.CancelEventHandler(this.textBox_instanceName_Validating);
             // 
             // textBox_dataDir
             // 

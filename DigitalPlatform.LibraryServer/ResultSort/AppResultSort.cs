@@ -308,13 +308,25 @@ public static bool IsSessionMemorySetFilePath(
             }
         }
 
+        // return:
+        //      要参与排序的列 index 数组。1 表示 Path, 从 2 开始表示 Cols 的列。负数表示倒序
         static int[] ParseSortCols(string def)
         {
             string[] list = def.Split(new char[] { '|' });
             List<int> results = new List<int>();
             foreach (var s in list)
             {
-                results.Add(Convert.ToInt32(s));
+                if (s == "-0")
+                    results.Add(-1);
+                else
+                {
+                    int v = Convert.ToInt32(s);
+                    if (v >= 0)
+                        v++;
+                    else
+                        v--;
+                    results.Add(v);
+                }
             }
 
             return results.ToArray();

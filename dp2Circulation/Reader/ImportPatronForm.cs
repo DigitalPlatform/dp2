@@ -146,6 +146,31 @@ namespace dp2Circulation
                 {
                     return this.textBox_objectDirectoryName.Text;
                 }));
+
+                if ((info.TargetDbName == "<覆盖到原有路径>"
+                    && info.AppendMode != "覆盖到原有路径")
+                    ||
+                    (info.TargetDbName != "<覆盖到原有路径>"
+                    && info.AppendMode == "覆盖到原有路径"))
+                {
+                    strError = "导入方式和目标库，只要其中一个为“覆盖到原有路径”，另一个也必须是“覆盖到原有路径”";
+                    goto ERROR1;
+                }
+            }
+
+            // TODO: 根据危险性出现提示
+            // 如果是 覆盖到原有路径，最好先把所有路径统计一下，然后显示出来
+            // 建议做一个把 XML 文件导入读者查询窗内存的功能，便于查看其中的每一条读者记录
+            if (info.TargetDbName == "<覆盖到原有路径>")
+            {
+                DialogResult result = MessageBox.Show(this,
+    "您现在采用的是“覆盖到原有路径”导入方式，将采用读者 XML 文件中每条记录记载的原有路径来导入，假设文件中包含了不同读者库的记录，那么会分别导入到这些不同的读者库中的原有 ID 位置。\r\n\r\n确实要进行导入?",
+    "BinaryResControl",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return;
             }
 
             var strSourceFileName = this.textBox_patronXmlFileName.Text;
@@ -244,6 +269,93 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
+#if NO
+        string CollectRecPath(string strSourceFileName)
+        {
+            this.Invoke((Action)(() =>
+EnableControls(false)
+));
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在分析读者记录路径 ...");
+            stop.BeginLoop();
+            try
+            {
+                // 用 FileStream 方式打开，主要是为了能在中途观察进度
+                using (FileStream file = File.Open(strSourceFileName,
+    FileMode.Open,
+    FileAccess.Read))
+                using (XmlTextReader reader = new XmlTextReader(file))
+                {
+                    if (stop != null)
+                        stop.SetProgressRange(0, file.Length);
+
+                    bool bRet = false;
+
+                    // 到根元素
+                    while (true)
+                    {
+                        bRet = reader.Read();
+                        if (bRet == false)
+                            throw new Exception("没有根元素");
+
+                        if (reader.NodeType == XmlNodeType.Element)
+                            break;
+                    }
+
+                    for (; ; )
+                    {
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        // 到下一个 record 元素
+                        while (true)
+                        {
+                            bRet = reader.Read();
+                            if (bRet == false)
+                                break;
+                            if (reader.NodeType == XmlNodeType.Element)
+                                break;
+                        }
+
+                        if (bRet == false)
+                            break;  // 结束
+
+                        DoRecord(reader, info);
+
+                        if (stop != null)
+                            stop.SetProgressValue(file.Position);
+
+                        info.PatronRecCount++;
+                    }
+                }
+                return;
+            }
+            catch (Exception ex)
+            {
+                MainForm.WriteErrorLog($"导入读者 XML 记录时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                strError = ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.Invoke((Action)(() =>
+                    EnableControls(true)
+                    ));
+            }
+        }
+#endif
+
         private void button_stop_Click(object sender, EventArgs e)
         {
 
@@ -338,15 +450,23 @@ namespace dp2Circulation
             }
             else
             {
+                // 覆盖
                 if (info.RestoreMode == true)
                     strAction = "forcechange";
                 else
                     strAction = "change";
-                strTargetRecPath = info.TargetDbName + "/" + Global.GetRecordID(strPath);
+
+                if (info.TargetDbName == "<覆盖到原有路径>")
+                {
+                    Debug.Assert(info.AppendMode == "覆盖到原有路径");
+                    strTargetRecPath = strPath;
+                }
+                else
+                    strTargetRecPath = info.TargetDbName + "/" + Global.GetRecordID(strPath);
                 timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
             }
 
-            REDO:
+        REDO:
             long lRet = info.Channel.SetReaderInfo(
     stop,
     strAction,
@@ -493,6 +613,8 @@ new string[] { "重试", "跳过", "中断" },
             if (this.comboBox_targetDbName.Items.Count > 0)
                 return;
 
+            this.comboBox_targetDbName.Items.Add("<覆盖到原有路径>");
+
             if (Program.MainForm.ReaderDbNames != null)
             {
                 foreach (var name in Program.MainForm.ReaderDbNames)
@@ -538,6 +660,18 @@ new string[] { "重试", "跳过", "中断" },
                 this.textBox_objectDirectoryName.Text = this.textBox_patronXmlFileName.Text + ".object";
             else
                 this.textBox_objectDirectoryName.Text = "";
+        }
+
+        private void comboBox_targetDbName_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.comboBox_targetDbName.Text == "<覆盖到原有路径>")
+                this.comboBox_appendMode.Text = "覆盖到原有路径";
+        }
+
+        private void comboBox_appendMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.comboBox_appendMode.Text == "覆盖到原有路径")
+                this.comboBox_targetDbName.Text = "<覆盖到原有路径>";
         }
     }
 }
