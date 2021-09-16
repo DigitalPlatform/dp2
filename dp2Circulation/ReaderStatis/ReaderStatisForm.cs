@@ -84,41 +84,9 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
             ScriptManager.CfgFilePath = Path.Combine(
     Program.MainForm.UserDir,
     "reader_statis_projects.xml");
-
-#if NO
-            ScriptManager.applicationInfo = Program.MainForm.AppInfo;
-            ScriptManager.CfgFilePath =
-                Program.MainForm.DataDir + "\\reader_statis_projects.xml";
-            ScriptManager.DataDir = Program.MainForm.DataDir;
-
-            ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
-            ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
-
-            try
-            {
-                ScriptManager.Load();
-            }
-            catch (FileNotFoundException)
-            {
-                // 不必报错 2009/2/4
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message);
-            }
-#endif
 
             this.radioButton_inputStyle_barcodeFile.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "readerstatisform",
@@ -147,7 +115,6 @@ namespace dp2Circulation
                 "readerstatisform",
                 "input_recpath_filename",
                 "");
-
 
             // 输入的读者库名
             this.comboBox_inputReaderDbName.Text = Program.MainForm.AppInfo.GetString(
@@ -198,31 +165,11 @@ namespace dp2Circulation
 
         private void ReaderStatisForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if NO
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
 
-            }
-#endif
         }
-
-
 
         private void ReaderStatisForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-#if NO
-            if (stop != null) // 脱离关联
-            {
-                stop.Unregister();	// 和容器关联
-                stop = null;
-            }
-#endif
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 Program.MainForm.AppInfo.SetBoolean(
@@ -294,19 +241,6 @@ namespace dp2Circulation
                     "departmentTable",
                     this.checkBox_departmentTable.Checked);
             }
-
-#if NO
-            if (this.ErrorInfoForm != null)
-            {
-                try
-                {
-                    this.ErrorInfoForm.Close();
-                }
-                catch
-                {
-                }
-            }
-#endif
         }
 
         private void button_inputCreateTimeRange_Click(object sender, EventArgs e)
@@ -343,7 +277,6 @@ namespace dp2Circulation
                 return;
 
             this.textBox_createTimeRange.Text = Global.MakeTimeRangeString(dlg.StartDate, dlg.EndDate);
-
         }
 
         private void button_inputExpireTimeRange_Click(object sender, EventArgs e)
@@ -380,7 +313,6 @@ namespace dp2Circulation
                 return;
 
             this.textBox_expireTimeRange.Text = Global.MakeTimeRangeString(dlg.StartDate, dlg.EndDate);
-
         }
 
         internal override void CreateDefaultContent(CreateDefaultContentEventArgs e)
@@ -485,7 +417,6 @@ namespace dp2Circulation
 
             try
             {
-
                 int nRet = 0;
                 strError = "";
 
@@ -529,7 +460,6 @@ namespace dp2Circulation
                         goto END1;
                 }
 
-
                 // 触发Script中OnBegin()代码
                 // OnBegin()中仍然有修改MainForm面板的自由
                 if (objStatis != null)
@@ -548,7 +478,7 @@ namespace dp2Circulation
                 if (nRet == 1)
                     goto END1;  // TODO: SkipAll如何执行? 是否连OnEnd也不执行了？
 
-            END1:
+                END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
                 {
@@ -560,7 +490,6 @@ namespace dp2Circulation
 
             ERROR1:
                 return -1;
-
             }
             catch (Exception ex)
             {
@@ -580,7 +509,6 @@ namespace dp2Circulation
 
                 EnableControls(true);
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
-
             }
         }
 
@@ -611,18 +539,17 @@ namespace dp2Circulation
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									// Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
-
 
             // 创建Project中Script main.cs的Assembly
             // return:
@@ -645,7 +572,6 @@ namespace dp2Circulation
                     goto ERROR1;
                 MessageBox.Show(this, strWarning);
             }
-
 
             this.AssemblyMain = Assembly.LoadFrom(strMainCsDllName);
             if (this.AssemblyMain == null)
@@ -694,18 +620,6 @@ namespace dp2Circulation
             // List<string> LogFileNames = null;
 
             // 清除错误信息窗口中残余的内容
-#if NO
-            if (this.ErrorInfoForm != null)
-            {
-                try
-                {
-                    this.ErrorInfoForm.HtmlString = "<pre>";
-                }
-                catch
-                {
-                }
-            }
-#endif
             ClearErrorInfoForm();
 
             // 准备几个时间参数
@@ -738,8 +652,6 @@ namespace dp2Circulation
                     return -1;
             }
 
-
-
             // 部门名过滤列表
             string strDepartmentList = this.textBox_departmentNames.Text;
             if (String.IsNullOrEmpty(strDepartmentList) == true)
@@ -766,7 +678,6 @@ namespace dp2Circulation
 
             try
             {
-
                 if (this.InputStyle == ReaderStatisInputStyle.WholeReaderDatabase)
                 {
                     nRet = SearchAllReaderRecPath(strTempRecPathFilename,
@@ -866,7 +777,6 @@ namespace dp2Circulation
                         string strOutputRecPath = "";
                         byte[] baTimestamp = null;
 
-
                         string[] results = null;
 
                         string strAccessPoint = "";
@@ -925,7 +835,6 @@ namespace dp2Circulation
                         string strXml = "";
 
                         strXml = results[0];
-
 
                         // 看看是否在希望统计的范围内
                         XmlDocument dom = new XmlDocument();
@@ -991,8 +900,18 @@ namespace dp2Circulation
                                     GetErrorInfoForm().WriteHtml(HttpUtility.HtmlEncode(strError) + "\r\n");
                                 }
                             }
+                            else
+                            {
+                                // 2021/9/16
+                                // strCreateDate 为空
+                                DateTime createTime = new DateTime(0);
+                                if (createTime >= startCreate && createTime <= endCreate)
+                                {
+                                }
+                                else
+                                    continue;
+                            }
                         }
-
 
                         // 按照失效日期筛选
                         if (this.textBox_expireTimeRange.Text != "")
@@ -1020,8 +939,18 @@ namespace dp2Circulation
                                     GetErrorInfoForm().WriteHtml(HttpUtility.HtmlEncode(strError) + "\r\n");
                                 }
                             }
+                            else
+                            {
+                                // 2021/9/16
+                                // strExpireDate 为空
+                                DateTime expireTime = new DateTime(0);
+                                if (expireTime >= startExpire && expireTime <= endExpire)
+                                {
+                                }
+                                else
+                                    continue;
+                            }
                         }
-
 
                         // strXml中为日志记录
 
@@ -1067,11 +996,8 @@ namespace dp2Circulation
                 File.Delete(strTempRecPathFilename);
             }
 
-
             return 0;
         }
-
-
 
         // 注意：上级函数RunScript()已经使用了BeginLoop()和EnableControls()
         // 检索获得所有读者记录路径(输出到文件)
@@ -1126,15 +1052,11 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                goto ERROR1;
-                            }
+                            strError = "用户中断";
+                            goto ERROR1;
                         }
-
 
                         lRet = Channel.GetSearchResult(
                             stop,
@@ -1156,7 +1078,6 @@ namespace dp2Circulation
 
                         Debug.Assert(searchresults != null, "");
 
-
                         // 处理浏览结果
                         for (int i = 0; i < searchresults.Length; i++)
                         {
@@ -1164,7 +1085,6 @@ namespace dp2Circulation
                             // TODO: 其实可以取记录路径，用它来获取记录比用条码更快
                             sw.Write(searchresults[i].Path + "\r\n");
                         }
-
 
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
@@ -1174,7 +1094,6 @@ namespace dp2Circulation
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
                     }
-
                 }
                 finally
                 {
@@ -1219,7 +1138,6 @@ namespace dp2Circulation
                 // 切换到过滤特性page
                 this.tabControl_main.SelectedTab = this.tabPage_filter;
                 return;
-
             }
 
             if (this.tabControl_main.SelectedTab == this.tabPage_filter)
@@ -1291,7 +1209,6 @@ namespace dp2Circulation
                 this.Running = true;
                 try
                 {
-
                     nRet = RunScript(strProjectName,
                         strProjectLocate,
                         out strError);

@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.36.*")]
-[assembly: AssemblyFileVersion("3.36.0.0")]
+[assembly: AssemblyVersion("3.37.*")]
+[assembly: AssemblyFileVersion("3.37.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -106,3 +106,4 @@ using System.Runtime.InteropServices;
 // 3.34 2021/9/9 读者窗打印读者账簿里面的失效期，日期格式从 d 改为 yyyy-MM-dd，避免某些机器上出现的 “星期三”字样
 // 3.35 2021/9/10 书目查询窗和实体查询窗增加了“升序/降序”菜单命令
 // 3.36 2021/9/13 导入 .bdf 修正“导入模式”的 bug
+// 3.37 2021/9/16 读者统计窗当输入了办证日期和失效期筛选范围的时候，原来版本对于读者记录中的空值时间是全部通过筛选，最新版改为通不过筛选。(注：当没有输入这两项筛选日期的时候能通过筛选)
