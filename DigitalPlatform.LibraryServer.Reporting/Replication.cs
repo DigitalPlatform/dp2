@@ -1061,7 +1061,7 @@ out strError);
         // parameters:
         //      task_dom    存储了计划信息的 XMlDocument 对象。执行后，里面的信息会记载了断点信息等。如果完全完成，则保存前可以仅仅留下结束点信息
         public int RunFirstPlan(
-            // DatabaseConfig config,
+            DatabaseConfig config,
             LibraryChannel channel,
             ref XmlDocument task_dom,
             Delegate_showMessage func_showMessage,
@@ -1071,7 +1071,7 @@ out strError);
             strError = "";
             int nRet = 0;
 
-            var context = new LibraryContext();
+            var context = new LibraryContext(config);
             try
             {
                 // 初始化各种表，除了 operlogXXX 表以外
@@ -1868,7 +1868,7 @@ strStyle,
 
 
             context.Dispose();
-            context = new LibraryContext();
+            context = new LibraryContext(context.DatabaseConfig);
             // DetachAll(context);
 
             return count;
@@ -1907,7 +1907,7 @@ strStyle,
             }
 
             context.Dispose();
-            context = new LibraryContext();
+            context = new LibraryContext(context.DatabaseConfig);
             // DetachAll(context);
         }
 
@@ -2727,7 +2727,7 @@ LibraryChannel channel,
             }
 
             context.Dispose();
-            context = new LibraryContext();
+            context = new LibraryContext(context.DatabaseConfig);
         }
 
         // 在内存中增加一行

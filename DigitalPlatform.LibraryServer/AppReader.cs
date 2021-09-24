@@ -7388,7 +7388,7 @@ out strError);
             int nRet = GetAccount("reader",
                 out Account accountref,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == 0)    // 2021/9/22 增加 nRet == 0
             {
                 // text-level: 用户提示
                 strError = string.Format(this.GetString("获得reader参考帐户时出错s"),    // "获得reader参考帐户时出错: {0}"

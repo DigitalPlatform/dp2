@@ -310,33 +310,33 @@ namespace dp2Circulation
             }
         }
              * */
-                /*
-            else if (strTaskName == "正元一卡通读者信息同步")
+            /*
+        else if (strTaskName == "正元一卡通读者信息同步")
+        {
+            StartZhengyuanReplicationDlg dlg = new StartZhengyuanReplicationDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.StartInfo = startinfo;
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
             {
-                StartZhengyuanReplicationDlg dlg = new StartZhengyuanReplicationDlg();
-                MainForm.SetControlFont(dlg, this.Font, false);
-                dlg.StartInfo = startinfo;
-                dlg.ShowDialog(this);
-                if (dlg.DialogResult != DialogResult.OK)
-                {
-                    strError = "用户放弃启动";
-                    return -1;
-                }
+                strError = "用户放弃启动";
+                return -1;
             }
-            else if (strTaskName == "迪科远望一卡通读者信息同步")
+        }
+        else if (strTaskName == "迪科远望一卡通读者信息同步")
+        {
+            StartDkywReplicationDlg dlg = new StartDkywReplicationDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            startinfo.Start = "!breakpoint";    // 一开始就有适当的缺省值，避免从头开始跟踪
+            dlg.StartInfo = startinfo;
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
             {
-                StartDkywReplicationDlg dlg = new StartDkywReplicationDlg();
-                MainForm.SetControlFont(dlg, this.Font, false);
-                startinfo.Start = "!breakpoint";    // 一开始就有适当的缺省值，避免从头开始跟踪
-                dlg.StartInfo = startinfo;
-                dlg.ShowDialog(this);
-                if (dlg.DialogResult != DialogResult.OK)
-                {
-                    strError = "用户放弃启动";
-                    return -1;
-                }
+                strError = "用户放弃启动";
+                return -1;
             }
-                 * */
+        }
+             * */
             else if (strTaskName == "读者信息同步")
             {
 #if NO
@@ -424,7 +424,10 @@ namespace dp2Circulation
             }
             else if (strTaskName == "<日志备份>")
             {
-                string strOutputFolder = "";
+                string strOutputFolder = MainForm.AppInfo.GetString(
+                    "BatchTaskForm",
+                    "operLogBackupFolder",
+                    "");
 
                 // 备份日志文件。即，把日志文件从服务器拷贝到本地目录。要处理好增量复制的问题。
                 // return:
@@ -433,6 +436,13 @@ namespace dp2Circulation
                 //      1   成功启动了下载
                 int nRet = Program.MainForm.BackupOperLogFiles(ref strOutputFolder,
             out strError);
+
+                if (string.IsNullOrEmpty(strOutputFolder) == false)
+                    MainForm.AppInfo.SetString(
+        "BatchTaskForm",
+        "operLogBackupFolder",
+        strOutputFolder);
+
                 if (nRet != 1)
                 {
                     if (nRet == 0 && string.IsNullOrEmpty(strError))
@@ -441,6 +451,10 @@ namespace dp2Circulation
                 }
                 strError = "本地任务 '<日志备份> 成功启动'";
                 return 1;
+            }
+            else if (strTaskName == "报表创建")
+            {
+                startinfo.Start = "activate";   // 表示立即启动，忽略服务器原有定时启动参数
             }
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);

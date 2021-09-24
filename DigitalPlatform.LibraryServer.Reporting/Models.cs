@@ -7,10 +7,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
+
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
+using MySql.Data.MySqlClient;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {
@@ -30,21 +33,27 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public DbSet<ItemOper> ItemOpers { get; set; }
         public DbSet<AmerceOper> AmerceOpers { get; set; }
 
-        /*
         DatabaseConfig _config = null;
+
+        public DatabaseConfig DatabaseConfig
+        {
+            get
+            {
+                return _config;
+            }
+        }
 
         public LibraryContext(DatabaseConfig config)
         {
             _config = config;
         }
-        */
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // optionsBuilder.UseMySQL("server=localhost;database=library;user=user;password=password");
             optionsBuilder
-                .UseLazyLoadingProxies()
-                .UseMySql(DatabaseConfig.BuildConnectionString());
+                // .UseLazyLoadingProxies()
+                .UseMySql(_config.BuildConnectionString());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -996,16 +1005,32 @@ namespace DigitalPlatform.LibraryServer.Reporting
 #endif
     }
 
-    public static class DatabaseConfig
+    public class DatabaseConfig
     {
-        public static string ServerName { get; set; }
-        public static string UserName { get; set; }
-        public static string Password { get; set; }
-        public static string DatabaseName { get; set; }
+        public string ServerName { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public string DatabaseName { get; set; }
 
-        public static string BuildConnectionString()
+        public string BuildConnectionString()
         {
-            return $"server={ServerName};database={DatabaseName};user={UserName};password={Password};Connection Timeout=300;Keepalive=10;";
+            /*
+            MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder
+            {
+                Server = ServerName,
+                Database = DatabaseName,
+                ConnectionProtocol = MySqlConnectionProtocol.Pipe,
+                PipeName = "MYSQL",
+                UserID = UserName,
+                Password = Password,
+                SslMode = MySqlSslMode.None,
+                AllowPublicKeyRetrieval = true,
+            };
+            return builder.ConnectionString;
+            */
+            // string value = $"server={ServerName};database={DatabaseName};user={UserName};password={Password};Connection Timeout=300;Keepalive=10;"; // sslMode=None;
+            string value = $"Server={ServerName};Database={DatabaseName};User Id={UserName};Password={Password};";
+            return value;
         }
     }
 }

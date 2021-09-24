@@ -1086,7 +1086,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1170,7 +1170,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1231,7 +1231,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1883,7 +1883,7 @@ out string strError)
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1979,7 +1979,7 @@ out string strError)
 
             filter.Assembly = assembly;
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -2224,7 +2224,7 @@ out string strError)
 
             e.Canceled = true;  // 不能解释处理
             return;
-            ERROR1:
+        ERROR1:
             e.Canceled = true;
             e.ErrorInfo = strError;
         }
@@ -2541,7 +2541,7 @@ out string strError)
                 _inFaceCall--;
                 EndFaceChannel(channel);
             }
-            ERROR1:
+        ERROR1:
             return Task.FromResult(
             new NormalResult
             {
@@ -2608,7 +2608,7 @@ out string strError)
                 _inFaceCall--;
                 EndFaceChannel(channel);
             }
-            ERROR1:
+        ERROR1:
             result.ErrorInfo = strError;
             result.Value = -1;
             return result;
@@ -2656,7 +2656,7 @@ out string strError)
                 _inFaceCall--;
                 EndFaceChannel(channel);
             }
-            ERROR1:
+        ERROR1:
             result.ErrorInfo = strError;
             result.Value = -1;
             return result;
@@ -2775,7 +2775,7 @@ out string strError)
                 bDone = true;
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"连接指纹中心 '{strUrl}' 时出现异常: {ex.Message}";
                 return null;
@@ -2952,7 +2952,6 @@ out strError);
             return 1;
         }
 
-
         // return:
         //      -1  出错
         //      0   没有找到
@@ -2973,6 +2972,7 @@ out strError);
             LibraryChannel channel = this.GetChannel();
             try
             {
+            REDO:
                 string[] results = null;
                 byte[] baNewTimestamp = null;
                 long lRet = channel.GetBiblioInfos(
@@ -2986,7 +2986,31 @@ out strError);
                 if (lRet == 0)
                     return 0;
                 if (lRet == -1)
-                    return -1;
+                {
+                    // 2021/9/23
+                    bool bHideMessageBox = true;
+                    string error = strError;
+                    DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                    {
+                        return MessageDialog.Show(this,
+                        error + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxDefaultButton.Button1,
+        null,
+        ref bHideMessageBox,
+        new string[] { "重试", "跳过", "放弃" },
+        20);
+                    }));
+
+                    if (result == DialogResult.Cancel)
+                        return -1;
+                    else if (result == System.Windows.Forms.DialogResult.No)
+                        return 0;
+                    else
+                        goto REDO;
+
+                    // return -1;
+                }
                 if (results == null || results.Length == 0)
                 {
                     strError = "results error";
@@ -3094,7 +3118,7 @@ Keys keyData)
                     message
                 };
 
-                REDO:
+            REDO:
                 long lRet = channel.SetMessage(
                     "send",
                     "",

@@ -806,6 +806,42 @@ namespace DigitalPlatform.LibraryServer
                         this.ChargingOperDatabase = new ChargingOperDatabase();
                     }
 
+                    // 2021/9/19
+                    // 元素 reportStorage
+                    node = dom.DocumentElement.SelectSingleNode("reportStorage") as XmlElement;
+                    if (node != null)
+                    {
+                        app._reportStorageServerType = node.GetAttribute("serverType");
+                        app._reportStorageServerName = node.GetAttribute("serverName");
+                        app._reportStorageUserId = node.GetAttribute("userId");
+                        app._reportStoragePassword = DecryptReportPassword(node.GetAttribute("password"));
+                        app._reportStorageDatabaseName = node.GetAttribute("databaseName");
+                    }
+                    else
+                    {
+                        app._reportStorageServerType = "";
+                        app._reportStorageServerName = "";
+                        app._reportStorageUserId = "";
+                        app._reportStoragePassword = "";
+                        app._reportStorageDatabaseName = "";
+                    }
+
+                    // 2021/9/20
+                    // reportReplication 元素
+                    node = dom.DocumentElement.SelectSingleNode("reportReplication") as XmlElement;
+                    if (node != null)
+                    {
+                        app._reportReplicationServer = node.GetAttribute("serverUrl");
+                        app._reportReplicationUserName = node.GetAttribute("userName");
+                        app._reportReplicationPassword = DecryptPassword(node.GetAttribute("password"));
+                    }
+                    else
+                    {
+                        app._reportReplicationServer = "";
+                        app._reportReplicationUserName = "";
+                        app._reportReplicationPassword = "";
+                    }
+
                     // 预约到书
                     // 元素<arrived>
                     // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf/notifyTypes
@@ -2972,7 +3008,7 @@ namespace DigitalPlatform.LibraryServer
                 this.WriteErrorLog("watcher 触发了 LoadCfg() ...");
 
                 nRet = this.LoadCfg(
-                    _libraryCfgDomFullInitialCount == 0 ? false: true,
+                    _libraryCfgDomFullInitialCount == 0 ? false : true,
                     this.DataDir,
                     this.HostDir,
                     out string strError);
@@ -3768,6 +3804,8 @@ namespace DigitalPlatform.LibraryServer
                             "globalResults",    // 2018/12/3
                             "rfid", // 2019/1/11
                             "barcodeValidation", // 2019/5/31
+                            "reportStorage",    // 2021/9/19
+                            "reportReplication",    // 2021/9/20
                         };
 
                             RestoreElements(cfg_dom, writer, elements);

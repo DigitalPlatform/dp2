@@ -1251,8 +1251,6 @@ namespace dp2Circulation
             }
 
             this.button_next.Enabled = true;
-
-
         }
 
         private void button_print_Click(object sender, EventArgs e)
@@ -1542,8 +1540,6 @@ namespace dp2Circulation
         {
             // Program.MainForm.stopManager.Active(this.stop);
         }
-
-
     }
 
     /// <summary>

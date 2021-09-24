@@ -8,7 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.Xml;
+using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 
@@ -90,6 +91,9 @@ namespace dp2Inventory
                 && string.IsNullOrEmpty(this.textBox_dp2library_serverUrl.Text)
                 && string.IsNullOrEmpty(this.textBox_sip_serverAddr.Text))
                 errors.Add("dp2library 服务器 URL 和 SIP 服务器地址两者必须至少配置其中一个");
+
+            if (IsValidVerifyRule(this.textBox_verifyRule.Text, out string error) == false)
+                errors.Add($"条码号校验规则不合法: {error}");
 
             if (errors.Count > 0)
             {
@@ -186,6 +190,32 @@ namespace dp2Inventory
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        static bool IsValidVerifyRule(string rule, out string error)
+        {
+            error = "";
+            if (string.IsNullOrEmpty(rule))
+                return true;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(rule);
+            }
+            catch(Exception ex)
+            {
+                error = $"XML 结构不合法: {ex.Message}";
+                return false;
+            }
+
+            if (dom.DocumentElement.Name != "validator")
+            {
+                error = "根元素必须为 validator";
+                return false;
+            }
+
+            return true;
         }
 
         static List<object> Backup()
@@ -292,6 +322,20 @@ namespace dp2Inventory
         private void linkLabel_uploadApiRepo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start("https://github.com/renyh/InventoryAPI");
+        }
+
+        private void button_sampleRule_Click(object sender, EventArgs e)
+        {
+            MessageDlg.Show(this,
+                @"<validator >
+    <entity>
+        <range value='0000001-9999999'></range>
+    </entity>
+    <shelf>
+        <range value='0101-0909'></range>
+    </shelf>
+</validator>",
+                "样例 条码号校验规则 代码");
         }
     }
 }

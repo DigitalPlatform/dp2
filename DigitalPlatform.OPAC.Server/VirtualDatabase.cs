@@ -85,6 +85,28 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 获得特定语言下的From名称列表
+        public List<DbFromInfo> GetFroms(string strLang)
+        {
+            List<DbFromInfo> results = new List<DbFromInfo>();
+            XmlNodeList nodes = this.nodeDatabase.SelectNodes("from");
+            foreach (XmlElement node in nodes)
+            {
+                string style = node.GetAttribute("style");
+                string strName = DomUtil.GetCaption(strLang, node);
+                if (strName == null)
+                {   // 如果下面根本没有定义<caption>元素，则采用<from>元素的name属性值
+                    strName = DomUtil.GetAttr(node, "name");
+                    if (String.IsNullOrEmpty(strName) == true)
+                        continue;   // 实在没有，只好舍弃
+                }
+                results.Add(new DbFromInfo { Caption = strName, Style = style});
+            }
+
+            return results;
+        }
+
+#if REMOVED
+        // 获得特定语言下的From名称列表
         public List<string> GetFroms(string strLang)
         {
             List<string> results = new List<string>();
@@ -103,6 +125,7 @@ namespace DigitalPlatform.OPAC.Server
 
             return results;
         }
+#endif
 
         // 2012/10/25
         public List<DbFromInfo> GetFromInfos(string strLang)
@@ -688,7 +711,6 @@ namespace DigitalPlatform.OPAC.Server
 
             return strResult;
         }
-
     }
 
     public class DbFromInfo

@@ -1348,19 +1348,17 @@ MessageBoxDefaultButton.Button1);
             out string strError)
         {
             strError = "";
-            if (string.IsNullOrEmpty(strOutputFolder))
+            // if (string.IsNullOrEmpty(strOutputFolder))
             {
                 FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
 
-                dir_dlg.Description = "请指定下载目标文件夹";
+                dir_dlg.Description = "请指定下载目标文件夹(注意每次尽量指定同一个文件夹，这样软件就只下载增量部分)";
                 dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
                 dir_dlg.ShowNewFolderButton = true;
-                dir_dlg.SelectedPath = _usedDownloadFolder;
+                dir_dlg.SelectedPath = strOutputFolder;
 
                 if (dir_dlg.ShowDialog() != DialogResult.OK)
                     return 0;
-
-                _usedDownloadFolder = dir_dlg.SelectedPath;
 
                 strOutputFolder = dir_dlg.SelectedPath;
             }

@@ -229,9 +229,11 @@
     <Compile Include="AppDatabaseVerify.cs" />
     <Compile Include="AppFileSystem.cs" />
     <Compile Include="AppLoginCache.cs" />
+    <Compile Include="AppReportBuilder.cs" />
     <Compile Include="AppRights.cs" />
     <Compile Include="AppScriptFilter.cs" />
     <Compile Include="AppSystemParameter.cs" />
+    <Compile Include="BatchTask\ReportBuilder.cs" />
     <Compile Include="BiblioSummaryCache.cs" />
     <Compile Include="CachedRecord.cs" />
     <Compile Include="deleted\AppColumn.cs" />
@@ -250,14 +252,14 @@
     <Compile Include="AppScript.cs" />
     <Compile Include="AppZhongcihao.cs" />
     <Compile Include="ArriveMonitor.cs" />
-    <Compile Include="BatchTask.cs" />
-    <Compile Include="BatchTaskCollection.cs" />
+    <Compile Include="BatchTask\BatchTask.cs" />
+    <Compile Include="BatchTask\BatchTaskCollection.cs" />
     <Compile Include="deleted\BookControl.cs" />
     <Compile Include="BrowseColumnCaption.cs" />
     <Compile Include="deleted\CacheBuilder.cs" />
     <Compile Include="CfgsMap.cs" />
     <Compile Include="deleted\ColumnStorage.cs" />
-    <Compile Include="DkywReplication.cs" />
+    <Compile Include="BatchTask\DkywReplication.cs" />
     <Compile Include="DupResultSet.cs" />
     <Compile Include="Garden.cs" />
     <Compile Include="MarcTable.cs" />
@@ -272,8 +274,8 @@
     <Compile Include="ItemDatabase\OrderItemDatabase.cs" />
     <Compile Include="LibraryApplication.cs" />
     <Compile Include="Clock.cs" />
-    <Compile Include="LibraryReplication.cs" />
-    <Compile Include="MessageMonitor.cs" />
+    <Compile Include="BatchTask\LibraryReplication.cs" />
+    <Compile Include="BatchTask\MessageMonitor.cs" />
     <Compile Include="MongoDb\MongoDatabase.cs" />
     <Compile Include="MongoDb\ReadingOperDatabase.cs" />
     <Compile Include="OnlineStatis.cs" />
@@ -285,15 +287,15 @@
     <Compile Include="KernelDbInfo.cs" />
     <Compile Include="deleted\MyLibraryControl.cs" />
     <Compile Include="OperLogFileCache.cs" />
-    <Compile Include="OperLogRecover.cs" />
-    <Compile Include="PatronReplication.cs" />
+    <Compile Include="BatchTask\OperLogRecover.cs" />
+    <Compile Include="BatchTask\PatronReplication.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Query.cs" />
-    <Compile Include="ReadersMonitor.cs" />
+    <Compile Include="BatchTask\ReadersMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="deleted\QuestionCollection.cs" />
     <Compile Include="ReaderConverter.cs" />
@@ -309,7 +311,7 @@
     <Compile Include="deleted\TestControl2.cs" />
     <Compile Include="AccountTable.cs" />
     <Compile Include="TempCodeCollection.cs" />
-    <Compile Include="Threads\BackupTask.cs" />
+    <Compile Include="BatchTask\BackupTask.cs" />
     <Compile Include="Threads\DefaultThread.cs" />
     <Compile Include="Threads\LocationResultset.cs" />
     <Compile Include="Threads\OperLogThread.cs" />
@@ -319,7 +321,7 @@
     <Compile Include="UidTable.cs" />
     <Compile Include="UnhandledExceptionModule.cs" />
     <Compile Include="VirtualDatabase.cs" />
-    <Compile Include="ZhengyuanReplication.cs" />
+    <Compile Include="BatchTask\ZhengyuanReplication.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Digitalplatform.DTLP\DigitalPlatform.DTLP.csproj">
@@ -341,6 +343,10 @@
     <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
       <Project>{2F085431-027A-4DDF-9B3D-83219E629FA1}</Project>
       <Name>DigitalPlatform.LibraryServer.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryServer.Reporting\DigitalPlatform.LibraryServer.Reporting.csproj">
+      <Project>{42059af3-46ec-476a-a0ff-7932df49a7db}</Project>
+      <Name>DigitalPlatform.LibraryServer.Reporting</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.MarcDom\DigitalPlatform.MarcDom.csproj">
       <Project>{3F81F705-5265-47EE-9255-CB33E1C135B8}</Project>

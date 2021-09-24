@@ -33,6 +33,7 @@ namespace dp2Inventory
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_rfid = new System.Windows.Forms.TabPage();
+            this.linkLabel_uploadApiRepo = new System.Windows.Forms.LinkLabel();
             this.textBox_rfid_uploadInterfaceUrl = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
             this.checkBox_rfid_rpanTypeSwitch = new System.Windows.Forms.CheckBox();
@@ -74,7 +75,7 @@ namespace dp2Inventory
             this.checkBox_enableTagCache = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.textBox_verifyRule = new System.Windows.Forms.TextBox();
-            this.linkLabel_uploadApiRepo = new System.Windows.Forms.LinkLabel();
+            this.button_sampleRule = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage_rfid.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_seconds)).BeginInit();
@@ -143,6 +144,19 @@ namespace dp2Inventory
             this.tabPage_rfid.TabIndex = 0;
             this.tabPage_rfid.Text = "RFID";
             this.tabPage_rfid.UseVisualStyleBackColor = true;
+            // 
+            // linkLabel_uploadApiRepo
+            // 
+            this.linkLabel_uploadApiRepo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.linkLabel_uploadApiRepo.AutoSize = true;
+            this.linkLabel_uploadApiRepo.Location = new System.Drawing.Point(581, 423);
+            this.linkLabel_uploadApiRepo.Name = "linkLabel_uploadApiRepo";
+            this.linkLabel_uploadApiRepo.Size = new System.Drawing.Size(222, 21);
+            this.linkLabel_uploadApiRepo.TabIndex = 8;
+            this.linkLabel_uploadApiRepo.TabStop = true;
+            this.linkLabel_uploadApiRepo.Text = "上传接口开源项目 ...";
+            this.linkLabel_uploadApiRepo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.linkLabel_uploadApiRepo.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_uploadApiRepo_LinkClicked);
             // 
             // textBox_rfid_uploadInterfaceUrl
             // 
@@ -548,6 +562,7 @@ namespace dp2Inventory
             // 
             // tabPage_other
             // 
+            this.tabPage_other.Controls.Add(this.button_sampleRule);
             this.tabPage_other.Controls.Add(this.checkBox_enableTagCache);
             this.tabPage_other.Controls.Add(this.groupBox1);
             this.tabPage_other.Location = new System.Drawing.Point(4, 31);
@@ -593,18 +608,17 @@ namespace dp2Inventory
             this.textBox_verifyRule.Size = new System.Drawing.Size(759, 456);
             this.textBox_verifyRule.TabIndex = 2;
             // 
-            // linkLabel_uploadApiRepo
+            // button_sampleRule
             // 
-            this.linkLabel_uploadApiRepo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.linkLabel_uploadApiRepo.AutoSize = true;
-            this.linkLabel_uploadApiRepo.Location = new System.Drawing.Point(581, 423);
-            this.linkLabel_uploadApiRepo.Name = "linkLabel_uploadApiRepo";
-            this.linkLabel_uploadApiRepo.Size = new System.Drawing.Size(222, 21);
-            this.linkLabel_uploadApiRepo.TabIndex = 8;
-            this.linkLabel_uploadApiRepo.TabStop = true;
-            this.linkLabel_uploadApiRepo.Text = "上传接口开源项目 ...";
-            this.linkLabel_uploadApiRepo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.linkLabel_uploadApiRepo.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_uploadApiRepo_LinkClicked);
+            this.button_sampleRule.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_sampleRule.Location = new System.Drawing.Point(621, 79);
+            this.button_sampleRule.Name = "button_sampleRule";
+            this.button_sampleRule.Size = new System.Drawing.Size(152, 40);
+            this.button_sampleRule.TabIndex = 7;
+            this.button_sampleRule.Text = "样例代码";
+            this.button_sampleRule.UseVisualStyleBackColor = true;
+            this.button_sampleRule.Click += new System.EventHandler(this.button_sampleRule_Click);
             // 
             // SettingDialog
             // 
@@ -692,5 +706,6 @@ namespace dp2Inventory
         private System.Windows.Forms.TextBox textBox_verifyRule;
         private System.Windows.Forms.CheckBox checkBox_enableTagCache;
         private System.Windows.Forms.LinkLabel linkLabel_uploadApiRepo;
+        private System.Windows.Forms.Button button_sampleRule;
     }
 }

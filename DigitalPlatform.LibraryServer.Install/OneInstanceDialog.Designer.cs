@@ -56,6 +56,7 @@
             this.ToolStripMenuItem_configMongoDB = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_configServerReplication = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBox_stopInstance = new System.Windows.Forms.CheckBox();
+            this.ToolStripMenuItem_configReporting = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -274,7 +275,7 @@
             this.toolStrip1.Location = new System.Drawing.Point(26, 671);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
-            this.toolStrip1.Size = new System.Drawing.Size(353, 38);
+            this.toolStrip1.Size = new System.Drawing.Size(407, 38);
             this.toolStrip1.TabIndex = 22;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -309,7 +310,8 @@
             this.toolStripDropDownButton_commands.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_configMq,
             this.ToolStripMenuItem_configMongoDB,
-            this.ToolStripMenuItem_configServerReplication});
+            this.ToolStripMenuItem_configServerReplication,
+            this.ToolStripMenuItem_configReporting});
             this.toolStripDropDownButton_commands.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_commands.Image")));
             this.toolStripDropDownButton_commands.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_commands.Name = "toolStripDropDownButton_commands";
@@ -347,6 +349,13 @@
             this.checkBox_stopInstance.Text = "停用本实例";
             this.checkBox_stopInstance.UseVisualStyleBackColor = true;
             this.checkBox_stopInstance.CheckedChanged += new System.EventHandler(this.checkBox_stopInstance_CheckedChanged);
+            // 
+            // ToolStripMenuItem_configReporting
+            // 
+            this.ToolStripMenuItem_configReporting.Name = "ToolStripMenuItem_configReporting";
+            this.ToolStripMenuItem_configReporting.Size = new System.Drawing.Size(369, 40);
+            this.ToolStripMenuItem_configReporting.Text = "配置报表参数";
+            this.ToolStripMenuItem_configReporting.Click += new System.EventHandler(this.ToolStripMenuItem_configReporting_Click);
             // 
             // OneInstanceDialog
             // 
@@ -417,5 +426,6 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_configMongoDB;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_configServerReplication;
         private System.Windows.Forms.CheckBox checkBox_stopInstance;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_configReporting;
     }
 }

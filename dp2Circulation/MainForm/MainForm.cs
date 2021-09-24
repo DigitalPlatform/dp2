@@ -1152,7 +1152,6 @@ Stack:
             form.Show();
 #endif
             OpenWindow<ReaderStatisForm>();
-
         }
 
         // 新开册统计窗

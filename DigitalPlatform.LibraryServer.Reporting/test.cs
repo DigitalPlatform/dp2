@@ -53,7 +53,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
             }
 
             context.Dispose();
-            context = new LibraryContext();
+            context = new LibraryContext(context.DatabaseConfig);
 
             // 用于最后阶段比对检索点
             List<Key> save_keys = new List<Key>();
@@ -85,7 +85,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
             }
 
             context.Dispose();
-            context = new LibraryContext();
+            context = new LibraryContext(context.DatabaseConfig);
 
             // 检查检索点是否正确
             var keys = context.Keys

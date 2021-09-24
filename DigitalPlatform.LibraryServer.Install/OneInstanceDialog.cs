@@ -1313,5 +1313,37 @@ MessageBoxDefaultButton.Button1);
                 e.Cancel = true;
             }
         }
+
+        // 配置报表参数
+        private void ToolStripMenuItem_configReporting_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strDataDir = this.textBox_dataDir.Text;
+            // string strInstanceName = this.textBox_instanceName.Text;
+
+            if (string.IsNullOrEmpty(strDataDir))
+            {
+                strError = "尚未指定数据目录";
+                goto ERROR1;
+            }
+
+            string strLibraryXmlFileName = Path.Combine(strDataDir, "library.xml");
+            if (File.Exists(strLibraryXmlFileName) == false)
+            {
+                strError = "配置文件 '" + strLibraryXmlFileName + "' 不存在，无法进行进一步配置";
+                goto ERROR1;
+            }
+
+            using (ReportingDialog dlg = new ReportingDialog())
+            {
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.LibraryXmlFileName = strLibraryXmlFileName;
+                dlg.ShowDialog(this);
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }

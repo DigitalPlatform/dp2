@@ -15,6 +15,8 @@ using System.Web;
 using System.Windows.Forms;
 using System.Xml;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
@@ -25,6 +27,8 @@ namespace TestReporting
 {
     public partial class Form1 : Form
     {
+        DatabaseConfig _databaseConfig = null;
+
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
@@ -108,6 +112,23 @@ bool bClickClose = false)
         {
             ClientInfo.Initial("testreporting");
 
+            {
+                string value = ClientInfo.Config.Get("global", "databaseConfig");
+                if (string.IsNullOrEmpty(value) == false)
+                    _databaseConfig = JsonConvert.DeserializeObject<DatabaseConfig>(value);
+                else
+                    _databaseConfig = null;
+                if (_databaseConfig == null)
+                    _databaseConfig = new DatabaseConfig();
+            }
+
+            /*
+            DatabaseConfig.ServerName = "localhost";
+            DatabaseConfig.DatabaseName = "testrep";
+            DatabaseConfig.UserName = "root";
+            DatabaseConfig.Password = "test";
+            */
+
             this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
 
             this.textBox_replicationStart.Text = ClientInfo.Config.Get("global", "replication_start", "");   //  Properties.Settings.Default.repPlan;
@@ -136,11 +157,15 @@ bool bClickClose = false)
 
             this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
-
         }
 
         void SaveSettings()
         {
+            {
+                string value = JsonConvert.SerializeObject(_databaseConfig);
+                ClientInfo.Config.Set("global", "databaseConfig", value);
+            }
+
             if (this.checkBox_cfg_savePasswordLong.Checked == false)
                 this.textBox_cfg_password.Text = "";
             ClientInfo.Config?.Set("global", "ui_state", this.UiState);
@@ -489,12 +514,15 @@ string strHtml)
                             ErrorInfo = strError
                         };
 
+                    /*
                     DatabaseConfig.ServerName = "localhost";
                     DatabaseConfig.DatabaseName = "testrep";
                     DatabaseConfig.UserName = "root";
                     DatabaseConfig.Password = "test";
+                    */
 
                     nRet = replication.RunFirstPlan(
+                        _databaseConfig,
                         channel,
                         ref task_dom,
                         (message) =>
@@ -560,12 +588,15 @@ string strHtml)
                             ErrorInfo = strError
                         };
 
+                    /*
                     DatabaseConfig.ServerName = "localhost";
                     DatabaseConfig.DatabaseName = "testrep";
                     DatabaseConfig.UserName = "root";
                     DatabaseConfig.Password = "test";
+                    */
 
                     nRet = replication.RunFirstPlan(
+                        _databaseConfig,
                         channel,
                         ref task_dom,
                         (message) =>
@@ -621,14 +652,16 @@ dlg.UiState);
             string strOutputFileName = Path.Combine(ClientInfo.UserDir, "test.rml");
             string strOutputHtmlFileName = Path.Combine(ClientInfo.UserDir, "test.html");
 
+            /*
             DatabaseConfig.ServerName = "localhost";
             DatabaseConfig.DatabaseName = "testrep";
             DatabaseConfig.UserName = "root";
             DatabaseConfig.Password = "test";
+            */
 
             Hashtable param_table = dlg.SelectedParamTable;
 
-            using (var context = new LibraryContext())
+            using (var context = new LibraryContext(_databaseConfig))
             {
                 Report.BuildReport(context,
                     param_table,
@@ -667,12 +700,14 @@ dlg.UiState);
 
         private void MenuItem_runAllTest_Click(object sender, EventArgs e)
         {
+            /*
             DatabaseConfig.ServerName = "localhost";
             DatabaseConfig.DatabaseName = "testrep";
             DatabaseConfig.UserName = "root";
             DatabaseConfig.Password = "test";
+            */
 
-            using (var context = new LibraryContext())
+            using (var context = new LibraryContext(_databaseConfig))
             {
                 test.TestAll(context);
             }
@@ -682,12 +717,13 @@ dlg.UiState);
 
         private void MenuItem_testDeleteBiblioRecord_Click(object sender, EventArgs e)
         {
+            /*
             DatabaseConfig.ServerName = "localhost";
             DatabaseConfig.DatabaseName = "testrep";
             DatabaseConfig.UserName = "root";
             DatabaseConfig.Password = "test";
-
-            using (var context = new LibraryContext())
+            */
+            using (var context = new LibraryContext(_databaseConfig))
             {
                 // test.TestLeftJoinKeys(context);
             }
@@ -728,12 +764,14 @@ dlg.UiState);
                             ErrorInfo = strError
                         };
 
+                    /*
                     DatabaseConfig.ServerName = "localhost";
                     DatabaseConfig.DatabaseName = "testrep";
                     DatabaseConfig.UserName = "root";
                     DatabaseConfig.Password = "test";
+                    */
 
-                    var context = new LibraryContext();
+                    var context = new LibraryContext(_databaseConfig);
                     try
                     {
                         nRet = replication.DoCreateOperLogTable(
@@ -793,18 +831,42 @@ dlg.UiState);
         // 删掉以前的所有 database，然后创建空白的 database
         private void MenuItem_recreateBlankDatabase_Click(object sender, EventArgs e)
         {
+            /*
             DatabaseConfig.ServerName = "localhost";
             DatabaseConfig.DatabaseName = "testrep";
             DatabaseConfig.UserName = "root";
             DatabaseConfig.Password = "test";
-
-            using (var context = new LibraryContext())
+            */
+            using (var context = new LibraryContext(_databaseConfig))
             {
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
             }
 
             MessageBox.Show(this, "OK");
+        }
+
+        private void MenuItem_settings_Click(object sender, EventArgs e)
+        {
+            MySqlDataSourceDlg dlg = new MySqlDataSourceDlg();
+
+            dlg.KernelLoginName = _databaseConfig.UserName;
+            dlg.KernelLoginPassword = _databaseConfig.Password;
+            dlg.SqlServerName = _databaseConfig.ServerName;
+            dlg.InstanceName = _databaseConfig.DatabaseName;
+
+            if (dlg.ShowDialog(this) == DialogResult.Cancel)
+                return;
+
+            _databaseConfig.UserName = dlg.KernelLoginName;
+            _databaseConfig.Password = dlg.KernelLoginPassword;
+            _databaseConfig.ServerName = dlg.SqlServerName;
+            _databaseConfig.DatabaseName = dlg.InstanceName;
+        }
+
+        private void MenuItem_exit_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

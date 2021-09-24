@@ -206,6 +206,25 @@ namespace DigitalPlatform.OPAC.Web
             base.OnUnload(e);
         }
 
+        // 数据库名 DropDownList 有一个 bug，就是当从其它 index 切换到 0 的时候不会触发 DbNameListTextChanged() 事件
+        // https://forums.asp.net/t/1275349.aspx?Dropdownlist+not+firing+SelectedIndexChanged+on+first+item+with+autopostback+true
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+
+            for (int i = 0; i < this.LineCount; i++)
+            {
+                string strID = "db" + Convert.ToString(i);
+                var control = this.FindControl(strID) as DropDownList;
+
+                // 补一次事件
+                if (control != null && control.SelectedIndex == 0)
+                {
+                    DbNameListTextChanged(control, e);
+                }
+            }
+        }
+
         protected override void CreateChildControls()
         {
             // LoadDbNameInfo();
@@ -402,8 +421,10 @@ namespace DigitalPlatform.OPAC.Web
 
                 // 数据库名字被重选后，回传，触发改变 Froms 列表内容
                 listDbName.AutoPostBack = true;
-                listDbName.TextChanged -= new EventHandler(this.DbNameListTextChanged);
-                listDbName.TextChanged += new EventHandler(this.DbNameListTextChanged);
+                // https://forums.asp.net/t/1275349.aspx?Dropdownlist+not+firing+SelectedIndexChanged+on+first+item+with+autopostback+true
+                listDbName.SelectedIndexChanged += new EventHandler(this.DbNameListTextChanged);
+                //listDbName.TextChanged -= new EventHandler(this.DbNameListTextChanged);
+                //listDbName.TextChanged += new EventHandler(this.DbNameListTextChanged);
 
                 line.Controls.Add(listDbName);
                 FillDbNameList(listDbName);
@@ -419,7 +440,7 @@ namespace DigitalPlatform.OPAC.Web
                 list = new DropDownList();
                 list.ID = "from" + Convert.ToString(i);
                 list.Width = new Unit("100%");
-                list.Text = "test";
+                // list.Text = "test";
                 list.CssClass = "from";
                 line.Controls.Add(list);
 
@@ -429,15 +450,14 @@ namespace DigitalPlatform.OPAC.Web
                 usedDbName.Value = "";
                 line.Controls.Add(usedDbName);
 
-#if NO
                 if (this.Page.IsPostBack == false)
                 {
                     string strDbName = listDbName.Text;
-                    // FillFromList(list, strDbName, usedDbName);
-                    FillFromList(list);
+                    FillFromList(list, strDbName, usedDbName);
+                    // FillFromList(list);
                 }
-#endif
-                FillFromList(list);
+
+                // FillFromList(list);
 
                 // 文字part6
                 LiteralControl part6 = new LiteralControl(
@@ -675,13 +695,16 @@ namespace DigitalPlatform.OPAC.Web
 
             // 填入fromlist
             fromlist.Items.Clear();
-            fromlist.Items.Add(this.GetString("quoted_all"));   // "<全部>"或者"<all>"
+
+            // testing
+            // fromlist.Items.Add(strDbName);
+
+            fromlist.Items.Add(this.GetQuotedAll());   // this.GetString("quoted_all") "<全部>"或者"<all>"
 
             // 2007/10/9
-            if (String.IsNullOrEmpty(strDbName) == true
-                || strDbName.ToLower() == "<all>"
-                || strDbName == "<全部>")
+            if (IsAll(strDbName) == true)
             {
+                FillFromList(fromlist);
                 return;
             }
 
@@ -690,11 +713,11 @@ namespace DigitalPlatform.OPAC.Web
             VirtualDatabase vdb = app.vdbs[strDbName];  // 需要增加一个索引器
 
             // 获得特定语言下的From名称列表
-            List<string> froms = vdb.GetFroms(this.Lang);
+            var froms = vdb.GetFroms(this.Lang);
             // bool bFoundOldText = false;
-            for (int i = 0; i < froms.Count; i++)
+            foreach (var from in froms)
             {
-                ListItem item = new ListItem(froms[i], froms[i]);
+                ListItem item = new ListItem(from.Caption, from.Style);
                 fromlist.Items.Add(item);
 
                 /*
@@ -714,13 +737,18 @@ namespace DigitalPlatform.OPAC.Web
              */
         }
 
+        // 填入全部数据库公共的 Froms
         void FillFromList(DropDownList fromlist)
         {
             // string strError = "";
 
             // 填入fromlist
             fromlist.Items.Clear();
-            fromlist.Items.Add(this.GetString("quoted_all"));   // "<全部>"或者"<all>"
+
+            // testing
+            // fromlist.Items.Add("公共");
+
+            fromlist.Items.Add(this.GetQuotedAll());   // "<全部>"或者"<all>"
 
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
 
@@ -753,6 +781,12 @@ namespace DigitalPlatform.OPAC.Web
                     fromlist.Items.Add(item);
                     return;
                 }
+
+                foreach (DbFromInfo info in infos)
+                {
+                    ListItem item = new ListItem(info.Caption, info.Style);
+                    fromlist.Items.Add(item);
+                }
             }
             else   // 2015/1/26
             {
@@ -760,16 +794,7 @@ namespace DigitalPlatform.OPAC.Web
                 fromlist.Items.Add(item);
                 return;
             }
-
-            foreach (DbFromInfo info in infos)
-            {
-                ListItem item = new ListItem(info.Caption, info.Style);
-                fromlist.Items.Add(item);
-            }
-
-            return;
         }
-
 
         protected void OnSearch(object sender, SearchEventArgs e)
         {
@@ -923,7 +948,7 @@ namespace DigitalPlatform.OPAC.Web
                 string strFrom = "";
                 strID = "from" + Convert.ToString(i);
                 list = (DropDownList)FindControl(strID);
-                strFrom = list.SelectedItem.Value;  // list.Text;
+                strFrom = list.Text;   // list.SelectedItem.Value;
 
                 //
 
@@ -951,9 +976,7 @@ namespace DigitalPlatform.OPAC.Web
                 {
                     string strTargetList = "";
 
-                    if (String.IsNullOrEmpty(strDbName) == true
-                        || strDbName.ToLower() == "<all>"
-                        || strDbName == "<全部>")
+                    if (IsAll(strDbName) == true)
                     {
                         List<string> found_dup = new List<string>();    // 用于去重
 
@@ -1377,7 +1400,13 @@ namespace DigitalPlatform.OPAC.Web
             }
              */
 
-            list.Items.Add(this.GetString("quoted_all"));   // <全部> 2007/10/9
+
+            // list.Items.Add(this.GetString("quoted_all"));   // <全部> 2007/10/9
+            // 2021/9/24
+            {
+                string name = this.GetQuotedAll();
+                list.Items.Add(new ListItem(name, name));
+            }
 
             if (app.vdbs != null)   // 2015/1/26
             {
@@ -1402,6 +1431,26 @@ namespace DigitalPlatform.OPAC.Web
                 list.Items.Add(item);
             }
             return;
+        }
+
+        // 2021/9/24
+        public string GetQuotedAll()
+        {
+            // 特意将符号 <> 替换为 []
+            // return this.GetString("quoted_all").Replace("<", "[").Replace(">", "]");
+            return this.GetString("quoted_all");    //.Replace("<", "").Replace(">", "");
+        }
+
+        static bool IsAll(string strDbName)
+        {
+            if (String.IsNullOrEmpty(strDbName) == true
+    || strDbName.ToLower() == "<all>"
+    || strDbName == "<全部>"
+    || strDbName.ToLower() == "[all]"
+    || strDbName == "[全部]")
+                return true;
+
+            return false;
         }
 
         public string GetPrefixString(string strTitle,

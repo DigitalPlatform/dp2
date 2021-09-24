@@ -219,6 +219,8 @@ namespace DigitalPlatform.LibraryServer
                     task = new ServerReplication(this, strName);
                 else if (strName == "大备份")
                     task = new BackupTask(this, strName);
+                else if (strName == "报表创建")
+                    task = new ReportBuilder(this, strName);
                 else
                 {
                     strError = "系统不能识别任务名 '" + strName + "'";

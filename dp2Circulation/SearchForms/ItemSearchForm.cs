@@ -3491,8 +3491,12 @@ dlg.UiState);
                     if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断";
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
                         return -1;
                     }
+
+                    List<string> errors = new List<string>();
+                    bool bChanged = false;
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -3527,11 +3531,23 @@ dlg.UiState);
                     catch (Exception ex)
                     {
                         strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
-                        return -1;
+                        DialogResult result = MessageBox.Show(this,
+strError + "\r\n\r\n是否跳过此条记录继续处理?\r\n\r\n(Yes 跳过；No 中断处理)",
+"ItemSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                        if (result == DialogResult.No)
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+                            return -1;
+                        }
+
+                        errors.Add(strError);
+                        errors.Add("^跳过此条继续处理后面的记录");
+                        goto CONTINUE;
                     }
 
-                    List<string> errors = new List<string>();
-                    bool bChanged = false;
 
                     try
                     {
@@ -3540,8 +3556,11 @@ dlg.UiState);
                     catch (Exception ex)
                     {
                         strError = ExceptionUtil.GetDebugText(ex);
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
                         return -1;
                     }
+
+                CONTINUE:
 
                     if (errors.Count > 0)
                     {
@@ -7256,6 +7275,19 @@ out strError);
 dlg.UiState);
             if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
+
+            if (File.Exists(dlg.OutputFileName))
+            {
+                DialogResult result = MessageBox.Show(this,
+$"文件 {dlg.OutputFileName} 已经存在。\r\n\r\n继续处理将会覆盖它。要继续处理么? (是：继续; 否: 放弃处理)",
+"ItemSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == System.Windows.Forms.DialogResult.No)
+                    return;
+            }
+
             /*
             int nRet = GetLocationList(
 out List<string> location_list_param,

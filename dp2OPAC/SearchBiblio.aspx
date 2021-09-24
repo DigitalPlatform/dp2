@@ -1,5 +1,8 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="SearchBiblio"
- MaintainScrollPositionOnPostBack="true" validateRequest="false" Codebehind="SearchBiblio.aspx.cs" %>
+ MaintainScrollPositionOnPostBack="true"
+    validateRequest="false"
+    Codebehind="SearchBiblio.aspx.cs"
+    %>
 
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
