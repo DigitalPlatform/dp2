@@ -954,7 +954,6 @@ BYTE[0] BYTE[1] BYTE[2] BYTE[3] BYTE[4] BYTE[5] BYTE[6] BYTE[7]
             }
         }
 
-
         // 计算校验位
         static byte ComputeCheck(List<byte> bytes)
         {

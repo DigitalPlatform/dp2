@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // 您可以指定所有这些值，也可以使用“修订号”和“内部版本号”的默认值， 
 // 方法是按如下所示使用“*”:
-[assembly: AssemblyVersion("3.3.*")]
-[assembly: AssemblyFileVersion("3.3.0.0")]
+[assembly: AssemblyVersion("3.4.*")]
+[assembly: AssemblyFileVersion("3.4.0.0")]
 
 // 1.1 (2016/6/26） 增加 Session 计数器功能
 // 1.2 (2016/10/7) 对期刊，增加显示每期封面的功能
@@ -41,3 +41,4 @@ using System.Runtime.InteropServices;
 // 3.1 (2021/5/28) management.aspx 页面只有具备 manageopac 权限的用户才允许使用
 // 3.2 (2021/6/11) column.aspx 创建栏目缓存功能，消除了一个 bug: 当所有书目库都没有评注库的情况下创建栏目缓存会报错
 // 3.3 (2021/7/21) book.aspx 中，当用户不具备 getbiblioinfo 权限时(例如为存取定义定义了不适当的值引起)，会直接报错让下级记录(例如评注)也显示不出来。这个问题已经解决。
+// 3.4 (2021/9/28) searchbiblio.aspx 中，修正(虚拟库)所选检索途径被程序误识别为“<全部>”的 bug

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +9,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 
 using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -42,6 +44,8 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #endif
+            // 2021/9/27
+            FillDropDown(this.comboBox_location);
 
             this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
                 this.CfgSectionName,
@@ -137,6 +141,14 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(this.comboBox_location.Text) == true)
             {
                 MessageBox.Show(this, "请指定馆藏地点");
+                return;
+            }
+
+            // 2021/9/27
+            var error = SelectLocationDialog.VerifyLocation(this.comboBox_location.Items.Cast<string>(), this.comboBox_location.Text);
+            if (error != null)
+            {
+                MessageBox.Show(this, $"{error}。请重新选择或者输入");
                 return;
             }
 

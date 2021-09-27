@@ -1275,7 +1275,7 @@ namespace dp2SSL
 #endif
             bool succeed = false;
 
-            WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' open door");
+            WpfClientInfo.WriteInfoLog($"++incWaiting() door '{e.Door.Name}' open door (读者触发开门)");
             e.Door.IncWaiting();
 
             try

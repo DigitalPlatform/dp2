@@ -6193,13 +6193,10 @@ MessageBoxDefaultButton.Button2);
                 List<EntityInfo> entity_list = new List<EntityInfo>();
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断1";
-                            return 1;
-                        }
+                        strError = "用户中断1";
+                        return 1;
                     }
 
                     ListViewItem item = items[i];

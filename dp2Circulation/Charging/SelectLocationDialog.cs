@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -85,6 +86,14 @@ namespace dp2Circulation
                 return;
             }
 
+            // 2021/9/27
+            var error = VerifyLocation(this.listBox1.Items.Cast<string>(), this.SelectedLocation);
+            if (error != null)
+            {
+                MessageBox.Show(this, $"{error}。请重新选择或者输入");
+                return;
+            }
+
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
@@ -110,6 +119,32 @@ namespace dp2Circulation
             {
                 this.textBox_batchNo.Text = value;
             }
+        }
+
+        // 
+
+        // 校验馆藏地字符串的合法性
+        public static string VerifyLocation(
+            IEnumerable<string> values,
+            string location)
+        {
+            if (location.IndexOfAny(new char[] { ' ' }) != -1)
+                return $"馆藏地 '{location}' 不合法。不应包含空格";
+
+            if (values.Contains(location))
+                return null;
+            if (location.Contains(":"))
+            {
+                var parts = StringUtil.ParseTwoPart(location, ":");
+                string left = parts[0];
+                string right = parts[1];
+                if (string.IsNullOrEmpty(right))
+                    return $"馆藏地 '{location}' 不合法。冒号右侧不应为空";
+                if (values.Cast<string>().Contains(left))
+                    return null;
+            }
+
+            return $"馆藏地 '{location}' 不合法";
         }
     }
 }

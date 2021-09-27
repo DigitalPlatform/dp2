@@ -2251,6 +2251,11 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
                 strLocation = StringUtil.GetPureLocationString(strLocation);
+
+                // 2021/9/27
+                if (strLocation != null && strLocation.Contains(" "))
+                    errors.Add($"馆藏地 '{strLocation}' 格式不合法。不应包含空格字符");
+
                 // 解析
                 LibraryApplication.ParseCalendarName(strLocation,
             out string strLibraryCode,
@@ -2337,13 +2342,22 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
+                    // 2021/9/27
+                    // 如果馆藏地字符串具有冒号，需要把冒号右侧的部分去掉
+                    string pure_location = strLocation;
+                    if (pure_location.IndexOfAny(new char[] { '-', ':' }) != -1)
+                    {
+                        List<string> parts = StringUtil.ParseTwoPart(pure_location, new string[] { "-", ":" });
+                        pure_location = parts[0];
+                    }
+
                     // return:
                     //      -2  校验函数不打算对这个分馆的号码进行校验
                     //      -1  调用出错
                     //      0   校验正确
                     //      1   校验发现错误
                     nRet = VerifyItemBarcode(
-                        App.BarcodeValidation ? strLocation : strLibraryCode,
+                        App.BarcodeValidation ? pure_location : strLibraryCode,
                         strNewBarcode,
                         out strError);
                     if (nRet != 0 && nRet != -2)

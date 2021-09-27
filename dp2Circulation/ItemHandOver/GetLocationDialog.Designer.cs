@@ -107,7 +107,6 @@ namespace dp2Circulation
             this.Load += new System.EventHandler(this.SearchByBatchnoForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

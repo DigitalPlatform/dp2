@@ -92,9 +92,7 @@ TaskScheduler.Default);
                 try
                 {
                     if (state.NewState == "open")
-                    {
                         continue;
-                    }
 
                     Debug.Assert(state.NewState == "close");
 
@@ -107,7 +105,7 @@ TaskScheduler.Default);
                         var result = await ShelfData.RefreshInventoryAsync(state.Door);
                         if (result.Value == -1)
                             WpfClientInfo.WriteErrorLog($"*** 针对门 {state.Door.Name} 执行 RefreshInventoryAsync() 时出错: {result.ErrorInfo}");
-                        
+
                         WpfClientInfo.WriteInfoLog($"针对门 {state.Door.Name} 执行 RefreshInventoryAsync() 耗时 {(DateTime.Now - start).TotalSeconds.ToString()}");
 
                         start = DateTime.Now;
@@ -124,10 +122,13 @@ TaskScheduler.Default);
                     }
                     finally
                     {
-                        state.Door.DecWaiting();
-                        WpfClientInfo.WriteInfoLog($"--decWaiting() door '{state.Door.Name}' in ProcessingAsync()");
+                        if (state.NeedDecCount)
+                        {
+                            state.Door.DecWaiting();
+                            WpfClientInfo.WriteInfoLog($"--decWaiting() door '{state.Door.Name}' in ProcessingAsync() 1 (结束变化处理)");
+                            state.NeedDecCount = false;
+                        }
                     }
-
 
                     // 注: 调用完成后门控件上的 +- 数字才会消失
                     var task = PageMenu.PageShelf.DoRequestAsync(actions, "");
@@ -141,6 +142,12 @@ TaskScheduler.Default);
                 }
                 finally
                 {
+                    if (state.NeedDecCount)
+                    {
+                        state.Door.DecWaiting();
+                        WpfClientInfo.WriteInfoLog($"--decWaiting() door '{state.Door.Name}' in ProcessingAsync() 2 (结束变化处理)");
+                        state.NeedDecCount = false;
+                    }
                     // state.State = "";
                 }
             }
@@ -155,7 +162,7 @@ TaskScheduler.Default);
         }
 
         // 将指定门的暂存的信息构造为 Action。但并不立即提交
-        public async static Task BuildDoorActionsAsync(DoorItem door, 
+        public async static Task BuildDoorActionsAsync(DoorItem door,
             bool clearOperator)
         {
             var result = await ShelfData.BuildActionsAsync((entity) =>
@@ -203,6 +210,10 @@ TaskScheduler.Default);
             public DoorItem Door { get; set; }
             public string OldState { get; set; }
             public string NewState { get; set; }
+
+            // 2021/9/26
+            // 是否需要减去门计数器 1
+            public bool NeedDecCount { get; set; }
         }
 
         // 状态变化集合

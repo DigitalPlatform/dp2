@@ -300,14 +300,25 @@ namespace dp2SSL
                                 PageShelf.TrySetMessage(null, text);
                             }
 
+                            // 2021/9/26
+                            // 有没有可能连续发来两次 open 信号?
                             if (StringUtil.IsInList("open", result.NewState))
                             {
                                 result.Door.OpenTime = DateTime.Now;
 
-                                // 2020/11/21
-                                // 门收到打开信号后，停止等待动画
-                                result.Door.DecWaiting();
-                                WpfClientInfo.WriteInfoLog($"--decWaiting() door '{result.Door.Name}' in _listLocks()");
+                                // 2021/9/26
+                                if (result.Door.Waiting <= 0)
+                                {
+                                    var current_state = result.Door.State;
+                                    WpfClientInfo.WriteErrorLog($"收到门 '{result.Door.Name}' 打开信号时，Waiting 为异常值 {result.Door.Waiting}(正常值应为 >= 1)，这意味着稍早并没有配套的 IncWaiting() 动作(很可能是关门未关严放手又弹开造成)。此次 DecWaiting() 被忽略。(诊断信息：当前门状态为 '{current_state}')");
+                                }
+                                else
+                                {
+                                    // 2020/11/21
+                                    // 门收到打开信号后，停止等待动画
+                                    result.Door.DecWaiting();
+                                    WpfClientInfo.WriteInfoLog($"--decWaiting() door '{result.Door.Name}' in _listLocks() (收到门打开信号)");
+                                }
 
                                 /*
                                 // 添加一个表示开门动作的(状态变化)事项
@@ -332,7 +343,7 @@ namespace dp2SSL
                                 // List<ActionInfo> actions = null;
                                 // 2019/12/15
                                 // 补做一次 inventory，确保不会漏掉 RFID 变动信息
-                                WpfClientInfo.WriteInfoLog($"++incWaiting() door '{result.Door.Name}' in _listLocks()");
+                                WpfClientInfo.WriteInfoLog($"++incWaiting() door '{result.Door.Name}' in _listLocks() (收到门关闭信号，开始进行变化处理)");
                                 result.Door.IncWaiting();  // inventory 期间显示等待动画
 
                                 DoorStateTask.AppendList(new DoorStateTask.DoorStateChange
@@ -340,6 +351,7 @@ namespace dp2SSL
                                     Door = result.Door,
                                     OldState = result.OldState,
                                     NewState = "close",
+                                    NeedDecCount = true,
                                 });
                                 DoorStateTask.ActivateTask();
 
