@@ -30,17 +30,11 @@ namespace dp2Circulation
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ItemSearchForm));
             this.button_search = new System.Windows.Forms.Button();
-            this.listView_records = new DigitalPlatform.GUI.ListViewNF();
-            this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.comboBox_from = new System.Windows.Forms.ComboBox();
-            this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.label_message = new System.Windows.Forms.Label();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.tabControl_query = new System.Windows.Forms.TabControl();
             this.tabPage_simple = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel_query = new System.Windows.Forms.TableLayoutPanel();
-            this.comboBox_entityDbName = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label_entityDbName = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -51,6 +45,8 @@ namespace dp2Circulation
             this.toolStripDropDownButton_searchKeys = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_searchKeys = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_searchKeyID = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_idOrder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripDropDownButton_inputTimeString = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_rfc1123Single = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,12 +57,13 @@ namespace dp2Circulation
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_prevQuery = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_nextQuery = new System.Windows.Forms.ToolStripButton();
-            this.tabComboBox_queryWord = new DigitalPlatform.CommonControl.TabComboBox();
             this.tabPage_logic = new System.Windows.Forms.TabPage();
+            this.comboBox_entityDbName = new DigitalPlatform.CommonControl.CheckedComboBox();
+            this.tabComboBox_queryWord = new DigitalPlatform.CommonControl.TabComboBox();
             this.dp2QueryControl1 = new DigitalPlatform.CommonControl.dp2QueryControl();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem_idOrder = new System.Windows.Forms.ToolStripMenuItem();
-            this.tableLayoutPanel_main.SuspendLayout();
+            this.listView_records = new DigitalPlatform.GUI.ListViewNF();
+            this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -90,39 +87,6 @@ namespace dp2Circulation
             this.button_search.UseVisualStyleBackColor = true;
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
-            // listView_records
-            // 
-            this.listView_records.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader_path,
-            this.columnHeader_1});
-            this.listView_records.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView_records.FullRowSelect = true;
-            this.listView_records.HideSelection = false;
-            this.listView_records.Location = new System.Drawing.Point(0, 0);
-            this.listView_records.Margin = new System.Windows.Forms.Padding(0);
-            this.listView_records.Name = "listView_records";
-            this.listView_records.Size = new System.Drawing.Size(817, 299);
-            this.listView_records.TabIndex = 10;
-            this.listView_records.UseCompatibleStateImageBehavior = false;
-            this.listView_records.View = System.Windows.Forms.View.Details;
-            this.listView_records.ColumnContextMenuClicked += new DigitalPlatform.GUI.ListViewNF.ColumnContextMenuHandler(this.listView_records_ColumnContextMenuClicked);
-            this.listView_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
-            this.listView_records.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.listView_records_ItemDrag);
-            this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
-            this.listView_records.DoubleClick += new System.EventHandler(this.listView_records_DoubleClick);
-            this.listView_records.Enter += new System.EventHandler(this.listView_records_Enter);
-            this.listView_records.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_records_MouseUp);
-            // 
-            // columnHeader_path
-            // 
-            this.columnHeader_path.Text = "路径";
-            this.columnHeader_path.Width = 150;
-            // 
-            // columnHeader_1
-            // 
-            this.columnHeader_1.Text = "1";
-            this.columnHeader_1.Width = 200;
-            // 
             // comboBox_from
             // 
             this.comboBox_from.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -145,43 +109,15 @@ namespace dp2Circulation
             this.comboBox_from.Location = new System.Drawing.Point(156, 87);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(264, 29);
+            this.comboBox_from.Size = new System.Drawing.Size(318, 29);
             this.comboBox_from.TabIndex = 9;
             this.comboBox_from.Text = "册条码";
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
             // 
-            // tableLayoutPanel_main
-            // 
-            this.tableLayoutPanel_main.ColumnCount = 1;
-            this.tableLayoutPanel_main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_main.Controls.Add(this.label_message, 0, 2);
-            this.tableLayoutPanel_main.Controls.Add(this.splitContainer_main, 0, 1);
-            this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
-            this.tableLayoutPanel_main.Padding = new System.Windows.Forms.Padding(0, 18, 0, 18);
-            this.tableLayoutPanel_main.RowCount = 3;
-            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(829, 648);
-            this.tableLayoutPanel_main.TabIndex = 12;
-            // 
-            // label_message
-            // 
-            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_message.Location = new System.Drawing.Point(0, 598);
-            this.label_message.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
-            this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(829, 32);
-            this.label_message.TabIndex = 9;
-            // 
             // splitContainer_main
             // 
             this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_main.Location = new System.Drawing.Point(6, 23);
+            this.splitContainer_main.Location = new System.Drawing.Point(0, 0);
             this.splitContainer_main.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.splitContainer_main.Name = "splitContainer_main";
             this.splitContainer_main.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -193,8 +129,8 @@ namespace dp2Circulation
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.listView_records);
-            this.splitContainer_main.Size = new System.Drawing.Size(817, 566);
-            this.splitContainer_main.SplitterDistance = 253;
+            this.splitContainer_main.Size = new System.Drawing.Size(829, 648);
+            this.splitContainer_main.SplitterDistance = 246;
             this.splitContainer_main.SplitterWidth = 14;
             this.splitContainer_main.TabIndex = 10;
             // 
@@ -207,7 +143,7 @@ namespace dp2Circulation
             this.tabControl_query.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabControl_query.Name = "tabControl_query";
             this.tabControl_query.SelectedIndex = 0;
-            this.tabControl_query.Size = new System.Drawing.Size(817, 253);
+            this.tabControl_query.Size = new System.Drawing.Size(829, 246);
             this.tabControl_query.TabIndex = 10;
             // 
             // tabPage_simple
@@ -217,7 +153,7 @@ namespace dp2Circulation
             this.tabPage_simple.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabPage_simple.Name = "tabPage_simple";
             this.tabPage_simple.Padding = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.tabPage_simple.Size = new System.Drawing.Size(809, 218);
+            this.tabPage_simple.Size = new System.Drawing.Size(821, 211);
             this.tabPage_simple.TabIndex = 0;
             this.tabPage_simple.Text = "简单";
             this.tabPage_simple.UseVisualStyleBackColor = true;
@@ -250,25 +186,8 @@ namespace dp2Circulation
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_query.Size = new System.Drawing.Size(688, 208);
+            this.tableLayoutPanel_query.Size = new System.Drawing.Size(688, 201);
             this.tableLayoutPanel_query.TabIndex = 8;
-            // 
-            // comboBox_entityDbName
-            // 
-            this.comboBox_entityDbName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_entityDbName.BackColor = System.Drawing.SystemColors.Window;
-            this.comboBox_entityDbName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.comboBox_entityDbName.Location = new System.Drawing.Point(154, 46);
-            this.comboBox_entityDbName.Margin = new System.Windows.Forms.Padding(4);
-            this.comboBox_entityDbName.Name = "comboBox_entityDbName";
-            this.comboBox_entityDbName.Padding = new System.Windows.Forms.Padding(4);
-            this.comboBox_entityDbName.ReadOnly = false;
-            this.comboBox_entityDbName.Size = new System.Drawing.Size(268, 32);
-            this.comboBox_entityDbName.TabIndex = 4;
-            this.comboBox_entityDbName.DropDown += new System.EventHandler(this.comboBox_entityDbName_DropDown);
-            this.comboBox_entityDbName.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.comboBox_entityDbName_ItemChecked);
-            this.comboBox_entityDbName.SizeChanged += new System.EventHandler(this.comboBox_entityDbName_SizeChanged);
             // 
             // label3
             // 
@@ -334,7 +253,7 @@ namespace dp2Circulation
             this.comboBox_matchStyle.Location = new System.Drawing.Point(156, 126);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(264, 29);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(318, 29);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "精确一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -354,11 +273,11 @@ namespace dp2Circulation
             this.toolStripSeparator3,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(426, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(480, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(262, 42);
+            this.toolStrip_search.Size = new System.Drawing.Size(208, 42);
             this.toolStrip_search.TabIndex = 12;
             this.toolStrip_search.Text = "检索";
             // 
@@ -389,16 +308,28 @@ namespace dp2Circulation
             // ToolStripMenuItem_searchKeys
             // 
             this.ToolStripMenuItem_searchKeys.Name = "ToolStripMenuItem_searchKeys";
-            this.ToolStripMenuItem_searchKeys.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_searchKeys.Size = new System.Drawing.Size(276, 40);
             this.ToolStripMenuItem_searchKeys.Text = "仅获得检索点";
             this.ToolStripMenuItem_searchKeys.Click += new System.EventHandler(this.ToolStripMenuItem_searchKeys_Click);
             // 
             // ToolStripMenuItem_searchKeyID
             // 
             this.ToolStripMenuItem_searchKeyID.Name = "ToolStripMenuItem_searchKeyID";
-            this.ToolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(315, 40);
+            this.ToolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(276, 40);
             this.ToolStripMenuItem_searchKeyID.Text = "带检索点的检索";
             this.ToolStripMenuItem_searchKeyID.Click += new System.EventHandler(this.ToolStripMenuItem_searchKeyID_Click);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(273, 6);
+            // 
+            // toolStripMenuItem_idOrder
+            // 
+            this.toolStripMenuItem_idOrder.Name = "toolStripMenuItem_idOrder";
+            this.toolStripMenuItem_idOrder.Size = new System.Drawing.Size(276, 40);
+            this.toolStripMenuItem_idOrder.Text = "升序";
+            this.toolStripMenuItem_idOrder.Click += new System.EventHandler(this.toolStripMenuItem_idOrder_Click);
             // 
             // toolStripSeparator1
             // 
@@ -480,6 +411,35 @@ namespace dp2Circulation
             this.toolStripButton_nextQuery.Text = "前进";
             this.toolStripButton_nextQuery.Click += new System.EventHandler(this.toolStripButton_nextQuery_Click);
             // 
+            // tabPage_logic
+            // 
+            this.tabPage_logic.Controls.Add(this.dp2QueryControl1);
+            this.tabPage_logic.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_logic.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.tabPage_logic.Name = "tabPage_logic";
+            this.tabPage_logic.Padding = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.tabPage_logic.Size = new System.Drawing.Size(821, 379);
+            this.tabPage_logic.TabIndex = 1;
+            this.tabPage_logic.Text = "逻辑";
+            this.tabPage_logic.UseVisualStyleBackColor = true;
+            // 
+            // comboBox_entityDbName
+            // 
+            this.comboBox_entityDbName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_entityDbName.BackColor = System.Drawing.SystemColors.Window;
+            this.comboBox_entityDbName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBox_entityDbName.Location = new System.Drawing.Point(154, 46);
+            this.comboBox_entityDbName.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_entityDbName.Name = "comboBox_entityDbName";
+            this.comboBox_entityDbName.Padding = new System.Windows.Forms.Padding(4);
+            this.comboBox_entityDbName.ReadOnly = false;
+            this.comboBox_entityDbName.Size = new System.Drawing.Size(322, 32);
+            this.comboBox_entityDbName.TabIndex = 4;
+            this.comboBox_entityDbName.DropDown += new System.EventHandler(this.comboBox_entityDbName_DropDown);
+            this.comboBox_entityDbName.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.comboBox_entityDbName_ItemChecked);
+            this.comboBox_entityDbName.SizeChanged += new System.EventHandler(this.comboBox_entityDbName_SizeChanged);
+            // 
             // tabComboBox_queryWord
             // 
             this.tabComboBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -489,22 +449,10 @@ namespace dp2Circulation
             this.tabComboBox_queryWord.Location = new System.Drawing.Point(156, 5);
             this.tabComboBox_queryWord.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabComboBox_queryWord.Name = "tabComboBox_queryWord";
-            this.tabComboBox_queryWord.Size = new System.Drawing.Size(264, 32);
+            this.tabComboBox_queryWord.Size = new System.Drawing.Size(318, 32);
             this.tabComboBox_queryWord.TabIndex = 13;
             this.tabComboBox_queryWord.DropDown += new System.EventHandler(this.tabComboBox_queryWord_DropDown);
             this.tabComboBox_queryWord.Enter += new System.EventHandler(this.tabComboBox_queryWord_Enter);
-            // 
-            // tabPage_logic
-            // 
-            this.tabPage_logic.Controls.Add(this.dp2QueryControl1);
-            this.tabPage_logic.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_logic.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.tabPage_logic.Name = "tabPage_logic";
-            this.tabPage_logic.Padding = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.tabPage_logic.Size = new System.Drawing.Size(809, 218);
-            this.tabPage_logic.TabIndex = 1;
-            this.tabPage_logic.Text = "逻辑";
-            this.tabPage_logic.UseVisualStyleBackColor = true;
             // 
             // dp2QueryControl1
             // 
@@ -513,31 +461,52 @@ namespace dp2Circulation
             this.dp2QueryControl1.Margin = new System.Windows.Forms.Padding(11, 10, 11, 10);
             this.dp2QueryControl1.Name = "dp2QueryControl1";
             this.dp2QueryControl1.PanelMode = DigitalPlatform.CommonControl.PanelMode.None;
-            this.dp2QueryControl1.Size = new System.Drawing.Size(797, 208);
+            this.dp2QueryControl1.Size = new System.Drawing.Size(809, 369);
             this.dp2QueryControl1.TabIndex = 1;
             this.dp2QueryControl1.GetList += new DigitalPlatform.CommonControl.GetListEventHandler(this.dp2QueryControl1_GetList);
             this.dp2QueryControl1.ViewXml += new System.EventHandler(this.dp2QueryControl1_ViewXml);
             this.dp2QueryControl1.AppendMenu += new DigitalPlatform.ApendMenuEventHandler(this.dp2QueryControl1_AppendMenu);
             // 
-            // toolStripSeparator6
+            // listView_records
             // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(312, 6);
+            this.listView_records.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader_path,
+            this.columnHeader_1});
+            this.listView_records.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_records.FullRowSelect = true;
+            this.listView_records.HideSelection = false;
+            this.listView_records.Location = new System.Drawing.Point(0, 0);
+            this.listView_records.Margin = new System.Windows.Forms.Padding(0);
+            this.listView_records.Name = "listView_records";
+            this.listView_records.Size = new System.Drawing.Size(829, 388);
+            this.listView_records.TabIndex = 10;
+            this.listView_records.UseCompatibleStateImageBehavior = false;
+            this.listView_records.View = System.Windows.Forms.View.Details;
+            this.listView_records.ColumnContextMenuClicked += new DigitalPlatform.GUI.ListViewNF.ColumnContextMenuHandler(this.listView_records_ColumnContextMenuClicked);
+            this.listView_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
+            this.listView_records.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.listView_records_ItemDrag);
+            this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+            this.listView_records.DoubleClick += new System.EventHandler(this.listView_records_DoubleClick);
+            this.listView_records.Enter += new System.EventHandler(this.listView_records_Enter);
+            this.listView_records.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_records_MouseUp);
             // 
-            // toolStripMenuItem_idOrder
+            // columnHeader_path
             // 
-            this.toolStripMenuItem_idOrder.Name = "toolStripMenuItem_idOrder";
-            this.toolStripMenuItem_idOrder.Size = new System.Drawing.Size(315, 40);
-            this.toolStripMenuItem_idOrder.Text = "升序";
-            this.toolStripMenuItem_idOrder.Click += new System.EventHandler(this.toolStripMenuItem_idOrder_Click);
+            this.columnHeader_path.Text = "路径";
+            this.columnHeader_path.Width = 150;
+            // 
+            // columnHeader_1
+            // 
+            this.columnHeader_1.Text = "1";
+            this.columnHeader_1.Width = 200;
             // 
             // ItemSearchForm
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(168F, 168F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(829, 648);
-            this.Controls.Add(this.tableLayoutPanel_main);
+            this.Controls.Add(this.splitContainer_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.Name = "ItemSearchForm";
@@ -550,7 +519,6 @@ namespace dp2Circulation
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.ItemSearchForm_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.ItemSearchForm_DragEnter);
             this.DragOver += new System.Windows.Forms.DragEventHandler(this.ItemSearchForm_DragOver);
-            this.tableLayoutPanel_main.ResumeLayout(false);
             this.splitContainer_main.Panel1.ResumeLayout(false);
             this.splitContainer_main.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).EndInit();
@@ -574,7 +542,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader_path;
         private System.Windows.Forms.ColumnHeader columnHeader_1;
         private System.Windows.Forms.ComboBox comboBox_from;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_query;
         private DigitalPlatform.CommonControl.CheckedComboBox comboBox_entityDbName;
         private System.Windows.Forms.Label label3;
@@ -582,7 +549,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label_matchStyle;
         private System.Windows.Forms.ComboBox comboBox_matchStyle;
-        private System.Windows.Forms.Label label_message;
         private System.Windows.Forms.ToolStrip toolStrip_search;
         private System.Windows.Forms.ToolStripButton toolStripButton_search;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_searchKeys;

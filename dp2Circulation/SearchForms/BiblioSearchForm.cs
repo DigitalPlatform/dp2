@@ -5372,6 +5372,9 @@ Keys keyData)
                         // TODO: 是否清除余下的列内容?
                     }
 
+                    // 2021/9/28
+                    // 确保列标题列数足够
+                    ListViewUtil.EnsureColumns(item.ListView, item.SubItems.Count);
 
                     i++;
                 }

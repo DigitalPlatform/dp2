@@ -640,14 +640,16 @@ namespace dp2Circulation
             {
                 return (string)this.Invoke((Func<string>)(() =>
                 {
-                    return this.label_message.Text;
+                    // return this.label_message.Text;
+                    return Program.MainForm.StatusBarMessage;
                 }));
             }
             set
             {
                 this.Invoke((Action)(() =>
                 {
-                    this.label_message.Text = value;
+                    // this.label_message.Text = value;
+                    Program.MainForm.StatusBarMessage = value;
                 }));
             }
         }

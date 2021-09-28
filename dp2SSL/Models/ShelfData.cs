@@ -306,11 +306,30 @@ namespace dp2SSL
                             {
                                 result.Door.OpenTime = DateTime.Now;
 
+                                // 2021/9/28
+                                // 记忆最近开门者
+                                if (result.Door.Operator != null)
+                                    ShelfData.MemoryOpen(result.Door, result.Door.Operator);
+
                                 // 2021/9/26
                                 if (result.Door.Waiting <= 0)
                                 {
                                     var current_state = result.Door.State;
                                     WpfClientInfo.WriteErrorLog($"收到门 '{result.Door.Name}' 打开信号时，Waiting 为异常值 {result.Door.Waiting}(正常值应为 >= 1)，这意味着稍早并没有配套的 IncWaiting() 动作(很可能是关门未关严放手又弹开造成)。此次 DecWaiting() 被忽略。(诊断信息：当前门状态为 '{current_state}')");
+
+                                    // 2021/9/28
+                                    // 记忆最近开门者
+                                    if (result.Door.Operator == null)
+                                    {
+                                        var info = ShelfData.GetOpenInfo(result.Door);
+                                        if (info == null)
+                                            WpfClientInfo.WriteErrorLog($"此时门 '{result.Door.Name}' 没有开门者信息，这意味着后面关门时如果需要构建借书请求到时候将会出错");
+                                        else
+                                        {
+                                            result.Door.Operator = info.Operator;
+                                            WpfClientInfo.WriteErrorLog($"dp2ssl 权且利用最近一次开门 '{result.Door.Name}' 期间({info.OpenTime.ToString()},距当前时刻 {(DateTime.Now - info.OpenTime).ToString()})的操作者 {info.Operator.ToString()} 充当本次开门的操作者。但这样做不一定正确，请注意核实操作者");
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -340,6 +359,13 @@ namespace dp2SSL
 
                             if (StringUtil.IsInList("close", result.NewState))
                             {
+                                // 2021/9/28
+                                // 记忆最近开门者
+                                if (result.Door.Operator != null)
+                                    ShelfData.MemoryOpen(result.Door, result.Door.Operator);
+                                else
+                                    WpfClientInfo.WriteErrorLog($"*** 警告 ***: 门 '{result.Door.Name}' 收到关门信号时发现没有开门者信息。预期后面构建动作对象时可能会出错");
+
                                 // List<ActionInfo> actions = null;
                                 // 2019/12/15
                                 // 补做一次 inventory，确保不会漏掉 RFID 变动信息
@@ -441,6 +467,42 @@ namespace dp2SSL
             }
         }
 
+        #region 记忆最近开门的操作者
+
+        public class OpenInfo
+        {
+            public DoorItem Door { get; set; }
+            public DateTime OpenTime { get; set; }
+            public Operator Operator { get; set; }
+        }
+        // DoorItem --> OpenInfo
+        static Hashtable _openTable = new Hashtable();
+
+        public static void MemoryOpen(
+            DoorItem door,
+            Operator person)
+        {
+            lock (_openTable.SyncRoot)
+            {
+                var info = new OpenInfo
+                {
+                    Door = door,
+                    Operator = person,
+                    OpenTime = DateTime.Now
+                };
+                _openTable[door] = info;
+            }
+        }
+
+        public static OpenInfo GetOpenInfo(DoorItem door)
+        {
+            lock (_openTable.SyncRoot)
+            {
+                return _openTable[door] as OpenInfo;
+            }
+        }
+
+        #endregion
 
 
         // 保存一个已经打开的灯的门名字表。只要有一个以上事项，就表示要开灯；如果一个事项也没有，就表示要关灯
@@ -1788,8 +1850,12 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         if (ShelfData.BelongToNormal(entity) == false)
                             continue;
                         var person = func_getOperator?.Invoke(entity);
-                        if (person == null)
+                        if (person == null) // 注：如果得到一个内容为空的 Operator 对象则不会进入 if
+                        {
+                            // 2021/9/28
+                            WpfClientInfo.WriteErrorLog($"*** 严重错误 ***: 在构造借书动作时发现没有和门关联的操作者信息。已忽略此 entity。请注意检查追踪此册去向。\r\nentity={ActionInfo.ToString(entity)}");
                             continue;
+                        }
 
                         // 2020/4/19
                         // 检查一下 actions 里面是否已经有了针对同一个 PII 的 return 动作。
@@ -2713,7 +2779,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         {
                             borrowTime = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             WpfClientInfo.WriteErrorLog($"AddLocalBorrowItems() FromRfc1123DateTimeString({borrowDate}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             continue;
@@ -2794,7 +2860,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 if (borrow_info.Overflows != null && borrow_info.Overflows.Length > 0)
                                     borrow.SetAttribute("overflow", string.Join("; ", borrow_info.Overflows));
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 WpfClientInfo.WriteErrorLog($"AddLocalBorrowItems() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             }
@@ -2829,7 +2895,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         {
                             borrowTime = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             WpfClientInfo.WriteErrorLog($"GetBorrowItems() FromRfc1123DateTimeString({borrowDate}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                             continue;
@@ -4862,7 +4928,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     await FillBookFieldsAsync(l_Removes, token, style);
                     await FillBookFieldsAsync(l_Changes, token, style);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"ChangeEntitiesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -5473,7 +5539,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                     if (string.IsNullOrEmpty(text) == false)
                         App.CurrentApp.SpeakSequence(text); // 不打断前面的说话
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"Sound() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -7544,7 +7610,7 @@ TaskScheduler.Default);
             return $"Action={Action},TransferDirection={TransferDirection},Location={Location},CurrentShelfNo={CurrentShelfNo},Operator=[{Operator}],Entity=[{ToString(this.Entity)}],BatchNo={BatchNo}";
         }
 
-        static string ToString(Entity entity)
+        public static string ToString(Entity entity)
         {
             return $"PII:{entity.PII},OI:{entity.OI},UID:{entity.UID},Title:{entity.Title},ItemRecPath:{entity.ItemRecPath},ReaderName:{entity.ReaderName},Antenna:{entity.Antenna},AOI:{entity.AOI}";
         }

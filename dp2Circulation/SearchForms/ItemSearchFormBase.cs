@@ -583,21 +583,33 @@ namespace dp2Circulation
             }
             else
             {
+                /*
+                int max_length = 0;
+
                 // 2021/9/1
                 if (cols != null)
-                    ListViewUtil.EnsureColumns(item.ListView, cols.Length + 1);
+                    max_length = cols.Length + 1;
+                */
 
                 int c = 0;
                 for (; c < cols.Length; c++)
                 {
+                    int index = 0;
                     if (this.m_nBiblioSummaryColumn == 0)
-                        ListViewUtil.ChangeItemText(item,
-                        c + 1,
-                        cols[c]);
+                        index = c + 1;
                     else
-                        ListViewUtil.ChangeItemText(item,
-                        c + (m_nBiblioSummaryColumn + 1),
-                        cols[c]);
+                        index = c + (m_nBiblioSummaryColumn + 1);
+
+                    ListViewUtil.ChangeItemText(item,
+                    index,
+                    cols[c]);
+
+                    /*
+                    // 2021/9/28
+                    // 计算最大列数
+                    if (max_length < index + 1)
+                        max_length = index + 1;
+                    */
                 }
 
                 if (bClearRestColumns)
@@ -613,6 +625,15 @@ namespace dp2Circulation
                         item.SubItems[c].Text = "";
                     }
                 }
+
+                // 2021/9/28
+                // 确保列标题列数足够
+                /*
+                if (max_length > 0)
+                    ListViewUtil.EnsureColumns(item.ListView, max_length);
+                */
+                ListViewUtil.EnsureColumns(item.ListView, item.SubItems.Count);
+
             }
         }
 

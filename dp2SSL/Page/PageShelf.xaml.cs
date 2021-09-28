@@ -1318,6 +1318,13 @@ namespace dp2SSL
 
                 e.Door.Operator = person;
 
+                // 2021/9/28
+                // 方便追踪触发开门的读者
+                WpfClientInfo.WriteInfoLog($"{person.ToString()} 触发开门");
+
+                // 记忆最近开门者
+                ShelfData.MemoryOpen(e.Door, person);
+
                 // 把发出命令的瞬间安排在 getLockState 之前的间隙。就是说不和 getLockState 重叠
                 //lock (RfidManager.SyncRoot)
                 //{
@@ -1346,7 +1353,7 @@ namespace dp2SSL
                 // var result = RfidManager.OpenShelfLock(e.Door.LockPath, style);
                 if (result.Value == -1)
                 {
-                    WpfClientInfo.WriteErrorLog($"OpenShelfLock() error: {result.ErrorInfo}");
+                    WpfClientInfo.WriteErrorLog($"OpenShelfLock() error({person.ToString()}): {result.ErrorInfo}");
                     //MessageBox.Show(result.ErrorInfo);
                     DisplayError(ref progress, "开门", result.ErrorInfo);
                     e.Door.Operator = null;

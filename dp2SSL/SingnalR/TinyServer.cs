@@ -293,11 +293,14 @@ TaskScheduler.Default);
 
             DisposeHandlers();
 
-            Connection.Reconnected -= Connection_Reconnected;
+            if (Connection != null)
+            {
+                Connection.Reconnected -= Connection_Reconnected;
 
-            Connection.Stop();
-            Connection.Dispose();
-            Connection = null;
+                Connection.Stop();
+                Connection.Dispose();
+                Connection = null;
+            }
 
             _userName = "";
         }

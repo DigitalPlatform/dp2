@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.38.*")]
-[assembly: AssemblyFileVersion("3.38.0.0")]
+[assembly: AssemblyVersion("3.40.*")]
+[assembly: AssemblyFileVersion("3.40.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -109,3 +109,7 @@ using System.Runtime.InteropServices;
 // 3.37 2021/9/16 读者统计窗当输入了办证日期和失效期筛选范围的时候，原来版本对于读者记录中的空值时间是全部通过筛选，最新版改为通不过筛选。(注：当没有输入这两项筛选日期的时候能通过筛选)
 // 3.38 2021/9/22 批处理任务窗在启动“<日志备份>”以后能记住所选择的本地文件夹，下次再启动的时候能自动默认选择上次选过的文件夹
 //                  实体查询窗中导出详情到 Excel 文件功能针对网络故障做了增强改进，加了报错和重试机制
+// 3.39 2021/9/28 典藏移交窗和快捷出纳窗中的典藏移交功能，增强了对用户输入的馆藏地字符串的检查。特别是带有冒号的班级书架形态的馆藏地(例如 "班级书架:0102")
+// 3.40 2021/9/28 实体查询窗、订购查询窗等去掉了 tablelayout_main 控件。尝试解决在有的机器上 listview 内容没有水平卷滚条的问题
+//                  实体查询窗、订购查询窗等修正了浏览列标题不足的 bug
+//                  日志统计窗里面的“打印典藏移交清单”功能，除了原先的 action 为 "transfer" 的日志记录外，新增加了把 action 为 "change" 的日志记录也纳入打印候选范围。只是对 action 为 "change" 的日志记录要求册记录 location 元素发生了实质性修改才会纳入候选范围

@@ -624,6 +624,9 @@ TaskScheduler.Default);
             using (var releaser = await _databaseLimit.EnterAsync())
             using (var context = new RequestContext())
             {
+                // 2021/9/28
+                context.Database.EnsureCreated();
+
                 List<RequestItem> items = new List<RequestItem>();
                 items.AddRange(context.Requests);
                 // 先删除
@@ -766,6 +769,9 @@ TaskScheduler.Default);
             {
                 using (var context = new RequestContext())
                 {
+                    // 2021/9/28
+                    context.Database.EnsureCreated();
+
                     var items = context.Requests.Where(o => o.Action == "borrow" && o.LinkID == null && string.IsNullOrEmpty(o.ActionString) == false).ToList();
                     RequestItem request = null;
                     foreach (var item in items)
@@ -934,6 +940,9 @@ TaskScheduler.Default);
             {
                 using (var context = new RequestContext())
                 {
+                    // 2021/9/28
+                    context.Database.EnsureCreated();
+
                     var item = context.Requests.FirstOrDefault(o => o.ID == id);
                     item.State = action.State;
                     item.SyncErrorInfo = action.SyncErrorInfo;
@@ -1250,6 +1259,9 @@ TaskScheduler.Default);
             {
                 using (var context = new RequestContext())
                 {
+                    // 2021/9/28
+                    context.Database.EnsureCreated();
+
                     var items = context.Requests.Where(o => o.PII == uii && o.OperTime >= createTime).ToList();
                     foreach (var item in items)
                     {

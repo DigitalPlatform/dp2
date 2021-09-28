@@ -60,7 +60,11 @@ namespace dp2Circulation
                         return 0;
 
                     string action = DomUtil.GetElementText(dom.DocumentElement, "action");
-                    if (action != "transfer")
+                    if (action == "transfer" || action == "change")
+                    {
+
+                    }
+                    else
                         return 0;
 
                     var item = new TransferItem();
@@ -79,6 +83,11 @@ namespace dp2Circulation
                     new_itemdom.LoadXml(new_xml);
 
                     item.TargetLocation = DomUtil.GetElementText(new_itemdom.DocumentElement, "location");
+
+                    // 2021/9/28
+                    // 对于动作为 change 的，只纳入那些 location 真正发生过修改的日志记录
+                    if (action == "change" && item.SourceLocation == item.TargetLocation)
+                        return 0;
 
                     // 2020/11/23
                     item.SourceCurrentLocation = DomUtil.GetElementText(old_itemdom.DocumentElement, "currentLocation");
