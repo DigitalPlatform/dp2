@@ -113,3 +113,4 @@ using System.Runtime.InteropServices;
 // 3.40 2021/9/28 实体查询窗、订购查询窗等去掉了 tablelayout_main 控件。尝试解决在有的机器上 listview 内容没有水平卷滚条的问题
 //                  实体查询窗、订购查询窗等修正了浏览列标题不足的 bug
 //                  日志统计窗里面的“打印典藏移交清单”功能，除了原先的 action 为 "transfer" 的日志记录外，新增加了把 action 为 "change" 的日志记录也纳入打印候选范围。只是对 action 为 "change" 的日志记录要求册记录 location 元素发生了实质性修改才会纳入候选范围
+//                  典藏移交窗里面修改馆藏地功能中的对话框增加了“批次号”textbox，所输入的批次号会用于写入 setEntity 操作日志记录中

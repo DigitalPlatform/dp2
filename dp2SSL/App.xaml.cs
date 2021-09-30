@@ -2297,6 +2297,11 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 window.Width = Math.Min(1000, mainWindows.ActualWidth * 0.95);
                 window.Height = Math.Min(700, mainWindows.ActualHeight * .95);
             }
+            else if (style == "full")
+            {
+                window.Width = mainWindows.ActualWidth;
+                window.Height = mainWindows.ActualHeight;
+            }
             else
             {
                 window.Width = Math.Min(700, mainWindows.ActualWidth * 0.95);

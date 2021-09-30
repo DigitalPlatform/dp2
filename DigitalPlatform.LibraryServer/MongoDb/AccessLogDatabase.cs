@@ -620,6 +620,13 @@ g => new { Id = g.Key, Count = g.Count() })
             strError = "";
             List<OperLogInfo> results = new List<OperLogInfo>();
 
+            // 2021/9/30
+            if (lIndex < 0)
+            {
+                strError = $"lIndex 参数必须大于等于 0 (但却为 {lIndex})";
+                return -1;
+            }
+
             if (StringUtil.IsInList("getfilenames", strStyle) == true)
             {
                 int hit_count = 0;

@@ -53,7 +53,11 @@ namespace DigitalPlatform.LibraryServer.Reporting
             // optionsBuilder.UseMySQL("server=localhost;database=library;user=user;password=password");
             optionsBuilder
                 // .UseLazyLoadingProxies()
-                .UseMySql(_config.BuildConnectionString());
+                .UseMySql(_config.BuildConnectionString()/*,
+                mySqlOptionsAction:sqlOptions=>
+                {
+                    sqlOptions.EnableRetryOnFailure();
+                }*/);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -118,6 +122,9 @@ namespace DigitalPlatform.LibraryServer.Reporting
             });
             modelBuilder.Entity<CircuOper>(entity =>
             {
+                //entity.HasKey(e => new { e.ReaderBarcode});
+                //entity.HasKey(e => new { e.ItemBarcode });
+
                 entity.HasKey(e => new { e.Date, e.No, e.SubNo });
             });
             modelBuilder.Entity<PatronOper>(entity =>
@@ -312,7 +319,6 @@ namespace DigitalPlatform.LibraryServer.Reporting
             this.Mime = strMime;
             return 0;
         }
-
     }
 
     // 流通操作 每行
@@ -325,6 +331,9 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public string ReaderBarcode { get; set; }
 
         public DateTime ReturningTime { get; set; }
+
+        // 2021/9/28
+        public string BorrowID { get; set; }
 
         // 根据日志 XML 记录填充数据
         public override int SetData(XmlDocument dom,
@@ -367,6 +376,11 @@ namespace DigitalPlatform.LibraryServer.Reporting
 
             this.ItemBarcode = strItemBarcode;
             this.ReaderBarcode = strReaderBarcode;
+
+            // 2021/9/29
+            string strBorrowID = DomUtil.GetElementText(dom.DocumentElement,
+    "borrowID");
+            this.BorrowID = strBorrowID;
             return 0;
         }
 

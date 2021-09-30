@@ -2181,6 +2181,32 @@ string strOutputFileName)
                     ItemBarcode = item == null ? "" : item.ItemBarcode,
                     BorrowTime = oper.OperTime,
                     ReturnTime = context
+                    .CircuOpers.Where(x => x.ReaderBarcode == patronBarcode && x.Action == "return" && x.OperTime >= oper.OperTime && string.Compare(x.Date, oper.Date) >= 0)
+                    .Select(a => new { a.OperTime })
+                    // .OrderBy(a => a.OperTime)
+                    .FirstOrDefault().OperTime,
+                    Summary = context
+                    .Biblios.Where(x => item != null && x.RecPath == item.BiblioRecPath)
+                    .Select(a => a.Summary)
+                    .FirstOrDefault()
+                }
+            )
+            .DefaultIfEmpty()
+            .OrderBy(t => t.BorrowTime)
+            //.Take(1000)
+            .ToList();
+
+
+            /*
+            .LeftJoin(
+                context.Items,
+                oper => oper.ItemBarcode,
+                item => item.ItemBarcode,
+                (oper, item) => new
+                {
+                    ItemBarcode = item == null ? "" : item.ItemBarcode,
+                    BorrowTime = oper.OperTime,
+                    ReturnTime = context
                     .CircuOpers.Where(x => x.ReaderBarcode == patronBarcode && x.Action == "return" && x.OperTime >= oper.OperTime)
                     .Select(a => new { a.OperTime })
                     .OrderBy(a => a.OperTime)
@@ -2193,7 +2219,9 @@ string strOutputFileName)
             )
             .DefaultIfEmpty()
             .OrderBy(t => t.BorrowTime)
+            //.Take(1000)
             .ToList();
+            */
 
             // %name% %readerbarcode% %department%
             var patrons = context.Patrons.Where(x => x.Barcode == patronBarcode)

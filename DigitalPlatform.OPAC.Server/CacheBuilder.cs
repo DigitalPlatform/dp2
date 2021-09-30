@@ -1607,6 +1607,13 @@ namespace DigitalPlatform.OPAC.Server
                                 continue;
                             }
 
+                            // 2021/9/30
+                            if (rec.Cols[0] == "[滤除]")
+                            {
+                                strError = $"账户 {channel.UserName} 权限不足，在获取册记录 {rec.Path} 的浏览列 format:@coldef://parent 时内容被滤除。请注意增补必要的权限";
+                                return -1;
+                            }
+
                             // return:
                             //      -1  出错
                             //      1   成功

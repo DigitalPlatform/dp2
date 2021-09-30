@@ -15,7 +15,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using System.Reflection;
 
 namespace DigitalPlatform.LibraryServer.Reporting
 {

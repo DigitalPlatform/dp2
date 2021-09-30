@@ -33,6 +33,7 @@
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_buildPlan = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_continueExcutePlan = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_settings = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testCreateReport = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,7 +65,6 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
-            this.MenuItem_settings = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
@@ -112,6 +112,13 @@
             this.MenuItem_continueExcutePlan.Size = new System.Drawing.Size(318, 40);
             this.MenuItem_continueExcutePlan.Text = "继续执行同步计划";
             this.MenuItem_continueExcutePlan.Click += new System.EventHandler(this.MenuItem_continueExcutePlan_Click);
+            // 
+            // MenuItem_settings
+            // 
+            this.MenuItem_settings.Name = "MenuItem_settings";
+            this.MenuItem_settings.Size = new System.Drawing.Size(318, 40);
+            this.MenuItem_settings.Text = "设置 ...";
+            this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 
             // MenuItem_exit
             // 
@@ -178,7 +185,7 @@
             // MenuItem_createReport
             // 
             this.MenuItem_createReport.Name = "MenuItem_createReport";
-            this.MenuItem_createReport.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_createReport.Size = new System.Drawing.Size(234, 40);
             this.MenuItem_createReport.Text = "创建报表 ...";
             // 
             // toolStrip1
@@ -232,7 +239,7 @@
             this.tabPage_history.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_history.Name = "tabPage_history";
             this.tabPage_history.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_history.Size = new System.Drawing.Size(970, 470);
+            this.tabPage_history.Size = new System.Drawing.Size(970, 458);
             this.tabPage_history.TabIndex = 0;
             this.tabPage_history.Text = "操作历史";
             this.tabPage_history.UseVisualStyleBackColor = true;
@@ -244,7 +251,7 @@
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(29, 31);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(962, 464);
+            this.webBrowser1.Size = new System.Drawing.Size(962, 452);
             this.webBrowser1.TabIndex = 2;
             // 
             // tabPage_config
@@ -422,13 +429,6 @@
             this.toolStripButton_cfg_setHongnibaServer.Text = "红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
-            // 
-            // MenuItem_settings
-            // 
-            this.MenuItem_settings.Name = "MenuItem_settings";
-            this.MenuItem_settings.Size = new System.Drawing.Size(318, 40);
-            this.MenuItem_settings.Text = "设置 ...";
-            this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 
             // Form1
             // 

@@ -4369,6 +4369,7 @@ strContent);
             //      1   中断
             nRet = SaveItemRecords(
                 items,  // 保存范围可能比本次clear的稍大
+                dlg.BatchNo,
                 out nSavedCount,
                 out strError);
             if (nRet == -1)
@@ -4465,6 +4466,7 @@ strContent);
             //      1   中断
             nRet = SaveItemRecords(
                 items,  // 保存范围可能比本次clear的稍大
+                "",
                 out nSavedCount,
                 out strError);
             if (nRet == -1)
@@ -6058,6 +6060,7 @@ MessageBoxDefaultButton.Button2);
             //      1   中断
             nRet = SaveItemRecords(
                 items,  // 保存范围可能比本次clear的稍大
+                "",
                 out nSavedCount,
                 out strError);
             if (nRet == -1)
@@ -6170,6 +6173,7 @@ MessageBoxDefaultButton.Button2);
         //      1   中断
         int SaveItemRecords(
             List<ListViewItem> items,
+            string strBatchNo,
             out int nSavedCount,
             out string strError)
         {
@@ -6275,6 +6279,10 @@ MessageBoxDefaultButton.Button2);
 
                     info.OldRecord = data.Xml;
                     info.OldTimestamp = data.Timestamp;
+
+                    // 2021/9/28
+                    if (string.IsNullOrEmpty(strBatchNo) == false)
+                        info.Style = $"batchNo:{strBatchNo}";
 
                     entity_list.Add(info);
 

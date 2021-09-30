@@ -30,6 +30,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
 using dp2SSL.Models;
+using System.Windows.Media;
 
 namespace dp2SSL
 {
@@ -568,7 +569,7 @@ IList<MessageRecord> messages)
                     if (action == "create")
                         await ProcessMessages(messages);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"ProcessMessages() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -588,7 +589,7 @@ IList<MessageRecord> messages)
                         string command = message.data.Substring($"@{_userName} ".Length).Trim();
 
                         if (message.groups != null && message.groups.Length > 0)
-                            await ProcessCommandAsync(command, message.groups[0]);
+                            await ProcessCommandAsync(command, message.groups[0], message.userName);
 
                         _instantMessageIDs[message.id] = message.publishTime;
                         ClearOldIDs();
@@ -869,7 +870,7 @@ cancellation_token);
             // 2021/9/8
             if (delete_keys.Count > 0)
             {
-                foreach(var key in delete_keys)
+                foreach (var key in delete_keys)
                 {
                     _instantMessageIDs.Remove(key);
                 }
@@ -1064,7 +1065,9 @@ cancellation_token);
         }
         */
 
-        static async Task ProcessCommandAsync(string command, string groupName)
+        static async Task ProcessCommandAsync(string command,
+            string groupName,
+            string sender)
         {
             /*
             // 测试 让 dp2mserver 清除当前通道的 ConnectionInfo
@@ -1356,6 +1359,118 @@ update
                 return;
             }
 
+            // 关机
+            if (command.StartsWith("shutdown"))
+            {
+                // 若当前为书柜界面，则需要检查是否有打开的门
+                if (IsInShelfPage() && ShelfData.OpeningDoorCount > 0)
+                {
+                    await SendMessageAsync(groupName, $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，因此拒绝执行 shutdown 命令");
+                    return;
+                }
+
+                _shutdownAgreementTable[sender] = true;
+
+                // 启动等待任务
+                if (_shutdownAgreementTable.Count == 1
+                    && _shutdownAgreementTask == null)
+                {
+                    await SendMessageAsync(groupName, $"已进入关机预备状态，等待一共 {_shutdownAgreementAmount} 个管理员参与 shutdown 命令。关机预备状态将持续 {_shutdownAgreementPeriod.TotalMinutes} 分钟。\r\n*** 警告：远程关机后，无法通过远程再开机(只能由现场的人开机)，请各参与者务必慎重确认操作 ***");
+                    // 等待一段时间后，自动将 _shutdownAgreementCount 清零
+                    _shutdownAgreementTask = Task.Run(async () =>
+                    {
+                        using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken))
+                        {
+                            ProgressWindow progress = null;
+
+                            App.Invoke(new Action(() =>
+                            {
+                                progress = new ProgressWindow();
+                                progress.TitleText = "准备关机";
+                                progress.MessageText = "正在准备关机";
+                                progress.Owner = Application.Current.MainWindow;
+                                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                                progress.Closed += (s, e) =>
+                                {
+                                    cancel.Cancel();
+                                };
+                                progress.okButton.Content = "停止";
+                                progress.Background = new SolidColorBrush(Colors.DarkRed);
+                                // TODO: 让对话框遮住全部屏幕。或者 AddLayer
+                                App.SetSize(progress, "full");
+                                progress.BackColor = "yellow";
+                                progress.Show();
+                            }));
+
+                            try
+                            {
+                                // 再次检查开门状态
+                                if (IsInShelfPage() && ShelfData.OpeningDoorCount > 0)
+                                {
+                                    await SendMessageAsync(groupName, $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，因此拒绝执行 shutdown 命令");
+                                    return;
+                                }
+
+                                var token = cancel.Token;
+                                await Task.Delay(_shutdownAgreementPeriod, token);
+                            }
+                            finally
+                            {
+                                _shutdownAgreementTable.Clear();
+                                await SendMessageAsync(groupName, $"已取消关机预备状态，shutdown 命令取消执行");
+                                _shutdownAgreementTask = null;
+
+                                App.Invoke(new Action(() =>
+                                {
+                                    progress.Close();
+                                }));
+                            }
+                        }
+                    });
+                }
+
+                /*
+                string param = command.Substring("shutdown".Length).Trim();
+                WpfClientInfo.WriteInfoLog($"shutdown 命令参数：'{param}'");
+                */
+
+                if (_shutdownAgreementTable.Count >= _shutdownAgreementAmount)
+                {
+                    // 关闭电脑
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            // 为 dp2ssl 开机后自动重启预先设定好 cmdlineparam.txt 文件
+                            WriteParameterFile();
+
+                            await Task.Delay(1000);
+                            WpfClientInfo.WriteInfoLog($"经下列管理员 {GetUserList()} 共同参与，关机命令得以最终执行");
+                            ShutdownUtil.DoExitWindows(ShutdownUtil.ExitWindows.ShutDown);
+                        }
+                        catch (Exception ex)
+                        {
+                            WpfClientInfo.WriteErrorLog($"接受远程命令关机过程出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                        }
+                    });
+                    await SendMessageAsync(groupName, $"Windows 将在一秒后关机");
+                    return;
+                }
+                else
+                {
+                    var delta = _shutdownAgreementAmount - _shutdownAgreementTable.Count;
+                    await SendMessageAsync(groupName, $"当前已有下列管理员 {GetUserList()} 参与执行了 shutdown 命令。还需 {delta} 个成员执行 shutdown 命令，才能真正关机");
+                    return;
+                }
+
+                string GetUserList()
+                {
+                    List<string> names = new List<string>(_shutdownAgreementTable.Keys.Cast<string>());
+                    return StringUtil.MakePathList(names);
+                }
+            }
+
+
             // 重新启动 dp2ssl
             if (command.StartsWith("restart"))
             {
@@ -1379,6 +1494,7 @@ update
                     }))
                 {
                     // 重启电脑
+                    // TODO: 这个过程中应暂时禁止读者开门
                     _ = Task.Run(async () =>
                     {
                         try
@@ -1450,6 +1566,13 @@ update
 
             await SendMessageAsync(groupName, $"我无法理解这个命令 '{command}'");
         }
+
+        // 在执行关机命令过程中，同意关机的点对点账户名列表
+        // account_name --> true
+        static Hashtable _shutdownAgreementTable = new Hashtable();
+        static TimeSpan _shutdownAgreementPeriod = TimeSpan.FromMinutes(5);
+        static Task _shutdownAgreementTask = null;
+        static int _shutdownAgreementAmount = 2;    // 需要至少此数目的用户参与执行 shutdown 命令，才能真正关机
 
         static bool IsInSettingPage()
         {
@@ -1896,7 +2019,7 @@ text.ToString());
                     };
                 }
 
-            // REDO:
+                // REDO:
                 // 子参数
                 string param = command.Substring("write tag".Length).Trim();
 
@@ -2528,7 +2651,7 @@ text.ToString());
                 {
                     SearchAndResponse(param);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"SearchAndResponse() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -4231,7 +4354,7 @@ strError);
         results,
         errorInfo).ConfigureAwait(false);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"TryResponseSetInfo() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }

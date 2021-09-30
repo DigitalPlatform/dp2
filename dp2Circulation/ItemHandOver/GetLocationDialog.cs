@@ -73,6 +73,20 @@ namespace dp2Circulation
             }
         }
 
+        // 2021/9/28
+        // 批次号。用于写入 dp2library 操作日志
+        public string BatchNo
+        {
+            get
+            {
+                return this.textBox_batchNo.Text;
+            }
+            set
+            {
+                this.textBox_batchNo.Text = value;
+            }
+        }
+
         private void comboBox_location_DropDown(object sender, EventArgs e)
         {
             FillDropDown((ComboBox)sender);
@@ -160,6 +174,15 @@ namespace dp2Circulation
         {
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
+        }
+
+        private void textBox_batchNo_Validating(object sender, CancelEventArgs e)
+        {
+            if (this.textBox_batchNo.Text.IndexOfAny(new char[] { ':', ',' }) != -1)
+            {
+                MessageBox.Show(this, $"批次号内容 '{this.textBox_batchNo.Text}' 中包含非法字符");
+                e.Cancel = true;
+            }
         }
     }
 }
