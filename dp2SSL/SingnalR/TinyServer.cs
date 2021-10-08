@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Windows.Navigation;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
+using System.Windows.Media;
 
 using Newtonsoft.Json;
 using Microsoft.AspNet.SignalR.Client;
@@ -30,7 +31,6 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.SimpleMessageQueue;
 using DigitalPlatform.RFID;
 using dp2SSL.Models;
-using System.Windows.Media;
 
 namespace dp2SSL
 {
@@ -1585,7 +1585,6 @@ update
             return result;
         }
 
-
         // 当前是否正处在书柜页面
         static bool IsInShelfPage()
         {
@@ -2078,7 +2077,7 @@ text.ToString());
                     App.Invoke(new Action(() =>
                     {
                         dlg = new WriteTagWindow();
-                        App.SetSize(dlg, "wide");
+                        App.SetSize(dlg, "full");
                     }));
 
                     dlg.LoopWriting = loop;
