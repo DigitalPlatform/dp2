@@ -939,6 +939,8 @@ namespace DigitalPlatform.GUI
             styles.Add(ColumnSortStyle.RightAlign);// 右对齐字符串
             styles.Add(ColumnSortStyle.RecPath);    // 记录路径。例如“中文图书/1”，以'/'为界，右边部分当作数字值排序。或者“localhost/中文图书/ctlno/1”
             styles.Add(ColumnSortStyle.LongRecPath);  // 记录路径。例如“中文图书/1 @本地服务器”
+            // 2021/10/9
+            styles.Add(ColumnSortStyle.RFC1123);  // RFC1123 时间字符串
 
             // 寻找标题 .Tag 中的定义
             if (nColumn < list.Columns.Count)

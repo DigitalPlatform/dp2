@@ -1475,7 +1475,7 @@ namespace DigitalPlatform.LibraryServer
                     //		-1	出错
                     //		0	脚本代码没有找到
                     //      1   成功
-                    nRet = this.InitialLibraryHostAssembly(out strError);
+                    nRet = this.InitialLibraryHostAssembly(null, out strError);
                     if (nRet == -1)
                     {
                         app.WriteErrorLog(strError);

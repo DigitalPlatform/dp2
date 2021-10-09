@@ -4786,6 +4786,24 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        // 2021/10/9
+        // 执行一个功能
+        public void Operate(FuncState func,
+            string text, 
+            string comment)
+        {
+            // 先切换到这个功能状态，避免用户困惑
+            if (this.FuncState != func)
+                this.FuncState = func;
+
+            this.Invoke((Action)(() =>
+            {
+                this.textBox_input.Text = text;
+            }));
+
+            AsyncDoAction(func, text, "", string.IsNullOrEmpty(comment) ? "" : $"comment:{comment}");
+        }
+
         private void toolStripDropDownButton1_DropDownOpening(object sender, EventArgs e)
         {
             string list = this.webBrowser_reader.Document.InvokeScript("getSelectedBarcodes") as string;

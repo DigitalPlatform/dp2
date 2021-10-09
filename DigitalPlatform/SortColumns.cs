@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using DigitalPlatform.GUI;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace DigitalPlatform
 {
@@ -75,6 +76,15 @@ namespace DigitalPlatform
             get
             {
                 return new ColumnSortStyle("IpAddress");
+            }
+        }
+
+        // 2021/10/9
+        public static ColumnSortStyle RFC1123
+        {
+            get
+            {
+                return new ColumnSortStyle("RFC1123");
             }
         }
 
@@ -318,10 +328,10 @@ namespace DigitalPlatform
                 // strOldText = header.Text;
                 // 记忆下来
                 prop = new ColumnProperty(header.Text);
-                header.Tag = prop; 
+                header.Tag = prop;
             }
 
-            string strNewText = 
+            string strNewText =
                 (column.Asc == true ? "▲" : "▼")
                 + (nSortNo + 1).ToString()
                 + " "
@@ -396,7 +406,7 @@ namespace DigitalPlatform
             }
             else
                 strServerName = "";
-            
+
             nRet = strRecPath.LastIndexOf("/");
             if (nRet == -1)
             {
@@ -450,6 +460,267 @@ namespace DigitalPlatform
             return (parts1.Length - parts2.Length);
         }
 
+        // 2021/10/9
+        public static int CompareRFC1123(string s1, string s2)
+        {
+            DateTime time1;
+            DateTime time2;
+
+            if (string.IsNullOrEmpty(s1))
+                time1 = DateTime.MinValue;
+            else
+            {
+                try
+                {
+                    time1 = FromRfc1123DateTimeString(s1);
+                }
+                catch
+                {
+                    time1 = DateTime.MinValue;
+                }
+            }
+
+            if (string.IsNullOrEmpty(s2))
+                time2 = DateTime.MinValue;
+            else
+            {
+                try
+                {
+                    time2 = FromRfc1123DateTimeString(s2);
+                }
+                catch
+                {
+                    time2 = DateTime.MinValue;
+                }
+            }
+
+            if (time1 == time2)
+                return 0;
+            if (time1 > time2)
+                return 1;
+            return -1;
+        }
+
+        #region RFC1123 时间处理
+
+        // 把字符串转换为DateTime对象
+        // 注意返回的是GMT时间
+        // 注意可能抛出异常
+        public static DateTime FromRfc1123DateTimeString(string strTime)
+        {
+            if (string.IsNullOrEmpty(strTime) == true)
+                throw new Exception("时间字符串为空");
+
+            string strError = "";
+            string strMain = "";
+            string strTimeZone = "";
+            TimeSpan offset;
+            // 将RFC1123字符串中的timezone部分分离出来
+            // parameters:
+            //      strMain [out]去掉timezone以后的左边部分
+            //      strTimeZone [out]timezone部分
+            int nRet = SplitRfc1123TimeZoneString(strTime,
+            out strMain,
+            out strTimeZone,
+            out offset,
+            out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+
+            DateTime parsedBack;
+            string[] formats = {
+                "ddd, dd MMM yyyy HH':'mm':'ss",   // [ddd, ] 'GMT'
+                "dd MMM yyyy HH':'mm':'ss",
+                "ddd, dd MMM yyyy HH':'mm",
+                "dd MMM yyyy HH':'mm",
+                                };
+
+            bool bRet = DateTime.TryParseExact(strMain,
+                formats,
+                DateTimeFormatInfo.InvariantInfo,
+                DateTimeStyles.None,
+                out parsedBack);
+            if (bRet == false)
+            {
+                strError = "时间字符串 '" + strTime + "' 不是RFC1123格式";
+                throw new Exception(strError);
+            }
+
+            return parsedBack - offset;
+        }
+
+        static TimeSpan GetOffset(string strDigital)
+        {
+            if (strDigital.Length != 5)
+                throw new Exception("strDigital必须为5字符");
+
+            int hours = Convert.ToInt32(strDigital.Substring(1, 2));
+            int minutes = Convert.ToInt32(strDigital.Substring(3, 2));
+            TimeSpan offset = new TimeSpan(hours, minutes, 0);
+            if (strDigital[0] == '-')
+                offset = new TimeSpan(offset.Ticks * -1);
+
+            return offset;
+        }
+
+        // 将RFC1123字符串中的timezone部分分离出来
+        // parameters:
+        //      strMain [out]去掉timezone以后的左边部分// ，并去掉左边逗号以左的部分
+        //      strTimeZone [out]timezone部分
+        static int SplitRfc1123TimeZoneString(string strTimeParam,
+            out string strMain,
+            out string strTimeZone,
+            out TimeSpan offset,
+            out string strError)
+        {
+            strError = "";
+            strMain = "";
+            strTimeZone = "";
+            offset = new TimeSpan(0);
+            int nRet = 0;
+
+            string strTime = strTimeParam.Trim();
+
+            /*
+            // 去掉逗号以左的部分
+            int nRet = strTime.IndexOf(",");
+            if (nRet != -1)
+                strTime = strTime.Substring(nRet + 1).Trim();
+             * */
+
+            // 一位字母
+            if (strTime.Length > 2
+                && strTime[strTime.Length - 2] == ' ')
+            {
+                strMain = strTime.Substring(0, strTime.Length - 2).Trim();
+                strTimeZone = strTime.Substring(strTime.Length - 1);
+                if (strTimeZone == "J")
+                {
+                    strError = "RFC1123字符串 '" + strTimeParam + "' 格式错误： 最后一位TimeZone字符，不能为'J'";
+                    return -1;
+                }
+
+                if (strTimeZone == "Z")
+                    return 0;
+
+                int nHours = 0;
+
+                if (strTimeZone[0] >= 'A' && strTimeZone[0] < 'J')
+                    nHours = -(strTimeZone[0] - 'A' + 1);
+                else if (strTimeZone[0] >= 'K' && strTimeZone[0] <= 'M')
+                    nHours = -(strTimeZone[0] - 'B' + 1);
+                else if (strTimeZone[0] >= 'N' && strTimeZone[0] <= 'Y')
+                    nHours = strTimeZone[0] - 'N' + 1;
+
+                offset = new TimeSpan(nHours, 0, 0);
+                return 0;
+            }
+
+            // ( "+" / "-") 4DIGIT
+            if (strTime.Length > 5
+                && (strTime[strTime.Length - 5] == '+' || strTime[strTime.Length - 5] == '-'))
+            {
+                strMain = strTime.Substring(0, strTime.Length - 5).Trim();
+                strTimeZone = strTime.Substring(strTime.Length - 5);
+
+                try
+                {
+                    offset = GetOffset(strTimeZone);
+                }
+                catch (Exception ex)
+                {
+                    strError = ex.Message;
+                    return -1;
+                }
+
+                return 0;
+            }
+
+            string[] modes = {
+                            "GMT",
+                            "UT",
+                            "EST",
+                            "EDT",
+                            "CST",
+                            "CDT",
+                            "MST",
+                            "MDT",
+                            "PST",
+                            "PDT"};
+            if (strTime.Length <= 3)
+            {
+                strError = "RFC1123字符串 '" + strTimeParam + "' 格式错误： 字符数不足";
+                return -1;
+            }
+
+            string strPart = strTime.Substring(strTime.Length - 3);
+            foreach (string mode in modes)
+            {
+                nRet = strPart.LastIndexOf(mode);
+                if (nRet != -1)
+                {
+                    nRet = strTime.LastIndexOf(mode);
+                    Debug.Assert(nRet != -1, "");
+
+                    strMain = strTime.Substring(0, nRet).Trim();
+                    strTimeZone = mode;
+
+                    if (strTimeZone == "GMT" || strTimeZone == "UT")
+                        return 0;
+
+                    string strDigital = "";
+
+                    switch (strTimeZone)
+                    {
+                        case "EST":
+                            strDigital = "-0500";
+                            break;
+                        case "EDT":
+                            strDigital = "-0400";
+                            break;
+                        case "CST":
+                            strDigital = "-0600";
+                            break;
+                        case "CDT":
+                            strDigital = "-0500";
+                            break;
+                        case "MST":
+                            strDigital = "-0700";
+                            break;
+                        case "MDT":
+                            strDigital = "-0600";
+                            break;
+                        case "PST":
+                            strDigital = "-0800";
+                            break;
+                        case "PDT":
+                            strDigital = "-0700";
+                            break;
+                        default:
+                            strError = "error";
+                            return -1;
+                    }
+
+                    try
+                    {
+                        offset = GetOffset(strDigital);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = ex.Message;
+                        return -1;
+                    }
+
+                    return 0;
+                }
+            }
+
+            strError = "RFC1123字符串 '" + strTimeParam + "' 格式错误： TimeZone部分不合法";
+            return -1;
+        }
+
+        #endregion
+
         public int Compare(object x, object y)
         {
             for (int i = 0; i < this.SortColumns.Count; i++)
@@ -491,7 +762,7 @@ namespace DigitalPlatform
                     column.SortStyle.CompareFunc(this, e);
                     nRet = e.Result;
                 }
-                else if (column.SortStyle == ColumnSortStyle.None 
+                else if (column.SortStyle == ColumnSortStyle.None
                     || column.SortStyle == ColumnSortStyle.LeftAlign)
                 {
                     nRet = String.Compare(s1, s2);
@@ -571,6 +842,10 @@ namespace DigitalPlatform
                 {
                     nRet = CompareIpAddress(s1, s2);
                 }
+                else if (column.SortStyle == ColumnSortStyle.RFC1123)
+                {
+                    nRet = CompareRFC1123(s1, s2);
+                }
                 else if (this.EventCompare != null)
                 {
                     CompareEventArgs e = new CompareEventArgs();
@@ -587,7 +862,7 @@ namespace DigitalPlatform
                     nRet = String.Compare(s1, s2);
                 }
 
-                END1:
+            END1:
                 if (nRet != 0)
                 {
                     if (column.Asc == true)

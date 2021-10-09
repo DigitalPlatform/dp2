@@ -803,6 +803,19 @@ out strError);
             }
         }
 
+        // 2021/10/9
+        // 获得当前浏览列表中选定的行的条码号
+        public List<string> GetSelectedBarcodes()
+        {
+            List<string> results = new List<string>();
+            foreach(ListViewItem item in this.listView_records.SelectedItems)
+            {
+                string barcode = ListViewUtil.GetItemText(item, 1);
+                results.Add(barcode);
+            }
+            return results;
+        }
+
         // 将记录装载到交费窗
         // parameters:
         //      strIdType   标识类型 "barcode" "recpath"

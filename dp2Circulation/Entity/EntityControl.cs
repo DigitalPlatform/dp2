@@ -496,6 +496,13 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("察看借阅者[装入新开的读者窗] (&B)");
+            menuItem.Click += new System.EventHandler(this.menu_loadReaderInfo_Click);
+            if (this.listView.SelectedItems.Count == 0
+                || GetBorrowers().Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             // -----
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -515,7 +522,37 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView, new Point(e.X, e.Y));
+        }
 
+        List<string> GetBorrowers()
+        {
+            List<string> results = new List<string>();
+            foreach (ListViewItem item in this.listView.SelectedItems)
+            {
+                BookItem bookitem = (BookItem)item.Tag;
+                if (string.IsNullOrEmpty(bookitem.Borrower) == true)
+                    continue;
+                results.Add(bookitem.Borrower);
+            }
+
+            return results;
+        }
+
+        // 2021/10/9
+        // 将所选行的借阅者装入新开的读者窗
+        void menu_loadReaderInfo_Click(object sender, EventArgs e)
+        {
+            var barcodes = GetBorrowers();
+            if (barcodes.Count == 0)
+            {
+                MessageBox.Show(this, "当前所选的册记录行的借阅者列行没有内容");
+                return;
+            }
+            foreach (string barcode in barcodes)
+            {
+                var reader_form = Program.MainForm.OpenWindow<ReaderInfoForm>("new");
+                reader_form.AsyncLoadRecord(barcode);
+            }
         }
 
         void menu_loadToNewItemForm_Click(object sender, EventArgs e)
@@ -628,7 +665,7 @@ namespace dp2Circulation
                 {
                     // TODO: 对有些列要限制不让改动，比如记录路径列
                     bookitem.SetColumnText(x, "");
-                    
+
                     bookitem.RefreshListView();
                     bChanged = true;
                 }
@@ -1932,7 +1969,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
     "EntityEditForm",
     "uiState",
     "");
-                
+
                 edit.ShowDialog(this);
 
                 Program.MainForm.AppInfo.SetString(

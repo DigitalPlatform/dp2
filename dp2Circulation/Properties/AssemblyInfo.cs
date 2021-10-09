@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.40.*")]
-[assembly: AssemblyFileVersion("3.40.0.0")]
+[assembly: AssemblyVersion("3.41.*")]
+[assembly: AssemblyFileVersion("3.41.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -114,3 +114,7 @@ using System.Runtime.InteropServices;
 //                  实体查询窗、订购查询窗等修正了浏览列标题不足的 bug
 //                  日志统计窗里面的“打印典藏移交清单”功能，除了原先的 action 为 "transfer" 的日志记录外，新增加了把 action 为 "change" 的日志记录也纳入打印候选范围。只是对 action 为 "change" 的日志记录要求册记录 location 元素发生了实质性修改才会纳入候选范围
 //                  典藏移交窗里面修改馆藏地功能中的对话框增加了“批次号”textbox，所输入的批次号会用于写入 setEntity 操作日志记录中
+// 3.41 2021/10/9 日志统计窗里面“打印典藏以交清单”功能的候选对话框中增加了点击列标题对浏览行进行排序的功能
+//                  在读者窗为当前活动窗口的前提下，点框架窗口工具条的“借”按钮，可以切换到快捷出纳窗，并且会自动载入这个读者信息，准备好借书
+//                  在读者查询窗为当前活动窗口的前提下，点框架窗口工具条的“借”按钮，可以切换到快捷出纳窗，并且会自动载入刚才读者查询窗浏览列表中选定的第一个读者记录，准备好借书
+//                  在种册窗的“册”属性页，上下文菜单上增加了“查看借阅者”命令。注意这是打开新的读者窗装入，选定了多少行，就可能打开这么多个新的读者窗，注意使用以后关闭这些读者窗

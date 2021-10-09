@@ -1,4 +1,4 @@
-﻿// 读者XML记录转换为HTML显示格式
+﻿// 读者 XML 记录转换为 HTML 显示格式
 // 编写者：谢涛
 
 // 修改历史：
@@ -26,7 +26,8 @@
 // 2017/5/22    	册信息显示增加了 卷册 列
 // 2020/9/17    使用读者照片的顺序改为先看有没有 "face" 用途的，如果没有再看 "photo" 用途的
 // 2020/9/27    显示在借册信息的行数最多限制 100，多出来的会被略去
-// 2021/8/23	在借册行左侧增加 checkbox
+// 2021/8/23	“在借册”行左侧增加 checkbox
+// 2021/10/9    “在借册”行左边增加一列序号
 
 using System;
 using System.Collections.Generic;
@@ -56,13 +57,13 @@ public class MyConverter : ReaderConverter
         {
             return ex.Message;
         }
-        
+
         string strStyle = "";   // 页面风格名称 例如"_dark"
         List<string> formats = StringUtil.FindPrefixInList(StringUtil.SplitList(this.Formats, ','), "style_");
         if (formats.Count > 0)
             strStyle = formats[0].Substring("style".Length);
-            
-        string strLink = "<link href='%mappeddir%\\styles\\readerhtml"+strStyle+".css' type='text/css' rel='stylesheet' />"
+
+        string strLink = "<link href='%mappeddir%\\styles\\readerhtml" + strStyle + ".css' type='text/css' rel='stylesheet' />"
             + "<link href=\"%mappeddir%/jquery-ui-1.8.7/css/jquery-ui-1.8.7.css\" rel=\"stylesheet\" type=\"text/css\" />"
             + "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-1.4.4.min.js\"></script>"
             + "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-ui-1.8.7.min.js\"></script>"
@@ -94,19 +95,19 @@ public class MyConverter : ReaderConverter
 
         strResult.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
 
-        strResult.Append( "<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n\t<head>" + strLink + "</head>\r\n\t<body"
+        strResult.Append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n\t<head>" + strLink + "</head>\r\n\t<body"
             + (string.IsNullOrEmpty(strBodyClass) == false ? " class='" + strBodyClass + "'" : "")
             + ">");
 
         // 左右分布的大表格
-        strResult.Append( "\r\n\t\t<table class='layout'>");
-        strResult.Append( "\r\n\t\t\t<tr class='content'>");
+        strResult.Append("\r\n\t\t<table class='layout'>");
+        strResult.Append("\r\n\t\t\t<tr class='content'>");
 
         string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
         string strPersonName = DomUtil.GetElementText(dom.DocumentElement, "name");
 
         string strFingerprint = DomUtil.GetElementText(dom.DocumentElement, "fingerprint");
-        
+
         string strWeixinBinding = StringUtil.GetParameterByPrefix(DomUtil.GetElementText(dom.DocumentElement, "email"),
     "weixinid",
     ":");
@@ -119,8 +120,8 @@ public class MyConverter : ReaderConverter
         strResult.Append("<img id='cardphoto' class='pending' name='"
             + (this.RecPath == "?" ? "?" : "object-path:" + strPhotoPath) // 这里直接用读者证条码号也可以,只不过前端处理速度稍慢
             + "' src='%mappeddir%\\images\\ajax-loader.gif' alt='" + HttpUtility.HtmlEncode(strPersonName) + " 的照片'></img>");
-            
-        string strIcons = "";    
+
+        string strIcons = "";
         if (string.IsNullOrEmpty(strFingerprint) == false)
             strIcons += "<img src='%mappeddir%\\images\\fingerprint.png' style='background-color:#ffffff;' alt='有指纹信息'>";
         if (string.IsNullOrEmpty(strWeixinBinding) == false)
@@ -128,7 +129,7 @@ public class MyConverter : ReaderConverter
 
         if (string.IsNullOrEmpty(strIcons) == false)
             strResult.Append("<br/>" + strIcons);
-            
+
         strResult.Append("</td>");
         strResult.Append("<td class='warning' id='insertpoint'></td>");
 
@@ -143,26 +144,26 @@ public class MyConverter : ReaderConverter
         // 读者类别		
         string strReaderType = DomUtil.GetElementText(dom.DocumentElement, "readerType");
 
-        strResult.Append( "<tr class='content readertype'><td class='name'>读者类别</td><td class='value'>" + strReaderType + "</td></tr>");
+        strResult.Append("<tr class='content readertype'><td class='name'>读者类别</td><td class='value'>" + strReaderType + "</td></tr>");
 
 
         // 姓名
-        strResult.Append( "<tr class='content name'><td class='name'>姓名</td><td class='value' >" + strPersonName
+        strResult.Append("<tr class='content name'><td class='name'>姓名</td><td class='value' >" + strPersonName
     + "</td></tr>");
 
         // 补齐高度
         strResult.Append("<tr class='content blank'><td class='name'></td><td class='value' ></td></tr>");
 
-        strResult.Append( "</table></td>");
+        strResult.Append("</table></td>");
 
-        strResult.Append( "<td class='middle'>&nbsp;</td>");
+        strResult.Append("<td class='middle'>&nbsp;</td>");
 
-        strResult.Append( "<td class='right'>");
+        strResult.Append("<td class='right'>");
 
-        strResult.Append( "<table class='readerinfo'>");
+        strResult.Append("<table class='readerinfo'>");
 
         // 证状态
-        strResult.Append( "<tr class='content state'><td class='name'>证状态</td><td class='value'>"
+        strResult.Append("<tr class='content state'><td class='name'>证状态</td><td class='value'>"
  + strReaderState + "</td></tr>");
 
         /*
@@ -176,9 +177,9 @@ public class MyConverter : ReaderConverter
         if (bExpired == true)
             strExpireDateValueClass = "expireddate";
 
-        strResult.Append( "<tr class='content " + strExpireDateValueClass + "'><td class='name'>失效日期</td><td class='value'>" + LocalDate(strExpireDate) + "</td></tr>");
+        strResult.Append("<tr class='content " + strExpireDateValueClass + "'><td class='name'>失效日期</td><td class='value'>" + LocalDate(strExpireDate) + "</td></tr>");
 
-        strResult.Append( "<tr class='content department'><td class='name'>单位</td><td class='value'>"
+        strResult.Append("<tr class='content department'><td class='name'>单位</td><td class='value'>"
  + DomUtil.GetElementText(dom.DocumentElement, "department") + "</td></tr>");
 
         strResult.Append("<tr class='content comment'><td class='name'>注释</td><td class='value'><div class='wide'><div>"
@@ -187,13 +188,13 @@ public class MyConverter : ReaderConverter
         // 补齐高度
         strResult.Append("<tr class='content blank'><td class='name'></td><td class='value' ></td></tr>");
 
-        strResult.Append( "</table>");
+        strResult.Append("</table>");
 
-        strResult.Append( "</td></tr>");
+        strResult.Append("</td></tr>");
 
         // 大表格收尾
-        strResult.Append( "</table>");
-        
+        strResult.Append("</table>");
+
         // 获得日历
         Calendar calendar = null;
         // return:
@@ -218,9 +219,9 @@ public class MyConverter : ReaderConverter
 
         if (nodes.Count > 0)
         {
-            strResult.Append( "<div class='tabletitle'>违约/交费信息</div>");
-            strResult.Append( "<table class='overdue'>");
-            strResult.Append( "<tr class='columntitle'><td>册条码号</td><td>说明</td><td>金额</td><td nowrap>以停代金情况</td><td>起点日期</td><td>期限</td><td>终点日期</td><td>ID</td><td>注释</td></tr>");
+            strResult.Append("<div class='tabletitle'>违约/交费信息</div>");
+            strResult.Append("<table class='overdue'>");
+            strResult.Append("<tr class='columntitle'><td>册条码号</td><td>说明</td><td>金额</td><td nowrap>以停代金情况</td><td>起点日期</td><td>期限</td><td>终点日期</td><td>ID</td><td>注释</td></tr>");
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -273,7 +274,7 @@ public class MyConverter : ReaderConverter
                     if (nRet == -1)
                     {
                         strError = "在分析期限参数的过程中发生错误: " + strError;
-                        strResult.Append( strError);
+                        strResult.Append(strError);
                     }
 
                     long lResultValue = 0;
@@ -287,23 +288,23 @@ public class MyConverter : ReaderConverter
                     if (nRet == -1)
                     {
                         strError = "在计算以停代金周期的过程中发生错误: " + strError;
-                        strResult.Append( strError);
+                        strResult.Append(strError);
                     }
 
                     strPauseInfo += "停借期 " + lResultValue.ToString() + LibraryApplication.GetDisplayTimeUnit(strUnit) + " (计算过程如下: 超期 " + lOverduePeriod.ToString() + LibraryApplication.GetDisplayTimeUnit(strUnit) + "，读者类型 " + strReaderType + " 的 以停代金因子 为 " + strPauseCfgString + ")";
                 }
 
-                strResult.Append( "<tr class='content'>");
-                strResult.Append( "<td class='barcode' >" + strBarcodeLink + "</td>");
-                strResult.Append( "<td class='reason'><div class='wide'></div>" + strOver + "</td>");
-                strResult.Append( "<td class='price' >" + strPrice + "</td>");
-                strResult.Append( "<td class='pauseinfo'>" + strPauseInfo + "</td>");
-                strResult.Append( "<td class='borrowdate' >" + strBorrowDate + "</td>");
-                strResult.Append( "<td class='borrowperiod' >" + LibraryApplication.GetDisplayTimePeriodString(strBorrowPeriod) + "</td>");
-                strResult.Append( "<td class='returndate' >" + strReturnDate + "</td>");
-                strResult.Append( "<td class='id' >" + strID + "</td>");
-                strResult.Append( "<td class='comment' width='30%'>" + strComment + "</td>");
-                strResult.Append( "</tr>");
+                strResult.Append("<tr class='content'>");
+                strResult.Append("<td class='barcode' >" + strBarcodeLink + "</td>");
+                strResult.Append("<td class='reason'><div class='wide'></div>" + strOver + "</td>");
+                strResult.Append("<td class='price' >" + strPrice + "</td>");
+                strResult.Append("<td class='pauseinfo'>" + strPauseInfo + "</td>");
+                strResult.Append("<td class='borrowdate' >" + strBorrowDate + "</td>");
+                strResult.Append("<td class='borrowperiod' >" + LibraryApplication.GetDisplayTimePeriodString(strBorrowPeriod) + "</td>");
+                strResult.Append("<td class='returndate' >" + strReturnDate + "</td>");
+                strResult.Append("<td class='id' >" + strID + "</td>");
+                strResult.Append("<td class='comment' width='30%'>" + strComment + "</td>");
+                strResult.Append("</tr>");
             }
 
             if (StringUtil.IsInList("pauseBorrowing", this.App.OverdueStyle) == true)
@@ -320,33 +321,33 @@ public class MyConverter : ReaderConverter
                 if (nRet == -1)
                 {
                     strError = "在计算以停代金的过程中发生错误: " + strError;
-                    strResult.Append( strError);
+                    strResult.Append(strError);
                 }
                 if (nRet == 1)
                 {
-                    strResult.Append( "<td colspan='8'>" + strPauseMessage + "</td>");	// ???
+                    strResult.Append("<td colspan='8'>" + strPauseMessage + "</td>");	// ???
                 }
             }
 
-            strResult.Append( "</table>");
+            strResult.Append("</table>");
 
 
-            strWarningText += "<div class='warning amerce'><div class='number'>"+nodes.Count.ToString()+"</div><div class='text'>待交费</div></div>";
+            strWarningText += "<div class='warning amerce'><div class='number'>" + nodes.Count.ToString() + "</div><div class='text'>待交费</div></div>";
         }
 
         // ***
         // 借阅的册
-        strResult.Append( "<div class='tabletitle'>借阅信息</div>");
+        strResult.Append("<div class='tabletitle'>借阅信息</div>");
 
         nodes = dom.DocumentElement.SelectNodes("borrows/borrow");
         int nBorrowCount = nodes.Count;
 
-        strResult.Append( "<table class='borrowinfo'>");
+        strResult.Append("<table class='borrowinfo'>");
 
-        strResult.Append( "<tr class='borrow_count'><td colspan='9' class='borrow_count'>");
+        strResult.Append("<tr class='borrow_count'><td colspan='9' class='borrow_count'>");
 
         string strMaxItemCount = GetParam(strReaderType, "", "可借总册数");
-        strResult.Append( "最多可借:" + strMaxItemCount + " ");
+        strResult.Append("最多可借:" + strMaxItemCount + " ");
 
         int nMax = 0;
         try
@@ -355,20 +356,20 @@ public class MyConverter : ReaderConverter
         }
         catch
         {
-            strResult.Append( "当前读者 可借总册数 参数 '" + strMaxItemCount + "' 格式错误");
+            strResult.Append("当前读者 可借总册数 参数 '" + strMaxItemCount + "' 格式错误");
             goto CONTINUE1;
         }
 
-        strResult.Append( "当前可借:" + System.Convert.ToString(Math.Max(0, nMax - nodes.Count)) + "");
+        strResult.Append("当前可借:" + System.Convert.ToString(Math.Max(0, nMax - nodes.Count)) + "");
 
     CONTINUE1:
 
         int nOverdueCount = 0;
-        strResult.Append( "</td></tr>");
+        strResult.Append("</td></tr>");
 
         if (nodes.Count > 0)
         {
-            strResult.Append( "<tr class='columntitle'><td></td><td>册条码号</td><td>摘要</td><td>卷册</td><td>价格</td><td>续借次</td><td>借阅日期</td><td>期限</td><td>操作者</td><td>应还日期</td><td>续借注</td></tr>");
+            strResult.Append("<tr class='columntitle'><td></td><td>册条码号</td><td>摘要</td><td>卷册</td><td>价格</td><td>续借次</td><td>借阅日期</td><td>期限</td><td>操作者</td><td>应还日期</td><td>续借注</td></tr>");
 
             for (int i = 0; i < Math.Min(nodes.Count, 100); i++)
             {
@@ -385,7 +386,7 @@ public class MyConverter : ReaderConverter
                 string strPrice = DomUtil.GetAttr(node, "price");
                 string strTimeReturning = DomUtil.GetAttr(node, "timeReturning");
 
-		string strVolume = DomUtil.GetAttr(node, "volume");
+                string strVolume = DomUtil.GetAttr(node, "volume");
 
 #if NO
                 string strOverDue = "";
@@ -413,8 +414,8 @@ public class MyConverter : ReaderConverter
                     // strOverDue = strError;	// 可能也有一些必要的信息，例如非工作日
                 }
 #endif
-                    string strOverDue = "";
-                    bool bOverdue = false;  // 是否超期
+                string strOverDue = "";
+                bool bOverdue = false;  // 是否超期
                 {
 
                     DateTime timeReturning = DateTime.MinValue;
@@ -455,7 +456,7 @@ public class MyConverter : ReaderConverter
                                 + ")";
                         }
 
-                        strOverDue = "<a title='" + strError.Replace("'","\"") + "'>" + strOverDue + "</a>";
+                        strOverDue = "<a title='" + strError.Replace("'", "\"") + "'>" + strOverDue + "</a>";
                     }
                 }
 
@@ -465,51 +466,51 @@ public class MyConverter : ReaderConverter
 
                 /* strResult.Append( "<tr class='content' "+strColor+" nowrap>"); */
                 if (bOverdue == true)
-                    strResult.Append( "<tr class='content overdue'>");
+                    strResult.Append("<tr class='content overdue'>");
                 else
-                    strResult.Append( "<tr class='content'>");
-                strResult.Append( "<td class='checkbox' nowrap><input class='sel' type='checkbox' data-barcode='"+strBarcode+"'></input></td>");
-                strResult.Append( "<td class='barcode' nowrap>" + strBarcodeLink + "</td>");
-                strResult.Append( "<td class='summary pending'><br/>BC:" + strBarcode + "|" + strConfirmItemRecPath 
+                    strResult.Append("<tr class='content'>");
+                strResult.Append("<td class='checkbox' nowrap><span style='index'>"+(i+1).ToString()+"</span><input class='sel' type='checkbox' data-barcode='" + strBarcode + "'></input></td>");
+                strResult.Append("<td class='barcode' nowrap>" + strBarcodeLink + "</td>");
+                strResult.Append("<td class='summary pending'><br/>BC:" + strBarcode + "|" + strConfirmItemRecPath
                     + (string.IsNullOrEmpty(strBiblioRecPath) == true ? "" : "|" + strBiblioRecPath) + "</td>");
 
-		
-                strResult.Append( "<td class='volume' nowrap>" + HttpUtility.HtmlEncode(strVolume) + "</td>");
-                strResult.Append( "<td class='price' nowrap align='right'>" + strPrice + "</td>");
-                strResult.Append( "<td class='no' nowrap align='right'>" + strNo + "</td>");
-                strResult.Append( "<td class='borrowdate' >" + LocalDateOrTime(strBorrowDate, strPeriod) + "</td>");
-                strResult.Append( "<td class='period' nowrap>" + LibraryApplication.GetDisplayTimePeriodString(strPeriod) + "</td>");
-                strResult.Append( "<td class='operator' nowrap>" + strOperator + "</td>");
-                strResult.Append( "<td class='returndate' width='30%'>" + strOverDue + "</td>");
-                strResult.Append( "<td class='renewcomment' width='30%'>" + strRenewComment.Replace(";", "<br/>") + "</td>");
-                strResult.Append( "</tr>");
+
+                strResult.Append("<td class='volume' nowrap>" + HttpUtility.HtmlEncode(strVolume) + "</td>");
+                strResult.Append("<td class='price' nowrap align='right'>" + strPrice + "</td>");
+                strResult.Append("<td class='no' nowrap align='right'>" + strNo + "</td>");
+                strResult.Append("<td class='borrowdate' >" + LocalDateOrTime(strBorrowDate, strPeriod) + "</td>");
+                strResult.Append("<td class='period' nowrap>" + LibraryApplication.GetDisplayTimePeriodString(strPeriod) + "</td>");
+                strResult.Append("<td class='operator' nowrap>" + strOperator + "</td>");
+                strResult.Append("<td class='returndate' width='30%'>" + strOverDue + "</td>");
+                strResult.Append("<td class='renewcomment' width='30%'>" + strRenewComment.Replace(";", "<br/>") + "</td>");
+                strResult.Append("</tr>");
             }
 
             if (nodes.Count > 100)
             {
                 int rest = nodes.Count - 100;
                 strResult.Append("<tr class='content'>");
-                strResult.Append("<td class='barcode' colspan='10' >(剩余 "+rest.ToString()+" 项被略去 ...)</td>");
+                strResult.Append("<td class='barcode' colspan='10' >(剩余 " + rest.ToString() + " 项被略去 ...)</td>");
                 strResult.Append("</tr>");
             }
         }
 
-        strResult.Append( "</table>");
+        strResult.Append("</table>");
 
         if (nOverdueCount > 0)
             strWarningText += "<div class='warning overdue'><div class='number'>" + nOverdueCount.ToString() + "</div><div class='text'>已超期</div></div>";
 
         // ***
         // 预约请求
-        strResult.Append( "<div class='tabletitle'>预约请求</div>");
+        strResult.Append("<div class='tabletitle'>预约请求</div>");
         nodes = dom.DocumentElement.SelectNodes("reservations/request");
 
         if (nodes.Count > 0)
         {
             int nArriveCount = 0;
 
-            strResult.Append( "<table class='reservation'>");
-            strResult.Append( "<tr class='columntitle'><td nowrap>册条码号</td><td nowrap>到达情况</td><td nowrap>摘要</td><td nowrap>请求日期</td><td nowrap>操作者</td><td nowrap>配书情况</td></tr>");
+            strResult.Append("<table class='reservation'>");
+            strResult.Append("<tr class='columntitle'><td nowrap>册条码号</td><td nowrap>到达情况</td><td nowrap>摘要</td><td nowrap>请求日期</td><td nowrap>操作者</td><td nowrap>配书情况</td></tr>");
 
             foreach (XmlElement node in nodes)
             {
@@ -546,24 +547,24 @@ public class MyConverter : ReaderConverter
 
                     nArriveCount++;
                 }
-                
+
                 string strBox = node.GetAttribute("box");
                 if (string.IsNullOrEmpty(strBox) == false)
                     strClass += " boxing";
 
-                strResult.Append( "<tr class='" + strClass + "'>");
-                strResult.Append( "<td class='barcode'>"
+                strResult.Append("<tr class='" + strClass + "'>");
+                strResult.Append("<td class='barcode'>"
                     + MakeBarcodeListHyperLink(strBarcodes, strArrivedItemBarcode, ", ")
                     + (nBarcodesCount > 1 ? " 之一" : "")
                     + "</td>");
-                strResult.Append( "<td class='state'>" + strState + "</td>");
-                strResult.Append( "<td class='summary'>" + strSummary + "</td>");
-                strResult.Append( "<td class='requestdate'>" + strRequestDate + "</td>");
-                strResult.Append( "<td class='operator'>" + strOperator + "</td>");
-                strResult.Append( "<td class='boxing'>" + strBox + "</td>");
-                strResult.Append( "</tr>");
+                strResult.Append("<td class='state'>" + strState + "</td>");
+                strResult.Append("<td class='summary'>" + strSummary + "</td>");
+                strResult.Append("<td class='requestdate'>" + strRequestDate + "</td>");
+                strResult.Append("<td class='operator'>" + strOperator + "</td>");
+                strResult.Append("<td class='boxing'>" + strBox + "</td>");
+                strResult.Append("</tr>");
             }
-            strResult.Append( "</table>");
+            strResult.Append("</table>");
 
             if (nArriveCount > 0)
                 strWarningText += "<div class='warning arrive'><div class='number'>" + nArriveCount.ToString() + "</div><div class='text'>预约到书</div></div>";
@@ -611,7 +612,7 @@ public class MyConverter : ReaderConverter
                     string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
                     string strBiblioRecPath = DomUtil.GetAttr(node, "biblioRecPath");
                     string strReturnDate = DomUtil.GetAttr(node, "returnDate");
-			string strVolume = DomUtil.GetAttr(node, "volume");
+                    string strVolume = DomUtil.GetAttr(node, "volume");
 
                     // string strBarcodeLink = "<a href='" + App.OpacServerUrl + "/book.aspx?barcode=" + strBarcode + "&borrower=" + strReaderBarcode + "&forcelogin=userid' target='_blank'>" + strBarcode + "</a>";
                     string strBarcodeLink = "<a href='javascript:void(0);'  onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\" onmouseover=\"OnHover(this.innerText);\">" + strBarcode + "</a>";
@@ -619,7 +620,7 @@ public class MyConverter : ReaderConverter
                     strResult.Append("<tr class='content'>");
                     strResult.Append("<td class='index' nowrap>" + (i + 1).ToString() + "</td>");
                     strResult.Append("<td class='barcode' nowrap>" + strBarcodeLink + "</td>");
-                    strResult.Append("<td class='summary pending'>BC:" + strBarcode + "|" + strConfirmItemRecPath 
+                    strResult.Append("<td class='summary pending'>BC:" + strBarcode + "|" + strConfirmItemRecPath
                         + (string.IsNullOrEmpty(strBiblioRecPath) == true ? "" : "|" + strBiblioRecPath) + "</td>");
 
                     strResult.Append("<td class='volume' nowrap>" + HttpUtility.HtmlEncode(strVolume) + "</td>");
@@ -637,7 +638,7 @@ public class MyConverter : ReaderConverter
             }
         }
 
-        strResult.Append( "</body></html>");
+        strResult.Append("</body></html>");
 
         return strResult.ToString();
     }

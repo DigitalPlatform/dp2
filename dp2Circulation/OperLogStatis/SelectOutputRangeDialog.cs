@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 
@@ -18,6 +18,28 @@ namespace dp2Circulation
         public SelectOutputRangeDialog()
         {
             InitializeComponent();
+
+            ListViewProperty prop = new ListViewProperty();
+            this.listView1.Tag = prop;
+            // 批次号
+            prop.SetSortStyle(0, ColumnSortStyle.LeftAlign);
+            // 目标馆藏地
+            prop.SetSortStyle(1, ColumnSortStyle.LeftAlign);
+            // 册数
+            prop.SetSortStyle(2, ColumnSortStyle.RightAlign);
+
+            prop.CompareColumn += new CompareEventHandler(prop_CompareColumn);
+        }
+
+        internal static void prop_CompareColumn(object sender, CompareEventArgs e)
+        {
+            e.Result = string.Compare(e.String1, e.String2);
+        }
+
+        void ClearListViewPropertyCache()
+        {
+            ListViewProperty prop = (ListViewProperty)this.listView1.Tag;
+            prop.ClearCache();
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -162,6 +184,11 @@ namespace dp2Circulation
         private void SelectOutputRangeDialog_Load(object sender, EventArgs e)
         {
             EnableOKButton();
+        }
+
+        private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            ListViewUtil.OnColumnClick(this.listView1, e);
         }
     }
 

@@ -151,12 +151,37 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 找到 script 元素
+        int GetScriptElement(out XmlElement nodeScript,
+            out string strError)
+        {
+            nodeScript = null;
+            strError = "";
+
+            if (this.LibraryCfgDom == null)
+            {
+                strError = "LibraryCfgDom为空";
+                return -1;
+            }
+
+            // 找到<script>节点
+            // 必须在根下
+            nodeScript = this.LibraryCfgDom.DocumentElement.SelectSingleNode("script") as XmlElement;
+
+            // <script>节点不存在
+            if (nodeScript == null)
+                return 0;
+
+            return 1;
+        }
+
         // 初始化 Assembly 对象
         // return:
         //		-1	出错
         //		0	脚本代码没有找到
         //      1   成功
         int _initialLibraryHostAssembly(
+            XmlElement nodeScript,
             Assembly existing_assembly,
             string strExistingMD5,
             out Assembly assembly,
@@ -168,6 +193,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             int nRet = 0;
 
+            /*
             if (this.LibraryCfgDom == null)
             {
                 assembly = null;
@@ -186,6 +212,7 @@ namespace DigitalPlatform.LibraryServer
             // <script>节点下级无CDATA节点
             if (nodeScript.ChildNodes.Count == 0)
                 return 0;
+            */
 
             XmlNode firstNode = nodeScript.ChildNodes[0];
 
@@ -250,13 +277,14 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-
         // 初始化Assembly对象
         // return:
         //		-1	出错
         //		0	脚本代码没有找到
         //      1   成功
-        public int InitialLibraryHostAssembly(out string strError)
+        public int InitialLibraryHostAssembly(
+            XmlElement nodeScript,
+            out string strError)
         {
             strError = "";
             int nRet = 0;
@@ -277,27 +305,47 @@ namespace DigitalPlatform.LibraryServer
 
             Assembly assembly = null;
             string strMD5 = "";
+            bool testing = false;
 
-            // 初始化 Assembly 对象
-            // return:
-            //		-1	出错
-            //		0	脚本代码没有找到
-            //      1   成功
-            nRet = _initialLibraryHostAssembly(
-                existing_assembly,
-                strExistingMD5,
-                out assembly,
-                out strMD5,
-                out strError);
+            if (nodeScript == null)
+            {
+                // 2021/10/9
+                // 找到 script 元素
+                nRet = GetScriptElement(out nodeScript,
+                    out strError);
+            }
+            else
+            {
+                testing = true;
+            }
+
+            if (nRet != -1)
+            {
+                // 初始化 Assembly 对象
+                // return:
+                //		-1	出错
+                //		0	脚本代码没有找到
+                //      1   成功
+                nRet = _initialLibraryHostAssembly(
+                    nodeScript,
+                    existing_assembly,
+                    strExistingMD5,
+                    out assembly,
+                    out strMD5,
+                    out strError);
+            }
 
             _lockAssembly.EnterWriteLock();
             try
             {
                 if (nRet == -1)
                 {
-                    this.m_strAssemblyLibraryHostError = strError;
-                    this.m_assemblyLibraryHost = null;
-                    this._scriptMD5 = "";
+                    if (testing == false)
+                    {
+                        this.m_strAssemblyLibraryHostError = strError;
+                        this.m_assemblyLibraryHost = null;
+                        this._scriptMD5 = "";
+                    }
                 }
                 else
                 {

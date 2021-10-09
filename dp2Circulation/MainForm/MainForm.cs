@@ -1322,9 +1322,12 @@ Stack:
             OpenWindow<ReaderSearchForm>();
         }
 
-        void OpenWindow<T>()
+        public T OpenWindow<T>(string style = "control")
         {
-            if (Control.ModifierKeys == Keys.Control)
+            bool control = StringUtil.IsInList("control", style);
+            bool open_new = StringUtil.IsInList("new", style);
+            if ((control == true && Control.ModifierKeys == Keys.Control)
+                || open_new)
             {
                 T form = Activator.CreateInstance<T>();
                 dynamic o = form;
@@ -1341,9 +1344,10 @@ Stack:
                     // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
                 }
                 o.Show();
+                return o;
             }
             else
-                EnsureChildForm<T>(true);
+                return EnsureChildForm<T>(true);
         }
 
         // 新开实体查询窗
@@ -4268,6 +4272,35 @@ Stack:
                 {
                     EnsureChildForm<ChargingForm>().Activate();
                     EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.Borrow;
+                }
+                else if (this.ActiveMdiChild != null
+        && this.ActiveMdiChild is ReaderInfoForm)
+                {
+                    var reader_form = (ReaderInfoForm)this.ActiveMdiChild;
+                    var charging_form = EnsureChildForm<QuickChargingForm>();
+                    charging_form.Activate();
+                    charging_form.SmartFuncState = FuncState.Borrow;
+                    // 将当前读者的证条码号输入到快捷出纳窗 textbox 中
+                    if (string.IsNullOrEmpty(reader_form.ReaderBarcode) == false)
+                        charging_form.Operate(FuncState.Borrow,
+                reader_form.ReaderBarcode,
+                "");
+                }
+                else if (this.ActiveMdiChild != null
+&& this.ActiveMdiChild is ReaderSearchForm)
+                {
+                    var search_form = (ReaderSearchForm)this.ActiveMdiChild;
+                    var charging_form = EnsureChildForm<QuickChargingForm>();
+                    charging_form.Activate();
+                    charging_form.SmartFuncState = FuncState.Borrow;
+                    // 当前选定的证条码号
+                    var barcodes = search_form.GetSelectedBarcodes();
+                    if (barcodes.Count > 0 && string.IsNullOrEmpty(barcodes[0]) == false)
+                    {
+                        charging_form.Operate(FuncState.Borrow,
+barcodes[0],
+"");
+                    }
                 }
                 else
                 {

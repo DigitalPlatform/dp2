@@ -6681,15 +6681,17 @@ namespace dp2Circulation
             if (nRet == -1)
             {
                 this.textBox_script_comment.Text = strError;
-                this.ScriptChanged = false;
+                // 3.95 以前，无论是否出错，实际上 dp2library 已经改变了 LibraryDom
+                // 3.95 以后，如果报错说明 dp2library 没有采纳脚本
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.95") < 0)
+                    this.ScriptChanged = false;
                 goto ERROR1;
             }
             else
             {
                 this.textBox_script_comment.Text = "";
+                this.ScriptChanged = false;
             }
-
-            this.ScriptChanged = false;
 
             return;
         ERROR1:

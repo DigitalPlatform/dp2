@@ -11880,6 +11880,41 @@ true);
                             goto ERROR1;
                         }
 
+                        // 2021/10/9
+                        // 先编译一次，如果报错则不兑现到 LibraryDom
+                        if (strName == "script")
+                        {
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml("<script>" + strValue + "</script>");
+                            }
+                            catch(Exception ex)
+                            {
+                                strError = "脚本代码 XML 结构错误。保存失败";
+                                goto ERROR1;
+                            }
+
+                            // 注意检测编译错误
+                            // 初始化LibraryHostAssembly对象
+                            // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
+                            // return:
+                            //		-1	出错
+                            //		0	脚本代码没有找到
+                            //      1   成功
+                            nRet = app.InitialLibraryHostAssembly(
+                                dom.DocumentElement,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                /*
+                                app.ActivateManagerThread(); // 促使尽快保存
+                                app.WriteErrorLog(strError);
+                                */
+                                goto ERROR1;
+                            }
+                        }
+
                         bool changed = false;
                         XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode(strName);
                         if (string.IsNullOrEmpty(strValue) == false)
@@ -11913,6 +11948,7 @@ true);
 
                         app.Changed = changed;
 
+#if REMOVED
                         if (strName == "script" && changed)
                         {
                             // 注意检测编译错误
@@ -11931,6 +11967,8 @@ true);
                             }
 
                         }
+#endif
+
                         if (changed)
                             app.ActivateManagerThread();
                         goto END1;
