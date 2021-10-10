@@ -5882,7 +5882,13 @@ out strError);
             }
             set
             {
-                toolStripStatusLabel_main.Text = value;
+                if (this.InvokeRequired)
+                    this.Invoke((Action)(() =>
+                    {
+                        toolStripStatusLabel_main.Text = value;
+                    }));
+                else
+                    toolStripStatusLabel_main.Text = value;
             }
         }
 

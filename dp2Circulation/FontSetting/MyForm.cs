@@ -2697,6 +2697,65 @@ out string strError)
                 });
         }
 
+        // 2021/10/10
+        public async Task<NormalResult> GetFaceState(string style)
+        {
+            string strError = "";
+
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
+            {
+                strError = "尚未配置 人脸识别接口URL 系统参数，无法进行 GetState() 调用";
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+
+            FaceChannel channel = StartFaceChannel(
+                Program.MainForm.FaceReaderUrl,
+                out strError);
+            if (channel == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            _inFaceCall++;
+            try
+            {
+                try
+                {
+                    return await Task.Run(() =>
+                    {
+                        return channel.Object.GetState(style);
+                    });
+                }
+                catch (RemotingException ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = 0,  // 让调主认为没有出错
+                        ErrorInfo = ex.Message
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "针对 " + Program.MainForm.FaceReaderUrl + " 的 GetState() 请求失败: " + ex.Message
+                    };
+                }
+            }
+            finally
+            {
+                _inFaceCall--;
+                EndFaceChannel(channel);
+            }
+        }
+
 #if NO
         GetFeatureStringResult CallGetFeatureString(FaceChannel channel,
     string strExcludeBarcodes,

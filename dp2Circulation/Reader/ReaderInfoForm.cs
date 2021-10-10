@@ -1129,47 +1129,50 @@ MessageBoxDefaultButton.Button2);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            // this.textBox_readerBarcode.Enabled = bEnable;
-            // this.button_load.Enabled = bEnable;
-            this.toolStrip_load.Enabled = bEnable;
-
-
-            this.readerEditControl1.Enabled = bEnable;
-
-            if (bEnable == false)
-                this.toolStripButton_delete.Enabled = bEnable;
-            else
+            this.Invoke((Action)(() =>
             {
-                if (this.readerEditControl1.RecPath != "")
-                    this.toolStripButton_delete.Enabled = true;  // 只有具备明确的路径的记录，才能被删除
+                // this.textBox_readerBarcode.Enabled = bEnable;
+                // this.button_load.Enabled = bEnable;
+                this.toolStrip_load.Enabled = bEnable;
+
+
+                this.readerEditControl1.Enabled = bEnable;
+
+                if (bEnable == false)
+                    this.toolStripButton_delete.Enabled = bEnable;
                 else
-                    this.toolStripButton_delete.Enabled = false;
-            }
+                {
+                    if (this.readerEditControl1.RecPath != "")
+                        this.toolStripButton_delete.Enabled = true;  // 只有具备明确的路径的记录，才能被删除
+                    else
+                        this.toolStripButton_delete.Enabled = false;
+                }
 
-            this.toolStripButton_loadFromIdcard.Enabled = bEnable;
+                this.toolStripButton_loadFromIdcard.Enabled = bEnable;
 
-            this.toolStripDropDownButton_loadBlank.Enabled = bEnable;
-            this.toolStripButton_loadBlank.Enabled = bEnable;
+                this.toolStripDropDownButton_loadBlank.Enabled = bEnable;
+                this.toolStripButton_loadBlank.Enabled = bEnable;
 
-            this.toolStripButton_webCamera.Enabled = bEnable;
-            this.toolStripButton_pasteCardPhoto.Enabled = bEnable;
+                this.toolStripButton_webCamera.Enabled = bEnable;
+                this.toolStripButton_pasteCardPhoto.Enabled = bEnable;
 
-            this.toolStripButton_registerFingerprint.Enabled = bEnable;
-            this.toolStripButton_createMoneyRecord.Enabled = bEnable;
+                this.toolStripButton_registerFingerprint.Enabled = bEnable;
+                this.toolStripButton_createMoneyRecord.Enabled = bEnable;
 
-            this.toolStripButton_saveTo.Enabled = bEnable;
-            //this.toolStripButton_save.Enabled = bEnable;
-            this.toolStripSplitButton_save.Enabled = bEnable;
+                this.toolStripButton_saveTo.Enabled = bEnable;
+                //this.toolStripButton_save.Enabled = bEnable;
+                this.toolStripSplitButton_save.Enabled = bEnable;
 
-            this.toolStripButton_clearOutofReservationCount.Enabled = bEnable;
+                this.toolStripButton_clearOutofReservationCount.Enabled = bEnable;
 
-            this.toolStripButton_option.Enabled = bEnable;
+                this.toolStripButton_option.Enabled = bEnable;
 
-            this.toolStripDropDownButton_otherFunc.Enabled = bEnable;
+                this.toolStripDropDownButton_otherFunc.Enabled = bEnable;
 
-            // 2008/10/28
-            this.toolStripButton_next.Enabled = bEnable;
-            this.toolStripButton_prev.Enabled = bEnable;
+                // 2008/10/28
+                this.toolStripButton_next.Enabled = bEnable;
+                this.toolStripButton_prev.Enabled = bEnable;
+            }));
         }
 
         private void toolStripTextBox_barcode_KeyDown(object sender, KeyEventArgs e)
@@ -1890,8 +1893,11 @@ strNewDefault);
 
         void EnableToolStrip(bool bEnable)
         {
-            toolStripTextBox_barcode.Enabled = bEnable;
-            this.toolStrip1.Enabled = bEnable;
+            this.Invoke((Action)(() =>
+            {
+                toolStripTextBox_barcode.Enabled = bEnable;
+                this.toolStrip1.Enabled = bEnable;
+            }));
         }
 
 #if REMOVED
@@ -1986,331 +1992,353 @@ strNewDefault);
         /// </summary>
         /// <param name="strStyle">风格。为 displaysuccess/verifybarcode/changereaderbarcode/changestate/changereaderforce 之一或者组合。缺省值为 displaysuccess,verifybarcode</param>
         /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
-        public int SaveRecord(string strStyle = "displaysuccess,verifybarcode")
+        public async Task<int> SaveRecord(string strStyle = "displaysuccess,verifybarcode")
         {
             string strError = "";
             int nRet = 0;
 
-            bool bControlPressed = (Control.ModifierKeys & Keys.Control) == Keys.Control;
-
-            if (bControlPressed == false
-                && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == true)
-            {
-                strError = "尚未输入证条码号";
-                goto ERROR1;
-            }
-
-            // 是否强制修改册条码号
-            bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
-            bool bChangeState = StringUtil.IsInList("changestate", strStyle);
-            bool bChangeReaderForce = StringUtil.IsInList("changereaderforce", strStyle);
-            if (bChangeReaderBarcode && bChangeReaderForce)
-            {
-                strError = "style 不应同时包含 changereaderbarcode 和 changerecordforce";
-                goto ERROR1;
-            }
-
-            if (bChangeReaderForce)
-            {
-                var result = MessageBox.Show(this,
-                    "您确实要强制修改当前读者记录？\r\n\r\n警告：当读者有在借记录的情况下，强制修改保存功能，*** 不会自动修改*** 这些在借册记录，会造成借阅信息关联错误。若只是想在修改证条码号以后保存记录，请改用“保存(强制修改证条码号)功能”",
-                    "谨慎使用“保存(强制修改)”功能",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2);
-                if (result == DialogResult.No)
-                    return 0;
-            }
-
-            bool bVerifyBarcode = StringUtil.IsInList("verifybarcode", strStyle);
-
-            // 校验证条码号
-            if ((this.NeedVerifyBarcode == true || bVerifyBarcode)
-                && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
-            {
-                // 形式校验条码号
-                // return:
-                //      -2  服务器没有配置校验方法，无法校验
-                //      -1  error
-                //      0   不是合法的条码号
-                //      1   是合法的读者证条码号
-                //      2   是合法的册条码号
-                nRet = VerifyBarcode(
-                    Program.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
-                    this.readerEditControl1.Barcode,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                // 输入的条码格式不合法
-                if (nRet == 0)
-                {
-                    strError = "您输入的证条码 " + this.readerEditControl1.Barcode + " 格式不正确(" + strError + ")。";
-                    goto ERROR1;
-                }
-
-                // 实际输入的是册条码号
-                if (nRet == 2)
-                {
-                    strError = "您输入的条码号 " + this.readerEditControl1.Barcode + " 是册条码号。请输入读者证条码号。";
-                    goto ERROR1;
-                }
-
-                // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
-                if (nRet == -2
-                    && (this.NeedVerifyBarcode == true && bVerifyBarcode == false))
-                {
-                    MessageBox.Show(this, "警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
-                }
-            }
-
-            // TODO: 保存时候的选项
-
-            // 当 this.readerEditControl1.RecPath 为空的时候，需要出现对话框，让用户可以选择目标库
-            string strTargetRecPath = this.readerEditControl1.RecPath;
-            if (string.IsNullOrEmpty(this.readerEditControl1.RecPath) == true)
-            {
-                // 出现对话框，让用户可以选择目标库
-                ReaderSaveToDialog saveto_dlg = new ReaderSaveToDialog();
-                MainForm.SetControlFont(saveto_dlg, this.Font, false);
-                saveto_dlg.MessageText = "请选择记录位置";
-                // saveto_dlg.MainForm = Program.MainForm;
-                saveto_dlg.RecPath = this.readerEditControl1.RecPath;
-                saveto_dlg.RecID = "?";
-
-                Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
-                saveto_dlg.ShowDialog(this);
-                Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
-
-                if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                    return 0;
-
-                strTargetRecPath = saveto_dlg.RecPath;
-            }
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
-            stop.BeginLoop();
-
-            EnableControls(false);
-
             try
             {
-                nRet = GetReaderXml(
-            true,
-            false,
-            out string strNewXml,
-            out strError);
-                if (nRet == -1)
-                    goto ERROR1;
 
-                string strAction = this.m_strSetAction;
+                bool bControlPressed = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
-                // 如果特意选定过要保存的位置
-                if (string.IsNullOrEmpty(strTargetRecPath) == false
-                    && Global.IsAppendRecPath(strTargetRecPath) == false // 2015/11/16 增加的此句，消除 Bug
-                    && strAction == "new")
-                    strAction = "change";
-
-                if (strAction == "change" && bChangeReaderBarcode)
+                if (bControlPressed == false
+                    && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == true)
                 {
-                    if (bChangeState)
-                    {
-                        strError = "changestate 和 changereaderbarcode 不应同时具备";
-                        goto ERROR1;
-                    }
-                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.51") < 0)
-                    {
-                        strError = "需要 dp2library 版本在 2.51 以上才能实现强制修改册条码号的功能。当前 dp2library 版本为 " + Program.MainForm.ServerVersion;
-                        goto ERROR1;
-                    }
-                    strAction = "changereaderbarcode";
-                }
-                else if (strAction == "change" && bChangeState) // 2020/5/28
-                {
-                    strAction = "changestate";
-                }
-
-                if (strAction == "change" && bChangeReaderForce)
-                {
-                    strAction = "forcechange";
-                }
-
-                // 调试
-                // MessageBox.Show(this, "1 this.m_strSetAction='"+this.m_strSetAction+"'");
-
-                long lRet = Channel.SetReaderInfo(
-                    stop,
-                    strAction,  // this.m_strSetAction,
-                    strTargetRecPath,
-                    strNewXml,
-                    // 2007/11/5 changed
-                    this.m_strSetAction != "new" ? this.readerEditControl1.OldRecord : null,
-                    this.m_strSetAction != "new" ? this.readerEditControl1.Timestamp : null,
-                    out string strExistingXml,
-                    out string strSavedXml,
-                    out string strSavedPath,
-                    out byte[] baNewTimestamp,
-                    out ErrorCodeValue kernel_errorcode,
-                    out strError);
-                if (lRet == -1)
-                {
-                    // Debug.Assert(false, "");
-
-                    if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
-                    {
-                        CompareReaderForm dlg = new CompareReaderForm();
-                        dlg.Initial(
-                            //Program.MainForm,
-                            this.readerEditControl1.RecPath,
-                            strExistingXml,
-                            baNewTimestamp,
-                            strNewXml,
-                            this.readerEditControl1.Timestamp,
-                            "数据库中的记录在编辑期间发生了改变。请仔细核对，并重新修改窗口中的未保存记录，按确定按钮后可重试保存。");
-
-                        dlg.StartPosition = FormStartPosition.CenterScreen;
-                        dlg.ShowDialog(this);
-                        if (dlg.DialogResult == DialogResult.OK)
-                        {
-                            nRet = this.readerEditControl1.SetData(dlg.UnsavedXml,
-                                dlg.RecPath,
-                                dlg.UnsavedTimestamp,
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                MessageBox.Show(this, strError);
-                            }
-                            MessageBox.Show(this, "请注意重新保存记录");
-                            return -1;
-                        }
-                    }
-
+                    strError = "尚未输入证条码号";
                     goto ERROR1;
                 }
 
-                /*
-                this.Timestamp = baNewTimestamp;
-                this.OldRecord = strSavedXml;
-                this.RecPath = strSavedPath;
-                 */
-
-                if (lRet == 1)
+                // 是否强制修改册条码号
+                bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
+                bool bChangeState = StringUtil.IsInList("changestate", strStyle);
+                bool bChangeReaderForce = StringUtil.IsInList("changereaderforce", strStyle);
+                if (bChangeReaderBarcode && bChangeReaderForce)
                 {
-                    // 部分字段被拒绝
-                    MessageBox.Show(this, strError);
-
-                    if (Channel.ErrorCode == ErrorCode.PartialDenied)
-                    {
-                        // 提醒重新装载?
-                        MessageBox.Show(this, "请重新装载记录, 检查哪些字段内容修改被拒绝。");
-                    }
+                    strError = "style 不应同时包含 changereaderbarcode 和 changerecordforce";
+                    goto ERROR1;
                 }
-                else
+
+                if (bChangeReaderForce)
                 {
-                    this.binaryResControl1.BiblioRecPath = strSavedPath;
-                    // 提交对象保存请求
+                    var result = MessageBox.Show(this,
+                        "您确实要强制修改当前读者记录？\r\n\r\n警告：当读者有在借记录的情况下，强制修改保存功能，*** 不会自动修改*** 这些在借册记录，会造成借阅信息关联错误。若只是想在修改证条码号以后保存记录，请改用“保存(强制修改证条码号)功能”",
+                        "谨慎使用“保存(强制修改)”功能",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning,
+                        MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                        return 0;
+                }
+
+                bool bVerifyBarcode = StringUtil.IsInList("verifybarcode", strStyle);
+
+                // 校验证条码号
+                if ((this.NeedVerifyBarcode == true || bVerifyBarcode)
+                    && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
+                {
+                    // 形式校验条码号
                     // return:
-                    //		-1	error
-                    //		>=0 实际上载的资源对象数
-                    nRet = this.binaryResControl1.Save(
-                        this.Channel,
-                        Program.MainForm.ServerVersion,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        MessageBox.Show(this, strError);
-                    }
-                    if (nRet >= 1)
-                    {
-                        // 重新获得时间戳
-                        lRet = Channel.GetReaderInfo(
-                            stop,
-                            "@path:" + strSavedPath,
-                            "", // "xml,html",
-                            out string[] results,
-                            out string strOutputPath,
-                            out baNewTimestamp,
-                            out strError);
-                        if (lRet == -1 || lRet == 0)
-                        {
-                            MessageBox.Show(this, strError);
-                        }
-                    }
-
-                    // 重新装载记录到编辑器
-                    nRet = this.readerEditControl1.SetData(strSavedXml,
-                        strSavedPath,
-                        baNewTimestamp,
+                    //      -2  服务器没有配置校验方法，无法校验
+                    //      -1  error
+                    //      0   不是合法的条码号
+                    //      1   是合法的读者证条码号
+                    //      2   是合法的册条码号
+                    nRet = VerifyBarcode(
+                        Program.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
+                        this.readerEditControl1.Barcode,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
 
-                    // 刷新XML显示
-                    /*
-                    this.SetXmlToWebbrowser(this.webBrowser_xml,
-                        strSavedXml);
-                     * */
-                    Global.SetXmlToWebbrowser(this.webBrowser_xml,
-Program.MainForm.DataDir,
-"xml",
-strSavedXml);
-                    // 2007/11/12
-                    this.m_strSetAction = "change";
-
-                    // 装载记录到HTML
+                    // 输入的条码格式不合法
+                    if (nRet == 0)
                     {
+                        strError = "您输入的证条码 " + this.readerEditControl1.Barcode + " 格式不正确(" + strError + ")。";
+                        goto ERROR1;
+                    }
 
-                        // string strBarcode = this.readerEditControl1.Barcode;
+                    // 实际输入的是册条码号
+                    if (nRet == 2)
+                    {
+                        strError = "您输入的条码号 " + this.readerEditControl1.Barcode + " 是册条码号。请输入读者证条码号。";
+                        goto ERROR1;
+                    }
 
-                        stop.SetMessage($"正在装入读者记录 {strSavedPath} 的 HTML ...");
+                    // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
+                    if (nRet == -2
+                        && (this.NeedVerifyBarcode == true && bVerifyBarcode == false))
+                    {
+                        MessageBoxShow("警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
+                    }
+                }
 
-                        int nRedoCount = 0;
-                    REDO_LOAD_HTML:
-                        string[] results = null;
-                        lRet = Channel.GetReaderInfo(
-                            stop,
-                            // strBarcode,
-                            "@path:" + strSavedPath,
-                            "html",
-                            out results,
-                            out string strOutputRecPath,
-                            out byte[] baTimestamp,
-                            out strError);
-                        if (lRet == -1)
+                // TODO: 保存时候的选项
+
+                // 当 this.readerEditControl1.RecPath 为空的时候，需要出现对话框，让用户可以选择目标库
+                string strTargetRecPath = this.readerEditControl1.RecPath;
+                if (string.IsNullOrEmpty(this.readerEditControl1.RecPath) == true)
+                {
+                    var ret = (int)this.Invoke(new Func<int>(() =>
+                    {
+                        // 出现对话框，让用户可以选择目标库
+                        ReaderSaveToDialog saveto_dlg = new ReaderSaveToDialog();
+                        MainForm.SetControlFont(saveto_dlg, this.Font, false);
+                        saveto_dlg.MessageText = "请选择记录位置";
+                        // saveto_dlg.MainForm = Program.MainForm;
+                        saveto_dlg.RecPath = this.readerEditControl1.RecPath;
+                        saveto_dlg.RecID = "?";
+
+                        Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
+                        saveto_dlg.ShowDialog(this);
+                        Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
+
+                        if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                            return 0;
+
+                        strTargetRecPath = saveto_dlg.RecPath;
+                        return 1;
+                    }));
+                    if (ret == 0)
+                        return 0;
+                }
+
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
+                stop.BeginLoop();
+
+                EnableControls(false);
+
+                try
+                {
+                    string strNewXml = "";
+                    this.Invoke((Action)(() =>
+                    {
+                        nRet = GetReaderXml(
+                true,
+                false,
+                out strNewXml,
+                out strError);
+                    }));
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    string strAction = this.m_strSetAction;
+
+                    // 如果特意选定过要保存的位置
+                    if (string.IsNullOrEmpty(strTargetRecPath) == false
+                        && Global.IsAppendRecPath(strTargetRecPath) == false // 2015/11/16 增加的此句，消除 Bug
+                        && strAction == "new")
+                        strAction = "change";
+
+                    if (strAction == "change" && bChangeReaderBarcode)
+                    {
+                        if (bChangeState)
                         {
-                            // 以读者身份保存自己的读者记录后，dp2library 为了清除以前缓存的登录信息，强制释放了通道。所以这里需要能重试操作
-                            if (Channel.ErrorCode == ErrorCode.ChannelReleased
-                                && nRedoCount < 10)
+                            strError = "changestate 和 changereaderbarcode 不应同时具备";
+                            goto ERROR1;
+                        }
+                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.51") < 0)
+                        {
+                            strError = "需要 dp2library 版本在 2.51 以上才能实现强制修改册条码号的功能。当前 dp2library 版本为 " + Program.MainForm.ServerVersion;
+                            goto ERROR1;
+                        }
+                        strAction = "changereaderbarcode";
+                    }
+                    else if (strAction == "change" && bChangeState) // 2020/5/28
+                    {
+                        strAction = "changestate";
+                    }
+
+                    if (strAction == "change" && bChangeReaderForce)
+                    {
+                        strAction = "forcechange";
+                    }
+
+                    // 调试
+                    // MessageBoxShow("1 this.m_strSetAction='"+this.m_strSetAction+"'");
+
+                    long lRet = Channel.SetReaderInfo(
+                        stop,
+                        strAction,  // this.m_strSetAction,
+                        strTargetRecPath,
+                        strNewXml,
+                        // 2007/11/5 changed
+                        this.m_strSetAction != "new" ? this.readerEditControl1.OldRecord : null,
+                        this.m_strSetAction != "new" ? this.readerEditControl1.Timestamp : null,
+                        out string strExistingXml,
+                        out string strSavedXml,
+                        out string strSavedPath,
+                        out byte[] baNewTimestamp,
+                        out ErrorCodeValue kernel_errorcode,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        // Debug.Assert(false, "");
+
+                        if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
+                        {
+                            var ret = (int)this.Invoke(new Func<int>(() =>
                             {
-                                nRedoCount++;
-                                goto REDO_LOAD_HTML;
+                                CompareReaderForm dlg = new CompareReaderForm();
+                                dlg.Initial(
+                                    //Program.MainForm,
+                                    this.readerEditControl1.RecPath,
+                                    strExistingXml,
+                                    baNewTimestamp,
+                                    strNewXml,
+                                    this.readerEditControl1.Timestamp,
+                                    "数据库中的记录在编辑期间发生了改变。请仔细核对，并重新修改窗口中的未保存记录，按确定按钮后可重试保存。");
+
+                                dlg.StartPosition = FormStartPosition.CenterScreen;
+                                dlg.ShowDialog(this);
+                                if (dlg.DialogResult == DialogResult.OK)
+                                {
+                                    nRet = this.readerEditControl1.SetData(dlg.UnsavedXml,
+                                    dlg.RecPath,
+                                    dlg.UnsavedTimestamp,
+                                    out strError);
+                                    if (nRet == -1)
+                                    {
+                                        MessageBoxShow(strError);
+                                    }
+                                    MessageBoxShow("请注意重新保存记录");
+                                    return -1;
+                                }
+                                return 0;
+                            }));
+                            if (ret == -1)
+                                return -1;
+                        }
+
+                        goto ERROR1;
+                    }
+
+                    /*
+                    this.Timestamp = baNewTimestamp;
+                    this.OldRecord = strSavedXml;
+                    this.RecPath = strSavedPath;
+                     */
+
+                    if (lRet == 1)
+                    {
+                        // 部分字段被拒绝
+                        MessageBoxShow(strError);
+
+                        if (Channel.ErrorCode == ErrorCode.PartialDenied)
+                        {
+                            // 提醒重新装载?
+                            MessageBoxShow("请重新装载记录, 检查哪些字段内容修改被拒绝。");
+                        }
+                    }
+                    else
+                    {
+                        this.binaryResControl1.BiblioRecPath = strSavedPath;
+                        // 提交对象保存请求
+                        // return:
+                        //		-1	error
+                        //		>=0 实际上载的资源对象数
+                        nRet = this.binaryResControl1.Save(
+                            this.Channel,
+                            Program.MainForm.ServerVersion,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            MessageBoxShow(strError);
+                        }
+                        if (nRet >= 1)
+                        {
+                            // 重新获得时间戳
+                            lRet = Channel.GetReaderInfo(
+                                stop,
+                                "@path:" + strSavedPath,
+                                "", // "xml,html",
+                                out string[] results,
+                                out string strOutputPath,
+                                out baNewTimestamp,
+                                out strError);
+                            if (lRet == -1 || lRet == 0)
+                            {
+                                MessageBoxShow(strError);
                             }
-                            strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
-                            // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
-                            this.m_webExternalHost.SetTextString(strError);
-                            goto ERROR1;
                         }
 
-                        if (lRet == 0)
+                        this.Invoke((Action)(() =>
                         {
-                            strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
-                            // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
-                            this.m_webExternalHost.SetTextString(strError);
+                            // 重新装载记录到编辑器
+                            nRet = this.readerEditControl1.SetData(strSavedXml,
+                                strSavedPath,
+                                baNewTimestamp,
+                                out strError);
+                        }));
+                        if (nRet == -1)
                             goto ERROR1;
-                        }
 
-                        if (lRet > 1)
+                        // 刷新XML显示
+                        /*
+                        this.SetXmlToWebbrowser(this.webBrowser_xml,
+                            strSavedXml);
+                         * */
+                        Global.SetXmlToWebbrowser(this.webBrowser_xml,
+    Program.MainForm.DataDir,
+    "xml",
+    strSavedXml);
+                        // 2007/11/12
+                        this.m_strSetAction = "change";
+
+                        // 装载记录到HTML
                         {
-                            // strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，注意这是一个严重错误，请系统管理员尽快排除。";
-                            strError = $"路径 '{strSavedPath}' 命中记录 { lRet.ToString() } 条，注意这是一个严重错误，请系统管理员尽快排除。";
-                            strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
-                            // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
-                            this.m_webExternalHost.SetTextString(strError);
-                            goto ERROR1;    // 当出错处理
-                        }
 
-                        string strHtml = results[0];
+                            // string strBarcode = this.readerEditControl1.Barcode;
+
+                            stop.SetMessage($"正在装入读者记录 {strSavedPath} 的 HTML ...");
+
+                            int nRedoCount = 0;
+                        REDO_LOAD_HTML:
+                            string[] results = null;
+                            lRet = Channel.GetReaderInfo(
+                                stop,
+                                // strBarcode,
+                                "@path:" + strSavedPath,
+                                "html",
+                                out results,
+                                out string strOutputRecPath,
+                                out byte[] baTimestamp,
+                                out strError);
+                            if (lRet == -1)
+                            {
+                                // 以读者身份保存自己的读者记录后，dp2library 为了清除以前缓存的登录信息，强制释放了通道。所以这里需要能重试操作
+                                if (Channel.ErrorCode == ErrorCode.ChannelReleased
+                                    && nRedoCount < 10)
+                                {
+                                    nRedoCount++;
+                                    goto REDO_LOAD_HTML;
+                                }
+                                strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
+                                // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
+                                this.m_webExternalHost.SetTextString(strError);
+                                goto ERROR1;
+                            }
+
+                            if (lRet == 0)
+                            {
+                                strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
+                                // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
+                                this.m_webExternalHost.SetTextString(strError);
+                                goto ERROR1;
+                            }
+
+                            if (lRet > 1)
+                            {
+                                // strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，注意这是一个严重错误，请系统管理员尽快排除。";
+                                strError = $"路径 '{strSavedPath}' 命中记录 { lRet.ToString() } 条，注意这是一个严重错误，请系统管理员尽快排除。";
+                                strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
+                                // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
+                                this.m_webExternalHost.SetTextString(strError);
+                                goto ERROR1;    // 当出错处理
+                            }
+
+                            string strHtml = results[0];
 
 #if NO
                         Global.SetHtmlString(this.webBrowser_readerInfo,
@@ -2318,66 +2346,82 @@ strSavedXml);
         Program.MainForm.DataDir,
         "readerinfoform_reader");
 #endif
-                        this.SetReaderHtmlString(strHtml);
+                            this.SetReaderHtmlString(strHtml);
+                        }
                     }
-                }
 
-                List<string> warnings = new List<string>();
+                    List<string> warnings = new List<string>();
 
-                // 通知人脸中心获取最新变化信息
-                // TODO: 对比新旧记录，如果 face 元素变化了，或者册条码号变化了，才请求立即人脸缓存
-                if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false
-    && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
-                {
-                    var result = FaceNotifyTask("faceChanged").Result;
-                    if (result.Value == -1)
-                        warnings.Add(result.ErrorInfo);
-                }
-
-                // TODO: 对比新旧记录，如果指纹信息变化了，或者册条码号变化了，才请求立即刷新指纹缓存
-                // 更新指纹高速缓存
-                if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
-                && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
-                {
-                    // return:
-                    //      -2  remoting服务器连接失败。驱动程序尚未启动
-                    //      -1  出错
-                    //      0   成功
-                    nRet = UpdateFingerprintCache(
-                         this.readerEditControl1.Barcode,
-                         this.readerEditControl1.FingerprintFeature,
-                         out strError);
-                    if (nRet == -1)
+                    // 通知人脸中心获取最新变化信息
+                    // TODO: 对比新旧记录，如果 face 元素变化了，或者册条码号变化了，才请求立即人脸缓存
+                    if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false
+        && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
                     {
-                        // strError = "虽然读者记录已经保存成功，但更新指纹缓存时发生了错误: " + strError;
-                        // goto ERROR1;
-                        warnings.Add(strError);
+                        var result = await FaceNotifyTask("faceChanged");
+                        if (result.Value == -1)
+                            warnings.Add(result.ErrorInfo);
                     }
-                    // -2 故意不报错。因为用户可能配置了URL，但是当前驱动程序并没有启动
-                }
 
-                if (warnings.Count > 0)
+                    // TODO: 对比新旧记录，如果指纹信息变化了，或者册条码号变化了，才请求立即刷新指纹缓存
+                    // 更新指纹高速缓存
+                    if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
+                    && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
+                    {
+                        // return:
+                        //      -2  remoting服务器连接失败。驱动程序尚未启动
+                        //      -1  出错
+                        //      0   成功
+                        nRet = UpdateFingerprintCache(
+                             this.readerEditControl1.Barcode,
+                             this.readerEditControl1.FingerprintFeature,
+                             out strError);
+                        if (nRet == -1)
+                        {
+                            // strError = "虽然读者记录已经保存成功，但更新指纹缓存时发生了错误: " + strError;
+                            // goto ERROR1;
+                            warnings.Add(strError);
+                        }
+                        // -2 故意不报错。因为用户可能配置了URL，但是当前驱动程序并没有启动
+                    }
+
+                    if (warnings.Count > 0)
+                    {
+                        string warning = $"虽然读者记录已经保存成功，但通知人脸中心和指纹中心刷新时发生了错误: {StringUtil.MakePathList(warnings, "; ")}";
+                        this.ShowMessage(warning, "yellow", true);
+                    }
+                }
+                finally
                 {
-                    string warning = $"虽然读者记录已经保存成功，但通知人脸中心和指纹中心刷新时发生了错误: {StringUtil.MakePathList(warnings, "; ")}";
-                    this.ShowMessage(warning, "yellow", true);
+                    EnableControls(true);
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
                 }
+
+                if (StringUtil.IsInList("displaysuccess", strStyle) == true)
+                    Program.MainForm.StatusBarMessage = "读者记录保存成功";
+                return 1;
             }
-            finally
+            catch (Exception ex)
             {
-                EnableControls(true);
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                MainForm.WriteErrorLog($"SaveRecord() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                strError = $"SaveRecord() 出现异常: {ex.Message}。详情已写入错误日志";
+                goto ERROR1;
             }
 
-            if (StringUtil.IsInList("displaysuccess", strStyle) == true)
-                Program.MainForm.StatusBarMessage = "读者记录保存成功";
-            // MessageBox.Show(this, "保存成功");
-            return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
+            Program.MainForm.StatusBarMessage = strError;
             return -1;
+        }
+
+        void MessageBoxShow(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, text);
+            }));
         }
 
         // 另存
@@ -3681,6 +3725,8 @@ MessageBoxDefaultButton.Button2);
         /// <param name="m">消息</param>
         protected override void DefWndProc(ref Message m)
         {
+            int msg = m.Msg;
+
             switch (m.Msg)
             {
                 case WM_SET_FOCUS:
@@ -3835,68 +3881,80 @@ MessageBoxDefaultButton.Button2);
                     }
                     return;
                 case WM_SAVE_RECORD:
-                    EnableToolStrip(false);
-                    try
+                    _ = Task.Run(async () =>
                     {
-                        if (this.m_webExternalHost.CanCallNew(
-                            this.commander,
-                            m.Msg) == true)
+                        EnableToolStrip(false);
+                        try
                         {
-                            this.SaveRecord("displaysuccess");  // ,verifybarcode
+                            if (this.m_webExternalHost.CanCallNew(
+                                this.commander,
+                                msg) == true)
+                            {
+                                await this.SaveRecord("displaysuccess");  // ,verifybarcode
+                            }
                         }
-                    }
-                    finally
-                    {
-                        EnableToolStrip(true);
-                    }
+                        finally
+                        {
+                            EnableToolStrip(true);
+                        }
+                    });
                     return;
                 case WM_SAVE_RECORD_BARCODE:
-                    EnableToolStrip(false);
-                    try
+                    _ = Task.Run(async () =>
                     {
-                        if (this.m_webExternalHost.CanCallNew(
-                            this.commander,
-                            m.Msg) == true)
+                        EnableToolStrip(false);
+                        try
                         {
-                            this.SaveRecord("displaysuccess,changereaderbarcode");  // verifybarcode,
+                            if (this.m_webExternalHost.CanCallNew(
+                                this.commander,
+                                msg) == true)
+                            {
+                                await this.SaveRecord("displaysuccess,changereaderbarcode");  // verifybarcode,
+                            }
                         }
-                    }
-                    finally
-                    {
-                        EnableToolStrip(true);
-                    }
+                        finally
+                        {
+                            EnableToolStrip(true);
+                        }
+                    });
                     return;
                 case WM_SAVE_RECORD_STATE:
-                    EnableToolStrip(false);
-                    try
+                    _ = Task.Run(async () =>
                     {
-                        if (this.m_webExternalHost.CanCallNew(
-                            this.commander,
-                            m.Msg) == true)
+                        EnableToolStrip(false);
+                        try
                         {
-                            this.SaveRecord("displaysuccess,changestate");
+                            if (this.m_webExternalHost.CanCallNew(
+                                this.commander,
+                                msg) == true)
+                            {
+                                await this.SaveRecord("displaysuccess,changestate");
+                            }
                         }
-                    }
-                    finally
-                    {
-                        EnableToolStrip(true);
-                    }
+                        finally
+                        {
+                            EnableToolStrip(true);
+                        }
+                    });
                     return;
                 case WM_SAVE_RECORD_FORCE:
-                    EnableToolStrip(false);
-                    try
+                    _ = Task.Run(async () =>
                     {
-                        if (this.m_webExternalHost.CanCallNew(
-                            this.commander,
-                            m.Msg) == true)
+                        EnableToolStrip(false);
+                        try
                         {
-                            this.SaveRecord("displaysuccess,changereaderforce");
+                            if (this.m_webExternalHost.CanCallNew(
+                                this.commander,
+                                msg) == true)
+                            {
+                                await this.SaveRecord("displaysuccess,changereaderforce");
+                            }
                         }
-                    }
-                    finally
-                    {
-                        EnableToolStrip(true);
-                    }
+                        finally
+                        {
+                            EnableToolStrip(true);
+                        }
+                    });
                     return;
             }
             base.DefWndProc(ref m);
@@ -6873,7 +6931,28 @@ MessageBoxDefaultButton.Button1);
 
                 if (result.Value == -1 || result.Value == 0)
                 {
-                    strError = result.ErrorInfo;
+                    string log_info = "";
+                    if (result.ErrorCode == "alreadyExist")
+                    {
+                        string version = await GetFaceVersionAsync();
+
+                        // 要返回人脸特征
+                        if (StringUtil.CompareVersion(version, "1.5.12") >= 0
+                            && result.ImageData != null)
+                        {
+                            // 记载到本地 log 中
+                            string barcode = this.readerEditControl1.Barcode;
+                            string filename = Path.Combine(MainForm.UserLogDir, $"face_{DateTime.Now.ToString("yyyyMMdd_HHmmss")}_{barcode}.png");
+                            using (Image image = FromBytes(result.ImageData))
+                            {
+                                image.Save(filename, ImageFormat.Png);
+                            }
+                            MainForm.WriteInfoLog($"为读者 '{barcode}' 进行人脸登记过程中发现 {result.ErrorInfo}。\r\n读者 '{barcode}' 的人脸特征为:\r\n{result.FeatureString}\r\n其人脸图片已存入文件 {filename}");
+                            log_info = "。\r\n当前读者人脸信息(未登记)已写入错误日志";
+                        }
+                    }
+
+                    strError = result.ErrorInfo + log_info;
                     goto ERROR1;
                 }
 
@@ -6911,7 +6990,17 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             Program.MainForm.StatusBarMessage = strError;
+            this.ShowMessage(strError, "red", true);
             ShowMessageBox(strError);
+        }
+
+        // 获得人脸接口版本号
+        async Task<string> GetFaceVersionAsync()
+        {
+            var version_result = await GetFaceState("getVersion");
+            if (version_result.Value != -1)
+                return version_result.ErrorCode;
+            return "";
         }
 
         static Image FromBytes(byte[] bytes)
