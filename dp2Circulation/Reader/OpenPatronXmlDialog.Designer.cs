@@ -33,7 +33,7 @@
             this.button_getFileName = new System.Windows.Forms.Button();
             this.button_getObjectDirectoryName = new System.Windows.Forms.Button();
             this.textBox_objectDirectoryName = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.label_objectDirectoryName = new System.Windows.Forms.Label();
             this.checkBox_includeObjectFile = new System.Windows.Forms.CheckBox();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
@@ -93,18 +93,19 @@
             this.textBox_objectDirectoryName.Location = new System.Drawing.Point(66, 338);
             this.textBox_objectDirectoryName.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_objectDirectoryName.Name = "textBox_objectDirectoryName";
+            this.textBox_objectDirectoryName.ReadOnly = true;
             this.textBox_objectDirectoryName.Size = new System.Drawing.Size(649, 31);
             this.textBox_objectDirectoryName.TabIndex = 5;
             // 
-            // label2
+            // label_objectDirectoryName
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(62, 312);
-            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(180, 21);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "对象文件目录(&O):";
+            this.label_objectDirectoryName.AutoSize = true;
+            this.label_objectDirectoryName.Location = new System.Drawing.Point(62, 312);
+            this.label_objectDirectoryName.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label_objectDirectoryName.Name = "label_objectDirectoryName";
+            this.label_objectDirectoryName.Size = new System.Drawing.Size(180, 21);
+            this.label_objectDirectoryName.TabIndex = 4;
+            this.label_objectDirectoryName.Text = "对象文件目录(&O):";
             // 
             // checkBox_includeObjectFile
             // 
@@ -181,12 +182,13 @@
             this.Controls.Add(this.checkBox_includeObjectFile);
             this.Controls.Add(this.button_getObjectDirectoryName);
             this.Controls.Add(this.textBox_objectDirectoryName);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label_objectDirectoryName);
             this.Controls.Add(this.button_getFileName);
             this.Controls.Add(this.textBox_xmlFileName);
             this.Controls.Add(this.label1);
             this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.Name = "OpenPatronXmlFileDialog";
+            this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "打开读者 XML 文件";
             this.Load += new System.EventHandler(this.OpenPatronXmlFileDialog_Load);
@@ -202,7 +204,7 @@
         private System.Windows.Forms.Button button_getFileName;
         private System.Windows.Forms.Button button_getObjectDirectoryName;
         private System.Windows.Forms.TextBox textBox_objectDirectoryName;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_objectDirectoryName;
         private System.Windows.Forms.CheckBox checkBox_includeObjectFile;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;

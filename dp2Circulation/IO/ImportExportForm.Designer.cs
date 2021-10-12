@@ -34,7 +34,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.button_getObjectDirectoryName = new System.Windows.Forms.Button();
             this.textBox_objectDirectoryName = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.label_objectDirectoryName = new System.Windows.Forms.Label();
             this.button_source_findFileName = new System.Windows.Forms.Button();
             this.textBox_source_fileName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -103,7 +103,7 @@
             this.tabPage_source.Controls.Add(this.label4);
             this.tabPage_source.Controls.Add(this.button_getObjectDirectoryName);
             this.tabPage_source.Controls.Add(this.textBox_objectDirectoryName);
-            this.tabPage_source.Controls.Add(this.label3);
+            this.tabPage_source.Controls.Add(this.label_objectDirectoryName);
             this.tabPage_source.Controls.Add(this.button_source_findFileName);
             this.tabPage_source.Controls.Add(this.textBox_source_fileName);
             this.tabPage_source.Controls.Add(this.label2);
@@ -160,18 +160,19 @@
             this.textBox_objectDirectoryName.Location = new System.Drawing.Point(49, 227);
             this.textBox_objectDirectoryName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_objectDirectoryName.Name = "textBox_objectDirectoryName";
+            this.textBox_objectDirectoryName.ReadOnly = true;
             this.textBox_objectDirectoryName.Size = new System.Drawing.Size(649, 31);
             this.textBox_objectDirectoryName.TabIndex = 12;
             // 
-            // label3
+            // label_objectDirectoryName
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(46, 201);
-            this.label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(180, 21);
-            this.label3.TabIndex = 11;
-            this.label3.Text = "对象文件目录(&O):";
+            this.label_objectDirectoryName.AutoSize = true;
+            this.label_objectDirectoryName.Location = new System.Drawing.Point(46, 201);
+            this.label_objectDirectoryName.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label_objectDirectoryName.Name = "label_objectDirectoryName";
+            this.label_objectDirectoryName.Size = new System.Drawing.Size(180, 21);
+            this.label_objectDirectoryName.TabIndex = 11;
+            this.label_objectDirectoryName.Text = "对象文件目录(&O):";
             // 
             // button_source_findFileName
             // 
@@ -350,7 +351,7 @@
             this.panel_map.Location = new System.Drawing.Point(5, 275);
             this.panel_map.Margin = new System.Windows.Forms.Padding(5);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(706, 213);
+            this.panel_map.Size = new System.Drawing.Size(646, 213);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -655,7 +656,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button_getObjectDirectoryName;
         private System.Windows.Forms.TextBox textBox_objectDirectoryName;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label_objectDirectoryName;
         private System.Windows.Forms.TabPage tabPage_run;
         private System.Windows.Forms.Button button_target_simulateImport;
         private System.Windows.Forms.TabPage tabPage_convert;

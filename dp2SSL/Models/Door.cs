@@ -942,10 +942,10 @@ namespace dp2SSL
                         {
                             string style = "";  // "refreshCount";
                             CancellationToken token = ShelfData.CancelToken;
-                            await ShelfData.FillBookFieldsAsync(door._allEntities, token, style);
-                            await ShelfData.FillBookFieldsAsync(door._removeEntities, token, style);
-                            await ShelfData.FillBookFieldsAsync(door._addEntities, token, style);
-                            await ShelfData.FillBookFieldsAsync(door._errorEntities, token, style);
+                            await ShelfData.FillBookFieldsAsync(GetCollection(door._allEntities), token, style);
+                            await ShelfData.FillBookFieldsAsync(GetCollection(door._removeEntities), token, style);
+                            await ShelfData.FillBookFieldsAsync(GetCollection(door._addEntities), token, style);
+                            await ShelfData.FillBookFieldsAsync(GetCollection(door._errorEntities), token, style);
                         }
                         catch(Exception ex)
                         {
@@ -956,71 +956,88 @@ namespace dp2SSL
             }
         }
 
+        static IReadOnlyCollection<Entity> GetCollection(EntityCollection collection)
+        {
+            lock (_syncRoot_refresh)
+            {
+                return new List<Entity>(collection);
+            }
+        }
+
         // 根据 items 集合完整替换更新 collection 集合内容
         // 注意，本函数因为要修改 ObservationCollection，所以应该在界面线程内执行
         // ... You need to switch context back into the UI thread when you access the observable collection ...
         // https://stackoverflow.com/questions/12110740/collectionview-notsupportedexception-after-checking-on-dispatcher-currentdispatc
         static bool Update(EntityCollection collection, List<Entity> items)
         {
-            bool changed = false;
-            int oldCount = items.Count;
-            // 添加 items 中多出来的对象
-            foreach (var item in items)
+            lock (_syncRoot_refresh)
             {
+                bool changed = false;
+                int oldCount = items.Count;
+                // 添加 items 中多出来的对象
+                foreach (var item in items)
+                {
 #if AUTO_TEST
                 Debug.Assert(string.IsNullOrEmpty(item.PII) == false);
 #endif
-                // 用 UID 来搜索
-                var found = collection.FindEntityByUID(item.UID);
-                if (found == null)
+                    // 用 UID 来搜索
+                    var found = collection.FindEntityByUID(item.UID);
+                    if (found == null)
+                    {
+                        Entity dup = item.Clone();
+                        dup.Container = collection;
+                        dup.Waiting = false;
+                        collection.Add(dup);
+                        changed = true;
+                    }
+                }
+
+                List<Entity> removes = new List<Entity>();
+                // 删除 collection 中多出来的对象
+                foreach (var item in collection)
                 {
-                    Entity dup = item.Clone();
-                    dup.Container = collection;
-                    dup.Waiting = false;
-                    collection.Add(dup);
+                    var found = items.Find((o) => { return (o.UID == item.UID); });
+                    if (found == null)
+                        removes.Add(item);
+                }
+
+                foreach (var item in removes)
+                {
+                    collection.Remove(item);
                     changed = true;
                 }
-            }
 
-            List<Entity> removes = new List<Entity>();
-            // 删除 collection 中多出来的对象
-            foreach (var item in collection)
-            {
-                var found = items.Find((o) => { return (o.UID == item.UID); });
-                if (found == null)
-                    removes.Add(item);
+                Debug.Assert(oldCount == items.Count, "");
+                return changed;
             }
-
-            foreach (var item in removes)
-            {
-                collection.Remove(item);
-                changed = true;
-            }
-
-            Debug.Assert(oldCount == items.Count, "");
-            return changed;
         }
+
+        // 2021/10/12
+        static object _syncRoot_refresh = new object();
 
         // 根据 items 集合更新局部 collection 集合内容
         static void Refresh(EntityCollection collection, List<Entity> items)
         {
-            // 添加 items 中多出来的对象
-            foreach (var item in items)
+            lock (_syncRoot_refresh)
             {
+                // 添加 items 中多出来的对象
+                foreach (var item in items)
+                {
 #if AUTO_TEST
                 Debug.Assert(string.IsNullOrEmpty(item.PII) == false);
 #endif
-                // 用 UID 来搜索
-                var found = collection.FindEntityByUID(item.UID);
-                if (found != null)
-                {
-                    // 尽量保持原来 index 位置不变
-                    int index = collection.IndexOf(found);
-                    collection.RemoveAt(index);
-                    Entity dup = item.Clone();
-                    dup.Container = collection;
-                    dup.Waiting = false;
-                    collection.Insert(index, dup);
+                    // 用 UID 来搜索
+                    var found = collection.FindEntityByUID(item.UID);
+                    if (found != null)
+                    {
+                        // 尽量保持原来 index 位置不变
+                        int index = collection.IndexOf(found);
+                        collection.RemoveAt(index);
+                        Entity dup = item.Clone();
+                        dup.Container = collection;
+                        dup.Waiting = false;
+                        collection.Insert(index, dup);
+                    }
                 }
             }
         }

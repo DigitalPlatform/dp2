@@ -48,7 +48,7 @@ namespace dp2Circulation
 
         private void OpenPatronXmlFileDialog_Load(object sender, EventArgs e)
         {
-
+            checkBox_includeObjectFile_CheckedChanged(sender, e);
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -73,7 +73,7 @@ namespace dp2Circulation
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -158,16 +158,32 @@ namespace dp2Circulation
 
         private void checkBox_includeObjectFile_CheckedChanged(object sender, EventArgs e)
         {
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            this.textBox_objectDirectoryName.ReadOnly = !control;
+
             if (this.checkBox_includeObjectFile.Checked)
             {
                 this.textBox_objectDirectoryName.Enabled = true;
                 this.button_getObjectDirectoryName.Enabled = true;
+
+                this.checkBox_mimeFileExtension.Enabled = true;
+                this.checkBox_usageFileExtension.Enabled = true;
+
+                this.label_objectDirectoryName.Enabled = true;
+
+                AutoBuildObjectDirectoryName(true);
             }
             else
             {
                 this.textBox_objectDirectoryName.Enabled = false;
-                this.textBox_objectDirectoryName.Text = "";
                 this.button_getObjectDirectoryName.Enabled = false;
+
+                this.checkBox_mimeFileExtension.Enabled = false;
+                this.checkBox_usageFileExtension.Enabled = false;
+
+                this.label_objectDirectoryName.Enabled = false;
+
+                this.textBox_objectDirectoryName.Text = "";
             }
         }
 

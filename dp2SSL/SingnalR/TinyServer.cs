@@ -2077,7 +2077,6 @@ text.ToString());
                     App.Invoke(new Action(() =>
                     {
                         dlg = new WriteTagWindow();
-                        App.SetSize(dlg, "full");
                     }));
 
                     dlg.LoopWriting = loop;
@@ -2126,6 +2125,9 @@ text.ToString());
                     App.Invoke(new Action(() =>
                     {
                         dlg.Owner = Application.Current.MainWindow;
+                        dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        App.SetSize(dlg, "full");
+                        dlg.TitleText = "写入 RFID 图书标签";
                         dlg.Show();
                         PageMenu.PageSetting?.AddLayer();
                     }));

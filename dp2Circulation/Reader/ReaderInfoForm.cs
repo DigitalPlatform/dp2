@@ -6908,7 +6908,16 @@ MessageBoxDefaultButton.Button1);
             this.EnableControls(false);
             try
             {
-            REDO:
+                string version = await GetFaceVersionAsync();
+
+                // 要返回人脸特征
+                if (StringUtil.CompareVersion(version, "1.5.12") < 0)
+                {
+                    strError = $"人脸登记功能必须和 facecenter 1.5.12 或以上版本配套使用(但当前 facecenter 为 {version} 版)";
+                    goto ERROR1;
+                }
+
+                REDO:
                 GetFeatureStringResult result = await ReadFeatureString(
                     null,
                     this.readerEditControl1.Barcode,
@@ -6934,7 +6943,7 @@ MessageBoxDefaultButton.Button1);
                     string log_info = "";
                     if (result.ErrorCode == "alreadyExist")
                     {
-                        string version = await GetFaceVersionAsync();
+                        // string version = await GetFaceVersionAsync();
 
                         // 要返回人脸特征
                         if (StringUtil.CompareVersion(version, "1.5.12") >= 0

@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.CommonControl;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -44,7 +45,7 @@ namespace dp2Circulation
 
         private void OpenBiblioDumpFileDialog_Load(object sender, EventArgs e)
         {
-
+            checkBox_includeObjectFile_CheckedChanged(sender, e);
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -145,16 +146,27 @@ namespace dp2Circulation
 
         private void checkBox_includeObjectFile_CheckedChanged(object sender, EventArgs e)
         {
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            this.textBox_objectDirectoryName.ReadOnly = !control;
+
             if (this.checkBox_includeObjectFile.Checked)
             {
                 this.textBox_objectDirectoryName.Enabled = true;
                 this.button_getObjectDirectoryName.Enabled = true;
+
+                this.label_objectDirectoryName.Enabled = true;
+
+                AutoBuildObjectDirectoryName(true);
+
             }
             else
             {
                 this.textBox_objectDirectoryName.Enabled = false;
-                this.textBox_objectDirectoryName.Text = "";
                 this.button_getObjectDirectoryName.Enabled = false;
+
+                this.label_objectDirectoryName.Enabled = false;
+
+                this.textBox_objectDirectoryName.Text = "";
             }
         }
 

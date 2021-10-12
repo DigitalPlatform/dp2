@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.42.*")]
-[assembly: AssemblyFileVersion("3.42.0.0")]
+[assembly: AssemblyVersion("3.43.*")]
+[assembly: AssemblyFileVersion("3.43.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -119,3 +119,7 @@ using System.Runtime.InteropServices;
 //                  在读者查询窗为当前活动窗口的前提下，点框架窗口工具条的“借”按钮，可以切换到快捷出纳窗，并且会自动载入刚才读者查询窗浏览列表中选定的第一个读者记录，准备好借书
 //                  在种册窗的“册”属性页，上下文菜单上增加了“查看借阅者”命令。注意这是打开新的读者窗装入，选定了多少行，就可能打开这么多个新的读者窗，注意使用以后关闭这些读者窗
 // 3.42 2021/10/10 订购查询窗用“仅获得检索点”检索“订购时间”等途径命中后，列标题上点右鼠标键可以出现上下文菜单设置此列的排序方式。最新版在排序方式列表中增加了 RFC1123 类型，可用于 RFC1123 时间字符串排序。
+//      2021/10/11 读者窗在进行人脸登记的时候，如果发现特征和其它读者重复了，最新版(配合 FaceCenter 1.5.12)会自动将没有能登记成功的人脸特征记入错误日志，并把人脸图片写入日志目录中的一个图像文件中
+//                  读者窗保存读者记录功能因改进人脸登记功能进行了 async/await 改造
+// 3.43 2021/10/12 读者窗导出 XML 文件功能中的选择对象文件目录；书目查询窗导出 .bdf 文件功能中的选择对象文件目录界面均做了改进，Ctrl 键按下选择允许对象文件的 checkbox 是高级状态，允许单独修改对象文件目录名
+//                  导入读者 XML 文件，和导入 .bdf 文件的界面中选择对象文件目录的界面也做了相应的改进

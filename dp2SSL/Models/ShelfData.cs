@@ -1263,7 +1263,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
             if (StringUtil.IsInList("doors", style))
             {
-                XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("shelf/door");
+                XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("//door");  // "shelf/door"
                 foreach (XmlElement door in doors)
                 {
                     DoorItem.ParseReaderString(door.GetAttribute("antenna"),
@@ -3698,11 +3698,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                 return false;
             }
-
-
         }
-
-
 
         // Exception:
         //      可能会抛出异常 ArgumentException TagDataException

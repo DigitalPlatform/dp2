@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.53")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.53.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.54")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.54.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -146,3 +146,4 @@ using System.Windows;
 //      1.8.52 (2021/9/28) 书柜意外收到开门信号(指不是屏幕触发)时，这时候门没有开门者信息，dp2ssl 软件会自动把最近一次开此门的操作者当作本次操作者，并继续进行后面的操作，这一情况会写入错误日志
 //      1.8.53 (2021/10/8) 远程命令增加 shutdown 命令。要求两个操作者先后在五分钟内发出 shutdown 命令，dp2ssl 才会真正进行关机操作
 //                          写入标签的对话框现在改为占满全部屏幕显示(以前版本是随机的显示位置)
+//      1.8.54 (2021/10/12) 针对 DisplayCount() 出现异常: “Type: System.InvalidOperationException, Message: 集合已修改；可能无法执行枚举操作。”加固了代码

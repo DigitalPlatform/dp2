@@ -1,10 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Xml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,6 +10,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -40,6 +41,8 @@ namespace dp2Circulation
 "ui_state",
 "");
             }
+
+            checkBox_object_CheckedChanged(sender, e);
         }
 
         private void ImportPatronForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -641,25 +644,48 @@ new string[] { "重试", "跳过", "中断" },
 
         private void checkBox_object_CheckedChanged(object sender, EventArgs e)
         {
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            this.textBox_objectDirectoryName.ReadOnly = !control;
+
             if (this.checkBox_object.Checked)
             {
                 this.textBox_objectDirectoryName.Enabled = true;
                 this.button_getObjectDirectoryName.Enabled = true;
+
+                this.label_objectDirectoryName.Enabled = true;
+
+                AutoBuildObjectDirectoryName(true);
             }
             else
             {
                 this.textBox_objectDirectoryName.Enabled = false;
-                this.textBox_objectDirectoryName.Text = "";
                 this.button_getObjectDirectoryName.Enabled = false;
+
+                this.label_objectDirectoryName.Enabled = false;
+
+                this.textBox_objectDirectoryName.Text = "";
             }
         }
 
         private void textBox_patronXmlFileName_TextChanged(object sender, EventArgs e)
         {
+            /*
             if (string.IsNullOrEmpty(this.textBox_patronXmlFileName.Text) == false)
                 this.textBox_objectDirectoryName.Text = this.textBox_patronXmlFileName.Text + ".object";
             else
                 this.textBox_objectDirectoryName.Text = "";
+            */
+            AutoBuildObjectDirectoryName(true);
+        }
+
+        void AutoBuildObjectDirectoryName(bool bForce)
+        {
+            if (string.IsNullOrEmpty(this.textBox_objectDirectoryName.Text)
+                || bForce)
+            {
+                if (string.IsNullOrEmpty(this.textBox_patronXmlFileName.Text) == false)
+                    this.textBox_objectDirectoryName.Text = this.textBox_patronXmlFileName.Text + ".object";
+            }
         }
 
         private void comboBox_targetDbName_SelectedIndexChanged(object sender, EventArgs e)

@@ -214,6 +214,7 @@ namespace RfidCenter
                     ErrorInfo = Program.MainForm.ErrorStateInfo
                 };
             }
+
             return new NormalResult
             {
                 Value = -1,

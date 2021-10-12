@@ -2839,6 +2839,10 @@ namespace dp2SSL
                 // 2020/11/21
                 // 启动门状态处理任务。此任务长期在后台运行
                 DoorStateTask.StartTask();
+
+                // 2021/10/11
+                var numbers = $"{ShelfData.BookTagList.Tags.Count}:{ShelfData.PatronTagList.Tags.Count}";
+                WpfClientInfo.WriteInfoLog($"标签总数 {numbers}");
             }
             catch (Exception ex)
             {

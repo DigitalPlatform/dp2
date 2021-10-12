@@ -481,6 +481,7 @@ namespace dp2SSL
             RfidManager.Start(_cancelRfid.Token);
             if (App.Function == "智能书柜")
             {
+                // 智能书柜会为读者证 RFID 卡专门启动一个处理线程
                 WpfClientInfo.WriteInfoLog("RfidManager.StartBase2()");
                 RfidManager.StartBase2(_cancelRfid.Token);
             }
@@ -2299,6 +2300,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
             else if (style == "full")
             {
+                window.Left = 0;
+                window.Top = 0;
                 window.Width = mainWindows.ActualWidth;
                 window.Height = mainWindows.ActualHeight;
             }

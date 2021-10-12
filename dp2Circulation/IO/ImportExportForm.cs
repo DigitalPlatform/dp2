@@ -60,6 +60,8 @@ namespace dp2Circulation
 
             this._mapDialog.Show();  // 有了此句对话框的 xxx_load 才能被执行
             this._mapDialog.Hide();  // 有了此句可避免主窗口背后显示一个空对话框窗口
+
+            checkBox_subRecords_object_CheckedChanged(sender, e);
         }
 
         private void ImportExportForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -2148,16 +2150,26 @@ new string[] { "继续", "中断" });
 
         private void checkBox_subRecords_object_CheckedChanged(object sender, EventArgs e)
         {
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            this.textBox_objectDirectoryName.ReadOnly = !control;
+
             if (this.checkBox_subRecords_object.Checked)
             {
                 this.textBox_objectDirectoryName.Enabled = true;
                 this.button_getObjectDirectoryName.Enabled = true;
+
+                this.label_objectDirectoryName.Enabled = true;
+
+                AutoBuildObjectDirectoryName(true);
             }
             else
             {
                 this.textBox_objectDirectoryName.Enabled = false;
-                this.textBox_objectDirectoryName.Text = "";
                 this.button_getObjectDirectoryName.Enabled = false;
+
+                this.label_objectDirectoryName.Enabled = false;
+
+                this.textBox_objectDirectoryName.Text = "";
             }
         }
 
@@ -2380,10 +2392,23 @@ new string[] { "继续", "中断" });
 
         private void textBox_source_fileName_TextChanged(object sender, EventArgs e)
         {
+            /*
             if (string.IsNullOrEmpty(this.textBox_source_fileName.Text) == false)
                 this.textBox_objectDirectoryName.Text = this.textBox_source_fileName.Text + ".object";
             else
                 this.textBox_objectDirectoryName.Text = "";
+            */
+            AutoBuildObjectDirectoryName(true);
+        }
+
+        void AutoBuildObjectDirectoryName(bool bForce)
+        {
+            if (string.IsNullOrEmpty(this.textBox_objectDirectoryName.Text)
+                || bForce)
+            {
+                if (string.IsNullOrEmpty(this.textBox_source_fileName.Text) == false)
+                    this.textBox_objectDirectoryName.Text = this.textBox_source_fileName.Text + ".object";
+            }
         }
     }
 }

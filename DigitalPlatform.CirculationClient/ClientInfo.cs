@@ -526,12 +526,11 @@ namespace DigitalPlatform.CirculationClient
             if (string.IsNullOrEmpty(UserDir))
                 throw new ArgumentException("BeginUpdate() 调用位置不正确，应该在 Initial() 之后调用");
 
-            /*
             if (ApplicationDeployment.IsNetworkDeployed == false)
             {
                 WriteInfoLog($"BeginUpdate() 因为当前不是 ClickOnce 方式运行，没有启用 ClickOnce 自动更新机制");
                 return;
-            }*/
+            }
 
             Task.Factory.StartNew(async () =>
             {

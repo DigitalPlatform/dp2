@@ -13,6 +13,14 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 
+using LedDriver.First;
+using Microsoft.Win32;
+using Newtonsoft.Json;
+
+using PrinterDriver.Yanke;
+using RfidDrivers.First;
+using ShelfLockDriver.First;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
@@ -21,14 +29,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
-
-using LedDriver.First;
-using Microsoft.Win32;
-using Newtonsoft.Json;
-using PrinterDriver.Yanke;
-using RfidDrivers.First;
-using Serilog;
-using ShelfLockDriver.First;
 
 namespace RfidCenter
 {

@@ -45,7 +45,7 @@ namespace dp2Circulation
             this.checkBox_restoreMode = new System.Windows.Forms.CheckBox();
             this.button_getObjectDirectoryName = new System.Windows.Forms.Button();
             this.textBox_objectDirectoryName = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.label_objectDirectoryName = new System.Windows.Forms.Label();
             this.checkBox_object = new System.Windows.Forms.CheckBox();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -203,18 +203,19 @@ namespace dp2Circulation
             this.textBox_objectDirectoryName.Location = new System.Drawing.Point(56, 134);
             this.textBox_objectDirectoryName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_objectDirectoryName.Name = "textBox_objectDirectoryName";
+            this.textBox_objectDirectoryName.ReadOnly = true;
             this.textBox_objectDirectoryName.Size = new System.Drawing.Size(637, 31);
             this.textBox_objectDirectoryName.TabIndex = 16;
             // 
-            // label4
+            // label_objectDirectoryName
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(53, 108);
-            this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(180, 21);
-            this.label4.TabIndex = 15;
-            this.label4.Text = "对象文件目录(&O):";
+            this.label_objectDirectoryName.AutoSize = true;
+            this.label_objectDirectoryName.Location = new System.Drawing.Point(53, 108);
+            this.label_objectDirectoryName.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label_objectDirectoryName.Name = "label_objectDirectoryName";
+            this.label_objectDirectoryName.Size = new System.Drawing.Size(180, 21);
+            this.label_objectDirectoryName.TabIndex = 15;
+            this.label_objectDirectoryName.Text = "对象文件目录(&O):";
             // 
             // checkBox_object
             // 
@@ -238,7 +239,7 @@ namespace dp2Circulation
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.button_getObjectDirectoryName);
             this.Controls.Add(this.textBox_objectDirectoryName);
-            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label_objectDirectoryName);
             this.Controls.Add(this.checkBox_object);
             this.Controls.Add(this.checkBox_restoreMode);
             this.Controls.Add(this.checkBox_refreshRefID);
@@ -284,7 +285,7 @@ namespace dp2Circulation
         private System.Windows.Forms.CheckBox checkBox_restoreMode;
         private System.Windows.Forms.Button button_getObjectDirectoryName;
         private System.Windows.Forms.TextBox textBox_objectDirectoryName;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label_objectDirectoryName;
         private System.Windows.Forms.CheckBox checkBox_object;
     }
 }
