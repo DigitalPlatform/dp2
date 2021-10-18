@@ -1268,7 +1268,7 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(strRecPath) == true)
             {
-                strError = "浏览行记录路径列没有内容，无法获得书目记录路径";
+                strError = $"浏览行  '{ItemSearchFormBase.GetSummaryText(item)}' 记录路径列没有内容，无法获得书目记录路径";
                 return -1;
             }
 

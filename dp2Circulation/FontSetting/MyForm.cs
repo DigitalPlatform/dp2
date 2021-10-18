@@ -35,10 +35,23 @@ namespace dp2Circulation
     /// </summary>
     public class MyForm : Form, IMdiWindow
     {
+        System.Threading.CancellationTokenSource _cancel = new System.Threading.CancellationTokenSource();
+
+        public System.Threading.CancellationToken CancelToken
+        {
+            get
+            {
+                return _cancel.Token;
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
+                _cancel?.Cancel();
+                _cancel?.Dispose();
+
                 if (this.Channel != null)
                     this.Channel.Dispose();
 
@@ -289,6 +302,14 @@ namespace dp2Circulation
         /// </summary>
         public virtual void OnMyFormClosed()
         {
+            try
+            {
+                _cancel?.Cancel();
+            }
+            catch(ObjectDisposedException)
+            {
+            }
+
             if (this.Channel != null)
             {
                 this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -2438,6 +2459,7 @@ out string strError)
             }
         }
 
+#if NO
         public async Task<NormalResult> FaceGetState(string strStyle)
         {
             if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
@@ -2483,7 +2505,7 @@ out string strError)
                 EndFaceChannel(channel);
             }
         }
-
+#endif
         #endregion
 
         #region 人脸登记功能(从 ReaderInfoForm 移动过来)
@@ -2698,7 +2720,7 @@ out string strError)
         }
 
         // 2021/10/10
-        public async Task<NormalResult> GetFaceState(string style)
+        public async Task<NormalResult> FaceGetStateAsync(string style)
         {
             string strError = "";
 
@@ -2736,8 +2758,9 @@ out string strError)
                 {
                     return new NormalResult
                     {
-                        Value = 0,  // 让调主认为没有出错
-                        ErrorInfo = ex.Message
+                        Value = -1,
+                        ErrorInfo = ex.Message,
+                        ErrorCode = "RequestError"
                     };
                 }
                 catch (Exception ex)
@@ -3224,6 +3247,22 @@ Keys keyData)
         }
 
         internal ErrorTable _errorTable = null;
+
+        public void MessageBoxShow(string strText)
+        {
+            if (this.IsHandleCreated)
+                this.Invoke((Action)(() =>
+                {
+                    try
+                    {
+                        MessageBox.Show(this, strText);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+
+                    }
+                }));
+        }
     }
 
     public class FilterHost

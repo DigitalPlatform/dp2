@@ -2597,6 +2597,8 @@ LibraryChannel channel,
                                 */
                         }
 
+                        List<OperBase> lines = null;
+
                         {
                             // return:
                             //      -2  不能识别的 strOperation 类型
@@ -2608,7 +2610,7 @@ LibraryChannel channel,
                                 dom,
                                 current_item.Date,
                                 current_item.Index,
-                                out List<OperBase> lines,
+                                out lines,
                                 out strError);
                             if (lines != null)
                                 opers.AddRange(lines);
@@ -2628,6 +2630,7 @@ LibraryChannel channel,
                                 context,
                                 item,
                                 dom,
+                                lines,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -2727,6 +2730,8 @@ LibraryChannel channel,
 
             context.Dispose();
             context = new LibraryContext(context.DatabaseConfig);
+
+            // TODO: 处理 return 动作的 borrowID 补全
         }
 
         // 在内存中增加一行
@@ -2872,6 +2877,8 @@ LibraryChannel channel,
         #region
 
         // 将一条日志记录中的动作兑现到 item reader biblio class_ 表
+        // parameters:
+        //      opers   日志动作记录。在本函数中可能要对它进行修改
         // return:
         //      -1  出错
         //      0   没有必要处理
@@ -2880,6 +2887,7 @@ LibraryChannel channel,
             LibraryContext context,
             OperLogItem info,
             XmlDocument dom,
+            List<OperBase> opers,
             out string strError)
         {
             strError = "";
@@ -2917,6 +2925,7 @@ LibraryChannel channel,
                 nRet = this.TraceBorrow(
                     context,
                     dom,
+                    opers,
                     out strError);
             }
             else if (strOperation == "return")
@@ -2924,6 +2933,7 @@ LibraryChannel channel,
                 nRet = this.TraceReturn(
                     context,
                     dom,
+                    opers,
                     out strError);
             }
 
@@ -3737,6 +3747,7 @@ out string strError)
         public int TraceBorrow(
 LibraryContext context,
 XmlDocument domLog,
+            List<OperBase> opers,
 out string strError)
         {
             strError = "";
@@ -3770,6 +3781,24 @@ out string strError)
                     "borrowPeriod");
                 //string strReturningDate = ItemLine.GetLocalTime(DomUtil.GetElementText(domLog.DocumentElement,
                 //    "returningDate"));
+
+                string strBorrowID = DomUtil.GetElementText(domLog.DocumentElement,
+    "borrowID");
+                if (string.IsNullOrEmpty(strBorrowID))
+                {
+                    // 用日志记录的 uid 充当 borrowID 内容
+                    string uid = DomUtil.GetElementText(domLog.DocumentElement,
+"uid");
+                    strBorrowID = $"uid:{uid}";
+
+                    // 修改日志动作对象
+                    {
+                        CircuOper oper = opers[0] as CircuOper;
+                        Debug.Assert(oper != null);
+                        Debug.Assert(string.IsNullOrEmpty(oper.BorrowID));
+                        oper.BorrowID = strBorrowID;
+                    }
+                }
 
                 DateTime returningTime = DateTime.MinValue;
 
@@ -3809,6 +3838,9 @@ out string strError)
                     item.BorrowPeriod = strBorrowPeriod;
                     item.ReturningTime = returningTime;
 
+                    // 2021/10/15
+                    item.BorrowID = strBorrowID;
+
                     context.Items.Update(item);
                     context.SaveChanges();
                     dbContextTransaction.Commit();
@@ -3840,13 +3872,13 @@ out string strError)
         public int TraceReturn(
 LibraryContext context,
 XmlDocument domLog,
+            List<OperBase> opers,
 out string strError)
         {
             strError = "";
 
             using (var dbContextTransaction = context.Database.BeginTransaction())
             {
-
                 string strAction = DomUtil.GetElementText(domLog.DocumentElement,
     "action");
                 if (strAction != "return" && strAction != "lost")
@@ -3878,8 +3910,20 @@ out string strError)
                 else
                     item = context.Items.FirstOrDefault(x => x.ItemBarcode == strItemBarcode);
 
+                // 修改册记录状态
                 if (item != null)
                 {
+                    // 2021/10/15
+                    // 如果必要，修改日志动作对象
+                    {
+                        Debug.Assert(string.IsNullOrEmpty(item.BorrowID) == false);
+                        CircuOper oper = opers[0] as CircuOper;
+                        Debug.Assert(oper != null);
+                        if (string.IsNullOrEmpty(oper.BorrowID)
+                            && item.Borrower == strReaderBarcode)
+                            oper.BorrowID = item.BorrowID;
+                    }
+
                     if (string.IsNullOrEmpty(item.ItemBarcode))
                         item.ItemBarcode = strItemBarcode;
                     if (string.IsNullOrEmpty(item.ItemRecPath))
@@ -3888,6 +3932,7 @@ out string strError)
                     item.BorrowTime = DateTime.MinValue;
                     item.BorrowPeriod = null;
                     item.ReturningTime = DateTime.MinValue;
+                    item.BorrowID = null;
 
                     context.Items.Update(item);
                     context.SaveChanges();

@@ -1888,6 +1888,18 @@ MessageBoxDefaultButton.Button2);
 
             this.textBox_palmprint_readerUrl.Text = strDefaultValue;
         }
+
+        private void linkLabel_installFingerprintCenter_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var url = "https://dp2003.com/fingerprintcenter/v1/publish.htm";
+            Process.Start(url);
+        }
+
+        private void linkLabel_installFaceCenter_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var url = "https://dp2003.com/facecenter/v1/publish.htm";
+            Process.Start(url);
+        }
     }
 
     // 调用数据加工模块

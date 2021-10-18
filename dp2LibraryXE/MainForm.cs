@@ -5492,14 +5492,39 @@ MessageBoxDefaultButton.Button2);
         {
             string fileName = Path.Combine(this.UserDir, $"library_data\\log\\log_{DateTimeUtil.DateTimeToString8(DateTime.Now)}.txt");
             //Process.Start("notepad", fileName);
-            Process.Start(fileName);
+            if (File.Exists(fileName))
+            {
+                try
+                {
+                    Process.Start(fileName);
+                }
+                catch (Exception ex)
+                {
+                    WriteErrorLog($"Process.Start({fileName}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    MessageBox.Show(this, $"Process.Start({fileName}) 出现异常: {ex.Message}");
+                }
+            }
+            else
+                MessageBox.Show(this, $"错误日志文件 {fileName} 不存在");
         }
 
         private void MenuItem_viewTodayDp2kernelErrorLogFile_Click(object sender, EventArgs e)
         {
             string fileName = Path.Combine(this.UserDir, $"kernel_data\\log\\log_{DateTimeUtil.DateTimeToString8(DateTime.Now)}.txt");
-            // Process.Start("notepad", fileName);
-            Process.Start(fileName);
+            if (File.Exists(fileName))
+            {
+                try
+                {
+                    Process.Start(fileName);
+                }
+                catch (Exception ex)
+                {
+                    WriteErrorLog($"Process.Start({fileName}) 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    MessageBox.Show(this, $"Process.Start({fileName}) 出现异常: {ex.Message}");
+                }
+            }
+            else
+                MessageBox.Show(this, $"错误日志文件 {fileName} 不存在");
         }
 
         // 创建绿色更新包

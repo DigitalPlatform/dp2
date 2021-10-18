@@ -8738,6 +8738,12 @@ out strError);
                         throw new Exception("Items 中包含了 路径为空的事项");
                     }
 
+                    // 2021/10/18
+                    if (strRecPath.StartsWith("error:"))
+                    {
+                        throw new Exception("Items 中包含了 路径为报错内容的事项");
+                    }
+
                     Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
                     BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];

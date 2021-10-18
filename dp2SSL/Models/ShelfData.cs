@@ -1791,7 +1791,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 entity.AppendError(text, "red", "setEasError");
 
                                 // 写入错误日志
-                                WpfClientInfo.WriteInfoLog($"修改册 '{entity.PII}' 的 EAS 失败: {result.ErrorInfo}");
+                                WpfClientInfo.WriteInfoLog($"修改册 '{entity.GetPiiOrUid()}' 的 EAS 失败: {result.ErrorInfo}");
                             }
                         }
                     }

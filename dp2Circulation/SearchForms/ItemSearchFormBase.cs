@@ -886,6 +886,13 @@ namespace dp2Circulation
                 else
                     strBiblioRecPath = strText;
 #endif
+                // 2021/10/18
+                if (item.Text.StartsWith("error:"))
+                {
+                    colindex_list.Add(-1);
+                    continue;
+                }
+
                 int nCol = -1;
                 // 获得事项所从属的书目记录的路径
                 // return:
@@ -1167,6 +1174,20 @@ biblio.Content, biblio.RecPath);
             }
         }
 
+        // 2021/10/15
+        // 获得可以粗略描述一行的文字
+        public static string GetSummaryText(ListViewItem item)
+        {
+            List<string> results = new List<string>();
+            foreach (ListViewItem.ListViewSubItem subitem in item.SubItems)
+            {
+                if (string.IsNullOrEmpty(subitem.Text) == false)
+                    results.Add(subitem.Text);
+            }
+
+            return StringUtil.MakePathList(results, "; ");
+        }
+
         /*
 操作类型 crashReport -- 异常报告 
 主题 dp2circulation 
@@ -1220,9 +1241,16 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
             // 这是事项记录路径
             string strRecPath = ListViewUtil.GetItemText(item, 0);
 
+            // 2021/10/18
+            if (strRecPath.StartsWith("error:"))
+            {
+                strError = $"浏览行 '{GetSummaryText(item)}' 记录路径列内容为错误信息('{strRecPath}')，无法获得书目记录路径";
+                return -1;
+            }
+
             if (string.IsNullOrEmpty(strRecPath) == true)
             {
-                strError = "浏览行记录路径列没有内容，无法获得书目记录路径";
+                strError = $"浏览行 '{GetSummaryText(item)}' 记录路径列没有内容，无法获得书目记录路径";
                 return -1;
             }
 
@@ -1395,6 +1423,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
             return 1;
         }
 
+        const int COLUMN_ERRORINFO = 0;
+
         // return:
         //      false   出现错误
         //      true    成功
@@ -1419,12 +1449,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                 out strError);
             if (nRet == -1)
             {
-                ListViewUtil.ChangeItemText(item, 2, strError);
+                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "error: " + strError);
                 return false;
             }
             else if (nRet == 0)
             {
-                ListViewUtil.ChangeItemText(item, 2, "条码号 '" + strBarcode + "' 没有找到记录");
+                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "error: 册条码号 '" + strBarcode + "' 没有找到记录"); // 2
                 return false;
             }
             else if (nRet == 1)
@@ -1433,16 +1463,25 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
             }
             else if (nRet > 1) // 命中发生重复
             {
-                ListViewUtil.ChangeItemText(item, 2, "条码号 '" + strBarcode + "' 命中 " + nRet.ToString() + " 条记录，这是一个严重错误");
+                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, "error: 册条码号 '" + strBarcode + "' 命中 " + nRet.ToString() + " 条记录，这是一个严重错误");
                 return false;
             }
 
             string strItemDbName = Global.GetDbName(strItemRecPath);
             int index = GetColumnIndex(strItemDbName, "item_barcode");
-            // TODO: 这里最好直接报错返回
             if (index == -1)
+            {
                 index = 0;   // 这个大部分情况能奏效
 
+                /*
+                // 直接报错返回
+                // 2021/10/18
+                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, $"error: 实体库 '{strItemDbName}' 的 item_barcode 角色列定义没有找到");
+                return false;
+                */
+            }
+
+            // 注：如果不知道 index，就没法设置条码号列内容
             ListViewUtil.ChangeItemText(item, index, strBarcode);
 
             // TODO: 将书目记录路径放入item.Tag中备用

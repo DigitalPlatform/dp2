@@ -381,6 +381,23 @@ namespace DigitalPlatform.LibraryServer.Reporting
             string strBorrowID = DomUtil.GetElementText(dom.DocumentElement,
     "borrowID");
             this.BorrowID = strBorrowID;
+
+            // 补上 borrowID
+            if (string.IsNullOrEmpty(this.BorrowID)
+                && this.Action == "borrow")
+            {
+                // 用日志记录的 uid 充当 borrowID 内容
+                string uid = DomUtil.GetElementText(dom.DocumentElement,
+"uid");
+                this.BorrowID = $"uid:{uid}";
+            }
+
+            // 2021/10/14
+            // 补上 borrowID
+            if (this.Action == "return" && string.IsNullOrEmpty(this.BorrowID))
+            {
+
+            }
             return 0;
         }
 

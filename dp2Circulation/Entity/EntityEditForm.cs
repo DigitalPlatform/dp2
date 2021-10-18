@@ -1324,7 +1324,10 @@ namespace dp2Circulation
             strError = "";
 
 #if SN
-            var exceed = IncDailyCounter("rfid", 10);
+            string filename = Path.Combine(Program.MainForm.UserDir, $"daily_counter_{"rfid"}.txt");
+            var exceed = DailyCounter.IncDailyCounter(filename,
+                // "rfid",
+                10);
             if (exceed == true)
             {
                 int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
@@ -1585,72 +1588,6 @@ out strError);
             }
         }
 
-        class DailyCounter
-        {
-            public string Date { get; set; }
-            public long Value { get; set; }
-        }
-
-        // 增量每日使用次数计数器
-        // return:
-        //      false   在限制范围内
-        //      true    已经超出范围
-        public static bool IncDailyCounter(
-            string counter_name,
-            long limit_value)
-        {
-            try
-            {
-                string today = DateTimeUtil.DateTimeToString8(DateTime.Now);
-                string filename = Path.Combine(Program.MainForm.UserDir, $"daily_counter_{counter_name}.txt");
-                if (File.Exists(filename))
-                {
-                    var attr = File.GetAttributes(filename);
-                    if (attr != FileAttributes.Normal)
-                    {
-                        File.SetAttributes(filename, FileAttributes.Normal);
-                    }
-                }
-                /*
-                FileInfo fi = new FileInfo(filename);
-                if (fi.Exists)
-                    fi.Attributes &= ~FileAttributes.Hidden;
-                */
-                try
-                {
-                    string value = null;
-                    try
-                    {
-                        value = File.ReadAllText(filename);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        value = "";
-                    }
-
-                    DailyCounter counter = JsonConvert.DeserializeObject<DailyCounter>(value);
-                    if (counter == null || counter.Date != today)
-                        counter = new DailyCounter { Date = DateTimeUtil.DateTimeToString8(DateTime.Now) };
-
-                    counter.Value++;
-
-                    value = JsonConvert.SerializeObject(counter);
-                    File.WriteAllText(filename, value);
-                    if (counter.Value > limit_value)
-                        return true;
-                    return false;
-                }
-                finally
-                {
-                    // fi.Attributes |= FileAttributes.Hidden;
-                    File.SetAttributes(filename, FileAttributes.Hidden);
-                }
-            }
-            catch
-            {
-                return true;
-            }
-        }
 
 #if NO
         // 装入以前的标签信息

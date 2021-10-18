@@ -35,6 +35,7 @@ namespace dp2Circulation
             this.tabControl_query = new System.Windows.Forms.TabControl();
             this.tabPage_simple = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel_query = new System.Windows.Forms.TableLayoutPanel();
+            this.comboBox_entityDbName = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label_entityDbName = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -57,9 +58,8 @@ namespace dp2Circulation
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_prevQuery = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_nextQuery = new System.Windows.Forms.ToolStripButton();
-            this.tabPage_logic = new System.Windows.Forms.TabPage();
-            this.comboBox_entityDbName = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.tabComboBox_queryWord = new DigitalPlatform.CommonControl.TabComboBox();
+            this.tabPage_logic = new System.Windows.Forms.TabPage();
             this.dp2QueryControl1 = new DigitalPlatform.CommonControl.dp2QueryControl();
             this.listView_records = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -78,7 +78,7 @@ namespace dp2Circulation
             // button_search
             // 
             this.button_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_search.Location = new System.Drawing.Point(682, 87);
+            this.button_search.Location = new System.Drawing.Point(803, 87);
             this.button_search.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
@@ -89,8 +89,7 @@ namespace dp2Circulation
             // 
             // comboBox_from
             // 
-            this.comboBox_from.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_from.Dock = System.Windows.Forms.DockStyle.Fill;
             this.comboBox_from.DropDownHeight = 300;
             this.comboBox_from.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_from.FormattingEnabled = true;
@@ -109,7 +108,7 @@ namespace dp2Circulation
             this.comboBox_from.Location = new System.Drawing.Point(156, 87);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(318, 29);
+            this.comboBox_from.Size = new System.Drawing.Size(385, 29);
             this.comboBox_from.TabIndex = 9;
             this.comboBox_from.Text = "册条码";
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
@@ -178,7 +177,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_query.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_query.Location = new System.Drawing.Point(6, 5);
             this.tableLayoutPanel_query.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel_query.MaximumSize = new System.Drawing.Size(688, 0);
+            this.tableLayoutPanel_query.MaximumSize = new System.Drawing.Size(900, 0);
             this.tableLayoutPanel_query.Name = "tableLayoutPanel_query";
             this.tableLayoutPanel_query.RowCount = 5;
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -186,8 +185,24 @@ namespace dp2Circulation
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_query.Size = new System.Drawing.Size(688, 201);
+            this.tableLayoutPanel_query.Size = new System.Drawing.Size(809, 201);
             this.tableLayoutPanel_query.TabIndex = 8;
+            // 
+            // comboBox_entityDbName
+            // 
+            this.comboBox_entityDbName.BackColor = System.Drawing.SystemColors.Window;
+            this.comboBox_entityDbName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.comboBox_entityDbName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBox_entityDbName.Location = new System.Drawing.Point(154, 46);
+            this.comboBox_entityDbName.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_entityDbName.Name = "comboBox_entityDbName";
+            this.comboBox_entityDbName.Padding = new System.Windows.Forms.Padding(4);
+            this.comboBox_entityDbName.ReadOnly = false;
+            this.comboBox_entityDbName.Size = new System.Drawing.Size(389, 32);
+            this.comboBox_entityDbName.TabIndex = 4;
+            this.comboBox_entityDbName.DropDown += new System.EventHandler(this.comboBox_entityDbName_DropDown);
+            this.comboBox_entityDbName.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.comboBox_entityDbName_ItemChecked);
+            this.comboBox_entityDbName.SizeChanged += new System.EventHandler(this.comboBox_entityDbName_SizeChanged);
             // 
             // label3
             // 
@@ -240,8 +255,7 @@ namespace dp2Circulation
             // 
             // comboBox_matchStyle
             // 
-            this.comboBox_matchStyle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_matchStyle.Dock = System.Windows.Forms.DockStyle.Fill;
             this.comboBox_matchStyle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_matchStyle.FormattingEnabled = true;
             this.comboBox_matchStyle.Items.AddRange(new object[] {
@@ -253,7 +267,7 @@ namespace dp2Circulation
             this.comboBox_matchStyle.Location = new System.Drawing.Point(156, 126);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(318, 29);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(385, 29);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "精确一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -262,7 +276,7 @@ namespace dp2Circulation
             // toolStrip_search
             // 
             this.toolStrip_search.BackColor = System.Drawing.SystemColors.Window;
-            this.toolStrip_search.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.toolStrip_search.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip_search.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip_search.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip_search.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -273,11 +287,11 @@ namespace dp2Circulation
             this.toolStripSeparator3,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(480, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(547, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(208, 42);
+            this.toolStrip_search.Size = new System.Drawing.Size(262, 38);
             this.toolStrip_search.TabIndex = 12;
             this.toolStrip_search.Text = "检索";
             // 
@@ -287,7 +301,7 @@ namespace dp2Circulation
             this.toolStripButton_search.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_search.Image")));
             this.toolStripButton_search.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_search.Name = "toolStripButton_search";
-            this.toolStripButton_search.Size = new System.Drawing.Size(40, 36);
+            this.toolStripButton_search.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_search.Text = "检索";
             this.toolStripButton_search.Click += new System.EventHandler(this.toolStripButton_search_Click);
             // 
@@ -302,7 +316,7 @@ namespace dp2Circulation
             this.toolStripDropDownButton_searchKeys.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_searchKeys.Image")));
             this.toolStripDropDownButton_searchKeys.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_searchKeys.Name = "toolStripDropDownButton_searchKeys";
-            this.toolStripDropDownButton_searchKeys.Size = new System.Drawing.Size(21, 36);
+            this.toolStripDropDownButton_searchKeys.Size = new System.Drawing.Size(21, 32);
             this.toolStripDropDownButton_searchKeys.Text = "更多命令...";
             // 
             // ToolStripMenuItem_searchKeys
@@ -334,7 +348,7 @@ namespace dp2Circulation
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 42);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripDropDownButton_inputTimeString
             // 
@@ -348,7 +362,7 @@ namespace dp2Circulation
             this.toolStripDropDownButton_inputTimeString.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_inputTimeString.Image")));
             this.toolStripDropDownButton_inputTimeString.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_inputTimeString.Name = "toolStripDropDownButton_inputTimeString";
-            this.toolStripDropDownButton_inputTimeString.Size = new System.Drawing.Size(49, 36);
+            this.toolStripDropDownButton_inputTimeString.Size = new System.Drawing.Size(49, 32);
             this.toolStripDropDownButton_inputTimeString.Text = "和时间有关的功能";
             // 
             // ToolStripMenuItem_rfc1123Single
@@ -387,7 +401,7 @@ namespace dp2Circulation
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 42);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_prevQuery
             // 
@@ -396,7 +410,7 @@ namespace dp2Circulation
             this.toolStripButton_prevQuery.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prevQuery.Image")));
             this.toolStripButton_prevQuery.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_prevQuery.Name = "toolStripButton_prevQuery";
-            this.toolStripButton_prevQuery.Size = new System.Drawing.Size(40, 36);
+            this.toolStripButton_prevQuery.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_prevQuery.Text = "后退";
             this.toolStripButton_prevQuery.Click += new System.EventHandler(this.toolStripButton_prevQuery_Click);
             // 
@@ -407,9 +421,23 @@ namespace dp2Circulation
             this.toolStripButton_nextQuery.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_nextQuery.Image")));
             this.toolStripButton_nextQuery.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_nextQuery.Name = "toolStripButton_nextQuery";
-            this.toolStripButton_nextQuery.Size = new System.Drawing.Size(40, 36);
+            this.toolStripButton_nextQuery.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_nextQuery.Text = "前进";
             this.toolStripButton_nextQuery.Click += new System.EventHandler(this.toolStripButton_nextQuery_Click);
+            // 
+            // tabComboBox_queryWord
+            // 
+            this.tabComboBox_queryWord.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabComboBox_queryWord.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.tabComboBox_queryWord.DropDownWidth = 518;
+            this.tabComboBox_queryWord.FormattingEnabled = true;
+            this.tabComboBox_queryWord.Location = new System.Drawing.Point(156, 5);
+            this.tabComboBox_queryWord.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.tabComboBox_queryWord.Name = "tabComboBox_queryWord";
+            this.tabComboBox_queryWord.Size = new System.Drawing.Size(385, 32);
+            this.tabComboBox_queryWord.TabIndex = 13;
+            this.tabComboBox_queryWord.DropDown += new System.EventHandler(this.tabComboBox_queryWord_DropDown);
+            this.tabComboBox_queryWord.Enter += new System.EventHandler(this.tabComboBox_queryWord_Enter);
             // 
             // tabPage_logic
             // 
@@ -418,41 +446,10 @@ namespace dp2Circulation
             this.tabPage_logic.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabPage_logic.Name = "tabPage_logic";
             this.tabPage_logic.Padding = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.tabPage_logic.Size = new System.Drawing.Size(821, 379);
+            this.tabPage_logic.Size = new System.Drawing.Size(821, 211);
             this.tabPage_logic.TabIndex = 1;
             this.tabPage_logic.Text = "逻辑";
             this.tabPage_logic.UseVisualStyleBackColor = true;
-            // 
-            // comboBox_entityDbName
-            // 
-            this.comboBox_entityDbName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_entityDbName.BackColor = System.Drawing.SystemColors.Window;
-            this.comboBox_entityDbName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.comboBox_entityDbName.Location = new System.Drawing.Point(154, 46);
-            this.comboBox_entityDbName.Margin = new System.Windows.Forms.Padding(4);
-            this.comboBox_entityDbName.Name = "comboBox_entityDbName";
-            this.comboBox_entityDbName.Padding = new System.Windows.Forms.Padding(4);
-            this.comboBox_entityDbName.ReadOnly = false;
-            this.comboBox_entityDbName.Size = new System.Drawing.Size(322, 32);
-            this.comboBox_entityDbName.TabIndex = 4;
-            this.comboBox_entityDbName.DropDown += new System.EventHandler(this.comboBox_entityDbName_DropDown);
-            this.comboBox_entityDbName.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.comboBox_entityDbName_ItemChecked);
-            this.comboBox_entityDbName.SizeChanged += new System.EventHandler(this.comboBox_entityDbName_SizeChanged);
-            // 
-            // tabComboBox_queryWord
-            // 
-            this.tabComboBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabComboBox_queryWord.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.tabComboBox_queryWord.FormattingEnabled = true;
-            this.tabComboBox_queryWord.Location = new System.Drawing.Point(156, 5);
-            this.tabComboBox_queryWord.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.tabComboBox_queryWord.Name = "tabComboBox_queryWord";
-            this.tabComboBox_queryWord.Size = new System.Drawing.Size(318, 32);
-            this.tabComboBox_queryWord.TabIndex = 13;
-            this.tabComboBox_queryWord.DropDown += new System.EventHandler(this.tabComboBox_queryWord_DropDown);
-            this.tabComboBox_queryWord.Enter += new System.EventHandler(this.tabComboBox_queryWord_Enter);
             // 
             // dp2QueryControl1
             // 
@@ -461,7 +458,7 @@ namespace dp2Circulation
             this.dp2QueryControl1.Margin = new System.Windows.Forms.Padding(11, 10, 11, 10);
             this.dp2QueryControl1.Name = "dp2QueryControl1";
             this.dp2QueryControl1.PanelMode = DigitalPlatform.CommonControl.PanelMode.None;
-            this.dp2QueryControl1.Size = new System.Drawing.Size(809, 369);
+            this.dp2QueryControl1.Size = new System.Drawing.Size(809, 201);
             this.dp2QueryControl1.TabIndex = 1;
             this.dp2QueryControl1.GetList += new DigitalPlatform.CommonControl.GetListEventHandler(this.dp2QueryControl1_GetList);
             this.dp2QueryControl1.ViewXml += new System.EventHandler(this.dp2QueryControl1_ViewXml);

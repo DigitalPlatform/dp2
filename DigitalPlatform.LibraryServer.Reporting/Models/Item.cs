@@ -27,6 +27,9 @@ namespace DigitalPlatform.LibraryServer.Reporting
         public string BorrowPeriod { get; set; }
         public DateTime ReturningTime { get; set; }   // 预计还回时间
 
+        // 2021/10/15
+        public string BorrowID { get; set; }
+
         public Item Clone()
         {
             Item result = new Item();
@@ -51,6 +54,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
             another.BorrowTime = this.BorrowTime;
             another.BorrowPeriod = this.BorrowPeriod;
             another.ReturningTime = this.ReturningTime;
+            another.BorrowID = this.BorrowID;
         }
 
         public void ClearBorrowInfo()
@@ -59,6 +63,7 @@ namespace DigitalPlatform.LibraryServer.Reporting
             this.BorrowTime = DateTime.MinValue;
             this.BorrowPeriod = null;
             this.ReturningTime = DateTime.MinValue;
+            this.BorrowID = null;
         }
 
         // 从 XML 记录变换
@@ -105,6 +110,9 @@ namespace DigitalPlatform.LibraryServer.Reporting
             line.BorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
 "borrowPeriod");
             // line.ReturningTime = GetLocalTime(DomUtil.GetElementText(dom.DocumentElement, "returningDate"));
+            line.BorrowID = DomUtil.GetElementText(dom.DocumentElement,
+    "borrowID");
+
 
             if (line.BorrowTime != DateTime.MinValue)
             {

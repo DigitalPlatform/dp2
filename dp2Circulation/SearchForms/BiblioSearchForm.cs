@@ -5310,7 +5310,8 @@ Keys keyData)
                 List<string> recpaths = new List<string>();
                 foreach (ListViewItem item in items_param)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
                     items.Add(item);
                     recpaths.Add(item.Text);

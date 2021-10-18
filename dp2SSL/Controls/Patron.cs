@@ -341,6 +341,13 @@ namespace dp2SSL
             return this.AOI;
         }
 
+        // 2021/10/18
+        public string GetPiiOrUid()
+        {
+            if (string.IsNullOrEmpty(this.PII) == false)
+                return this.PII;
+            return this.UID;
+        }
     }
 
     // 读者信息

@@ -682,7 +682,7 @@ namespace dp2Circulation
 
         private void button_search_Click(object sender, EventArgs e)
         {
-            BeginSearch(false, false, null);
+            _ = BeginSearch(false, false, null);
         }
 
         ItemQueryParam PanelToQuery()
@@ -1010,21 +1010,62 @@ bClearList);
                 if (_idDesc)
                     strOutputStyle += ",desc";
 
+
                 long lRet = 0;
 
                 if (this.DbType == "item")
                 {
-                    lRet = channel.SearchItem(stop,
-                        this.EntityDbName,  // this.comboBox_entityDbName.Text, // "<all>",
-                        this.QueryWord, // this.tabComboBox_queryWord.Text,
-                        this.MaxSearchResultCount,
-                        this.From,  // this.comboBox_from.Text,
-                        strMatchStyle, // this.textBox_queryWord.Text == "" ? "left" : "exact",    // 原来为left 2007/10/18 changed
-                        this.Lang,
-                        strResultSetName,   // strResultSetName
-                        "",    // strSearchStyle
-                        strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
-                        out strError);
+                    string from = this.From;
+                    if ((from == "册条码" || from == "册条码号")
+                        && this.QueryWord.Contains("-"))
+                    {
+                        string range = this.QueryWord;
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await Task.Delay(1000);
+
+                                // 发生条码号
+                                // 根据范围定义，构建出一个一个的册条码号
+                                var barcodes = GenerateBarcodes(range,
+                                    10 * 10000,
+                                    this.CancelToken);
+
+                                var filePath = MainForm.GetTempFileName("barcodes");
+                                File.WriteAllLines(filePath, barcodes);
+                                try
+                                {
+                                    ImportFromBarcodeFile(filePath, false);
+                                }
+                                finally
+                                {
+                                    File.Delete(filePath);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                MainForm.WriteErrorLog($"按照范围检索册条码号出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                                MessageBoxShow($"按照范围检索册条码号出现异常: {ex.Message}");
+                            }
+                        });
+
+                        return 1;
+                    }
+                    else
+                    {
+                        lRet = channel.SearchItem(stop,
+                            this.EntityDbName,  // this.comboBox_entityDbName.Text, // "<all>",
+                            this.QueryWord, // this.tabComboBox_queryWord.Text,
+                            this.MaxSearchResultCount,
+                            from,  // this.comboBox_from.Text,
+                            strMatchStyle, // this.textBox_queryWord.Text == "" ? "left" : "exact",    // 原来为left 2007/10/18 changed
+                            this.Lang,
+                            strResultSetName,   // strResultSetName
+                            "",    // strSearchStyle
+                            strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
+                            out strError);
+                    }
                 }
                 else if (this.DbType == "comment")
                 {
@@ -1155,6 +1196,71 @@ bClearList);
         ERROR1:
             ShowMessageBox(strError);
             return -1;
+        }
+
+        // 根据范围定义，构建出一个一个的册条码号
+        List<string> GenerateBarcodes(string range,
+            long max_count,
+            CancellationToken token)
+        {
+            this.ShowMessage("正在发生册条码号 ...");
+            try
+            {
+                var parts = StringUtil.ParseTwoPart(range, "-");
+                string left = parts[0].Trim();
+                string right = parts[1].Trim();
+
+                if (left.Length != right.Length)
+                    throw new Exception($"‘{range}’ 横杠左右两侧的字符数不相等");
+
+                int direction = 0;
+                if (string.CompareOrdinal(left, right) < 0)
+                    direction = 1;
+                else if (string.CompareOrdinal(left, right) == 0)
+                    return new List<string>() { left };
+                else
+                    direction = -1;
+
+                List<string> results = new List<string>();
+                string number = left;
+                for (long i = 0; ; i++)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    results.Add(number);
+                    if ((i % 10000) == 0)
+                        this.ShowMessage($"正在发生册条码号 {number}");
+
+                    // 给一个被字符引导的数字增加一个数量。
+                    // 例如 B019X + 1 变成 B020X
+                    int nRet = StringUtil.IncreaseNumber(number,
+                        direction,
+                        out string strResult,
+                        out string strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);
+                    number = strResult;
+                    if (direction == 1)
+                    {
+                        if (string.CompareOrdinal(number, right) > 0)
+                            break;
+                    }
+                    else
+                    {
+                        if (string.CompareOrdinal(number, right) < 0)
+                            break;
+                    }
+
+                    if (i >= max_count)
+                        break;
+                }
+
+                return results;
+            }
+            finally
+            {
+                this.ClearMessage();
+            }
         }
 
         #region 预约到书库相关
@@ -2203,7 +2309,8 @@ out string strError);
 
             string strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
 
-            if (String.IsNullOrEmpty(strFirstColumn) == false)
+            if (String.IsNullOrEmpty(strFirstColumn) == false
+                && strFirstColumn.StartsWith("error:") == false)
             {
                 string strOpenStyle = "new";
                 if (this.LoadToExistWindow == true)
@@ -2228,6 +2335,10 @@ out string strError);
                     "recpath",
                     strOpenStyle);
             }
+            else if (strFirstColumn.StartsWith("error:"))
+            {
+                MessageBox.Show(this, $"{strFirstColumn} 无法进行装载");
+            }
             else
             {
                 ItemQueryParam query = (ItemQueryParam)this.listView_records.SelectedItems[0].Tag;
@@ -2245,7 +2356,7 @@ out string strError);
                 else
                     this.comboBox_matchStyle.Text = "精确一致";
 
-                BeginSearch(false, false, null);
+                _ = BeginSearch(false, false, null);
             }
         }
 
@@ -3443,7 +3554,8 @@ dlg.UiState);
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
 
                     items.Add(item);
@@ -5662,7 +5774,7 @@ Program.MainForm.DefaultFont);
                         return -1;
                     }
 
-                    string strRecPath = ListViewUtil.GetItemText(item, 0);
+                    // string strRecPath = ListViewUtil.GetItemText(item, 0);
 
                     string strItemBarcode = "";
                     // 根据 ListViewItem 对象，获得册条码号列的内容
@@ -5742,7 +5854,8 @@ Program.MainForm.DefaultFont);
                     return -1;
                 }
 
-                if (string.IsNullOrEmpty(item.Text) == true)
+                if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                     continue;
 
                 // 获得指定类型的的列的值
@@ -5809,7 +5922,8 @@ Program.MainForm.DefaultFont);
                     return -1;
                 }
 
-                if (string.IsNullOrEmpty(item.Text) == true)
+                if (string.IsNullOrEmpty(item.Text) == true 
+                    || item.Text.StartsWith("error:"))
                     continue;
 
                 int nCol = -1;
@@ -6461,7 +6575,8 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
 
                     items.Add(item);
@@ -7847,7 +7962,8 @@ out strError);
                 {
                     foreach (ListViewItem item in this.listView_records.SelectedItems)
                     {
-                        if (String.IsNullOrEmpty(item.Text) == true)
+                        if (String.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                             continue;
 
                         List<string> itemrecpaths = null;
@@ -8419,7 +8535,8 @@ out strError);
                                 goto ERROR1;
                             }
 
-                            if (string.IsNullOrEmpty(item.Text) == true)
+                            if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                                 continue;
 
                             if (stop != null)
@@ -8503,7 +8620,8 @@ MessageBoxDefaultButton.Button1);
                             goto ERROR1;
                         }
 
-                        if (string.IsNullOrEmpty(item.Text) == true)
+                        if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                             continue;
 
                         if (stop != null)
@@ -8581,7 +8699,8 @@ MessageBoxDefaultButton.Button1);
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem item in this._listviewRecords.SelectedItems)
             {
-                if (string.IsNullOrEmpty(item.Text) == true)
+                if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                     continue;
                 items.Add(item);
 
@@ -8663,7 +8782,8 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
 
                     if (stop != null)
@@ -9126,6 +9246,9 @@ MessageBoxDefaultButton.Button1);
 
             bool bControl = Control.ModifierKeys == Keys.Control;
 
+            ImportFromBarcodeFile(dlg.FileName, bControl);
+
+#if REMOVED
             this.m_strUsedBarcodeFilename = dlg.FileName;
 
             StreamReader sr = null;
@@ -9280,7 +9403,182 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             ShowMessageBox(strError);
+#endif
         }
+
+        public void ImportFromBarcodeFile(string fileName, bool bControl)
+        {
+            SetStatusMessage("");   // 清除以前残留的显示
+
+            this.m_strUsedBarcodeFilename = fileName;
+
+            StreamReader sr = null;
+            string strError = "";
+
+            try
+            {
+                // TODO: 最好自动探测文件的编码方式?
+                sr = new StreamReader(fileName, Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                strError = "打开文件 " + fileName + " 失败: " + ex.Message;
+                goto ERROR1;
+            }
+
+            if (stop.IsInLoop == true)
+            {
+                strError = "无法重复进入循环";
+                goto ERROR1;
+            }
+
+            bool needTransform = false;
+            // 变换条码号
+            // return:
+            //      -1  出错
+            //      0   不需要进行变换
+            //      1   需要进行变换
+            int nRet = Program.MainForm.NeedTransformBarcode(
+                Program.MainForm.FocusLibraryCode,
+                out strError);
+            if (nRet == -1)
+            {
+                goto ERROR1;
+            }
+            if (nRet == 1)
+                needTransform = true;
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导入条码号 ...");
+            stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+                // 导入的事项是没有序的，因此需要清除已有的排序标志
+                ListViewUtil.ClearSortColumns(this.listView_records);
+
+                if (this.listView_records.Items.Count > 0)
+                {
+                    DialogResult result = MessageBox.Show(this,
+                        "导入前是否要清除命中记录列表中的现有的 " + this.listView_records.Items.Count.ToString() + " 行?\r\n\r\n(如果不清除，则新导入的行将追加在已有行后面)\r\n(Yes 清除；No 不清除(追加)；Cancel 放弃导入)",
+                        this.DbType + "SearchForm",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Cancel)
+                        return;
+                    if (result == DialogResult.Yes)
+                    {
+                        ClearListViewItems();
+                    }
+                }
+
+                stop.SetProgressRange(0, sr.BaseStream.Length);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+
+                for (; ; )
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        ShowMessageBox("用户中断");
+                        return;
+                    }
+
+                    string strBarcode = sr.ReadLine();
+
+                    stop.SetProgressValue(sr.BaseStream.Position);
+
+                    if (strBarcode == null)
+                        break;
+
+                    // 2019/12/26
+                    // Transform
+                    if (bControl == false)
+                    {
+                        if (needTransform)
+                        {
+                            nRet = Program.MainForm.TransformBarcode(
+                                Program.MainForm.FocusLibraryCode,
+                                ref strBarcode,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                goto ERROR1;
+                            }
+
+                            // TODO: 如何让操作者能看到变换后的字符串?
+                        }
+                    }
+
+                    ListViewItem item = new ListViewItem();
+                    item.Text = "";
+                    // ListViewUtil.ChangeItemText(item, 1, strBarcode);
+
+                    this.Invoke((Action)(() =>
+                    {
+                        this.listView_records.Items.Add(item);
+
+                        FillLineByBarcode(channel,
+                            strBarcode,
+                            item);
+
+                        items.Add(item);
+                    }));
+                }
+
+                this.Invoke((Action)(() =>
+                {
+
+                    // 刷新浏览行
+                    nRet = RefreshListViewLines(
+                    channel,
+                    items,
+                    "",
+                    false,
+                    true,
+                    out strError);
+                }));
+
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.Invoke((Action)(() =>
+                {
+                    // 2014/1/15
+                    // 刷新书目摘要
+                    nRet = FillBiblioSummaryColumn(
+                        channel,
+                        items,
+                        false,
+                        out strError);
+                }));
+                if (nRet == -1)
+                    goto ERROR1;
+
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                if (sr != null)
+                    sr.Close();
+            }
+            return;
+        ERROR1:
+            ShowMessageBox(strError);
+        }
+
+
 
         // 从记录路径文件中导入
         void menu_importFromRecPathFile_Click(object sender, EventArgs e)
@@ -9412,7 +9710,8 @@ MessageBoxDefaultButton.Button1);
 
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    if (String.IsNullOrEmpty(item.Text) == true)
+                    if (String.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
 
 #if NO
@@ -10234,7 +10533,8 @@ dlg.UiState);
                     return -1;
                 }
 
-                if (string.IsNullOrEmpty(item.Text) == true)
+                if (string.IsNullOrEmpty(item.Text) == true
+                    || item.Text.StartsWith("error:"))
                     continue;
 
                 int nCol = -1;
@@ -11761,7 +12061,8 @@ out strError);
 
                     foreach (ListViewItem item in this.listView_records.SelectedItems)
                     {
-                        if (String.IsNullOrEmpty(item.Text) == true)
+                        if (String.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                             continue;
                         sw.WriteLine(item.Text);
                         nCount++;
@@ -12059,7 +12360,7 @@ out strError);
         private void toolStripButton_search_Click(object sender, EventArgs e)
         {
             if (CheckProperties() == true)
-                BeginSearch(false, false, null);
+                _ = BeginSearch(false, false, null);
         }
 
         bool CheckProperties()
@@ -12080,7 +12381,7 @@ out strError);
 
         private void ToolStripMenuItem_searchKeys_Click(object sender, EventArgs e)
         {
-            BeginSearch(true, false, null);
+            _ = BeginSearch(true, false, null);
         }
 
         // 将 ItemQueryParam 中的信息恢复到面板中
@@ -12245,7 +12546,7 @@ out strError);
 
         private void ToolStripMenuItem_searchKeyID_Click(object sender, EventArgs e)
         {
-            BeginSearch(false, true, null);
+            _ = BeginSearch(false, true, null);
         }
 
         private void textBox_queryWord_KeyPress(object sender, KeyPressEventArgs e)
@@ -12868,7 +13169,8 @@ out strError);
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
 
                     items.Add(item);

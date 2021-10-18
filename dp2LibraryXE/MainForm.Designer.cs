@@ -79,6 +79,9 @@
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setListeningUrl = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_buildGreenUpdatePack = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_updateByGreenUpdatePack = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -90,9 +93,6 @@
             this.toolStripStatusLabel_update = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_buildGreenUpdatePack = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuItem_updateByGreenUpdatePack = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -459,6 +459,25 @@
             this.MenuItem_setListeningUrl.Text = "设置监听 URL(&L) ...";
             this.MenuItem_setListeningUrl.Click += new System.EventHandler(this.MenuItem_setListeningUrl_Click);
             // 
+            // toolStripSeparator12
+            // 
+            this.toolStripSeparator12.Name = "toolStripSeparator12";
+            this.toolStripSeparator12.Size = new System.Drawing.Size(492, 6);
+            // 
+            // MenuItem_buildGreenUpdatePack
+            // 
+            this.MenuItem_buildGreenUpdatePack.Name = "MenuItem_buildGreenUpdatePack";
+            this.MenuItem_buildGreenUpdatePack.Size = new System.Drawing.Size(495, 40);
+            this.MenuItem_buildGreenUpdatePack.Text = "创建绿色更新包(&G)";
+            this.MenuItem_buildGreenUpdatePack.Click += new System.EventHandler(this.MenuItem_buildGreenUpdatePack_Click);
+            // 
+            // MenuItem_updateByGreenUpdatePack
+            // 
+            this.MenuItem_updateByGreenUpdatePack.Name = "MenuItem_updateByGreenUpdatePack";
+            this.MenuItem_updateByGreenUpdatePack.Size = new System.Drawing.Size(495, 40);
+            this.MenuItem_updateByGreenUpdatePack.Text = "安装绿色更新包(&U)";
+            this.MenuItem_updateByGreenUpdatePack.Click += new System.EventHandler(this.MenuItem_updateByGreenUpdatePack_Click);
+            // 
             // toolStripSeparator20
             // 
             this.toolStripSeparator20.Name = "toolStripSeparator20";
@@ -559,25 +578,6 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(682, 417);
             this.webBrowser1.TabIndex = 7;
-            // 
-            // MenuItem_buildGreenUpdatePack
-            // 
-            this.MenuItem_buildGreenUpdatePack.Name = "MenuItem_buildGreenUpdatePack";
-            this.MenuItem_buildGreenUpdatePack.Size = new System.Drawing.Size(495, 40);
-            this.MenuItem_buildGreenUpdatePack.Text = "创建绿色更新包(&G)";
-            this.MenuItem_buildGreenUpdatePack.Click += new System.EventHandler(this.MenuItem_buildGreenUpdatePack_Click);
-            // 
-            // toolStripSeparator12
-            // 
-            this.toolStripSeparator12.Name = "toolStripSeparator12";
-            this.toolStripSeparator12.Size = new System.Drawing.Size(492, 6);
-            // 
-            // MenuItem_updateByGreenUpdatePack
-            // 
-            this.MenuItem_updateByGreenUpdatePack.Name = "MenuItem_updateByGreenUpdatePack";
-            this.MenuItem_updateByGreenUpdatePack.Size = new System.Drawing.Size(495, 40);
-            this.MenuItem_updateByGreenUpdatePack.Text = "安装绿色更新包(&U)";
-            this.MenuItem_updateByGreenUpdatePack.Click += new System.EventHandler(this.MenuItem_updateByGreenUpdatePack_Click);
             // 
             // MainForm
             // 

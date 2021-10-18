@@ -4165,7 +4165,7 @@ namespace dp2SSL
                         return new NormalResult
                         {
                             Value = -1,
-                            ErrorInfo = $"修改册 '{entity.PII}' 的 EAS 失败: {eas_result.ErrorInfo}",
+                            ErrorInfo = $"修改册 '{entity.GetPiiOrUid()}' 的 EAS 失败: {eas_result.ErrorInfo}",
                             ErrorCode = "setEasError"
                         };
                     }

@@ -242,6 +242,8 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
+            this.linkLabel_installFaceCenter = new System.Windows.Forms.LinkLabel();
+            this.linkLabel_installFingerprintCenter = new System.Windows.Forms.LinkLabel();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -508,11 +510,11 @@
             this.tabPage_defaultAccount.Controls.Add(this.textBox_defaultAccount_userName);
             this.tabPage_defaultAccount.Controls.Add(this.label3);
             this.tabPage_defaultAccount.Controls.Add(this.label2);
-            this.tabPage_defaultAccount.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_defaultAccount.Location = new System.Drawing.Point(4, 85);
             this.tabPage_defaultAccount.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_defaultAccount.Name = "tabPage_defaultAccount";
             this.tabPage_defaultAccount.Padding = new System.Windows.Forms.Padding(5);
-            this.tabPage_defaultAccount.Size = new System.Drawing.Size(905, 513);
+            this.tabPage_defaultAccount.Size = new System.Drawing.Size(905, 459);
             this.tabPage_defaultAccount.TabIndex = 1;
             this.tabPage_defaultAccount.Text = "默认帐户 ";
             this.tabPage_defaultAccount.UseVisualStyleBackColor = true;
@@ -623,10 +625,10 @@
             this.tabPage_cacheManage.Controls.Add(this.button_reloadBiblioDbProperties);
             this.tabPage_cacheManage.Controls.Add(this.button_reloadBiblioDbFromInfos);
             this.tabPage_cacheManage.Controls.Add(this.button_clearValueTableCache);
-            this.tabPage_cacheManage.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_cacheManage.Location = new System.Drawing.Point(4, 85);
             this.tabPage_cacheManage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_cacheManage.Name = "tabPage_cacheManage";
-            this.tabPage_cacheManage.Size = new System.Drawing.Size(905, 513);
+            this.tabPage_cacheManage.Size = new System.Drawing.Size(905, 459);
             this.tabPage_cacheManage.TabIndex = 2;
             this.tabPage_cacheManage.Text = " 缓存管理 ";
             this.tabPage_cacheManage.UseVisualStyleBackColor = true;
@@ -730,10 +732,10 @@
             this.tabPage_charging.Controls.Add(this.label5);
             this.tabPage_charging.Controls.Add(this.numericUpDown_charging_infoDlgOpacity);
             this.tabPage_charging.Controls.Add(this.checkBox_charging_force);
-            this.tabPage_charging.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_charging.Location = new System.Drawing.Point(4, 85);
             this.tabPage_charging.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_charging.Name = "tabPage_charging";
-            this.tabPage_charging.Size = new System.Drawing.Size(905, 513);
+            this.tabPage_charging.Size = new System.Drawing.Size(905, 459);
             this.tabPage_charging.TabIndex = 3;
             this.tabPage_charging.Text = "出纳";
             this.tabPage_charging.UseVisualStyleBackColor = true;
@@ -979,10 +981,10 @@
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_speakNameWhenLoadReaderRecord);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_noBorrowHistory);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_verifyBarcode);
-            this.tabPage_quickCharging.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_quickCharging.Location = new System.Drawing.Point(4, 85);
             this.tabPage_quickCharging.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_quickCharging.Name = "tabPage_quickCharging";
-            this.tabPage_quickCharging.Size = new System.Drawing.Size(905, 513);
+            this.tabPage_quickCharging.Size = new System.Drawing.Size(905, 459);
             this.tabPage_quickCharging.TabIndex = 17;
             this.tabPage_quickCharging.Text = "快捷出纳";
             this.tabPage_quickCharging.UseVisualStyleBackColor = true;
@@ -1158,10 +1160,10 @@
             this.tabPage_itemManagement.Controls.Add(this.checkBox_itemManagement_searchDupWhenSaving);
             this.tabPage_itemManagement.Controls.Add(this.checkBox_itemManagement_cataloging);
             this.tabPage_itemManagement.Controls.Add(this.checkBox_itemManagement_verifyItemBarcode);
-            this.tabPage_itemManagement.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_itemManagement.Location = new System.Drawing.Point(4, 85);
             this.tabPage_itemManagement.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_itemManagement.Name = "tabPage_itemManagement";
-            this.tabPage_itemManagement.Size = new System.Drawing.Size(905, 513);
+            this.tabPage_itemManagement.Size = new System.Drawing.Size(905, 459);
             this.tabPage_itemManagement.TabIndex = 5;
             this.tabPage_itemManagement.Text = "种册";
             this.tabPage_itemManagement.UseVisualStyleBackColor = true;
@@ -1293,10 +1295,10 @@
             this.tabPage_ui.Controls.Add(this.checkBox_ui_hideFixedPanel);
             this.tabPage_ui.Controls.Add(this.comboBox_ui_fixedPanelDock);
             this.tabPage_ui.Controls.Add(this.label6);
-            this.tabPage_ui.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_ui.Location = new System.Drawing.Point(4, 85);
             this.tabPage_ui.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_ui.Name = "tabPage_ui";
-            this.tabPage_ui.Size = new System.Drawing.Size(905, 513);
+            this.tabPage_ui.Size = new System.Drawing.Size(905, 459);
             this.tabPage_ui.TabIndex = 4;
             this.tabPage_ui.Text = "外观";
             this.tabPage_ui.UseVisualStyleBackColor = true;
@@ -1396,10 +1398,10 @@
             this.tabPage_passgate.AutoScroll = true;
             this.tabPage_passgate.Controls.Add(this.numericUpDown_passgate_maxListItemsCount);
             this.tabPage_passgate.Controls.Add(this.label8);
-            this.tabPage_passgate.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_passgate.Location = new System.Drawing.Point(4, 85);
             this.tabPage_passgate.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_passgate.Name = "tabPage_passgate";
-            this.tabPage_passgate.Size = new System.Drawing.Size(905, 513);
+            this.tabPage_passgate.Size = new System.Drawing.Size(905, 459);
             this.tabPage_passgate.TabIndex = 6;
             this.tabPage_passgate.Text = "入馆登记";
             this.tabPage_passgate.UseVisualStyleBackColor = true;
@@ -1447,10 +1449,10 @@
             this.tabPage_search.Controls.Add(this.groupBox3);
             this.tabPage_search.Controls.Add(this.groupBox2);
             this.tabPage_search.Controls.Add(this.groupBox1);
-            this.tabPage_search.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_search.Location = new System.Drawing.Point(4, 85);
             this.tabPage_search.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_search.Name = "tabPage_search";
-            this.tabPage_search.Size = new System.Drawing.Size(905, 513);
+            this.tabPage_search.Size = new System.Drawing.Size(905, 459);
             this.tabPage_search.TabIndex = 7;
             this.tabPage_search.Text = "检索";
             this.tabPage_search.UseVisualStyleBackColor = true;
@@ -1910,10 +1912,10 @@
             this.tabPage_print.Controls.Add(this.comboBox_print_prnPort);
             this.tabPage_print.Controls.Add(this.label12);
             this.tabPage_print.Controls.Add(this.toolStrip_print);
-            this.tabPage_print.Location = new System.Drawing.Point(4, 58);
+            this.tabPage_print.Location = new System.Drawing.Point(4, 85);
             this.tabPage_print.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_print.Name = "tabPage_print";
-            this.tabPage_print.Size = new System.Drawing.Size(905, 486);
+            this.tabPage_print.Size = new System.Drawing.Size(905, 459);
             this.tabPage_print.TabIndex = 8;
             this.tabPage_print.Text = "凭条打印";
             this.tabPage_print.UseVisualStyleBackColor = true;
@@ -2050,10 +2052,10 @@
             this.tabPage_amerce.Controls.Add(this.label22);
             this.tabPage_amerce.Controls.Add(this.comboBox_amerce_interface);
             this.tabPage_amerce.Controls.Add(this.label15);
-            this.tabPage_amerce.Location = new System.Drawing.Point(4, 58);
+            this.tabPage_amerce.Location = new System.Drawing.Point(4, 85);
             this.tabPage_amerce.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_amerce.Name = "tabPage_amerce";
-            this.tabPage_amerce.Size = new System.Drawing.Size(905, 486);
+            this.tabPage_amerce.Size = new System.Drawing.Size(905, 459);
             this.tabPage_amerce.TabIndex = 10;
             this.tabPage_amerce.Text = "违约/交费";
             this.tabPage_amerce.UseVisualStyleBackColor = true;
@@ -2109,10 +2111,10 @@
             // 
             this.tabPage_accept.AutoScroll = true;
             this.tabPage_accept.Controls.Add(this.checkBox_accept_singleClickLoadDetail);
-            this.tabPage_accept.Location = new System.Drawing.Point(4, 58);
+            this.tabPage_accept.Location = new System.Drawing.Point(4, 85);
             this.tabPage_accept.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(905, 486);
+            this.tabPage_accept.Size = new System.Drawing.Size(905, 459);
             this.tabPage_accept.TabIndex = 11;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -2133,10 +2135,10 @@
             this.tabPage_cardReader.AutoScroll = true;
             this.tabPage_cardReader.Controls.Add(this.groupBox11);
             this.tabPage_cardReader.Controls.Add(this.groupBox8);
-            this.tabPage_cardReader.Location = new System.Drawing.Point(4, 58);
+            this.tabPage_cardReader.Location = new System.Drawing.Point(4, 85);
             this.tabPage_cardReader.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_cardReader.Name = "tabPage_cardReader";
-            this.tabPage_cardReader.Size = new System.Drawing.Size(905, 486);
+            this.tabPage_cardReader.Size = new System.Drawing.Size(905, 459);
             this.tabPage_cardReader.TabIndex = 12;
             this.tabPage_cardReader.Text = "读卡器";
             this.tabPage_cardReader.UseVisualStyleBackColor = true;
@@ -2223,10 +2225,10 @@
             this.tabPage_patron.Controls.Add(this.checkBox_patron_autoRetryReaderCard);
             this.tabPage_patron.Controls.Add(this.checkBox_patron_verifyBarcode);
             this.tabPage_patron.Controls.Add(this.checkBox_patron_displaySetReaderBarcodeDialog);
-            this.tabPage_patron.Location = new System.Drawing.Point(4, 58);
+            this.tabPage_patron.Location = new System.Drawing.Point(4, 85);
             this.tabPage_patron.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_patron.Name = "tabPage_patron";
-            this.tabPage_patron.Size = new System.Drawing.Size(905, 486);
+            this.tabPage_patron.Size = new System.Drawing.Size(905, 459);
             this.tabPage_patron.TabIndex = 13;
             this.tabPage_patron.Text = "读者";
             this.tabPage_patron.UseVisualStyleBackColor = true;
@@ -2283,10 +2285,10 @@
             this.tabPage_operLog.Controls.Add(this.button_operLog_clearCacheDirectory);
             this.tabPage_operLog.Controls.Add(this.checkBox_operLog_displayItemBorrowHistory);
             this.tabPage_operLog.Controls.Add(this.checkBox_operLog_displayReaderBorrowHistory);
-            this.tabPage_operLog.Location = new System.Drawing.Point(4, 58);
+            this.tabPage_operLog.Location = new System.Drawing.Point(4, 85);
             this.tabPage_operLog.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_operLog.Name = "tabPage_operLog";
-            this.tabPage_operLog.Size = new System.Drawing.Size(905, 486);
+            this.tabPage_operLog.Size = new System.Drawing.Size(905, 459);
             this.tabPage_operLog.TabIndex = 15;
             this.tabPage_operLog.Text = "日志";
             this.tabPage_operLog.UseVisualStyleBackColor = true;
@@ -2371,10 +2373,10 @@
             this.tabPage_global.Controls.Add(this.label26);
             this.tabPage_global.Controls.Add(this.checkBox_global_autoSelPinyin);
             this.tabPage_global.Controls.Add(this.checkBox_global_displayScriptErrorDialog);
-            this.tabPage_global.Location = new System.Drawing.Point(4, 58);
+            this.tabPage_global.Location = new System.Drawing.Point(4, 85);
             this.tabPage_global.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_global.Name = "tabPage_global";
-            this.tabPage_global.Size = new System.Drawing.Size(905, 486);
+            this.tabPage_global.Size = new System.Drawing.Size(905, 459);
             this.tabPage_global.TabIndex = 14;
             this.tabPage_global.Text = "全局";
             this.tabPage_global.UseVisualStyleBackColor = true;
@@ -2509,7 +2511,7 @@
             this.groupBox12.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox12.Name = "groupBox12";
             this.groupBox12.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox12.Size = new System.Drawing.Size(865, 147);
+            this.groupBox12.Size = new System.Drawing.Size(835, 147);
             this.groupBox12.TabIndex = 4;
             this.groupBox12.TabStop = false;
             this.groupBox12.Text = "掌纹阅读器接口 URL ";
@@ -2517,7 +2519,7 @@
             // button_palmprint_setDefaulValue
             // 
             this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(662, 82);
+            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(632, 82);
             this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
             this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
@@ -2533,20 +2535,21 @@
             this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
-            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(840, 31);
+            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(810, 31);
             this.textBox_palmprint_readerUrl.TabIndex = 0;
             // 
             // groupBox10
             // 
             this.groupBox10.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox10.Controls.Add(this.linkLabel_installFaceCenter);
             this.groupBox10.Controls.Add(this.button_face_setDefaultValue);
             this.groupBox10.Controls.Add(this.textBox_face_readerUrl);
             this.groupBox10.Location = new System.Drawing.Point(5, 341);
             this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Size = new System.Drawing.Size(865, 147);
+            this.groupBox10.Size = new System.Drawing.Size(835, 147);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2554,7 +2557,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(662, 82);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(632, 82);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2570,7 +2573,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(840, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(810, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2630,13 +2633,14 @@
             // 
             this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox7.Controls.Add(this.linkLabel_installFingerprintCenter);
             this.groupBox7.Controls.Add(this.button_fingerprint_setDefaultValue);
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(5, 24);
             this.groupBox7.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox7.Size = new System.Drawing.Size(865, 147);
+            this.groupBox7.Size = new System.Drawing.Size(835, 147);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2644,7 +2648,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(662, 82);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(632, 82);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2660,7 +2664,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(840, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(810, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2678,10 +2682,10 @@
             // 
             this.tabPage_labelPrint.Controls.Add(this.comboBox_labelPrint_accessNoSource);
             this.tabPage_labelPrint.Controls.Add(this.label28);
-            this.tabPage_labelPrint.Location = new System.Drawing.Point(4, 58);
+            this.tabPage_labelPrint.Location = new System.Drawing.Point(4, 85);
             this.tabPage_labelPrint.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_labelPrint.Name = "tabPage_labelPrint";
-            this.tabPage_labelPrint.Size = new System.Drawing.Size(905, 486);
+            this.tabPage_labelPrint.Size = new System.Drawing.Size(905, 459);
             this.tabPage_labelPrint.TabIndex = 18;
             this.tabPage_labelPrint.Text = "标签打印";
             this.tabPage_labelPrint.UseVisualStyleBackColor = true;
@@ -2868,6 +2872,28 @@
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
+            // 
+            // linkLabel_installFaceCenter
+            // 
+            this.linkLabel_installFaceCenter.AutoSize = true;
+            this.linkLabel_installFaceCenter.Location = new System.Drawing.Point(8, 92);
+            this.linkLabel_installFaceCenter.Name = "linkLabel_installFaceCenter";
+            this.linkLabel_installFaceCenter.Size = new System.Drawing.Size(321, 21);
+            this.linkLabel_installFaceCenter.TabIndex = 2;
+            this.linkLabel_installFaceCenter.TabStop = true;
+            this.linkLabel_installFaceCenter.Text = "下载安装 人脸中心(FaceCenter)";
+            this.linkLabel_installFaceCenter.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_installFaceCenter_LinkClicked);
+            // 
+            // linkLabel_installFingerprintCenter
+            // 
+            this.linkLabel_installFingerprintCenter.AutoSize = true;
+            this.linkLabel_installFingerprintCenter.Location = new System.Drawing.Point(7, 92);
+            this.linkLabel_installFingerprintCenter.Name = "linkLabel_installFingerprintCenter";
+            this.linkLabel_installFingerprintCenter.Size = new System.Drawing.Size(398, 21);
+            this.linkLabel_installFingerprintCenter.TabIndex = 3;
+            this.linkLabel_installFingerprintCenter.TabStop = true;
+            this.linkLabel_installFingerprintCenter.Text = "下载安装 指纹中心(FingerprintCenter)";
+            this.linkLabel_installFingerprintCenter.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_installFingerprintCenter_LinkClicked);
             // 
             // CfgDlg
             // 
@@ -3185,5 +3211,7 @@
         private System.Windows.Forms.Label label37;
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_global_securityProtocol;
         private System.Windows.Forms.CheckBox checkBox_global_disableSpeak;
+        private System.Windows.Forms.LinkLabel linkLabel_installFaceCenter;
+        private System.Windows.Forms.LinkLabel linkLabel_installFingerprintCenter;
     }
 }

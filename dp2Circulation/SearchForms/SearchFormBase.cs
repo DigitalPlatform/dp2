@@ -542,7 +542,8 @@ namespace dp2Circulation
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem item in this._listviewRecords.Items)
             {
-                if (string.IsNullOrEmpty(item.Text) == true)
+                if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                     continue;
                 items.Add(item);
 
@@ -598,7 +599,8 @@ namespace dp2Circulation
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem item in this._listviewRecords.SelectedItems)
             {
-                if (string.IsNullOrEmpty(item.Text) == true)
+                if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                     continue;
                 items.Add(item);
 
@@ -679,7 +681,8 @@ namespace dp2Circulation
                 List<string> recpaths = new List<string>();
                 foreach (ListViewItem item in items_param)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
                     items.Add(item);
                     recpaths.Add(item.Text);
@@ -1414,7 +1417,8 @@ namespace dp2Circulation
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this._listviewRecords.SelectedItems)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
 
                     items.Add(item);
@@ -1667,7 +1671,8 @@ dlg.UiState);
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this._listviewRecords.SelectedItems)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    if (string.IsNullOrEmpty(item.Text) == true
+                        || item.Text.StartsWith("error:"))
                         continue;
 
                     items.Add(item);

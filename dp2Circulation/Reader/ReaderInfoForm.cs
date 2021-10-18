@@ -1999,7 +1999,6 @@ strNewDefault);
 
             try
             {
-
                 bool bControlPressed = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
                 if (bControlPressed == false
@@ -6908,8 +6907,16 @@ MessageBoxDefaultButton.Button1);
             this.EnableControls(false);
             try
             {
-                string version = await GetFaceVersionAsync();
+                var version_result = await GetFaceVersionAsync();
+                if (version_result.Value == -1)
+                {
+                    strError = version_result.ErrorInfo;
+                    if (version_result.ErrorCode == "RequestError")
+                        strError += "。可能是因为 人脸中心(FaceCenter) 模块没有启动";
+                    goto ERROR1;
+                }
 
+                string version = version_result.ErrorCode;
                 // 要返回人脸特征
                 if (StringUtil.CompareVersion(version, "1.5.12") < 0)
                 {
@@ -6917,7 +6924,21 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
-                REDO:
+                // 2021/10/14
+                // 检查 FaceCenter 所连的 dp2library 服务器是否和 dp2circulation 所连的一致
+                NormalResult getstate_result = await FaceGetStateAsync("getLibraryServerUID");
+                if (getstate_result.Value == -1)
+                {
+                    strError = getstate_result.ErrorInfo;
+                    goto ERROR1;
+                }
+                else if (getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                {
+                    strError = $"人脸中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行人脸登记";
+                    goto ERROR1;
+                }
+
+            REDO:
                 GetFeatureStringResult result = await ReadFeatureString(
                     null,
                     this.readerEditControl1.Barcode,
@@ -7004,12 +7025,9 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 获得人脸接口版本号
-        async Task<string> GetFaceVersionAsync()
+        async Task<NormalResult> GetFaceVersionAsync()
         {
-            var version_result = await GetFaceState("getVersion");
-            if (version_result.Value != -1)
-                return version_result.ErrorCode;
-            return "";
+            return await FaceGetStateAsync("getVersion");
         }
 
         static Image FromBytes(byte[] bytes)

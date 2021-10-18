@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.43.*")]
-[assembly: AssemblyFileVersion("3.43.0.0")]
+[assembly: AssemblyVersion("3.45.*")]
+[assembly: AssemblyFileVersion("3.45.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -123,3 +123,6 @@ using System.Runtime.InteropServices;
 //                  读者窗保存读者记录功能因改进人脸登记功能进行了 async/await 改造
 // 3.43 2021/10/12 读者窗导出 XML 文件功能中的选择对象文件目录；书目查询窗导出 .bdf 文件功能中的选择对象文件目录界面均做了改进，Ctrl 键按下选择允许对象文件的 checkbox 是高级状态，允许单独修改对象文件目录名
 //                  导入读者 XML 文件，和导入 .bdf 文件的界面中选择对象文件目录的界面也做了相应的改进
+// 3.44 2021/10/14 读者窗登记人脸的时候，会自动检查 FaceCenter 所连的 dp2library 服务器是否和内务所连的一致，如果不一致会报错
+// 3.45 2021/10/15 实体查询窗上部检索面板的宽度有所增加。在窗口整体变窄的情况下，第一行检索词的下拉列表部分还能维持一个基本的显示宽度
+//                  实体查询窗的“册条码号”检索途径，当用“B0000001-B0000012”这样的检索词进行检索的时候，可以检索出一个连续范围的册条码号的记录

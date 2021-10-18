@@ -4540,7 +4540,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             EnableControlsForFace(false);
             try
             {
-                NormalResult getstate_result = await FaceGetState("getLibraryServerUID");
+                NormalResult getstate_result = await FaceGetStateAsync("getLibraryServerUID");
                 if (getstate_result.Value == -1)
                     result = new RecognitionFaceResult
                     {
