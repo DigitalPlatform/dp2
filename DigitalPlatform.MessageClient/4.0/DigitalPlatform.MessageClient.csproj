@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\MessageConnection.cs" />
+    <Compile Include="P2PConnection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResultManager.cs" />
   </ItemGroup>

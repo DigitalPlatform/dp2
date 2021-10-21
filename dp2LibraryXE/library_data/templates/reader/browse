@@ -24,4 +24,13 @@
   <col title="失效期" convert="rfc1123tolocaltimeu">
     <xpath>*/expireDate</xpath>
   </col>
+  <col title="人脸时间戳">
+    <xpath>*/face/@timestamp</xpath>
+  </col>
+  <col title="指纹时间戳">
+    <xpath>*/fingerprint/@timestamp</xpath>
+  </col>
+  <col title="掌纹时间戳">
+    <xpath>*/palmprint/@timestamp</xpath>
+  </col>
 </root>

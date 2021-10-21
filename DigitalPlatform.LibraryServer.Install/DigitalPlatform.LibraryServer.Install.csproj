@@ -94,6 +94,12 @@
     <Compile Include="CreateSupervisorDlg.designer.cs">
       <DependentUpon>CreateSupervisorDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="dp2MServerDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dp2MServerDialog.designer.cs">
+      <DependentUpon>dp2MServerDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="InstallLibraryParamDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -140,6 +146,9 @@
     <EmbeddedResource Include="CreateSupervisorDlg.resx">
       <DependentUpon>CreateSupervisorDlg.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="dp2MServerDialog.resx">
+      <DependentUpon>dp2MServerDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="InstallLibraryParamDlg.resx">
       <DependentUpon>InstallLibraryParamDlg.cs</DependentUpon>
     </EmbeddedResource>
@@ -180,6 +189,10 @@
     <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
       <Project>{2f085431-027a-4ddf-9b3d-83219e629fa1}</Project>
       <Name>DigitalPlatform.LibraryServer.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MessageClient\4.0\DigitalPlatform.MessageClient.csproj">
+      <Project>{ca005349-028d-48a4-ba05-6023625cc9bb}</Project>
+      <Name>DigitalPlatform.MessageClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.rms.Client\DigitalPlatform.rms.Client.csproj">
       <Project>{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}</Project>

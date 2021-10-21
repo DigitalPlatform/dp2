@@ -55,8 +55,9 @@
             this.ToolStripMenuItem_configMq = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_configMongoDB = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_configServerReplication = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkBox_stopInstance = new System.Windows.Forms.CheckBox();
             this.ToolStripMenuItem_configReporting = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkBox_stopInstance = new System.Windows.Forms.CheckBox();
+            this.ToolStripMenuItem_configMessageServer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -311,7 +312,8 @@
             this.ToolStripMenuItem_configMq,
             this.ToolStripMenuItem_configMongoDB,
             this.ToolStripMenuItem_configServerReplication,
-            this.ToolStripMenuItem_configReporting});
+            this.ToolStripMenuItem_configReporting,
+            this.ToolStripMenuItem_configMessageServer});
             this.toolStripDropDownButton_commands.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_commands.Image")));
             this.toolStripDropDownButton_commands.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_commands.Name = "toolStripDropDownButton_commands";
@@ -339,6 +341,13 @@
             this.ToolStripMenuItem_configServerReplication.Text = "配置服务器同步参数";
             this.ToolStripMenuItem_configServerReplication.Click += new System.EventHandler(this.ToolStripMenuItem_configServerReplication_Click);
             // 
+            // ToolStripMenuItem_configReporting
+            // 
+            this.ToolStripMenuItem_configReporting.Name = "ToolStripMenuItem_configReporting";
+            this.ToolStripMenuItem_configReporting.Size = new System.Drawing.Size(369, 40);
+            this.ToolStripMenuItem_configReporting.Text = "配置报表参数";
+            this.ToolStripMenuItem_configReporting.Click += new System.EventHandler(this.ToolStripMenuItem_configReporting_Click);
+            // 
             // checkBox_stopInstance
             // 
             this.checkBox_stopInstance.AutoSize = true;
@@ -350,12 +359,12 @@
             this.checkBox_stopInstance.UseVisualStyleBackColor = true;
             this.checkBox_stopInstance.CheckedChanged += new System.EventHandler(this.checkBox_stopInstance_CheckedChanged);
             // 
-            // ToolStripMenuItem_configReporting
+            // ToolStripMenuItem_configMessageServer
             // 
-            this.ToolStripMenuItem_configReporting.Name = "ToolStripMenuItem_configReporting";
-            this.ToolStripMenuItem_configReporting.Size = new System.Drawing.Size(369, 40);
-            this.ToolStripMenuItem_configReporting.Text = "配置报表参数";
-            this.ToolStripMenuItem_configReporting.Click += new System.EventHandler(this.ToolStripMenuItem_configReporting_Click);
+            this.ToolStripMenuItem_configMessageServer.Name = "ToolStripMenuItem_configMessageServer";
+            this.ToolStripMenuItem_configMessageServer.Size = new System.Drawing.Size(369, 40);
+            this.ToolStripMenuItem_configMessageServer.Text = "配置消息服务器参数";
+            this.ToolStripMenuItem_configMessageServer.Click += new System.EventHandler(this.ToolStripMenuItem_configMessageServer_Click);
             // 
             // OneInstanceDialog
             // 
@@ -427,5 +436,6 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_configServerReplication;
         private System.Windows.Forms.CheckBox checkBox_stopInstance;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_configReporting;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_configMessageServer;
     }
 }

@@ -30,12 +30,14 @@ namespace dp2SSL
 
         // 可以适当降低探测的频率。比如每五分钟探测一次
         // 两次检测网络之间的间隔
-        static TimeSpan _detectPeriod = TimeSpan.FromMinutes(5);
+        static TimeSpan _networkDetectPeriodShort = TimeSpan.FromMinutes(5);
+        static TimeSpan _networkDetectPeriodLong = TimeSpan.FromMinutes(20);
+
         // 最近一次检测网络的时间
         static DateTime _lastDetectTime;
 
         // 两次零星同步之间的间隔
-        static TimeSpan _replicatePeriod = TimeSpan.FromMinutes(1);
+        static TimeSpan _replicatePeriod = TimeSpan.FromMinutes(10);
         // 最近一次零星同步的时间
         static DateTime _lastReplicateTime;
 
@@ -131,7 +133,11 @@ namespace dp2SSL
                         }
 
                         // 检测网络状况
-                        if (DateTime.Now - _lastDetectTime > _detectPeriod)
+                        // 网络 OK 的时候检查间隔长；Bad 的时候检查间隔短
+                        if (
+                            (ShelfData.LibraryNetworkCondition == "OK" && DateTime.Now - _lastDetectTime > _networkDetectPeriodLong)
+                            || (ShelfData.LibraryNetworkCondition != "OK" && DateTime.Now - _lastDetectTime > _networkDetectPeriodShort)
+                            )
                         {
                             DetectLibraryNetwork();
 

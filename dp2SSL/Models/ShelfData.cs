@@ -6039,6 +6039,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             }
                             int nRedoBorrowCount = 0;
                         REDO_BORROW:
+                            WpfClientInfo.WriteInfoLog($"submit API Borrow() patron={info.Operator.PatronBarcode} book={pii}");
                             lRet = channel.Borrow(null,
                                 action == "renew",
                                 info.Operator.PatronBarcode,
@@ -6061,6 +6062,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             if (lRet == -1
                                 && (channel.ErrorCode == ErrorCode.AlreadyBorrowed || channel.ErrorCode == ErrorCode.AlreadyBorrowedByOther))
                             {
+                                WpfClientInfo.WriteInfoLog($"submit API (after AlreadyBorrow) Return() book={pii}");
                                 // 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
                                 long temp = channel.Return(null,
     "return",
@@ -6110,6 +6112,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                             */
                             // 智能书柜不使用 EAS 状态。可以考虑统一修改为 EAS Off 状态？
 
+                            WpfClientInfo.WriteInfoLog($"submit API Return() book={pii}");
                             lRet = channel.Return(null,
                                 "return",
                                 "", // _patron.Barcode,
@@ -6145,6 +6148,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 commands.Add("forceLog");
                             }
 
+                            WpfClientInfo.WriteInfoLog($"submit API (transfer) Return() book={pii}");
                             // string currentLocation = GetRandomString(); // testing
                             // TODO: 如果先前 entity.Title 已经有了内容，就不要在本次 Return() API 中要求返 biblio summary
                             lRet = channel.Return(null,

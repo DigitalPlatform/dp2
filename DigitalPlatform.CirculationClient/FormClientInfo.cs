@@ -180,7 +180,8 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        public static string SerialNumberMode = ""; // 序列号模式。空表示不需要序列号。"must" 要求需要序列号；"loose" 不要序列号也可运行，但高级功能需要序列号。loose 和 must 都会出现“设置序列号”菜单命令
+        public static string SerialNumberMode = ""; // 序列号模式。空/must/loose
+                                                    // 空表示不需要序列号。"must" 要求需要序列号；"loose" 不要序列号也可运行，但高级功能需要序列号。loose 和 must 都会出现“设置序列号”菜单命令
         public static string CopyrightKey = "";    // "dp2catalog_sn_key";
 
         static void SetTitle()

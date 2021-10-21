@@ -12,11 +12,9 @@ using Microsoft.AspNet.SignalR.Client;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using DigitalPlatform.MessageClient;
 
-namespace dp2ManageCenter.Message
+namespace DigitalPlatform.MessageClient
 {
-#if REMOVED
     /// <summary>
     /// 点对点消息通道
     /// </summary>
@@ -1087,5 +1085,4 @@ CancellationToken token)
         // public bool Finished = false;
     }
 
-#endif
 }

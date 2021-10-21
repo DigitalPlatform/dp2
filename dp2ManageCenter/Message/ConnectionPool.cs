@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
+using DigitalPlatform.MessageClient;
 
 namespace dp2ManageCenter.Message
 {

@@ -434,7 +434,6 @@ out string strError);
                     dates[0] = dates[0] + ":" + strRight;
                 }
 
-
                 using (BiblioCacheContext context = new BiblioCacheContext())
                 {
                     context.Database.EnsureCreated();

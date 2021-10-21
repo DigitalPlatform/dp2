@@ -894,7 +894,6 @@ FileShare.ReadWrite);
                             };
                             yield return item;
                         }
-
                     }
                 }
 

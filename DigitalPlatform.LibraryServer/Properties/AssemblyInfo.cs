@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.95.*")]
-[assembly: AssemblyFileVersion("3.95.0.0")]
+[assembly: AssemblyVersion("3.96.*")]
+[assembly: AssemblyFileVersion("3.96.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -294,3 +294,4 @@ ItemCanReturn()
 //		3.93 (2021/9/13) dp2Kernel 中的 browse 配置文件先前已允许使用 <root filter='marc'> 方式了，最新版扩展了 col/use 元素内容的用法，允许使用逗号间隔的多个名字
 //		3.94 (2021/9/15) GetSearchResult() API 中 sort:xxx 命令中列 -0 表示用路径排序的倒序
 //		3.95 (2021/10/9) SetSystemParameter() API 中 category 为 "circulation" name 为 "script" 时，改为先编译 C# 脚本代码，如果编译有错则不会改变 LibraryDom
+//		3.96 (2021/10/21) ResetPassword() API 中检索读者记录命中限制数从 10 修改为 500。并且，如果达到这个命中数，会在错误日志中记一笔警告信息

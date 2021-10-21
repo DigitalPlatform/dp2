@@ -217,6 +217,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppP2pNotify.cs" />
     <Compile Include="AppAuthorNumber.cs" />
     <Compile Include="AppBatchTask.cs" />
     <Compile Include="AppBiblio.cs" />
@@ -355,6 +356,10 @@
     <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
       <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
       <Name>DigitalPlatform.MarcKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MessageClient\4.0\DigitalPlatform.MessageClient.csproj">
+      <Project>{CA005349-028D-48A4-BA05-6023625CC9BB}</Project>
+      <Name>DigitalPlatform.MessageClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Message\DigitalPlatform.Message.csproj">
       <Project>{D0C73839-5A5E-41BA-B1E5-104EEC488E33}</Project>

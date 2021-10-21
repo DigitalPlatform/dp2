@@ -38,6 +38,14 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
+
+            bool control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            if (control)
+            {
+                this.label1_resetPatronPassword_queryword.Visible = true;
+                this.textBox_resetPatronPassword_queryWord.Visible = true;
+            }
+
 #if NO
             this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
@@ -358,7 +366,9 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_barcode.Text) == true)
+            // 注：当 queryword= 中有内容时，不要求必须输入 barcode
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_barcode.Text) == true
+                && string.IsNullOrEmpty(this.textBox_resetPatronPassword_queryWord.Text))
             {
                 strError = "请输入读者证条码号";
                 goto ERROR1;
@@ -378,8 +388,13 @@ namespace dp2Circulation
 
             string strParameters = "name=" + GetParamValue(this.textBox_resetPatronPassword_name.Text)
                 + ",tel=" + GetParamValue(this.textBox_resetPatronPassword_phoneNumber.Text)
-                + ",barcode=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text)
-                + ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text);
+                + ",barcode=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text);
+
+            // 2021/10/20
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_queryWord.Text))
+                strParameters += ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text);
+            else
+                strParameters += ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_queryWord.Text);
 
             LibraryChannel channel = this.Channel;
             try
@@ -419,7 +434,9 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_barcode.Text) == true)
+            // 注：当 queryword= 中有内容时，不要求必须输入 barcode
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_barcode.Text) == true
+                && string.IsNullOrEmpty(this.textBox_resetPatronPassword_queryWord.Text))
             {
                 strError = "请输入读者证条码号";
                 goto ERROR1;
@@ -438,10 +455,24 @@ namespace dp2Circulation
             }
 
             string strParameters = "name=" + GetParamValue(this.textBox_resetPatronPassword_name.Text)
+    + ",tel=" + GetParamValue(this.textBox_resetPatronPassword_phoneNumber.Text)
+    + ",barcode=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text);
+
+            // 2021/10/20
+            if (string.IsNullOrEmpty(this.textBox_resetPatronPassword_queryWord.Text))
+                strParameters += ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text);
+            else
+                strParameters += ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_queryWord.Text);
+
+            strParameters += ",style=returnMessage";
+
+            /*
+            string strParameters = "name=" + GetParamValue(this.textBox_resetPatronPassword_name.Text)
                 + ",tel=" + GetParamValue(this.textBox_resetPatronPassword_phoneNumber.Text)
                 + ",barcode=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text)
                 + ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_barcode.Text)
                 + ",style=returnMessage";
+            */
 
             LibraryChannel channel = this.Channel;
             try

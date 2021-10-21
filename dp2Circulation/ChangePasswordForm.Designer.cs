@@ -54,6 +54,8 @@ namespace dp2Circulation
             this.textBox_worker_userName = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.tabPage_resetPatronPassword = new System.Windows.Forms.TabPage();
+            this.label1_resetPatronPassword_queryword = new System.Windows.Forms.Label();
+            this.textBox_resetPatronPassword_queryWord = new System.Windows.Forms.TextBox();
             this.button_resetPatronPassword_displayTempPassword = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -349,6 +351,8 @@ namespace dp2Circulation
             // tabPage_resetPatronPassword
             // 
             this.tabPage_resetPatronPassword.AutoScroll = true;
+            this.tabPage_resetPatronPassword.Controls.Add(this.label1_resetPatronPassword_queryword);
+            this.tabPage_resetPatronPassword.Controls.Add(this.textBox_resetPatronPassword_queryWord);
             this.tabPage_resetPatronPassword.Controls.Add(this.button_resetPatronPassword_displayTempPassword);
             this.tabPage_resetPatronPassword.Controls.Add(this.textBox1);
             this.tabPage_resetPatronPassword.Controls.Add(this.label9);
@@ -364,6 +368,28 @@ namespace dp2Circulation
             this.tabPage_resetPatronPassword.TabIndex = 2;
             this.tabPage_resetPatronPassword.Text = "∂¡’ﬂ’“ªÿ√‹¬Î";
             this.tabPage_resetPatronPassword.UseVisualStyleBackColor = true;
+            // 
+            // label1_resetPatronPassword_queryword
+            // 
+            this.label1_resetPatronPassword_queryword.AutoSize = true;
+            this.label1_resetPatronPassword_queryword.Location = new System.Drawing.Point(27, 423);
+            this.label1_resetPatronPassword_queryword.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label1_resetPatronPassword_queryword.Name = "label1_resetPatronPassword_queryword";
+            this.label1_resetPatronPassword_queryword.Size = new System.Drawing.Size(120, 21);
+            this.label1_resetPatronPassword_queryword.TabIndex = 21;
+            this.label1_resetPatronPassword_queryword.Text = "queryword=";
+            this.label1_resetPatronPassword_queryword.Visible = false;
+            // 
+            // textBox_resetPatronPassword_queryWord
+            // 
+            this.textBox_resetPatronPassword_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_resetPatronPassword_queryWord.Location = new System.Drawing.Point(219, 420);
+            this.textBox_resetPatronPassword_queryWord.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.textBox_resetPatronPassword_queryWord.Name = "textBox_resetPatronPassword_queryWord";
+            this.textBox_resetPatronPassword_queryWord.Size = new System.Drawing.Size(428, 31);
+            this.textBox_resetPatronPassword_queryWord.TabIndex = 22;
+            this.textBox_resetPatronPassword_queryWord.Visible = false;
             // 
             // button_resetPatronPassword_displayTempPassword
             // 
@@ -519,5 +545,7 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_resetPatronPassword_phoneNumber;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Button button_resetPatronPassword_displayTempPassword;
+        private System.Windows.Forms.Label label1_resetPatronPassword_queryword;
+        private System.Windows.Forms.TextBox textBox_resetPatronPassword_queryWord;
     }
 }

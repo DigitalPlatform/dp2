@@ -861,6 +861,7 @@ namespace DigitalPlatform.CirculationClient
 
         // parameters:
         //      channel 通讯通道。如果为 null，表示希望根据以前的缓存文件初始化生物特征高速缓存，而不是从 dp2library 获取和更新信息
+        //      style   force_update/force_create/in_memory
         // return:
         //      -1  出错
         //      >=0   成功。返回实际初始化的事项
@@ -1138,6 +1139,7 @@ out string strFingerprint);
         // 初始化一个读者库的指纹缓存
         // parameters:
         //      channel 通讯通道。如果为 null，表示希望根据以前的缓存文件初始化生物特征高速缓存，而不是从 dp2library 获取和更新信息
+        //      style   force_update/force_create/in_memory
         // return:
         //      -1  出错
         //      >=0 实际发送给接口程序的事项数目
@@ -1154,6 +1156,14 @@ out string strFingerprint);
 
             bool force_update = StringUtil.IsInList("force_update", style);
 
+            // 2021/10/21
+            // 迫使重新创建结果集文件。也就是说先删除以前的结果集文件
+            bool force_create = StringUtil.IsInList("force_create", style);
+
+            // 2021/10/21
+            // 只利用内存，不创建和使用结果集文件
+            bool in_memory = StringUtil.IsInList("in_memory", style);
+
             DpResultSet resultset = null;
             bool bCreate = false;
 
@@ -1162,41 +1172,48 @@ out string strFingerprint);
             this.ShowMessage(strReaderDbName);
 
             // 结果集文件名
-            string strResultsetFilename = Path.Combine(strDir, strReaderDbName);
+            string strResultsetFilename = "";
 
-            if (File.Exists(strResultsetFilename) == false)
+            if (in_memory == false)
             {
+                // 结果集文件名
+                strResultsetFilename = Path.Combine(strDir, strReaderDbName);
+
+                if (force_create
+                    || File.Exists(strResultsetFilename) == false)
+                {
+                    if (channel == null)
+                    {
+                        strError = $"缓存文件 '{strResultsetFilename}' 不存在，无法进行脱机初始化高速缓存操作";
+                        return -1;
+                    }
+                    resultset = new DpResultSet(false, false);
+                    resultset.Create(strResultsetFilename,
+                        strResultsetFilename + ".index");
+                    bCreate = true;
+                }
+                else
+                    bCreate = false;
+
+                // 2020/9/25
+                // 利用以前的缓存文件建立高速缓存
                 if (channel == null)
                 {
-                    strError = $"缓存文件 '{strResultsetFilename}' 不存在，无法进行脱机初始化高速缓存操作";
-                    return -1;
+                    resultset = new DpResultSet(false, false);
+                    resultset.Attach(strResultsetFilename,
+            strResultsetFilename + ".index");
+
+                    // return:
+                    //      -2  remoting服务器连接失败。驱动程序尚未启动
+                    //      -1  出错
+                    //      >=0 实际发送给接口程序的事项数目
+                    nRet = CreateFingerprintCache(resultset, null,
+                        out strError);
+                    if (nRet == -1 || nRet == -2)
+                        return -1;
+
+                    return nRet;
                 }
-                resultset = new DpResultSet(false, false);
-                resultset.Create(strResultsetFilename,
-                    strResultsetFilename + ".index");
-                bCreate = true;
-            }
-            else
-                bCreate = false;
-
-            // 2020/9/25
-            // 利用以前的缓存文件建立高速缓存
-            if (channel == null)
-            {
-                resultset = new DpResultSet(false, false);
-                resultset.Attach(strResultsetFilename,
-        strResultsetFilename + ".index");
-
-                // return:
-                //      -2  remoting服务器连接失败。驱动程序尚未启动
-                //      -1  出错
-                //      >=0 实际发送给接口程序的事项数目
-                nRet = CreateFingerprintCache(resultset, null,
-                    out strError);
-                if (nRet == -1 || nRet == -2)
-                    return -1;
-
-                return nRet;
             }
 
             // *** 第一阶段， 创建新的结果集文件；或者获取全部读者记录中的指纹时间戳
@@ -1232,15 +1249,54 @@ out strError);
                 ResultSetLoader loader = new ResultSetLoader(channel,
                     null,
                     null,
-                    bCreate == true ? $"id,cols,format:cfgs/browse_{this.BrowseStyle}" : $"id,cols,format:cfgs/browse_{this.BrowseStyle}timestamp",
+                    bCreate == true || in_memory == true ? $"id,cols,format:cfgs/browse_{this.BrowseStyle}" : $"id,cols,format:cfgs/browse_{this.BrowseStyle}timestamp",
                     "zh");
                 loader.Prompt += this.Loader_Prompt;
+
+                int nSendCount = 0;
+                List<FingerprintItem> items = new List<FingerprintItem>();
 
                 foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                 {
                     token.ThrowIfCancellationRequested();
 
                     this.ShowMessage("正在处理读者记录 " + record.Path);
+
+                    if (in_memory)
+                    {
+                        if (record.Cols == null || record.Cols.Length < 3)
+                            continue;
+                        // timestamp | barcode | fingerprint
+                        string barcode = record.Cols[1];
+                        string fingerprint = record.Cols[2];
+                        // 注意读者证条码号为空的，不要发送出去
+                        if (string.IsNullOrEmpty(barcode))
+                            continue;
+                        FingerprintItem item = new FingerprintItem
+                        {
+                            ReaderBarcode = barcode,
+                            FingerprintString = fingerprint
+                        };
+
+                        items.Add(item);
+                        if (items.Count >= 100)
+                        {
+                            // return:
+                            //      0   成功
+                            //      其他  失败。错误码
+                            nRet = this.AddItems(
+                                items,
+                                null,
+                                out strError);
+                            if (nRet != 0)
+                                return -1;
+
+                            nSendCount += items.Count;
+                            items.Clear();
+                        }
+
+                        continue;
+                    }
 
                     if (bCreate == true)
                     {
@@ -1286,6 +1342,25 @@ out strError);
                     }
                 }
 
+                if (in_memory)
+                {
+                    if (items.Count > 0)
+                    {
+                        // return:
+                        //      0   成功
+                        //      其他  失败。错误码
+                        nRet = this.AddItems(
+                            items,
+                            null,
+                            out strError);
+                        if (nRet != 0)
+                            return -1;
+
+                        nSendCount += items.Count;
+                    }
+                    return nSendCount;
+                }
+
                 if (bCreate == true)
                     bDone = true;
 
@@ -1320,6 +1395,8 @@ out strError);
                     }
                 }
             }
+
+            Debug.Assert(string.IsNullOrEmpty(strResultsetFilename) == false);
 
             // 比对时间戳，更新结果集文件
             Hashtable update_table = new Hashtable();   // 需要更新的事项。recpath --> 1

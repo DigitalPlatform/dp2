@@ -131,6 +131,7 @@ namespace dp2SSL
                                     }
                                     */
 
+                                    // TODO: 这里建议要统计通讯使用的流量。如果连续发送出错，要静默一段时间再发送
                                     var result = await SetMessageAsync(request);
                                     if (result.Value == -1)
                                     {
@@ -2797,7 +2798,23 @@ text.ToString());
                     if (queryWordString.Contains("-"))
                     {
                         var parts = StringUtil.ParseTwoPart(queryWordString, "-");
-                        where_list.Add($" x.{use} >= Convert.ToInt32(\"{parts[0]}\") && x.{use} <= Convert.ToInt32(\"{parts[1]}\")");
+                        var left = parts[0];
+                        var right = parts[1];
+
+                        if (string.IsNullOrEmpty(left) && string.IsNullOrEmpty(right))
+                        {
+
+                        }
+                        else if (string.IsNullOrEmpty(left))
+                        {
+                            where_list.Add($" x.{use} <= Convert.ToInt32(\"{right}\")");
+                        }
+                        else if (string.IsNullOrEmpty(right))
+                        {
+                            where_list.Add($" x.{use} >= Convert.ToInt32(\"{left}\")");
+                        }
+                        else
+                            where_list.Add($" x.{use} >= Convert.ToInt32(\"{left}\") && x.{use} <= Convert.ToInt32(\"{right}\")");
                     }
                     else
                     {
@@ -2828,6 +2845,9 @@ out string strError);
                 else // if (request.MatchStyle == "middle")
                     where_list.Add($" x.{use}?.IndexOf(\"{queryWordString}\") != -1 ");
             }
+
+            if (where_list.Count == 0)
+                return "true";
 
             text.Append(StringUtil.MakePathList(where_list, "||"));
             return text.ToString();

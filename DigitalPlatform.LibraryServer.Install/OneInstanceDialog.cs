@@ -4,12 +4,12 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Collections;
+using System.Drawing;
 
 using DigitalPlatform.Install;
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Drawing;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1344,6 +1344,11 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void ToolStripMenuItem_configMessageServer_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -1333,6 +1333,22 @@ namespace DigitalPlatform.LibraryServer
                         app.WordDbName = "";
                     }
 
+                    // 点对点消息参数
+                    // messageServer
+                    node = dom.DocumentElement.SelectSingleNode("messageServer") as XmlElement;
+                    if (node != null)
+                    {
+                        app._mserverUrl = node.GetAttribute( "url");
+                        app._mserverUserName = node.GetAttribute("userName");
+                        app._mserverPassword = DecryptPassword(node.GetAttribute("password"));
+                    }
+                    else
+                    {
+                        app._mserverUrl = "";
+                        app._mserverUserName = "";
+                        app._mserverPassword = "";
+                    }
+
                     // *** 进入内存的参数结束
 
                     // bin dir
@@ -3295,6 +3311,9 @@ namespace DigitalPlatform.LibraryServer
                             "globalResults",    // 2018/12/3
                             "rfid", // 2019/1/11
                             "barcodeValidation", // 2019/5/31
+                            "reportStorage",
+                            "reportReplication",
+                            "messageServer",
                         };
 
             foreach (string element_name in unique_containers)
@@ -3806,6 +3825,7 @@ namespace DigitalPlatform.LibraryServer
                             "barcodeValidation", // 2019/5/31
                             "reportStorage",    // 2021/9/19
                             "reportReplication",    // 2021/9/20
+                            "messageServer", // 2021/10/21
                         };
 
                             RestoreElements(cfg_dom, writer, elements);
@@ -10051,7 +10071,7 @@ out strError);
             string strTelParam = (string)parameters["tel"];
             string strLibraryCodeList = (string)parameters["librarycode"];  // 控制检索读者记录的范围
 
-            int nMaxHitCount = 10;
+            int nMaxHitCount = 500; // 2021/10/21 从 10 改为 500
 
             bool bReturnMessage = false;
             string strStyle = (string)parameters["style"];
@@ -10135,6 +10155,9 @@ out strError);
                     return 0;
                 }
 #endif
+                // 2021/10/21
+                if (records.Count >= nMaxHitCount)
+                    this.WriteErrorLog($"警告: ResetPassword() 中用 strQueryWord='{strQueryWord}' 检索时命中的读者记录条数达到或超过限制数 {nMaxHitCount}，这意味着可能会有一些记录无法处理到");
 
                 // 筛选读者记录
                 // return:
@@ -10164,6 +10187,8 @@ out strError);
 
                 XmlDocument output_dom = new XmlDocument();
                 output_dom.LoadXml("<root />");
+
+                // TODO: results 中元素多于一个怎么处理?
 
                 foreach (KernelRecord record in results)
                 {
