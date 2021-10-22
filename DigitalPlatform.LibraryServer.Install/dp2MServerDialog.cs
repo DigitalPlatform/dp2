@@ -364,79 +364,65 @@ dp2library 服务器在 dp2mserver 中开辟的账号
 
         async Task<bool> CreateLibraryUser()
         {
-#if NO
             string strError = "";
             EnableControls(false);
             try
             {
-                using (MessageConnectionCollection _channels = new MessageConnectionCollection())
-                {
-                    _channels.Login += _channels_LoginSupervisor;
+                P2PConnection connection = new P2PConnection();
 
-                    MessageConnection connection = await _channels.GetConnectionAsyncLite(
-            this.textBox_url.Text,
-            "supervisor");
+                string userName = "supervisor";
+                string password = "";
+
+                var connect_result = await connection.ConnectAsync(GetUrl(),
+    userName,
+    password,
+    "");
+                if (connect_result.Value == -1)
+                    return false;
+
+                /*
                     // 记忆用过的超级用户名和密码
                     this.ManagerUserName = connection.UserName;
                     this.ManagerPassword = connection.Password;
+                */
 
-                    CancellationToken cancel_token = _cancel.Token;
+                // 图书馆名字
+                string libraryName = GetLibraryName();
+                // dp2library UID
+                string libraryUID = GetLibraryUid();
 
-                    string id = Guid.NewGuid().ToString();
+                CancellationToken cancel_token = _cancel.Token;
 
-                    string strDepartment = InputDlg.GetInput(
-    this,
-    "图书馆名",
-    "请指定图书馆名: ",
-    "",
-    this.Font);
-                    if (strDepartment == null)
-                        return false;
+                string id = Guid.NewGuid().ToString();
 
-                    bool bEanbleWebCall = false;
-                    this.Invoke(new Action(() =>
-                    {
-                        DialogResult temp_result = MessageBox.Show(this,
-    "是否允许 webCall (通过 dp2Router 访问 dp2library)?",
-    "安装 dp2Capo",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                        if (temp_result == System.Windows.Forms.DialogResult.Yes)
-                            bEanbleWebCall = true;
-                    }));
+                List<User> users = new List<User>();
 
-                    List<User> users = new List<User>();
+                User user = new User();
+                user.userName = this.textBox_userName.Text;
+                user.password = this.textBox_password.Text;
+                user.rights = "";
+                user.duty = "";
+                user.groups = new string[] { $"gn:_{libraryUID}|-n" };
+                user.department = libraryName;
+                user.binding = "ip:[current]";
+                user.comment = "dp2library 专用账号";
 
-                    User user = new User();
-                    user.userName = this.textBox_userName.Text;
-                    user.password = this.textBox_password.Text;
-                    user.rights = "";
-                    // TODO: 看看除了 weixin_xxx 以外是否还有其他请求者需要许可
-                    user.duty = ":weixinclient|" + MakeWeixinUserName(this.textBox_userName.Text) + ",getPatronInfo,searchBiblio,searchPatron,bindPatron,getBiblioInfo,getBiblioSummary,getItemInfo,circulation,getUserInfo,getRes,getSystemParameter";
-                    if (bEanbleWebCall)
-                        user.duty += ",webCall:router";
-                    user.groups = new string[] { "gn:_patronNotify|-n" };
-                    user.department = strDepartment;
-                    user.binding = "ip:[current]";
-                    user.comment = "dp2Capo 专用账号";
+                users.Add(user);
 
-                    users.Add(user);
+                MessageResult result = await connection.SetUsersAsyncLite("create",
+                    users,
+                    new TimeSpan(0, 1, 0),
+                    cancel_token);
 
-                    MessageResult result = await connection.SetUsersAsyncLite("create",
-                        users,
-                        new TimeSpan(0, 1, 0),
-                        cancel_token);
-
-                    if (result.Value == -1)
-                    {
-                        strError = "创建用户 '" + this.textBox_userName.Text + "' 时出错: " + result.ErrorInfo;
-                        goto ERROR1;
-                    }
-
-                    return true;
+                if (result.Value == -1)
+                {
+                    strError = "创建用户 '" + this.textBox_userName.Text + "' 时出错: " + result.ErrorInfo;
+                    goto ERROR1;
                 }
+
+                return true;
             }
+            /*
             catch (MessageException ex)
             {
                 if (ex.ErrorCode == "Unauthorized")
@@ -454,6 +440,7 @@ dp2library 服务器在 dp2mserver 中开辟的账号
                 strError = ex.Message;
                 goto ERROR1;
             }
+            */
             catch (AggregateException ex)
             {
                 strError = MessageConnection.GetExceptionText(ex);
@@ -473,8 +460,6 @@ dp2library 服务器在 dp2mserver 中开辟的账号
             {
                 MessageBox.Show(this, strError);
             }));
-            return false;
-#endif 
             return false;
         }
 
@@ -517,5 +502,26 @@ dp2library 服务器在 dp2mserver 中开辟的账号
             e.Parameters = "propertyList=biblio_search,libraryUID=install";
         }
 #endif
+
+        /*
+    <libraryInfo>
+        <libraryName>本地图书馆</libraryName>
+    </libraryInfo>
+        * 
+         * */
+        string GetLibraryName()
+        {
+            return this.CfgDom.DocumentElement.SelectSingleNode("libraryInfo/libraryName")?.InnerText?.Trim();
+        }
+
+        /*
+<root uid="62637a12-1965-4876-af3a-fc1d3009af8a">
+        * 
+         * */
+        public string GetLibraryUid()
+        {
+            return this.CfgDom.DocumentElement.SelectSingleNode("root/@uid")?.Value;
+        }
+
     }
 }

@@ -1074,6 +1074,44 @@ CancellationToken token)
         }
 
         #endregion
+
+        #region SetUsers() API
+
+        public Task<MessageResult> SetUsersTaskAsync(
+            string action,
+            List<User> users,
+            TimeSpan timeout,
+            CancellationToken token)
+        {
+            return TaskRun<MessageResult>(() =>
+            {
+                return SetUsersAsyncLite(action, users, timeout, token).Result;
+            }, token);
+        }
+
+        public async Task<MessageResult> SetUsersAsyncLite(
+    string action,
+    List<User> users,
+    TimeSpan timeout,
+    CancellationToken token)
+        {
+            Task<MessageResult> task = HubProxy.Invoke<MessageResult>("SetUsers",
+                action,
+                users);
+
+            List<Task> tasks = new List<Task>() { };
+            // if (task == await Task.WhenAny(task, Task.Delay(timeout), token.AsTask()).ConfigureAwait(false))
+            // https://stackoverflow.com/questions/18670111/task-from-cancellation-token
+            if (task == await Task.WhenAny(task,
+                Task.Delay(timeout),
+                Task.Delay(Timeout.Infinite, token)).ConfigureAwait(false))
+                return task.Result;
+
+            throw new TimeoutException("已超时 " + timeout.ToString());
+        }
+
+        #endregion
+
     }
 
     public class SearchResult
