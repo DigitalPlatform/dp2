@@ -203,7 +203,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006book_5/1" />
+        <ValueList ref="marcvaluelist#targetaudiencecodes" />
       </Property>
     </Char>
     <Char name="6/1">
@@ -212,7 +212,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006book_6/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
     </Char>
     <Char name="7/4">
@@ -230,7 +230,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006book_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
     </Char>
     <Char name="12/1">
@@ -254,10 +254,9 @@
     <Char name="14/1">
       <Property>
         <Label xml:lang="en">Index</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">索引</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006book_14/1" />
+        <ValueList ref="marcvaluelist#indexcodes" />
       </Property>
     </Char>
     <Char name="15/1">
@@ -318,7 +317,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006computer_5/1" />
+        <ValueList ref="marcvaluelist#targetaudiencecodes" />
       </Property>
     </Char>
     <Char name="6/3">
@@ -354,7 +353,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006computer_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
     </Char>
     <Char name="12/6">
@@ -433,7 +432,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006maps_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
     </Char>
     <Char name="12/1">
@@ -442,7 +441,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006maps_12/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
     </Char>
     <Char name="13/1">
@@ -457,10 +456,9 @@
     <Char name="14/1">
       <Property>
         <Label xml:lang="en">Index</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">索引</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006maps_14/1" />
+        <ValueList ref="marcvaluelist#indexcodes" />
       </Property>
     </Char>
     <Char name="15/1">
@@ -530,7 +528,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006music_5/1" />
+        <ValueList ref="marcvaluelist#targetaudiencecodes" />
       </Property>
     </Char>
     <Char name="6/1">
@@ -539,7 +537,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006music_6/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
     </Char>
     <Char name="7/6">
@@ -645,7 +643,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006continuing_5/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
     </Char>
     <Char name="6/1">
@@ -654,7 +652,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006continuing_6/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
     </Char>
     <Char name="7/1">
@@ -672,7 +670,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006continuing_8/3" />
+        <ValueList ref="marcvaluelist#natureofcontentscodes" />
       </Property>
     </Char>
     <Char name="11/1">
@@ -681,7 +679,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006continuing_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
     </Char>
     <Char name="12/1">
@@ -751,7 +749,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006mixed_6/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
     </Char>
     <Char name="7/11">
@@ -821,7 +819,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006visual_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
     </Char>
     <Char name="12/1">
@@ -830,7 +828,7 @@
         <Label xml:lang="zh">
         </Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006visual_12/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
     </Char>
     <Char name="13/3">
@@ -869,8 +867,7 @@
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -879,8 +876,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MAP_1/1" />
       </Property>
@@ -888,8 +884,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MAP_2/1" />
       </Property>
@@ -897,8 +892,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">颜色</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MAP_3/1" />
       </Property>
@@ -906,8 +900,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Physical medium</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MAP_4/1" />
       </Property>
@@ -915,8 +908,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Type of reproduction</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">复制品类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MAP_5/1" />
       </Property>
@@ -924,8 +916,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Production/reproduction details</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">制图/复制细节</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MAP_6/1" />
       </Property>
@@ -933,8 +924,7 @@
     <Char name="7/1">
       <Property>
         <Label xml:lang="en">Positive/negative aspect</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">正/负特性</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MAP_7/1" />
       </Property>
@@ -948,8 +938,7 @@
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -958,8 +947,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_1/1" />
       </Property>
@@ -967,8 +955,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_2/1" />
       </Property>
@@ -976,8 +963,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">颜色</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_3/1" />
       </Property>
@@ -985,8 +971,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Dimensions</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">尺寸</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_4/1" />
       </Property>
@@ -994,8 +979,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Sound</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">声音</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_5/1" />
       </Property>
@@ -1003,8 +987,7 @@
     <Char name="6/3">
       <Property>
         <Label xml:lang="en">Image bit depth</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">图像比特深度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_6/3" />
       </Property>
@@ -1012,8 +995,7 @@
     <Char name="9/1">
       <Property>
         <Label xml:lang="en">File formats</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">文件格式数量</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_9/1" />
       </Property>
@@ -1021,8 +1003,7 @@
     <Char name="10/1">
       <Property>
         <Label xml:lang="en">Quality assurance target(s)</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">质量保证指标</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_10/1" />
       </Property>
@@ -1030,8 +1011,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Antecedent/source</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">先前/来源</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_11/1" />
       </Property>
@@ -1039,8 +1019,7 @@
     <Char name="12/1">
       <Property>
         <Label xml:lang="en">Level of compression</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">压缩级别</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_12/1" />
       </Property>
@@ -1048,8 +1027,7 @@
     <Char name="13/1">
       <Property>
         <Label xml:lang="en">Reformatting quality</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">重定格式质量</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007ELECTRONIC_13/1" />
       </Property>
@@ -1058,13 +1036,12 @@
   <Field name="007" type="globe" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Globe (007/00=d)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Globe (007/00=d)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 球仪 (007/00=d)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1073,8 +1050,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007GLOBE_1/1" />
       </Property>
@@ -1082,8 +1058,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007GLOBE_2/1" />
       </Property>
@@ -1091,8 +1066,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">颜色</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007GLOBE_3/1" />
       </Property>
@@ -1100,8 +1074,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Physical medium</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007GLOBE_4/1" />
       </Property>
@@ -1109,8 +1082,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Type of reproduction</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">复制品类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007GLOBE_5/1" />
       </Property>
@@ -1119,13 +1091,12 @@
   <Field name="007" type="tactile_material" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Tactile material (007/00=f)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Tactile material (007/00=f)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 触摸资料 (007/00=f)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1134,8 +1105,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007TACTILE_1/1" />
       </Property>
@@ -1143,8 +1113,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007TACTILE_2/1" />
       </Property>
@@ -1152,8 +1121,7 @@
     <Char name="3/2">
       <Property>
         <Label xml:lang="en">Class of braille writing</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">盲字类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007TACTILE_3/2" />
       </Property>
@@ -1161,8 +1129,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Level of contraction</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">缩约程度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007TACTILE_5/1" />
       </Property>
@@ -1170,8 +1137,7 @@
     <Char name="6/3">
       <Property>
         <Label xml:lang="en">Braille music format</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">布莱叶盲字乐谱格式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007TACTILE_6/3" />
       </Property>
@@ -1179,8 +1145,7 @@
     <Char name="9/1">
       <Property>
         <Label xml:lang="en">Specific physical characteristics</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特殊物理特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007TACTILE_9/1" />
       </Property>
@@ -1189,13 +1154,12 @@
   <Field name="007" type="projected_graphic" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Projected graphic (007/00=g)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Projected graphic (007/00=g)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 放映图像 (007/00=g)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1204,8 +1168,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007PROJECTED_1/1" />
       </Property>
@@ -1213,8 +1176,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007PROJECTED_2/1" />
       </Property>
@@ -1222,8 +1184,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">颜色</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007PROJECTED_3/1" />
       </Property>
@@ -1231,8 +1192,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Base of emulsion</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">感光乳胶材料基地</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007PROJECTED_4/1" />
       </Property>
@@ -1240,8 +1200,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Sound on medium or separate</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">声音记录方式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007PROJECTED_5/1" />
       </Property>
@@ -1249,8 +1208,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Medium for sound</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">声音媒体</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007PROJECTED_6/1" />
       </Property>
@@ -1258,8 +1216,7 @@
     <Char name="7/1">
       <Property>
         <Label xml:lang="en">Dimensions</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">尺寸</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007PROJECTED_7/1" />
       </Property>
@@ -1267,8 +1224,7 @@
     <Char name="8/1">
       <Property>
         <Label xml:lang="en">Secondary support material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">辅助支撑材料</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007PROJECTED_8/1" />
       </Property>
@@ -1277,13 +1233,12 @@
   <Field name="007" type="microform" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Microform (007/00=h)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Microform (007/00=h)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 缩微资料 (007/00=h)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1292,8 +1247,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_1/1" />
       </Property>
@@ -1301,8 +1255,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_2/1" />
       </Property>
@@ -1310,8 +1263,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Positive/negative aspect</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">正/负特性</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_3/1" />
       </Property>
@@ -1319,8 +1271,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Dimensions</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">尺寸</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_4/1" />
       </Property>
@@ -1328,8 +1279,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Reduction ratio range</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">缩率范围</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_5/1" />
       </Property>
@@ -1337,8 +1287,7 @@
     <Char name="6/3">
       <Property>
         <Label xml:lang="en">Reduction ratio</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">缩率</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_6/3" />
       </Property>
@@ -1346,8 +1295,7 @@
     <Char name="9/1">
       <Property>
         <Label xml:lang="en">Color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">颜色</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_9/1" />
       </Property>
@@ -1355,8 +1303,7 @@
     <Char name="10/1">
       <Property>
         <Label xml:lang="en">Emulsion on film</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">胶片上的乳剂</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_10/1" />
       </Property>
@@ -1364,8 +1311,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Generation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">代次</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_11/1" />
       </Property>
@@ -1373,8 +1319,7 @@
     <Char name="12/1">
       <Property>
         <Label xml:lang="en">Base of film</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">片基类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MICROFORM_12/1" />
       </Property>
@@ -1383,13 +1328,12 @@
   <Field name="007" type="nonprojected_graphic" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Nonprojected graphic (007/00=k)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Nonprojected graphic (007/00=k)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 非放映图像 (007/00=k)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1398,8 +1342,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007NONPROJECTED_1/1" />
       </Property>
@@ -1407,8 +1350,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007NONPROJECTED_2/1" />
       </Property>
@@ -1416,8 +1358,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">颜色</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007NONPROJECTED_3/1" />
       </Property>
@@ -1425,8 +1366,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Primary support material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">主要支撑材料</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007NONPROJECTED_4/1" />
       </Property>
@@ -1434,8 +1374,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Secondary support material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">辅助支撑材料</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007NONPROJECTED_5/1" />
       </Property>
@@ -1444,13 +1383,12 @@
   <Field name="007" type="motion_picture" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Motion picture (007/00=m)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Motion picture (007/00=m)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 电影 (007/00=m)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1459,8 +1397,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_1/1" />
       </Property>
@@ -1468,8 +1405,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_2/1" />
       </Property>
@@ -1477,8 +1413,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">颜色</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_3/1" />
       </Property>
@@ -1486,8 +1421,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Motion picture presentation format</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">电影表现格式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_4/1" />
       </Property>
@@ -1495,8 +1429,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Sound on medium or separate</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">声音记录方式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_5/1" />
       </Property>
@@ -1504,8 +1437,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Medium for sound</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">声音媒体</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_6/1" />
       </Property>
@@ -1513,8 +1445,7 @@
     <Char name="7/1">
       <Property>
         <Label xml:lang="en">Dimensions</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">尺寸</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_7/1" />
       </Property>
@@ -1522,8 +1453,7 @@
     <Char name="8/1">
       <Property>
         <Label xml:lang="en">Configuration of playback channels</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">放音声道配置</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_8/1" />
       </Property>
@@ -1531,8 +1461,7 @@
     <Char name="9/1">
       <Property>
         <Label xml:lang="en">Production elements</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">制作单元</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_9/1" />
       </Property>
@@ -1540,8 +1469,7 @@
     <Char name="10/1">
       <Property>
         <Label xml:lang="en">Positive/negative aspect</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">正/负特性</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_10/1" />
       </Property>
@@ -1549,8 +1477,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Generation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">代次</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_11/1" />
       </Property>
@@ -1558,8 +1485,7 @@
     <Char name="12/1">
       <Property>
         <Label xml:lang="en">Base of film</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">胶片的片基</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_12/1" />
       </Property>
@@ -1567,8 +1493,7 @@
     <Char name="13/1">
       <Property>
         <Label xml:lang="en">Refined categories of color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">色彩类别</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_13/1" />
       </Property>
@@ -1576,8 +1501,7 @@
     <Char name="14/1">
       <Property>
         <Label xml:lang="en">Kind of color stock or print</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">电影胶片生片或拷贝的种类</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_14/1" />
       </Property>
@@ -1585,8 +1509,7 @@
     <Char name="15/1">
       <Property>
         <Label xml:lang="en">Deterioration stage</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">老化程度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_15/1" />
       </Property>
@@ -1594,8 +1517,7 @@
     <Char name="16/1">
       <Property>
         <Label xml:lang="en">Completeness</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">完整程度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_16/1" />
       </Property>
@@ -1603,8 +1525,7 @@
     <Char name="17/6">
       <Property>
         <Label xml:lang="en">Film inspection date</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">电影胶片检查日期</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007MOTION_17/6" />
       </Property>
@@ -1613,13 +1534,12 @@
   <Field name="007" type="remote-sensing_image" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Remote-sensing image (007/00=r)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Remote-sensing image (007/00=r)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 遥感影像 (007/00=r)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1628,8 +1548,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_1/1" />
       </Property>
@@ -1637,8 +1556,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_2/1" />
       </Property>
@@ -1646,8 +1564,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Altitude of sensor</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">传感器高度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_3/1" />
       </Property>
@@ -1655,8 +1572,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Attitude of sensor</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">传感器角度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_4/1" />
       </Property>
@@ -1664,8 +1580,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Cloud cover</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">云量覆盖</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_5/1" />
       </Property>
@@ -1673,8 +1588,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Platform construction type</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">遥感装置平台结构类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_6/1" />
       </Property>
@@ -1682,8 +1596,7 @@
     <Char name="7/1">
       <Property>
         <Label xml:lang="en">Platform use category</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">平台应用类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_7/1" />
       </Property>
@@ -1691,8 +1604,7 @@
     <Char name="8/1">
       <Property>
         <Label xml:lang="en">Sensor type</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">传感器类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_8/1" />
       </Property>
@@ -1700,8 +1612,7 @@
     <Char name="9/2">
       <Property>
         <Label xml:lang="en">Data type</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">数据类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007REMOTE_9/2" />
       </Property>
@@ -1710,13 +1621,12 @@
   <Field name="007" type="kit" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Kit (007/00=o)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Kit (007/00=o)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 -- 多载体配套资料 (007/00=o)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1725,8 +1635,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007KIT_1/1" />
       </Property>
@@ -1735,13 +1644,12 @@
   <Field name="007" type="notated_music" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Notated music (007/00=q)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Notated music (007/00=q)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 -- 乐谱 (007/00=q)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1750,8 +1658,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007NOTATED_1/1" />
       </Property>
@@ -1760,13 +1667,12 @@
   <Field name="007" type="sound_recording" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Sound recording (007/00=s)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Sound recording (007/00=s)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 -- 录音资料 (007/00=s)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1775,8 +1681,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_1/1" />
       </Property>
@@ -1784,8 +1689,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_2/1" />
       </Property>
@@ -1793,8 +1697,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Speed</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">播放速度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_3/1" />
       </Property>
@@ -1802,8 +1705,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Configuration of playback channels</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">放音声道配置</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_4/1" />
       </Property>
@@ -1811,8 +1713,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Groove width/groove pitch</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">唱片纹宽/录音筒纹高</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_5/1" />
       </Property>
@@ -1820,8 +1721,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Dimensions</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">尺寸</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_6/1" />
       </Property>
@@ -1829,8 +1729,7 @@
     <Char name="7/1">
       <Property>
         <Label xml:lang="en">Tape width</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">录音带宽度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_7/1" />
       </Property>
@@ -1838,8 +1737,7 @@
     <Char name="8/1">
       <Property>
         <Label xml:lang="en">Tape configuration</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">录音带结构</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_8/1" />
       </Property>
@@ -1847,8 +1745,7 @@
     <Char name="9/1">
       <Property>
         <Label xml:lang="en">Kind of disc, cylinder or tape</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">录音制品类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_9/1" />
       </Property>
@@ -1856,8 +1753,7 @@
     <Char name="10/1">
       <Property>
         <Label xml:lang="en">Kind of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体材料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_10/1" />
       </Property>
@@ -1865,8 +1761,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Kind of cutting</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">刻纹类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_11/1" />
       </Property>
@@ -1874,8 +1769,7 @@
     <Char name="12/1">
       <Property>
         <Label xml:lang="en">Special playback characteristics</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特殊播放特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_12/1" />
       </Property>
@@ -1883,8 +1777,7 @@
     <Char name="13/1">
       <Property>
         <Label xml:lang="en">Capture and storage technique</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">录音与存储技术</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007SOUND_13/1" />
       </Property>
@@ -1893,13 +1786,12 @@
   <Field name="007" type="text" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Text (007/00=t)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Text (007/00=t)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 -- 文本 (007/00=t)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1908,8 +1800,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007TEXT_1/1" />
       </Property>
@@ -1918,13 +1809,12 @@
   <Field name="007" type="videorecording" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Videorecording (007/00=v)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Videorecording (007/00=v)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 -- 录像 (007/00=v)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -1933,17 +1823,15 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007VIDEORECORDING_1/1" />
       </Property>
     </Char>
     <Char name="2/1">
       <Property>
-        <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="en">Undefined</Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007VIDEORECORDING_2/1" />
       </Property>
@@ -1951,8 +1839,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Color</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">颜色</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007VIDEORECORDING_3/1" />
       </Property>
@@ -1960,8 +1847,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Videorecording format</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">录像规格</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007VIDEORECORDING_4/1" />
       </Property>
@@ -1969,8 +1855,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Sound on medium or separate</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">声音记录方式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007VIDEORECORDING_5/1" />
       </Property>
@@ -1978,8 +1863,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Medium for sound</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">声音媒体</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007VIDEORECORDING_6/1" />
       </Property>
@@ -1987,8 +1871,7 @@
     <Char name="7/1">
       <Property>
         <Label xml:lang="en">Dimensions</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">尺寸</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007VIDEORECORDING_7/1" />
       </Property>
@@ -1996,8 +1879,7 @@
     <Char name="8/1">
       <Property>
         <Label xml:lang="en">Configuration of playback channels</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">放音声道配置</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007VIDEORECORDING_8/1" />
       </Property>
@@ -2006,13 +1888,12 @@
   <Field name="007" type="unspecified" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Unspecified (007/00=z)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Unspecified (007/00=z)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 -- 未详细说明资料类型 (007/00=z)</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Category of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007_0/1" />
         <sensitive />
@@ -2021,8 +1902,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Specific material designation</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特定资料标识</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#007UNSPECIFIED_1/1" />
       </Property>
@@ -2035,7 +1915,7 @@
   <Field name="008" type="books" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION</Label>
-      <Label xml:lang="zh">定长数据元素</Label>
+      <Label xml:lang="zh">定长数据元素-一般信息</Label>
     </Property>
     <Char name="0/6">
       <Property>
@@ -2080,6 +1960,7 @@
         <Label xml:lang="zh">图表</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_1/4" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="22/1">
@@ -2087,7 +1968,8 @@
         <Label xml:lang="en">Target audience</Label>
         <Label xml:lang="zh">读者对象</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006book_5/1" />
+        <ValueList ref="marcvaluelist#targetaudiencecodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="23/1">
@@ -2095,7 +1977,8 @@
         <Label xml:lang="en">Form of item</Label>
         <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006book_6/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="24/4">
@@ -2104,6 +1987,7 @@
         <Label xml:lang="zh">内容特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_7/4" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="28/1">
@@ -2111,7 +1995,8 @@
         <Label xml:lang="en">Government publication</Label>
         <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006book_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="29/1">
@@ -2120,6 +2005,7 @@
         <Label xml:lang="zh">会议出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_12/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="30/1">
@@ -2128,6 +2014,7 @@
         <Label xml:lang="zh">纪念文集</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_13/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="31/1">
@@ -2135,7 +2022,8 @@
         <Label xml:lang="en">Index</Label>
         <Label xml:lang="zh">索引</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006book_14/1" />
+        <ValueList ref="marcvaluelist#indexcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="32/1">
@@ -2144,6 +2032,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_15/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="33/1">
@@ -2152,6 +2041,7 @@
         <Label xml:lang="zh">文学形式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_16/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="34/1">
@@ -2160,6 +2050,7 @@
         <Label xml:lang="zh">传记</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_17/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="35/3">
@@ -2228,7 +2119,7 @@
       <Property>
         <Label xml:lang="en">Place of publication, production, or execution</Label>
         <Label xml:lang="zh">出版地</Label>
-        <ValueList ref="marcvaluelist#languagecode" />
+        <ValueList ref="marcvaluelist#countriescode" />
       </Property>
     </Char>
     <Char name="18/4">
@@ -2237,6 +2128,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_1/4" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="22/1">
@@ -2244,7 +2136,8 @@
         <Label xml:lang="en">Target audience</Label>
         <Label xml:lang="zh">读者对象</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006computer_5/1" />
+        <ValueList ref="marcvaluelist#targetaudiencecodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="23/3">
@@ -2253,6 +2146,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_6/3" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="26/1">
@@ -2261,6 +2155,7 @@
         <Label xml:lang="zh">计算机文件类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_9/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="27/1">
@@ -2269,6 +2164,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_10/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="28/1">
@@ -2276,7 +2172,8 @@
         <Label xml:lang="en">Government publication</Label>
         <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006computer_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="29/6">
@@ -2285,6 +2182,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_12/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="35/3">
@@ -2353,7 +2251,7 @@
       <Property>
         <Label xml:lang="en">Place of publication, production, or execution</Label>
         <Label xml:lang="zh">出版地</Label>
-        <ValueList ref="marcvaluelist#languagecode" />
+        <ValueList ref="marcvaluelist#countriescode" />
       </Property>
     </Char>
     <Char name="18/4">
@@ -2362,6 +2260,7 @@
         <Label xml:lang="zh">地形</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_1/4" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="22/2">
@@ -2370,6 +2269,7 @@
         <Label xml:lang="zh">投影</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_5/2" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="24/1">
@@ -2378,6 +2278,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_7/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="25/1">
@@ -2386,6 +2287,7 @@
         <Label xml:lang="zh">测绘资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_8/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="26/2">
@@ -2394,6 +2296,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_9/2" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="28/1">
@@ -2401,7 +2304,8 @@
         <Label xml:lang="en">Government publication</Label>
         <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006maps_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="29/1">
@@ -2409,7 +2313,8 @@
         <Label xml:lang="en">Form of item</Label>
         <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006maps_12/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="30/1">
@@ -2418,6 +2323,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_13/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="31/1">
@@ -2425,7 +2331,8 @@
         <Label xml:lang="en">Index</Label>
         <Label xml:lang="zh">索引</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006maps_14/1" />
+        <ValueList ref="marcvaluelist#indexcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="32/1">
@@ -2434,6 +2341,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_15/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="33/2">
@@ -2442,6 +2350,7 @@
         <Label xml:lang="zh">特殊格式特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_16/2" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="35/3">
@@ -2510,7 +2419,7 @@
       <Property>
         <Label xml:lang="en">Place of publication, production, or execution</Label>
         <Label xml:lang="zh">出版地</Label>
-        <ValueList ref="marcvaluelist#languagecode" />
+        <ValueList ref="marcvaluelist#countriescode" />
       </Property>
     </Char>
     <Char name="18/2">
@@ -2519,6 +2428,7 @@
         <Label xml:lang="zh">乐曲形式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_1/2" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="20/1">
@@ -2527,6 +2437,7 @@
         <Label xml:lang="zh">乐谱格式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_3/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="21/1">
@@ -2535,6 +2446,7 @@
         <Label xml:lang="zh">分谱</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_4/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="22/1">
@@ -2542,7 +2454,8 @@
         <Label xml:lang="en">Target audience</Label>
         <Label xml:lang="zh">读者对象</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006music_5/1" />
+        <ValueList ref="marcvaluelist#targetaudiencecodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="23/1">
@@ -2550,7 +2463,8 @@
         <Label xml:lang="en">Form of item</Label>
         <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006music_6/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="24/6">
@@ -2559,6 +2473,7 @@
         <Label xml:lang="zh">附件</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_7/6" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="30/2">
@@ -2567,6 +2482,7 @@
         <Label xml:lang="zh">录音资料的文稿</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_13/2" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="32/1">
@@ -2575,6 +2491,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_15/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="33/1">
@@ -2583,6 +2500,7 @@
         <Label xml:lang="zh">变调和改编</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_16/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="34/1">
@@ -2591,6 +2509,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_17/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="35/3">
@@ -2659,7 +2578,7 @@
       <Property>
         <Label xml:lang="en">Place of publication, production, or execution</Label>
         <Label xml:lang="zh">出版地</Label>
-        <ValueList ref="marcvaluelist#languagecode" />
+        <ValueList ref="marcvaluelist#countriescode" />
       </Property>
     </Char>
     <Char name="18/1">
@@ -2668,6 +2587,7 @@
         <Label xml:lang="zh">出版频率</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_1/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="19/1">
@@ -2676,6 +2596,7 @@
         <Label xml:lang="zh">发行规律性</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_2/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="20/1">
@@ -2684,6 +2605,7 @@
         <Label xml:lang="zh">ISSN 中心</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_3/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="21/1">
@@ -2692,6 +2614,7 @@
         <Label xml:lang="zh">连续性资源类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_4/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="22/1">
@@ -2699,7 +2622,8 @@
         <Label xml:lang="en">Form of original item</Label>
         <Label xml:lang="zh">原始文献载体形态</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006continuing_5/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="23/1">
@@ -2707,7 +2631,8 @@
         <Label xml:lang="en">Form of item</Label>
         <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006continuing_6/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="24/1">
@@ -2716,6 +2641,7 @@
         <Label xml:lang="zh">整体内容特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_7/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="25/3">
@@ -2723,7 +2649,8 @@
         <Label xml:lang="en">Nature of contents</Label>
         <Label xml:lang="zh">内容特征</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006continuing_8/3" />
+        <ValueList ref="marcvaluelist#natureofcontentscodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="28/1">
@@ -2731,7 +2658,8 @@
         <Label xml:lang="en">Government publication</Label>
         <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006continuing_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="29/1">
@@ -2740,6 +2668,7 @@
         <Label xml:lang="zh">会议出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_12/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="30/3">
@@ -2748,6 +2677,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_13/3" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="33/1">
@@ -2756,6 +2686,7 @@
         <Label xml:lang="zh">题名原文字母或文字</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_16/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="34/1">
@@ -2764,6 +2695,7 @@
         <Label xml:lang="zh">款目原则</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_17/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="35/3">
@@ -2832,7 +2764,7 @@
       <Property>
         <Label xml:lang="en">Place of publication, production, or execution</Label>
         <Label xml:lang="zh">出版地</Label>
-        <ValueList ref="marcvaluelist#languagecode" />
+        <ValueList ref="marcvaluelist#countriescode" />
       </Property>
     </Char>
     <Char name="18/3">
@@ -2841,6 +2773,7 @@
         <Label xml:lang="zh">电影或录像的放映时间</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_1/3" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="21/1">
@@ -2849,6 +2782,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_4/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="22/1">
@@ -2857,6 +2791,7 @@
         <Label xml:lang="zh">读者对象</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_5/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="23/5">
@@ -2865,6 +2800,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_6/5" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="28/1">
@@ -2872,7 +2808,8 @@
         <Label xml:lang="en">Government publication</Label>
         <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006visual_11/1" />
+        <ValueList ref="marcvaluelist#governmentpublicationcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="29/1">
@@ -2880,7 +2817,8 @@
         <Label xml:lang="en">Form of item</Label>
         <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006visual_12/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="30/3">
@@ -2889,6 +2827,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_13/3" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="33/1">
@@ -2897,6 +2836,7 @@
         <Label xml:lang="zh">可视听资料</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_16/1" />
+      <Display style="bold" />
       </Property>
     </Char>
     <Char name="34/1">
@@ -2905,6 +2845,7 @@
         <Label xml:lang="zh">技术</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_17/1" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="35/3">
@@ -2973,7 +2914,7 @@
       <Property>
         <Label xml:lang="en">Place of publication, production, or execution</Label>
         <Label xml:lang="zh">出版地</Label>
-        <ValueList ref="marcvaluelist#languagecode" />
+        <ValueList ref="marcvaluelist#countriescode" />
       </Property>
     </Char>
     <Char name="18/5">
@@ -2982,6 +2923,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006mixed_1/5" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="23/1">
@@ -2989,7 +2931,8 @@
         <Label xml:lang="en">Form of item</Label>
         <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
-        <ValueList ref="marcvaluelist#006mixed_6/1" />
+        <ValueList ref="marcvaluelist#formofitemcodes" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="24/11">
@@ -2998,6 +2941,7 @@
         <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006mixed_7/11" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="35/3">

@@ -81,9 +81,9 @@ namespace DigitalPlatform.Marc
             // 
             this.button_ok.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_ok.AutoSize = true;
-            this.button_ok.Location = new System.Drawing.Point(425, 256);
+            this.button_ok.Location = new System.Drawing.Point(456, 439);
             this.button_ok.Name = "button_ok";
-            this.button_ok.Size = new System.Drawing.Size(75, 23);
+            this.button_ok.Size = new System.Drawing.Size(138, 53);
             this.button_ok.TabIndex = 2;
             this.button_ok.Text = "确定";
             this.button_ok.Click += new System.EventHandler(this.button_ok_Click);
@@ -93,9 +93,9 @@ namespace DigitalPlatform.Marc
             this.button_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cancel.AutoSize = true;
             this.button_cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_cancel.Location = new System.Drawing.Point(506, 256);
+            this.button_cancel.Location = new System.Drawing.Point(605, 439);
             this.button_cancel.Name = "button_cancel";
-            this.button_cancel.Size = new System.Drawing.Size(76, 23);
+            this.button_cancel.Size = new System.Drawing.Size(139, 53);
             this.button_cancel.TabIndex = 3;
             this.button_cancel.Text = "取消";
             this.button_cancel.Click += new System.EventHandler(this.button_cancel_Click);
@@ -103,10 +103,10 @@ namespace DigitalPlatform.Marc
             // label_message
             // 
             this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_message.Location = new System.Drawing.Point(9, 261);
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_message.Location = new System.Drawing.Point(17, 461);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(413, 25);
+            this.label_message.Size = new System.Drawing.Size(434, 43);
             this.label_message.TabIndex = 1;
             this.label_message.MouseMove += new System.Windows.Forms.MouseEventHandler(this.label_message_MouseMove);
             // 
@@ -114,14 +114,14 @@ namespace DigitalPlatform.Marc
             // 
             this.TemplateControl.AdditionalValue = "";
             this.TemplateControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.TemplateControl.AutoScroll = true;
             this.TemplateControl.BackColor = System.Drawing.SystemColors.Control;
-            this.TemplateControl.Location = new System.Drawing.Point(11, 12);
+            this.TemplateControl.Location = new System.Drawing.Point(20, 21);
             this.TemplateControl.Name = "TemplateControl";
             this.TemplateControl.Padding = new System.Windows.Forms.Padding(8);
-            this.TemplateControl.Size = new System.Drawing.Size(567, 238);
+            this.TemplateControl.Size = new System.Drawing.Size(724, 412);
             this.TemplateControl.TabIndex = 0;
             this.TemplateControl.Value = "";
             this.TemplateControl.GetTemplateDef += new DigitalPlatform.Marc.GetTemplateDefEventHandler(this.TemplateControl_GetTemplateDef);
@@ -133,15 +133,15 @@ namespace DigitalPlatform.Marc
             // FixedTemplateDlg
             // 
             this.AcceptButton = this.button_ok;
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
+            this.AutoScaleBaseSize = new System.Drawing.Size(11, 24);
             this.CancelButton = this.button_cancel;
-            this.ClientSize = new System.Drawing.Size(590, 288);
+            this.ClientSize = new System.Drawing.Size(759, 508);
             this.Controls.Add(this.TemplateControl);
             this.Controls.Add(this.label_message);
             this.Controls.Add(this.button_cancel);
             this.Controls.Add(this.button_ok);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(100, 300);
+            this.MinimumSize = new System.Drawing.Size(183, 514);
             this.Name = "FixedTemplateDlg";
             this.ShowInTaskbar = false;
             this.Text = "定义模板";
@@ -252,15 +252,21 @@ namespace DigitalPlatform.Marc
 
         private void MarcFixedFieldControlDlg_Load(object sender, EventArgs e)
         {
-            if (this.Owner != null)
-                this.Font = this.Owner.Font;
-            else
             {
-                Font default_font = GetDefaultFont();
-                if (default_font != null)
-                    this.Font = default_font;
+                if (this.Owner != null)
+                    this.Font = this.Owner.Font;
+                else
+                {
+                    Font default_font = GetDefaultFont();
+                    if (default_font != null)
+                        this.Font = default_font;
+                }
+
+                this.TemplateControl.AdjuetLayoutSize();
             }
 
+            // 2021/10/24 去掉
+            /*
             int nResultWidth = 0;
             int nResultHeight = 0;
 
@@ -268,7 +274,7 @@ namespace DigitalPlatform.Marc
                 false,
                 out nResultWidth,
                 out nResultHeight);    // 2008/7/20
-
+            
             int nHeightDelta = this.Height - this.TemplateControl.Height;
 
             Size old_size = this.Size;
@@ -281,17 +287,15 @@ namespace DigitalPlatform.Marc
             this.Location = new Point(this.Location.X - nXDelta / 2,
                 this.Location.Y - nYDelta / 2);
 
-            this.TemplateControl.AdjuetListViewSize();
-            /*
-            TemplateControl.Size = new Size(nResultWidth,
-                nResultHeight);
-             * */
-            // API.PostMessage(this.Handle, WM_FIRST_SETFOCUS, 0, 0);
+            */
+
+            // 居中
+            this.CenterToScreen();
 
             this.BeginInvoke(new Action(() =>
-{
-    TemplateControl.FocusFirstLine();
-}));
+            {
+                TemplateControl.FocusFirstLine();
+            }));
         }
 
 #if NO
@@ -333,15 +337,20 @@ namespace DigitalPlatform.Marc
 
             Size old_size = this.Size;
 
+            /*
             this.Size = new Size(nResultWidth + 25,
                 Math.Max(this.Height, nResultHeight + nHeightDelta));
+            */
+
+            this.Size = new Size(Math.Max(old_size.Width, nResultWidth + 25),
+    Math.Max(this.Height, nResultHeight + nHeightDelta));
 
             int nXDelta = this.Size.Width - old_size.Width;
             int nYDelta = this.Size.Height - old_size.Height;
             this.Location = new Point(this.Location.X - nXDelta / 2,
                 this.Location.Y - nYDelta / 2);
 
-            this.TemplateControl.AdjuetListViewSize();
+            this.TemplateControl.AdjuetLayoutSize();
         }
 
         private void TemplateControl_ResetSize(object sender, EventArgs e)

@@ -423,337 +423,311 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No illustrations</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">无图表</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Illustrations</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">图表</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Maps</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">地图</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Portraits</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">肖像</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Charts</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">航行图</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Plans</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">设计图</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Plates</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">图版</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Music</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">乐谱</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">Facsimiles</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">摹真本</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Coats of arms</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">盾徽</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Genealogical tables</Label>
+      <Label xml:lang="zh">谱系表</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Forms</Label>
+      <Label xml:lang="zh">表格</Label>
     </Item>
     <Item>
       <Value>l</Value>
       <Label xml:lang="en">Samples</Label>
+      <Label xml:lang="zh">样品</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Phonodisc, phonowire, etc.</Label>
+      <Label xml:lang="zh">录音资料</Label>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">Photographs</Label>
+      <Label xml:lang="zh">照片</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Illuminations</Label>
+      <Label xml:lang="zh">彩饰</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006book_5/1" same="008_22/1">
-    <!-- 与"008_22/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Unknown or not specified</Label>
+      <Label xml:lang="zh">不详或者未说明</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Preschool</Label>
+      <Label xml:lang="zh">学龄前儿童</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Primary</Label>
+      <Label xml:lang="zh">小学生</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Pre-adolescent</Label>
+      <Label xml:lang="zh">青春前期的少年</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Adolescent</Label>
+      <Label xml:lang="zh">青少年</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Adult</Label>
+      <Label xml:lang="zh">成人</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Specialized</Label>
+      <Label xml:lang="zh">专业人员</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">General</Label>
+      <Label xml:lang="zh">普通读者</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Juvenile</Label>
+      <Label xml:lang="zh">少年</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+-->
+  <!--
   <ValueList name="006book_6/1" same="008_23/1">
-    <!-- 与"008_23/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">None of the following</Label>
+      <Label xml:lang="zh">非下列代码</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Microfilm</Label>
+      <Label xml:lang="zh">缩微胶卷</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Microfiche</Label>
+      <Label xml:lang="zh">缩微平片</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Microopaque</Label>
+      <Label xml:lang="zh">不透明缩微片</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Large print</Label>
+      <Label xml:lang="zh">大型印刷本</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Braille</Label>
+      <Label xml:lang="zh">盲文本</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Regular print reproduction</Label>
+      <Label xml:lang="zh">普通印刷本</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Electronic</Label>
+      <Label xml:lang="zh">电子文献</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
-  <ValueList name="006book_7/4" same="008_24/4">
-    <!-- 与"008_24/4"相同 -->
-    <Item>
-      <Value>_</Value>
-      <Label xml:lang="en">No specified nature of contents</Label>
-    </Item>
+
+  -->
+
+  <ValueList name="006book_7/4" merge="natureofcontentscodes">
+    <!-- 合并的原因是 附注有所不同 -->
     <Item>
       <Value>a</Value>
-      <Label xml:lang="en">Abstracts/summaries</Label>
+      <Comment xml:lang="zh">指编目文献包含其他出版物的摘要</Comment>
     </Item>
     <Item>
       <Value>b</Value>
-      <Label xml:lang="en">Bibliographies</Label>
+      <Comment xml:lang="zh">指编目文献本身或部分为书目。相关字段通常为 500 504 等</Comment>
     </Item>
     <Item>
       <Value>c</Value>
-      <Label xml:lang="en">Catalogs</Label>
-    </Item>
-    <Item>
-      <Value>d</Value>
-      <Label xml:lang="en">Dictionaries</Label>
-    </Item>
-    <Item>
-      <Value>e</Value>
-      <Label xml:lang="en">Encyclopedias</Label>
-    </Item>
-    <Item>
-      <Value>f</Value>
-      <Label xml:lang="en">Handbooks</Label>
-    </Item>
-    <Item>
-      <Value>g</Value>
-      <Label xml:lang="en">Legal articles</Label>
+      <Comment xml:lang="zh">表示编目文献本身为目录，如藏书目录、收集品的目录</Comment>
     </Item>
     <Item>
       <Value>i</Value>
-      <Label xml:lang="en">Indexes</Label>
-    </Item>
-    <Item>
-      <Value>j</Value>
-      <Label xml:lang="en">Patent document</Label>
+      <Comment xml:lang="zh">表示编目文献为其他书目资料的索引</Comment>
     </Item>
     <Item>
       <Value>k</Value>
-      <Label xml:lang="en">Discographies</Label>
-    </Item>
-    <Item>
-      <Value>l</Value>
-      <Label xml:lang="en">Legislation</Label>
-    </Item>
-    <Item>
-      <Value>m</Value>
-      <Label xml:lang="en">Theses</Label>
+      <Comment xml:lang="zh">表示编目文献全部或主要部分为唱片目录</Comment>
     </Item>
     <Item>
       <Value>n</Value>
-      <Label xml:lang="en">Surveys of literature in a subject area</Label>
+      <Comment xml:lang="zh">指某一专业领域有关文献的出版情况概况，通常在文献中带有参考书目，或文献本身就是书目。当选用代码 n 时，不使用代码 b</Comment>
     </Item>
     <Item>
       <Value>o</Value>
-      <Label xml:lang="en">Reviews</Label>
-    </Item>
-    <Item>
-      <Value>p</Value>
-      <Label xml:lang="en">Programmed texts</Label>
+      <Comment xml:lang="zh">表示编目文献为另一部已经出版或上演的作品的评论，如图书、电影、戏剧等的评论</Comment>
     </Item>
     <Item>
       <Value>q</Value>
-      <Label xml:lang="en">Filmographies</Label>
-    </Item>
-    <Item>
-      <Value>r</Value>
-      <Label xml:lang="en">Directories</Label>
-    </Item>
-    <Item>
-      <Value>s</Value>
-      <Label xml:lang="en">Statistics</Label>
-    </Item>
-    <Item>
-      <Value>t</Value>
-      <Label xml:lang="en">Technical reports</Label>
-    </Item>
-    <Item>
-      <Value>v</Value>
-      <Label xml:lang="en">Legal cases and case notes</Label>
-    </Item>
-    <Item>
-      <Value>w</Value>
-      <Label xml:lang="en">Law reports and digests</Label>
-    </Item>
-    <Item>
-      <Value>z</Value>
-      <Label xml:lang="en">Treaties</Label>
-    </Item>
-    <Item>
-      <Value>|</Value>
-      <Label xml:lang="en">No attempt to code</Label>
+      <Comment xml:lang="zh">表示编目文献全部或主要部分为电影目录</Comment>
     </Item>
   </ValueList>
+
+  <!--
   <ValueList name="006book_11/1" same="008_28/1">
-    <!-- 与"008_28/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Not a government publication</Label>
+      <Label xml:lang="zh">非政府出版物</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Autonomous or semi-autonomous component</Label>
+      <Label xml:lang="zh">自治区或半自治区</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Multilocal</Label>
+      <Label xml:lang="zh">多地方管辖区</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Federal/national</Label>
+      <Label xml:lang="zh">联邦/国家政府机构</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">International intergovernmental</Label>
+      <Label xml:lang="zh">国际政府间机构</Label>
     </Item>
     <Item>
       <Value>l</Value>
       <Label xml:lang="en">Local</Label>
+      <Label xml:lang="zh">地方行政机构</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Multistate</Label>
+      <Label xml:lang="zh">州、省、区的联合管辖机构</Label>
     </Item>
     <Item>
       <Value>o</Value>
-      <Label xml:lang="en">Government publication--level undetermined</Label>
+      <Label xml:lang="en">Government publication - level undetermined</Label>
+      <Label xml:lang="zh">政府出版物，级别不确定</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">State, provincial, territorial, dependent, etc.</Label>
+      <Label xml:lang="zh">州、省、区等独立管辖机构</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown if item is government publication</Label>
+      <Label xml:lang="zh">是否为政府出版物不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+
+  -->
   <ValueList name="006book_12/1" same="008_29/1">
     <!-- 与"008_29/1"相同 -->
     <Item>
       <Value>0</Value>
       <Label xml:lang="en">Not a conference publication</Label>
+      <Label xml:lang="zh">非会议出版物</Label>
     </Item>
     <Item>
       <Value>1</Value>
       <Label xml:lang="en">Conference publication</Label>
+      <Label xml:lang="zh">会议出版物</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006book_13/1" same="008_30/1">
@@ -761,44 +735,49 @@
     <Item>
       <Value>0</Value>
       <Label xml:lang="en">Not a festschrift</Label>
+      <Label xml:lang="zh">非纪念文集</Label>
     </Item>
     <Item>
       <Value>1</Value>
       <Label xml:lang="en">Festschrift</Label>
+      <Label xml:lang="zh">纪念文集</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006book_14/1" same="008_31/1">
-    <!-- 与"008_31/1"相同 -->
     <Item>
       <Value>0</Value>
       <Label xml:lang="en">No index</Label>
+      <Label xml:lang="zh">无索引</Label>
     </Item>
     <Item>
       <Value>1</Value>
       <Label xml:lang="en">Index present</Label>
+      <Label xml:lang="zh">含索引</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+-->
   <ValueList name="006book_15/1" same="008_32/1">
     <!-- 与"008_32/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006book_16/1" same="008_33/1">
@@ -806,58 +785,72 @@
     <Item>
       <Value>0</Value>
       <Label xml:lang="en">Not fiction (not further specified)</Label>
+      <Label xml:lang="zh">非小说，不说明文学形式</Label>
     </Item>
     <Item>
       <Value>1</Value>
       <Label xml:lang="en">Fiction (not further specified)</Label>
+      <Label xml:lang="zh">小说，不特指(如包括长篇小说、中篇小说、短篇小说等)</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Comic strips</Label>
+      <Label xml:lang="zh">连环漫画</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Dramas</Label>
+      <Label xml:lang="zh">戏剧</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Essays</Label>
+      <Label xml:lang="zh">散文杂著</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Novels</Label>
+      <Label xml:lang="zh">小说</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">Humor, satires, etc.</Label>
+      <Label xml:lang="zh">幽默、讽刺作品</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Letters</Label>
+      <Label xml:lang="zh">书信</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Short stories</Label>
+      <Label xml:lang="zh">短篇小说</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Mixed forms</Label>
+      <Label xml:lang="zh">混合形式</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Poetry</Label>
+      <Label xml:lang="zh">诗歌</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Speeches</Label>
+      <Label xml:lang="zh">演说词</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006book_17/1" same="008_34/1">
@@ -865,26 +858,32 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No biographical material</Label>
+      <Label xml:lang="zh">非传记</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Autobiography</Label>
+      <Label xml:lang="zh">自传</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Individual biography</Label>
+      <Label xml:lang="zh">个人传记</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Collective biography</Label>
+      <Label xml:lang="zh">合传</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Contains biographical information</Label>
+      <Label xml:lang="zh">包含传记信息</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
 
@@ -893,72 +892,80 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006computer_5/1" same="008_22/1">
-    <!-- 与"008_22/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Unknown or not specified</Label>
+      <Label xml:lang="zh">不详或未说明</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Preschool</Label>
+      <Label xml:lang="zh">学龄前儿童</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Primary</Label>
+      <Label xml:lang="zh">小学生</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Pre-adolescent</Label>
+      <Label xml:lang="zh">青春前期的少年</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Adolescent</Label>
+      <Label xml:lang="zh">青少年</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Adult</Label>
+      <Label xml:lang="zh">成人</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Specialized</Label>
+      <Label xml:lang="zh">专业人员</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">General</Label>
+      <Label xml:lang="zh">普通读者</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Juvenile</Label>
+      <Label xml:lang="zh">少年</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+
+  -->
   <ValueList name="006computer_6/3" same="008_23/3">
     <!-- 与"008_23/3"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006computer_9/1" same="008_26/1">
@@ -966,86 +973,72 @@
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Numeric data</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">数值型数据</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Computer program</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">计算机程序</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Representational</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">图形显示</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Document</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">文本</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Bibliographic data</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">书目数据</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Font</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">字体</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Game</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">游戏</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">Sound</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">声音</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Interactive multimedia</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">交互式多媒体</Label>
     </Item>
     <Item>
       <Value>j</Value>
-      <Label xml:lang="en">Interactive multimedia</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="en">Online system or service</Label>
+      <Label xml:lang="zh">联机系统或服务</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Combination</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">组合型</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006computer_10/1" same="008_27/1">
@@ -1053,80 +1046,90 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006computer_11/1" same="008_28/1">
-    <!-- 与"008_28/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Not a government publication</Label>
+      <Label xml:lang="zh">非政府出版物</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Autonomous or semi-autonomous component</Label>
+      <Label xml:lang="zh">自治区或半自治区</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Multilocal</Label>
+      <Label xml:lang="zh">多地方管辖区</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Federal/national</Label>
+      <Label xml:lang="zh">联邦/国家政府机构</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">International intergovernmental</Label>
+      <Label xml:lang="zh">国际间政府机构</Label>
     </Item>
     <Item>
       <Value>l</Value>
       <Label xml:lang="en">Local</Label>
+      <Label xml:lang="zh">地方行政机构</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Multistate</Label>
+      <Label xml:lang="zh">州、省、区的联合管辖机构</Label>
     </Item>
     <Item>
       <Value>o</Value>
-      <Label xml:lang="en">Government publication--level undetermined</Label>
+      <Label xml:lang="en">Government publication-level undetermined</Label>
+      <Label xml:lang="zh">政府出版物，级别不确定</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">State, provincial, territorial, dependent, etc.</Label>
+      <Label xml:lang="zh">州、省、区等独立管辖机构</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown if item is government publication</Label>
+      <Label xml:lang="zh">是否为政府出版物不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+
+  -->
   <ValueList name="006computer_12/6" same="008_29/6">
     <!-- 与"008_29/6"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
 
@@ -1137,58 +1140,72 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No relief shown</Label>
+      <Label xml:lang="zh">无地形信息</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Contours</Label>
+      <Label xml:lang="zh">等高线</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Shading</Label>
+      <Label xml:lang="zh">晕渲法</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Gradient and bathymetric tints</Label>
+      <Label xml:lang="zh">分层设色</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Hachures</Label>
+      <Label xml:lang="zh">晕滃线</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Bathymetry/soundings</Label>
+      <Label xml:lang="zh">海洋探测/声音测量</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Form lines</Label>
+      <Label xml:lang="zh">地形线</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Spot heights</Label>
+      <Label xml:lang="zh">高程点</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Pictorially</Label>
+      <Label xml:lang="zh">图示</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Land forms</Label>
+      <Label xml:lang="zh">地形</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Bathymetry/isolines</Label>
+      <Label xml:lang="zh">测深/等深线</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Rock drawings</Label>
+      <Label xml:lang="zh">岩石图</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other relief type</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006maps_5/2" same="008_22/2">
@@ -1196,200 +1213,244 @@
     <Item>
       <Value>__</Value>
       <Label xml:lang="en">Projection not specified</Label>
+      <Label xml:lang="zh">未说明</Label>
     </Item>
     <Item>
       <Value>aa</Value>
       <Label xml:lang="en">Aitoff</Label>
+      <Label xml:lang="zh">安托夫投影</Label>
     </Item>
     <Item>
       <Value>ab</Value>
       <Label xml:lang="en">Gnomic</Label>
+      <Label xml:lang="zh">日晷投影(球心投影)</Label>
     </Item>
     <Item>
       <Value>ac</Value>
       <Label xml:lang="en">Lambert's azimuthal equal area</Label>
+      <Label xml:lang="zh">兰勃特等积方位投影</Label>
     </Item>
     <Item>
       <Value>ad</Value>
       <Label xml:lang="en">Orthographic</Label>
+      <Label xml:lang="zh">正影投影</Label>
     </Item>
     <Item>
       <Value>ae</Value>
       <Label xml:lang="en">Azimuthal equidistant</Label>
+      <Label xml:lang="zh">等距方位投影</Label>
     </Item>
     <Item>
       <Value>af</Value>
       <Label xml:lang="en">Stereographic</Label>
+      <Label xml:lang="zh">球面投影</Label>
     </Item>
     <Item>
       <Value>ag</Value>
       <Label xml:lang="en">General vertical near-sided</Label>
+      <Label xml:lang="zh">等积方位投影</Label>
     </Item>
     <Item>
       <Value>am</Value>
       <Label xml:lang="en">Modified stereographic for Alaska</Label>
+      <Label xml:lang="zh">修正阿拉斯加球面投影</Label>
     </Item>
     <Item>
       <Value>an</Value>
       <Label xml:lang="en">Chamberlin trimetric</Label>
+      <Label xml:lang="zh">钱柏林三度投影</Label>
     </Item>
     <Item>
       <Value>ap</Value>
       <Label xml:lang="en">Polar stereographic</Label>
+      <Label xml:lang="zh">极球面投影</Label>
     </Item>
     <Item>
       <Value>au</Value>
       <Label xml:lang="en">Azimuthal, specific type unknown</Label>
+      <Label xml:lang="zh">方位投影，具体类型不详</Label>
     </Item>
     <Item>
       <Value>az</Value>
       <Label xml:lang="en">Azimuthal, other</Label>
+      <Label xml:lang="zh">其他方位投影</Label>
     </Item>
     <Item>
       <Value>ba</Value>
       <Label xml:lang="en">Gall</Label>
+      <Label xml:lang="zh">高尔投影</Label>
     </Item>
     <Item>
       <Value>bb</Value>
       <Label xml:lang="en">Goode's homolographic</Label>
+      <Label xml:lang="zh">古德等积圆柱投影</Label>
     </Item>
     <Item>
       <Value>bc</Value>
       <Label xml:lang="en">Lambert's cylindrical equal area</Label>
+      <Label xml:lang="zh">兰勃特等积圆柱投影</Label>
     </Item>
     <Item>
       <Value>bd</Value>
       <Label xml:lang="en">Mercator</Label>
+      <Label xml:lang="zh">墨卡托投影</Label>
     </Item>
     <Item>
       <Value>be</Value>
       <Label xml:lang="en">Miller</Label>
+      <Label xml:lang="zh">米勒投影</Label>
     </Item>
     <Item>
       <Value>bf</Value>
       <Label xml:lang="en">Mollweide</Label>
+      <Label xml:lang="zh">摩尔威特投影</Label>
     </Item>
     <Item>
       <Value>bg</Value>
       <Label xml:lang="en">Sinusoidal</Label>
+      <Label xml:lang="zh">正弦投影</Label>
     </Item>
     <Item>
       <Value>bh</Value>
       <Label xml:lang="en">Transverse Mercator</Label>
+      <Label xml:lang="zh">横轴墨卡托投影</Label>
     </Item>
     <Item>
       <Value>bj</Value>
       <Label xml:lang="en">Gauss-Kruger</Label>
+      <Label xml:lang="zh">高斯投影</Label>
     </Item>
     <Item>
       <Value>bj</Value>
       <Label xml:lang="en">Equirectangular</Label>
+      <Label xml:lang="zh">等正交投影</Label>
     </Item>
     <Item>
       <Value>bo</Value>
       <Label xml:lang="en">Oblique Mercator</Label>
+      <Label xml:lang="zh">斜轴墨卡托投影</Label>
     </Item>
     <Item>
       <Value>br</Value>
       <Label xml:lang="en">Robinson</Label>
+      <Label xml:lang="zh">罗宾逊</Label>
     </Item>
     <Item>
       <Value>bs</Value>
       <Label xml:lang="en">Space oblique Mercator</Label>
+      <Label xml:lang="zh">空间斜轴墨卡托投影</Label>
     </Item>
     <Item>
       <Value>bu</Value>
       <Label xml:lang="en">Cylindrical, specific type unknown</Label>
+      <Label xml:lang="zh">圆柱投影，具体类型不详</Label>
     </Item>
     <Item>
       <Value>bz</Value>
       <Label xml:lang="en">Cylindrical, other</Label>
+      <Label xml:lang="zh">其他圆柱投影</Label>
     </Item>
     <Item>
       <Value>ca</Value>
       <Label xml:lang="en">Alber's equal area</Label>
+      <Label xml:lang="zh">阿伯斯等积圆锥投影</Label>
     </Item>
     <Item>
       <Value>cb</Value>
       <Label xml:lang="en">Bonne</Label>
+      <Label xml:lang="zh">伯恩投影</Label>
     </Item>
     <Item>
       <Value>cc</Value>
       <Label xml:lang="en">Lambert's conformal conic</Label>
+      <Label xml:lang="zh">兰勃特等角圆锥投影</Label>
     </Item>
     <Item>
       <Value>ce</Value>
       <Label xml:lang="en">Equidistant conic</Label>
+      <Label xml:lang="zh">等距离圆锥投影</Label>
     </Item>
     <Item>
       <Value>cp</Value>
       <Label xml:lang="en">Polyconic</Label>
+      <Label xml:lang="zh">多圆锥投影</Label>
     </Item>
     <Item>
       <Value>cu</Value>
       <Label xml:lang="en">Conic, specific type unknown</Label>
+      <Label xml:lang="zh">圆锥投影，具体类型不详</Label>
     </Item>
     <Item>
       <Value>cz</Value>
       <Label xml:lang="en">Conic, other</Label>
+      <Label xml:lang="zh">其他圆锥投影</Label>
     </Item>
     <Item>
       <Value>da</Value>
       <Label xml:lang="en">Armadillo</Label>
+      <Label xml:lang="zh">犰狳投影</Label>
     </Item>
     <Item>
       <Value>db</Value>
       <Label xml:lang="en">Butterfly</Label>
+      <Label xml:lang="zh">蝶形投影</Label>
     </Item>
     <Item>
       <Value>dc</Value>
       <Label xml:lang="en">Eckert</Label>
+      <Label xml:lang="zh">埃克特投影</Label>
     </Item>
     <Item>
       <Value>dd</Value>
       <Label xml:lang="en">Goode's homolosine</Label>
+      <Label xml:lang="zh">古德等积投影</Label>
     </Item>
     <Item>
       <Value>de</Value>
       <Label xml:lang="en">Miller's bipolar oblique conformal conic</Label>
+      <Label xml:lang="zh">米勒双极投影</Label>
     </Item>
     <Item>
       <Value>df</Value>
       <Label xml:lang="en">Van Der Grinten</Label>
+      <Label xml:lang="zh">范德格林投影</Label>
     </Item>
     <Item>
       <Value>dg</Value>
       <Label xml:lang="en">Dimaxion</Label>
+      <Label xml:lang="zh">狄麦克森投影</Label>
     </Item>
     <Item>
       <Value>dh</Value>
       <Label xml:lang="en">Cordiform</Label>
+      <Label xml:lang="zh">心形投影</Label>
     </Item>
     <Item>
       <Value>dl</Value>
       <Label xml:lang="en">Lambert conformal</Label>
+      <Label xml:lang="zh">兰勃特正形投影</Label>
     </Item>
     <Item>
       <Value>zz</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006maps_7/1">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006maps_8/1" same="008_25/1">
@@ -1397,63 +1458,72 @@
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Single map</Label>
+      <Label xml:lang="zh">单张地图</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Map series</Label>
+      <Label xml:lang="zh">系列地图</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Map serial</Label>
+      <Label xml:lang="zh">连续出版的地图</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Globe</Label>
+      <Label xml:lang="zh">球仪</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Atlas</Label>
+      <Label xml:lang="zh">图集</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Separate map supplement to another work</Label>
+      <Label xml:lang="zh">单独出版的另一作品的补编</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Map bound as part of another work</Label>
+      <Label xml:lang="zh">与另一作品合订发行</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006maps_9/2">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006maps_11/1" same="008_28/1">
-    <!-- 与"008_28/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Not a government publication</Label>
+      <Label xml:lang="zh">非政府出版物</Label>
     </Item>
     <Item>
       <Value>a</Value>
@@ -1481,7 +1551,7 @@
     </Item>
     <Item>
       <Value>o</Value>
-      <Label xml:lang="en">Government publication--level undetermined</Label>
+      <Label xml:lang="en">Government publication-level undetermined</Label>
     </Item>
     <Item>
       <Value>s</Value>
@@ -1500,8 +1570,10 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+
+  -->
+  <!--
   <ValueList name="006maps_12/1" same="008_29/1">
-    <!-- 与"008_29/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">None of the following</Label>
@@ -1539,22 +1611,21 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+-->
   <ValueList name="006maps_13/1">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006maps_14/1" same="008_31/1">
-    <!-- 与"008_31/1"相同 -->
     <Item>
       <Value>0</Value>
       <Label xml:lang="en">No index</Label>
@@ -1568,18 +1639,17 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+-->
   <ValueList name="006maps_15/1">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006maps_16/2" same="008_33/2">
@@ -1587,424 +1657,508 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No specified special format characteristics</Label>
+      <Label xml:lang="zh">未详细说明</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Manuscript</Label>
+      <Label xml:lang="zh">手稿</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Picture card, post card</Label>
+      <Label xml:lang="zh">明信片</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Calendar</Label>
+      <Label xml:lang="zh">日历</Label>
     </Item>
     <Item>
       <Value>l</Value>
       <Label xml:lang="en">Puzzle</Label>
+      <Label xml:lang="zh">拼图</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Game</Label>
+      <Label xml:lang="zh">游戏</Label>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">Wall map</Label>
+      <Label xml:lang="zh">挂图</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Playing cards</Label>
+      <Label xml:lang="zh">纸牌</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Loose-leaf</Label>
+      <Label xml:lang="zh">活页地图</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
 
 
 
   <ValueList name="006music_1/2" same="008_18/2">
-    <!-- 与"008_18/2"相同 -->
+    <!-- 乐曲形式 -->
     <Item>
       <Value>an</Value>
       <Label xml:lang="en">Anthems</Label>
+      <Label xml:lang="zh">赞美歌</Label>
     </Item>
     <Item>
       <Value>bd</Value>
       <Label xml:lang="en">Ballads</Label>
+      <Label xml:lang="zh">叙事曲</Label>
     </Item>
     <Item>
       <Value>bg</Value>
       <Label xml:lang="en">Bluegrass music</Label>
+      <Label xml:lang="zh">蓝草音乐</Label>
     </Item>
     <Item>
       <Value>bl</Value>
       <Label xml:lang="en">Blues</Label>
+      <Label xml:lang="zh">布鲁斯</Label>
     </Item>
     <Item>
       <Value>bt</Value>
       <Label xml:lang="en">Ballets</Label>
+      <Label xml:lang="zh">芭蕾舞曲</Label>
     </Item>
     <Item>
       <Value>ca</Value>
       <Label xml:lang="en">Chaconnes</Label>
+      <Label xml:lang="zh">夏空舞曲</Label>
     </Item>
     <Item>
       <Value>cb</Value>
       <Label xml:lang="en">Chants, Other religions</Label>
+      <Label xml:lang="zh">其他圣咏</Label>
     </Item>
     <Item>
       <Value>cc</Value>
       <Label xml:lang="en">Chant, Christian</Label>
+      <Label xml:lang="zh">基督教圣咏</Label>
     </Item>
     <Item>
       <Value>cg</Value>
       <Label xml:lang="en">Concerti grossi</Label>
+      <Label xml:lang="zh">大协奏曲</Label>
     </Item>
     <Item>
       <Value>ch</Value>
       <Label xml:lang="en">Chorales</Label>
+      <Label xml:lang="zh">众赞歌</Label>
     </Item>
     <Item>
       <Value>cl</Value>
       <Label xml:lang="en">Chorale preludes</Label>
+      <Label xml:lang="zh">众赞歌前奏曲</Label>
     </Item>
     <Item>
       <Value>cn</Value>
       <Label xml:lang="en">Canons and rounds</Label>
+      <Label xml:lang="zh">卡农曲和轮唱歌</Label>
     </Item>
     <Item>
       <Value>co</Value>
       <Label xml:lang="en">Concertos</Label>
+      <Label xml:lang="zh">协奏曲</Label>
     </Item>
     <Item>
       <Value>cp</Value>
       <Label xml:lang="en">Chansons, polyphonic</Label>
+      <Label xml:lang="zh">复调尚松</Label>
     </Item>
     <Item>
       <Value>cr</Value>
       <Label xml:lang="en">Carols</Label>
+      <Label xml:lang="zh">圣诞歌</Label>
     </Item>
     <Item>
       <Value>cs</Value>
       <Label xml:lang="en">Chance compositions</Label>
+      <Label xml:lang="zh">机遇音乐</Label>
     </Item>
     <Item>
       <Value>ct</Value>
       <Label xml:lang="en">Cantatas</Label>
+      <Label xml:lang="zh">康塔塔</Label>
     </Item>
     <Item>
       <Value>cy</Value>
       <Label xml:lang="en">Country music</Label>
+      <Label xml:lang="zh">乡村音乐</Label>
     </Item>
     <Item>
       <Value>cz</Value>
       <Label xml:lang="en">Canzonas</Label>
+      <Label xml:lang="zh">坎佐纳</Label>
     </Item>
     <Item>
       <Value>df</Value>
       <Label xml:lang="en">Dance forms</Label>
+      <Label xml:lang="zh">舞曲(除玛祖卡、小步舞曲、帕凡舞、波洛奈兹舞和华尔兹舞曲外的全部舞曲)</Label>
     </Item>
     <Item>
       <Value>dv</Value>
       <Label xml:lang="en">Divertimentos, serenades, cassations, divertissements, notturni</Label>
+      <Label xml:lang="zh">嬉游曲、小夜曲、遣兴曲和怡情曲</Label>
     </Item>
     <Item>
       <Value>fg</Value>
       <Label xml:lang="en">Fugues</Label>
+      <Label xml:lang="zh">赋格曲</Label>
     </Item>
     <Item>
       <Value>fm</Value>
       <Label xml:lang="en">Folk music</Label>
+      <Label xml:lang="zh">民间音乐</Label>
     </Item>
     <Item>
       <Value>ft</Value>
       <Label xml:lang="en">Fantasias</Label>
+      <Label xml:lang="zh">幻想曲</Label>
     </Item>
     <Item>
       <Value>gm</Value>
       <Label xml:lang="en">Gospel music</Label>
+      <Label xml:lang="zh">福音音乐</Label>
     </Item>
     <Item>
       <Value>hy</Value>
       <Label xml:lang="en">Hymns</Label>
+      <Label xml:lang="zh">赞美诗</Label>
     </Item>
     <Item>
       <Value>jz</Value>
       <Label xml:lang="en">Jazz</Label>
+      <Label xml:lang="zh">爵士乐</Label>
     </Item>
     <Item>
       <Value>mc</Value>
       <Label xml:lang="en">Musical revues and comedies</Label>
+      <Label xml:lang="zh">音乐讽刺剧和喜剧</Label>
     </Item>
     <Item>
       <Value>md</Value>
       <Label xml:lang="en">Madrigals</Label>
+      <Label xml:lang="zh">牧歌</Label>
     </Item>
     <Item>
       <Value>mi</Value>
       <Label xml:lang="en">Minuets</Label>
+      <Label xml:lang="zh">小步舞曲</Label>
     </Item>
     <Item>
       <Value>mo</Value>
       <Label xml:lang="en">Motets</Label>
+      <Label xml:lang="zh">经文歌</Label>
     </Item>
     <Item>
       <Value>mp</Value>
       <Label xml:lang="en">Motion picture music</Label>
+      <Label xml:lang="zh">电影音乐</Label>
     </Item>
     <Item>
       <Value>mr</Value>
       <Label xml:lang="en">Marches</Label>
+      <Label xml:lang="zh">进行曲</Label>
     </Item>
     <Item>
       <Value>ms</Value>
       <Label xml:lang="en">Masses</Label>
+      <Label xml:lang="zh">弥撒曲</Label>
     </Item>
     <Item>
       <Value>mu</Value>
       <Label xml:lang="en">Multiple forms</Label>
+      <Label xml:lang="zh">多种形式</Label>
     </Item>
     <Item>
       <Value>mz</Value>
       <Label xml:lang="en">Mazurkas</Label>
+      <Label xml:lang="zh">玛祖卡舞曲</Label>
     </Item>
     <Item>
       <Value>nc</Value>
       <Label xml:lang="en">Nocturnes</Label>
+      <Label xml:lang="zh">夜曲</Label>
     </Item>
     <Item>
       <Value>nn</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用(表示文献为非音乐录音资料)</Label>
     </Item>
     <Item>
       <Value>op</Value>
       <Label xml:lang="en">Operas</Label>
+      <Label xml:lang="zh">歌剧</Label>
     </Item>
     <Item>
       <Value>or</Value>
       <Label xml:lang="en">Oratorios</Label>
+      <Label xml:lang="zh">清唱剧</Label>
     </Item>
     <Item>
       <Value>ov</Value>
       <Label xml:lang="en">Overtures</Label>
+      <Label xml:lang="zh">序曲</Label>
     </Item>
     <Item>
       <Value>pg</Value>
       <Label xml:lang="en">Program music</Label>
+      <Label xml:lang="zh">标题音乐</Label>
     </Item>
     <Item>
       <Value>pm</Value>
       <Label xml:lang="en">Passion music</Label>
+      <Label xml:lang="zh">耶稣受难曲</Label>
     </Item>
     <Item>
       <Value>po</Value>
       <Label xml:lang="en">Polonaises</Label>
+      <Label xml:lang="zh">波洛奈兹舞曲</Label>
     </Item>
     <Item>
       <Value>pp</Value>
       <Label xml:lang="en">Popular music</Label>
+      <Label xml:lang="zh">流行音乐</Label>
     </Item>
     <Item>
       <Value>pr</Value>
       <Label xml:lang="en">Preludes</Label>
+      <Label xml:lang="zh">前奏曲</Label>
     </Item>
     <Item>
       <Value>ps</Value>
       <Label xml:lang="en">Passacaglias</Label>
+      <Label xml:lang="zh">帕萨卡里亚舞曲</Label>
     </Item>
     <Item>
       <Value>pt</Value>
       <Label xml:lang="en">Part-songs</Label>
+      <Label xml:lang="zh">主调合唱曲</Label>
     </Item>
     <Item>
       <Value>pv</Value>
       <Label xml:lang="en">Pavans</Label>
+      <Label xml:lang="zh">帕凡舞曲</Label>
     </Item>
     <Item>
       <Value>rc</Value>
       <Label xml:lang="en">Rock music</Label>
+      <Label xml:lang="zh">摇滚音乐</Label>
     </Item>
     <Item>
       <Value>rd</Value>
       <Label xml:lang="en">Rondos</Label>
+      <Label xml:lang="zh">回旋曲</Label>
     </Item>
     <Item>
       <Value>rg</Value>
       <Label xml:lang="en">Ragtime music</Label>
+      <Label xml:lang="zh">雷格泰姆音乐</Label>
     </Item>
     <Item>
       <Value>ri</Value>
       <Label xml:lang="en">Ricercars</Label>
+      <Label xml:lang="zh">利切卡尔曲</Label>
     </Item>
     <Item>
       <Value>rp</Value>
       <Label xml:lang="en">Rhapsodies</Label>
+      <Label xml:lang="zh">狂想曲</Label>
     </Item>
     <Item>
       <Value>rq</Value>
       <Label xml:lang="en">Requiems</Label>
+      <Label xml:lang="zh">安魂曲</Label>
     </Item>
     <Item>
       <Value>sd</Value>
       <Label xml:lang="en">Square dance music</Label>
+      <Label xml:lang="zh">方块舞曲</Label>
     </Item>
     <Item>
       <Value>sg</Value>
       <Label xml:lang="en">Songs</Label>
+      <Label xml:lang="zh">歌曲</Label>
     </Item>
     <Item>
       <Value>sn</Value>
       <Label xml:lang="en">Sonatas</Label>
+      <Label xml:lang="zh">奏鸣曲</Label>
     </Item>
     <Item>
       <Value>sp</Value>
       <Label xml:lang="en">Symphonic poems</Label>
+      <Label xml:lang="zh">交响诗</Label>
     </Item>
     <Item>
       <Value>st</Value>
       <Label xml:lang="en">Studies and exercises</Label>
+      <Label xml:lang="zh">练习曲</Label>
     </Item>
     <Item>
       <Value>su</Value>
       <Label xml:lang="en">Suites</Label>
+      <Label xml:lang="zh">组曲</Label>
     </Item>
     <Item>
       <Value>sy</Value>
       <Label xml:lang="en">Symphonies</Label>
+      <Label xml:lang="zh">交响曲</Label>
     </Item>
     <Item>
       <Value>tc</Value>
       <Label xml:lang="en">Toccatas</Label>
+      <Label xml:lang="zh">托卡塔</Label>
     </Item>
     <Item>
       <Value>ts</Value>
       <Label xml:lang="en">Trio-sonatas</Label>
+      <Label xml:lang="zh">三重奏鸣曲</Label>
     </Item>
     <Item>
       <Value>uu</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>vr</Value>
       <Label xml:lang="en">Variations</Label>
+      <Label xml:lang="zh">变奏曲</Label>
     </Item>
     <Item>
       <Value>wz</Value>
       <Label xml:lang="en">Waltzes</Label>
+      <Label xml:lang="zh">华尔兹</Label>
     </Item>
     <Item>
       <Value>zz</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>||</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006music_3/1" same="008_20/1">
-    <!-- 与"008_20/1"相同 -->
+    <!-- 乐谱格式 -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Full score</Label>
+      <Label xml:lang="zh">总谱</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Full score, miniature or study size</Label>
+      <Label xml:lang="zh">小型总谱</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Accompaniment reduced for keyboard</Label>
+      <Label xml:lang="zh">键盘乐器伴奏用的缩编谱</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Voice score</Label>
+      <Label xml:lang="zh">声乐总谱</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Condensed score or piano-conductor score</Label>
+      <Label xml:lang="zh">缩写谱或钢琴指挥谱</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Close score</Label>
+      <Label xml:lang="zh">缩编谱</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Multiple score formats</Label>
+      <Label xml:lang="zh">多种乐谱格式</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用(指文献为非印刷型或手稿型音乐，如唱片或其他录音资料)</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006music_4/1" same="008_21/1">
-    <!-- 与"008_21/1"相同 -->
+    <!-- 分谱 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No parts in hand or not specified</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">无分谱或非特指</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Instrumental and vocal parts</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">器乐和声乐分谱</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Instrumental parts</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">器乐分谱</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Vocal parts</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">声乐分谱</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不适用</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006music_5/1" same="008_22/1">
-    <!-- 与"008_22/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Unknown or not specified</Label>
@@ -2046,8 +2200,9 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+-->
+  <!--
   <ValueList name="006music_6/1" same="008_23/1">
-    <!-- 与"008_23/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">None of the following</Label>
@@ -2085,340 +2240,393 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+
+  -->
   <ValueList name="006music_7/6" same="008_24/6">
-    <!-- 与"008_24/6"相同 -->
+    <!-- 附件 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No accompanying matter</Label>
+      <Label xml:lang="zh">无附件</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Discography</Label>
+      <Label xml:lang="zh">唱片分类目录</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Bibliography</Label>
+      <Label xml:lang="zh">书目</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Thematic ind</Label>
+      <Label xml:lang="zh">主题索引</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Libretto or text</Label>
+      <Label xml:lang="zh">台本或其他文字</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Biography of composer or author</Label>
+      <Label xml:lang="zh">作曲家或作者传记</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Biography of performer or history of ensemble</Label>
+      <Label xml:lang="zh">表演者传记或演出团历史</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Technical and/or historical information on instruments</Label>
+      <Label xml:lang="zh">乐器技术或历史资料</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">Technical information on music</Label>
+      <Label xml:lang="zh">音乐技术资料</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Historical information</Label>
+      <Label xml:lang="zh">历史资料</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Ethnological information</Label>
+      <Label xml:lang="zh">民族背景资料</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Instructional materials</Label>
+      <Label xml:lang="zh">说明性资料</Label>
     </Item>
     <Item>
       <Value>s</Value>
-      <Label xml:lang="en">Instructional materials</Label>
+      <Label xml:lang="en">Music</Label>
+      <Label xml:lang="zh">乐谱</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006music_13/2" same="008_30/2">
-    <!-- 与"008_30/2"相同 -->
+    <!-- 非音乐型录音资料的文体类别 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Item is a musical sound recording</Label>
+      <Label xml:lang="zh">文献为音乐录音资料</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Autobiography</Label>
+      <Label xml:lang="zh">自传</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Biography</Label>
+      <Label xml:lang="zh">传记</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Conference proceedings</Label>
+      <Label xml:lang="zh">会议录</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Drama</Label>
+      <Label xml:lang="zh">戏剧</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Essays</Label>
+      <Label xml:lang="zh">散文</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Fiction</Label>
+      <Label xml:lang="zh">小说</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Reporting</Label>
+      <Label xml:lang="zh">报告</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">History</Label>
+      <Label xml:lang="zh">历史</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Instruction</Label>
+      <Label xml:lang="zh">说明</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Language instruction</Label>
+      <Label xml:lang="zh">语言教学</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Comedy</Label>
+      <Label xml:lang="zh">喜剧</Label>
     </Item>
     <Item>
       <Value>l</Value>
-      <Label xml:lang="en">Lectures, spee</Label>
+      <Label xml:lang="en">Lectures, speeches</Label>
+      <Label xml:lang="zh">演讲</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Memoirs</Label>
+      <Label xml:lang="zh">回忆录</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用</Label>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">Folktales</Label>
+      <Label xml:lang="zh">民间故事</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Poetry</Label>
+      <Label xml:lang="zh">诗歌</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Rehearsals</Label>
+      <Label xml:lang="zh">排演</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Sounds</Label>
+      <Label xml:lang="zh">声音</Label>
     </Item>
     <Item>
       <Value>t</Value>
       <Label xml:lang="en">Interviews</Label>
+      <Label xml:lang="zh">采访</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006music_15/1">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006music_16/1" same="008_33/1">
-    <!-- 与"008_33/1"相同 -->
+    <!-- 变调和改编 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Not arrangement or transposition or not specified</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未改编/未变调或非特指</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Transposition</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">变调</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Arrangement</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">改编</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Both transposed and arranged</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">变调和改编</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不适用</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006music_17/1">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
 
 
 
   <ValueList name="006continuing_1/1" same="008_18/1">
-    <!-- 与"008_18/1"相同 -->
+    <!-- 出版频率 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No determinable frequency</Label>
+      <Label xml:lang="zh">无明确的出版频率(此代码用于表示连续出版物出版无规律的情况，008/19 字符位置的代码相应表示为 'x')</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Annual</Label>
+      <Label xml:lang="zh">年刊</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Bimonthly</Label>
+      <Label xml:lang="zh">双月刊</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Semiweekly</Label>
+      <Label xml:lang="zh">半周刊</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Daily</Label>
+      <Label xml:lang="zh">日刊</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Biweekly</Label>
+      <Label xml:lang="zh">双周刊</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Semiannual</Label>
+      <Label xml:lang="zh">半年刊(连续性出版物每年出版 2 期也被视为半年刊)</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Biennial</Label>
+      <Label xml:lang="zh">双年刊</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">Triennial</Label>
+      <Label xml:lang="zh">三年刊</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Three times a week</Label>
+      <Label xml:lang="zh">每周三期</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Three times a month</Label>
+      <Label xml:lang="zh">每月三期</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Continuously updated</Label>
+      <Label xml:lang="zh">不断更新</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Monthly</Label>
+      <Label xml:lang="zh">月刊(连续性出版物每年出版 9-12 期也被视为月刊)</Label>
     </Item>
     <Item>
       <Value>q</Value>
       <Label xml:lang="en">Quarterly</Label>
+      <Label xml:lang="zh">季刊(连续性出版物每年出版 4 期也被视为季刊)</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Semimonthly</Label>
+      <Label xml:lang="zh">半月刊</Label>
     </Item>
     <Item>
       <Value>t</Value>
       <Label xml:lang="en">Three times a year</Label>
+      <Label xml:lang="zh">每年三期</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>w</Value>
       <Label xml:lang="en">Weekly</Label>
+      <Label xml:lang="zh">周刊</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006continuing_2/1" same="008_19/1">
-    <!-- 与"008_19/1"相同 -->
+    <!-- 发行规律性 -->
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Normalized irregular</Label>
+      <Label xml:lang="zh">不规则定期(如连续性出版物的某几期出版不规律或在 310 字段说明中表示有合刊)</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Regular</Label>
+      <Label xml:lang="zh">定期(若由于出版困难等原因使本来发行规律的连续性出版物的出版偶尔出现偏差，依然视为发行有规律，使用代码 'r'，出现偏差的情况可在 515 字段说明)</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详(008/18 和 19 两个字符位置同时使用代码 'u'，记录中无 310 字段)</Label>
     </Item>
     <Item>
       <Value>x</Value>
       <Label xml:lang="en">Completely irregular</Label>
+      <Label xml:lang="zh">不定期(包括两种情况: 连续出版物的发行无规律，008/18 字符位置的代码为 ' '; 310 字段说明连续出版物的发行为“每年几期”)</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006continuing_3/1" same="008_20/1">
@@ -2449,42 +2657,50 @@
     </Item>
   </ValueList>
   <ValueList name="006continuing_4/1" same="008_21/1">
-    <!-- 与"008_21/1"相同 -->
+    <!-- 连续性资源类型 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">None of the following</Label>
+      <Label xml:lang="zh">非下列代码(如年鉴和年度报告)</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Updating database</Label>
+      <Label xml:lang="zh">更新型数据库</Label>
     </Item>
     <Item>
       <Value>l</Value>
       <Label xml:lang="en">Updating loose-leaf</Label>
+      <Label xml:lang="zh">不断更新的活页出版物</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Monographic series</Label>
+      <Label xml:lang="zh">丛书(指一组各自均有正题名同时又有总的丛编题名的出版物。若采用集中著录，即丛编题名作为正题名著录时，记录采用连续出版物的著录方法。即 头标区/07 代码为 's'，008 字段采用连续出版物的模式，008/21 代码为 'm'；若采用分散著录的方法，则将丛编题名著录在 440 或 490 字段，各卷的正题名著录在 245 字段，头标区/07 代码为 'm'，008 字段采用图书模式)</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Newspaper</Label>
+      <Label xml:lang="zh">报纸</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Periodical</Label>
+      <Label xml:lang="zh">期刊杂志</Label>
     </Item>
     <Item>
       <Value>w</Value>
       <Label xml:lang="en">Updating Web site</Label>
+      <Label xml:lang="zh">更新的网页</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!-- 参见 formofitemcodes
   <ValueList name="006continuing_5/1" same="008_22/1">
-    <!-- 与"008_22/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">None of the following</Label>
@@ -2518,8 +2734,10 @@
       <Label xml:lang="en">Electronic</Label>
     </Item>
   </ValueList>
+-->
+
+  <!--
   <ValueList name="006continuing_6/1" same="008_23/1">
-    <!-- 与"008_23/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">None of the following</Label>
@@ -2557,111 +2775,19 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
-  <ValueList name="006continuing_7/1" same="008_24/1">
-    <!-- 与"008_24/1"相同 -->
-    <Item>
-      <Value>_</Value>
-      <Label xml:lang="en">No specified nature of contents</Label>
-    </Item>
-    <Item>
-      <Value>a</Value>
-      <Label xml:lang="en">Abstracts/summaries</Label>
-    </Item>
+
+  -->
+
+  <ValueList name="006continuing_7/1" merge="natureofcontentscodes" same="008_24/1">
+    <!-- 合并的原因是 附注有所不同 -->
     <Item>
       <Value>b</Value>
-      <Label xml:lang="en">Bibliographies</Label>
-    </Item>
-    <Item>
-      <Value>c</Value>
-      <Label xml:lang="en">Catalogs</Label>
-    </Item>
-    <Item>
-      <Value>d</Value>
-      <Label xml:lang="en">Dictionaries</Label>
-    </Item>
-    <Item>
-      <Value>e</Value>
-      <Label xml:lang="en">Encyclopedias</Label>
-    </Item>
-    <Item>
-      <Value>f</Value>
-      <Label xml:lang="en">Handbooks</Label>
-    </Item>
-    <Item>
-      <Value>g</Value>
-      <Label xml:lang="en">Legal articles</Label>
-    </Item>
-    <Item>
-      <Value>h</Value>
-      <Label xml:lang="en">Biography</Label>
-    </Item>
-    <Item>
-      <Value>i</Value>
-      <Label xml:lang="en">Indexes</Label>
-    </Item>
-    <Item>
-      <Value>k</Value>
-      <Label xml:lang="en">Discographies</Label>
-    </Item>
-    <Item>
-      <Value>l</Value>
-      <Label xml:lang="en">Legislation</Label>
-    </Item>
-    <Item>
-      <Value>m</Value>
-      <Label xml:lang="en">Theses</Label>
-    </Item>
-    <Item>
-      <Value>n</Value>
-      <Label xml:lang="en">Surveys of literature in a subject area</Label>
-    </Item>
-    <Item>
-      <Value>o</Value>
-      <Label xml:lang="en">Reviews</Label>
-    </Item>
-    <Item>
-      <Value>p</Value>
-      <Label xml:lang="en">Programmed texts</Label>
-    </Item>
-    <Item>
-      <Value>q</Value>
-      <Label xml:lang="en">Filmographies</Label>
-    </Item>
-    <Item>
-      <Value>r</Value>
-      <Label xml:lang="en">Directories</Label>
-    </Item>
-    <Item>
-      <Value>s</Value>
-      <Label xml:lang="en">Statistics</Label>
-    </Item>
-    <Item>
-      <Value>t</Value>
-      <Label xml:lang="en">Technical reports</Label>
-    </Item>
-    <Item>
-      <Value>u</Value>
-      <Label xml:lang="en">Standards/specifications</Label>
-    </Item>
-    <Item>
-      <Value>v</Value>
-      <Label xml:lang="en">Legal cases and case notes</Label>
-    </Item>
-    <Item>
-      <Value>w</Value>
-      <Label xml:lang="en">Law reports and digests</Label>
-    </Item>
-    <Item>
-      <Value>z</Value>
-      <Label xml:lang="en">Treaties</Label>
-    </Item>
-    <Item>
-      <Value>|</Value>
-      <Label xml:lang="en">No attempt to code</Label>
+      <Comment xml:lang="zh">表示连续出版物的整体内容为书目，若只是包含书目，008/24 用 ' '，书目信息在 008/25-27 用代码 'b' 表示</Comment>
     </Item>
   </ValueList>
+
+  <!-- 参见 natureofcontentscodes
   <ValueList name="006continuing_8/3" same="008_25/3">
-    <!-- 与"008_25/3"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No specified nature of contents</Label>
@@ -2763,8 +2889,10 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+
+  -->
+  <!--
   <ValueList name="006continuing_11/1" same="008_28/1">
-    <!-- 与"008_28/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Not a government publication</Label>
@@ -2795,7 +2923,7 @@
     </Item>
     <Item>
       <Value>o</Value>
-      <Label xml:lang="en">Government publication--level undetermined</Label>
+      <Label xml:lang="en">Government publication-level undetermined</Label>
     </Item>
     <Item>
       <Value>s</Value>
@@ -2814,223 +2942,253 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+
+  -->
   <ValueList name="006continuing_12/1" same="008_29/1">
     <!-- 与"008_29/1"相同 -->
     <Item>
       <Value>0</Value>
       <Label xml:lang="en">Not a conference publication</Label>
+      <Label xml:lang="zh">非会议出版物</Label>
     </Item>
     <Item>
       <Value>1</Value>
       <Label xml:lang="en">Conference publication</Label>
+      <Label xml:lang="zh">会议出版物</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006continuing_13/3">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006continuing_16/1" same="008_33/1">
-    <!-- 与"008_33/1"相同 -->
+    <!-- 原文题名的字母或文字 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No alphabet or script given/no key title</Label>
+      <Label xml:lang="zh">无原文字母/无识别题名(通常书目记录中不含有识别题名时，代码为 ' ')</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Basic roman</Label>
+      <Label xml:lang="zh">基本罗马字母(表示题名的原文字母为罗马字母，不包含任何读音符号或特殊字符。如巴斯克语、英语、拉丁语、威尔士语和许多中美洲和南美洲的语言)</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Extended roman</Label>
+      <Label xml:lang="zh">扩展罗马字母(表示题名的原文字母为扩展罗马字母，即包括读音符号和特殊字符。大多数西欧的语言(除英语外)，基本属于这种类型)</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Cyrillic</Label>
+      <Label xml:lang="zh">西里尔字母</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Japanese</Label>
+      <Label xml:lang="zh">日语</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Chinese</Label>
+      <Label xml:lang="zh">汉语</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Arabic</Label>
+      <Label xml:lang="zh">阿拉伯语</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Greek</Label>
+      <Label xml:lang="zh">希腊语</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">Hebrew</Label>
+      <Label xml:lang="zh">希伯来语</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Thai</Label>
+      <Label xml:lang="zh">泰语</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Devanagari</Label>
+      <Label xml:lang="zh">天城体文字</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Korean</Label>
+      <Label xml:lang="zh">朝鲜语</Label>
     </Item>
     <Item>
       <Value>l</Value>
       <Label xml:lang="en">Tamil</Label>
+      <Label xml:lang="zh">泰米尔语</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他(当题名由多种文字或字母构成时，用代码 'z')</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006continuing_17/1" same="008_34/1">
-    <!-- 与"008_34/1"相同 -->
+    <!-- 款目原则 -->
     <Item>
       <Value>0</Value>
       <Label xml:lang="en">Successive entry</Label>
+      <Label xml:lang="zh">后续款目(表示记录是按后续款目原则编制，即每当题名或作为主要款目的团体名称或统一题名的限定成分发生改编时，就要重新建立一条新记录，先前或后续的题名或著者/题名记录在连接字段(780/785)中)</Label>
     </Item>
     <Item>
       <Value>1</Value>
       <Label xml:lang="en">Latest entry</Label>
+      <Label xml:lang="zh">最新款目(表示记录是按照最新款目原则编制，即编目依据最新题名或刊物实体，所有的前题名和刊物实体的信息记录在 245、547 和 550 字段。实际上最新款目原则在 AACR 编目规则引进后就被废除了)</Label>
     </Item>
     <Item>
       <Value>2</Value>
       <Label xml:lang="en">Integrated entry</Label>
+      <Label xml:lang="zh">集成款目(集成款目原则应用于不延续先前题名的集成性资源和电子连续出版物)</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
 
 
   <ValueList name="006visual_1/3" same="008_18/3">
-    <!-- 与"008_18/3"相同 -->
+    <!-- 电影或录像的放映时间 -->
     <Item>
       <Value>000</Value>
       <Label xml:lang="en">Running time exceeds three characters</Label>
+      <Label xml:lang="zh">放映时间超过 3 位数字</Label>
     </Item>
     <Item>
       <Value>???</Value>
       <Label xml:lang="en">(001-999)Running time</Label>
+      <Label xml:lang="zh">放映时间在 1-999 分钟之类的实际数字，若放映时间不足三位数，则数字右对齐，左边补 0，如放映时间为 96 分钟，则表示为 096</Label>
     </Item>
     <Item>
       <Value>---</Value>
       <Label xml:lang="en">Running time unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>nnn</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用(编目文献不是电影或录像，如编目文献为 20 张幻灯片)</Label>
     </Item>
     <Item>
       <Value>|||</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006visual_4/1">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006visual_5/1" same="008_22/1">
-    <!-- 与"008_22/1"相同 -->
+    <!-- 读者对象 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Unknown or not specified</Label>
+      <Label xml:lang="zh">不详或未说明</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Preschool</Label>
+      <Label xml:lang="zh">学龄前儿童</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Primary</Label>
+      <Label xml:lang="zh">小学生</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Pre-adolescent</Label>
+      <Label xml:lang="zh">青春前期的少年</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Adolescent</Label>
+      <Label xml:lang="zh">青少年</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Adult</Label>
-    </Item>
-    <Item>
-      <Value>a</Value>
-      <Label xml:lang="en">Preschool</Label>
+      <Label xml:lang="zh">成人</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Specialized</Label>
+      <Label xml:lang="zh">专业人员</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">General</Label>
+      <Label xml:lang="zh">普通读者</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Juvenile</Label>
+      <Label xml:lang="zh">少年</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006visual_6/5">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006visual_11/1" same="008_28/1">
-    <!-- 与"008_28/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Not a government publication</Label>
@@ -3061,7 +3219,7 @@
     </Item>
     <Item>
       <Value>o</Value>
-      <Label xml:lang="en">Government publication--level undetermined</Label>
+      <Label xml:lang="en">Government publication-level undetermined</Label>
     </Item>
     <Item>
       <Value>s</Value>
@@ -3080,8 +3238,10 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+
+  -->
+  <!-- 参见 formofitemcodes
   <ValueList name="006visual_12/1" same="008_29/1">
-    <!-- 与"008_29/1"相同 -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">None of the following</Label>
@@ -3119,136 +3279,163 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+-->
   <ValueList name="006visual_13/3">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006visual_16/1" same="008_33/1">
-    <!-- 与"008_33/1"相同 -->
+    <!-- 可视资料类型 -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Art original</Label>
+      <Label xml:lang="zh">艺术品原件(如雕塑作品)</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Kit</Label>
+      <Label xml:lang="zh">多载体配套资料(指编目文献包含 2 种或 2 种以上资料类型，如包含录音资料、地图、幻灯片等，而它们之间又不能区分主次关系)</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Art reproduction</Label>
+      <Label xml:lang="zh">艺术复制品</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Diorama</Label>
+      <Label xml:lang="zh">西洋景</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Filmstrip</Label>
+      <Label xml:lang="zh">幻灯条片</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Game</Label>
+      <Label xml:lang="zh">游戏</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Picture</Label>
+      <Label xml:lang="zh">图片</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Graphic</Label>
+      <Label xml:lang="zh">图形</Label>
     </Item>
     <Item>
       <Value>l</Value>
       <Label xml:lang="en">Technical drawing</Label>
+      <Label xml:lang="zh">技术图</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Motion picture</Label>
+      <Label xml:lang="zh">电影</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Chart</Label>
+      <Label xml:lang="zh">图表</Label>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">Flash card</Label>
+      <Label xml:lang="zh">闪视卡</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Microscope slide</Label>
+      <Label xml:lang="zh">显微镜载片</Label>
     </Item>
     <Item>
       <Value>q</Value>
       <Label xml:lang="en">Model</Label>
+      <Label xml:lang="zh">模型</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Realia</Label>
+      <Label xml:lang="zh">教具</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Slide</Label>
+      <Label xml:lang="zh">幻灯片</Label>
     </Item>
     <Item>
       <Value>t</Value>
       <Label xml:lang="en">Transparency</Label>
+      <Label xml:lang="zh">透明图片</Label>
     </Item>
     <Item>
       <Value>v</Value>
       <Label xml:lang="en">Videorecording</Label>
+      <Label xml:lang="zh">录像</Label>
     </Item>
     <Item>
       <Value>w</Value>
       <Label xml:lang="en">Toy</Label>
+      <Label xml:lang="zh">玩具</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="006visual_17/1" same="008_34/1">
-    <!-- 与"008_34/1"相同 -->
+    <!-- 技术 -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Animation</Label>
+      <Label xml:lang="zh">动画</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Animation and live action</Label>
+      <Label xml:lang="zh">动画和实景</Label>
     </Item>
     <Item>
       <Value>l</Value>
       <Label xml:lang="en">Live action</Label>
+      <Label xml:lang="zh">实景(若没有明确说明，电影和录像一般被视为实景拍摄)</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用(编目文献不是电影或录像)</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other technique</Label>
+      <Label xml:lang="zh">其他技术(如微型电影术、慢速拍摄技术等)</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
 
@@ -3257,18 +3444,16 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="006mixed_6/1" same="008_23/1">
-    <!-- 与"008_23/1"相同 -->
     <Item>
       <Value>*</Value>
       <Label xml:lang="en">None of the following</Label>
@@ -3306,474 +3491,547 @@
       <Label xml:lang="en">No attempt to code</Label>
     </Item>
   </ValueList>
+-->
   <ValueList name="006mixed_7/11">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007_0/1">
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Map</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">地图</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Electronic resource</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">电子资源</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Globe</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">球仪</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Tactile material</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">触摸资料</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Projected graphic</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">放映图像</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">Microform</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">缩微资料</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Nonprojected graphic</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">非放映图像</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Motion picture</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">电影</Label>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">Kit</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">多载体配套资料</Label>
     </Item>
     <Item>
       <Value>q</Value>
       <Label xml:lang="en">Notated music</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">乐谱</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Remote-sensing image</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">遥感图像</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Sound recording</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">录音资料</Label>
     </Item>
     <Item>
       <Value>t</Value>
       <Label xml:lang="en">Text</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">文本</Label>
     </Item>
     <Item>
       <Value>v</Value>
       <Label xml:lang="en">Videorecording</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">录像资料</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Unspecified</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未详细说明资料类型</Label>
     </Item>
   </ValueList>
   <ValueList name="007MAP_1/1">
+    <!-- 特定资料标识 (Specific material designation) 含 11 种代码-->
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Atlas</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">地图集</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Diagram</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">图表</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Map</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">地图</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Profile</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">纵断(剖)面图</Label>
     </Item>
     <Item>
       <Value>q</Value>
       <Label xml:lang="en">Model</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">模型</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Remote-sensing image</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">遥感影像图</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Section</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">横断(剖)面图</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unspecified</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未详细说明</Label>
     </Item>
     <Item>
       <Value>y</Value>
       <Label xml:lang="en">View</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">俯视图</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007MAP_2/1">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">未定义</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007MAP_3/1">
+    <!-- 颜色 (Color) 含 3 种代码-->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">One color</Label>
+      <Label xml:lang="zh">单色</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Multicolored</Label>
+      <Label xml:lang="zh">多色</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007MAP_4/1">
+    <!-- 载体 (Physical medium) 含 17 种代码-->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Paper</Label>
+      <Label xml:lang="zh">纸质</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Wood</Label>
+      <Label xml:lang="zh">木质</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Stone</Label>
+      <Label xml:lang="zh">石质</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Metal</Label>
+      <Label xml:lang="zh">金属</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Synthetic</Label>
+      <Label xml:lang="zh">合成材料</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Skin</Label>
+      <Label xml:lang="zh">皮质</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Textile</Label>
+      <Label xml:lang="zh">纺织品</Label>
+    </Item>
+    <Item>
+      <Value>j</Value>
+      <Label xml:lang="en">Glass</Label>
+      <Label xml:lang="zh">玻璃</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Plaster</Label>
+      <Label xml:lang="zh">石膏</Label>
+    </Item>
+    <Item>
+      <Value>q</Value>
+      <Label xml:lang="en">Flexible base photographic, positive</Label>
+      <Label xml:lang="zh">软性基，正片</Label>
+    </Item>
+    <Item>
+      <Value>r</Value>
+      <Label xml:lang="en">Flexible base photographic, negative</Label>
+      <Label xml:lang="zh">软性基，负片</Label>
+    </Item>
+    <Item>
+      <Value>s</Value>
+      <Label xml:lang="en">Non-flexible base photographic, positive</Label>
+      <Label xml:lang="zh">非软性基，正片</Label>
+    </Item>
+    <Item>
+      <Value>t</Value>
+      <Label xml:lang="en">Non-flexible base photographic, negative</Label>
+      <Label xml:lang="zh">非软性基，负片</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
+    </Item>
+    <Item>
+      <Value>y</Value>
+      <Label xml:lang="en">Other photographic medium</Label>
+      <Label xml:lang="zh">其他摄影载体(指 r q s t 所指材料之外的其他摄影载体)</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007MAP_5/1">
+    <!-- 复制品类型 (Type of reproduction) 含 5 种代码 -->
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Facsimile</Label>
+      <Label xml:lang="zh">摹真品</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用(表示在编测绘制品不是复制品)</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007MAP_6/1">
+    <!-- 制图/复制细节 (Production/repoduction details) 含 7 种代码 -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Photocopy, blueline print</Label>
+      <Label xml:lang="zh">照相复制，晒蓝图</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Photocopy</Label>
+      <Label xml:lang="zh">照相复制</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Pre-production</Label>
+      <Label xml:lang="zh">预印件</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Film</Label>
+      <Label xml:lang="zh">胶片复制</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007MAP_7/1">
+    <!-- 正/负特性 (Positive/negtive aspect) 含 5 种代码 -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Positive</Label>
+      <Label xml:lang="zh">正片</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Negative</Label>
+      <Label xml:lang="zh">负片</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Mixed polarity</Label>
+      <Label xml:lang="zh">混合</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007ELECTRONIC_1/1">
+    <!-- 特定资料标识 (Specific material designation) 含 12 种代码 -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Tape cartridge</Label>
+      <Label xml:lang="zh">盒式磁带</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Chip cartridge</Label>
+      <Label xml:lang="zh">盒式计算机芯片</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Computer optical disc cartridge</Label>
+      <Label xml:lang="zh">计算机盒式光盘</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Tape cassette</Label>
+      <Label xml:lang="zh">计算机盒式磁带</Label>
     </Item>
     <Item>
       <Value>h</Value>
       <Label xml:lang="en">Tape reel</Label>
+      <Label xml:lang="zh">盘式磁带</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Magnetic disc</Label>
+      <Label xml:lang="zh">磁盘</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Magneto-optical disc</Label>
+      <Label xml:lang="zh">磁光盘</Label>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">Optical disc</Label>
+      <Label xml:lang="zh">光盘</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Remote</Label>
+      <Label xml:lang="zh">远程访问</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unspecified</Label>
+      <Label xml:lang="zh">未详细说明</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007ELECTRONIC_2/1">
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">blank character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">无</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">fill character</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007ELECTRONIC_3/1">
+    <!-- 颜色 (Color) 含 9 种代码 -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">One color</Label>
+      <Label xml:lang="zh">单色</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Black-and-white</Label>
+      <Label xml:lang="zh">黑白</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Multicolored</Label>
+      <Label xml:lang="zh">多色</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Gray scale</Label>
+      <Label xml:lang="zh">灰度</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Mixed</Label>
+      <Label xml:lang="zh">混合</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用</Label>
+      <Comment xml:lang="zh">通常指电子资源不包含任何图像，如数字化的声音数据</Comment>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007ELECTRONIC_4/1">
+    <!-- 尺寸 (Dimensions) 含 11 种代码 -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">3 1/2 in.</Label>
+      <Label xml:lang="zh">3 1/2 英寸</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">12 in.</Label>
+      <Label xml:lang="zh">12 英寸</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">4 3/4 in. or 12 cm.</Label>
+      <Label xml:lang="zh">4 3/4 英寸或 12 厘米</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">1 1/8 x 2 3/8 in.</Label>
+      <Label xml:lang="zh">1 1/8 x 2 3/8 英寸</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">3 7/8 x 2 1/2 in.</Label>
+      <Label xml:lang="zh">3 7/8 x 2 1/2 英寸</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Not applicable</Label>
+      <Label xml:lang="zh">不适用</Label>
+      <Comment xml:lang="zh">如远程计算机文件</Comment>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">5 1/4 in.</Label>
+      <Label xml:lang="zh">5 1/4 英寸</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
     <Item>
       <Value>v</Value>
       <Label xml:lang="en">8 in.</Label>
+      <Label xml:lang="zh">8 英寸</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="007ELECTRONIC_5/1">
@@ -7140,65 +7398,81 @@
     </Item>
   </ValueList>
   <ValueList name="008_6/1">
+    <!-- 日期类型/出版状态 含 15 种代码 -->
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">No dates given; B.C. date involved</Label>
+      <Label xml:lang="zh">没有日期或包含公元前日期</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Continuing resource currently published</Label>
+      <Label xml:lang="zh">现刊</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Continuing resource ceased publication</Label>
+      <Label xml:lang="zh">绝刊</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Detailed date</Label>
+      <Label xml:lang="zh">详细日期</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Inclusive dates of collection</Label>
+      <Label xml:lang="zh">资料集的首末日期</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Range of years of bulk of collection</Label>
+      <Label xml:lang="zh">资料集的集中日期</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Multiple dates</Label>
+      <Label xml:lang="zh">多个日期</Label>
     </Item>
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">Dates unknown</Label>
+      <Label xml:lang="zh">日期不详</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Date of distribution/release/issue and production/recording session when different</Label>
+      <Label xml:lang="zh">发行和生产日期不同</Label>
     </Item>
     <Item>
       <Value>q</Value>
       <Label xml:lang="en">Questionable date</Label>
+      <Label xml:lang="zh">有疑问的日期</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Reprint/reissue date and original date</Label>
+      <Label xml:lang="zh">重印/再发行的日期与原版日期</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Single known date/probable date</Label>
+      <Label xml:lang="zh">单个已知日期或可能日期</Label>
     </Item>
     <Item>
       <Value>t</Value>
       <Label xml:lang="en">Publication date and copyright date</Label>
+      <Label xml:lang="zh">出版日期和版权日期</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Continuing resource status unknown</Label>
+      <Label xml:lang="zh">状态不明</Label>
     </Item>
     <Item>
       <Value>|</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">无意著录</Label>
     </Item>
   </ValueList>
   <ValueList name="008_7/4">
@@ -7212,14 +7486,17 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Date element is not applicable</Label>
+      <Label xml:lang="zh">日期元素不适用</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Date element is totally or partially unknown</Label>
+      <Label xml:lang="zh">日期元素整体或部分不详</Label>
     </Item>
     <Item>
       <Value>||||</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="008_11/4">
@@ -7233,14 +7510,17 @@
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Date element is not applicable</Label>
+      <Label xml:lang="zh">日期元素不适用</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Date element is totally or partially unknown</Label>
+      <Label xml:lang="zh">日期元素整体或部分不详</Label>
     </Item>
     <Item>
       <Value>||||</Value>
       <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
 
@@ -8781,29 +9061,34 @@
   </ValueList>
 
   <ValueList name="008_35/3">
+    <!-- 这里是一些语言的前置通用选项。不包含具体的语言 Item -->
     <Item>
       <Value>___</Value>
-      <Label xml:lang="en">
-        No information provided
-      </Label>
+      <Label xml:lang="en">No information provided</Label>
     </Item>
     <Item>
       <Value>zxx</Value>
-      <Label xml:lang="en">
-        No linguistic content
-      </Label>
+      <Label xml:lang="en">No linguistic content</Label>
     </Item>
     <Item>
       <Value>mul</Value>
       <Label xml:lang="en">Multiple languages</Label>
+      <Label xml:lang="zh">多种语言</Label>
     </Item>
     <Item>
       <Value>sgn</Value>
       <Label xml:lang="en">Sign languages</Label>
+      <Label xml:lang="zh">手语</Label>
     </Item>
     <Item>
       <Value>und</Value>
       <Label xml:lang="en">Undetermined</Label>
+      <Label xml:lang="zh">未定语种</Label>
+    </Item>
+    <Item>
+      <Value>|||</Value>
+      <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
     </Item>
   </ValueList>
   <ValueList name="008_38/1">
@@ -8876,8 +9161,7 @@
     <Item>
       <Value>aar</Value>
       <Label xml:lang="en">Afar</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">阿法尔语</Label>
     </Item>
     <Item>
       <Value>abk</Value>
@@ -8887,7 +9171,7 @@
     <Item>
       <Value>ace</Value>
       <Label xml:lang="en">Achinese</Label>
-      <Label xml:lang="zh">阿钦语</Label>
+      <Label xml:lang="zh">阿钦语(亚齐语)</Label>
     </Item>
     <Item>
       <Value>ach</Value>
@@ -8902,17 +9186,17 @@
     <Item>
       <Value>afh</Value>
       <Label xml:lang="en">Afrihili(Aritificial language)</Label>
-      <Label xml:lang="zh">阿弗里希利语</Label>
+      <Label xml:lang="zh">各种阿弗里希利语</Label>
     </Item>
     <Item>
       <Value>afr</Value>
       <Label xml:lang="en">Afrikaans</Label>
-      <Label xml:lang="zh">南非所用之荷兰语</Label>
+      <Label xml:lang="zh">南非所用之荷兰语(阿非利卡语)</Label>
     </Item>
     <Item>
       <Value>afa</Value>
       <Label xml:lang="en">Afro Asiatic(Other)</Label>
-      <Label xml:lang="zh">其他亚非语系</Label>
+      <Label xml:lang="zh">其他亚非语系的语言</Label>
     </Item>
     <Item>
       <Value>aka</Value>
@@ -8937,27 +9221,28 @@
     <Item>
       <Value>alg</Value>
       <Label xml:lang="en">Algonquian languages</Label>
-      <Label xml:lang="zh">（美国印第安族最大一族）阿尔冈琴语系</Label>
+      <Label xml:lang="zh">(美国印第安族最大一族)阿尔冈琴语系</Label>
     </Item>
     <Item>
       <Value>ajm</Value>
       <Label xml:lang="en">Aljjamia</Label>
-      <Label xml:lang="zh">阿尔加米尼亚</Label>
+      <Label xml:lang="zh">阿尔加米尼亚语</Label>
     </Item>
     <Item>
       <Value>tut</Value>
       <Label xml:lang="en">Altaic(Other)</Label>
-      <Label xml:lang="zh">其他阿尔泰语系</Label>
+      <Label xml:lang="zh">(其他)阿尔泰语系</Label>
     </Item>
     <Item>
       <Value>amh</Value>
       <Label xml:lang="en">Amharic</Label>
-      <Label xml:lang="zh">阿比尼亚宫廷贵族的语言：阿姆哈拉语（一种南族语）</Label>
+      <Label xml:lang="zh">阿姆哈拉语(一种南族语)</Label>
+      <Comment xml:lang="zh">阿比尼亚宫廷贵族的语言</Comment>
     </Item>
     <Item>
       <Value>apa</Value>
       <Label xml:lang="en">Apache languages</Label>
-      <Label xml:lang="zh">阿帕切语</Label>
+      <Label xml:lang="zh">各种阿帕切语</Label>
     </Item>
     <Item>
       <Value>ara</Value>
@@ -8977,7 +9262,8 @@
     <Item>
       <Value>arn</Value>
       <Label xml:lang="en">Araucanian</Label>
-      <Label xml:lang="zh">阿拉肯尼亚语（阿劳干语）</Label>
+      <Label xml:lang="zh">阿拉肯尼亚语(阿劳干语)</Label>
+      <Comment xml:lang="zh">用 Mapuche</Comment>
     </Item>
     <Item>
       <Value>arw</Value>
@@ -8992,7 +9278,7 @@
     <Item>
       <Value>art</Value>
       <Label xml:lang="en">Artificial(Other)</Label>
-      <Label xml:lang="zh">其他人造语言</Label>
+      <Label xml:lang="zh">(其他)人造语言</Label>
     </Item>
     <Item>
       <Value>asm</Value>
@@ -9012,12 +9298,12 @@
     <Item>
       <Value>map</Value>
       <Label xml:lang="en">Austronesian(Other)</Label>
-      <Label xml:lang="zh">其他马来亚玻里尼西亚语系</Label>
+      <Label xml:lang="zh">(其他)马来亚-玻里尼西亚语系的语言</Label>
     </Item>
     <Item>
       <Value>ava</Value>
       <Label xml:lang="en">Avaric</Label>
-      <Label xml:lang="zh">阿瓦尔语</Label>
+      <Label xml:lang="zh">阿瓦尔语(阿法语)</Label>
     </Item>
     <Item>
       <Value>ave</Value>
@@ -9032,7 +9318,7 @@
     <Item>
       <Value>aym</Value>
       <Label xml:lang="en">Aymara</Label>
-      <Label xml:lang="zh">艾麦拉语（艾马拉语）</Label>
+      <Label xml:lang="zh">艾麦拉语(艾马拉语)</Label>
     </Item>
     <Item>
       <Value>aze</Value>
@@ -9042,7 +9328,7 @@
     <Item>
       <Value>ban</Value>
       <Label xml:lang="en">Balinese</Label>
-      <Label xml:lang="zh">巴里语</Label>
+      <Label xml:lang="zh">巴里语(巴厘语)</Label>
     </Item>
     <Item>
       <Value>bat</Value>
@@ -9062,7 +9348,7 @@
     <Item>
       <Value>bai</Value>
       <Label xml:lang="en">Bamileke languages</Label>
-      <Label xml:lang="zh">巴米罗克语</Label>
+      <Label xml:lang="zh">各种巴米罗克语</Label>
     </Item>
     <Item>
       <Value>bad</Value>
@@ -9102,7 +9388,8 @@
     <Item>
       <Value>ber</Value>
       <Label xml:lang="en">Berber languages</Label>
-      <Label xml:lang="zh">北非一回教土族语言</Label>
+      <Label xml:lang="zh">柏柏尔语</Label>
+      <Comment xml:lang="zh">北非一回教土族语言</Comment>
     </Item>
     <Item>
       <Value>bho</Value>
@@ -9160,6 +9447,7 @@
       <Value>bel</Value>
       <Label xml:lang="en">Byelorussian</Label>
       <Label xml:lang="zh">白俄罗斯语</Label>
+      <Comment xml:lang="zh">用 Belarusian</Comment>
     </Item>
     <Item>
       <Value>cad</Value>
@@ -9174,12 +9462,12 @@
     <Item>
       <Value>cat</Value>
       <Label xml:lang="en">Catalan</Label>
-      <Label xml:lang="zh">加泰隆语</Label>
+      <Label xml:lang="zh">加泰罗尼亚语(加泰隆语)</Label>
     </Item>
     <Item>
       <Value>cau</Value>
       <Label xml:lang="en">Caucasian(Other)</Label>
-      <Label xml:lang="zh">其他高加索语系</Label>
+      <Label xml:lang="zh">(其他)高加索语系的语言</Label>
     </Item>
     <Item>
       <Value>ceb</Value>
@@ -9194,7 +9482,7 @@
     <Item>
       <Value>cai</Value>
       <Label xml:lang="en">Central American Indian(Other)</Label>
-      <Label xml:lang="zh">其他中美印第安语系</Label>
+      <Label xml:lang="zh">(其他)中美印第安语系</Label>
     </Item>
     <Item>
       <Value>chg</Value>
@@ -9219,7 +9507,7 @@
     <Item>
       <Value>chy</Value>
       <Label xml:lang="en">Cheyenne</Label>
-      <Label xml:lang="zh">切延内语（夏延语）</Label>
+      <Label xml:lang="zh">切延内语(夏延语)</Label>
     </Item>
     <Item>
       <Value>chb</Value>
@@ -9249,7 +9537,7 @@
     <Item>
       <Value>chu</Value>
       <Label xml:lang="en">Church Slavic</Label>
-      <Label xml:lang="zh">古代俄语（宗教斯拉夫语）</Label>
+      <Label xml:lang="zh">古代俄语(宗教斯拉夫语)</Label>
     </Item>
     <Item>
       <Value>chk</Value>
@@ -9263,14 +9551,19 @@
       <Label xml:lang="zh">楚瓦什语</Label>
     </Item>
     <Item>
+      <Value>cmc</Value>
+      <Label xml:lang="en">Chamic languages</Label>
+      <Label xml:lang="zh">各种占米克语</Label>
+    </Item>
+    <Item>
       <Value>cop</Value>
       <Label xml:lang="en">coptic</Label>
-      <Label xml:lang="zh">埃及古语（科普特语）</Label>
+      <Label xml:lang="zh">埃及古语(科普特语)</Label>
     </Item>
     <Item>
       <Value>cor</Value>
       <Label xml:lang="en">Corrnish</Label>
-      <Label xml:lang="zh">康瓦尔郡语（科尼什语）</Label>
+      <Label xml:lang="zh">康瓦尔郡语(科尼什语)</Label>
     </Item>
     <Item>
       <Value>cos</Value>
@@ -9285,7 +9578,7 @@
     <Item>
       <Value>mus</Value>
       <Label xml:lang="en">Creek</Label>
-      <Label xml:lang="zh">摩斯科格语（美国东南部印第安人）</Label>
+      <Label xml:lang="zh">摩斯科格语(美国东南部印第安人)</Label>
     </Item>
     <Item>
       <Value>cpe</Value>
@@ -9370,7 +9663,7 @@
     </Item>
     <Item>
       <Value>gem</Value>
-      <Label xml:lang="en">Dutch,Old（to1050）</Label>
+      <Label xml:lang="en">Dutch,Old(to1050)</Label>
       <Label xml:lang="zh">古代荷兰语</Label>
     </Item>
     <Item>
@@ -9477,7 +9770,7 @@
     <Item>
       <Value>fiu</Value>
       <Label xml:lang="en">Finno-Ugrian(Other)</Label>
-      <Label xml:lang="zh">芬匈语（其他）</Label>
+      <Label xml:lang="zh">芬匈语(其他)</Label>
     </Item>
     <Item>
       <Value>fon</Value>
@@ -9533,7 +9826,7 @@
     <Item>
       <Value>lug</Value>
       <Label xml:lang="en">Ganda</Label>
-      <Label xml:lang="zh">卢干达语（干达语）</Label>
+      <Label xml:lang="zh">卢干达语(干达语)</Label>
     </Item>
     <Item>
       <Value>gay</Value>
@@ -9543,12 +9836,12 @@
     <Item>
       <Value>gez</Value>
       <Label xml:lang="en">Geez</Label>
-      <Label xml:lang="zh">（用Ethiopic）</Label>
+      <Label xml:lang="zh">(用Ethiopic)</Label>
     </Item>
     <Item>
       <Value>geo</Value>
       <Label xml:lang="en">Georgian</Label>
-      <Label xml:lang="zh">外高加索语（格鲁吉亚语）</Label>
+      <Label xml:lang="zh">外高加索语(格鲁吉亚语)</Label>
     </Item>
     <Item>
       <Value>gmh</Value>
@@ -9654,7 +9947,7 @@
     <Item>
       <Value>hin</Value>
       <Label xml:lang="en">Hindi</Label>
-      <Label xml:lang="zh">北印度语（印地语）</Label>
+      <Label xml:lang="zh">北印度语(印地语)</Label>
     </Item>
     <Item>
       <Value>hmo</Value>
@@ -9705,7 +9998,7 @@
     <Item>
       <Value>inc</Value>
       <Label xml:lang="en">Indic(Other)</Label>
-      <Label xml:lang="zh">印度语（其他）</Label>
+      <Label xml:lang="zh">印度语(其他)</Label>
     </Item>
     <Item>
       <Value>ine</Value>
@@ -9854,7 +10147,7 @@
     <Item>
       <Value>khi</Value>
       <Label xml:lang="en">Khoisan(Other)</Label>
-      <Label xml:lang="zh">科依桑语（其他）</Label>
+      <Label xml:lang="zh">科依桑语(其他)</Label>
     </Item>
     <Item>
       <Value>kho</Value>
@@ -9905,7 +10198,7 @@
     <Item>
       <Value>kpe</Value>
       <Label xml:lang="en">Kpelle</Label>
-      <Label xml:lang="zh">克佩列语（格贝列语）</Label>
+      <Label xml:lang="zh">克佩列语(格贝列语)</Label>
     </Item>
     <Item>
       <Value>kro</Value>
@@ -10060,7 +10353,7 @@
     <Item>
       <Value>mal</Value>
       <Label xml:lang="en">Malayalam</Label>
-      <Label xml:lang="zh">马拉维拉姆语（德维拉土语之一）</Label>
+      <Label xml:lang="zh">马拉维拉姆语(德维拉土语之一)</Label>
     </Item>
     <Item>
       <Value>mlt</Value>
@@ -10101,7 +10394,7 @@
     <Item>
       <Value>chm</Value>
       <Label xml:lang="en">Mari</Label>
-      <Label xml:lang="zh">（美俚语？）</Label>
+      <Label xml:lang="zh">(美俚语？)</Label>
     </Item>
     <Item>
       <Value>mah</Value>
@@ -10156,7 +10449,7 @@
     <Item>
       <Value>mkh</Value>
       <Label xml:lang="en">Mon-Khmer(Other)</Label>
-      <Label xml:lang="zh">孟一高棉语（其他）</Label>
+      <Label xml:lang="zh">孟一高棉语(其他)</Label>
     </Item>
     <Item>
       <Value>lol</Value>
@@ -10182,7 +10475,7 @@
     <Item>
       <Value>mun</Value>
       <Label xml:lang="en">Munda(Other)</Label>
-      <Label xml:lang="zh">蒙达语（其他）</Label>
+      <Label xml:lang="zh">蒙达语(其他)</Label>
     </Item>
     <Item>
       <Value>nav</Value>
@@ -10285,7 +10578,7 @@
     <Item>
       <Value>oji</Value>
       <Label xml:lang="en">Ojibwa</Label>
-      <Label xml:lang="zh">奥季布瓦语（北美印第安人一大种族语）</Label>
+      <Label xml:lang="zh">奥季布瓦语(北美印第安人一大种族语)</Label>
     </Item>
     <Item>
       <Value>peo</Value>
@@ -10365,7 +10658,7 @@
     <Item>
       <Value>phi</Value>
       <Label xml:lang="en">Philippine(Other)</Label>
-      <Label xml:lang="zh">菲律宾语（其他）</Label>
+      <Label xml:lang="zh">菲律宾语(其他)</Label>
     </Item>
     <Item>
       <Value>phn</Value>
@@ -10468,12 +10761,12 @@
     <Item>
       <Value>scc</Value>
       <Label xml:lang="en">Serbo-croatian (Cyrillic)</Label>
-      <Label xml:lang="zh">塞尔维亚-克罗地亚语（基里尔字母之一）</Label>
+      <Label xml:lang="zh">塞尔维亚-克罗地亚语(基里尔字母之一)</Label>
     </Item>
     <Item>
       <Value>scr</Value>
       <Label xml:lang="en">Serbo-Croatian(Roman)</Label>
-      <Label xml:lang="zh">塞尔维亚-克罗地亚语（罗马字母）</Label>
+      <Label xml:lang="zh">塞尔维亚-克罗地亚语(罗马字母)</Label>
     </Item>
     <Item>
       <Value>srr</Value>
@@ -10509,12 +10802,12 @@
     <Item>
       <Value>sin</Value>
       <Label xml:lang="en">Sinhalese</Label>
-      <Label xml:lang="zh">僧加罗语（锡兰语）</Label>
+      <Label xml:lang="zh">僧加罗语(锡兰语)</Label>
     </Item>
     <Item>
       <Value>sit</Value>
       <Label xml:lang="en">Sino-Tibetan(Other)</Label>
-      <Label xml:lang="zh">汉藏语系（其他）</Label>
+      <Label xml:lang="zh">汉藏语系(其他)</Label>
     </Item>
     <Item>
       <Value>sio</Value>
@@ -10524,7 +10817,7 @@
     <Item>
       <Value>den</Value>
       <Label xml:lang="en">Slave(Other)</Label>
-      <Label xml:lang="zh">苏族语（其他）</Label>
+      <Label xml:lang="zh">苏族语(其他)</Label>
     </Item>
     <Item>
       <Value>sla</Value>
@@ -10762,7 +11055,7 @@
     <Item>
       <Value>umb</Value>
       <Label xml:lang="en">Umbundu</Label>
-      <Label xml:lang="zh">蒙都（姆本崩杜语）</Label>
+      <Label xml:lang="zh">蒙都(姆本崩杜语)</Label>
     </Item>
     <Item>
       <Value>ung</Value>
@@ -10797,7 +11090,7 @@
     <Item>
       <Value>vol</Value>
       <Label xml:lang="en">Volapuk</Label>
-      <Label xml:lang="zh">沃拉普克语（一种人造语言）</Label>
+      <Label xml:lang="zh">沃拉普克语(一种人造语言)</Label>
     </Item>
     <Item>
       <Value>vot</Value>
@@ -10904,4 +11197,316 @@
       <Label xml:lang="zh">祖尼语</Label>
     </Item>
   </ValueList>
+
+  <ValueList name="governmentpublicationcodes" same="008_28/1">
+    <!-- 与"008_28/1"相同 -->
+    <Item>
+      <Value>_</Value>
+      <Label xml:lang="en">Not a government publication</Label>
+      <Label xml:lang="zh">非政府出版物</Label>
+    </Item>
+    <Item>
+      <Value>a</Value>
+      <Label xml:lang="en">Autonomous or semi-autonomous component</Label>
+      <Label xml:lang="zh">自治区或半自治区</Label>
+    </Item>
+    <Item>
+      <Value>c</Value>
+      <Label xml:lang="en">Multilocal</Label>
+      <Label xml:lang="zh">多地方管辖区</Label>
+    </Item>
+    <Item>
+      <Value>f</Value>
+      <Label xml:lang="en">Federal/national</Label>
+      <Label xml:lang="zh">联邦/国家政府机构</Label>
+    </Item>
+    <Item>
+      <Value>i</Value>
+      <Label xml:lang="en">International intergovernmental</Label>
+      <Label xml:lang="zh">国际政府间机构</Label>
+    </Item>
+    <Item>
+      <Value>l</Value>
+      <Label xml:lang="en">Local</Label>
+      <Label xml:lang="zh">地方行政机构</Label>
+    </Item>
+    <Item>
+      <Value>m</Value>
+      <Label xml:lang="en">Multistate</Label>
+      <Label xml:lang="zh">州、省、区的联合管辖机构</Label>
+    </Item>
+    <Item>
+      <Value>o</Value>
+      <Label xml:lang="en">Government publication-level undetermined</Label>
+      <Label xml:lang="zh">政府出版物，级别不确定</Label>
+    </Item>
+    <Item>
+      <Value>s</Value>
+      <Label xml:lang="en">State, provincial, territorial, dependent, etc.</Label>
+      <Label xml:lang="zh">州、省、区等独立管辖机构</Label>
+    </Item>
+    <Item>
+      <Value>u</Value>
+      <Label xml:lang="en">Unknown if item is government publication</Label>
+      <Label xml:lang="zh">是否为政府出版物不详</Label>
+    </Item>
+    <Item>
+      <Value>z</Value>
+      <Label xml:lang="en">Other</Label>
+      <Label xml:lang="zh">其他</Label>
+    </Item>
+    <Item>
+      <Value>|</Value>
+      <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
+    </Item>
+  </ValueList>
+
+  <!-- Form of item codes-->
+  <ValueList name="formofitemcodes" same="008_23/1">
+    <!-- 与"008_23/1"相同 -->
+    <Item>
+      <Value>_</Value>
+      <Label xml:lang="en">None of the following</Label>
+      <Label xml:lang="zh">非下列代码</Label>
+    </Item>
+    <Item>
+      <Value>a</Value>
+      <Label xml:lang="en">Microfilm</Label>
+      <Label xml:lang="zh">缩微胶卷</Label>
+    </Item>
+    <Item>
+      <Value>b</Value>
+      <Label xml:lang="en">Microfiche</Label>
+      <Label xml:lang="zh">缩微平片</Label>
+    </Item>
+    <Item>
+      <Value>c</Value>
+      <Label xml:lang="en">Microopaque</Label>
+      <Label xml:lang="zh">不透明缩微片</Label>
+    </Item>
+    <Item>
+      <Value>d</Value>
+      <Label xml:lang="en">Large print</Label>
+      <Label xml:lang="zh">大型印刷本</Label>
+    </Item>
+    <Item>
+      <Value>f</Value>
+      <Label xml:lang="en">Braille</Label>
+      <Label xml:lang="zh">盲文本</Label>
+    </Item>
+    <Item>
+      <Value>r</Value>
+      <Label xml:lang="en">Regular print reproduction</Label>
+      <Label xml:lang="zh">普通印刷本</Label>
+    </Item>
+    <Item>
+      <Value>s</Value>
+      <Label xml:lang="en">Electronic</Label>
+      <Label xml:lang="zh">电子文献</Label>
+    </Item>
+    <Item>
+      <Value>|</Value>
+      <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
+    </Item>
+  </ValueList>
+
+  <ValueList name="indexcodes" same="008_31/1">
+    <Item>
+      <Value>0</Value>
+      <Label xml:lang="en">No index</Label>
+      <Label xml:lang="zh">无索引</Label>
+    </Item>
+    <Item>
+      <Value>1</Value>
+      <Label xml:lang="en">Index present</Label>
+      <Label xml:lang="zh">含索引</Label>
+    </Item>
+    <Item>
+      <Value>|</Value>
+      <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
+    </Item>
+  </ValueList>
+
+  <ValueList name="targetaudiencecodes" same="008_22/1">
+    <!-- 读者对象 -->
+    <Item>
+      <Value>_</Value>
+      <Label xml:lang="en">Unknown or not specified</Label>
+      <Label xml:lang="zh">不详或者未说明</Label>
+    </Item>
+    <Item>
+      <Value>a</Value>
+      <Label xml:lang="en">Preschool</Label>
+      <Label xml:lang="zh">学龄前儿童</Label>
+    </Item>
+    <Item>
+      <Value>b</Value>
+      <Label xml:lang="en">Primary</Label>
+      <Label xml:lang="zh">小学生</Label>
+    </Item>
+    <Item>
+      <Value>c</Value>
+      <Label xml:lang="en">Pre-adolescent</Label>
+      <Label xml:lang="zh">青春前期的少年</Label>
+    </Item>
+    <Item>
+      <Value>d</Value>
+      <Label xml:lang="en">Adolescent</Label>
+      <Label xml:lang="zh">青少年</Label>
+    </Item>
+    <Item>
+      <Value>e</Value>
+      <Label xml:lang="en">Adult</Label>
+      <Label xml:lang="zh">成人</Label>
+    </Item>
+    <Item>
+      <Value>f</Value>
+      <Label xml:lang="en">Specialized</Label>
+      <Label xml:lang="zh">专业人员</Label>
+    </Item>
+    <Item>
+      <Value>g</Value>
+      <Label xml:lang="en">General</Label>
+      <Label xml:lang="zh">普通读者</Label>
+    </Item>
+    <Item>
+      <Value>j</Value>
+      <Label xml:lang="en">Juvenile</Label>
+      <Label xml:lang="zh">少年</Label>
+    </Item>
+    <Item>
+      <Value>|</Value>
+      <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
+    </Item>
+  </ValueList>
+
+  <!--Nature of contents-->
+  <ValueList name="natureofcontentscodes" same="008_24/4">
+    <!-- 内容特征 -->
+    <Item>
+      <Value>_</Value>
+      <Label xml:lang="en">No specified nature of contents</Label>
+      <Label xml:lang="zh">未详细说明</Label>
+    </Item>
+    <Item>
+      <Value>a</Value>
+      <Label xml:lang="en">Abstracts/summaries</Label>
+      <Label xml:lang="zh">文摘/摘要</Label>
+    </Item>
+    <Item>
+      <Value>b</Value>
+      <Label xml:lang="en">Bibliographies</Label>
+      <Label xml:lang="zh">书目</Label>
+    </Item>
+    <Item>
+      <Value>c</Value>
+      <Label xml:lang="en">Catalogs</Label>
+      <Label xml:lang="zh">目录</Label>
+    </Item>
+    <Item>
+      <Value>d</Value>
+      <Label xml:lang="en">Dictionaries</Label>
+      <Label xml:lang="zh">字典、词典</Label>
+    </Item>
+    <Item>
+      <Value>e</Value>
+      <Label xml:lang="en">Encyclopedias</Label>
+      <Label xml:lang="zh">百科全书</Label>
+    </Item>
+    <Item>
+      <Value>f</Value>
+      <Label xml:lang="en">Handbooks</Label>
+      <Label xml:lang="zh">手册</Label>
+    </Item>
+    <Item>
+      <Value>g</Value>
+      <Label xml:lang="en">Legal articles</Label>
+      <Label xml:lang="zh">法律条文</Label>
+    </Item>
+    <Item>
+      <Value>i</Value>
+      <Label xml:lang="en">Indexes</Label>
+      <Label xml:lang="zh">索引</Label>
+    </Item>
+    <Item>
+      <Value>j</Value>
+      <Label xml:lang="en">Patent document</Label>
+      <Label xml:lang="zh">专利文献</Label>
+    </Item>
+    <Item>
+      <Value>k</Value>
+      <Label xml:lang="en">Discographies</Label>
+      <Label xml:lang="zh">唱片目录</Label>
+    </Item>
+    <Item>
+      <Value>l</Value>
+      <Label xml:lang="en">Legislation</Label>
+      <Label xml:lang="zh">法规</Label>
+    </Item>
+    <Item>
+      <Value>m</Value>
+      <Label xml:lang="en">Theses</Label>
+      <Label xml:lang="zh">学位论文</Label>
+    </Item>
+    <Item>
+      <Value>n</Value>
+      <Label xml:lang="en">Surveys of literature in a subject area</Label>
+      <Label xml:lang="zh">专业领域文献概览</Label>
+    </Item>
+    <Item>
+      <Value>o</Value>
+      <Label xml:lang="en">Reviews</Label>
+      <Label xml:lang="zh">评论</Label>
+    </Item>
+    <Item>
+      <Value>p</Value>
+      <Label xml:lang="en">Programmed texts</Label>
+      <Label xml:lang="zh">教材</Label>
+    </Item>
+    <Item>
+      <Value>q</Value>
+      <Label xml:lang="en">Filmographies</Label>
+      <Label xml:lang="zh">电影目录</Label>
+    </Item>
+    <Item>
+      <Value>r</Value>
+      <Label xml:lang="en">Directories</Label>
+      <Label xml:lang="zh">名录</Label>
+    </Item>
+    <Item>
+      <Value>s</Value>
+      <Label xml:lang="en">Statistics</Label>
+      <Label xml:lang="zh">统计资料</Label>
+    </Item>
+    <Item>
+      <Value>t</Value>
+      <Label xml:lang="en">Technical reports</Label>
+      <Label xml:lang="zh">技术报告</Label>
+    </Item>
+    <Item>
+      <Value>v</Value>
+      <Label xml:lang="en">Legal cases and case notes</Label>
+      <Label xml:lang="zh">法律案例和案例分析</Label>
+    </Item>
+    <Item>
+      <Value>w</Value>
+      <Label xml:lang="en">Law reports and digests</Label>
+      <Label xml:lang="zh">法律报告和摘要</Label>
+    </Item>
+    <Item>
+      <Value>z</Value>
+      <Label xml:lang="en">Treaties</Label>
+      <Label xml:lang="zh">条约</Label>
+    </Item>
+    <Item>
+      <Value>|</Value>
+      <Label xml:lang="en">No attempt to code</Label>
+      <Label xml:lang="zh">不选用</Label>
+    </Item>
+  </ValueList>
+
 </Description>

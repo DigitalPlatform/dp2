@@ -11,6 +11,7 @@ using System.Net;
 using System.IO;
 using System.Threading;
 using System.Reflection;
+using System.Linq;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
@@ -19,29 +20,32 @@ using DigitalPlatform.Drawing;
 namespace DigitalPlatform.Marc
 {
 
-	public class MarcFixedFieldControl : System.Windows.Forms.ScrollableControl
-	{
+    public class MarcFixedFieldControl : System.Windows.Forms.ScrollableControl
+    {
         public event GetTemplateDefEventHandler GetTemplateDef = null;  // 外部接口，获取一个特定模板的XML定义
         public event EventHandler ResetSize = null;
         public event ResetTitleEventHandler ResetTitle = null;
 
-
-		#region 成员变量
+        #region 成员变量
 
         XmlNode nodeTemplateDef = null;
 
         List<XmlNode> CurValueListNodes = null;    // 当前正在显示的值列表节点
         string CurActiveValueUnit = "";  // 当前已经加亮的值事项
 
-		public XmlDocument MarcDefDom = null;  // 配置文件的dom
-		public string Lang = "";
+        public XmlDocument MarcDefDom = null;  // 配置文件的dom
+        public string Lang = "";
 
-		TemplateRoot templateRoot = null;
-		private System.Windows.Forms.ListView listView_values = null;
-		public int nCurLine = -1;
+        TemplateRoot templateRoot = null;
+        private System.Windows.Forms.ListView listView_values = null;
+        public int nCurLine = -1;
+
+        Panel _editArea = null;
 
         Font m_fontDefaultInfo = null;
-		// 文字的字体字号
+        Font m_fontDefaultInfoBold = null;
+
+        // 文字的字体字号
         public Font DefaultInfoFont
         {
             get
@@ -53,11 +57,28 @@ namespace DigitalPlatform.Marc
             }
         }
 
+        // 2021/01/24
+        public Font DefaultInfoFontBold
+        {
+            get
+            {
+                if (this.m_fontDefaultInfoBold == null)
+                    this.m_fontDefaultInfoBold = new Font(this.Font.FontFamily,
+                        this.Font.SizeInPoints,
+                        FontStyle.Bold,
+                        GraphicsUnit.Point);
+
+                return this.m_fontDefaultInfoBold;
+            }
+        }
+
         Font m_fontDefaultValue = null;
+        Font m_fontDefaultValueBold = null;
+
         private ImageList imageList_lineState;
         private IContainer components;
-    
-		public Font DefaultValueFont
+
+        public Font DefaultValueFont
         {
             get
             {
@@ -67,23 +88,23 @@ namespace DigitalPlatform.Marc
                 return this.m_fontDefaultValue;
             }
         }
-            
-            
-            
-        /*
-        public Font DefaultValueFont
+
+        // 2021/10/24
+        public Font DefaultValueFontBold
         {
             get
             {
-                return this.Font;
-            }
-            set
-            {
-                this.Font = value;
-            }
-        }*/
+                if (this.m_fontDefaultValueBold == null)
+                    this.m_fontDefaultValueBold = new Font("Courier New",
+                        this.Font.SizeInPoints,
+                        FontStyle.Bold,
+                        GraphicsUnit.Point);
 
-		#endregion
+                return this.m_fontDefaultValueBold;
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 解析宏
@@ -97,32 +118,45 @@ namespace DigitalPlatform.Marc
         /// </summary>
         public event GetConfigDomEventHandle GetConfigDom = null;
 
-		public MarcFixedFieldControl()
-		{
-			// 该调用是 Windows.Forms 窗体设计器所必需的。
-			InitializeComponent();
+        public MarcFixedFieldControl()
+        {
+            // 该调用是 Windows.Forms 窗体设计器所必需的。
+            InitializeComponent();
 
-			// TODO: 在 InitComponent 调用后添加任何初始化
-		}
+            // TODO: 在 InitComponent 调用后添加任何初始化
+        }
 
 
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if( components != null )
-					components.Dispose();
-			}
-			base.Dispose( disposing );
-		}
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                {
+                    this.m_fontDefaultInfo?.Dispose();
+                    this.m_fontDefaultInfo = null;
 
-		#region 组件设计器生成的代码
-		/// <summary>
-		/// 设计器支持所需的方法 - 不要使用代码编辑器 
-		/// 修改此方法的内容。
-		/// </summary>
-		private void InitializeComponent()
-		{
+                    this.m_fontDefaultValue?.Dispose();
+                    this.m_fontDefaultValue = null;
+
+                    this.m_fontDefaultInfoBold?.Dispose();
+                    this.m_fontDefaultInfoBold = null;
+
+                    this.m_fontDefaultValueBold?.Dispose();
+                    this.m_fontDefaultValueBold = null;
+                }
+                if (components != null)
+                    components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region 组件设计器生成的代码
+        /// <summary>
+        /// 设计器支持所需的方法 - 不要使用代码编辑器 
+        /// 修改此方法的内容。
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MarcFixedFieldControl));
             this.imageList_lineState = new System.Windows.Forms.ImageList(this.components);
@@ -142,11 +176,10 @@ namespace DigitalPlatform.Marc
             this.Size = new System.Drawing.Size(168, 160);
             this.Enter += new System.EventHandler(this.MarcFixedFieldControl_Enter);
             this.ResumeLayout(false);
+        }
+        #endregion
 
-		}
-		#endregion
-
-		#region 函数
+        #region 函数
 
 #if NO
 		// 拆分一个ref字符串为来源和ValueList的名称
@@ -230,16 +263,16 @@ namespace DigitalPlatform.Marc
 		}
 #endif
 
-		// 得到Label的最大宽度
-		public void GetMaxWidth(//Graphics g,
+        // 得到Label的最大宽度
+        public void GetMaxWidth(//Graphics g,
             out int nMaxLabelWidth,
             out int nMaxNameWidth)
-		{
-			nMaxLabelWidth = 0;
+        {
+            nMaxLabelWidth = 0;
             nMaxNameWidth = 0;
-			for(int i=0;i<this.templateRoot.Lines.Count;i++)
-			{
-				TemplateLine line = (TemplateLine)this.templateRoot.Lines[i];
+            for (int i = 0; i < this.templateRoot.Lines.Count; i++)
+            {
+                TemplateLine line = this.templateRoot.Lines[i];
 
                 string strTemp = line.m_strLabel;
                 // strTemp = strTemp.Replace(" ", "M");    // +"M";   // 2008/7/16
@@ -247,8 +280,8 @@ namespace DigitalPlatform.Marc
                     this.DefaultInfoFont,
                     strTemp /*line.m_strLabel*/);   // +strTemp.Length * 2;
 
-				if (nOneLabelWidth > nMaxLabelWidth)
-					nMaxLabelWidth = nOneLabelWidth;
+                if (nOneLabelWidth > nMaxLabelWidth)
+                    nMaxLabelWidth = nOneLabelWidth;
 
                 // 
                 int nOneNameWidth = GraphicsUtil.GetWidth(//g,
@@ -257,45 +290,52 @@ namespace DigitalPlatform.Marc
 
                 if (nOneNameWidth > nMaxNameWidth)
                     nMaxNameWidth = nOneNameWidth;
-			}
-		}
+            }
+        }
 
 
-		// 初始化控件
-		// paramters:
-		//		fieldNode	Field节点
-		//		strLang	语言版本
-		// return:
-		//		-1	出错
-		//		0	不是定长字段
-		//		1	成功
-		public int Initial(XmlNode node,
-			string strLang,
+        // 初始化控件
+        // paramters:
+        //		fieldNode	Field节点
+        //		strLang	语言版本
+        // return:
+        //		-1	出错
+        //		0	不是定长字段
+        //		1	成功
+        public int Initial(XmlNode node,
+            string strLang,
             out int nResultWidth,
             out int nResultHeight,
-			out string strError)
-		{
+            out string strError)
+        {
             nResultWidth = 0;
             nResultHeight = 0;
-			
-			strError = "";
 
-			this.Lang = strLang;
+            strError = "";
+
+            this.Lang = strLang;
 
             this.Controls.Clear();
 
-			this.templateRoot = new TemplateRoot(this);
-			int nRet = this.templateRoot.Initial(node,
-				strLang,
-				out strError);
-			if (nRet == 0)
-				return 0;
-			if (nRet == -1)
-				return -1;
+            this.templateRoot = new TemplateRoot(this);
+            int nRet = this.templateRoot.Initial(node,
+                strLang,
+                out strError);
+            if (nRet == 0)
+                return 0;
+            if (nRet == -1)
+                return -1;
+
+            // *** 建立编辑区域
+            this._editArea = new Panel();
+            this._editArea.AutoScroll = true;
+            this._editArea.Location = new Point(0, 0);
+            this._editArea.Anchor = AnchorStyles.Left | AnchorStyles.Top;
+            this.Controls.Add(this._editArea);
 
             for (int i = 0; i < this.templateRoot.Lines.Count; i++)
             {
-                TemplateLine line = (TemplateLine)this.templateRoot.Lines[i];
+                TemplateLine line = this.templateRoot.Lines[i];
 
                 /*
                 string strTempValue = line.m_strValue;
@@ -310,35 +350,37 @@ namespace DigitalPlatform.Marc
 
                 int nHeight = this.DefaultValueFont.Height;
                  * */
+                var bold = StringUtil.IsInList("bold", line.DisplayStyle) == true;
 
                 ValueEditBox textBox_value = new ValueEditBox();
-                textBox_value.Font = this.DefaultValueFont;
+                textBox_value.Font = bold ? this.DefaultValueFontBold : this.DefaultValueFont;
                 textBox_value.Name = "value_" + Convert.ToString(i);
                 textBox_value.TabIndex = i;
                 textBox_value.Text = line.m_strValue;
                 textBox_value.MaxLength = line.m_nValueLength;
                 textBox_value.nIndex = i;
                 textBox_value.fixedFieldCtrl = this;
-                this.Controls.Add(textBox_value);
+                _editArea.Controls.Add(textBox_value);
                 line.TextBox_value = textBox_value;
                 textBox_value.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
                 textBox_value.ForeColor = SystemColors.WindowText;
                 textBox_value.BackColor = SystemColors.Window;
                 textBox_value.TextChanged -= new EventHandler(textBox_value_TextChanged);
                 textBox_value.TextChanged += new EventHandler(textBox_value_TextChanged);
+                textBox_value.Tag = line;
 
                 Label label_label = new Label();
-                label_label.Font = this.DefaultInfoFont;
+                label_label.Font = bold ? this.DefaultInfoFontBold : this.DefaultInfoFont;
                 label_label.Name = "label_" + Convert.ToString(i);
                 label_label.TabIndex = i;
                 label_label.Text = line.m_strLabel;
                 label_label.TextAlign = ContentAlignment.MiddleRight;
                 // label_label.BorderStyle = BorderStyle.FixedSingle;
-                this.Controls.Add(label_label);
+                _editArea.Controls.Add(label_label);
                 line.Label_label = label_label;
 
                 Label label_name = new Label();
-                label_name.Font = this.DefaultInfoFont;
+                label_name.Font = bold ? this.DefaultInfoFontBold : this.DefaultInfoFont;
                 label_name.Name = "name_" + Convert.ToString(i);
                 label_name.TabIndex = i;
                 label_name.Text = line.m_strName;
@@ -346,26 +388,29 @@ namespace DigitalPlatform.Marc
                 label_name.BorderStyle = BorderStyle.None;
                 // label_name.BackColor = SystemColors.Window;
                 label_name.ForeColor = SystemColors.GrayText;
-                this.Controls.Add(label_name);
+                _editArea.Controls.Add(label_name);
                 line.Label_Name = label_name;
 
                 Label label_state = new Label();
-                label_state.Font = this.DefaultInfoFont;
+                label_state.Font = bold ? this.DefaultInfoFontBold : this.DefaultInfoFont;
                 label_state.Name = "state_" + Convert.ToString(i);
                 label_state.TabIndex = i;
                 label_state.Text = "";
                 label_state.BorderStyle = BorderStyle.None;
                 label_state.ImageList = this.imageList_lineState;
-                this.Controls.Add(label_state);
+                _editArea.Controls.Add(label_state);
                 line.Label_state = label_state;
                 line.LineState = line.LineState;
             }
 
+            // 建立列表区域
             this.listView_values = new ListView();
+            this.listView_values.Font = DefaultValueFont;   // 2021/10/24
+            this.listView_values.ShowItemToolTips = true;
             this.listView_values.Name = "listView_values";
             this.listView_values.TabIndex = 100;
             this.listView_values.View = View.Details;
-            this.listView_values.Columns.Add("值", 50, HorizontalAlignment.Left);
+            this.listView_values.Columns.Add("值", 60, HorizontalAlignment.Left);
             this.listView_values.Columns.Add("说明", 700, HorizontalAlignment.Left);
             this.listView_values.FullRowSelect = true;
             this.listView_values.HideSelection = false;
@@ -516,11 +561,10 @@ namespace DigitalPlatform.Marc
 
             AdjustTextboxSize(
                 true,
-             out nResultWidth,
-             out nResultHeight);
-
+                out nResultWidth,
+                out nResultHeight);
             return 1;
-		}
+        }
 
         internal int m_nDisableTextChanged = 0;
 
@@ -540,7 +584,7 @@ namespace DigitalPlatform.Marc
                     return;
 
                 TemplateLine changed_line = null;
-                foreach (TemplateLine line in this.templateRoot.Lines)
+                foreach (var line in this.templateRoot.Lines)
                 {
                     if (line.TextBox_value == textbox)
                     {
@@ -642,7 +686,7 @@ namespace DigitalPlatform.Marc
 
         TemplateLine GetLine(ValueEditBox textbox)
         {
-            foreach (TemplateLine line in this.templateRoot.Lines)
+            foreach (var line in this.templateRoot.Lines)
             {
                 if (line.TextBox_value == textbox)
                 {
@@ -665,12 +709,12 @@ namespace DigitalPlatform.Marc
             strValue = "";
             strError = "";
 
-            TemplateLine line = (TemplateLine)this.templateRoot.Lines[index];
-			if (line == null)
-			{
+            TemplateLine line = this.templateRoot.Lines[index];
+            if (line == null)
+            {
                 strError = "未找到序号为'" + Convert.ToString(index) + "'行";
                 return -1;
-			}
+            }
 
             if (line.DefaultValue == null)
             {
@@ -718,16 +762,16 @@ namespace DigitalPlatform.Marc
 
         int m_nInShowValueList = 0;
 
-		// 显示值列表
-		public void ShowValueList(
+        // 显示值列表
+        public void ShowValueList(
             int nCaretPosition,
             int nLineChars,
             string strCurLine)
-		{
-			this.Update();
+        {
+            this.Update();
 
-			if (this.nCurLine == -1)
-				return;
+            if (this.nCurLine == -1)
+                return;
 
             if (this.m_nInShowValueList > 0)
             {
@@ -741,7 +785,7 @@ namespace DigitalPlatform.Marc
             {
                 string strError = "";
 
-                TemplateLine line = (TemplateLine)this.templateRoot.Lines[this.nCurLine];
+                TemplateLine line = this.templateRoot.Lines[this.nCurLine];
                 if (line == null)
                 {
                     strError = "未找到序号为'" + Convert.ToString(this.nCurLine) + "'行";
@@ -830,25 +874,37 @@ namespace DigitalPlatform.Marc
 
                 this.listView_values.Items.Clear(); // 2006/5/30 add
 
-                foreach (XmlNode valuelist_node in line.ValueListNodes)
+                int nMaxValueChars = 0; // 值列最大字符数
+                foreach (XmlElement valuelist_node in line.ValueListNodes)
                 {
-                    XmlNodeList itemList = valuelist_node.SelectNodes("Item");
+                    // TODO: 要处理 valueList_node 的 merge="xxx" 属性
+                    var itemList = GetItems(valuelist_node);
+                    // XmlNodeList itemList = valuelist_node.SelectNodes("Item");
                     foreach (XmlNode itemNode in itemList)
                     {
-                        string strItemLable = "";
+                        string strItemLabel = "";
 
                         // 从一个元素的下级的多个<strElementName>元素中, 提取语言符合的XmlNode的InnerText
                         // parameters:
                         //      bReturnFirstNode    如果找不到相关语言的，是否返回第一个<strElementName>
-                        strItemLable = DomUtil.GetXmlLangedNodeText(
+                        strItemLabel = DomUtil.GetXmlLangedNodeText(
                     this.Lang,
                     itemNode,
                     "Label",
                     true);
-                        if (string.IsNullOrEmpty(strItemLable) == true)
-                            strItemLable = "<尚未定义>";
+                        if (string.IsNullOrEmpty(strItemLabel) == true)
+                            strItemLabel = "<尚未定义>";
                         else
-                            strItemLable = StringUtil.Trim(strItemLable);
+                            strItemLabel = StringUtil.Trim(strItemLabel);
+
+                        // 2021/10/23
+                        string strItemComment = DomUtil.GetXmlLangedNodeText(
+this.Lang,
+itemNode,
+"Comment",
+true);
+                        if (string.IsNullOrEmpty(strItemComment) == false)
+                            strItemLabel += $"({strItemComment})";
 
 #if NO
                         XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
@@ -884,11 +940,23 @@ namespace DigitalPlatform.Marc
                             nValueChars = strItemValue.Length;
                         }
 
+                        nMaxValueChars = Math.Max(nMaxValueChars, strItemValue.Length);
+
                         // 加入listview
                         ListViewItem item = new ListViewItem(strItemValue);
-                        item.SubItems.Add(strItemLable);
+                        item.SubItems.Add(strItemLabel);
                         this.listView_values.Items.Add(item);
                     }
+                }
+
+                // 2021/10/24
+                // 确保 listview 第一列可以容纳最宽的字符
+                if (nMaxValueChars > 0)
+                {
+                    int pixel_width = GraphicsUtil.GetWidth(this.listView_values.Font,
+        new string('M', nMaxValueChars));
+                    if (this.listView_values.Columns[0].Width < pixel_width)
+                        this.listView_values.Columns[0].Width = pixel_width;
                 }
 
                 this.CurValueListNodes = line.ValueListNodes;
@@ -942,7 +1010,120 @@ namespace DigitalPlatform.Marc
             {
                 this.m_nInShowValueList--;
             }
-		}
+        }
+
+        // 2021/10/23
+        // 获得一个 ValueList 元素下的全部 Item 元素。
+        // 注：此函数可以处理 <ValueList merge="xxx"> 情况
+        static List<XmlElement> GetItems(XmlElement valuelist)
+        {
+            string mergeName = valuelist.GetAttribute("merge");
+            if (string.IsNullOrEmpty(mergeName) == false)
+            {
+                // 找到这个 ValueList
+                var base_valuelist = valuelist.OwnerDocument.DocumentElement.SelectSingleNode($"//ValueList[@name='{mergeName}']") as XmlElement;
+                if (base_valuelist == null)
+                    throw new Exception($"没有找到名为 '{mergeName}' 的 ValueList 元素");
+                var origins = GetItems(base_valuelist);
+
+                // 选出现有 Item 元素，然后从 XmlDocument 中删除
+                var items = new List<XmlElement>(valuelist.SelectNodes("Item").Cast<XmlElement>());
+                foreach (XmlElement item in items)
+                {
+                    // 从当前 XmlDocument 中删除
+                    item.ParentNode.RemoveChild(item);
+                }
+
+                // 要把内容复制过来再修改
+                List<XmlElement> targets = new List<XmlElement>();
+                foreach (var origin in origins)
+                {
+                    XmlElement target = valuelist.AppendChild(origin.CloneNode(true)) as XmlElement;
+                    targets.Add(target);
+                }
+
+                foreach (XmlElement item in items)
+                {
+                    var target = FindItem(targets, GetItemValue(item));
+                    if (target == null)
+                        valuelist.AppendChild(item);
+                    else
+                        MergeItem(target, item);
+                }
+
+                // 删除 merge 属性
+                // TODO: 为了方便调试识别，可以考虑把 merge 属性值赋予一个调试属性
+                valuelist.RemoveAttribute("merge");
+                return new List<XmlElement>(valuelist.SelectNodes("Item").Cast<XmlElement>());
+            }
+
+            return new List<XmlElement>(valuelist.SelectNodes("Item").Cast<XmlElement>());
+        }
+
+        // 获得 Item 元素的下级 Value 元素的 InnerText
+        static string GetItemValue(XmlElement item)
+        {
+            return item.SelectSingleNode("Value")?.InnerText;
+        }
+
+        // 根据 Value 值找到集合中的一个 Item 元素
+        static XmlElement FindItem(List<XmlElement> items, string value)
+        {
+            foreach (var item in items)
+            {
+                if (GetItemValue(item) == value)
+                    return item;
+            }
+
+            return null;
+        }
+
+        // 把 addition 元素的下级元素合并到 origin 元素下级。最终 origin 元素被修改
+        static void MergeItem(XmlElement origin, XmlElement addition)
+        {
+            // 遍历下级元素
+            foreach (XmlNode sub in addition.ChildNodes)
+            {
+                if (sub.NodeType != XmlNodeType.Element)
+                    continue;
+                XmlElement child = sub as XmlElement;
+                if (child.Name == "Comment" || child.Name == "Label")
+                {
+                    string lang = child.GetAttribute("lang", "http://www.w3.org/XML/1998/namespace");
+                    MergeElement(origin, lang, child.Name, child.InnerText);
+                }
+            }
+        }
+
+        static void MergeElement(XmlElement origin, string lang, string element_name, string inner_text)
+        {
+            // 遍历下级元素
+            foreach (XmlNode sub in origin.ChildNodes)
+            {
+                if (sub.NodeType != XmlNodeType.Element)
+                    continue;
+                XmlElement child = sub as XmlElement;
+                if (child.Name == element_name)
+                {
+                    string current_lang = child.GetAttribute("lang", "http://www.w3.org/XML/1998/namespace");
+                    if (current_lang == lang)
+                    {
+                        child.InnerText = inner_text;
+                        return;
+                    }
+                }
+            }
+
+            // 没有找到，那就插入一个下级元素
+            var new_child = origin.OwnerDocument.CreateElement(element_name);
+            {
+                var attr = origin.OwnerDocument.CreateAttribute("xml", "lang", "http://www.w3.org/XML/1998/namespace");
+                attr.Value = lang;
+                origin.SetAttributeNode(attr);
+            }
+            new_child.InnerText = inner_text;
+            origin.AppendChild(new_child);
+        }
 
         public int LineCount
         {
@@ -958,7 +1139,11 @@ namespace DigitalPlatform.Marc
         {
             if (this.m_currentTextBox != null)
             {
-                this.m_currentTextBox.Font = this.DefaultValueFont;
+                var line = this.m_currentTextBox.Tag as TemplateLine;
+                Debug.Assert(line != null);
+                var bold = StringUtil.IsInList("bold", line.DisplayStyle) == true;
+
+                this.m_currentTextBox.Font = bold ? this.DefaultValueFontBold : this.DefaultValueFont;
                 this.m_currentTextBox.ForeColor = SystemColors.WindowText;
                 this.m_currentTextBox.BackColor = SystemColors.Window;
             }
@@ -975,7 +1160,7 @@ namespace DigitalPlatform.Marc
             if (nLineIndex >= templateRoot.Lines.Count)
                 return null; // 下标越界
 
-            TemplateLine line = (TemplateLine)templateRoot.Lines[nLineIndex];
+            TemplateLine line = templateRoot.Lines[nLineIndex];
 
             ChangeFocusDisplay(line.TextBox_value);
 
@@ -1025,8 +1210,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
 
          * */
         // 当在ValueList列表中双击某项时把值回到对应的地方
-		private void ValueList_DoubleClick(object sender, System.EventArgs e)
-		{
+        private void ValueList_DoubleClick(object sender, System.EventArgs e)
+        {
             string strError = "";
 
             if (this.listView_values.SelectedItems.Count == 0)
@@ -1035,11 +1220,11 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                 goto ERROR1;
             }
 
-			ListViewItem item = this.listView_values.SelectedItems[0];
+            ListViewItem item = this.listView_values.SelectedItems[0];
 
             // 配置文件中可以使用 '_' 代替空格
-			string strValue = item.Text.Trim().Replace("_", " ");
-			//MessageBox.Show(this,strValue);
+            string strValue = item.Text.Trim().Replace("_", " ");
+            //MessageBox.Show(this,strValue);
 
             if (string.IsNullOrEmpty(strValue) == true)
             {
@@ -1047,59 +1232,59 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                 goto ERROR1;
             }
 
-			TemplateLine line = (TemplateLine)this.templateRoot.Lines[this.nCurLine];
-			int nPosition = line.TextBox_value.SelectionStart;
+            TemplateLine line = this.templateRoot.Lines[this.nCurLine];
+            int nPosition = line.TextBox_value.SelectionStart;
 
-			if (nPosition == line.m_nValueLength)
-				nPosition = line.m_nValueLength -1;
+            if (nPosition == line.m_nValueLength)
+                nPosition = line.m_nValueLength - 1;
 
-			// 得到正确的插入符位置
-			if (line.TextBox_value.MaxLength % strValue.Length != 0)
-			{
+            // 得到正确的插入符位置
+            if (line.TextBox_value.MaxLength % strValue.Length != 0)
+            {
                 strError = "值字符数必须是配置值的整倍数";  // 2009/9/21 add
-				goto ERROR1;
-			}
+                goto ERROR1;
+            }
 
-			string strTempValue = line.m_strValue;
-			if (strTempValue.Length < line.m_nValueLength)
-				strTempValue = strTempValue + new string(' ',line.m_nValueLength - strTempValue.Length);
+            string strTempValue = line.m_strValue;
+            if (strTempValue.Length < line.m_nValueLength)
+                strTempValue = strTempValue + new string(' ', line.m_nValueLength - strTempValue.Length);
 
-			nPosition = (nPosition/strValue.Length)*strValue.Length;
+            nPosition = (nPosition / strValue.Length) * strValue.Length;
 
-			strTempValue = strTempValue.Remove(nPosition,strValue.Length);
-			strTempValue = strTempValue.Insert(nPosition,strValue);
+            strTempValue = strTempValue.Remove(nPosition, strValue.Length);
+            strTempValue = strTempValue.Insert(nPosition, strValue);
 
-			line.m_strValue = strTempValue;
-			line.TextBox_value.Text = strTempValue;
-			line.TextBox_value.SelectionStart = nPosition + strValue.Length;
+            line.m_strValue = strTempValue;
+            line.TextBox_value.Text = strTempValue;
+            line.TextBox_value.SelectionStart = nPosition + strValue.Length;
 
-			line.TextBox_value.Focus();
+            line.TextBox_value.Focus();
             line.TextBox_value.NextLineIfNeed();
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-		}
-		
-		// 得到字段的值
-		public string Value
-		{
-			get
-			{
+        }
+
+        // 得到字段的值
+        public string Value
+        {
+            get
+            {
                 if (this.templateRoot != null)
-				    return this.templateRoot.GetValue();
+                    return this.templateRoot.GetValue();
 
                 return "";
-			}
-			set
-			{
+            }
+            set
+            {
                 if (templateRoot != null)
                 {
                     m_nDisableTextChanged++;
                     this.templateRoot.SetValue(value);
                     m_nDisableTextChanged--;
                 }
-			}
-		}
+            }
+        }
 
         // 多处来的字符串部分
         public string AdditionalValue
@@ -1118,31 +1303,31 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
             }
         }
 
-		#endregion
+        #endregion
 
-		#region 事件
+        #region 事件
 
-		public event BeginGetValueListEventHandle BeginGetValueList;
-		public void fireBeginGetValueList(object sender,
-			BeginGetValueListEventArgs args)
-		{
-			if (BeginGetValueList != null)
-			{
-				this.BeginGetValueList(sender,args);
-			}
-		}
+        public event BeginGetValueListEventHandle BeginGetValueList;
+        public void fireBeginGetValueList(object sender,
+            BeginGetValueListEventArgs args)
+        {
+            if (BeginGetValueList != null)
+            {
+                this.BeginGetValueList(sender, args);
+            }
+        }
 
-		public event EndGetValueListEventHandle EndGetValueList;
-		public void fireEndGetValueList(object sender,
-			EndGetValueListEventArgs args)
-		{
-			if (EndGetValueList != null)
-			{
-				this.EndGetValueList(sender,args);
-			}
-		}
+        public event EndGetValueListEventHandle EndGetValueList;
+        public void fireEndGetValueList(object sender,
+            EndGetValueListEventArgs args)
+        {
+            if (EndGetValueList != null)
+            {
+                this.EndGetValueList(sender, args);
+            }
+        }
 
-		#endregion
+        #endregion
 
         private void MarcFixedFieldControl_Enter(object sender, EventArgs e)
         {
@@ -1152,8 +1337,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                 TemplateLine line = null;
                 if (this.m_currentTextBox != null)
                     line = GetLine(this.m_currentTextBox);
-                else 
-                    line = (TemplateLine)this.templateRoot.Lines[0];
+                else
+                    line = this.templateRoot.Lines[0];
 
                 if (line == null)
                     return;
@@ -1168,7 +1353,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
             // 如果有闲暇，可以编为第一次就针对性焦点在某个行上
             if (this.templateRoot.Lines.Count > 0)
             {
-                TemplateLine line = (TemplateLine)this.templateRoot.Lines[0];
+                TemplateLine line = this.templateRoot.Lines[0];
                 line.TextBox_value.SelectionStart = 0;
                 line.TextBox_value.SelectionLength = 0;
 
@@ -1181,17 +1366,31 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
         {
             base.OnSizeChanged(e);
 
-            AdjuetListViewSize();
+            AdjuetLayoutSize();
         }
 
-        public void AdjuetListViewSize()
+        // 调整 ListView 内部左边第一列的宽度，确保文字不被显示截断
+        public void AdjustListviewColumnWidth()
         {
+
+        }
+
+        public void AdjuetLayoutSize()
+        {
+            if (this._editArea != null)
+            {
+                int height = this.ClientSize.Height;
+                this._editArea.Size = new Size(this._editAreaWidth, Math.Max(0, height));
+            }
+
             if (listView_values != null)
             {
                 int nWidth = this.Width - this.listView_values.Location.X;
                 this.listView_values.Size = new Size(nWidth, this.Size.Height);
             }
         }
+
+        int _editAreaWidth = 0;
 
         public void AdjustTextboxSize(
             bool bSimulate,
@@ -1207,10 +1406,12 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
   out nLabelWidth,
   out nNameWidth);
 
-            int y = this.Padding.Top;
+            int y = this._editArea.Padding.Top;
             int nBlankWidth = 8;
             int nLineSep = 4;
             int nStateWidth = 8;
+            int left_padding = this._editArea.Padding.Left;
+            int right_padding = this._editArea.Padding.Right;
 
             int nMaxValueWidth = 0;
             for (int i = 0; i < this.templateRoot.Lines.Count; i++)
@@ -1218,7 +1419,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                 if (i != 0)
                     y += nLineSep;
 
-                TemplateLine line = (TemplateLine)this.templateRoot.Lines[i];
+                TemplateLine line = this.templateRoot.Lines[i];
 
                 string strTempValue = line.m_strValue;
                 // strTempValue = strTempValue.Replace(' ','m');   // ?
@@ -1239,7 +1440,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                 {
                     line.TextBox_value.ClientSize = new Size(nValueWidth, line.TextBox_value.ClientSize.Height);
                     line.TextBox_value.Location = new System.Drawing.Point(
-                        this.Padding.Left + nLabelWidth + nBlankWidth + nNameWidth + nStateWidth,
+                        left_padding + nLabelWidth + nBlankWidth + nNameWidth + nStateWidth,
                         y);
                 }
 
@@ -1249,7 +1450,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                 {
                     // line.Label_label.AutoSize = true;
                     line.Label_label.Size = new Size(nLabelWidth, nHeight);
-                    line.Label_label.Location = new System.Drawing.Point(this.Padding.Left, y);
+                    line.Label_label.Location = new System.Drawing.Point(left_padding, y);
 
                     line.Label_Name.AutoSize = true;
                     // line.Label_Name.Size = new Size(nNameWidth, nHeight);
@@ -1259,7 +1460,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
 
                     line.Label_state.Size = new Size(nStateWidth, nHeight);
                     line.Label_state.Location = new System.Drawing.Point(
-                        this.Padding.Left + nLabelWidth + nBlankWidth + nNameWidth,
+                        left_padding + nLabelWidth + nBlankWidth + nNameWidth,
                         y);
 
                 }
@@ -1267,11 +1468,14 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                 y = y + nHeight;
             }
 
-            int nListViewOrgX = this.Padding.Left + nLabelWidth + nBlankWidth + nNameWidth + nStateWidth + nMaxValueWidth + 4 + this.Padding.Right;
+            _editAreaWidth = left_padding + nLabelWidth + nBlankWidth + nNameWidth + nStateWidth + nMaxValueWidth + 4 + right_padding + SystemInformation.VerticalScrollBarWidth;
+
+            // int nListViewOrgX = this.Padding.Left + nLabelWidth + nBlankWidth + nNameWidth + nStateWidth + nMaxValueWidth + 4 + this.Padding.Right;
+            int nListViewOrgX = this.Padding.Left + _editAreaWidth + this.Padding.Right;
             int nListViewOrgY = 0;
 
             int nListViewWidth = Math.Min(this.Width - nListViewOrgX - 10, 200);
-            int nListViewHeight = Math.Max(y+this.Padding.Bottom, 10 * this.DefaultValueFont.Height);  // 保证高度不能太小
+            int nListViewHeight = Math.Max(y + this.Padding.Top + this.Padding.Bottom, 10 * this.DefaultValueFont.Height);  // 保证高度不能太小
 
             if (bSimulate == false)
             {
@@ -1279,8 +1483,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                     nListViewOrgX,
                     nListViewOrgY);
                 this.listView_values.Size = new Size(nListViewWidth, nListViewHeight);
-                this.listView_values.MinimumSize = new Size(50, nListViewHeight);
-                this.listView_values.MaximumSize = new Size(1024, 768);
+                // this.listView_values.MinimumSize = new Size(50, nListViewHeight);
+                // this.listView_values.MaximumSize = new Size(1024, 768);
             }
 
             int nDocumentWith = nListViewOrgX + nListViewWidth;
@@ -1288,7 +1492,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
 
             nResultWidth = nDocumentWith + 100;
             nResultHeight = nDocumentHeight;
-
 
             // TODO: 修改label的宽度?
             if (bSimulate == false)
@@ -1305,36 +1508,42 @@ EventArgs e)
 
             // 迫使采用最新的字体
             this.m_fontDefaultInfo = null;
+
             this.m_fontDefaultValue = null;
 
+            this.m_fontDefaultInfoBold = null;
+
+            this.m_fontDefaultValueBold = null;
+
             // Font textbox_font = new Font("Courier New", this.Font.SizeInPoints, GraphicsUnit.Point);
-            for (int i = 0; i < this.templateRoot.Lines.Count; i++)
+            foreach (var line in this.templateRoot.Lines)
             {
-                TemplateLine line = (TemplateLine)this.templateRoot.Lines[i];
+                // TemplateLine line = this.templateRoot.Lines[i];
 
                 string strTempValue = line.m_strValue;
 
-                line.TextBox_value.Font = this.DefaultValueFont;
-                line.Label_label.Font = this.DefaultInfoFont;
-                line.Label_Name.Font = this.DefaultInfoFont;
+                var bold = StringUtil.IsInList("bold", line.DisplayStyle) == true;
+                line.TextBox_value.Font = bold ? this.DefaultValueFontBold : this.DefaultValueFont;
+                line.Label_label.Font = bold ? this.DefaultInfoFontBold : this.DefaultInfoFont;
+                line.Label_Name.Font = bold ? this.DefaultInfoFontBold : this.DefaultInfoFont;
             }
         }
-	}
+    }
 
 
-	public delegate void BeginGetValueListEventHandle(object sender,
-	BeginGetValueListEventArgs e);
-	public class BeginGetValueListEventArgs: EventArgs
-	{
-		public string Ref = "";
-	}
+    public delegate void BeginGetValueListEventHandle(object sender,
+    BeginGetValueListEventArgs e);
+    public class BeginGetValueListEventArgs : EventArgs
+    {
+        public string Ref = "";
+    }
 
-	public delegate void EndGetValueListEventHandle(object sender,
-	EndGetValueListEventArgs e);
-	public class EndGetValueListEventArgs: EventArgs
-	{
-		public string Ref = "";
-	}
+    public delegate void EndGetValueListEventHandle(object sender,
+    EndGetValueListEventArgs e);
+    public class EndGetValueListEventArgs : EventArgs
+    {
+        public string Ref = "";
+    }
 
     //
     public delegate void GetConfigFileEventHandle(object sender,

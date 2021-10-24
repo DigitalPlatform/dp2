@@ -11,59 +11,63 @@ using DigitalPlatform.Text;
 namespace DigitalPlatform.Marc
 {
     // 模板行
-	public class TemplateLine : IComparable
-	{
-		public TemplateRoot container = null;
+    public class TemplateLine : IComparable
+    {
+        public TemplateRoot container = null;
 
         public bool IsSensitive = false;
         internal LineState m_lineState = LineState.None;
 
-		private XmlNode m_charNode = null;
-		private string m_strLang = null;
+        private XmlNode m_charNode = null;
+        private string m_strLang = null;
 
-		internal string m_strLabel = null;
-		internal string m_strName = null;
-		internal string m_strValue = null;
+        internal string m_strLabel = null;
+        internal string m_strName = null;
+        internal string m_strValue = null;
+
+        // 2021/10/24
+        // Char/Display/@style
+        public string DisplayStyle { get; set; }
 
         // public XmlNode ValueListNode1 = null;   // 由TemplateLine.Initial()初始化
         public List<XmlNode> ValueListNodes = null;   // 由TemplateLine.Initial()初始化
 
-		public Label Label_label = null;
-		public Label Label_Name = null;
+        public Label Label_label = null;
+        public Label Label_Name = null;
         public Label Label_state = null;
         public ValueEditBox TextBox_value = null;   // changed 2006/5/15
 
-		internal int m_nValueLength = 0;
-		internal int m_nStart = 0;
+        internal int m_nValueLength = 0;
+        internal int m_nStart = 0;
 
         public string DefaultValue = null;
 
-		// parameter:
-		//		node	char节点
-		//		strLang	语言版本
-		public TemplateLine(TemplateRoot templateRoot,
-			XmlNode node,
-			string strLang)
-		{
-			this.container = templateRoot;
-			this.m_charNode = node;
-			this.m_strLang = strLang;
+        // parameter:
+        //		node	char节点
+        //		strLang	语言版本
+        public TemplateLine(TemplateRoot templateRoot,
+            XmlNode node,
+            string strLang)
+        {
+            this.container = templateRoot;
+            this.m_charNode = node;
+            this.m_strLang = strLang;
 
-			string strError;
-			// 通过一个Char节点，初始化本行的值
-			// parameter:
-			//		node	char节点
-			//		strLang	语言版本
-			//		strError	出错信息
-			// return:
-			//		-1	失败
-			//		0	成功
-			int nRet = this.Initial(this.m_charNode,
-				this.m_strLang,
-				out strError);
-			if (nRet == -1)
-				throw new Exception(strError);
-		}
+            string strError;
+            // 通过一个Char节点，初始化本行的值
+            // parameter:
+            //		node	char节点
+            //		strLang	语言版本
+            //		strError	出错信息
+            // return:
+            //		-1	失败
+            //		0	成功
+            int nRet = this.Initial(this.m_charNode,
+                this.m_strLang,
+                out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
 
         static string Trim(string s)
         {
@@ -97,57 +101,61 @@ namespace DigitalPlatform.Marc
         }
 
 
-/*
-		<Char name='0/5'>
-			<Property>
-				<Label xml:lang='en'>?</Label>
-				<Label xml:lang='cn'>记录长度</Label>
-				<Help xml:lang='cn'></Help>
-				<ValueList name='header_0/5'>
-					<Item>
-						<Value>?????</Value>
-						<Label xml:lang='cn'>由软件自动填写</Label>
-					</Item>
-				</ValueList>
-			</Property>
-		</Char>
-*/
-		// 通过一个Char节点，初始化本行的值
-		// parameter:
-		//		node	char节点
-		//		strLang	语言版本
-		//		strError	出错信息
-		// return:
-		//		-1	失败
-		//		0	成功
-		public int Initial(XmlNode node,
-			string strLang,
-			out string strError)
-		{
-			strError = "";
+        /*
+                <Char name='0/5'>
+                    <Property>
+                        <Label xml:lang='en'>?</Label>
+                        <Label xml:lang='cn'>记录长度</Label>
+                        <Help xml:lang='cn'></Help>
+                        <ValueList name='header_0/5'>
+                            <Item>
+                                <Value>?????</Value>
+                                <Label xml:lang='cn'>由软件自动填写</Label>
+                            </Item>
+                        </ValueList>
+                    </Property>
+                </Char>
+        */
+        // 通过一个Char节点，初始化本行的值
+        // parameter:
+        //		node	char节点
+        //		strLang	语言版本
+        //		strError	出错信息
+        // return:
+        //		-1	失败
+        //		0	成功
+        public int Initial(XmlNode node,
+            string strLang,
+            out string strError)
+        {
+            strError = "";
 
-			if (node == null)
-			{
-				strError = "调用错误，node参数不能为null";
-				Debug.Assert(false,strError);
-				return -1;
-			}
+            if (node == null)
+            {
+                strError = "调用错误，node参数不能为null";
+                Debug.Assert(false, strError);
+                return -1;
+            }
 
-			this.m_strName = Trim(DomUtil.GetAttr(node,"name"));
-			if (this.m_strName == "")
-			{
-				strError = "<Char>元素的name属性可能不存在或者值为空，配置文件不合法。";
-				Debug.Assert(false,strError);
-				return -1;					
-			}
+            this.m_strName = Trim(DomUtil.GetAttr(node, "name"));
+            if (this.m_strName == "")
+            {
+                strError = "<Char>元素的name属性可能不存在或者值为空，配置文件不合法。";
+                Debug.Assert(false, strError);
+                return -1;
+            }
 
-			XmlNode propertyNode = node.SelectSingleNode("Property");
-			if (propertyNode == null)
-			{
-				strError = "<Char>元素下级未定义<Property>元素，配置文件不合法";
-				Debug.Assert(false,strError);
-				return -1;
-			}
+            XmlNode propertyNode = node.SelectSingleNode("Property");
+            if (propertyNode == null)
+            {
+                strError = "<Char>元素下级未定义<Property>元素，配置文件不合法";
+                Debug.Assert(false, strError);
+                return -1;
+            }
+
+            // 2021/10/24
+            // Property/Display
+            this.DisplayStyle = propertyNode?.SelectSingleNode("Display/@style")?.Value;
 
             // <Property>/<sensitive>
             if (propertyNode.SelectSingleNode("sensitive") != null)
@@ -205,16 +213,16 @@ namespace DigitalPlatform.Marc
                 this.m_strLabel = Trim(DomUtil.GetNodeText(labelNode));
 #endif
 
-			// 给value赋初值
-			int nIndex = this.m_strName.IndexOf("/");
-			if (nIndex >= 0)
-			{
-				string strLetterCount = this.m_strName.Substring(nIndex+1);
-				this.m_nValueLength = Convert.ToInt32(strLetterCount);
-				this.m_nStart = Convert.ToInt32(this.m_strName.Substring(0,nIndex));
-			}
-			if (this.m_strValue == null)
-				this.m_strValue = new string('*',this.m_nValueLength);
+            // 给value赋初值
+            int nIndex = this.m_strName.IndexOf("/");
+            if (nIndex >= 0)
+            {
+                string strLetterCount = this.m_strName.Substring(nIndex + 1);
+                this.m_nValueLength = Convert.ToInt32(strLetterCount);
+                this.m_nStart = Convert.ToInt32(this.m_strName.Substring(0, nIndex));
+            }
+            if (this.m_strValue == null)
+                this.m_strValue = new string('*', this.m_nValueLength);
 
 
             XmlNodeList valuelist_nodes = propertyNode.SelectNodes("ValueList");
@@ -225,18 +233,16 @@ namespace DigitalPlatform.Marc
             }
 
             return 0;
+        }
 
-		}
+        // 比较
+        public int CompareTo(object obj)
+        {
+            TemplateLine line = (TemplateLine)obj;
 
-
-		// 比较
-		public int CompareTo(object obj)
-		{
-			TemplateLine line = (TemplateLine)obj;
-
-			return this.m_nStart - line.m_nStart;
-		}
-	}
+            return this.m_nStart - line.m_nStart;
+        }
+    }
 
     // 值对象
     public class ValueItem
