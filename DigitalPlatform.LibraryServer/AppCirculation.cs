@@ -11406,8 +11406,10 @@ start_time_1,
         // return:
         //      -1  数据格式错误
         //      0   成功
-        public int CheckNotifyPoint(
+        public static int CheckNotifyPoint(
+            LibraryApplication app,
             Calendar calendar,
+            DateTime utc_now,
             string strBorrowDate,
             string strPeriod,
             string strNotifyDef,
@@ -11418,22 +11420,23 @@ start_time_1,
 
             indices = new List<int>();
 
-            // long lOver = 0;
-
             DateTime borrowdate;
-
-            LibraryApplication app = this;
 
             try
             {
-                // 注意返回的是GMT时间
+                // 注意返回的是 GMT 时间
                 borrowdate = DateTimeUtil.FromRfc1123DateTimeString(strBorrowDate);
             }
             catch
             {
-                // text-level: 内部错误
-                strError = string.Format(this.GetString("借阅日期值s格式错误"), // "借阅日期值 '{0}' 格式错误"
-                    strBorrowDate);
+                if (app != null)
+                {
+                    // text-level: 内部错误
+                    strError = string.Format(app.GetString("借阅日期值s格式错误"), // "借阅日期值 '{0}' 格式错误"
+                        strBorrowDate);
+                }
+                else
+                    strError = $"借阅日期值 '{strBorrowDate}' 格式错误";
 
                 // "借阅日期值 '" + strBorrowDate + "' 格式错误";
                 return -1;
@@ -11448,10 +11451,14 @@ start_time_1,
                 out strError);
             if (nRet == -1)
             {
-                // text-level: 内部错误
-                strError = string.Format(this.GetString("借阅期限值s格式错误s"),    // "借阅期限 值 '{0}' 格式错误: {1}" 
-                    strPeriod,
-                    strError);
+                if (app != null)
+                    // text-level: 内部错误
+                    strError = string.Format(app.GetString("借阅期限值s格式错误s"),    // "借阅期限 值 '{0}' 格式错误: {1}" 
+                        strPeriod,
+                        strError);
+                else
+                    strError = $"借阅期限 值 '{strPeriod}' 格式错误: {strError}";
+
                 // "借阅期限 值 '" + strPeriod + "' 格式错误: " + strError;
                 return -1;
             }
@@ -11489,7 +11496,11 @@ start_time_1,
                 bEndInNonWorkingDay = true;
             }
 #endif
-            DateTime now = this.Clock.UtcNow;
+            /*
+            DateTime now = DateTime.UtcNow;
+            if (app != null)
+                now = app.Clock.UtcNow;
+            */
 
             // 正规化时间
             nRet = DateTimeUtil.RoundTime(strPeriodUnit,
@@ -11503,7 +11514,7 @@ start_time_1,
             if (nRet == -1)
                 return -1;
             nRet = DateTimeUtil.RoundTime(strPeriodUnit,
-    ref now,
+    ref utc_now,
     out strError);
             if (nRet == -1)
                 return -1;
@@ -11521,7 +11532,7 @@ start_time_1,
                 //      1   满足
                 nRet = GetCheckPoint(borrowdate,
                     timeEnd,
-                    now,
+                    utc_now,
                     strOnePoint,
                     out strError);
                 if (nRet == -1)
@@ -11604,7 +11615,7 @@ start_time_1,
 
                 // point 是否需要正规化？ 困难是此时不具备时间参数参数
 
-                if (point <= start || point >= end)
+                if (point < start || point > end) // 原来是 if (point <= start || point >= end)
                     return 0;
 
                 if (now >= point)
@@ -11634,13 +11645,15 @@ start_time_1,
                 return -1;
             }
 
-            // 计算出时间点
+            // 计算出检测时间点
             if (bReverse == true)
                 point = end - delta;
             else
                 point = start + delta;
 
-            if (point <= start || point >= end)
+            // start(借阅日期) ---- point(检查点) ---- end(应还日期)
+
+            if (point < start || point > end) // 原来是 if (point <= start || point >= end)
                 return 0;
 
             if (now >= point)

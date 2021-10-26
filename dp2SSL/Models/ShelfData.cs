@@ -3412,7 +3412,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             DateTime now = DateTime.Now;
             string path = Path.Combine(WpfClientInfo.UserLogDir, "initial_" + DateTimeUtil.DateTimeToString8(now) + ".txt");
             string time = now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
-            File.AppendAllText(path, "=== " + time + " ===\r\n" + text);
+            File.AppendAllText(path, "=== " + time + " ===\r\n" + text + "\r\n");
             return new WriteInitialLogResult
             {
                 FileName = path,

@@ -10,16 +10,16 @@
       <ValueList name="*" src="marcvaluelist" />
     </Style>
     <Description>USMARC西文图书</Description>
+    <!-- 最后修订: 2021/10/25 -->
   </Property>
   <Field name="###" length="24" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">Leader and Directory</Label>
+      <Label xml:lang="en">Leader</Label>
       <Label xml:lang="zh">头标区</Label>
-      <Help xml:lang="zh">帮助信息</Help>
     </Property>
     <Char name="0/5">
       <Property>
-        <Label xml:lang="en">Logical record length</Label>
+        <Label xml:lang="en">Record length</Label>
         <Label xml:lang="zh">记录长度</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#header_0/5" />
@@ -60,7 +60,7 @@
     <Char name="9/1">
       <Property>
         <Label xml:lang="en">Character coding scheme</Label>
-        <Label xml:lang="zh">编码特征</Label>
+        <Label xml:lang="zh">字符编码特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#header_9/1" />
       </Property>
@@ -68,7 +68,7 @@
     <Char name="10/1">
       <Property>
         <Label xml:lang="en">Indicator count</Label>
-        <Label xml:lang="zh">指示符长度</Label>
+        <Label xml:lang="zh">指示符数</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#header_10/1" />
       </Property>
@@ -76,7 +76,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Subfield code count</Label>
-        <Label xml:lang="zh">子字段标识符长度</Label>
+        <Label xml:lang="zh">子字段标识代码数</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#header_11/1" />
       </Property>
@@ -100,7 +100,7 @@
     <Char name="18/1">
       <Property>
         <Label xml:lang="en">Descriptive cataloging form</Label>
-        <Label xml:lang="zh">著录格式</Label>
+        <Label xml:lang="zh">著录标准</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#header_18/1" />
       </Property>
@@ -108,11 +108,12 @@
     <Char name="19/1">
       <Property>
         <Label xml:lang="en">Linked record requirement</Label>
-        <Label xml:lang="zh">记录关联条件</Label>
+        <Label xml:lang="zh">连接记录要求</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#header_19/1" />
       </Property>
     </Char>
+    <!--
     <Char name="20/4">
       <Property>
         <Label xml:lang="en">Entry map</Label>
@@ -126,14 +127,68 @@
         </ValueList>
       </Property>
     </Char>
+    -->
+    <Char name="20/1">
+      <Property>
+        <Label xml:lang="en">Length of the length-of-field portion</Label>
+        <Label xml:lang="zh">字段长度部分的长度</Label>
+        <Help xml:lang="zh" />
+        <ValueList>
+          <Item>
+            <Value>4</Value>
+            <Label xml:lang="zh">由软件自动填写</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="21/1">
+      <Property>
+        <Label xml:lang="en">Length of the starting-character-position portion</Label>
+        <Label xml:lang="zh">起始字符位置部分的长度</Label>
+        <Help xml:lang="zh" />
+        <ValueList>
+          <Item>
+            <Value>5</Value>
+            <Label xml:lang="zh">由软件自动填写</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="22/1">
+      <Property>
+        <Label xml:lang="en">Length of the implementation-define portion</Label>
+        <Label xml:lang="zh">实现者定义部分的长度</Label>
+        <Help xml:lang="zh" />
+        <ValueList>
+          <Item>
+            <Value>0</Value>
+            <Label xml:lang="zh">由软件自动填写</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="23/1">
+      <Property>
+        <Label xml:lang="en">Undefined</Label>
+        <Label xml:lang="zh">未定义</Label>
+        <Help xml:lang="zh" />
+        <ValueList>
+          <Item>
+            <Value>0</Value>
+            <Label xml:lang="zh">由软件自动填写</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
   </Field>
   <!-- *******************标识块(Identification Block)*****************
   -->
   <Field name="001" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">CONTROL NUMBER</Label>
+      <Label xml:lang="en">Control Number</Label>
       <Label xml:lang="zh">控制号</Label>
     </Property>
+    <!--
     <Char name="0/1">
       <Property>
         <Label xml:lang="en" />
@@ -160,29 +215,29 @@
         <Label xml:lang="zh">编目流水号</Label>
       </Property>
     </Char>
+    -->
   </Field>
   <Field name="003" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">CONTROL NUMBER IDENTIFIER</Label>
+      <Label xml:lang="en">Control Number Identifier</Label>
       <Label xml:lang="zh">控制号标识</Label>
     </Property>
   </Field>
   <Field name="005">
     <Property>
-      <Label xml:lang="en">DATE AND TIME OF LATEST TRANSACTION</Label>
-      <Label xml:lang="zh">最近一次作业的日期和时间</Label>
+      <Label xml:lang="en">Date and Time of Latest Transaction</Label>
+      <Label xml:lang="zh">最近一次处理的日期和时间</Label>
     </Property>
   </Field>
   <Field name="006" type="Books" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Additional Material Characteristics -- Books</Label>
-      <Label xml:lang="zh">Additional Material Characteristics -- Books</Label>
+      <Label xml:lang="zh">附件特征 - 图书</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Form of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006_0/1" />
         <sensitive />
@@ -191,8 +246,7 @@
     <Char name="1/4">
       <Property>
         <Label xml:lang="en">Illustrations</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">图表</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_1/4" />
       </Property>
@@ -200,8 +254,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Target audience</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">读者对象</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#targetaudiencecodes" />
       </Property>
@@ -209,8 +262,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Form of item</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
@@ -218,8 +270,7 @@
     <Char name="7/4">
       <Property>
         <Label xml:lang="en">Nature of contents</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">内容特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_7/4" />
       </Property>
@@ -227,8 +278,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Government publication</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
@@ -236,8 +286,7 @@
     <Char name="12/1">
       <Property>
         <Label xml:lang="en">Conference publication</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">会议出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_12/1" />
       </Property>
@@ -245,8 +294,7 @@
     <Char name="13/1">
       <Property>
         <Label xml:lang="en">Festschrift</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">纪念文集</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_13/1" />
       </Property>
@@ -262,8 +310,7 @@
     <Char name="15/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_15/1" />
       </Property>
@@ -271,8 +318,7 @@
     <Char name="16/1">
       <Property>
         <Label xml:lang="en">Literary form</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">文学体裁</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_16/1" />
       </Property>
@@ -280,8 +326,7 @@
     <Char name="17/1">
       <Property>
         <Label xml:lang="en">Biography</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">传记</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006book_17/1" />
       </Property>
@@ -290,13 +335,12 @@
   <Field name="006" type="Computer Files" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Additional Material Characteristics -- Computer files/Electronic resources</Label>
-      <Label xml:lang="zh">Additional Material Characteristics -- Computer files/Electronic resources</Label>
+      <Label xml:lang="zh">附件特征 - 计算机文件/电子资源</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Form of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006_0/1" />
         <sensitive />
@@ -305,8 +349,7 @@
     <Char name="1/4">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_1/4" />
       </Property>
@@ -314,8 +357,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Target audience</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">读者对象</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#targetaudiencecodes" />
       </Property>
@@ -323,8 +365,7 @@
     <Char name="6/3">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_6/3" />
       </Property>
@@ -332,8 +373,7 @@
     <Char name="9/1">
       <Property>
         <Label xml:lang="en">Type of computer file</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">计算机文件类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_9/1" />
       </Property>
@@ -341,8 +381,7 @@
     <Char name="10/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_10/1" />
       </Property>
@@ -350,8 +389,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Government publication</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
@@ -359,8 +397,7 @@
     <Char name="12/6">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006computer_12/1" />
       </Property>
@@ -369,13 +406,12 @@
   <Field name="006" type="Maps" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Additional Material Characteristics -- Maps</Label>
-      <Label xml:lang="zh">Additional Material Characteristics -- Maps</Label>
+      <Label xml:lang="zh">附件特征 - 地图</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Form of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006_0/1" />
         <sensitive />
@@ -384,8 +420,7 @@
     <Char name="1/4">
       <Property>
         <Label xml:lang="en">Relief</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">地形</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_1/4" />
       </Property>
@@ -393,8 +428,7 @@
     <Char name="5/2">
       <Property>
         <Label xml:lang="en">Projection</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">投影</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_5/2" />
       </Property>
@@ -402,8 +436,7 @@
     <Char name="7/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_7/1" />
       </Property>
@@ -411,8 +444,7 @@
     <Char name="8/1">
       <Property>
         <Label xml:lang="en">Type of cartographic material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">测绘制图资料出版形式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_8/1" />
       </Property>
@@ -420,8 +452,7 @@
     <Char name="9/2">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_9/2" />
       </Property>
@@ -429,8 +460,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Government publication</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
@@ -438,8 +468,7 @@
     <Char name="12/1">
       <Property>
         <Label xml:lang="en">Form of item</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
@@ -447,8 +476,7 @@
     <Char name="13/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_13/1" />
       </Property>
@@ -464,8 +492,7 @@
     <Char name="15/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_15/1" />
       </Property>
@@ -473,8 +500,7 @@
     <Char name="16/2">
       <Property>
         <Label xml:lang="en">Special format characteristics</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">特殊形式特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006maps_16/2" />
       </Property>
@@ -483,13 +509,12 @@
   <Field name="006" type="Music" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Additional Material Characteristics -- Music</Label>
-      <Label xml:lang="zh">Additional Material Characteristics -- Music</Label>
+      <Label xml:lang="zh">附件特征 - 音乐</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Form of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006_0/1" />
         <sensitive />
@@ -498,8 +523,7 @@
     <Char name="1/2">
       <Property>
         <Label xml:lang="en">Form of composition</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">乐曲形式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_1/2" />
       </Property>
@@ -507,8 +531,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">Format of music</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">乐谱类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_3/1" />
       </Property>
@@ -516,8 +539,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Music parts</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">分谱</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_4/1" />
       </Property>
@@ -525,8 +547,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Target audience</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">读者对象</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#targetaudiencecodes" />
       </Property>
@@ -534,8 +555,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Form of item</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
@@ -543,8 +563,7 @@
     <Char name="7/6">
       <Property>
         <Label xml:lang="en">Accompanying matter</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">附件</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_7/6" />
       </Property>
@@ -552,8 +571,7 @@
     <Char name="13/2">
       <Property>
         <Label xml:lang="en">Literary text for sound recordings</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">录音资料的文体类别</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_13/2" />
       </Property>
@@ -561,8 +579,7 @@
     <Char name="15/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_15/1" />
       </Property>
@@ -570,8 +587,7 @@
     <Char name="16/1">
       <Property>
         <Label xml:lang="en">Transposition and arrangement</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">变调和改编</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_16/1" />
       </Property>
@@ -579,8 +595,7 @@
     <Char name="17/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006music_17/1" />
       </Property>
@@ -589,13 +604,12 @@
   <Field name="006" type="Continuing Resources" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Additional Material Characteristics -- Continuing resources</Label>
-      <Label xml:lang="zh">Additional Material Characteristics -- Continuing resources</Label>
+      <Label xml:lang="zh">附件特征 - 连续性资源</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Form of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006_0/1" />
         <sensitive />
@@ -604,8 +618,7 @@
     <Char name="1/1">
       <Property>
         <Label xml:lang="en">Frequency</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">出版频率</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_1/1" />
       </Property>
@@ -613,8 +626,7 @@
     <Char name="2/1">
       <Property>
         <Label xml:lang="en">Regularity</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">发行规律</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_2/1" />
       </Property>
@@ -622,8 +634,7 @@
     <Char name="3/1">
       <Property>
         <Label xml:lang="en">ISSN center</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">ISSN 中心</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_3/1" />
       </Property>
@@ -631,8 +642,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Type of continuing resource</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">连续性资源类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_4/1" />
       </Property>
@@ -640,8 +650,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Form of original item</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">原版文献形式</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
@@ -649,8 +658,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Form of item</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
@@ -658,8 +666,7 @@
     <Char name="7/1">
       <Property>
         <Label xml:lang="en">Nature of entire work</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">整体特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_7/1" />
       </Property>
@@ -667,8 +674,7 @@
     <Char name="8/3">
       <Property>
         <Label xml:lang="en">Nature of contents</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">内容特征</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#natureofcontentscodes" />
       </Property>
@@ -676,8 +682,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Government publication</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
@@ -685,8 +690,7 @@
     <Char name="12/1">
       <Property>
         <Label xml:lang="en">Conference publication</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">会议出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_12/1" />
       </Property>
@@ -694,8 +698,7 @@
     <Char name="13/3">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_13/3" />
       </Property>
@@ -703,8 +706,7 @@
     <Char name="16/1">
       <Property>
         <Label xml:lang="en">Original alphabet or script of title</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">题名原文字母或文字</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_16/1" />
       </Property>
@@ -712,8 +714,7 @@
     <Char name="17/1">
       <Property>
         <Label xml:lang="en">Entry convention</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">款目原则</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006continuing_17/1" />
       </Property>
@@ -722,13 +723,12 @@
   <Field name="006" type="Mixed Materials" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Additional Material Characteristics -- Mixed materials</Label>
-      <Label xml:lang="zh">Additional Material Characteristics -- Mixed materials</Label>
+      <Label xml:lang="zh">附件特征 - 混合型资料</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Form of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006_0/1" />
         <sensitive />
@@ -737,8 +737,7 @@
     <Char name="1/5">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006mixed_1/5" />
       </Property>
@@ -746,8 +745,7 @@
     <Char name="6/1">
       <Property>
         <Label xml:lang="en">Form of item</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
@@ -755,8 +753,7 @@
     <Char name="7/11">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006mixed_7/11" />
       </Property>
@@ -765,13 +762,12 @@
   <Field name="006" type="Visual Materials" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Additional Material Characteristics -- Visual materials</Label>
-      <Label xml:lang="zh">Additional Material Characteristics -- Visual materials</Label>
+      <Label xml:lang="zh">附件特征 - 可视资料</Label>
     </Property>
     <Char name="0/1">
       <Property>
         <Label xml:lang="en">Form of material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006_0/1" />
         <sensitive />
@@ -780,8 +776,7 @@
     <Char name="1/3">
       <Property>
         <Label xml:lang="en">Running time</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">放映时间</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_1/3" />
       </Property>
@@ -789,8 +784,7 @@
     <Char name="4/1">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_4/1" />
       </Property>
@@ -798,8 +792,7 @@
     <Char name="5/1">
       <Property>
         <Label xml:lang="en">Target audience</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">读者对象</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_5/1" />
       </Property>
@@ -807,8 +800,7 @@
     <Char name="6/5">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_6/5" />
       </Property>
@@ -816,8 +808,7 @@
     <Char name="11/1">
       <Property>
         <Label xml:lang="en">Government publication</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">政府出版物</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#governmentpublicationcodes" />
       </Property>
@@ -825,8 +816,7 @@
     <Char name="12/1">
       <Property>
         <Label xml:lang="en">Form of item</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">载体形态</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#formofitemcodes" />
       </Property>
@@ -834,8 +824,7 @@
     <Char name="13/3">
       <Property>
         <Label xml:lang="en">Undefined</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">未定义</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_13/3" />
       </Property>
@@ -843,8 +832,7 @@
     <Char name="16/1">
       <Property>
         <Label xml:lang="en">Type of visual material</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">可视资料类型</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_16/1" />
       </Property>
@@ -852,8 +840,7 @@
     <Char name="17/1">
       <Property>
         <Label xml:lang="en">Technique</Label>
-        <Label xml:lang="zh">
-        </Label>
+        <Label xml:lang="zh">技术</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_17/1" />
       </Property>
@@ -862,7 +849,7 @@
   <Field name="007" type="map" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Map (007/00=a)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Map (007/00=a)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 地图 (007/00=a)</Label>
     </Property>
     <Char name="0/1">
       <Property>
@@ -933,7 +920,7 @@
   <Field name="007" type="electronic_resource" mandatory="yes" repeatable="no">
     <Property>
       <Label xml:lang="en">Physical Description Fixed Field-General Information -- Electronic resource (007/00=c)</Label>
-      <Label xml:lang="zh">Physical Description Fixed Field-General Information -- Electronic resource (007/00=c)</Label>
+      <Label xml:lang="zh">载体形态定长字段 - 一般信息 - 电子资源 (007/00=c)</Label>
     </Property>
     <Char name="0/1">
       <Property>
@@ -1914,8 +1901,8 @@
   -->
   <Field name="008" type="books" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION</Label>
-      <Label xml:lang="zh">定长数据元素-一般信息</Label>
+      <Label xml:lang="en">Fixed-Length Data Elements -- General Information</Label>
+      <Label xml:lang="zh">定长数据元素-一般信息 - 图书</Label>
     </Property>
     <Char name="0/6">
       <Property>
@@ -2082,8 +2069,8 @@
   -->
   <Field name="008" type="computer_files" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION</Label>
-      <Label xml:lang="zh">定长数据元素</Label>
+      <Label xml:lang="en">Fixed-Length Data Elements -- General Information</Label>
+      <Label xml:lang="zh">定长数据元素-一般信息 - 电子资源</Label>
     </Property>
     <Char name="0/6">
       <Property>
@@ -2214,8 +2201,8 @@
   -->
   <Field name="008" type="maps" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION</Label>
-      <Label xml:lang="zh">定长数据元素</Label>
+      <Label xml:lang="en">Fixed-Length Data Elements -- General Information</Label>
+      <Label xml:lang="zh">定长数据元素-一般信息 - 地图</Label>
     </Property>
     <Char name="0/6">
       <Property>
@@ -2382,8 +2369,8 @@
   -->
   <Field name="008" type="music" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION</Label>
-      <Label xml:lang="zh">定长数据元素</Label>
+      <Label xml:lang="en">Fixed-Length Data Elements -- General Information</Label>
+      <Label xml:lang="zh">定长数据元素-一般信息 - 音乐</Label>
     </Property>
     <Char name="0/6">
       <Property>
@@ -2541,8 +2528,8 @@
   -->
   <Field name="008" type="contining_resources" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION</Label>
-      <Label xml:lang="zh">定长数据元素</Label>
+      <Label xml:lang="en">Fixed-Length Data Elements -- General Information</Label>
+      <Label xml:lang="zh">定长数据元素-一般信息 - 连续性资源</Label>
     </Property>
     <Char name="0/6">
       <Property>
@@ -2727,8 +2714,8 @@
   -->
   <Field name="008" type="visual_materials" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION</Label>
-      <Label xml:lang="zh">定长数据元素</Label>
+      <Label xml:lang="en">Fixed-Length Data Elements -- General Information</Label>
+      <Label xml:lang="zh">定长数据元素-一般信息 - 可视资料</Label>
     </Property>
     <Char name="0/6">
       <Property>
@@ -2836,7 +2823,7 @@
         <Label xml:lang="zh">可视听资料</Label>
         <Help xml:lang="zh" />
         <ValueList ref="marcvaluelist#006visual_16/1" />
-      <Display style="bold" />
+        <Display style="bold" />
       </Property>
     </Char>
     <Char name="34/1">
@@ -2877,8 +2864,8 @@
   -->
   <Field name="008" type="mixed_materials" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION</Label>
-      <Label xml:lang="zh">定长数据元素</Label>
+      <Label xml:lang="en">Fixed-Length Data Elements -- General Information</Label>
+      <Label xml:lang="zh">定长数据元素-一般信息 - 混合型资料</Label>
     </Property>
     <Char name="0/6">
       <Property>
@@ -2969,7 +2956,7 @@
   </Field>
   <Field name="010" repeatable="no">
     <Property>
-      <Label xml:lang="en">LIBRARY OF CONGRESS CONTROL NUMBER</Label>
+      <Label xml:lang="en">Library of Congress Control Number</Label>
       <Label xml:lang="zh">美国国会图书馆控制号</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -2999,7 +2986,7 @@
   </Field>
   <Field name="013">
     <Property>
-      <Label xml:lang="en">PATENT CONTROL INFORMATION</Label>
+      <Label xml:lang="en">Patent Control Information</Label>
       <Label xml:lang="zh">专利控制信息</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -3053,7 +3040,7 @@
   </Field>
   <Field name="015" repeatable="no">
     <Property>
-      <Label xml:lang="en">NATIONAL BIBLIOGRAPHY NUMBER</Label>
+      <Label xml:lang="en">National Bibliography Number</Label>
       <Label xml:lang="zh">国家书目号</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -3083,9 +3070,41 @@
   </Field>
   <Field name="016">
     <Property>
-      <Label xml:lang="en">NATIONAL BIBLIOGRAPHIC AGENCY CONTROL NUMBER</Label>
+      <Label xml:lang="en">National Bibliographic Agency Control Number</Label>
       <Label xml:lang="zh">国家书目机构控制号</Label>
     </Property>
+    <Indicator>
+      <Char name="0/1">
+        <Property>
+          <Label xml:lang="en">National Bibliographic Agency</Label>
+          <Label xml:lang="zh">国家书目机构</Label>
+          <ValueList>
+            <Item>
+              <Value>_</Value>
+              <Label xml:lang="zh">加拿大国家图书馆</Label>
+            </Item>
+            <Item>
+              <Value>7</Value>
+              <Label xml:lang="zh">机构在 $2 说明</Label>
+              <Comment xml:lang="zh">机构代码取自美国国会图书馆维护的 MARC Code List for Organizations</Comment>
+            </Item>
+          </ValueList>
+        </Property>
+      </Char>
+      <Char name="1/1">
+        <Property>
+          <Label xml:lang="en">Undefined</Label>
+          <Label xml:lang="zh">未定义</Label>
+          <ValueList name="indicatorcharundefined">
+            <Item>
+              <Value>_</Value>
+              <Label xml:lang="zh">Undefined</Label>
+              <Label xml:lang="zh">未定义</Label>
+            </Item>
+          </ValueList>
+        </Property>
+      </Char>
+    </Indicator>
     <Subfield name="a" repeatable="no">
       <Property>
         <Label xml:lang="en">Record control number</Label>
@@ -3113,9 +3132,34 @@
   </Field>
   <Field name="017">
     <Property>
-      <Label xml:lang="en">COPYRIGHT OR LEGAL DEPOSIT NUMBER</Label>
-      <Label xml:lang="zh">版权登记号</Label>
+      <Label xml:lang="en">Copyright or Legal Deposit Number</Label>
+      <Label xml:lang="zh">版权或法定呈缴号</Label>
     </Property>
+    <Indicator>
+      <Char name="0/1">
+        <Property>
+          <Label xml:lang="en">Undefined</Label>
+          <Label xml:lang="zh">未定义</Label>
+          <ValueList ref="indicatorcharundefined"/>
+        </Property>
+      </Char>
+      <Char name="1/1">
+        <Property>
+          <Label xml:lang="en"></Label>
+          <Label xml:lang="zh">显示常数控制符</Label>
+          <ValueList>
+            <Item>
+              <Value>_</Value>
+              <Label xml:lang="zh">版权或法定呈缴号</Label>
+            </Item>
+            <Item>
+              <Value>8</Value>
+              <Label xml:lang="zh">不生成附注导语</Label>
+            </Item>
+          </ValueList>
+        </Property>
+      </Char>
+    </Indicator>
     <Subfield name="a" mandatory="yes">
       <Property>
         <Label xml:lang="en">Copyright registration number</Label>
@@ -3149,25 +3193,31 @@
   </Field>
   <Field name="018" repeatable="no">
     <Property>
-      <Label xml:lang="en">COPYRIGHT ARTICLE-FEE CODE</Label>
-      <Label xml:lang="zh">论文版权费识别代码</Label>
+      <Label xml:lang="en">Copyright Article-Fee Code</Label>
+      <Label xml:lang="zh">版权论文费代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
         <Label xml:lang="en">Copyright article-fee code</Label>
-        <Label xml:lang="zh">论文版权费识别代码</Label>
+        <Label xml:lang="zh">版权论文费代码</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="6">
+      <Property>
+        <Label xml:lang="en"></Label>
+        <Label xml:lang="zh">连接</Label>
       </Property>
     </Subfield>
     <Subfield name="8">
       <Property>
         <Label xml:lang="en">Field link and sequence number</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">字段连接和顺序号</Label>
       </Property>
     </Subfield>
   </Field>
   <Field name="020">
     <Property>
-      <Label xml:lang="en">INTERNATIONAL STANDARD BOOK NUMBER</Label>
+      <Label xml:lang="en">International Standard Book Number</Label>
       <Label xml:lang="zh">国际标准书号</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -3203,7 +3253,7 @@
   </Field>
   <Field name="022">
     <Property>
-      <Label xml:lang="en">INTERNATIONAL STANDARD SERIAL NUMBER</Label>
+      <Label xml:lang="en">International Standard Serial Number</Label>
       <Label xml:lang="zh">国际标准连续出版物号</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -3239,8 +3289,8 @@
   </Field>
   <Field name="024">
     <Property>
-      <Label xml:lang="en">OTHER STANDARD IDENTIFIER</Label>
-      <Label xml:lang="zh">其它标准号</Label>
+      <Label xml:lang="en">Other Standard Identifier</Label>
+      <Label xml:lang="zh">其他标准号标识</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -3287,7 +3337,7 @@
   </Field>
   <Field name="025" mandatory="yes">
     <Property>
-      <Label xml:lang="en">OVERSEAS ACQUISITION NUMBER</Label>
+      <Label xml:lang="en">Overseas Acquisition Number</Label>
       <Label xml:lang="zh">海外采访号</Label>
     </Property>
     <Subfield name="a">
@@ -3303,9 +3353,10 @@
       </Property>
     </Subfield>
   </Field>
+  <!-- TODO: 026 -->
   <Field name="027">
     <Property>
-      <Label xml:lang="en">STANDARD TECHNICAL REPORT NUMBER</Label>
+      <Label xml:lang="en">Standard Technical Report Number</Label>
       <Label xml:lang="zh">标准技术报告号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -3335,7 +3386,7 @@
   </Field>
   <Field name="028">
     <Property>
-      <Label xml:lang="en">PUBLISHER NUMBER</Label>
+      <Label xml:lang="en">Publisher Number</Label>
       <Label xml:lang="zh">音乐资料出版者号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -3365,8 +3416,8 @@
   </Field>
   <Field name="030">
     <Property>
-      <Label xml:lang="en">CODEN DESIGNATION</Label>
-      <Label xml:lang="zh">缩称代码(CODEN)标识</Label>
+      <Label xml:lang="en">CODEN Designation</Label>
+      <Label xml:lang="zh">科技期刊缩称代码(CODEN)</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -3393,9 +3444,10 @@
       </Property>
     </Subfield>
   </Field>
+  <!-- TODO: 031 -->
   <Field name="032">
     <Property>
-      <Label xml:lang="en">POSTAL REGISTRATION NUMBER</Label>
+      <Label xml:lang="en">Postal Registration Number</Label>
       <Label xml:lang="zh">邮政登记号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -3425,8 +3477,8 @@
   </Field>
   <Field name="033">
     <Property>
-      <Label xml:lang="en">DATE/TIME AND PLACE OF AN EVENT</Label>
-      <Label xml:lang="zh">事件发生的日期/时间和地点</Label>
+      <Label xml:lang="en">Date/Time and Place of an Event</Label>
+      <Label xml:lang="zh">事件的日期/时间和地点</Label>
     </Property>
     <Subfield name="a">
       <Property>
@@ -3467,7 +3519,7 @@
   </Field>
   <Field name="034">
     <Property>
-      <Label xml:lang="en">CODED CARTOGRAPHIC MATHEMATICAL DATA</Label>
+      <Label xml:lang="en">Code Cartographic Mathmatical Data</Label>
       <Label xml:lang="zh">制图数学数据代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -3575,7 +3627,7 @@
   </Field>
   <Field name="035">
     <Property>
-      <Label xml:lang="en">SYSTEM CONTROL NUMBER</Label>
+      <Label xml:lang="en">System Control Number</Label>
       <Label xml:lang="zh">系统控制号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -3605,13 +3657,13 @@
   </Field>
   <Field name="036" repeatable="no">
     <Property>
-      <Label xml:lang="en">ORIGINAL STUDY NUMBER FOR COMPUTER DATA FILES</Label>
+      <Label xml:lang="en">Original Study Number for Computer Data Files</Label>
       <Label xml:lang="zh">计算机文件的原始研究号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
         <Label xml:lang="en">Original study number</Label>
-        <Label xml:lang="zh">原始研究员</Label>
+        <Label xml:lang="zh">原始研究号</Label>
       </Property>
     </Subfield>
     <Subfield name="b" repeatable="no">
@@ -3623,19 +3675,19 @@
     <Subfield name="6">
       <Property>
         <Label xml:lang="en">Linkage</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">连接</Label>
       </Property>
     </Subfield>
     <Subfield name="8">
       <Property>
         <Label xml:lang="en">Field link and sequence number</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">字段连接和顺序号</Label>
       </Property>
     </Subfield>
   </Field>
   <Field name="037">
     <Property>
-      <Label xml:lang="en">SOURCE OF ACQUISITION</Label>
+      <Label xml:lang="en">Source of Acquisition</Label>
       <Label xml:lang="zh">采访源</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -3677,19 +3729,21 @@
     <Subfield name="6">
       <Property>
         <Label xml:lang="en">Linkage</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">连接</Label>
       </Property>
     </Subfield>
     <Subfield name="8">
       <Property>
         <Label xml:lang="en">Field link and sequence number</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">字段连接和顺序号</Label>
       </Property>
     </Subfield>
   </Field>
+  <!-- TODO: 038-->
+
   <Field name="040" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">CATALOGING SOURCE</Label>
+      <Label xml:lang="en">Cataloging Source</Label>
       <Label xml:lang="zh">编目源</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -3737,7 +3791,7 @@
   </Field>
   <Field name="041" repeatable="no">
     <Property>
-      <Label xml:lang="en">LANGUAGE CODE</Label>
+      <Label xml:lang="en">Language Code</Label>
       <Label xml:lang="zh">语种代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -3797,7 +3851,7 @@
   </Field>
   <Field name="042" repeatable="no">
     <Property>
-      <Label xml:lang="en">AUTHENTICATION CODE</Label>
+      <Label xml:lang="en">Authentication Code</Label>
       <Label xml:lang="zh">鉴定代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -3809,7 +3863,7 @@
   </Field>
   <Field name="043" repeatable="no">
     <Property>
-      <Label xml:lang="en">GEOGRAPHIC AREA CODE</Label>
+      <Label xml:lang="en">Geographic Area Code</Label>
       <Label xml:lang="zh">地理区域代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -3851,8 +3905,8 @@
   </Field>
   <Field name="044" repeatable="no">
     <Property>
-      <Label xml:lang="en">COUNTRY OF PUBLISHING/PRODUCING ENTITY CODE</Label>
-      <Label xml:lang="zh">出版/生产国代码</Label>
+      <Label xml:lang="en">Country of Publishing/Production Entity Code</Label>
+      <Label xml:lang="zh">出版/生产实体国代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
       <Property>
@@ -3893,7 +3947,7 @@
   </Field>
   <Field name="045" repeatable="no">
     <Property>
-      <Label xml:lang="en">COUNTRY OF PUBLISHING/PRODUCING ENTITY CODE</Label>
+      <Label xml:lang="en">Time Period of Content</Label>
       <Label xml:lang="zh">文献内容涵盖时段</Label>
     </Property>
     <Subfield name="a">
@@ -3929,7 +3983,7 @@
   </Field>
   <Field name="046" repeatable="no">
     <Property>
-      <Label xml:lang="en">SPECIAL CODED DATES</Label>
+      <Label xml:lang="en">Special Coded Dates</Label>
       <Label xml:lang="zh">特殊编码日期</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -3977,8 +4031,8 @@
   </Field>
   <Field name="047" repeatable="no">
     <Property>
-      <Label xml:lang="en">FORM OF MUSICAL COMPOSITION CODE</Label>
-      <Label xml:lang="zh">乐曲形式代码</Label>
+      <Label xml:lang="en">Form of Musical Composition Code</Label>
+      <Label xml:lang="zh">音乐作品形式代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
       <Property>
@@ -3989,14 +4043,14 @@
     <Subfield name="8">
       <Property>
         <Label xml:lang="en">Field link and sequence number</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">字段连接和顺序号</Label>>
       </Property>
     </Subfield>
   </Field>
   <Field name="048">
     <Property>
-      <Label xml:lang="en">NUMBER OF MUSICAL INSTRUMENTS OR VOICES CODE</Label>
-      <Label xml:lang="zh">乐器或声部编号代码</Label>
+      <Label xml:lang="en">Number of Musical Instruments or Voices Code</Label>
+      <Label xml:lang="zh">乐器或人声数代码</Label>
     </Property>
     <Subfield name="a">
       <Property>
@@ -4019,7 +4073,7 @@
   </Field>
   <Field name="050">
     <Property>
-      <Label xml:lang="en">LIBRARY OF CONGRESS CALL NUMBER</Label>
+      <Label xml:lang="en">Library of Congress Call Number</Label>
       <Label xml:lang="zh">美国国会图书馆索书号</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -4085,8 +4139,8 @@
   </Field>
   <Field name="052">
     <Property>
-      <Label xml:lang="en">GEOGRAPHIC CLASSIFICATION</Label>
-      <Label xml:lang="zh">地理区域分类代码</Label>
+      <Label xml:lang="en">Geographic Classification</Label>
+      <Label xml:lang="zh">地理分类代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -4127,13 +4181,13 @@
   </Field>
   <Field name="055">
     <Property>
-      <Label xml:lang="en">CLASSIFICATION NUMBERS ASSIGNED IN CANADA</Label>
-      <Label xml:lang="zh">加拿大索书号/分类号</Label>
+      <Label xml:lang="en">Classification Number Assigned in Canada</Label>
+      <Label xml:lang="zh">加拿大分类号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
         <Label xml:lang="en">Classification number</Label>
-        <Label xml:lang="zh">NLC分类号</Label>
+        <Label xml:lang="zh">分类号</Label>
       </Property>
     </Subfield>
     <Subfield name="b" repeatable="no">
@@ -4151,19 +4205,19 @@
     <Subfield name="6">
       <Property>
         <Label xml:lang="en">Linkage</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">连接</Label>
       </Property>
     </Subfield>
     <Subfield name="8">
       <Property>
         <Label xml:lang="en">Field link and sequence number</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh"></Label>
       </Property>
     </Subfield>
   </Field>
   <Field name="060">
     <Property>
-      <Label xml:lang="en">NATIONAL LIBRARY OF MEDICINE CALL NUMBER</Label>
+      <Label xml:lang="en">National Library of Medicine Call Number</Label>
       <Label xml:lang="zh">美国国家医学图书馆索书号</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -4217,8 +4271,8 @@
   </Field>
   <Field name="066" repeatable="no">
     <Property>
-      <Label xml:lang="en">CHARACTER SETS PRESENT</Label>
-      <Label xml:lang="zh">字符集</Label>
+      <Label xml:lang="en">Character Set Present</Label>
+      <Label xml:lang="zh">字符集表示</Label>
     </Property>
     <Subfield name="a" repeatable="no">
       <Property>
@@ -4241,7 +4295,7 @@
   </Field>
   <Field name="070">
     <Property>
-      <Label xml:lang="en">NATIONAL AGRICULTURAL LIBRARY CALL NUMBER</Label>
+      <Label xml:lang="en">National Agricultural Library Call Number</Label>
       <Label xml:lang="zh">美国国家农业图书馆索书号</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -4295,7 +4349,7 @@
   </Field>
   <Field name="072">
     <Property>
-      <Label xml:lang="en">SUBJECT CATEGORY CODE</Label>
+      <Label xml:lang="en">Subject Category Code</Label>
       <Label xml:lang="zh">主题类别代码</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -4331,7 +4385,7 @@
   </Field>
   <Field name="074">
     <Property>
-      <Label xml:lang="en">GPO ITEM NUMBER</Label>
+      <Label xml:lang="en">GPO Item Number</Label>
       <Label xml:lang="zh">美国政府出版局文献号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -4355,7 +4409,7 @@
   </Field>
   <Field name="080">
     <Property>
-      <Label xml:lang="en">UNIVERSAL DECIMAL CLASSIFICATION NUMBER</Label>
+      <Label xml:lang="en">Universal Decimal Classification Number</Label>
       <Label xml:lang="zh">国际十进分类号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -4397,7 +4451,7 @@
   </Field>
   <Field name="082">
     <Property>
-      <Label xml:lang="en">DEWEY DECIMAL CLASSIFICATION NUMBER</Label>
+      <Label xml:lang="en">Deway Decimal Classification Number</Label>
       <Label xml:lang="zh">杜威十进分类号</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -4433,7 +4487,7 @@
   </Field>
   <Field name="084">
     <Property>
-      <Label xml:lang="en">OTHER CLASSIFICATION NUMBER</Label>
+      <Label xml:lang="en">Other Classification Number</Label>
       <Label xml:lang="zh">其它分类号</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -4469,7 +4523,7 @@
   </Field>
   <Field name="086">
     <Property>
-      <Label xml:lang="en">GOVERNMENT DOCUMENT CLASSIFICATION NUMBER</Label>
+      <Label xml:lang="en">Government Document Classification Number</Label>
       <Label xml:lang="zh">政府文献分类号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -4505,7 +4559,7 @@
   </Field>
   <Field name="088">
     <Property>
-      <Label xml:lang="en">REPORT NUMBER</Label>
+      <Label xml:lang="en">Report Number</Label>
       <Label xml:lang="zh">报告号</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -4535,7 +4589,7 @@
   </Field>
   <Field name="093" repeatable="no">
     <Property>
-      <Label xml:lang="en" />
+      <Label xml:lang="en">China Library Classification Number</Label>
       <Label xml:lang="zh">中国图书馆分类法分类号</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -4655,7 +4709,7 @@
   </Field>
   <Field name="100" repeatable="no">
     <Property>
-      <Label xml:lang="en">MAIN ENTRY--PERSONAL NAME</Label>
+      <Label xml:lang="en">Main Entry--Personal Names</Label>
       <Label xml:lang="zh">主要款目-个人名称</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -4769,7 +4823,7 @@
   </Field>
   <Field name="110" repeatable="no">
     <Property>
-      <Label xml:lang="en">MAIN ENTRY--CORPORATE NAME</Label>
+      <Label xml:lang="en">Main Entry--Corporate Names</Label>
       <Label xml:lang="zh">主要款目-团体名称</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -4871,7 +4925,7 @@
   </Field>
   <Field name="111" repeatable="no">
     <Property>
-      <Label xml:lang="en">MAIN ENTRY--MEETING NAME</Label>
+      <Label xml:lang="en">Main Entry--Meeting Name</Label>
       <Label xml:lang="zh">主要款目-会议名称</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -4973,7 +5027,7 @@
   </Field>
   <Field name="130" repeatable="no">
     <Property>
-      <Label xml:lang="en">MAIN ENTRY--UNIFORM TITLE</Label>
+      <Label xml:lang="en">Main Entry--Uniform Title</Label>
       <Label xml:lang="zh">主要款目-统一题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5075,7 +5129,7 @@
   </Field>
   <Field name="210" repeatable="no">
     <Property>
-      <Label xml:lang="en">ABBREVIATED TITLE</Label>
+      <Label xml:lang="en">Abbreviated Title</Label>
       <Label xml:lang="zh">缩略题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5111,7 +5165,7 @@
   </Field>
   <Field name="222">
     <Property>
-      <Label xml:lang="en">KEY TITLE</Label>
+      <Label xml:lang="en">Key Title</Label>
       <Label xml:lang="zh">识别题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5141,7 +5195,7 @@
   </Field>
   <Field name="240" repeatable="no">
     <Property>
-      <Label xml:lang="en">UNIFORM TITLE</Label>
+      <Label xml:lang="en">Uniform Title</Label>
       <Label xml:lang="zh">统一题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5237,7 +5291,7 @@
   </Field>
   <Field name="242">
     <Property>
-      <Label xml:lang="en">TRANSLATION OF TITLE BY CATALOGING AGENCY</Label>
+      <Label xml:lang="en">Translation of Title by Catalogin Agency</Label>
       <Label xml:lang="zh">编目机构提供的翻译题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5297,7 +5351,7 @@
   </Field>
   <Field name="243" repeatable="no">
     <Property>
-      <Label xml:lang="en">COLLECTIVE UNIFORM TITLE</Label>
+      <Label xml:lang="en">Collective Uniform Title</Label>
       <Label xml:lang="zh">作品集统一题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5393,7 +5447,7 @@
   </Field>
   <Field name="245" mandatory="yes" repeatable="no">
     <Property>
-      <Label xml:lang="en">TITLE STATEMENT</Label>
+      <Label xml:lang="en">Title Statement</Label>
       <Label xml:lang="zh">题名说明</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5477,7 +5531,7 @@
   </Field>
   <Field name="246">
     <Property>
-      <Label xml:lang="en">VARYING FORM OF TITLE</Label>
+      <Label xml:lang="en">Varying Form of Title</Label>
       <Label xml:lang="zh">变异题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5549,7 +5603,7 @@
   </Field>
   <Field name="247">
     <Property>
-      <Label xml:lang="en">FORMER TITLE OR TITLE VARIATIONS</Label>
+      <Label xml:lang="en">Former Title or Title Variations</Label>
       <Label xml:lang="zh">前题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5615,7 +5669,7 @@
   </Field>
   <Field name="250" repeatable="no">
     <Property>
-      <Label xml:lang="en">EDITION STATEMENT</Label>
+      <Label xml:lang="en">Edition Statement</Label>
       <Label xml:lang="zh">版本说明</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5645,8 +5699,8 @@
   </Field>
   <Field name="254" repeatable="no">
     <Property>
-      <Label xml:lang="en">MUSICAL PRESENTATION STATEMENT</Label>
-      <Label xml:lang="zh">乐谱说明</Label>
+      <Label xml:lang="en">Musical Presentation Statement</Label>
+      <Label xml:lang="zh">音乐表现形式说明</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -5669,7 +5723,7 @@
   </Field>
   <Field name="255">
     <Property>
-      <Label xml:lang="en">CARTOGRAPHIC MATHEMATICAL DATA</Label>
+      <Label xml:lang="en">Cartographic Mathematical Data</Label>
       <Label xml:lang="zh">制图数学数据</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5729,7 +5783,7 @@
   </Field>
   <Field name="256" repeatable="no">
     <Property>
-      <Label xml:lang="en">COMPUTER FILE CHARACTERISTICS</Label>
+      <Label xml:lang="en">Computer File Characteristics</Label>
       <Label xml:lang="zh">计算机文件特征</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5753,7 +5807,7 @@
   </Field>
   <Field name="257" repeatable="no">
     <Property>
-      <Label xml:lang="en">COUNTRY OF PRODUCING ENTITY FOR ARCHIVAL FILMS</Label>
+      <Label xml:lang="en">Country of Producing Entity for Archival Films</Label>
       <Label xml:lang="zh">档案电影生产国</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5775,9 +5829,10 @@
       </Property>
     </Subfield>
   </Field>
+  <!-- TODO: 258 -->
   <Field name="260" repeatable="no">
     <Property>
-      <Label xml:lang="en">PUBLICATION, DISTRIBUTION, ETC. (IMPRINT) (IMPRINT)</Label>
+      <Label xml:lang="en">Publication, Distribution, etc. (Imprint)</Label>
       <Label xml:lang="zh">出版发行项</Label>
     </Property>
     <Subfield name="a">
@@ -5837,7 +5892,7 @@
   </Field>
   <Field name="263" repeatable="no">
     <Property>
-      <Label xml:lang="en">PROJECTED PUBLICATION DATE (IMPRINT) (IMPRINT)</Label>
+      <Label xml:lang="en">Projected Publication Date</Label>
       <Label xml:lang="zh">计划出版日期</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -5861,7 +5916,7 @@
   </Field>
   <Field name="270">
     <Property>
-      <Label xml:lang="en">ADDRESS (IMPRINT) (IMPRINT)</Label>
+      <Label xml:lang="en">Address</Label>
       <Label xml:lang="zh">地址信息</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -5993,7 +6048,7 @@
   </Field>
   <Field name="300" mandatory="yes">
     <Property>
-      <Label xml:lang="en">PHYSICAL DESCRIPTION (IMPRINT) (IMPRINT)</Label>
+      <Label xml:lang="en">Physical Description</Label>
       <Label xml:lang="zh">载体形态</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -6053,7 +6108,7 @@
   </Field>
   <Field name="306" repeatable="no">
     <Property>
-      <Label xml:lang="en">PLAYING TIME</Label>
+      <Label xml:lang="en">Playing Time</Label>
       <Label xml:lang="zh">播放持续时间</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -6077,8 +6132,8 @@
   </Field>
   <Field name="307">
     <Property>
-      <Label xml:lang="en">HOURS, ETC.</Label>
-      <Label xml:lang="zh">文献检索或获取时间</Label>
+      <Label xml:lang="en">Hours, Etc.</Label>
+      <Label xml:lang="zh">访问或获取时间</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -6107,7 +6162,7 @@
   </Field>
   <Field name="310" repeatable="no">
     <Property>
-      <Label xml:lang="en">CURRENT PUBLICATION FREQUENCY</Label>
+      <Label xml:lang="en">Current Publication Frequency</Label>
       <Label xml:lang="zh">当前出版频率</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -6137,7 +6192,7 @@
   </Field>
   <Field name="321">
     <Property>
-      <Label xml:lang="en">FORMER PUBLICATION FREQUENCY</Label>
+      <Label xml:lang="en">Former Publication Frequency</Label>
       <Label xml:lang="zh">先前出版频率</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -6167,7 +6222,7 @@
   </Field>
   <Field name="340">
     <Property>
-      <Label xml:lang="en">PHYSICAL MEDIUM</Label>
+      <Label xml:lang="en">Physical Medium</Label>
       <Label xml:lang="zh">物理载体</Label>
     </Property>
     <Subfield name="a">
@@ -6239,7 +6294,7 @@
   </Field>
   <Field name="342">
     <Property>
-      <Label xml:lang="en">GEOSPATIAL REFERENCE DATA</Label>
+      <Label xml:lang="en">Geospartial Reference Data</Label>
       <Label xml:lang="zh">地理空间坐标数据</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -6401,7 +6456,7 @@
   </Field>
   <Field name="343">
     <Property>
-      <Label xml:lang="en">PLANAR COORDINATE DATA</Label>
+      <Label xml:lang="en">Plannar Coordinate Data</Label>
       <Label xml:lang="zh">平面坐标数据</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -6473,7 +6528,7 @@
   </Field>
   <Field name="351">
     <Property>
-      <Label xml:lang="en">ORGANIZATION AND ARRANGEMENT OF MATERIALS</Label>
+      <Label xml:lang="en">Organization and Arrangement of Materials</Label>
       <Label xml:lang="zh">资料集的组织和编排</Label>
     </Property>
     <Subfield name="a">
@@ -6515,7 +6570,7 @@
   </Field>
   <Field name="352">
     <Property>
-      <Label xml:lang="en">DIGITAL GRAPHIC REPRESENTATION</Label>
+      <Label xml:lang="en">Digital Graphic Representation</Label>
       <Label xml:lang="zh">数字化图形表示法</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -6581,8 +6636,8 @@
   </Field>
   <Field name="355">
     <Property>
-      <Label xml:lang="en">SECURITY CLASSIFICATION CONTROL</Label>
-      <Label xml:lang="zh">保密级别控制</Label>
+      <Label xml:lang="en">Security Classification Control</Label>
+      <Label xml:lang="zh">保密等级控制</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -6653,8 +6708,8 @@
   </Field>
   <Field name="357" repeatable="no">
     <Property>
-      <Label xml:lang="en">ORIGINATOR DISSEMINATION CONTROL</Label>
-      <Label xml:lang="zh">文献传播控制</Label>
+      <Label xml:lang="en">Originator Dissemination Control</Label>
+      <Label xml:lang="zh">原创者传播控制</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -6695,8 +6750,8 @@
   </Field>
   <Field name="362">
     <Property>
-      <Label xml:lang="en">DATES OF PUBLICATION AND/OR SEQUENTIAL DESIGNATION</Label>
-      <Label xml:lang="zh">出版日期/卷期标识</Label>
+      <Label xml:lang="en">Dates of publication and/or Sequential Designation</Label>
+      <Label xml:lang="zh">出版日期和/或卷期标识</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -7031,7 +7086,7 @@
   </Field>
   <Field name="440">
     <Property>
-      <Label xml:lang="en">SERIES STATEMENT/ADDED ENTRY--TITLE</Label>
+      <Label xml:lang="en">Series Statement/Added Entry--Title</Label>
       <Label xml:lang="zh">丛编说明/附加款目-题名</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7079,7 +7134,7 @@
   </Field>
   <Field name="490">
     <Property>
-      <Label xml:lang="en">SERIES STATEMENT</Label>
+      <Label xml:lang="en">Series Statement</Label>
       <Label xml:lang="zh">丛编说明</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -7121,7 +7176,7 @@
   </Field>
   <Field name="500">
     <Property>
-      <Label xml:lang="en">GENERAL NOTE</Label>
+      <Label xml:lang="en">General Note</Label>
       <Label xml:lang="zh">一般性附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7145,13 +7200,13 @@
   </Field>
   <Field name="501">
     <Property>
-      <Label xml:lang="en">GENERAL NOTE</Label>
+      <Label xml:lang="en">With Note</Label>
       <Label xml:lang="zh">合订附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
-        <Label xml:lang="en">General note</Label>
-        <Label xml:lang="zh">一般性附注</Label>
+        <Label xml:lang="en">Width note</Label>
+        <Label xml:lang="zh">合订附注</Label>
       </Property>
     </Subfield>
     <Subfield name="5" repeatable="no">
@@ -7163,19 +7218,19 @@
     <Subfield name="6">
       <Property>
         <Label xml:lang="en">Linkage</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">连接</Label>
       </Property>
     </Subfield>
     <Subfield name="8">
       <Property>
         <Label xml:lang="en">Field link and sequence number</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">字段连接和顺序号</Label>
       </Property>
     </Subfield>
   </Field>
   <Field name="502">
     <Property>
-      <Label xml:lang="en">DISSERTATION NOTE</Label>
+      <Label xml:lang="en">Dissertation Note</Label>
       <Label xml:lang="zh">学位论文附注</Label>
     </Property>
     <Subfield name="a">
@@ -7187,19 +7242,19 @@
     <Subfield name="6">
       <Property>
         <Label xml:lang="en">Linkage</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">连接</Label>
       </Property>
     </Subfield>
     <Subfield name="8">
       <Property>
         <Label xml:lang="en">Field link and sequence number</Label>
-        <Label xml:lang="zh" />
+        <Label xml:lang="zh">字段连接和顺序号</Label>
       </Property>
     </Subfield>
   </Field>
   <Field name="504">
     <Property>
-      <Label xml:lang="en">BIBLIOGRAPHY, ETC. NOTE</Label>
+      <Label xml:lang="en">Bibliography, etc. Note</Label>
       <Label xml:lang="zh">书目等附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7229,7 +7284,7 @@
   </Field>
   <Field name="505">
     <Property>
-      <Label xml:lang="en">FORMATTED CONTENTS NOTE</Label>
+      <Label xml:lang="en">Formatted Contents Note</Label>
       <Label xml:lang="zh">格式化内容附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7277,8 +7332,8 @@
   </Field>
   <Field name="506">
     <Property>
-      <Label xml:lang="en">RESTRICTIONS ON ACCESS NOTE</Label>
-      <Label xml:lang="zh">检索限定附注</Label>
+      <Label xml:lang="en">Restrictions on Access Note</Label>
+      <Label xml:lang="zh">存取限定附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -7337,7 +7392,7 @@
   </Field>
   <Field name="507" repeatable="no">
     <Property>
-      <Label xml:lang="en">SCALE NOTE FOR GRAPHIC MATERIAL</Label>
+      <Label xml:lang="en">Scale Note for Graphic Material</Label>
       <Label xml:lang="zh">图形资料的比例尺附注</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -7367,7 +7422,7 @@
   </Field>
   <Field name="508" repeatable="no">
     <Property>
-      <Label xml:lang="en">CREATION/PRODUCTION CREDITS NOTE</Label>
+      <Label xml:lang="en">Creation/Production Credits Note</Label>
       <Label xml:lang="zh">制作与生产责任附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7391,7 +7446,7 @@
   </Field>
   <Field name="510">
     <Property>
-      <Label xml:lang="en">CITATION/REFERENCES NOTE</Label>
+      <Label xml:lang="en">Citation/References Note</Label>
       <Label xml:lang="zh">引文/参考附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7439,13 +7494,13 @@
   </Field>
   <Field name="511">
     <Property>
-      <Label xml:lang="en">PARTICIPANT OR PERFORMER NOTE</Label>
-      <Label xml:lang="zh">参考者或表演者附注</Label>
+      <Label xml:lang="en">Participant or Performer Note</Label>
+      <Label xml:lang="zh">参加者或表演者附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
         <Label xml:lang="en">Participant or performer note</Label>
-        <Label xml:lang="zh">参考者或表演者附注</Label>
+        <Label xml:lang="zh">参加者或表演者附注</Label>
       </Property>
     </Subfield>
     <Subfield name="6">
@@ -7463,7 +7518,7 @@
   </Field>
   <Field name="513">
     <Property>
-      <Label xml:lang="en">TYPE OF REPORT AND PERIOD COVERED NOTE</Label>
+      <Label xml:lang="en">Type of Report and Period Covered Note</Label>
       <Label xml:lang="zh">报告类型及日期范围附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7493,7 +7548,7 @@
   </Field>
   <Field name="514" repeatable="no">
     <Property>
-      <Label xml:lang="en">DATA QUALITY NOTE</Label>
+      <Label xml:lang="en">Data Quality Note</Label>
       <Label xml:lang="zh">数据质量附注</Label>
     </Property>
     <Subfield name="a" repeatable="no">
@@ -7595,7 +7650,7 @@
   </Field>
   <Field name="515">
     <Property>
-      <Label xml:lang="en">NUMBERING PECULIARITIES NOTE</Label>
+      <Label xml:lang="en">Numbering Peculiarities Note</Label>
       <Label xml:lang="zh">编号特点附注</Label>
     </Property>
     <Subfield name="a">
@@ -7619,7 +7674,7 @@
   </Field>
   <Field name="516">
     <Property>
-      <Label xml:lang="en">TYPE OF COMPUTER FILE OR DATA NOTE</Label>
+      <Label xml:lang="en">Type OF Computer File or Data Note</Label>
       <Label xml:lang="zh">计算机文件类型或数据附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7643,7 +7698,7 @@
   </Field>
   <Field name="518">
     <Property>
-      <Label xml:lang="en">DATE/TIME AND PLACE OF AN EVENT NOTE</Label>
+      <Label xml:lang="en">Date/Time and Place of an Event Note</Label>
       <Label xml:lang="zh">事件发生的日期/时间和地点附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7673,7 +7728,7 @@
   </Field>
   <Field name="520">
     <Property>
-      <Label xml:lang="en">SUMMARY, ETC.</Label>
+      <Label xml:lang="en">Summary, etc.</Label>
       <Label xml:lang="zh">摘要等附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
@@ -7709,7 +7764,7 @@
   </Field>
   <Field name="521">
     <Property>
-      <Label xml:lang="en">TARGET AUDIENCE NOTE</Label>
+      <Label xml:lang="en">Target Audience Note</Label>
       <Label xml:lang="zh">读者对象附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes">
@@ -7745,8 +7800,8 @@
   </Field>
   <Field name="522" repeatable="no">
     <Property>
-      <Label xml:lang="en">GEOGRAPHIC COVERAGE NOTE</Label>
-      <Label xml:lang="zh">地理区域附注</Label>
+      <Label xml:lang="en">Geographic Coverage Note</Label>
+      <Label xml:lang="zh">地理区域范围附注</Label>
     </Property>
     <Subfield name="a" mandatory="yes" repeatable="no">
       <Property>
@@ -14431,6 +14486,7 @@
       <Label xml:lang="zh">一般处理数据</Label>
       <Help xml:lang="zh">帮助信息</Help>
     </Property>
+    <!--
     <Indicator>
       <Property>
         <Label xml:lang="en">INDICATOR</Label>
@@ -14438,6 +14494,7 @@
         <Help xml:lang="zh">帮助信息</Help>
       </Property>
     </Indicator>
+    -->
     <Group>
       <Property>
         <Label xml:lang="en">group</Label>

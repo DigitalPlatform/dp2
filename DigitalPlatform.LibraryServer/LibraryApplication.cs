@@ -262,7 +262,7 @@ namespace DigitalPlatform.LibraryServer
 
         public string CfgMapDir = "";  // cfgmap目录
 
-        public string LogDir = "";	// 事件日志目录
+        public string LogDir = "";	// 错误日志目录
 
         // public string OperLogDir = "";  // 操作日志目录
 

@@ -51,7 +51,7 @@ public class MyHost : DetailHost
 
             // 维护 260 出版地 出版社
             actions.NewItem("维护260对照表", "ISBN出版社代码 和 260字段$a出版地$b出版社名 的对照表", "Manage260", false);
-            
+
             // 分割行
             actions.NewSeperator();
 
@@ -739,7 +739,6 @@ dlg.UiState);
         field.Subfields[strName] = subfield;
     }
 
-
     // 获得模板定义
     void GetTemplateDef(object sender, GetTemplateDefEventArgs e)
     {
@@ -768,7 +767,7 @@ dlg.UiState);
             string strType = "";
             // http://www.loc.gov/marc/bibliographic/bd008b.html
             // Books definition of field 008/18-34 is used when Leader/06 (Type of record) contains code a (Language material) or t (Manuscript language material) and Leader/07 (Bibliographic level) contains code a (Monographic component part), c (Collection), d (Subunit), or m (Monograph). 
-            if ("at".IndexOf(header.Value[6])!= -1
+            if ("at".IndexOf(header.Value[6]) != -1
                 && "acdm".IndexOf(header.Value[7]) != -1)
                 strType = "books";
             // http://www.loc.gov/marc/bibliographic/bd008c.html
@@ -796,14 +795,14 @@ dlg.UiState);
             // Mixed materials definition of field 008/18-34 is used when Leader/06 (Type of record) contains code p (Mixed material). 
             else if ("p".IndexOf(header.Value[6]) != -1)
                 strType = "mixed_materials";
-            else 
+            else
             {
-                e.ErrorInfo = "无法根据当前头标区 '"+header.Value.Replace(" ", "_")+"' 内容辨别文献类型，所以无法获得模板定义";
+                e.ErrorInfo = "无法根据当前头标区 '" + header.Value.Replace(" ", "_") + "' 内容辨别文献类型，所以无法获得模板定义";
                 return;
             }
 
 
-            e.DefNode = this.DetailForm.MarcEditor.MarcDefDom.DocumentElement.SelectSingleNode("Field[@name='" + e.FieldName + "' and @type='"+strType+"']");
+            e.DefNode = this.DetailForm.MarcEditor.MarcDefDom.DocumentElement.SelectSingleNode("Field[@name='" + e.FieldName + "' and @type='" + strType + "']");
             if (e.DefNode == null)
             {
                 e.ErrorInfo = "字段名为 '" + e.FieldName + "' 类型为='" + strType + "' 的模板定义无法在MARC定义文件中找到";

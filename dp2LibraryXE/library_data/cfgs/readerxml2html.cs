@@ -28,6 +28,7 @@
 // 2020/9/27    显示在借册信息的行数最多限制 100，多出来的会被略去
 // 2021/8/23	“在借册”行左侧增加 checkbox
 // 2021/10/9    “在借册”行左边增加一列序号
+// 2021/10/25   显示掌纹图标和人脸(识别)图标
 
 using System;
 using System.Collections.Generic;
@@ -107,6 +108,8 @@ public class MyConverter : ReaderConverter
         string strPersonName = DomUtil.GetElementText(dom.DocumentElement, "name");
 
         string strFingerprint = DomUtil.GetElementText(dom.DocumentElement, "fingerprint");
+        string strPalmprint = DomUtil.GetElementText(dom.DocumentElement, "palmprint");
+        string strFace = DomUtil.GetElementText(dom.DocumentElement, "face");
 
         string strWeixinBinding = StringUtil.GetParameterByPrefix(DomUtil.GetElementText(dom.DocumentElement, "email"),
     "weixinid",
@@ -123,9 +126,13 @@ public class MyConverter : ReaderConverter
 
         string strIcons = "";
         if (string.IsNullOrEmpty(strFingerprint) == false)
-            strIcons += "<img src='%mappeddir%\\images\\fingerprint.png' style='background-color:#ffffff;' alt='有指纹信息'>";
+            strIcons += "<img src='%mappeddir%\\images\\fingerprint.png' style='background-color:#ffffff;width:32px;' alt='有指纹信息'>";
         if (string.IsNullOrEmpty(strWeixinBinding) == false)
-            strIcons += "<img src='%mappeddir%\\images\\wechat_16.png' alt='有微信绑定信息'>";
+            strIcons += "<img src='%mappeddir%\\images\\wechat_16.png' style='background-color:#ffffff;width:32px;' alt='有微信绑定信息'>";
+        if (string.IsNullOrEmpty(strPalmprint) == false)
+            strIcons += "<img src='%mappeddir%\\images\\palmprint.png' style='background-color:#ffffff;max-width:32px;' alt='有掌纹信息'>";
+        if (string.IsNullOrEmpty(strFace) == false)
+            strIcons += "<img src='%mappeddir%\\images\\face.png' style='background-color:#ffffff;max-width:32px;' alt='有人脸信息'>";
 
         if (string.IsNullOrEmpty(strIcons) == false)
             strResult.Append("<br/>" + strIcons);

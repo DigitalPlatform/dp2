@@ -504,7 +504,7 @@ namespace DigitalPlatform.Marc
 
                 this.m_domMarcDef = e.XmlDocument;
                 return this.m_domMarcDef;
-                ERROR1:
+            ERROR1:
                 m_strMarcDomError = strError;
                 return null;
             }
@@ -1882,7 +1882,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     // return;
                 }
             }
-            END1:
+        END1:
             base.OnMouseDown(e);
         }
 
@@ -2466,7 +2466,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (nRet == 1)
                 this.Marc = strMARC;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2511,7 +2511,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (nRet == 1)
                 this.Marc = strMARC;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2534,7 +2534,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (nRet == 1)
                 this.Marc = strMARC;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2568,7 +2568,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             MarcEditor.TextToClipboard(strText);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4326,7 +4326,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                         this.SetActiveField(0, 3, true);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(this, $"异常: {ex.Message}");
             }
@@ -5549,7 +5549,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
 
             return results;
-            ERROR1:
+        ERROR1:
             if (bSimulate == true)
             {
                 results.Add("出错: " + strError);
@@ -5839,7 +5839,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         // 通过模板取固定字段的值
         // parameter:
         //		strFieldName	字段名称
-        //		strSubFieldName	子字段名称 如果为空表示获得字段的定长模板
+        //		strSubFieldName	子字段名称 如果为空表示获得字段的定长模板，如果为 "indicator" 表示获得指示符的定长模板
         // return:
         //		-1	出错
         //		0	没找到 可能是模板文件不存在，或者对应的配置事项不存在
@@ -5901,17 +5901,18 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
             // *** MarcEditor来自己获得定义
 
-
             // 根据字段名找到配置文件中的该字段的定义
             XmlNodeList nodes = null;
             if (strSubFieldName == "")
                 nodes = this.MarcDefDom.DocumentElement.SelectNodes("Field[@name='" + strFieldName + "']");
+            else if (strSubFieldName == "indicator")    // 2021/10/25
+                nodes = this.MarcDefDom.DocumentElement.SelectNodes("Field[@name='" + strFieldName + "']/Indicator");
             else
                 nodes = this.MarcDefDom.DocumentElement.SelectNodes("Field[@name='" + strFieldName + "']/Subfield[@name='" + strSubFieldName + "']");
 
             if (nodes.Count == 0)
             {
-                strError = "MARC定义文件中没有找到字段名为 '" + strFieldName + "' 子字段名为 '" + strSubFieldName + "' 的字段/子字段 定义";
+                strError = "MARC定义文件中没有找到字段名为 '" + strFieldName + "' 子字段名为 '" + strSubFieldName + "' 的字段/子字段/字段指示符 定义";
                 return 0;
             }
 
@@ -5949,7 +5950,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             {
                 nodeDef = nodes[0];
             }
-            FOUND:
+        FOUND:
             FixedTemplateDlg dlg = new FixedTemplateDlg();
             // GuiUtil.AutoSetDefaultFont(dlg);
             if (string.IsNullOrEmpty(strTitle) == false)
@@ -6169,8 +6170,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 out nSubfieldDupIndex,
                 out strSubfieldValue);
 
-
-
             string strError;
             string strOutputValue;
             int nRet = 0;
@@ -6198,6 +6197,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
                 // 不让小edit全选上
                 this.curEdit.SelectionLength = 0;
+            }
+            else if (strSubfieldName == "indicator")
+            {
+
             }
             else
             {
@@ -6436,8 +6439,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
                     strLeft = strLeft.Substring(nTempIndex + 2);
                 }
-
-
 
                 if (strFieldValue.Length > nCurSubfieldX + 1 + 1)
                 {

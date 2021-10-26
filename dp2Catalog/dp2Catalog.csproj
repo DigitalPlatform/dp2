@@ -11,8 +11,8 @@
     <RootNamespace>dp2Catalog</RootNamespace>
     <AssemblyName>dp2Catalog</AssemblyName>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>6AF85AEF3D710EA412E3251FB895A45EE1B11018</ManifestCertificateThumbprint>
-    <ManifestKeyFile>代码签名证书-2020.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>3EC46D6B99520A1DCDAD027B726C38528625A83D</ManifestCertificateThumbprint>
+    <ManifestKeyFile>数字平台（北京）软件有限责任公司.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <SccProjectName>
@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>25</ApplicationRevision>
+    <ApplicationRevision>26</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -87,7 +87,7 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
+    <ManifestTimestampUrl>http://timestamp.digicert.com</ManifestTimestampUrl>
   </PropertyGroup>
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -766,6 +766,7 @@
     </Compile>
     <None Include="代码签名证书-2019.pfx" />
     <None Include="代码签名证书-2020.pfx" />
+    <None Include="数字平台（北京）软件有限责任公司.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.AmazonInterface\DigitalPlatform.AmazonInterface.csproj">

@@ -1,17 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Description>
-  <!-- USMARC 西文图书 -->
+  <!-- USMARC 西文图书 值列表 -->
+  <!-- 最后修订: 2021/10/25 -->
   <ValueList name="header_0/5">
+    <!-- Record length -->
     <Item>
       <Value>?????</Value>
       <Label xml:lang="zh">由软件自动填写</Label>
     </Item>
   </ValueList>
   <ValueList name="header_5/1">
+    <!-- Record status -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Increase in encoding level</Label>
-      <Label xml:lang="zh">正式记录或完整记录</Label>
+      <Label xml:lang="zh">由简编记录升级的记录</Label>
     </Item>
     <Item>
       <Value>c</Value>
@@ -26,116 +29,118 @@
     <Item>
       <Value>n</Value>
       <Label xml:lang="en">New</Label>
-      <Label xml:lang="zh">新的记录</Label>
+      <Label xml:lang="zh">新记录</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Increase in encoding level from prepublication</Label>
-      <Label xml:lang="zh">正式出版前纪录或不完整记录</Label>
+      <Label xml:lang="zh">由在版编目升级的记录</Label>
     </Item>
   </ValueList>
   <ValueList name="header_6/1">
+    <!-- Type of record -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Language material</Label>
-      <Label xml:lang="zh">文字资料印刷品</Label>
+      <Label xml:lang="zh">文字资料</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Notated music</Label>
-      <Label xml:lang="zh">乐谱印刷品</Label>
+      <Label xml:lang="zh">乐谱</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Manuscript notated music</Label>
-      <Label xml:lang="zh">乐谱手稿</Label>
+      <Label xml:lang="zh">手稿型乐谱</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Cartographic material</Label>
-      <Label xml:lang="zh">测绘资料印刷品</Label>
+      <Label xml:lang="zh">测绘制图资料</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Manuscript cartographic material</Label>
-      <Label xml:lang="zh">测绘资料手稿</Label>
+      <Label xml:lang="zh">手稿型测绘制图资料</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Projected medium</Label>
-      <Label xml:lang="zh">放映和视频资料</Label>
+      <Label xml:lang="zh">放映媒体</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Nonmusical sound recording</Label>
-      <Label xml:lang="zh">非音乐性录音资料</Label>
+      <Label xml:lang="zh">非音乐录音资料</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Musical sound recording</Label>
-      <Label xml:lang="zh">音乐性录音资料</Label>
+      <Label xml:lang="zh">音乐录音资料</Label>
     </Item>
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Two-dimensional nonprojectable graphic</Label>
-      <Label xml:lang="zh">二维图形</Label>
+      <Label xml:lang="zh">二维非放映图像</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Computer file</Label>
-      <Label xml:lang="zh">计算机文件</Label>
+      <Label xml:lang="zh">计算机文件/电子资源</Label>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">Kit</Label>
-      <Label xml:lang="zh">工具</Label>
+      <Label xml:lang="zh">多载体配套资料</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Mixed material</Label>
-      <Label xml:lang="zh">复合材料</Label>
+      <Label xml:lang="zh">混合型资料</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Three-dimensional artifact or naturally occurring object</Label>
-      <Label xml:lang="zh">三维制品或立体物</Label>
+      <Label xml:lang="zh">三维制品或天然物体</Label>
     </Item>
     <Item>
       <Value>t</Value>
       <Label xml:lang="en">Manuscript language material</Label>
-      <Label xml:lang="zh">文字资料手稿</Label>
+      <Label xml:lang="zh">手稿型文字资料</Label>
     </Item>
   </ValueList>
   <ValueList name="header_7/1">
+    <!-- 书目级别 Bibliographic level -->
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Monographic component part</Label>
-      <Label xml:lang="zh">专题资料组成部分</Label>
+      <Label xml:lang="zh">专著部分级</Label>
     </Item>
     <Item>
       <Value>b</Value>
       <Label xml:lang="en">Serial component part</Label>
-      <Label xml:lang="zh">连续出版物组成部分</Label>
+      <Label xml:lang="zh">连续出版物部分级</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Collection</Label>
-      <Label xml:lang="zh">收藏品</Label>
+      <Label xml:lang="zh">合集</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Subunit</Label>
-      <Label xml:lang="zh">子单元</Label>
+      <Label xml:lang="zh">子集</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Integrating resource</Label>
-      <Label xml:lang="zh">资源整合体</Label>
+      <Label xml:lang="zh">集成性资源</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Monograph/item</Label>
-      <Label xml:lang="zh">专著/单行本</Label>
+      <Label xml:lang="zh">图书/单册</Label>
     </Item>
     <Item>
       <Value>s</Value>
@@ -144,10 +149,11 @@
     </Item>
   </ValueList>
   <ValueList name="header_8/1">
+    <!-- 控制类型 Type of control -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">No specific type</Label>
-      <Label xml:lang="zh">(空格)无类型</Label>
+      <Label xml:lang="zh">无特定的控制类型</Label>
     </Item>
     <Item>
       <Value>a</Value>
@@ -156,10 +162,11 @@
     </Item>
   </ValueList>
   <ValueList name="header_9/1">
+    <!-- 字符编码系统 Character coding scheme -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">MARC-8</Label>
-      <Label xml:lang="zh">(空格)MARC-8</Label>
+      <Label xml:lang="zh">MARC-8</Label>
     </Item>
     <Item>
       <Value>a</Value>
@@ -168,48 +175,53 @@
     </Item>
   </ValueList>
   <ValueList name="header_10/1">
+    <!-- 指示符数 Indicator count -->
     <Item>
       <Value>2</Value>
-      <Label xml:lang="zh">字段指示符的长度</Label>
+      <Label xml:lang="zh">字段指示符的长度。由软件自动填写</Label>
     </Item>
   </ValueList>
   <ValueList name="header_11/1">
+    <!-- Subfield code count -->
     <Item>
       <Value>2</Value>
-      <Label xml:lang="zh">子字段标识符的长度</Label>
+      <Label xml:lang="zh">子字段标识符的长度。由软件自动填写</Label>
     </Item>
   </ValueList>
   <ValueList name="header_12/5">
+    <!-- 数据基地址 Base address of data -->
     <Item>
       <Value>?????</Value>
       <Label xml:lang="zh">由软件自动填写</Label>
     </Item>
   </ValueList>
   <ValueList name="header_17/1">
+    <!-- 编码等级 Encoding level -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Full level</Label>
-      <Label xml:lang="zh">(空格)完全级</Label>
+      <Label xml:lang="zh">完全级</Label>
     </Item>
     <Item>
       <Value>1</Value>
       <Label xml:lang="en">Full level, material not examined</Label>
-      <Label xml:lang="zh">完全级，但该记录建立时未依据原作品。</Label>
+      <Label xml:lang="zh">完全级，未与编目实体核对</Label>
     </Item>
     <Item>
       <Value>2</Value>
       <Label xml:lang="en">Less-than-full level, material not examined</Label>
-      <Label xml:lang="zh">次完全级，该记录建立时未依据原作品。</Label>
+      <Label xml:lang="zh">次完全级，未与编目实体核对</Label>
     </Item>
     <Item>
       <Value>3</Value>
       <Label xml:lang="en">Abbreviated level</Label>
-      <Label xml:lang="zh">简单级</Label>
+      <Label xml:lang="zh">简编级</Label>
     </Item>
     <Item>
       <Value>4</Value>
       <Label xml:lang="en">Core level</Label>
       <Label xml:lang="zh">核心级</Label>
+      <Comment xml:lang="zh">指介于完全级和最简编级之间的书目记录，符合核心记录的标准</Comment>
     </Item>
     <Item>
       <Value>5</Value>
@@ -219,58 +231,62 @@
     <Item>
       <Value>7</Value>
       <Label xml:lang="en">Minimal level</Label>
-      <Label xml:lang="zh">最低级</Label>
+      <Label xml:lang="zh">最简级</Label>
     </Item>
     <Item>
       <Value>8</Value>
       <Label xml:lang="en">Prepublication level</Label>
-      <Label xml:lang="zh">出版前预编目</Label>
+      <Label xml:lang="zh">(出版前)预编级</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
-      <Label xml:lang="zh">不可知</Label>
+      <Label xml:lang="zh">级别不详</Label>
     </Item>
     <Item>
       <Value>z</Value>
       <Label xml:lang="en">Not applicable</Label>
       <Label xml:lang="zh">不适用</Label>
+      <Comment xml:lang="zh">编目级别概念不适用该记录</Comment>
     </Item>
   </ValueList>
   <ValueList name="header_18/1">
+    <!-- 著录标准 Descriptive cataloging form -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Non-ISBD</Label>
-      <Label xml:lang="zh">(空格)非ISBD格式</Label>
+      <Label xml:lang="zh">非 ISBD 标准</Label>
     </Item>
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">AACR2</Label>
-      <Label xml:lang="zh">AACR2 格式</Label>
+      <Label xml:lang="zh">AACR2</Label>
     </Item>
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">ISBD</Label>
-      <Label xml:lang="zh">采用ISBD格式</Label>
+      <Label xml:lang="zh">ISBD</Label>
     </Item>
     <Item>
       <Value>u</Value>
       <Label xml:lang="en">Unknown</Label>
-      <Label xml:lang="zh">不可知</Label>
+      <Label xml:lang="zh">不详</Label>
     </Item>
   </ValueList>
   <ValueList name="header_19/1">
+    <!-- 连接记录要求 Linked record requirement -->
     <Item>
       <Value>_</Value>
       <Label xml:lang="en">Related record not required</Label>
-      <Label xml:lang="zh">(空格)关联记录不是必须的</Label>
+      <Label xml:lang="zh">不要求相关记录</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Related record required</Label>
-      <Label xml:lang="zh">必须关联记录</Label>
+      <Label xml:lang="zh">要求相关记录</Label>
     </Item>
   </ValueList>
+  <!--
   <ValueList name="001_0/1">
     <Item>
       <Value>0</Value>
@@ -323,100 +339,86 @@
       <Label xml:lang="zh">其它</Label>
     </Item>
   </ValueList>
+  -->
   <ValueList name="006_0/1">
     <Item>
       <Value>a</Value>
       <Label xml:lang="en">Language material</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">印刷型文字资料</Label>
     </Item>
     <Item>
       <Value>c</Value>
       <Label xml:lang="en">Notated music</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">印刷型乐谱</Label>
     </Item>
     <Item>
       <Value>d</Value>
       <Label xml:lang="en">Manuscript notated music</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">手稿型乐谱</Label>
     </Item>
     <Item>
       <Value>e</Value>
       <Label xml:lang="en">Cartographic material</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">印刷型测绘制图资料</Label>
     </Item>
     <Item>
       <Value>f</Value>
       <Label xml:lang="en">Manuscript cartographic material</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">手稿型测绘制图资料</Label>
     </Item>
     <Item>
       <Value>g</Value>
       <Label xml:lang="en">Projected medium</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">放映媒体</Label>
     </Item>
 
     <Item>
       <Value>i</Value>
       <Label xml:lang="en">Nonmusical sound recording</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">非音乐录音资料</Label>
     </Item>
     <Item>
       <Value>j</Value>
       <Label xml:lang="en">Musical sound recording</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">音乐录音资料</Label>
     </Item>
-
     <Item>
       <Value>k</Value>
       <Label xml:lang="en">Two-dimensional nonprojectable graphic</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">二维非放映图像</Label>
     </Item>
     <Item>
       <Value>m</Value>
       <Label xml:lang="en">Computer file/Electronic resource</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">计算机文件/电子资源</Label>
     </Item>
     <Item>
       <Value>o</Value>
       <Label xml:lang="en">Kit</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">多载体配套资料</Label>
     </Item>
     <Item>
       <Value>p</Value>
       <Label xml:lang="en">Mixed material</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">混合型资料</Label>
     </Item>
     <Item>
       <Value>r</Value>
       <Label xml:lang="en">Three-dimensional artifact or naturally occurring object</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">三维制品或天然物体</Label>
     </Item>
     <Item>
       <Value>s</Value>
       <Label xml:lang="en">Serial/Integrating resource</Label>
+      <Label xml:lang="zh">非印刷型连续出版物/集成性资源</Label>
+      <Comment xml:lang="zh">印刷型连续出版物的资料特征记录在 008 字段</Comment>
     </Item>
     <Item>
       <Value>t</Value>
       <Label xml:lang="en">Manuscript language material</Label>
-      <Label xml:lang="zh">
-      </Label>
+      <Label xml:lang="zh">手稿型文字资料</Label>
     </Item>
-
   </ValueList>
-
 
   <ValueList name="006book_1/4">
     <!-- 与"008_18/4"相同 -->

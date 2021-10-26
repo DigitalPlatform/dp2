@@ -10,6 +10,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using System.IO;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -143,7 +144,6 @@ namespace DigitalPlatform.LibraryServer
 
             this.AppendResultText("开始新一轮循环\r\n");
 
-
             recpath_table.Clear();
 
             if (string.IsNullOrEmpty(this.App.OutgoingQueue) == false)
@@ -159,7 +159,22 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
             else
+            {
                 this._queue = null;
+            }
+
+            // 
+            {
+                if (this._queue == null)
+                    this.AppendResultText("MessageQueue 尚未配置\r\n");
+                else
+                    this.AppendResultText("MessageQueue 已经配置\r\n");
+
+                if (this.App.MessageCenter == null)
+                    this.AppendResultText("MessageCenter 尚未初始化\r\n");
+                else
+                    this.AppendResultText("MessageCenter 已经初始化\r\n");
+            }
 
             List<string> bodytypes = new List<string>();
 
@@ -185,8 +200,11 @@ namespace DigitalPlatform.LibraryServer
                     foreach (MessageInterface message_interface in this.App.m_externalMessageInterfaces)
                     {
                         bodytypes.Add(message_interface.Type);
+                        this.AppendResultText($"扩展的消息接口 {message_interface.Type} 已经配置\r\n");
                     }
                 }
+                else
+                    this.AppendResultText("扩展的消息接口 尚未配置\r\n");
             }
             else
                 bodytypes = StringUtil.SplitList(strBodyTypesDef);
@@ -194,7 +212,7 @@ namespace DigitalPlatform.LibraryServer
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
 
             int nTotalRecCount = 0;
-            foreach (DigitalPlatform.LibraryServer.LibraryApplication.ReaderDbCfg cfg in this.App.ReaderDbs)
+            foreach (LibraryApplication.ReaderDbCfg cfg in this.App.ReaderDbs)
             {
 #if NO
                 // 系统挂起的时候，不运行本线程
@@ -333,6 +351,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         AppendResultText("DoOneRecord() error : " + strError + "。\r\n");
+                        WriteMonitorLog($"DoOneRecord() error : {strError}");
                         // 循环并不停止
                     }
                     if (bChanged == true)
@@ -347,20 +366,27 @@ namespace DigitalPlatform.LibraryServer
     baOutputTimeStamp,
     out byte[] output_timestamp,
     out strError);
+                        WriteMonitorLog($"SavePatronRecord({strOutputPath}) return {nRet}, strError={strError}");
+
                         if (nRet == -1)
                         {
-                            AppendResultText("SavePatronRecord() error : " + strError + "。\r\n");
+                            AppendResultText($"SavePatronRecord({strOutputPath}) error : " + strError + "。\r\n");
                             // 循环并不停止
                         }
                         else if (nRet == -2)
                         {
                             if (nRedoCount > 10)
                             {
-                                AppendResultText("SavePatronRecord() (遇到时间戳不匹配)重试十次以后依然出错，放弃重试。error : " + strError + "。\r\n");
+                                AppendResultText($"SavePatronRecord({strOutputPath}) (遇到时间戳不匹配)重试十次以后依然出错，放弃重试。error : {strError}。\r\n");
+                                WriteMonitorLog($"SavePatronRecord({strOutputPath}) (遇到时间戳不匹配)重试十次以后依然出错，放弃重试。error : {strError}");
                                 // 循环并不停止
                             }
-                            baOutputTimeStamp = output_timestamp;
-                            goto REDO;
+                            else
+                            {
+                                baOutputTimeStamp = output_timestamp;
+                                nRedoCount++;   // 2021/10/26
+                                goto REDO;
+                            }
                         }
                     }
 
@@ -368,7 +394,8 @@ namespace DigitalPlatform.LibraryServer
                     continue;
                 } // end of for
 
-                AppendResultText("针对读者库 " + strReaderDbName + " 的循环结束。共处理 " + nOnePassRecCount.ToString() + " 条记录。\r\n");
+                AppendResultText($"针对读者库 { strReaderDbName } 的循环结束。共处理 { nOnePassRecCount.ToString() } 条记录。\r\n");
+                WriteMonitorLog($"针对读者库 { strReaderDbName } 的循环结束。共处理 { nOnePassRecCount.ToString() } 条记录。\r\n");
             }
 
             recpath_table.Clear();
@@ -432,6 +459,8 @@ namespace DigitalPlatform.LibraryServer
             // long lRet = 0;
             int nRet = 0;
 
+            WriteMonitorLog($"--- 处理读者记录 strPath={strPath}, strLibraryCode={strLibraryCode}, nRedoCount={nRedoCount}");
+
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
             // int nRedoCount = 0;
 
@@ -449,12 +478,23 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            {
+                string name = DomUtil.GetElementText(readerdom.DocumentElement, "name");
+                string barcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                string refID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+                string department = DomUtil.GetElementText(readerdom.DocumentElement, "department");
+
+                WriteMonitorLog($"姓名:{name}, 单位:{department}, 证条码号:{barcode}, 参考ID:{refID}");
+            }
+
             // 2020/3/2
             string oldLibraryCode = DomUtil.GetElementText(readerdom.DocumentElement, "libraryCode");
             if (oldLibraryCode != strLibraryCode)
             {
                 DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
                 bChanged = true;
+
+                WriteMonitorLog($"将 libraryCode 元素文本从 '{oldLibraryCode}' 改为 '{strLibraryCode}'");
             }
 
             // 2020/9/8
@@ -462,7 +502,11 @@ namespace DigitalPlatform.LibraryServer
             App.AddPatronOI(readerdom, strLibraryCode);
             string newOI = DomUtil.GetElementText(readerdom.DocumentElement, "oi");
             if (oldOI != newOI)
+            {
                 bChanged = true;
+
+                WriteMonitorLog($"将 oi 元素文本从 '{oldOI}' 改为 '{newOI}'");
+            }
 
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
@@ -488,22 +532,33 @@ namespace DigitalPlatform.LibraryServer
                 this.AppendResultText(strError + "\r\n");
                 // return -1;
                 calendar = null;
+                WriteMonitorLog(strError);
                 // 继续往后运行。和 calendar 无关的功能还能起作用
             }
 
-            // testing
-            calendar = null;
-
-            // 每种 bodytype 做一次
-            for (int i = 0; i < bodytypes.Count; i++)
+            var borrow_nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+            if (borrow_nodes.Count == 0)
             {
-                string strBodyType = bodytypes[i];
+                WriteMonitorLog("目前没有 borrows/borrow 元素。跳过超期通知部分");
+            }
+            else
+            {
+                // testing
+                // calendar = null;
 
-                string strReaderEmailAddress = "";
-                if (strBodyType == "email")
+                List<string> send_types = new List<string>();
+
+                // 每种 bodytype 做一次
+                for (int i = 0; i < bodytypes.Count; i++)
                 {
-                    string strValue = DomUtil.GetElementText(readerdom.DocumentElement,
-                        "email");
+                    string strBodyType = bodytypes[i];
+                    WriteMonitorLog($" - strBodyType={strBodyType}");
+
+                    string strReaderEmailAddress = "";
+                    if (strBodyType == "email")
+                    {
+                        string strValue = DomUtil.GetElementText(readerdom.DocumentElement,
+                            "email");
 #if NO
                     // 注: email 元素内容，现在是存储 email 和微信号等多种绑定途径 2016/4/16
                     // return:
@@ -521,19 +576,26 @@ namespace DigitalPlatform.LibraryServer
                         strReaderEmailAddress = strValue;
                     }
 #endif
-                    strReaderEmailAddress = LibraryServerUtil.GetEmailAddress(strValue);
-                    // 读者记录中没有email地址，就无法进行email方式的通知了
-                    if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
-                        continue;
-                }
+                        strReaderEmailAddress = LibraryServerUtil.GetEmailAddress(strValue);
 
-                if (strBodyType == "dpmail")
-                {
-                    if (this.App.MessageCenter == null)
-                    {
-                        continue;
+                        WriteMonitorLog($"读者记录中 email 元素文本为 '{strValue}'，提取 email 地址为 '{strReaderEmailAddress}'");
+
+                        // 读者记录中没有email地址，就无法进行email方式的通知了
+                        if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
+                        {
+                            WriteMonitorLog("该读者没有 email 地址，跳过 email 类型处理");
+                            continue;
+                        }
                     }
-                }
+
+                    if (strBodyType == "dpmail")
+                    {
+                        if (this.App.MessageCenter == null)
+                        {
+                            WriteMonitorLog("dp2library 没有配置 MessageCenter，跳过 dpmail 类型处理");
+                            continue;
+                        }
+                    }
 
 #if NO
                 List<string> notifiedBarcodes = new List<string>();
@@ -551,251 +613,291 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
 #endif
 
-                // List<string> wantNotifyBarcodes = null;
+                    // List<string> wantNotifyBarcodes = null;
 
-                // 保存调用脚本前的读者记录 
-                string strOldReaderXml = readerdom.DocumentElement.OuterXml;
+                    // 保存调用脚本前的读者记录 
+                    string strOldReaderXml = readerdom.DocumentElement.OuterXml;
 
-                if (calendar == null)
-                    continue;
-
-                // 执行脚本函数NotifyReader
-                // parameters:
-                // return:
-                //      -2  not found script
-                //      -1  出错
-                //      0   成功
-                // nResultValue
-                //      -1  出错
-                //      0   没有必要发送
-                //      1   需要发送
-                nRet = this.App.DoNotifyReaderScriptFunction(
-                        readerdom,
-                        calendar,
-                        // notifiedBarcodes,
-                        strBodyType,
-                        out int nResultValue,
-                        out string strBody,
-                        out string strMime,
-                        // out wantNotifyBarcodes,
-                        out strError);
-                if (nRet == -1)
-                {
-                    this.AppendResultText("DoNotifyReaderScriptFunction [barcode=" + strReaderBarcode + "] error: " + strError + "\r\n");
-                    continue;
-                }
-
-                // 2010/12/18
-                // 不可能发生。因为基类有NotifyReader()函数了
-                if (nRet == -2)
-                    break;
-
-                if (nResultValue == -1)
-                {
-                    this.AppendResultText("DoNotifyReaderScriptFunction [strReaderBarcode=" + strReaderBarcode + "] nResultValue == -1, errorinfo: " + strError + "\r\n");
-                    continue;
-                }
-
-                // nRet = 1;  // testing
-
-                if (nResultValue == 0)
-                {
-                    // 不要发送邮件
-                    continue;
-                }
-
-                bool bSendMessageError = false;
-
-                if (nResultValue == 1 && nRedoCount == 0)   // 2008/5/27 changed 重做的时候，不再发送消息，以免消息库记录爆满
-                {
-                    // 发送邮件
-
-                    // 2016/4/10
-                    if (strBodyType == "mq" && this._queue != null)
+                    if (calendar == null)
                     {
-                        string strRecipient = (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
-                            + "@LUID:" + this.App.UID;
-                        // 向 MSMQ 消息队列发送消息
-                        // return:
-                        //      -2  MSMQ 错误
-                        //      -1  出错
-                        //      0   成功
-                        nRet = SendToQueue(this._queue,
-                            strRecipient,
-                            strMime,
-                            strBody,
-                            out strError);
-                        if (nRet == -1 || nRet == -2)
-                        {
-                            strError = "发送 MQ 出错: " + strError;
-                            if (this.App.Statis != null)
-                                this.App.Statis.IncreaseEntryValue(strLibraryCode,
-                                "超期通知",
-                                "MQ超期通知消息发送错误数",
-                                1);
-                            this.AppendResultText(strError + "\r\n");
-                            bSendMessageError = true;
-
-                            this.App.WriteErrorLog(strError);
-                            readerdom = new XmlDocument();
-                            readerdom.LoadXml(strOldReaderXml);
-                        }
-                        else
-                        {
-                            // 2020/1/17
-                            // 发送成功则记入错误日志，便于排查错误
-                            this.App.WriteErrorLog($"成功发出 MQ 消息: recipient={strRecipient}, mime={strMime}, body={strBody}");
-
-                            if (this.App.Statis != null)
-                                this.App.Statis.IncreaseEntryValue(
-                                strLibraryCode,
-                                "超期通知",
-                                "MQ超期通知人数",
-                                1);
-                        }
+                        WriteMonitorLog("该读者没有相关的开馆日历，跳过 bodytypes 处理");
+                        continue;
                     }
 
-                    if (strBodyType == "dpmail")
-                    {
-                        // 发送消息
-                        // return:
-                        //      -1  出错
-                        //      0   成功
-                        nRet = this.App.MessageCenter.SendMessage(
-                            this.RmsChannels,
-                            strReaderBarcode,
-                            "图书馆",
-                            "借阅信息提示",
-                            strMime,    // "text",
-                            strBody,
-                            false,
+                    StringBuilder debugInfo = new StringBuilder();
+                    // 执行脚本函数NotifyReader
+                    // parameters:
+                    // return:
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    // nResultValue
+                    //      -1  出错
+                    //      0   没有必要发送
+                    //      1   需要发送
+                    nRet = this.App.DoNotifyReaderScriptFunction(
+                            readerdom,
+                            calendar,
+                            // notifiedBarcodes,
+                            strBodyType,
+                            debugInfo,
+                            out int nResultValue,
+                            out string strBody,
+                            out string strMime,
+                            // out wantNotifyBarcodes,
                             out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "发送dpmail出错: " + strError;
-                            if (this.App.Statis != null)
-                                this.App.Statis.IncreaseEntryValue(strLibraryCode,
-                                "超期通知",
-                                "dpmail message 超期通知消息发送错误数",
-                                1);
-                            this.AppendResultText(strError + "\r\n");
-                            bSendMessageError = true;
-                            // return -1;
-
-                            this.App.WriteErrorLog(strError);
-                            readerdom = new XmlDocument();
-                            readerdom.LoadXml(strOldReaderXml);
-                        }
-                        else
-                        {
-                            if (this.App.Statis != null)
-                                this.App.Statis.IncreaseEntryValue(
-                                strLibraryCode,
-                                "超期通知",
-                                "dpmail超期通知人数",
-                                1);
-                        }
+                    WriteMonitorLog($"DoNotifyReaderScriptFunction() 返回 nRet={nRet}, nResultValue={nResultValue}, strError={ strError }, \r\n  strBody='{strBody}', strMime='{strMime}', \r\n  debugInfo='{debugInfo.ToString()}'");
+                    if (nRet == -1)
+                    {
+                        this.AppendResultText("DoNotifyReaderScriptFunction [barcode=" + strReaderBarcode + "] error: " + strError + "\r\n");
+                        continue;
                     }
 
-                    MessageInterface external_interface = this.App.GetMessageInterface(strBodyType);
-
-                    if (external_interface != null)
+                    // 2010/12/18
+                    // 不可能发生。因为基类有NotifyReader()函数了
+                    if (nRet == -2)
                     {
-                        // 发送消息
-                        try
+                        WriteMonitorLog("nRet == -2，从所有 bodytype 循环中 break");
+                        break;
+                    }
+
+                    if (nResultValue == -1)
+                    {
+                        this.AppendResultText("DoNotifyReaderScriptFunction [strReaderBarcode=" + strReaderBarcode + "] nResultValue == -1, errorinfo: " + strError + "\r\n");
+                        WriteMonitorLog("nResultValue == -1，跳过当前 bodytype");
+                        continue;
+                    }
+
+                    // nRet = 1;  // testing
+
+                    if (nResultValue == 0)
+                    {
+                        // 不要发送邮件
+                        WriteMonitorLog("nResultValue == 0，不发送任何邮件");
+                        continue;
+                    }
+
+                    bool bSendMessageError = false;
+
+                    if (nResultValue == 1 && nRedoCount == 0)   // 2008/5/27 changed 重做的时候，不再发送消息，以免消息库记录爆满
+                    {
+                        // 发送邮件
+
+                        if (this._queue == null)
+                            WriteMonitorLog("this._queue == null (MessageQueue 尚未配置)");
+
+                        // 2016/4/10
+                        if (strBodyType == "mq" && this._queue != null)
                         {
-                            // 发送一条消息
-                            // parameters:
-                            //      strPatronBarcode    读者证条码号
-                            //      strPatronXml    读者记录XML字符串。如果需要除证条码号以外的某些字段来确定消息发送地址，可以从XML记录中取
-                            //      strMessageText  消息文字
-                            //      strError    [out]返回错误字符串
+                            string strRecipient = (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
+                                + "@LUID:" + this.App.UID;
+                            // 向 MSMQ 消息队列发送消息
                             // return:
-                            //      -1  发送失败
-                            //      0   没有必要发送
-                            //      >=1   发送成功，返回实际发送的消息条数
-                            nRet = external_interface.HostObj.SendMessage(
-                                strReaderBarcode,
-                                readerdom.DocumentElement.OuterXml,
+                            //      -2  MSMQ 错误
+                            //      -1  出错
+                            //      0   成功
+                            nRet = SendToQueue(this._queue,
+                                strRecipient,
+                                strMime,
                                 strBody,
-                                strLibraryCode,
                                 out strError);
-                        }
-                        catch (Exception ex)
-                        {
-                            strError = external_interface.Type + " 类型的外部消息接口Assembly中SendMessage()函数抛出异常: " + ex.Message;
-                            nRet = -1;
-                        }
-                        if (nRet == -1)
-                        {
-                            strError = "向读者 '" + strReaderBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
-                            if (this.App.Statis != null)
-                                this.App.Statis.IncreaseEntryValue(
-                                strLibraryCode,
-                                "超期通知",
-                                external_interface.Type + " message 超期通知消息发送错误数",
-                                1);
-                            this.AppendResultText(strError + "\r\n");
-                            bSendMessageError = true;
-                            // return -1;
+                            if (nRet == -1 || nRet == -2)
+                            {
+                                strError = "发送 MQ 出错: " + strError;
+                                if (this.App.Statis != null)
+                                    this.App.Statis.IncreaseEntryValue(strLibraryCode,
+                                    "超期通知",
+                                    "MQ超期通知消息发送错误数",
+                                    1);
+                                this.AppendResultText(strError + "\r\n");
+                                bSendMessageError = true;
 
-                            this.App.WriteErrorLog(strError);
-                            readerdom = new XmlDocument();
-                            readerdom.LoadXml(strOldReaderXml);
+                                this.App.WriteErrorLog(strError);
+                                WriteMonitorLog(strError);
+                                readerdom = new XmlDocument();
+                                readerdom.LoadXml(strOldReaderXml);
+                            }
+                            else
+                            {
+                                if (this.App.Statis != null)
+                                    this.App.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    "超期通知",
+                                    "MQ超期通知人数",
+                                    1);
+
+                                // 2020/1/17
+                                // 发送成功则记入错误日志，便于排查错误
+                                // this.App.WriteErrorLog($"成功发出 MQ 消息: recipient={strRecipient}, mime={strMime}, body={strBody}");
+                                WriteMonitorLog($"成功发出 MQ 消息: recipient={strRecipient}, mime={strMime}, body={strBody}");
+                                send_types.Add(strBodyType);
+                            }
                         }
-                        else if (nRet >= 1)
+
+                        if (strBodyType == "dpmail")
                         {
-                            if (this.App.Statis != null)
-                                this.App.Statis.IncreaseEntryValue(strLibraryCode,
-                                "超期通知",
-                                external_interface.Type + " message 超期通知人数",
-                                1);
+                            // 发送消息
+                            // return:
+                            //      -1  出错
+                            //      0   成功
+                            nRet = this.App.MessageCenter.SendMessage(
+                                this.RmsChannels,
+                                strReaderBarcode,
+                                "图书馆",
+                                "借阅信息提示",
+                                strMime,    // "text",
+                                strBody,
+                                false,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "发送dpmail出错: " + strError;
+                                if (this.App.Statis != null)
+                                    this.App.Statis.IncreaseEntryValue(strLibraryCode,
+                                    "超期通知",
+                                    "dpmail message 超期通知消息发送错误数",
+                                    1);
+                                this.AppendResultText(strError + "\r\n");
+                                bSendMessageError = true;
+                                // return -1;
+
+                                this.App.WriteErrorLog(strError);
+                                WriteMonitorLog(strError);
+                                readerdom = new XmlDocument();
+                                readerdom.LoadXml(strOldReaderXml);
+                            }
+                            else
+                            {
+                                if (this.App.Statis != null)
+                                    this.App.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    "超期通知",
+                                    "dpmail超期通知人数",
+                                    1);
+
+                                WriteMonitorLog($"成功发出 dpmail 消息: readerBarcode={strReaderBarcode}, mime={strMime}, body={strBody}");
+                                send_types.Add(strBodyType);
+                            }
+                        }
+
+                        MessageInterface external_interface = this.App.GetMessageInterface(strBodyType);
+
+                        if (external_interface == null)
+                            WriteMonitorLog("external_interface == null");
+
+                        if (external_interface != null)
+                        {
+                            // 发送消息
+                            try
+                            {
+                                // 发送一条消息
+                                // parameters:
+                                //      strPatronBarcode    读者证条码号
+                                //      strPatronXml    读者记录XML字符串。如果需要除证条码号以外的某些字段来确定消息发送地址，可以从XML记录中取
+                                //      strMessageText  消息文字
+                                //      strError    [out]返回错误字符串
+                                // return:
+                                //      -1  发送失败
+                                //      0   没有必要发送
+                                //      >=1   发送成功，返回实际发送的消息条数
+                                nRet = external_interface.HostObj.SendMessage(
+                                    strReaderBarcode,
+                                    readerdom.DocumentElement.OuterXml,
+                                    strBody,
+                                    strLibraryCode,
+                                    out strError);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = external_interface.Type + " 类型的外部消息接口Assembly中SendMessage()函数抛出异常: " + ex.Message;
+                                nRet = -1;
+                            }
+
+                            if (nRet == -1)
+                            {
+                                strError = "向读者 '" + strReaderBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
+                                if (this.App.Statis != null)
+                                    this.App.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    "超期通知",
+                                    external_interface.Type + " message 超期通知消息发送错误数",
+                                    1);
+                                this.AppendResultText(strError + "\r\n");
+                                bSendMessageError = true;
+                                // return -1;
+
+                                this.App.WriteErrorLog(strError);
+                                WriteMonitorLog(strError);
+
+                                readerdom = new XmlDocument();
+                                readerdom.LoadXml(strOldReaderXml);
+                            }
+                            else if (nRet >= 1)
+                            {
+                                if (this.App.Statis != null)
+                                    this.App.Statis.IncreaseEntryValue(strLibraryCode,
+                                    "超期通知",
+                                    external_interface.Type + " message 超期通知人数",
+                                    1);
+
+                                WriteMonitorLog($"成功发出 {external_interface.Type} 消息: readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
+                                send_types.Add(external_interface.Type);
+                            }
+                        }
+
+                        if (strBodyType == "email")
+                        {
+                            // 发送email
+                            // return:
+                            //      -1  error
+                            //      0   not found smtp server cfg
+                            //      1   succeed
+                            nRet = this.App.SendEmail(strReaderEmailAddress,
+                                "借阅信息提示",
+                                strBody,
+                                strMime,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "发送 email 到 '" + strReaderEmailAddress + "' 出错: " + strError;
+                                if (this.App.Statis != null)
+                                    this.App.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    "超期通知",
+                                    "email message 超期通知消息发送错误数",
+                                    1);
+                                this.AppendResultText(strError + "\r\n");
+                                bSendMessageError = true;
+                                // return -1;
+
+                                this.App.WriteErrorLog(strError);
+                                WriteMonitorLog(strError);
+                                readerdom = new XmlDocument();
+                                readerdom.LoadXml(strOldReaderXml);
+                            }
+                            else if (nRet == 1)
+                            {
+                                if (this.App.Statis != null)
+                                    this.App.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    "超期通知",
+                                    "email超期通知人数",
+                                    1);
+
+                                WriteMonitorLog($"成功发出 email 消息: strReaderEmailAddress={strReaderEmailAddress}, mime={strMime}, body={strBody}");
+                                send_types.Add(strBodyType);
+                            }
+                            else
+                            {
+                                WriteMonitorLog($"SendEmail() return {nRet}");
+                            }
                         }
                     }
 
-                    if (strBodyType == "email")
+                    WriteMonitorLog($"bSendMessageError={bSendMessageError} bChanged={bChanged} 注: 如果 bSendMessageError == false，则不会设置 bChanged = true");
+
+                    if (bSendMessageError == false)
                     {
-                        // 发送email
-                        // return:
-                        //      -1  error
-                        //      0   not found smtp server cfg
-                        //      1   succeed
-                        nRet = this.App.SendEmail(strReaderEmailAddress,
-                            "借阅信息提示",
-                            strBody,
-                            strMime,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "发送 email 到 '" + strReaderEmailAddress + "' 出错: " + strError;
-                            if (this.App.Statis != null)
-                                this.App.Statis.IncreaseEntryValue(
-                                strLibraryCode,
-                                "超期通知",
-                                "email message 超期通知消息发送错误数",
-                                1);
-                            this.AppendResultText(strError + "\r\n");
-                            bSendMessageError = true;
-                            // return -1;
-
-                            this.App.WriteErrorLog(strError);
-                            readerdom = new XmlDocument();
-                            readerdom.LoadXml(strOldReaderXml);
-                        }
-                        else if (nRet == 1)
-                        {
-                            if (this.App.Statis != null)
-                                this.App.Statis.IncreaseEntryValue(
-                                strLibraryCode,
-                                "超期通知",
-                                "email超期通知人数",
-                                1);
-                        }
-                    }
-                }
-
-                if (bSendMessageError == false)
-                {
 #if NO
                     // 在读者记录中标记出那些已经发送过通知的册，避免以后重复通知
                     // return:
@@ -814,9 +916,13 @@ namespace DigitalPlatform.LibraryServer
                         bChanged = true;
 #endif
 
-                    bChanged = true;
-                }
-            } // end of for
+                        bChanged = true;
+                    }
+                } // end of for
+
+                if (send_types.Count > 0)
+                    AppendResultText($"已发出 {StringUtil.MakePathList(send_types)}");
+            }
 
             // 刷新以停代金情况
             // 2007/12/17
@@ -836,6 +942,7 @@ namespace DigitalPlatform.LibraryServer
                     "refresh",
                     "", // 因为是机器触发，所以不记载IP地址
                     out strError);
+                WriteMonitorLog($"ProcessPauseBorrowing() return {nRet}, strError={strError}");
                 if (nRet == -1)
                 {
                     strError = "在refresh以停代金的过程中发生错误: " + strError;
@@ -923,7 +1030,10 @@ namespace DigitalPlatform.LibraryServer
                 bChanged = true;
 
             if (bChanged)
+            {
                 strReaderXml = readerdom.OuterXml;
+                WriteMonitorLog("strReaderXml 返回改变后的内容");
+            }
 
 #if NO
             // 修改读者记录后存回
@@ -1090,7 +1200,7 @@ namespace DigitalPlatform.LibraryServer
             TimeSpan expireLength = app.GetConditionalPatronPasswordExpireLength(readerdom);
 
             XmlElement password_element = readerdom.DocumentElement.SelectSingleNode("password") as XmlElement;
-            
+
             // 2021/9/2
             if (password_element == null)
                 return false;
@@ -1770,6 +1880,26 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        public class WriteMonitorLogResult : NormalResult
+        {
+            public string FileName { get; set; }
+            public string Time { get; set; }
+        }
+
+        // 写入日志信息到一个专门的 .log 文件，避免基本的 .log 文件尺寸太大
+        public WriteMonitorLogResult WriteMonitorLog(string text)
+        {
+            DateTime now = DateTime.Now;
+            string path = Path.Combine(this.App.LogDir, "readersMonitor_" + DateTimeUtil.DateTimeToString8(now) + ".txt");
+            string time = now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
+            File.AppendAllText(path, time + "  " + text + "\r\n");
+            return new WriteMonitorLogResult
+            {
+                FileName = path,
+                Time = time
+            };
         }
     }
 }

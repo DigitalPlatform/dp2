@@ -69,4 +69,7 @@
   <action element="face" type="">
     <caption lang="zh">人脸</caption>
   </action>
+  <action element="palmprint" type="">
+    <caption lang="zh">掌纹</caption>
+  </action>
 </root>

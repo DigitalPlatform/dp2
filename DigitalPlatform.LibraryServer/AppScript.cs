@@ -1096,6 +1096,7 @@ namespace DigitalPlatform.LibraryServer
             Calendar calendar,
             // List<string> notifiedBarcodes,
             string strBodyType,
+            StringBuilder debugInfo,
             out int nResultValue,
             out string strBody,
             out string strMime,
@@ -1169,6 +1170,7 @@ namespace DigitalPlatform.LibraryServer
                     calendar,
                     // notifiedBarcodes,
                     strBodyType,
+                    debugInfo,
                     out strBody,
                     out strMime,
                     // out wantNotifyBarcodes,
@@ -2211,7 +2213,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 特殊权限列表。这些权限，都是“反向”权限，即加了这些权限反而限制了权限。也就是说增加了这些权限不会让账户有权利增强的效果
-        static string[] special_rights = new string[] { 
+        static string[] special_rights = new string[] {
             "denychangemypassword",
             "neverexpire",
             "denyresetmypassword",    // 2021/8/2
@@ -2268,10 +2270,10 @@ namespace DigitalPlatform.LibraryServer
             return true;
         }
 
-        static bool Contains(string [] array, string s)
+        static bool Contains(string[] array, string s)
         {
             s = LibraryApplication.GetPrefix(s);
-            foreach(string a in array)
+            foreach (string a in array)
             {
                 var prefix = LibraryApplication.GetPrefix(a);
                 if (s == prefix)
@@ -2993,6 +2995,7 @@ strRoom1);
             Calendar calendar,
             // List<string> notifiedBarcodes,
             string strBodyType,
+            StringBuilder debugInfo,
             out string strBody,
             out string strMime,
             // out List<string> wantNotifyBarcodes,
@@ -3005,6 +3008,7 @@ strRoom1);
                     calendar,
                     //notifiedBarcodes,
                     strBodyType,
+                    debugInfo,
                     out strBody,
                     out strMime,
                     //out wantNotifyBarcodes,
@@ -3017,6 +3021,7 @@ strRoom1);
                     readerdom,
                     calendar,
                     strBodyType,
+                    debugInfo,
                     out strBody,
                     out strMime,
                     out strError);
@@ -3150,8 +3155,10 @@ strRoom1);
                     // return:
                     //      -1  数据格式错误
                     //      0   成功
-                    nRet = App.CheckNotifyPoint(
+                    nRet = LibraryApplication.CheckNotifyPoint(
+                        App,
                         calendar,
+                        App.Clock.UtcNow,
                         strBorrowDate,
                         strPeriod,
                         App.NotifyDef,
@@ -3232,12 +3239,16 @@ strRoom1);
 
             strResult += "</body></html>";
 
-            strBody = strResult;
-
             if (nOverdueCount + nNormalCount > 0)
+            {
+                strBody = strResult;
                 return 1;
+            }
             else
+            {
+                strBody = "";
                 return 0;
+            }
         }
 
         // 检查是否至少有一个字符位置为 ch 代表的值
@@ -3299,6 +3310,7 @@ strRoom1);
             XmlDocument readerdom,
             Calendar calendar,
             string strBodyType,
+            StringBuilder debugInfo,
             out string strBody,
             out string strMime,
             out string strError)
@@ -3312,9 +3324,14 @@ strRoom1);
             int nOverdueCount = 0;  // 超期提醒的事项数
             int nNormalCount = 0;   // 一般提醒的事项数
 
+            debugInfo?.AppendLine("进入 NotifyReaderMQ() 函数");
+
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
             if (nodes.Count == 0)
+            {
+                debugInfo?.AppendLine("没有 borrows/borrow 元素");
                 return 0;
+            }
 
             // 表达通知信息的 XML 记录
             XmlDocument output_dom = new XmlDocument();
@@ -3349,6 +3366,8 @@ strRoom1);
                 // string strRenewComment = DomUtil.GetAttr(node, "renewComment");
                 string strHistory = DomUtil.GetAttr(node, "notifyHistory");
 
+                debugInfo?.AppendLine($"- 开始处理册 '{strBarcode}'。notifyHistory='{strHistory}' borrowDate={strBorrowDate}, borrowPeriod={strPeriod}");
+
                 string strOverDue = "";
                 bool bOverdue = false;  // 是否超期
                 DateTime timeReturning = DateTime.MinValue;
@@ -3367,6 +3386,7 @@ strRoom1);
                             out strError);
                         lOver = lValue;
                         nRet = 1;
+                        debugInfo?.AppendLine($"_testoverduenotify: strPeriod={strPeriod}, lOver={lOver}, nRet={nRet}");
                     }
                     else
                     {
@@ -3385,9 +3405,14 @@ strRoom1);
                             out lOver,
                             out strPeriodUnit,
                             out strError);
+
+                        debugInfo?.AppendLine($"GetReturningTime() strBorrowDate={strBorrowDate}, strPeriod={strPeriod}. return nRet={nRet}, lOver={lOver}, timeReturning={timeReturning}, strPeriodUnit={strPeriodUnit} ");
                     }
                     if (nRet == -1)
+                    {
                         strOverDue = strError;
+                        debugInfo?.AppendLine($"nRet == -1 strOverDue={strOverDue}, bOverdur={bOverdue}");
+                    }
                     else
                     {
                         if (nRet == 1)
@@ -3395,6 +3420,7 @@ strRoom1);
                             bOverdue = true;
                             strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
                                                 this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit));
+                            debugInfo?.AppendLine($"nRet == 1 strOverDue={strOverDue}, bOverdur={bOverdue}");
                         }
                     }
                 }
@@ -3404,13 +3430,18 @@ strRoom1);
                 strChars = ReadersMonitor.GetNotifiedChars(App,
                     strBodyType,
                     strHistory);
+                debugInfo?.AppendLine($"GetNotifiedChars() strBodyType='{strBodyType}', strHistory='{strHistory}', return strChars='{strChars}'");
 
+                debugInfo?.AppendLine($"bOverdue={bOverdue}");
                 if (bOverdue == true)
                 {
                     // 看看是不是已经通知过
                     if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y'
                         && bTestNotify == false)
+                    {
+                        debugInfo?.AppendLine($"因为 strChars[0] == 'y'，跳过本次通知");
                         continue;
+                    }
 
                     // 合并设置一种 body type 的全部通知字符
                     // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
@@ -3419,8 +3450,12 @@ strRoom1);
                         "y",
                         ref strHistory,
                         out strError);
+                    debugInfo?.AppendLine($"SetNotifiedChars() strBodyType='{strBodyType}' strHistory='{strHistory}', return nRet={nRet}, strHistry='{strHistory}', strError='{strError}'");
                     if (nRet == -1)
+                    {
+                        debugInfo?.AppendLine($"退出 NotifyReaderMQ() 函数, strError='{strError}'");
                         return -1;
+                    }
 
                     ReadersMonitor.SetChar(ref strChars,
                         0,
@@ -3432,20 +3467,29 @@ strRoom1);
                 else if (string.IsNullOrEmpty(App.NotifyDef) == false)
                 {
                     // 检查超期前的通知点
+                    debugInfo?.AppendLine($"检查“即将超期”情况。App.NotifyDef='{App.NotifyDef}'");
 
                     // 检查每个通知点，返回当前时间已经达到或者超过了通知点的那些检查点的下标
                     // return:
                     //      -1  数据格式错误
                     //      0   成功
-                    nRet = App.CheckNotifyPoint(
+                    nRet = LibraryApplication.CheckNotifyPoint(
+                        App,
                         calendar,
+                        App.Clock.UtcNow,
                         strBorrowDate,
                         strPeriod,
                         App.NotifyDef,
                         out List<int> indices,
                         out strError);
+
+                    debugInfo?.AppendLine($"CheckNotifyPoint() strBorrowDate={strBorrowDate} strPeriod={strPeriod} App.NotifyDef={App.NotifyDef}, return nRet={nRet} indices='{ToString(indices)}'");
+
                     if (nRet == -1)
+                    {
+                        debugInfo?.AppendLine($"退出 NotifyReaderMQ() 函数, strError='{strError}'");
                         return -1;
+                    }
 
                     // 偏移量 0 让给了超期通知
                     for (int k = 0; k < indices.Count; k++)
@@ -3458,9 +3502,13 @@ strRoom1);
                     {
                         // 至少有一个检查点尚未通知
                         strOverDue = "即将到期";
+                        debugInfo?.AppendLine($"CheckChar() strChars='{strChars}' indices='{ToString(indices)}' return true, strOverDue='{strOverDue}'");
                     }
                     else
+                    {
+                        debugInfo?.AppendLine($"CheckChar() strChars='{strChars}' indices='{ToString(indices)}' return false, 跳过册 '{strBarcode}'");
                         continue;
+                    }
 
                     foreach (int index in indices)
                     {
@@ -3470,10 +3518,15 @@ strRoom1);
                             'n');
                     }
 
+                    debugInfo?.AppendLine($"strChars 变为 '{strChars}'");
+
                     nNormalCount++;
                 }
                 else
+                {
+                    debugInfo?.AppendLine($"跳过册 '{strBarcode}'");
                     continue;
+                }
 
                 // 合并设置一种 body type 的全部通知字符
                 // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
@@ -3482,9 +3535,17 @@ strRoom1);
                     strChars,
                     ref strHistory,
                     out strError);
+                debugInfo?.AppendLine($"SetNotifiedChars() strBodyType='{strBodyType}' strChars='{strChars}' strHistory='{strHistory}', return nRet={nRet} strHistory='{strHistory}' strError='{strError}'");
+
                 if (nRet == -1)
+                {
+                    debugInfo?.AppendLine($"退出 NotifyReaderMQ() 函数, strError='{strError}'");
                     return -1;
+                }
+
                 DomUtil.SetAttr(node, "notifyHistory", strHistory);
+
+                debugInfo?.AppendLine($"修改 borrow 元素的 notifyHistory 属性值为 '{strHistory}'");
 
                 // 获得图书摘要信息
                 string strSummary = "";
@@ -3507,6 +3568,8 @@ strRoom1);
                 strResult += "应还日期: " + timeReturning.ToString("d") + " ";
                 strResult += strOverDue + "\n";
 
+                debugInfo?.AppendLine($"strResult='{strResult}'");
+
                 {
                     XmlElement item = output_dom.CreateElement("item");
                     items.AppendChild(item);
@@ -3526,36 +3589,57 @@ strRoom1);
                 }
             }
 
-            /*
-            if (nOverdueCount > 0)
-                strResult += "=== 共有 " + nOverdueCount.ToString() + " 册图书超期, 请尽快归还。";
-            if (nNormalCount > 0)
-                strResult += "=== 共有 " + nNormalCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
-             * */
-            items.SetAttribute("overdueCount", nOverdueCount.ToString());
-            items.SetAttribute("normalCount", nNormalCount.ToString());
-
-            DomUtil.SetElementText(output_dom.DocumentElement, "text", strResult);
-
+            debugInfo?.AppendLine($"nOverdueCount={nOverdueCount}, nNormalCount={nNormalCount}");
+            if (nOverdueCount + nNormalCount > 0)
             {
-                XmlElement record = output_dom.CreateElement("patronRecord");
-                output_dom.DocumentElement.AppendChild(record);
-                record.InnerXml = readerdom.DocumentElement.InnerXml;
+                /*
+if (nOverdueCount > 0)
+    strResult += "=== 共有 " + nOverdueCount.ToString() + " 册图书超期, 请尽快归还。";
+if (nNormalCount > 0)
+    strResult += "=== 共有 " + nNormalCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
+ * */
+                items.SetAttribute("overdueCount", nOverdueCount.ToString());
+                items.SetAttribute("normalCount", nNormalCount.ToString());
 
-                DomUtil.DeleteElement(record, "borrowHistory");
-                DomUtil.DeleteElement(record, "password");
-                DomUtil.DeleteElement(record, "fingerprint");
-                DomUtil.DeleteElement(record, "palmprint");
-                DomUtil.DeleteElement(record, "face");
-                // TODO: 是否包含 libraryCode 元素?
+                DomUtil.SetElementText(output_dom.DocumentElement, "text", strResult);
+
+                {
+                    XmlElement record = output_dom.CreateElement("patronRecord");
+                    output_dom.DocumentElement.AppendChild(record);
+                    record.InnerXml = readerdom.DocumentElement.InnerXml;
+
+                    DomUtil.DeleteElement(record, "borrowHistory");
+                    DomUtil.DeleteElement(record, "password");
+                    DomUtil.DeleteElement(record, "fingerprint");
+                    DomUtil.DeleteElement(record, "palmprint");
+                    DomUtil.DeleteElement(record, "face");
+                    // TODO: 是否包含 libraryCode 元素?
+                }
+
+
+                strBody = output_dom.DocumentElement.OuterXml;
+                debugInfo?.AppendLine($"退出 NotifyReaderMQ() 函数, 返回 1");
+                return 1;
+            }
+            else
+            {
+                strBody = "";   // 2021/10/25
+                debugInfo?.AppendLine($"退出 NotifyReaderMQ() 函数, 返回 0");
+                return 0;
+            }
+        }
+
+        static string ToString(List<int> indices)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach (var index in indices)
+            {
+                if (text.Length > 0)
+                    text.Append(",");
+                text.Append(index.ToString());
             }
 
-            strBody = output_dom.DocumentElement.OuterXml;
-
-            if (nOverdueCount + nNormalCount > 0)
-                return 1;
-            else
-                return 0;
+            return text.ToString();
         }
 
         // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用
@@ -3564,6 +3648,7 @@ strRoom1);
             Calendar calendar,
             // List<string> notifiedBarcodes,
             string strBodyType,
+            StringBuilder debugInfo,
             out string strBody,
             out string strMime,
             // out List<string> wantNotifyBarcodes,
@@ -3676,8 +3761,10 @@ strRoom1);
                     // return:
                     //      -1  数据格式错误
                     //      0   成功
-                    nRet = App.CheckNotifyPoint(
+                    nRet = LibraryApplication.CheckNotifyPoint(
+                        App,
                         calendar,
+                        App.Clock.UtcNow,
                         strBorrowDate,
                         strPeriod,
                         App.NotifyDef,
@@ -3754,12 +3841,16 @@ strRoom1);
                 strResult += "=== 共有 " + nNormalCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
              * */
 
-            strBody = strResult;
-
             if (nOverdueCount + nNormalCount > 0)
+            {
+                strBody = strResult;
                 return 1;
+            }
             else
+            {
+                strBody = "";   // 2021/10/25
                 return 0;
+            }
         }
 #if NO
         // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用

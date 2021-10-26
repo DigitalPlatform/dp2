@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.45.*")]
-[assembly: AssemblyFileVersion("3.45.0.0")]
+[assembly: AssemblyVersion("3.46.*")]
+[assembly: AssemblyFileVersion("3.46.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -126,3 +126,4 @@ using System.Runtime.InteropServices;
 // 3.44 2021/10/14 读者窗登记人脸的时候，会自动检查 FaceCenter 所连的 dp2library 服务器是否和内务所连的一致，如果不一致会报错
 // 3.45 2021/10/15 实体查询窗上部检索面板的宽度有所增加。在窗口整体变窄的情况下，第一行检索词的下拉列表部分还能维持一个基本的显示宽度
 //                  实体查询窗的“册条码号”检索途径，当用“B0000001-B0000012”这样的检索词进行检索的时候，可以检索出一个连续范围的册条码号的记录
+// 3.46 2021/10/25 读者查询窗快速修改册记录功能增加了修改掌纹的选项
