@@ -32,6 +32,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Linq;
 
 namespace dp2Circulation
 {
@@ -1135,7 +1136,6 @@ MessageBoxDefaultButton.Button2);
                 // this.button_load.Enabled = bEnable;
                 this.toolStrip_load.Enabled = bEnable;
 
-
                 this.readerEditControl1.Enabled = bEnable;
 
                 if (bEnable == false)
@@ -1148,30 +1148,33 @@ MessageBoxDefaultButton.Button2);
                         this.toolStripButton_delete.Enabled = false;
                 }
 
-                this.toolStripButton_loadFromIdcard.Enabled = bEnable;
+                EnableToolStripExclude(bEnable, 
+                    new ToolStripItem[] { this.toolStripButton_stopSummaryLoop, this.toolStripButton_delete });
 
-                this.toolStripDropDownButton_loadBlank.Enabled = bEnable;
-                this.toolStripButton_loadBlank.Enabled = bEnable;
+                // this.toolStripButton_loadFromIdcard.Enabled = bEnable;
 
-                this.toolStripButton_webCamera.Enabled = bEnable;
-                this.toolStripButton_pasteCardPhoto.Enabled = bEnable;
+                // this.toolStripDropDownButton_loadBlank.Enabled = bEnable;
+                // this.toolStripButton_loadBlank.Enabled = bEnable;
 
-                this.toolStripButton_registerFingerprint.Enabled = bEnable;
-                this.toolStripButton_createMoneyRecord.Enabled = bEnable;
+                // this.toolStripButton_webCamera.Enabled = bEnable;
+                // this.toolStripButton_pasteCardPhoto.Enabled = bEnable;
 
-                this.toolStripButton_saveTo.Enabled = bEnable;
+                // this.toolStripButton_registerFingerprint.Enabled = bEnable;
+                // this.toolStripButton_createMoneyRecord.Enabled = bEnable;
+
+                // this.toolStripButton_saveTo.Enabled = bEnable;
                 //this.toolStripButton_save.Enabled = bEnable;
-                this.toolStripSplitButton_save.Enabled = bEnable;
+                // this.toolStripSplitButton_save.Enabled = bEnable;
 
-                this.toolStripButton_clearOutofReservationCount.Enabled = bEnable;
+                // this.toolStripButton_clearOutofReservationCount.Enabled = bEnable;
 
-                this.toolStripButton_option.Enabled = bEnable;
+                // this.toolStripButton_option.Enabled = bEnable;
 
-                this.toolStripDropDownButton_otherFunc.Enabled = bEnable;
+                //this.toolStripDropDownButton_otherFunc.Enabled = bEnable;
 
                 // 2008/10/28
-                this.toolStripButton_next.Enabled = bEnable;
-                this.toolStripButton_prev.Enabled = bEnable;
+                //this.toolStripButton_next.Enabled = bEnable;
+                //this.toolStripButton_prev.Enabled = bEnable;
             }));
         }
 
@@ -1898,6 +1901,22 @@ strNewDefault);
                 toolStripTextBox_barcode.Enabled = bEnable;
                 this.toolStrip1.Enabled = bEnable;
             }));
+        }
+
+        // 除了 stop 按钮外，Enable/Disable 其他所有按钮
+        void EnableToolStripExclude(bool bEnable,
+            ToolStripItem [] excludes )
+        {
+            List<ToolStripItem> all = new List<ToolStripItem>(this.toolStrip1.Items.Cast<ToolStripItem>());
+            foreach(var item in excludes)
+            {
+                all.Remove(item);
+            }
+            
+            foreach (var item in all)
+            {
+                item.Enabled = bEnable;
+            }
         }
 
 #if REMOVED
@@ -3964,7 +3983,6 @@ MessageBoxDefaultButton.Button2);
             // this.m_webExternalHost.IsInLoop = false;
             this.m_webExternalHost.StopPrevious();
             this.webBrowser_readerInfo.Stop();
-
         }
 
 
