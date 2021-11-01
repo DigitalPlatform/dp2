@@ -672,6 +672,12 @@ Stack:
         {
             // DisableChildTopMost();
 
+            // 保存 palmprintForm 是否打开的状态
+            {
+                bool visible = !(_palmprintForm == null || _palmprintForm?.IsDisposed == true);
+                this.AppInfo.SetBoolean("palmprint", "palmprintDialogVisible", visible);
+            }
+
             // 在前面关闭MDI子窗口的时候已经遇到了终止关闭的情况，这里就不用再次询问了
             if (e.CloseReason == CloseReason.UserClosing && e.Cancel == true)
                 return;
@@ -798,7 +804,7 @@ Stack:
                 FinishFixedPanel();
 
                 AppInfo.SaveFormStates(this,
-                    "mainformstate");
+                "mainformstate");
             }
 
             // cfgcache
@@ -9816,6 +9822,77 @@ out strError);
         private void MenuItem_importFromPatronXml_Click(object sender, EventArgs e)
         {
             OpenWindow<ImportPatronForm>();
+        }
+
+        Charging.PalmprintForm _palmprintForm = null;
+
+        public void PausePalmprintDisplay()
+        {
+            _palmprintForm.Pause = true;
+        }
+
+        public void ContinuePalmprintDisplay()
+        {
+            _palmprintForm.Pause = false;
+        }
+
+        public void SetPalmprintMessage(string message, string id)
+        {
+            string type = "";
+            var text = message;
+            if (text.Contains(":"))
+            {
+                var parts = StringUtil.ParseTwoPart(text, ":");
+                type = parts[0];
+                text = parts[1];
+            }
+            _palmprintForm.MessageText = $"({id}) {text}";
+        }
+
+        private void MenuItem_displayPalmprintDialog_Click(object sender, EventArgs e)
+        {
+            bool visible = !(_palmprintForm == null || _palmprintForm?.IsDisposed == true);
+
+            if (visible == false)
+                ShowPalmprintDialog();
+            else
+                ClosePalmprintDialog();
+        }
+
+        void ShowPalmprintDialog()
+        {
+            if (_palmprintForm == null || _palmprintForm.IsDisposed == true)
+            {
+                _palmprintForm = new Charging.PalmprintForm();
+                // _palmprintForm.FormClosed -= new FormClosedEventHandler(accept_FormClosed);
+                // _palmprintForm.FormClosed += new FormClosedEventHandler(accept_FormClosed);
+                _palmprintForm.FormClosed += (o1, e1) =>
+                {
+                    if (_palmprintForm != null)
+                    {
+                        if (this.AppInfo != null)
+                            this.AppInfo.UnlinkFormState(_palmprintForm);
+                        this._palmprintForm = null;
+                    }
+
+                    this.MenuItem_displayPalmprintDialog.Checked = false;
+                };
+
+                this.AppInfo.LinkFormState(_palmprintForm, "palmprintform_state");
+
+                _palmprintForm.Show(this);
+            }
+            else
+            {
+                _palmprintForm.Activate();
+            }
+
+            this.MenuItem_displayPalmprintDialog.Checked = true;
+        }
+
+        void ClosePalmprintDialog()
+        {
+            _palmprintForm?.Close();
         }
     }
 

@@ -8,10 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform.Drawing;
+
 namespace dp2Circulation
 {
     public partial class RegisterPalmprintDialog : Form
     {
+        // public bool Finished { get; set; }
+
         public RegisterPalmprintDialog()
         {
             InitializeComponent();
@@ -26,6 +30,20 @@ namespace dp2Circulation
             set
             {
                 this.label_text.Text = value;
+            }
+        }
+
+        public Image Image
+        {
+            get
+            {
+                return this.pictureBox1.Image;
+            }
+            set
+            {
+                ImageUtil.SetImage(this.pictureBox1, value);
+
+                // this.pictureBox1.Image = value;
             }
         }
 
@@ -45,6 +63,19 @@ namespace dp2Circulation
             {
                 this.button_cancel.Text = value;
             }
+        }
+
+        public void DisplayError(string strError, Color backColor)
+        {
+            // 显示错误
+            this.Invoke((Action)(() =>
+            {
+                this.Image = Charging.PalmprintForm.BuildTextImage(
+                strError,
+                backColor,
+                32,
+                this.pictureBox1.Width);
+            }));
         }
     }
 }

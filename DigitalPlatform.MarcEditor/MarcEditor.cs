@@ -2590,6 +2590,8 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     this.SetActiveField(0, 3, true);
             }
 
+            // 2021/10/28
+            this.FireTextChanged();
         }
 
         void Menu_r2l(object sender, EventArgs e)
@@ -3085,6 +3087,10 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     return;
 
                 this.m_bChanged = value;
+
+                // 2021/14/28
+                if (value == true)
+                    this.FireTextChanged();
             }
         }
 
@@ -3499,9 +3505,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         }
 
         // 文档发生改变
-        internal void FireTextChanged()
+        internal void FireTextChanged(bool changed = true)
         {
-            this.Changed = true;
+            // this.Changed = changed;
+            if (this.DesignMode == false)
+                this.m_bChanged = changed;
 
             EventArgs e = new EventArgs();
             this.OnTextChanged(e);

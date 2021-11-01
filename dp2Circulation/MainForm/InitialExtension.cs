@@ -1512,6 +1512,10 @@ MessageBoxDefaultButton.Button1);
 
             InitialFixedPanel();
 
+            // 2021/11/1
+            if (this.AppInfo.GetBoolean("palmprint", "palmprintDialogVisible", false))
+                ShowPalmprintDialog();
+
             stopManager.Initial(this.toolButton_stop,
                 (object)this.toolStripStatusLabel_main,
                 (object)this.toolStripProgressBar_main);
@@ -1760,7 +1764,7 @@ MessageBoxDefaultButton.Button1);
         {
             // 2021/3/19
             // 保护。防止重复 +=
-            FingerprintManager.Touched -= PalmprintManager_Touched; ;
+            FingerprintManager.Touched -= PalmprintManager_Touched;
             // SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
 
             if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false)
@@ -1772,6 +1776,7 @@ MessageBoxDefaultButton.Button1);
                 _cancelPalmManager?.Cancel();
 
                 _cancelPalmManager = new CancellationTokenSource();
+                FingerprintManager.Base.ShortWaitTime = TimeSpan.FromMilliseconds(1);   // 2021/11/1
                 FingerprintManager.Base.Name = "掌纹中心";
                 FingerprintManager.SessionID = session_id;
                 FingerprintManager.Url = this.PalmprintReaderUrl;
@@ -1906,13 +1911,23 @@ MessageBoxDefaultButton.Button1);
                 return;
             }
 
-            Program.MainForm.OperHistory?.AppendHtml($"<div class='debug recpath'>{ HttpUtility.HtmlEncode($"掌纹消息 {e.ToString()}") }</div>");
             if (e.Quality == -1)
             {
-                string error = $"palmTouched 提示文字 (e.Quality == -1) {e.Message}";
-                Program.MainForm.OperHistory?.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                this.Invoke((Action)(() =>
+                {
+                    var id = e.Result?.MessageID;
+                    this.SetPalmprintMessage($"{e.Message}", id);
+                }));
+                /*
+                {
+                    string error = $"palmTouched 提示文字 (e.Quality == -1) {e.Message}";
+                    Program.MainForm.OperHistory?.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                }
+                */
                 return;
             }
+            else
+                Program.MainForm.OperHistory?.AppendHtml($"<div class='debug recpath'>{ HttpUtility.HtmlEncode($"掌纹消息 {e.ToString()}") }</div>");
 
             // dp2circulation 自己不是在最前面的时候，不进行掌纹 SendKey。这样避免和同时运行的 dp2SSL 冲突(dp2ssl 自己可以轮询掌纹 message)
             if (_isActivated == false)
@@ -1934,10 +1949,42 @@ MessageBoxDefaultButton.Button1);
                 return;
             }
 
-            this.Invoke((Action)(() =>
+            // 2021/10/28
+            // 忽略图像消息
+            if (e.Message.StartsWith("!image"))
+                return;
+
+            if (_disablePalmSendKey == false)
             {
-                SendKeys.Send(e.Message + "\r");
-            }));
+                this.Invoke((Action)(() =>
+                {
+                    SendKeys.Send(e.Message + "\r");
+                    this.SetPalmprintMessage("识别成功 " + e.Message, e.Result?.MessageID);
+                }));
+            }
+            else
+            {
+                string error = $"掌纹输入 '{e.Message}' 被丢弃";
+                Program.MainForm.OperHistory?.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+            }
+        }
+
+        bool _disablePalmSendKey = false;
+
+        public void EnablePalmSendKey()
+        {
+            _disablePalmSendKey = false;
+
+            string text = $"重新启用掌纹输入";
+            Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");
+        }
+
+        public void DisablePalmSendKey()
+        {
+            _disablePalmSendKey = true;
+
+            string text = $"临时禁用掌纹输入";
+            Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");
         }
 
         #endregion
@@ -4928,7 +4975,7 @@ Culture=neutral, PublicKeyToken=null
                     return 0;
 
                 int nRedoCount = 0;
-                REDO_GET:
+            REDO_GET:
                 string strValue = "";
                 long lRet = channel.GetSystemParameter(Stop,
                     "arrived",

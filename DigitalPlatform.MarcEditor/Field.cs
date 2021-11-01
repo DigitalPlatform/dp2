@@ -84,7 +84,6 @@ namespace DigitalPlatform.Marc
 
                     // 文档发生改变
                     this.container.MarcEditor.FireTextChanged();
-
                 }
             }
         }

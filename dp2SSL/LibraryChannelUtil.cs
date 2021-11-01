@@ -629,7 +629,8 @@ namespace dp2SSL
                     return new NormalResult
                     {
                         Value = 0,
-                        ErrorInfo = strError
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString(),
                     };
                 }
 
@@ -642,7 +643,8 @@ namespace dp2SSL
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = $"DetectNetwork() 出现异常：{ex.Message}"
+                    ErrorInfo = $"DetectNetwork() 出现异常：{ex.Message}",
+                    ErrorCode = ex.GetType().ToString(),
                 };
             }
             finally

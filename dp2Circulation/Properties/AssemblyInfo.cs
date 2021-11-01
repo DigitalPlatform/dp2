@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.46.*")]
-[assembly: AssemblyFileVersion("3.46.0.0")]
+[assembly: AssemblyVersion("3.47.*")]
+[assembly: AssemblyFileVersion("3.47.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -127,3 +127,6 @@ using System.Runtime.InteropServices;
 // 3.45 2021/10/15 实体查询窗上部检索面板的宽度有所增加。在窗口整体变窄的情况下，第一行检索词的下拉列表部分还能维持一个基本的显示宽度
 //                  实体查询窗的“册条码号”检索途径，当用“B0000001-B0000012”这样的检索词进行检索的时候，可以检索出一个连续范围的册条码号的记录
 // 3.46 2021/10/25 读者查询窗快速修改册记录功能增加了修改掌纹的选项
+// 3.47 2021/10/28 增加了配置选项，可以在读者窗活动期间临时禁用掌纹输入，这样可以避免密集进行读者掌纹登记时候误修改了读者记录
+//                  读者窗“登记掌纹”按钮按下后没有被禁用的 bug 已经修正
+//                  MARC 编辑器中“重新排序字段”功能没有设置 Changed = true 的 bug (种册窗在字段重新排序后保存和全部保存按钮没有变成 Enabled)已经修正

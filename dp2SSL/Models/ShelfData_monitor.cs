@@ -344,6 +344,22 @@ TaskScheduler.Default).Unwrap();
             else
             {
                 _libraryNetworkCondition = "Bad";
+
+                if (detect_result.ErrorCode == "RequestCanceled"
+                    || detect_result.ErrorCode == "RequestError")
+                {
+                }
+                else
+                {
+                    // 将不寻常的原因写入错误日志
+                    WpfClientInfo.WriteInfoLog($"检查 dp2library 连接状态时出现不寻常的报错: {detect_result.ErrorInfo}。errorCode={detect_result.ErrorCode}");
+                }
+
+                // 2021/11/1
+                // 也写入紧凑日志
+                _ = GlobalMonitor.CompactLog.Add("检查 dp2library 连接状态时出错: {0}。errorCode={1}",
+    new object[] { detect_result.ErrorInfo, detect_result.ErrorCode });
+
                 PageMenu.PageShelf?.SetBackColor(Brushes.DarkBlue);
             }
         }

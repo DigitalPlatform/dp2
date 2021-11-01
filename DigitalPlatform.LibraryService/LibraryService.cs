@@ -10743,7 +10743,7 @@ true);
                     if (StringUtil.IsInList("denychangemypassword", userinfo.Rights/*sessioninfo.RightsOrigin*/) == true)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "当前登录用户 " + userinfo.Rights/*sessioninfo.UserID*/ + " 因被设定了 denychangemypassword 权限，不能修改自己的密码";
+                        result.ErrorInfo = "当前登录用户 " + sessioninfo.UserID/*userinfo.Rights*/ + " 因被设定了 denychangemypassword 权限，不能修改自己的密码";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }

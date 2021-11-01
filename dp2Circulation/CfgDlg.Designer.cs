@@ -214,6 +214,7 @@
             this.button_palmprint_setDefaulValue = new System.Windows.Forms.Button();
             this.textBox_palmprint_readerUrl = new System.Windows.Forms.TextBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.linkLabel_installFaceCenter = new System.Windows.Forms.LinkLabel();
             this.button_face_setDefaultValue = new System.Windows.Forms.Button();
             this.textBox_face_readerUrl = new System.Windows.Forms.TextBox();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
@@ -222,6 +223,7 @@
             this.label21 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.linkLabel_installFingerprintCenter = new System.Windows.Forms.LinkLabel();
             this.button_fingerprint_setDefaultValue = new System.Windows.Forms.Button();
             this.textBox_fingerprint_readerUrl = new System.Windows.Forms.TextBox();
             this.button_fingerprint_clearLocalCacheFiles = new System.Windows.Forms.Button();
@@ -242,8 +244,7 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.linkLabel_installFaceCenter = new System.Windows.Forms.LinkLabel();
-            this.linkLabel_installFingerprintCenter = new System.Windows.Forms.LinkLabel();
+            this.checkBox_patron_disableBioKeyboardSimulation = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -2221,6 +2222,7 @@
             // tabPage_patron
             // 
             this.tabPage_patron.AutoScroll = true;
+            this.tabPage_patron.Controls.Add(this.checkBox_patron_disableBioKeyboardSimulation);
             this.tabPage_patron.Controls.Add(this.checkBox_patron_disableIdcardReaderKeyboardSimulation);
             this.tabPage_patron.Controls.Add(this.checkBox_patron_autoRetryReaderCard);
             this.tabPage_patron.Controls.Add(this.checkBox_patron_verifyBarcode);
@@ -2511,7 +2513,7 @@
             this.groupBox12.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox12.Name = "groupBox12";
             this.groupBox12.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox12.Size = new System.Drawing.Size(835, 147);
+            this.groupBox12.Size = new System.Drawing.Size(805, 147);
             this.groupBox12.TabIndex = 4;
             this.groupBox12.TabStop = false;
             this.groupBox12.Text = "掌纹阅读器接口 URL ";
@@ -2519,7 +2521,7 @@
             // button_palmprint_setDefaulValue
             // 
             this.button_palmprint_setDefaulValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(632, 82);
+            this.button_palmprint_setDefaulValue.Location = new System.Drawing.Point(602, 82);
             this.button_palmprint_setDefaulValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_palmprint_setDefaulValue.Name = "button_palmprint_setDefaulValue";
             this.button_palmprint_setDefaulValue.Size = new System.Drawing.Size(193, 40);
@@ -2535,7 +2537,7 @@
             this.textBox_palmprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_palmprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_palmprint_readerUrl.Name = "textBox_palmprint_readerUrl";
-            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(810, 31);
+            this.textBox_palmprint_readerUrl.Size = new System.Drawing.Size(780, 31);
             this.textBox_palmprint_readerUrl.TabIndex = 0;
             // 
             // groupBox10
@@ -2549,15 +2551,26 @@
             this.groupBox10.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox10.Size = new System.Drawing.Size(835, 147);
+            this.groupBox10.Size = new System.Drawing.Size(805, 147);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
             // 
+            // linkLabel_installFaceCenter
+            // 
+            this.linkLabel_installFaceCenter.AutoSize = true;
+            this.linkLabel_installFaceCenter.Location = new System.Drawing.Point(8, 92);
+            this.linkLabel_installFaceCenter.Name = "linkLabel_installFaceCenter";
+            this.linkLabel_installFaceCenter.Size = new System.Drawing.Size(321, 21);
+            this.linkLabel_installFaceCenter.TabIndex = 2;
+            this.linkLabel_installFaceCenter.TabStop = true;
+            this.linkLabel_installFaceCenter.Text = "下载安装 人脸中心(FaceCenter)";
+            this.linkLabel_installFaceCenter.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_installFaceCenter_LinkClicked);
+            // 
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(632, 82);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(602, 82);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2573,7 +2586,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(810, 31);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(780, 31);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2640,15 +2653,26 @@
             this.groupBox7.Margin = new System.Windows.Forms.Padding(5);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox7.Size = new System.Drawing.Size(835, 147);
+            this.groupBox7.Size = new System.Drawing.Size(805, 147);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
             // 
+            // linkLabel_installFingerprintCenter
+            // 
+            this.linkLabel_installFingerprintCenter.AutoSize = true;
+            this.linkLabel_installFingerprintCenter.Location = new System.Drawing.Point(7, 92);
+            this.linkLabel_installFingerprintCenter.Name = "linkLabel_installFingerprintCenter";
+            this.linkLabel_installFingerprintCenter.Size = new System.Drawing.Size(398, 21);
+            this.linkLabel_installFingerprintCenter.TabIndex = 3;
+            this.linkLabel_installFingerprintCenter.TabStop = true;
+            this.linkLabel_installFingerprintCenter.Text = "下载安装 指纹中心(FingerprintCenter)";
+            this.linkLabel_installFingerprintCenter.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_installFingerprintCenter_LinkClicked);
+            // 
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(632, 82);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(602, 82);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(5);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(193, 40);
@@ -2664,7 +2688,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(11, 35);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(810, 31);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(780, 31);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2873,27 +2897,16 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // linkLabel_installFaceCenter
+            // checkBox_patron_disableBioKeyboardSimulation
             // 
-            this.linkLabel_installFaceCenter.AutoSize = true;
-            this.linkLabel_installFaceCenter.Location = new System.Drawing.Point(8, 92);
-            this.linkLabel_installFaceCenter.Name = "linkLabel_installFaceCenter";
-            this.linkLabel_installFaceCenter.Size = new System.Drawing.Size(321, 21);
-            this.linkLabel_installFaceCenter.TabIndex = 2;
-            this.linkLabel_installFaceCenter.TabStop = true;
-            this.linkLabel_installFaceCenter.Text = "下载安装 人脸中心(FaceCenter)";
-            this.linkLabel_installFaceCenter.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_installFaceCenter_LinkClicked);
-            // 
-            // linkLabel_installFingerprintCenter
-            // 
-            this.linkLabel_installFingerprintCenter.AutoSize = true;
-            this.linkLabel_installFingerprintCenter.Location = new System.Drawing.Point(7, 92);
-            this.linkLabel_installFingerprintCenter.Name = "linkLabel_installFingerprintCenter";
-            this.linkLabel_installFingerprintCenter.Size = new System.Drawing.Size(398, 21);
-            this.linkLabel_installFingerprintCenter.TabIndex = 3;
-            this.linkLabel_installFingerprintCenter.TabStop = true;
-            this.linkLabel_installFingerprintCenter.Text = "下载安装 指纹中心(FingerprintCenter)";
-            this.linkLabel_installFingerprintCenter.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_installFingerprintCenter_LinkClicked);
+            this.checkBox_patron_disableBioKeyboardSimulation.AutoSize = true;
+            this.checkBox_patron_disableBioKeyboardSimulation.Location = new System.Drawing.Point(5, 241);
+            this.checkBox_patron_disableBioKeyboardSimulation.Margin = new System.Windows.Forms.Padding(5);
+            this.checkBox_patron_disableBioKeyboardSimulation.Name = "checkBox_patron_disableBioKeyboardSimulation";
+            this.checkBox_patron_disableBioKeyboardSimulation.Size = new System.Drawing.Size(511, 25);
+            this.checkBox_patron_disableBioKeyboardSimulation.TabIndex = 4;
+            this.checkBox_patron_disableBioKeyboardSimulation.Text = "当读者窗活动时自动关闭 掌纹、指纹 键盘仿真(&S)";
+            this.checkBox_patron_disableBioKeyboardSimulation.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -3213,5 +3226,6 @@
         private System.Windows.Forms.CheckBox checkBox_global_disableSpeak;
         private System.Windows.Forms.LinkLabel linkLabel_installFaceCenter;
         private System.Windows.Forms.LinkLabel linkLabel_installFingerprintCenter;
+        private System.Windows.Forms.CheckBox checkBox_patron_disableBioKeyboardSimulation;
     }
 }

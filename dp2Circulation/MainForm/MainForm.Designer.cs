@@ -167,6 +167,7 @@
             this.MenuItem_importFromMarc = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_importExport = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_importFromOrderDistributeExcelFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_importFromPatronXml = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_openTestSearch = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_window = new System.Windows.Forms.ToolStripMenuItem();
@@ -176,6 +177,7 @@
             this.MenuItem_arrangeIcons = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_closeAllMdiWindows = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator24 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_displayPalmprintDialog = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_displayFixPanel = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_ui = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_font = new System.Windows.Forms.ToolStripMenuItem();
@@ -249,7 +251,6 @@
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_importFromPatronXml = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -1166,6 +1167,13 @@
             this.MenuItem_importFromOrderDistributeExcelFile.Text = "从订购去向 Excel 文件导入(&D)";
             this.MenuItem_importFromOrderDistributeExcelFile.Click += new System.EventHandler(this.MenuItem_importFromOrderDistributeExcelFile_Click);
             // 
+            // MenuItem_importFromPatronXml
+            // 
+            this.MenuItem_importFromPatronXml.Name = "MenuItem_importFromPatronXml";
+            this.MenuItem_importFromPatronXml.Size = new System.Drawing.Size(412, 40);
+            this.MenuItem_importFromPatronXml.Text = "从读者 XML 文件导入(&P)";
+            this.MenuItem_importFromPatronXml.Click += new System.EventHandler(this.MenuItem_importFromPatronXml_Click);
+            // 
             // toolStripSeparator17
             // 
             this.toolStripSeparator17.Name = "toolStripSeparator17";
@@ -1187,6 +1195,7 @@
             this.MenuItem_arrangeIcons,
             this.MenuItem_closeAllMdiWindows,
             this.toolStripSeparator24,
+            this.MenuItem_displayPalmprintDialog,
             this.MenuItem_displayFixPanel});
             this.MenuItem_window.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_window.Name = "MenuItem_window";
@@ -1239,6 +1248,13 @@
             // 
             this.toolStripSeparator24.Name = "toolStripSeparator24";
             this.toolStripSeparator24.Size = new System.Drawing.Size(336, 6);
+            // 
+            // MenuItem_displayPalmprintDialog
+            // 
+            this.MenuItem_displayPalmprintDialog.Name = "MenuItem_displayPalmprintDialog";
+            this.MenuItem_displayPalmprintDialog.Size = new System.Drawing.Size(339, 40);
+            this.MenuItem_displayPalmprintDialog.Text = "掌纹窗";
+            this.MenuItem_displayPalmprintDialog.Click += new System.EventHandler(this.MenuItem_displayPalmprintDialog_Click);
             // 
             // MenuItem_displayFixPanel
             // 
@@ -1935,13 +1951,6 @@
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_importFromPatronXml
-            // 
-            this.MenuItem_importFromPatronXml.Name = "MenuItem_importFromPatronXml";
-            this.MenuItem_importFromPatronXml.Size = new System.Drawing.Size(412, 40);
-            this.MenuItem_importFromPatronXml.Text = "从读者 XML 文件导入(&P)";
-            this.MenuItem_importFromPatronXml.Click += new System.EventHandler(this.MenuItem_importFromPatronXml_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(168F, 168F);
@@ -2187,6 +2196,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_palmprint;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_palmprint_restartPalmCenter;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_importFromPatronXml;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_displayPalmprintDialog;
     }
 }
 

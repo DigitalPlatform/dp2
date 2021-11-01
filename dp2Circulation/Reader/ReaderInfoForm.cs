@@ -1063,6 +1063,25 @@ MessageBoxDefaultButton.Button2);
             Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
+        void EnableBioSendKey(bool bEnable)
+        {
+            /*
+            if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
+            {
+                var result = FingerprintManager.GetState(bEnable ? "continueCapture" : "disableCatpure");
+                if (result.Value == -1)
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"禁用或者启动掌纹捕捉时出错: {result.ErrorInfo}") }</div>");
+                else
+                {
+                }
+            }
+            */
+            if (bEnable)
+                MainForm.EnablePalmSendKey();
+            else
+                MainForm.DisablePalmSendKey();
+        }
+
         void EnableSendKey(bool bEnable)
         {
             // 2014/10/12
@@ -1111,6 +1130,9 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableSendKey(false);
             }
+
+            if (this.DisableBioSendkey)
+                EnableBioSendKey(false);
             // Debug.WriteLine("Activated");
         }
 
@@ -1120,6 +1142,9 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableSendKey(true);
             }
+
+            if (this.DisableBioSendkey)
+                EnableBioSendKey(true);
 
             // Debug.WriteLine("DeActivated");
         }
@@ -1148,7 +1173,7 @@ MessageBoxDefaultButton.Button2);
                         this.toolStripButton_delete.Enabled = false;
                 }
 
-                EnableToolStripExclude(bEnable, 
+                EnableToolStripExclude(bEnable,
                     new ToolStripItem[] { this.toolStripButton_stopSummaryLoop, this.toolStripButton_delete });
 
                 // this.toolStripButton_loadFromIdcard.Enabled = bEnable;
@@ -1905,14 +1930,14 @@ strNewDefault);
 
         // 除了 stop 按钮外，Enable/Disable 其他所有按钮
         void EnableToolStripExclude(bool bEnable,
-            ToolStripItem [] excludes )
+            ToolStripItem[] excludes)
         {
             List<ToolStripItem> all = new List<ToolStripItem>(this.toolStrip1.Items.Cast<ToolStripItem>());
-            foreach(var item in excludes)
+            foreach (var item in excludes)
             {
                 all.Remove(item);
             }
-            
+
             foreach (var item in all)
             {
                 item.Enabled = bEnable;
@@ -4840,6 +4865,20 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        /// <summary>
+        /// 是否在读者窗范围内自动关闭 掌纹、指纹 键盘仿真
+        /// </summary>
+        public bool DisableBioSendkey
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetBoolean(
+    "reader_info_form",
+    "disable_bio_sendkey",
+    true);
+            }
+        }
+
         // string m_strLoadSource = "";   // 从什么渠道装载的空白记录信息? local server idcard
 
         string m_strIdcardXml = "";
@@ -7048,7 +7087,7 @@ MessageBoxDefaultButton.Button1);
             return await FaceGetStateAsync("getVersion");
         }
 
-        static Image FromBytes(byte[] bytes)
+        public static Image FromBytes(byte[] bytes)
         {
             using (MemoryStream stream = new MemoryStream(bytes))
             {
@@ -7319,6 +7358,51 @@ MessageBoxDefaultButton.Button1);
             this.ShowMessage("等待扫描掌纹 ...");
             this.EnableControls(false);
 
+            // TODO: 关联到 form 的 cancel 对象
+            CancellationTokenSource cancel = new CancellationTokenSource();
+            var token = cancel.Token;
+            var task = Task.Run(async () =>
+            {
+                // 暂停掌纹图像对话框的显示
+                MainForm.PausePalmprintDisplay();
+                try
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        // 2021/11/1
+                        if (FingerprintManager.Pause == true)
+                        {
+                            dlg.DisplayError("暂停显示", Color.DarkGray);
+                            await Task.Delay(TimeSpan.FromSeconds(1), token);
+                            continue;
+                        }
+
+                        var result = FingerprintManager.GetImage("wait:1000");
+                        if (result.ImageData == null)
+                        {
+                            Thread.Sleep(50);
+                            continue;
+                        }
+
+                        var image = FromBytes(result.ImageData);
+                        dlg.Invoke(new Action(() =>
+                        {
+                            dlg.Image = image;
+                        }));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 写入错误日志
+                    MainForm.WriteErrorLog($"显示掌纹图像出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+                finally
+                {
+                    // 恢复掌纹图像对话框的显示
+                    MainForm.ContinuePalmprintDisplay();
+                }
+            });
+
             try
             {
                 NormalResult getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "");
@@ -7366,6 +7450,13 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
+                this.Invoke((Action)(() =>
+                {
+                    dlg.CancelButtonText = "关闭";
+                    dlg.BackColor = Color.DarkGreen;
+                    dlg.ForeColor = Color.White;
+                }));
+
 #if NO
                 strFingerprint = "12345";   // test
                 strVersion = "test-version";
@@ -7379,13 +7470,9 @@ MessageBoxDefaultButton.Button1);
                     AddImportantField("palmprint");
                 }
 
-                this.Invoke((Action)(() =>
-                {
-                    dlg.CancelButtonText = "关闭";
-                }));
-
                 try
                 {
+                    // await Task.Delay(TimeSpan.FromSeconds(5), _cancel.Token);
                     await Task.Delay(TimeSpan.FromSeconds(5), _cancel.Token);
                 }
                 catch
@@ -7400,6 +7487,7 @@ MessageBoxDefaultButton.Button1);
 
                 FingerprintManager.Touched -= PalmprintManager_Touched;
 
+                cancel.Cancel();
                 dlg.Close();
             }
 
@@ -7412,10 +7500,43 @@ MessageBoxDefaultButton.Button1);
                 if (e.Quality != -1)
                     return;
 
-                dlg.Invoke((Action)(() =>
+                string type = "";
+                var text = e.Message;
+                if (text.Contains(":"))
                 {
-                    dlg.Message = e.Message;
-                }));
+                    var parts = StringUtil.ParseTwoPart(text, ":");
+                    type = parts[0];
+                    text = parts[1];
+                }
+
+                if (type == "register")
+                {
+                    dlg.Invoke((Action)(() =>
+                    {
+#if REMOVED
+                    // 2021/10/28
+                    if (e.Message.StartsWith("!image")
+                        && e.Result != null && e.Result.ImageData != null)
+                    {
+                        // 图像消息
+                        try
+                        {
+                            ParseWidthHeight(e.Message.Substring("!image:".Length),
+        out int width,
+        out int height);
+                            var bmp = ToGrayBitmap(e.Result.ImageData, width, height);
+                            dlg.Image = bmp;
+                        }
+                        catch (Exception ex)
+                        {
+                            dlg.Message = "异常: " + ex.Message;
+                        }
+                    }
+                    else
+#endif
+                        dlg.Message = text; //  e.Message;
+                    }));
+                }
             }
 
             // Program.MainForm.Speak("掌纹信息获取成功");
@@ -7426,6 +7547,64 @@ MessageBoxDefaultButton.Button1);
             this.ShowMessage(strError, "red", true);
         }
 
+        static void ParseWidthHeight(string text,
+            out int width,
+            out int height)
+        {
+            var parts = StringUtil.ParseTwoPart(text, "*");
+            if (Int32.TryParse(parts[0], out width) == false)
+                throw new ArgumentException($"长宽字符串 '{text}' 格式不正确。星号左侧应该是数字");
+            if (Int32.TryParse(parts[1], out height) == false)
+                throw new ArgumentException($"长宽字符串 '{text}' 格式不正确。星号右侧应该是数字");
+        }
+
+#if REMOVED
+        public static Bitmap ToGrayBitmap(byte[] rawValues, int width, int height)
+        {
+            //// 申请目标位图的变量，并将其内存区域锁定
+            Bitmap bmp = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
+            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, width, height),
+                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+
+            //// 获取图像参数
+            int stride = bmpData.Stride;  // 扫描线的宽度
+            int offset = stride - width;  // 显示宽度与扫描线宽度的间隙
+            IntPtr iptr = bmpData.Scan0;  // 获取bmpData的内存起始位置
+            int scanBytes = stride * height;   // 用stride宽度，表示这是内存区域的大小
+
+            //// 下面把原始的显示大小字节数组转换为内存中实际存放的字节数组
+            int posScan = 0, posReal = 0;   // 分别设置两个位置指针，指向源数组和目标数组
+            byte[] pixelValues = new byte[scanBytes];  //为目标数组分配内存
+            for (int x = 0; x < height; x++)
+            {
+                //// 下面的循环节是模拟行扫描
+                for (int y = 0; y < width; y++)
+                {
+                    pixelValues[posScan++] = rawValues[posReal++];
+                }
+                posScan += offset;  //行扫描结束，要将目标位置指针移过那段“间隙”
+            }
+
+            //// 用Marshal的Copy方法，将刚才得到的内存字节数组复制到BitmapData中
+            System.Runtime.InteropServices.Marshal.Copy(pixelValues, 0, iptr, scanBytes);
+            bmp.UnlockBits(bmpData);  // 解锁内存区域
+
+            //// 下面的代码是为了修改生成位图的索引表，从伪彩修改为灰度
+            ColorPalette tempPalette;
+            using (Bitmap tempBmp = new Bitmap(1, 1, PixelFormat.Format8bppIndexed))
+            {
+                tempPalette = tempBmp.Palette;
+            }
+            for (int i = 0; i < 256; i++)
+            {
+                tempPalette.Entries[i] = Color.FromArgb(i, i, i);
+            }
+            bmp.Palette = tempPalette;
+            //// 算法到此结束，返回结果
+            return bmp;
+        }
+
+#endif
         private void toolStripMenuItem_clearPalmprint_Click(object sender, EventArgs e)
         {
             this.readerEditControl1.PalmprintFeatureVersion = "";

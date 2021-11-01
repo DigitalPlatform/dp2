@@ -114,6 +114,10 @@ namespace DigitalPlatform.CirculationClient
         // 2021/3/23
         // 捕获的时间
         public DateTime CreateTime { get; set; }
+
+        // 2021/10/28
+        // 图像数据。指纹、掌纹等的图像
+        public byte[] ImageData { get; set; }
     }
 
     public delegate void ImageReadyEventHandler(object sender,

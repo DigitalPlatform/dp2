@@ -82,6 +82,14 @@ namespace DigitalPlatform.Interfaces
         NormalResult GetState(string style);
 
         NormalResult ActivateWindow();
+
+        // 2021/10/29
+        // 获得一副图像。
+        // parameters:
+        //      strStyle    风格。
+        //                  camera，或者默认，从摄像头抓取一副图像
+        //                  patron:xxx  读者头像。xxx 为证条码号
+        GetImageResult GetImage(string strStyle);
     }
 
     [Serializable()]
@@ -100,6 +108,9 @@ namespace DigitalPlatform.Interfaces
         public DateTime CreateTime { get; set; }
         // 匹配的分数
         public int Score { get; set; }
+
+        // 2021/10/28
+        public byte [] ImageData { get; set; }
 
         public override string ToString()
         {

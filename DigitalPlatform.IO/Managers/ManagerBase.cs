@@ -178,7 +178,12 @@ namespace DigitalPlatform.IO
                         }
 
                         if (skip_func?.Invoke() == true)
+                        {
+                            // 2021/11/1
+                            await Task.Delay(this.LongWaitTime,
+    token);
                             continue;
+                        }
                     }
 
                     //if (this.State == "pause")

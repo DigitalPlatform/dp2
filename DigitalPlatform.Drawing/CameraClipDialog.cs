@@ -106,7 +106,7 @@ namespace DigitalPlatform.Drawing
                 this.qrRecognitionControl1.Image = BuildTextImage("正在初始化摄像头，请稍候 ...",
                     Color.Gray,
                     64,
-                    2000); ;
+                    2000);
             }
 
             this.qrRecognitionControl1.CurrentCamera = m_strCurrentCamera;

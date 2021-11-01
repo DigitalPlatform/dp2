@@ -629,6 +629,11 @@ false);
     "disable_idcardreader_sendkey",
     true);
 
+            this.checkBox_patron_disableBioKeyboardSimulation.Checked = ap.GetBoolean(
+    "reader_info_form",
+    "disable_bio_sendkey",
+    true);
+
             // 日志
             // 显示读者借阅历史
             this.checkBox_operLog_displayReaderBorrowHistory.Checked =
@@ -1287,6 +1292,11 @@ false);
         "reader_info_form",
         "disable_idcardreader_sendkey",
         this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Checked);
+
+                ap.SetBoolean(
+"reader_info_form",
+"disable_bio_sendkey",
+this.checkBox_patron_disableBioKeyboardSimulation.Checked);
 
                 // 日志
                 // 显示读者借阅历史
