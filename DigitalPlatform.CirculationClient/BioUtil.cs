@@ -159,6 +159,16 @@ namespace DigitalPlatform.CirculationClient
             return e.Image;
         }
 
+        // 2021/11/2
+        // 还能获得文本附加信息
+        public Image TryGetImage(out string text)
+        {
+            var e = new GetImageEventArgs();
+            this.TriggerGetImage(e);
+            text = e.Text;
+            return e.Image;
+        }
+
         public void TriggerGetIrImage(GetImageEventArgs e)
         {
             this.GetIrImage?.Invoke(this, e);
@@ -1669,6 +1679,10 @@ out string strError);
     {
         // [out] 返回图象
         public Image Image { get; set; }
+
+        // 2021/11/2
+        // [out] 返回附加信息
+        public string Text { get; set; }
     }
 
     public class ProcessInfo

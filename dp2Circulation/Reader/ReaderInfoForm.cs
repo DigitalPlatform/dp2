@@ -1133,6 +1133,7 @@ MessageBoxDefaultButton.Button2);
 
             if (this.DisableBioSendkey)
                 EnableBioSendKey(false);
+
             // Debug.WriteLine("Activated");
         }
 
@@ -7343,13 +7344,18 @@ MessageBoxDefaultButton.Button1);
             RegisterPalmprintDialog dlg = new RegisterPalmprintDialog();
             dlg.FormClosed += (s, e) =>
             {
+                { 
+                    if (MainForm.AppInfo != null)
+                        MainForm.AppInfo.UnlinkFormState(dlg);
+                }
                 _cancel.Cancel();
                 _ = Task.Run(async () =>
                 {
                     await CancelReadPalmprintString();
                 });
             };
-            dlg.StartPosition = FormStartPosition.CenterScreen;
+            // dlg.StartPosition = FormStartPosition.CenterScreen;
+            MainForm.AppInfo.LinkFormState(dlg, "RegisterPalmprintDialog_state");
             dlg.Show(this);
             dlg.Message = "等待扫入掌纹 ...";
 
@@ -7377,7 +7383,7 @@ MessageBoxDefaultButton.Button1);
                             continue;
                         }
 
-                        var result = FingerprintManager.GetImage("wait:1000");
+                        var result = FingerprintManager.GetImage("wait:1000,rect");
                         if (result.ImageData == null)
                         {
                             Thread.Sleep(50);
@@ -7385,6 +7391,8 @@ MessageBoxDefaultButton.Button1);
                         }
 
                         var image = FromBytes(result.ImageData);
+                        if (string.IsNullOrEmpty(result.Text) == false)
+                            Charging.PalmprintForm.PaintLines(image, result.Text);
                         dlg.Invoke(new Action(() =>
                         {
                             dlg.Image = image;
@@ -7453,8 +7461,7 @@ MessageBoxDefaultButton.Button1);
                 this.Invoke((Action)(() =>
                 {
                     dlg.CancelButtonText = "关闭";
-                    dlg.BackColor = Color.DarkGreen;
-                    dlg.ForeColor = Color.White;
+                    dlg.ColorMode = "green";
                 }));
 
 #if NO

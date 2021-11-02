@@ -38,7 +38,7 @@ namespace dp2Circulation
             // button_cancel
             // 
             this.button_cancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.button_cancel.BackColor = System.Drawing.Color.Transparent;
+            this.button_cancel.BackColor = System.Drawing.SystemColors.Window;
             this.button_cancel.Location = new System.Drawing.Point(322, 496);
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(185, 51);

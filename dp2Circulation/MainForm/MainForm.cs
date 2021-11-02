@@ -1649,6 +1649,19 @@ Stack:
                     StartOrStopPalmManager();
                 });
             }
+
+            if (e.Section == "reader_info_form"
+                && e.Entry == "disable_bio_sendkey"
+                )
+            {
+                if (DomUtil.IsBooleanTrue((string)e.Value) == false)
+                    this.EnablePalmSendKey();
+                else
+                {
+                    if (this.ActiveMdiChild is ReaderInfoForm)
+                        this.DisablePalmSendKey();
+                }
+            }
         }
 
         public bool PrintLabelMode
@@ -8909,6 +8922,13 @@ Keys keyData)
         private void MainForm_Deactivate(object sender, EventArgs e)
         {
             _isActivated = false;
+
+            // 2021/11/2
+            if (this.ActiveMdiChild is QuickChargingForm)
+            {
+                ((QuickChargingForm)this.ActiveMdiChild).SetInputFocusState(false);
+            }
+
             // 休眠 RfidManager
             // SetRfidManagerPause(true);
 
@@ -9828,25 +9848,30 @@ out strError);
 
         public void PausePalmprintDisplay()
         {
-            _palmprintForm.Pause = true;
+            if (_palmprintForm != null)
+                _palmprintForm.Pause = true;
         }
 
         public void ContinuePalmprintDisplay()
         {
-            _palmprintForm.Pause = false;
+            if (_palmprintForm != null)
+                _palmprintForm.Pause = false;
         }
 
         public void SetPalmprintMessage(string message, string id)
         {
-            string type = "";
-            var text = message;
-            if (text.Contains(":"))
+            if (_palmprintForm != null)
             {
-                var parts = StringUtil.ParseTwoPart(text, ":");
-                type = parts[0];
-                text = parts[1];
+                string type = "";
+                var text = message;
+                if (text.Contains(":"))
+                {
+                    var parts = StringUtil.ParseTwoPart(text, ":");
+                    type = parts[0];
+                    text = parts[1];
+                }
+                _palmprintForm.MessageText = $"({id}) {text}";
             }
-            _palmprintForm.MessageText = $"({id}) {text}";
         }
 
         private void MenuItem_displayPalmprintDialog_Click(object sender, EventArgs e)
@@ -9857,6 +9882,11 @@ out strError);
                 ShowPalmprintDialog();
             else
                 ClosePalmprintDialog();
+
+            if (this.ActiveMdiChild is QuickChargingForm)
+            {
+                ((QuickChargingForm)this.ActiveMdiChild).FocusInput();
+            }
         }
 
         void ShowPalmprintDialog()

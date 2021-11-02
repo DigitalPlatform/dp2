@@ -231,7 +231,13 @@ namespace dp2Circulation
             });
         }
 
-
+        public void FocusInput()
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.textBox_input.Focus();
+            }));
+        }
 
         // 新 Tag 到来
         private void MainForm_TagChanged(object sender, TagChangedEventArgs e)
@@ -3960,6 +3966,8 @@ MessageBoxDefaultButton.Button2);
             //OpenRfidCapture(false);
             //Debug.WriteLine("deactivate");
             this.PauseRfid = true;
+
+            SetInputFocusState(false);
         }
 
         private void textBox_input_Enter(object sender, EventArgs e)
@@ -3973,12 +3981,34 @@ MessageBoxDefaultButton.Button2);
             // 扫入 3 种条码均可
             EnterOrLeavePQR(true, InputType.ALL);
             //OpenRfidCapture(true);
+
+            // 外观变化
+            SetInputFocusState(true);
         }
 
         private void textBox_input_Leave(object sender, EventArgs e)
         {
             EnterOrLeavePQR(false);
             //OpenRfidCapture(false);
+
+            // 外观变化
+            SetInputFocusState(false);
+        }
+
+        public void SetInputFocusState(bool focus)
+        {
+            /*
+            if (focus)
+            {
+                this.textBox_input.BackColor = SystemColors.Window;
+                this.textBox_input.ForeColor = SystemColors.WindowText;
+            }
+            else
+            {
+                this.textBox_input.BackColor = Color.DarkRed;
+                this.textBox_input.ForeColor = Color.White;
+            }
+            */
         }
 
         private void QuickChargingForm_Enter(object sender, EventArgs e)
@@ -4789,7 +4819,7 @@ MessageBoxDefaultButton.Button2);
         // 2021/10/9
         // 执行一个功能
         public void Operate(FuncState func,
-            string text, 
+            string text,
             string comment)
         {
             // 先切换到这个功能状态，避免用户困惑

@@ -155,5 +155,9 @@ namespace DigitalPlatform.Interfaces
     {
         // [out] 返回图象
         public byte[] ImageData { get; set; }
+
+        // 2021/11/2
+        // [out] 返回附加的文本信息
+        public string Text { get; set; }
     }
 }

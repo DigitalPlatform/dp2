@@ -1853,7 +1853,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        const string pamcenter_base_version = "1.0.14";
+        const string pamcenter_base_version = "1.1.3";   // "1.0.14";
         public void CheckPalmCenterVersion()
         {
             if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
@@ -1932,13 +1932,27 @@ MessageBoxDefaultButton.Button1);
             // dp2circulation 自己不是在最前面的时候，不进行掌纹 SendKey。这样避免和同时运行的 dp2SSL 冲突(dp2ssl 自己可以轮询掌纹 message)
             if (_isActivated == false)
             {
-                string error = "注意此时内务窗口不在最前面，textbox 无法捕获掌纹输入";
-                Program.MainForm.OperHistory?.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
-                /*
-                // 2021/3/18
-                Program.MainForm.Speak(error);
-                */
-                return;
+                // Debug.WriteLine($"_palmprintForm.Focused={_palmprintForm.Focused}");
+                if (_palmprintForm != null && _palmprintForm.IsActivated
+    && this.ActiveMdiChild is QuickChargingForm)
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        this.Activate();
+                    }));
+                    ((QuickChargingForm)this.ActiveMdiChild).FocusInput();
+                }
+                else
+                {
+                    string error = "注意此时内务窗口不在最前面，textbox 无法捕获掌纹输入";
+                    Program.MainForm.OperHistory?.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+
+                    /*
+                    // 2021/3/18
+                    Program.MainForm.Speak(error);
+                    */
+                    return;
+                }
             }
 
             // 2021/1/5
@@ -1975,6 +1989,8 @@ MessageBoxDefaultButton.Button1);
         {
             _disablePalmSendKey = false;
 
+            _palmprintForm.DisableSendKey = false;
+
             string text = $"重新启用掌纹输入";
             Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");
         }
@@ -1982,6 +1998,8 @@ MessageBoxDefaultButton.Button1);
         public void DisablePalmSendKey()
         {
             _disablePalmSendKey = true;
+
+            _palmprintForm.DisableSendKey = true;
 
             string text = $"临时禁用掌纹输入";
             Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");

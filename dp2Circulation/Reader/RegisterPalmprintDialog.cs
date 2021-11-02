@@ -65,6 +65,33 @@ namespace dp2Circulation
             }
         }
 
+        string _colorMode = ""; // ""/"green"
+
+        public string ColorMode
+        {
+            get
+            {
+                return this._colorMode;
+            }
+            set
+            {
+                if (value == "green")
+                {
+                    this.BackColor = Color.DarkGreen;
+                    this.ForeColor = Color.White;
+                    this.button_cancel.BackColor = Color.Green;
+                    this.button_cancel.ForeColor = Color.White;
+                }
+                else
+                {
+                    this.BackColor = SystemColors.Window;
+                    this.ForeColor = SystemColors.WindowText;
+                    this.button_cancel.BackColor = SystemColors.Window;
+                    this.button_cancel.ForeColor = SystemColors.WindowText;
+                }
+            }
+        }
+
         public void DisplayError(string strError, Color backColor)
         {
             // 显示错误
