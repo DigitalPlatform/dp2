@@ -21,11 +21,11 @@ using System.Collections;
 using System.ServiceModel.Description;
 using System.Web;
 using System.Net;
+using System.Net.Security;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
-using System.Net.Security;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -224,6 +224,12 @@ namespace DigitalPlatform.LibraryClient
         /// 空闲事件
         /// </summary>
         public event IdleEventHandler Idle = null;
+
+        // 2021/11/3
+        /// <summary>
+        /// 重设密码事件
+        /// </summary>
+        public event ResetPasswordEventHandler ResetPasswordEvent = null;
 
         /// <summary>
         /// 当前通道对象携带的扩展参数
@@ -1132,7 +1138,7 @@ out strError);
             strOutputUserName = "";
             strLibraryCode = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginLogin(
@@ -1227,7 +1233,7 @@ out strError);
             strOutputUserName = "";
             strLibraryCode = "";
 
-            REDO:
+        REDO:
             TimeSpan old_timeout = this.Timeout;
             if (this.Timeout < TimeSpan.FromSeconds(10))
                 this.Timeout = TimeSpan.FromSeconds(10);
@@ -1525,7 +1531,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -1598,7 +1604,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetFriends(
@@ -1659,7 +1665,7 @@ out strError);
             strVersion = "";
             strUID = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetVersion(
@@ -1721,7 +1727,7 @@ out strError);
             strError = "";
             strOldLang = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetLang(
@@ -1820,7 +1826,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -1993,7 +1999,7 @@ out strError);
             Record[] searchresults = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetSearchResult(
@@ -2083,7 +2089,7 @@ out strError);
             searchresults = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetSearchResult(
@@ -2161,7 +2167,7 @@ out strError);
             searchresults = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetBrowseRecords(
@@ -2233,7 +2239,7 @@ out strError);
             strXml = "";
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetRecord(
@@ -2318,7 +2324,7 @@ out strError);
             baNewTimestamp = null;
             kernel_errorcode = ErrorCodeValue.NoError;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetReaderInfo(
@@ -2434,7 +2440,7 @@ out strError);
             strRecPath = "";
             baTimestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetReaderInfo(
@@ -2499,7 +2505,7 @@ out strError);
                     ErrorInfo = strError
                 };
 
-                REDOLOGIN:
+            REDOLOGIN:
                 this.BeforeLogin(this, ea);
 
                 // 2021/4/3
@@ -2536,6 +2542,7 @@ out strError);
                 if (ea.FirstTry == true)
                     strMessage = strError;
 
+                REDOLOGIN_1:
                 if (_loginCount > 100)
                 {
                     strError = $"重新登录次数太多，超过 100 次。最近一次错误信息='{strError}'，ErrorCode={this.ErrorCode} 。请检查登录 API 是否出现了逻辑问题";
@@ -2567,7 +2574,24 @@ out strError);
                     else if (this.ErrorCode == localhost.ErrorCode.TempCodeMismatch)
                         ea.LoginFailCondition = LoginFailCondition.TempCodeMismatch;
                     else if (this.ErrorCode == ErrorCode.PasswordExpired)
+                    {
+                        /*
+                        if (this.ResetPasswordEvent != null)
+                        {
+                            ResetPasswordEventArgs e1 = new ResetPasswordEventArgs();
+                            // 请求获得自动重设密码的新密码
+                            this.ResetPasswordEvent(this, e1);
+                            if (e1.Canceled == false)
+                            {
+                                // 执行重设密码动作
+
+                                ea.Password = e1.NewPassword;
+                                goto REDOLOGIN_1;
+                            }
+                        }
+                        */
                         ea.LoginFailCondition = LoginFailCondition.PasswordExpired;
+                    }
                     else
                         ea.LoginFailCondition = LoginFailCondition.PasswordError;
                     goto REDOLOGIN;
@@ -2694,7 +2718,7 @@ out strError);
 
             item_timestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetItemInfo(
@@ -2797,7 +2821,7 @@ out strError);
             strError = "";
 
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginBorrow(
@@ -2910,7 +2934,7 @@ out strError);
             strOutputReaderBarcode = "";
             return_info = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginReturn(
@@ -2996,7 +3020,7 @@ out strError);
             strError = "";
             failed_items = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginAmerce(
@@ -3072,7 +3096,7 @@ out strError);
             entityinfos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetEntities(
@@ -3142,7 +3166,7 @@ out strError);
             errorinfos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetEntities(
@@ -3216,7 +3240,7 @@ out strError);
             infos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginListBiblioDbFroms(
@@ -3310,7 +3334,7 @@ out strError);
             strError = "";
             strQueryXml = "";
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -3391,7 +3415,7 @@ out strError);
             strBiblio = "";
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetBiblioInfo(
@@ -3516,7 +3540,7 @@ out strError);
             values = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetValueTable(
@@ -3610,7 +3634,7 @@ out strError);
             strError = "";
             records = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetOperLogs(
@@ -3737,7 +3761,7 @@ out strError);
                         return lAttachmentTotalLength;
                 }
             }
-            DELETE_AND_RETURN:
+        DELETE_AND_RETURN:
             File.Delete(strOutputFileName);
             return lRet;
         }
@@ -3794,7 +3818,7 @@ out strError);
             attachment_data = null;
             lAttachmentTotalLength = 0;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetOperLog(
@@ -3874,7 +3898,7 @@ out strError);
             strError = "";
 
             contents = null;
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetCalendar(
@@ -3937,7 +3961,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetCalendar(
@@ -4001,7 +4025,7 @@ out strError);
             strError = "";
             resultInfo = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginBatchTask(
@@ -4066,7 +4090,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -4227,7 +4251,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetClock(
@@ -4284,7 +4308,7 @@ out strError);
             strTime = "";
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetClock(
@@ -4344,7 +4368,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginVerifyReaderPassword(
@@ -4406,7 +4430,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginChangeReaderPassword(
@@ -4471,7 +4495,7 @@ out strError);
             strError = "";
             strMessage = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginResetPassword(
@@ -4525,7 +4549,7 @@ out strError);
             strError = "";
             results = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginBindPatron(
@@ -4586,7 +4610,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginClearAllDbs(
@@ -4670,7 +4694,7 @@ out strError);
             strError = "";
             strOutputInfo = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginManageDatabase(
@@ -4740,7 +4764,7 @@ out strError);
             strError = "";
 
             contents = null;
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetUser(
@@ -4803,7 +4827,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetUser(
@@ -4866,7 +4890,7 @@ out strError);
             strError = "";
 
             contents = null;
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetChannelInfo(
@@ -4934,7 +4958,7 @@ out strError);
             strError = "";
 
             results = null;
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginManageChannel(
@@ -5002,7 +5026,7 @@ out strError);
             strError = "";
             target_timestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginMoveReaderInfo(
@@ -5065,7 +5089,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginDevolveReaderInfo(
@@ -5126,7 +5150,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginChangeUserPassword(
@@ -5206,7 +5230,7 @@ out strError);
             strError = "";
             strOutputBarcode = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginVerifyBarcode(
@@ -5261,7 +5285,7 @@ out strError);
             strError = "";
             infos = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginListFile(
@@ -5344,7 +5368,7 @@ out strError);
             strFileTime = "";
             baContent = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetFile(
@@ -5420,7 +5444,7 @@ out strError);
             strError = "";
             strValue = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetSystemParameter(
@@ -5482,7 +5506,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetSystemParameter(
@@ -5530,7 +5554,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginUrgentRecover(
@@ -5588,7 +5612,7 @@ out strError);
             aDupPath = null;
             strOutputReaderBarcode = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginRepairBorrowInfo(
@@ -5664,7 +5688,7 @@ out strError);
             baTimestamp = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetBiblioInfos(
@@ -5752,7 +5776,7 @@ out strError);
             strOutputBiblioRecPath = "";
             baOutputTimestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetBiblioInfo(
@@ -5820,7 +5844,7 @@ out strError);
             baOutputTimestamp = null;
             strOutputBiblio = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginCopyBiblioInfo(
@@ -5881,7 +5905,7 @@ out strError);
             strError = "";
             results = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginPassGate(
@@ -5940,7 +5964,7 @@ out strError);
 
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginForegift(
@@ -5994,7 +6018,7 @@ out strError);
             strOutputID = "";
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginHire(
@@ -6043,7 +6067,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSettlement(
@@ -6094,7 +6118,7 @@ out strError);
             strError = "";
             strQueryXml = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSearchOneClassCallNumber(
@@ -6152,7 +6176,7 @@ out strError);
             strError = "";
             searchresults = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetCallNumberSearchResult(
@@ -6207,7 +6231,7 @@ out strError);
             strError = "";
             strTailNumber = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetOneClassTailNumber(
@@ -6261,7 +6285,7 @@ out strError);
             strError = "";
             strOutputNumber = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetOneClassTailNumber(
@@ -6316,7 +6340,7 @@ out strError);
             strError = "";
             strQueryXml = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSearchUsedZhongcihao(
@@ -6373,7 +6397,7 @@ out strError);
             strError = "";
             searchresults = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetZhongcihaoSearchResult(
@@ -6427,7 +6451,7 @@ out strError);
             strError = "";
             strTailNumber = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetZhongcihaoTailNumber(
@@ -6481,7 +6505,7 @@ out strError);
             strError = "";
             strOutputNumber = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetZhongcihaoTailNumber(
@@ -6539,7 +6563,7 @@ out strError);
             strError = "";
             strUsedProjectName = "";
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -6597,7 +6621,7 @@ out strError);
             strError = "";
             results = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginListDupProjectInfos(
@@ -6649,7 +6673,7 @@ out strError);
             strError = "";
             searchresults = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetDupSearchResult(
@@ -6704,7 +6728,7 @@ out strError);
             strError = "";
             strValue = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetUtilInfo(
@@ -6762,7 +6786,7 @@ out strError);
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetUtilInfo(
@@ -6844,13 +6868,13 @@ out strError);
             strOutputResPath = "";
             baOutputTimestamp = null;
 
-            /*
-            if (stop != null)
-            {
-                Debug.Assert(stop.State == -1 || stop.State == 0, "");
-            }*/
+        /*
+        if (stop != null)
+        {
+            Debug.Assert(stop.State == -1 || stop.State == 0, "");
+        }*/
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetRes(
@@ -7544,7 +7568,7 @@ out strError);
                 baContent = ByteArray.CompressGzip(baContent);
             }
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginWriteRes(
@@ -8073,7 +8097,7 @@ out string strError)
             issueinfos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetIssues(
@@ -8131,7 +8155,7 @@ out string strError)
             errorinfos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetIssues(
@@ -8316,7 +8340,7 @@ out string strError)
             strIssueRecPath = "";
             issue_timestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetIssueInfo(
@@ -8398,7 +8422,7 @@ out string strError)
         {
             strError = "";
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -8468,7 +8492,7 @@ out string strError)
             orderinfos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetOrders(
@@ -8527,7 +8551,7 @@ out string strError)
             errorinfos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetOrders(
@@ -8725,7 +8749,7 @@ out string strError)
 
             strItemRecPath = "";
             item_timestamp = null;
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetOrderInfo(
@@ -8807,7 +8831,7 @@ out string strError)
         {
             strError = "";
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -8877,7 +8901,7 @@ out string strError)
             commentinfos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetComments(
@@ -8935,7 +8959,7 @@ out string strError)
             errorinfos = null;
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetComments(
@@ -9072,7 +9096,7 @@ out string strError)
             strCommentRecPath = "";
             comment_timestamp = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetCommentInfo(strRefID,
@@ -9195,7 +9219,7 @@ out string strError)
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginReservation(
@@ -9266,7 +9290,7 @@ out string strError)
         {
             strError = "";
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -9327,7 +9351,7 @@ out string strError)
             strError = "";
             messages = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetMessage(
@@ -9383,7 +9407,7 @@ out string strError)
             messages = null;
             nTotalCount = 0;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginListMessage(
@@ -9461,7 +9485,7 @@ out string strError)
             strError = "";
             output_messages = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetMessage(
@@ -9514,7 +9538,7 @@ out string strError)
             info = null;
             strXml = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetStatisInfo(
@@ -9563,7 +9587,7 @@ out string strError)
             strError = "";
             dates = null;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginExistStatisInfo(
@@ -9612,7 +9636,7 @@ out string strError)
             strError = "";
             lValue = 0;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginHitCounter(
@@ -9668,7 +9692,7 @@ out string strError)
             strError = "";
             results = null;
 
-            REDO:
+        REDO:
             this.BeginSearch();
             try
             {
@@ -9801,7 +9825,7 @@ out string strError)
             items = null;
             kernel_errorcode = ErrorCodeValue.NoError;
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginDir(
@@ -9860,7 +9884,7 @@ out string strError)
             strDebugInfo = "";
             strNumber = null;
 
-            REDO:
+        REDO:
             try
             {
                 // localhost.dp2libraryClient ws1 = this.ws;
@@ -9916,7 +9940,7 @@ out string strPinyinXml,
             strError = "";
             strPinyinXml = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetPinyin(
@@ -9963,7 +9987,7 @@ string strPinyinXml,
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginSetPinyin(
@@ -10654,6 +10678,28 @@ Stack:
         public string ErrorInfo = "";
         // public bool Canceled = false;
     }
+
+
+    /// <summary>
+    /// 重设密码事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void ResetPasswordEventHandler(object sender,
+    ResetPasswordEventArgs e);
+
+    /// <summary>
+    /// 重设密码事件的参数
+    /// </summary>
+    public class ResetPasswordEventArgs : EventArgs
+    {
+        // public string ErrorInfo = "";
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+
+        public bool Canceled { get; set; }
+    }
+
 
     // https://stackoverflow.com/questions/18454292/system-net-certificatepolicy-to-servercertificatevalidationcallback-accept-all-c
     public static class SSLValidator

@@ -2416,6 +2416,13 @@ out string strError);
                 Debug.Assert(strIdType == "recpath", "");
                 // recpath
                 strBarcodeOrRecPath = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
+
+                // 2021/11/3
+                if (strBarcodeOrRecPath.StartsWith("error:"))
+                {
+                    ShowMessageBox($"记录路径为错误状态，无法装入册记录");
+                    return;
+                }
             }
 
             if (strTargetFormType == "EntityForm")
@@ -5922,7 +5929,7 @@ Program.MainForm.DefaultFont);
                     return -1;
                 }
 
-                if (string.IsNullOrEmpty(item.Text) == true 
+                if (string.IsNullOrEmpty(item.Text) == true
                     || item.Text.StartsWith("error:"))
                     continue;
 
@@ -6288,11 +6295,19 @@ Program.MainForm.DefaultFont);
             if (result == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
+            // 2021/11/3
+            List<string> error_recpaths = new List<string>();
+
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
                 if (string.IsNullOrEmpty(item.Text) == false)
-                    items.Add(item);
+                {
+                    if (item.Text.StartsWith("error:") == true)
+                        error_recpaths.Add(item.Text);
+                    else
+                        items.Add(item);
+                }
             }
 
             if (stop.IsInLoop == true)
@@ -6475,7 +6490,10 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 stop.Style = StopStyle.None;
             }
 
-            ShowMessageBox("成功删除" + this.DbTypeCaption + "记录 " + items.Count + " 条");
+            string message = "成功删除" + this.DbTypeCaption + "记录 " + items.Count + " 条";
+            if (error_recpaths.Count > 0)
+                message += $"\r\n跳过错误状态的记录路径 {error_recpaths.Count} 个";
+            ShowMessageBox(message);
             return;
         ERROR1:
             ShowMessageBox(strError);

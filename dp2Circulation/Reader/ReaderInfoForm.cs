@@ -7433,6 +7433,14 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
+                // 暂停识别掌纹
+                getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "pauseCapture");
+                if (getstate_result.Value == -1)
+                {
+                    strError = getstate_result.ErrorInfo;
+                    goto ERROR1;
+                }
+
             // TODO: 练习模式需要判断版本 2.2 以上
 
             REDO:
@@ -7489,6 +7497,15 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                {
+                    // 恢复识别掌纹
+                    var getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "continueCapture");
+                    if (getstate_result.Value == -1)
+                    {
+                        MainForm.WriteErrorLog($"registerPalmprintAsync() 中恢复识别掌纹时出错: {getstate_result.ErrorInfo}");
+                    }
+                }
+
                 this.EnableControls(true);
                 this.ClearMessage();
 

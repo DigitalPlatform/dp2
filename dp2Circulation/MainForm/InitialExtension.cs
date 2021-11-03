@@ -1989,7 +1989,8 @@ MessageBoxDefaultButton.Button1);
         {
             _disablePalmSendKey = false;
 
-            _palmprintForm.DisableSendKey = false;
+            if (_palmprintForm != null)
+                _palmprintForm.DisableSendKey = false;
 
             string text = $"重新启用掌纹输入";
             Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");
@@ -1999,7 +2000,8 @@ MessageBoxDefaultButton.Button1);
         {
             _disablePalmSendKey = true;
 
-            _palmprintForm.DisableSendKey = true;
+            if (_palmprintForm != null)
+                _palmprintForm.DisableSendKey = true;
 
             string text = $"临时禁用掌纹输入";
             Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");

@@ -14,12 +14,12 @@ using System.Threading.Tasks;
 
 using Serilog;
 using Serilog.Core;
+using Newtonsoft.Json;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
 using DigitalPlatform.Xml;
-using Newtonsoft.Json;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -862,6 +862,13 @@ namespace DigitalPlatform.CirculationClient
             };
         }
 
+        #region 遇 dp2library 账户密码过期时，自动设置一个新密码的机制
 
+        public static NormalResult AutoResetPassword()
+        {
+            return new NormalResult();
+        }
+
+        #endregion
     }
 }
