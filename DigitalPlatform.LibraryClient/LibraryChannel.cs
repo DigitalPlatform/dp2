@@ -227,9 +227,15 @@ namespace DigitalPlatform.LibraryClient
 
         // 2021/11/3
         /// <summary>
-        /// 重设密码事件
+        /// 请求重设密码事件
         /// </summary>
-        public event ResetPasswordEventHandler ResetPasswordEvent = null;
+        public event RequestPasswordEventHandler RequestPasswordEvent = null;
+
+        // 2021/11/4
+        /// <summary>
+        /// 密码变化通知事件
+        /// </summary>
+        public event PasswordChangedEventHandler PasswordChangedEvent = null;
 
         /// <summary>
         /// 当前通道对象携带的扩展参数
@@ -2575,21 +2581,41 @@ out strError);
                         ea.LoginFailCondition = LoginFailCondition.TempCodeMismatch;
                     else if (this.ErrorCode == ErrorCode.PasswordExpired)
                     {
-                        /*
-                        if (this.ResetPasswordEvent != null)
+                        // 注: 密码失效时自动修改密码功能，需要用到两个事件: RequestPasswordEvent 和 PasswordChangedEvent
+                        // 分别用于询问新密码，和通知密码修改成功。前端一般可在接到密码修改成功通知后，更换自己储存的密码，便于下次用新密码来自动登录
+                        if (this.RequestPasswordEvent != null)
                         {
-                            ResetPasswordEventArgs e1 = new ResetPasswordEventArgs();
+                            RequestPasswordEventArgs e1 = new RequestPasswordEventArgs();
                             // 请求获得自动重设密码的新密码
-                            this.ResetPasswordEvent(this, e1);
+                            this.RequestPasswordEvent(this, e1);
                             if (e1.Canceled == false)
                             {
                                 // 执行重设密码动作
-
-                                ea.Password = e1.NewPassword;
-                                goto REDOLOGIN_1;
+                                string oldPassword = ea.Password;
+                                string newPassword = e1.NewPassword;
+                                int nRet = AutoChangePassword(ea.UserName,
+                                    oldPassword,
+                                    newPassword,
+                                    out string strTempError);
+                                if (nRet == 0)
+                                {
+                                    // 修改密码成功。触发通知
+                                    this.PasswordChangedEvent?.Invoke(this,
+                                        new PasswordChangedEventArgs
+                                        {
+                                            OldPassword = oldPassword,
+                                            NewPassword = newPassword,
+                                        });
+                                    ea.Password = newPassword;
+                                    goto REDOLOGIN_1;
+                                }
+                                else
+                                {
+                                    // 修改密码发生错误(原因可能是新密码强度不够等)。触发通知
+                                    this.PasswordChangedEvent?.Invoke(this, new PasswordChangedEventArgs { ErrorInfo = strError });
+                                }
                             }
                         }
-                        */
                         ea.LoginFailCondition = LoginFailCondition.PasswordExpired;
                     }
                     else
@@ -2612,6 +2638,28 @@ out strError);
             }
 
             return -1;
+        }
+
+        int AutoChangePassword(string userName,
+            string oldPassword,
+            string newPassword,
+            out string strError)
+        {
+            strError = "";
+
+            // return.Value:
+            //      -1  出错
+            //      0   成功
+            var ret = this.ChangeUserPassword(null,
+                userName,
+                oldPassword,
+                newPassword,
+                out strError);
+            if (ret == -1)
+                return -1;
+
+
+            return 0;
         }
 
         // 获得实体记录(简装版本，省掉3个输出参数)
@@ -10679,19 +10727,19 @@ Stack:
         // public bool Canceled = false;
     }
 
-
+    // 2021/11/4
     /// <summary>
-    /// 重设密码事件
+    /// 请求重设密码事件
     /// </summary>
     /// <param name="sender">发送者</param>
     /// <param name="e">事件参数</param>
-    public delegate void ResetPasswordEventHandler(object sender,
-    ResetPasswordEventArgs e);
+    public delegate void RequestPasswordEventHandler(object sender,
+    RequestPasswordEventArgs e);
 
     /// <summary>
-    /// 重设密码事件的参数
+    /// 请求重设密码事件的参数
     /// </summary>
-    public class ResetPasswordEventArgs : EventArgs
+    public class RequestPasswordEventArgs : EventArgs
     {
         // public string ErrorInfo = "";
         public string OldPassword { get; set; }
@@ -10700,6 +10748,24 @@ Stack:
         public bool Canceled { get; set; }
     }
 
+    // 2021/11/4
+    /// <summary>
+    /// 密码变化通知事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void PasswordChangedEventHandler(object sender,
+    PasswordChangedEventArgs e);
+
+    /// <summary>
+    /// 密码变化通知事件的参数
+    /// </summary>
+    public class PasswordChangedEventArgs : EventArgs
+    {
+        public string ErrorInfo { get; set; }
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+    }
 
     // https://stackoverflow.com/questions/18454292/system-net-certificatepolicy-to-servercertificatevalidationcallback-accept-all-c
     public static class SSLValidator

@@ -808,7 +808,7 @@ out strError);
         public List<string> GetSelectedBarcodes()
         {
             List<string> results = new List<string>();
-            foreach(ListViewItem item in this.listView_records.SelectedItems)
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
                 string barcode = ListViewUtil.GetItemText(item, 1);
                 results.Add(barcode);
@@ -3015,24 +3015,34 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
+            // 按下 Ctrl 键，表示没有 face 元素的读者记录也尽量创建 face 元素(否则只会修改已经有 face 元素的读者记录)
+            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
             string version = "";
 
             var result = await QuickChangeItemRecords(
-                (recpath, dom, time) =>
+                async (recpath, dom, time) =>
                 {
                     // Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(recpath) + "</div>");
 
+                    var face = (XmlElement)dom.DocumentElement.SelectSingleNode("face");
                     // 检查是否具有人脸特征
-                    if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
+                    if (face == null)
                     {
-                        Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode("没有 face 元素") + "</div>");
-                        return false;
+                        if (control == false)
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode("没有 face 元素") + "</div>");
+                            return false;
+                        }
+                        // 否则创建 face 元素
+                        face = dom.CreateElement("face");
+                        dom.DocumentElement.AppendChild(face);
                     }
 
-                    // TODO: 如果 version 一致，则跳过刷新
+                    // 如果 version 一致，则跳过刷新
                     if (string.IsNullOrEmpty(version))
                     {
-                        GetFeatureStringResult version_result = ReadFeatureString(null, "", "getVersion").Result;
+                        GetFeatureStringResult version_result = await ReadFeatureString(null, "", "getVersion");
                         if (version_result.Value == -1)
                             throw new Exception(version_result.ErrorInfo);
                         version = version_result.Version;
@@ -3073,10 +3083,10 @@ MessageBoxDefaultButton.Button1);
                     using (Stream stream = File.OpenRead(strLocalFilePath))
                     {
                         bytes = new byte[stream.Length];
-                        stream.Read(bytes, 0, bytes.Length);
+                        await stream.ReadAsync(bytes, 0, bytes.Length);
                     }
 
-                    GetFeatureStringResult feature_result = ReadFeatureString(bytes, "", "").Result;
+                    GetFeatureStringResult feature_result = await ReadFeatureString(bytes, "", "");
                     if (feature_result.Value == -1)
                     {
                         if (feature_result.ErrorCode == "getFeatureFail")

@@ -1373,7 +1373,7 @@ namespace dp2Circulation
             }
         }
 
-        public delegate bool delegate_changeAction(string recpath,
+        public delegate Task<bool> delegate_changeAction(string recpath,
             XmlDocument dom,
             DateTime now);
 
@@ -1507,7 +1507,7 @@ namespace dp2Circulation
                             return new NormalResult { Value = -1, ErrorInfo = strError };
                         }
 
-                        var changed = callback(info.RecPath, dom, now);
+                        var changed = callback(info.RecPath, dom, now).GetAwaiter().GetResult();
 #if NO
                     // 修改一个订购记录 XmlDocument
                     // return:

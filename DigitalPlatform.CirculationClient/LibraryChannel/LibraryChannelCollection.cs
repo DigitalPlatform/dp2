@@ -32,11 +32,27 @@ namespace DigitalPlatform.CirculationClient
         /// </summary>
         public event AfterLoginEventHandle AfterLogin;
 
+        // 2021/11/3
+        /// <summary>
+        /// 请求重设密码事件
+        /// </summary>
+        public event RequestPasswordEventHandler RequestPasswordEvent = null;
+
+        // 2021/11/4
+        /// <summary>
+        /// 密码变化通知事件
+        /// </summary>
+        public event PasswordChangedEventHandler PasswordChangedEvent = null;
+
+
         public void Dispose()
         {
             this.Close();
             BeforeLogin = null;
             AfterLogin = null;
+
+            RequestPasswordEvent = null;
+            PasswordChangedEvent = null;
         }
 
         internal ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
@@ -58,6 +74,12 @@ namespace DigitalPlatform.CirculationClient
             channel.AfterLogin -= new AfterLoginEventHandle(channel_AfterLogin);
             channel.AfterLogin += new AfterLoginEventHandle(channel_AfterLogin);
 
+            channel.RequestPasswordEvent -= Channel_RequestPasswordEvent;
+            channel.RequestPasswordEvent += Channel_RequestPasswordEvent;
+
+            channel.PasswordChangedEvent -= Channel_PasswordChangedEvent;
+            channel.PasswordChangedEvent += Channel_PasswordChangedEvent;
+
             this.m_lock.EnterWriteLock();
             try
             {
@@ -69,6 +91,16 @@ namespace DigitalPlatform.CirculationClient
             }
 
             return channel;
+        }
+
+        private void Channel_PasswordChangedEvent(object sender, PasswordChangedEventArgs e)
+        {
+            this.PasswordChangedEvent?.Invoke(sender, e);
+        }
+
+        private void Channel_RequestPasswordEvent(object sender, RequestPasswordEventArgs e)
+        {
+            this.RequestPasswordEvent?.Invoke(sender, e);
         }
 
         // 2015/1/1
@@ -147,7 +179,8 @@ namespace DigitalPlatform.CirculationClient
         }
 
         // 查找指定URL的LibraryChannel对象
-        /*public*/ LibraryChannel _findChannel(string strUrl)
+        /*public*/
+        LibraryChannel _findChannel(string strUrl)
         {
             foreach (LibraryChannel channel in this)
             {
