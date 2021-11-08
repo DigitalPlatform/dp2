@@ -18,10 +18,40 @@ namespace dp2SSL
     /// </summary>
     public class LampPerdayTask
     {
-        public struct PerdayTime
+        public class PerdayTime
         {
-            public int Hour { get; set; }
-            public int Minute { get; set; }
+            int _hour = 0;
+
+            public int Hour
+            {
+                get
+                {
+                    return _hour;
+                }
+                set
+                {
+                    if (value < 0 || value > 23)
+                        throw new ArgumentException("Hour 值应在 0-23 之间");
+                    _hour = value;
+                }
+            }
+
+            int _minute = 0;
+
+            public int Minute
+            {
+                get
+                {
+                    return _minute;
+                }
+                set
+                {
+                    if (value < 0 || value > 59)
+                        throw new ArgumentException("Minute 值应在 0-59 之间");
+
+                    _minute = value;
+                }
+            }
 
             public override string ToString()
             {
@@ -32,7 +62,7 @@ namespace dp2SSL
             public static string ToString(List<PerdayTime> times)
             {
                 List<string> results = new List<string>();
-                foreach(var time in times)
+                foreach (var time in times)
                 {
                     results.Add(time.ToString());
                 }
@@ -69,12 +99,12 @@ namespace dp2SSL
                 time.Hour = Convert.ToInt32(strHour);
                 time.Minute = Convert.ToInt32(strMinute);
             }
-            catch
+            catch (Exception ex)
             {
                 return new ParseTimeResult
                 {
                     Value = -1,
-                    ErrorInfo = "时间值 " + strStartTime + " 格式不正确。应为 hh:mm"
+                    ErrorInfo = $"时间值 '{ strStartTime }' 格式(hh:mm)不合法: {ex.Message}"
                 };
             }
 

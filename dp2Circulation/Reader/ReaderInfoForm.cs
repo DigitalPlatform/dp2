@@ -7488,7 +7488,7 @@ MessageBoxDefaultButton.Button1);
                 try
                 {
                     // await Task.Delay(TimeSpan.FromSeconds(5), _cancel.Token);
-                    await Task.Delay(TimeSpan.FromSeconds(15), _cancel.Token);
+                    await Task.Delay(TimeSpan.FromSeconds(5), _cancel.Token);
                 }
                 catch
                 {

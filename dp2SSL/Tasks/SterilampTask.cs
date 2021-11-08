@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Windows;
+using System.Windows.Media;
 
 using FluentScheduler;
 
+using static dp2SSL.LampPerdayTask;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.WPF;
-using static dp2SSL.LampPerdayTask;
+using DigitalPlatform.RFID;
 
 namespace dp2SSL
 {
@@ -78,7 +82,7 @@ namespace dp2SSL
             // 初始化任务调度器
             TryInitialize();
 
-            App.CurrentApp.CancelSterilamp();
+            CancelSterilamp();
             WpfClientInfo.WriteInfoLog($"sterilamp 先关掉(可能亮着的)紫外灯");
 
             // 每日亮灯时间点
@@ -133,7 +137,7 @@ namespace dp2SSL
 
                             if (InWeekday() == true)
                             {
-                                _ = App.CurrentApp.BeginSterilamp();
+                                _ = BeginSterilamp();
                                 WpfClientInfo.WriteInfoLog("sterilamp job head 触发开灯");
                             }
                             else
@@ -194,5 +198,130 @@ namespace dp2SSL
             return StringUtil.MakePathList(results, ",");
         }
         */
+
+        #region 紫外消毒
+
+        static Task _sterilampTask = null;
+        static CancellationTokenSource _cancelSterilamp = new CancellationTokenSource();
+
+        // 开启紫外线灯
+        public static bool BeginSterilamp()
+        {
+            if (_sterilampTask != null)
+                return false;
+
+            _cancelSterilamp?.Cancel();
+            _cancelSterilamp?.Dispose();
+
+            _cancelSterilamp = new CancellationTokenSource();
+            _sterilampTask = SterilampAsync(_cancelSterilamp.Token);
+            return true;
+        }
+
+        // 取消正在进行的紫外线灯
+        public static void CancelSterilamp()
+        {
+            _cancelSterilamp?.Cancel();
+        }
+
+        // 紫外杀菌
+        async static Task SterilampAsync(CancellationToken token)
+        {
+            ProgressWindow progress = null;
+
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(App.CancelToken, token))
+            {
+                App.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.TitleText = "紫外线消毒";
+                    progress.MessageText = "警告：紫外线对眼睛和皮肤有害";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += (s, e) =>
+                    {
+                        cancel.Cancel();
+                    };
+                    progress.okButton.Content = "停止";
+                    progress.Background = new SolidColorBrush(Colors.DarkRed);
+                    App.SetSize(progress, "wide");
+                    progress.BackColor = "yellow";
+                    progress.Show();
+                }));
+
+                PageShelf.TrySetMessage(null, "即将开始紫外线消毒，正在倒计时 ...");
+
+                try
+                {
+                    // 若当前为书柜界面，则需要检查是否有打开的门
+                    if (ShelfData.OpeningDoorCount > 0)
+                    {
+                        var text = $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，暂时无法打开紫外灯";
+                        App.CurrentApp.Speak(text);
+                        return;
+                    }
+
+                    // 首先倒计时警告远离
+                    App.CurrentApp.Speak("即将开始紫外线消毒，请马上远离书柜");
+                    for (int i = 20; i > 0; i--)
+                    {
+                        if (cancel.Token.IsCancellationRequested)
+                            return;
+                        string text = $"({i}) 即将进行紫外线消毒，请迅速远离书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = text;
+                        }));
+                        await Task.Delay(TimeSpan.FromSeconds(1), cancel.Token);
+                    }
+
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.BackColor = "red";
+                        progress.MessageText = "正在进行紫外线消毒，请不要靠近书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
+                    }));
+
+                    PageShelf.TrySetMessage(null, "正在进行紫外线消毒，请不要靠近书柜");
+
+                    // TODO: 屏幕上可以显示剩余时间
+                    // TODO: 背景色动画，闪动
+                    RfidManager.TurnSterilamp("*", "turnOn");
+                    DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
+                    for (int i = 0; i < 3 * 10; i++)    // 10 分钟
+                    {
+                        App.CurrentApp.SpeakSequence("正在进行紫外线消毒，紫外灯对眼睛和皮肤有害，请不要靠近书柜");
+                        if (cancel.Token.IsCancellationRequested)
+                            break;
+                        string timeText = $"剩余 {Convert.ToInt32((end - DateTime.Now).TotalMinutes)} 分钟";
+
+                        if ((i % 3) == 0)
+                            App.CurrentApp.SpeakSequence(timeText);
+
+                        App.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = $"({timeText}) 正在进行紫外线消毒，请不要靠近书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
+                        }));
+                        await Task.Delay(TimeSpan.FromSeconds(20), cancel.Token);
+                    }
+                }
+                finally
+                {
+                    RfidManager.TurnSterilamp("*", "turnOff");
+                    App.CurrentApp.Speak("紫外灯已关闭");
+                    App.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+
+                    PageShelf.TrySetMessage(null, "紫外线消毒结束");
+
+                    _sterilampTask = null;
+                }
+            }
+        }
+
+        #endregion
+
+
     }
 }

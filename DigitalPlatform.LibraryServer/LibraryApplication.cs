@@ -16234,6 +16234,7 @@ strLibraryCode);    // 读者所在的馆代码
         BarcodeDup = 42,        // 条码号重复了 2021/8/9
         DisplayNameDup = 43,  // 显示名重复了 2021/8/9
         RefIdDup = 44,    // 参考 ID 重复了 2021/8/9
+        Canceled = 45,  // 2021/11/6
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容

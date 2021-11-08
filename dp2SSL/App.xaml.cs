@@ -206,7 +206,8 @@ namespace dp2SSL
 
                 // 2021/8/21
                 // 把错误日志同时也发送给 dp2mserver
-                WpfClientInfo.WriteLogEvent += (o1, e1) => {
+                WpfClientInfo.WriteLogEvent += (o1, e1) =>
+                {
                     try
                     {
                         if (string.IsNullOrEmpty(App.messageServerUrl) == false
@@ -216,7 +217,7 @@ namespace dp2SSL
                             PageShelf.TrySetMessage(null, "*** ERROR *** " + e1.Message);
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         WpfClientInfo.WriteLogInternal("error", $"WriteLogEvent 内发生异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
@@ -339,7 +340,7 @@ namespace dp2SSL
                     if (App.Current != null && App.Current.MainWindow != null)
                         InputMethod.SetPreferredImeState(App.Current.MainWindow, InputMethodState.Off);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"SetPreferredImeState() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -374,7 +375,7 @@ namespace dp2SSL
                     // WpfClientInfo.WriteInfoLog($"GetRfidCfg() return {result.ToString()}");
                     LibraryName = result.LibraryName;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"GetRfidCfg() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -1107,7 +1108,7 @@ namespace dp2SSL
                 var path = Path.Combine(WpfClientInfo.UserDir, "tagLines.json");
                 File.WriteAllText(path, ShelfData.BuildTagLineJsonString());
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"SaveTagLines() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -2349,124 +2350,6 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
-        Task _sterilampTask = null;
-        CancellationTokenSource _cancelSterilamp = new CancellationTokenSource();
-
-        // 开启紫外线灯
-        public bool BeginSterilamp()
-        {
-            if (_sterilampTask != null)
-                return false;
-
-            _cancelSterilamp?.Cancel();
-            _cancelSterilamp?.Dispose();
-
-            _cancelSterilamp = new CancellationTokenSource();
-            _sterilampTask = App.CurrentApp.SterilampAsync(_cancelSterilamp.Token);
-            return true;
-        }
-
-        // 取消正在进行的紫外线灯
-        public void CancelSterilamp()
-        {
-            _cancelSterilamp?.Cancel();
-        }
-
-        // 紫外杀菌
-        async Task SterilampAsync(CancellationToken token)
-        {
-            ProgressWindow progress = null;
-
-            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancelApp.Token, token))
-            {
-                App.Invoke(new Action(() =>
-                {
-                    progress = new ProgressWindow();
-                    progress.TitleText = "紫外线消毒";
-                    progress.MessageText = "警告：紫外线对眼睛和皮肤有害";
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    progress.Closed += (s, e) =>
-                    {
-                        cancel.Cancel();
-                    };
-                    progress.okButton.Content = "停止";
-                    progress.Background = new SolidColorBrush(Colors.DarkRed);
-                    App.SetSize(progress, "wide");
-                    progress.BackColor = "yellow";
-                    progress.Show();
-                }));
-
-                PageShelf.TrySetMessage(null, "即将开始紫外线消毒，正在倒计时 ...");
-
-                try
-                {
-                    // 若当前为书柜界面，则需要检查是否有打开的门
-                    if (ShelfData.OpeningDoorCount > 0)
-                    {
-                        var text = $"当前有 {ShelfData.OpeningDoorCount} 个柜门处于打开状态，暂时无法打开紫外灯";
-                        App.CurrentApp.Speak(text);
-                        return;
-                    }
-
-                    // 首先倒计时警告远离
-                    App.CurrentApp.Speak("即将开始紫外线消毒，请马上远离书柜");
-                    for (int i = 20; i > 0; i--)
-                    {
-                        if (cancel.Token.IsCancellationRequested)
-                            return;
-                        string text = $"({i}) 即将进行紫外线消毒，请迅速远离书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
-                        App.Invoke(new Action(() =>
-                        {
-                            progress.MessageText = text;
-                        }));
-                        await Task.Delay(TimeSpan.FromSeconds(1), cancel.Token);
-                    }
-
-                    App.Invoke(new Action(() =>
-                    {
-                        progress.BackColor = "red";
-                        progress.MessageText = "正在进行紫外线消毒，请不要靠近书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
-                    }));
-
-                    PageShelf.TrySetMessage(null, "正在进行紫外线消毒，请不要靠近书柜");
-
-                    // TODO: 屏幕上可以显示剩余时间
-                    // TODO: 背景色动画，闪动
-                    RfidManager.TurnSterilamp("*", "turnOn");
-                    DateTime end = DateTime.Now + TimeSpan.FromMinutes(10);
-                    for (int i = 0; i < 3 * 10; i++)    // 10 分钟
-                    {
-                        App.CurrentApp.SpeakSequence("正在进行紫外线消毒，紫外灯对眼睛和皮肤有害，请不要靠近书柜");
-                        if (cancel.Token.IsCancellationRequested)
-                            break;
-                        string timeText = $"剩余 {Convert.ToInt32((end - DateTime.Now).TotalMinutes)} 分钟";
-
-                        if ((i % 3) == 0)
-                            App.CurrentApp.SpeakSequence(timeText);
-
-                        App.Invoke(new Action(() =>
-                        {
-                            progress.MessageText = $"({timeText}) 正在进行紫外线消毒，请不要靠近书柜\r\n\r\n警告：紫外线对眼睛和皮肤有害";
-                        }));
-                        await Task.Delay(TimeSpan.FromSeconds(20), cancel.Token);
-                    }
-                }
-                finally
-                {
-                    RfidManager.TurnSterilamp("*", "turnOff");
-                    App.CurrentApp.Speak("紫外灯已关闭");
-                    App.Invoke(new Action(() =>
-                    {
-                        progress.Close();
-                    }));
-
-                    PageShelf.TrySetMessage(null, "紫外线消毒结束");
-
-                    _sterilampTask = null;
-                }
-            }
-        }
 
         public static void Invoke(Action action)
         {
@@ -2482,7 +2365,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             {
                 Current.Dispatcher?.Invoke(action);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2021/8/31
                 WpfClientInfo.WriteErrorLog($"UI 异常: {ExceptionUtil.GetDebugText(ex)}");

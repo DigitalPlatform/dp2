@@ -1302,6 +1302,20 @@ update
                 return;
             }
 
+            // 2021/11/7
+            // 设置每日关机时间点
+            if (command.StartsWith("set shutdown time"))
+            {
+                string param = command.Substring("set shutdown time".Length).Trim();
+                string old_param = ShutdownTask.GetPerdayTask();
+                var result = ShutdownTask.ChangePerdayTask(param);
+                if (result.Value == -1)
+                    await SendMessageAsync(groupName, $"设置关机时间时出错: {result.ErrorInfo}");
+                else
+                    await SendMessageAsync(groupName, $"已设置关机时间 {param}。(上次的时间是 {old_param})");
+                return;
+            }
+
             // 2021/1/20
             // 设置每日紫外灯时间点
             if (command.StartsWith("set sterilamp time"))
@@ -1334,13 +1348,13 @@ update
                 if (string.IsNullOrEmpty(param)
                     || param == "on" || param == "begin" || param == "turnon")
                 {
-                    App.CurrentApp.BeginSterilamp();
+                    SterilampTask.BeginSterilamp();
                     return;
                 }
 
                 if (param == "off" || param == "end" || param == "stop" || param == "turnoff")
                 {
-                    App.CurrentApp.CancelSterilamp();
+                    SterilampTask.CancelSterilamp();
                     return;
                 }
 
@@ -1443,7 +1457,7 @@ update
                         try
                         {
                             // 为 dp2ssl 开机后自动重启预先设定好 cmdlineparam.txt 文件
-                            WriteParameterFile();
+                            ShutdownTask.WriteParameterFile();
 
                             await Task.Delay(1000);
                             WpfClientInfo.WriteInfoLog($"经下列管理员 {GetUserList()} 共同参与，关机命令得以最终执行");
@@ -1501,7 +1515,7 @@ update
                         try
                         {
                             // 为 dp2ssl 开机后自动重启预先设定好 cmdlineparam.txt 文件
-                            WriteParameterFile();
+                            ShutdownTask.WriteParameterFile();
 
                             await Task.Delay(1000);
                             ShutdownUtil.DoExitWindows(ShutdownUtil.ExitWindows.Reboot);
@@ -1598,26 +1612,6 @@ update
             return result;
         }
 
-        // 准备命令行参数文件
-        static bool WriteParameterFile()
-        {
-            try
-            {
-                string binDir = "c:\\dp2ssl";
-                if (Directory.Exists(binDir))
-                {
-                    string fileName = System.IO.Path.Combine(binDir, "cmdlineparam.txt");
-                    File.WriteAllText(fileName, "silently");
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                WpfClientInfo.WriteErrorLog($"准备命令行参数文件时出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                return false;
-            }
-        }
 
         // -x:0
         // -y:0

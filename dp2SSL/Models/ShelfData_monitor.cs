@@ -93,6 +93,7 @@ namespace dp2SSL
 
             LampPerdayTask.StartPerdayTask();
             SterilampTask.StartPerdayTask();
+            ShutdownTask.StartPerdayTask();
 
             CancellationToken token = _cancel.Token;
             // bool download_complete = false;

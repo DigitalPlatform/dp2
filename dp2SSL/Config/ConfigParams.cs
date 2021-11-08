@@ -11,16 +11,153 @@ using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 using DigitalPlatform.Core;
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
-    public class ConfigParams
+    public class ConfigParams : DataErrorInfoImpl, INotifyPropertyChanged
     {
         ConfigSetting _config = null;
 
         public ConfigParams(ConfigSetting config)
         {
             _config = config;
+        }
+
+        internal void OnPropertyChanged(string name)
+        {
+            if (this.PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void LoadData()
+        {
+            SipServerUrl = _config.Get("global", "sipServerUrl", "");
+            SipUserName = _config.Get("global", "sipUserName", "");
+            SipPassword = App.DecryptPasssword(_config.Get("global", "sipPassword", ""));
+            SipEncoding = _config.Get("global", "sipEncoding", "utf-8");
+            SipInstitution = _config.Get("global", "sipInstitution", "");
+            
+            Dp2ServerUrl = _config.Get("global", "dp2ServerUrl", "");
+            Dp2UserName = _config.Get("global", "dp2UserName", "");
+            Dp2Password = App.DecryptPasssword(_config.Get("global", "dp2Password", ""));
+            
+            RfidURL = _config.Get("global", "rfidUrl", "");
+            FingerprintURL = _config.Get("global", "fingerprintUrl", "");
+            FaceURL = _config.Get("global", "faceUrl", "");
+            
+            FullScreen = _config.GetInt("global", "fullScreen", 1) == 1 ? true : false;
+            AutoTrigger = _config.GetBoolean("ssl_operation", "auto_trigger", false);
+            PatronInfoLasting = _config.GetBoolean("ssl_operation", "patron_info_lasting", false);
+            AutoBackMenuPage = _config.GetBoolean("ssl_operation", "auto_back_menu_page", false);
+            ProcessMonitor = _config.GetBoolean("global", "process_monitor", true);
+            ReplicateEntities = _config.GetBoolean("shelf", "replicateEntities", false);
+            Function = _config.Get("global", "function", "自助借还");
+            PatronBarcodeStyle = _config.Get("global", "patron_barcode_style", "禁用");
+            WorkerBarcodeStyle = _config.Get("global", "worker_barcode_style", "禁用");
+            PosPrintStyle = _config.Get("global", "pos_print_style", "不打印");
+            CacheWorkerPasswordLength = _config.Get("global", "memory_worker_password", "无");
+            AutoBackMainMenuSeconds = _config.GetInt("global", "autoback_mainmenu_seconds", -1);
+            AutoShutdownParam = ShutdownTask.GetPerdayTask();
+            
+            MessageServerUrl = _config.Get("global", "messageServerUrl", "");
+            MessageUserName = _config.Get("global", "messageUserName", "");
+            MessagePassword = App.DecryptPasssword(_config.Get("global", "messagePassword", ""));
+        }
+
+        public void SaveData()
+        {
+            List<string> errors = new List<string>();
+
+            _config.Set("global", "sipServerUrl", SipServerUrl);
+            _config.Set("global", "sipUserName", SipUserName);
+            _config.Set("global", "sipPassword", App.EncryptPassword(SipPassword));
+            _config.Set("global", "sipEncoding", SipEncoding);
+            _config.Set("global", "sipInstitution", SipInstitution);
+            {
+                _config.Set("global", "dp2ServerUrl", Dp2ServerUrl);
+                App.CurrentApp.ClearChannelPool();
+            }
+            {
+                _config.Set("global", "dp2UserName", Dp2UserName);
+                App.CurrentApp.ClearChannelPool();
+            }
+            {
+                _config.Set("global", "dp2Password", App.EncryptPassword(Dp2Password));
+                App.CurrentApp.ClearChannelPool();
+            }
+            _config.Set("global", "rfidUrl", RfidURL);
+            _config.Set("global", "fingerprintUrl", FingerprintURL);
+            _config.Set("global", "faceUrl", FaceURL);
+            _config.SetInt("global", "fullScreen", FullScreen == true ? 1 : 0);
+            _config.SetBoolean("ssl_operation", "auto_trigger", AutoTrigger);
+            _config.SetBoolean("ssl_operation", "patron_info_lasting", PatronInfoLasting);
+            _config.SetBoolean("ssl_operation", "auto_back_menu_page", AutoBackMenuPage);
+            _config.SetBoolean("global", "process_monitor", ProcessMonitor);
+            _config.SetBoolean("shelf", "replicateEntities", ReplicateEntities);
+            _config.Set("global", "function", Function);
+            _config.Set("global", "patron_barcode_style", PatronBarcodeStyle);
+            _config.Set("global", "worker_barcode_style", WorkerBarcodeStyle);
+            _config.Set("global", "pos_print_style", PosPrintStyle);
+            _config.Set("global", "memory_worker_password", CacheWorkerPasswordLength);
+            _config.SetInt("global", "autoback_mainmenu_seconds", AutoBackMainMenuSeconds);
+            
+            var result = ShutdownTask.ChangePerdayTask(AutoShutdownParam);
+            if (result.Value == -1)
+                errors.Add(result.ErrorInfo);
+
+            {
+                _config.Set("global", "messageServerUrl", MessageServerUrl);
+                App.CurrentApp.ClearChannelPool();
+            }
+            {
+                _config.Set("global", "messageUserName", MessageUserName);
+                App.CurrentApp.ClearChannelPool();
+            }
+            {
+                _config.Set("global", "messagePassword", App.EncryptPassword(MessagePassword));
+                App.CurrentApp.ClearChannelPool();
+            }
+
+            // 有错误
+            if (errors.Count > 0)
+            {
+
+            }
+        }
+
+        public string Validate()
+        {
+            List<string> errors = new List<string>();
+            string error = ValidateProperty("AutoShutdownParam");
+            if (error != null)
+                errors.Add(error);
+
+            return StringUtil.MakePathList(errors, "\r\n");
+        }
+
+        string ValidateProperty(string name)
+        {
+            IDataErrorInfo errorInfo = (IDataErrorInfo)this;
+            string error = errorInfo[name];
+            if (error == null)
+                return null;
+
+            var value = GetProperty(this, name);
+            var display_attr = typeof(ConfigParams)
+  .GetProperty(name)
+  .GetCustomAttributes(false)
+  .OfType<DisplayAttribute>().ToList().FirstOrDefault();
+            return $"{display_attr.Name} 值 '{value}' 不合法: {error}";
+        }
+
+        static string GetProperty(Object obj, string name)
+        {
+            obj.GetType().GetField(name);   // ?
+            var prop = obj.GetType().GetProperty(name);
+            return (string)prop.GetValue(obj);
         }
 
         #region SIP2 服务器
@@ -33,16 +170,17 @@ namespace dp2SSL
         [Category("SIP2 服务器")]
         public string SipServerUrl
         {
-            get
-            {
-                return _config.Get("global", "sipServerUrl", "");
-            }
+            get => _sipServerUrl;
             set
             {
-                _config.Set("global", "sipServerUrl", value);
-                // App.CurrentApp.ClearChannelPool();
+                if (_sipServerUrl != value)
+                {
+                    _sipServerUrl = value;
+                    OnPropertyChanged("SipServerUrl");
+                }
             }
         }
+        private string _sipServerUrl;
 
         [Display(
     Order = 2,
@@ -52,16 +190,17 @@ namespace dp2SSL
         [Category("SIP2 服务器")]
         public string SipUserName
         {
-            get
-            {
-                return _config.Get("global", "sipUserName", "");
-            }
+            get => _sipUserName;
             set
             {
-                _config.Set("global", "sipUserName", value);
-                // App.CurrentApp.ClearChannelPool();
+                if (_sipUserName != value)
+                {
+                    _sipUserName = value;
+                    OnPropertyChanged("SipUserName");
+                }
             }
         }
+        private string _sipUserName;
 
         [Display(
     Order = 3,
@@ -72,16 +211,17 @@ namespace dp2SSL
         [Category("SIP2 服务器")]
         public string SipPassword
         {
-            get
-            {
-                return App.DecryptPasssword(_config.Get("global", "sipPassword", ""));
-            }
+            get => _sipPassword;
             set
             {
-                _config.Set("global", "sipPassword", App.EncryptPassword(value));
-                // App.CurrentApp.ClearChannelPool();
+                if (_sipPassword != value)
+                {
+                    _sipPassword = value;
+                    OnPropertyChanged("SipPassword");
+                }
             }
         }
+        private string _sipPassword;
 
         [Display(
 Order = 4,
@@ -92,15 +232,17 @@ Description = "SIP2 通讯所用的字符集编码方式"
         [Category("SIP2 服务器")]
         public string SipEncoding
         {
-            get
-            {
-                return _config.Get("global", "sipEncoding", "utf-8");
-            }
+            get => _sipEncoding;
             set
             {
-                _config.Set("global", "sipEncoding", value);
+                if (_sipEncoding != value)
+                {
+                    _sipEncoding = value;
+                    OnPropertyChanged("SipEncoding");
+                }
             }
         }
+        private string _sipEncoding;
 
         // 2021/1/31
         [Display(
@@ -111,15 +253,17 @@ Description = "用于 SIP2 服务器的 RFID 标签机构代码"
         [Category("SIP2 服务器")]
         public string SipInstitution
         {
-            get
-            {
-                return _config.Get("global", "sipInstitution", "");
-            }
+            get => _sipInstitution;
             set
             {
-                _config.Set("global", "sipInstitution", value);
+                if (_sipInstitution != value)
+                {
+                    _sipInstitution = value;
+                    OnPropertyChanged("SipInstitution");
+                }
             }
         }
+        private string _sipInstitution;
 
         #endregion
 
@@ -133,16 +277,17 @@ Description = "用于 SIP2 服务器的 RFID 标签机构代码"
         [Category("dp2 服务器")]
         public string Dp2ServerUrl
         {
-            get
-            {
-                return _config.Get("global", "dp2ServerUrl", "");
-            }
+            get => _dp2ServerUrl;
             set
             {
-                _config.Set("global", "dp2ServerUrl", value);
-                App.CurrentApp.ClearChannelPool();
+                if (_dp2ServerUrl != value)
+                {
+                    _dp2ServerUrl = value;
+                    OnPropertyChanged("Dp2ServerUrl");
+                }
             }
         }
+        private string _dp2ServerUrl;
 
         [Display(
     Order = 2,
@@ -152,16 +297,17 @@ Description = "用于 SIP2 服务器的 RFID 标签机构代码"
         [Category("dp2 服务器")]
         public string Dp2UserName
         {
-            get
-            {
-                return _config.Get("global", "dp2UserName", "");
-            }
+            get => _dp2UserName;
             set
             {
-                _config.Set("global", "dp2UserName", value);
-                App.CurrentApp.ClearChannelPool();
+                if (_dp2UserName != value)
+                {
+                    _dp2UserName = value;
+                    OnPropertyChanged("Dp2UserName");
+                }
             }
         }
+        private string _dp2UserName;
 
         [Display(
     Order = 3,
@@ -172,16 +318,17 @@ Description = "用于 SIP2 服务器的 RFID 标签机构代码"
         [Category("dp2 服务器")]
         public string Dp2Password
         {
-            get
-            {
-                return App.DecryptPasssword(_config.Get("global", "dp2Password", ""));
-            }
+            get => _dp2Password;
             set
             {
-                _config.Set("global", "dp2Password", App.EncryptPassword(value));
-                App.CurrentApp.ClearChannelPool();
+                if (_dp2Password != value)
+                {
+                    _dp2Password = value;
+                    OnPropertyChanged("Dp2Password");
+                }
             }
         }
+        private string _dp2Password;
 
         #endregion
 
@@ -194,15 +341,17 @@ Description = "RFID 接口 URL 地址"
         [Category("RFID 接口")]
         public string RfidURL
         {
-            get
-            {
-                return _config.Get("global", "rfidUrl", "");
-            }
+            get => _rfidURL;
             set
             {
-                _config.Set("global", "rfidUrl", value);
+                if (_rfidURL != value)
+                {
+                    _rfidURL = value;
+                    OnPropertyChanged("RfidURL");
+                }
             }
         }
+        private string _rfidURL;
 
         // 默认值 ipc://FingerprintChannel/FingerprintServer
         [Display(
@@ -213,15 +362,17 @@ Description = "指纹接口 URL 地址"
         [Category("指纹接口")]
         public string FingerprintURL
         {
-            get
-            {
-                return _config.Get("global", "fingerprintUrl", "");
-            }
+            get => _fingerprintURL;
             set
             {
-                _config.Set("global", "fingerprintUrl", value);
+                if (_fingerprintURL != value)
+                {
+                    _fingerprintURL = value;
+                    OnPropertyChanged("FingerprintURL");
+                }
             }
         }
+        private string _fingerprintURL;
 
         // 默认值 ipc://FaceChannel/FaceServer
         [Display(
@@ -232,15 +383,17 @@ Description = "人脸接口 URL 地址"
         [Category("人脸接口")]
         public string FaceURL
         {
-            get
-            {
-                return _config.Get("global", "faceUrl", "");
-            }
+            get => _faceURL;
             set
             {
-                _config.Set("global", "faceUrl", value);
+                if (_faceURL != value)
+                {
+                    _faceURL = value;
+                    OnPropertyChanged("FaceURL");
+                }
             }
         }
+        private string _faceURL;
 
         // 默认值 true
         [Display(
@@ -251,15 +404,17 @@ Description = "程序启动时候是否自动全屏"
         [Category("启动")]
         public bool FullScreen
         {
-            get
-            {
-                return _config.GetInt("global", "fullScreen", 1) == 1 ? true : false;
-            }
+            get => _fullScreen;
             set
             {
-                _config.SetInt("global", "fullScreen", value == true ? 1 : 0);
+                if (_fullScreen != value)
+                {
+                    _fullScreen = value;
+                    OnPropertyChanged("FullScreen");
+                }
             }
         }
+        private bool _fullScreen;
 
         // 默认值 false
         [Display(
@@ -270,15 +425,17 @@ Description = "借书和还书操作是否自动触发操作按钮"
         [Category("自助借还操作风格")]
         public bool AutoTrigger
         {
-            get
-            {
-                return _config.GetBoolean("ssl_operation", "auto_trigger", false);
-            }
+            get => _autoTrigger;
             set
             {
-                _config.SetBoolean("ssl_operation", "auto_trigger", value);
+                if (_autoTrigger != value)
+                {
+                    _autoTrigger = value;
+                    OnPropertyChanged("AutoTrigger");
+                }
             }
         }
+        private bool _autoTrigger;
 
         // 默认值 false
         [Display(
@@ -289,16 +446,17 @@ Description = "RFID读者卡读卡器是否竖向放置"
         [Category("自助借还操作风格")]
         public bool PatronInfoLasting
         {
-            get
-            {
-                return _config.GetBoolean("ssl_operation", "patron_info_lasting", false);
-            }
+            get => _patronInfoLasting;
             set
             {
-                _config.SetBoolean("ssl_operation", "patron_info_lasting", value);
+                if (_patronInfoLasting != value)
+                {
+                    _patronInfoLasting = value;
+                    OnPropertyChanged("PatronInfoLasting");
+                }
             }
         }
-
+        private bool _patronInfoLasting;
 
         // 默认值 false
         [Display(
@@ -309,15 +467,17 @@ Description = "借书还书操作完成后是否立即自动返回菜单页面"
         [Category("自助借还操作风格")]
         public bool AutoBackMenuPage
         {
-            get
-            {
-                return _config.GetBoolean("ssl_operation", "auto_back_menu_page", false);
-            }
+            get => _autoBackMenuPage;
             set
             {
-                _config.SetBoolean("ssl_operation", "auto_back_menu_page", value);
+                if (_autoBackMenuPage != value)
+                {
+                    _autoBackMenuPage = value;
+                    OnPropertyChanged("AutoBackMenuPage");
+                }
             }
         }
+        private bool _autoBackMenuPage;
 
         /*
         // 默认值 false
@@ -369,15 +529,17 @@ Description = "自动监控和重启 人脸中心 RFID中心 指纹中心等模�
         [Category("维护")]
         public bool ProcessMonitor
         {
-            get
-            {
-                return _config.GetBoolean("global", "process_monitor", true);
-            }
+            get => _processMonitor;
             set
             {
-                _config.SetBoolean("global", "process_monitor", value);
+                if (_processMonitor != value)
+                {
+                    _processMonitor = value;
+                    OnPropertyChanged("ProcessMonitor");
+                }
             }
         }
+        private bool _processMonitor;
 
         // 默认值 false
         [Display(
@@ -388,15 +550,17 @@ Description = "(智能书柜)自动同步全部册记录和书目摘要到本地
         [Category("维护")]
         public bool ReplicateEntities
         {
-            get
-            {
-                return _config.GetBoolean("shelf", "replicateEntities", false);
-            }
+            get => _replicateEntities;
             set
             {
-                _config.SetBoolean("shelf", "replicateEntities", value);
+                if (_replicateEntities != value)
+                {
+                    _replicateEntities = value;
+                    OnPropertyChanged("ReplicateEntities");
+                }
             }
         }
+        private bool _replicateEntities;
 
         /*
         // 默认值 空
@@ -430,15 +594,17 @@ Description = "dp2SSL 的功能类型"
         [Category("全局")]
         public string Function
         {
-            get
-            {
-                return _config.Get("global", "function", "自助借还");
-            }
+            get => _function;
             set
             {
-                _config.Set("global", "function", value);
+                if (_function != value)
+                {
+                    _function = value;
+                    OnPropertyChanged("Function");
+                }
             }
         }
+        private string _function;
 
         // 默认值 空
         [Display(
@@ -450,15 +616,17 @@ Description = "读者证条码的输入方式"
         [Category("全局")]
         public string PatronBarcodeStyle
         {
-            get
-            {
-                return _config.Get("global", "patron_barcode_style", "禁用");
-            }
+            get => _patronBarcodeStyle;
             set
             {
-                _config.Set("global", "patron_barcode_style", value);
+                if (_patronBarcodeStyle != value)
+                {
+                    _patronBarcodeStyle = value;
+                    OnPropertyChanged("PatronBarcodeStyle");
+                }
             }
         }
+        private string _patronBarcodeStyle;
 
         // 默认值 空
         [Display(
@@ -470,15 +638,17 @@ Description = "工作人员条码的输入方式"
         [Category("全局")]
         public string WorkerBarcodeStyle
         {
-            get
-            {
-                return _config.Get("global", "worker_barcode_style", "禁用");
-            }
+            get => _workerBarcodeStyle;
             set
             {
-                _config.Set("global", "worker_barcode_style", value);
+                if (_workerBarcodeStyle != value)
+                {
+                    _workerBarcodeStyle = value;
+                    OnPropertyChanged("WorkerBarcodeStyle");
+                }
             }
         }
+        private string _workerBarcodeStyle;
 
         // 默认值 空
         [Display(
@@ -490,15 +660,17 @@ Description = "凭条(小票)打印方式"
         [Category("全局")]
         public string PosPrintStyle
         {
-            get
-            {
-                return _config.Get("global", "pos_print_style", "不打印");
-            }
+            get => _posPrintStyle;
             set
             {
-                _config.Set("global", "pos_print_style", value);
+                if (_posPrintStyle != value)
+                {
+                    _posPrintStyle = value;
+                    OnPropertyChanged("PosPrintStyle");
+                }
             }
         }
+        private string _posPrintStyle;
 
         // 默认值 false
         [Display(
@@ -510,16 +682,17 @@ Description = "工作人员刷卡成功登录后，多少时间内再刷卡不�
         [Category("全局")]
         public string CacheWorkerPasswordLength
         {
-            get
-            {
-                return _config.Get("global", "memory_worker_password", "无");
-            }
+            get => _cacheWorkerPasswordLength;
             set
             {
-                _config.Set("global", "memory_worker_password", value);
+                if (_cacheWorkerPasswordLength != value)
+                {
+                    _cacheWorkerPasswordLength = value;
+                    OnPropertyChanged("CacheWorkerPasswordLength");
+                }
             }
         }
-
+        private string _cacheWorkerPasswordLength;
 
         // 默认值 -1。-1 表示永远不返回
         [Display(
@@ -530,15 +703,40 @@ Description = "当没有操作多少秒以后，自动返回主菜单页面"
         [Category("全局")]
         public int AutoBackMainMenuSeconds
         {
-            get
-            {
-                return _config.GetInt("global", "autoback_mainmenu_seconds", -1);
-            }
+            get => _autoBackMainMenuSeconds;
             set
             {
-                _config.SetInt("global", "autoback_mainmenu_seconds", value);
+                if (_autoBackMainMenuSeconds != value)
+                {
+                    _autoBackMainMenuSeconds = value;
+                    OnPropertyChanged("AutoBackMainMenuSeconds");
+                }
             }
         }
+        private int _autoBackMainMenuSeconds;
+
+        // 2021/11/7
+        // 默认值 null。null 表示不关机
+        [Display(
+Order = 15,
+Name = "每日自动关机",
+Description = "每日自动执行关机的时间定义。例如 17:30,18:30"
+)]
+        [Category("全局")]
+        [CustomValidation(typeof(ShutdownParamValidator), "Validate")]  // https://stackoverflow.com/questions/4396205/implementing-validations-in-wpf-propertygrid
+        public string AutoShutdownParam
+        {
+            get => _autoShutdownParam;
+            set
+            {
+                if (_autoShutdownParam != value)
+                {
+                    _autoShutdownParam = value;
+                    OnPropertyChanged("AutoShutdownParam");
+                }
+            }
+        }
+        private string _autoShutdownParam;
 
         /*
         // 默认值 空
@@ -593,16 +791,17 @@ Description = "是否动态反馈图书变动数"
         [Category("消息服务器")]
         public string MessageServerUrl
         {
-            get
-            {
-                return _config.Get("global", "messageServerUrl", "");
-            }
+            get => _messageServerUrl;
             set
             {
-                _config.Set("global", "messageServerUrl", value);
-                App.CurrentApp.ClearChannelPool();
+                if (_messageServerUrl != value)
+                {
+                    _messageServerUrl = value;
+                    OnPropertyChanged("MessageServerUrl");
+                }
             }
         }
+        private string _messageServerUrl;
 
         [Display(
     Order = 22,
@@ -612,16 +811,17 @@ Description = "是否动态反馈图书变动数"
         [Category("消息服务器")]
         public string MessageUserName
         {
-            get
-            {
-                return _config.Get("global", "messageUserName", "");
-            }
+            get => _messageUserName;
             set
             {
-                _config.Set("global", "messageUserName", value);
-                App.CurrentApp.ClearChannelPool();
+                if (_messageUserName != value)
+                {
+                    _messageUserName = value;
+                    OnPropertyChanged("MessageUserName");
+                }
             }
         }
+        private string _messageUserName;
 
         [Display(
     Order = 23,
@@ -632,16 +832,17 @@ Description = "是否动态反馈图书变动数"
         [Category("消息服务器")]
         public string MessagePassword
         {
-            get
-            {
-                return App.DecryptPasssword(_config.Get("global", "messagePassword", ""));
-            }
+            get => _messagePassword;
             set
             {
-                _config.Set("global", "messagePassword", App.EncryptPassword(value));
-                App.CurrentApp.ClearChannelPool();
+                if (_messagePassword != value)
+                {
+                    _messagePassword = value;
+                    OnPropertyChanged("MessagePassword");
+                }
             }
         }
+        private string _messagePassword;
 
         /*
         [Display(
@@ -667,5 +868,37 @@ Description = "用于交换消息的组的名字"
         #endregion
     }
 
+    // https://stackoverflow.com/questions/4396205/implementing-validations-in-wpf-propertygrid
+    public class DataErrorInfoImpl : IDataErrorInfo
+    {
+        string IDataErrorInfo.Error
+        {
+            get
+            {
+                return string.Empty;
+            }
+        }
 
+        string IDataErrorInfo.this[string columnName]
+        {
+            get
+            {
+                var pi = GetType().GetProperty(columnName);
+                var value = pi.GetValue(this, null);
+
+                var context = new ValidationContext(this, null, null) { MemberName = columnName };
+                var validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+                if (!Validator.TryValidateProperty(value, context, validationResults))
+                {
+                    var sb = new StringBuilder();
+                    foreach (var vr in validationResults)
+                    {
+                        sb.AppendLine(vr.ErrorMessage);
+                    }
+                    return sb.ToString().Trim();
+                }
+                return null;
+            }
+        }
+    }
 }

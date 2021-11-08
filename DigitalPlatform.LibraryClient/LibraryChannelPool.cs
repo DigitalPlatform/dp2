@@ -22,6 +22,19 @@ namespace DigitalPlatform.LibraryClient
         /// </summary>
         public event AfterLoginEventHandle AfterLogin;
 
+        // 2021/11/6
+        /// <summary>
+        /// 请求重设密码事件
+        /// </summary>
+        public event RequestPasswordEventHandler RequestPasswordEvent = null;
+
+        // 2021/11/6
+        /// <summary>
+        /// 密码变化通知事件
+        /// </summary>
+        public event PasswordChangedEventHandler PasswordChangedEvent = null;
+
+
         /// <summary>
         /// 最多通道数
         /// </summary>
@@ -71,6 +84,13 @@ namespace DigitalPlatform.LibraryClient
                 inner_channel.AfterLogin -= inner_channel_AfterLogin;
                 inner_channel.AfterLogin += inner_channel_AfterLogin;
 
+                // 2021/11/6
+                inner_channel.RequestPasswordEvent -= Inner_channel_RequestPasswordEvent;
+                inner_channel.RequestPasswordEvent += Inner_channel_RequestPasswordEvent;
+
+                inner_channel.PasswordChangedEvent -= Inner_channel_PasswordChangedEvent;
+                inner_channel.PasswordChangedEvent += Inner_channel_PasswordChangedEvent;
+
                 wrapper = new LibraryChannelWrapper();
                 wrapper.Channel = inner_channel;
                 wrapper.InUsing = true;
@@ -96,6 +116,16 @@ namespace DigitalPlatform.LibraryClient
             {
                 this.m_lock.ExitWriteLock();
             }
+        }
+
+        private void Inner_channel_PasswordChangedEvent(object sender, PasswordChangedEventArgs e)
+        {
+            PasswordChangedEvent?.Invoke(sender, e);
+        }
+
+        private void Inner_channel_RequestPasswordEvent(object sender, RequestPasswordEventArgs e)
+        {
+            RequestPasswordEvent?.Invoke(sender, e);
         }
 
         void inner_channel_AfterLogin(object sender, AfterLoginEventArgs e)
@@ -267,6 +297,8 @@ namespace DigitalPlatform.LibraryClient
             {
                 wrapper.Channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
                 wrapper.Channel.AfterLogin -= inner_channel_AfterLogin;
+                wrapper.Channel.RequestPasswordEvent -= Inner_channel_RequestPasswordEvent;
+                wrapper.Channel.PasswordChangedEvent -= Inner_channel_PasswordChangedEvent;
                 wrapper.Channel.Close();
             }
 

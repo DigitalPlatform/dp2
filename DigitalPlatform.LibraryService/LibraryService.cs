@@ -9589,6 +9589,14 @@ namespace dp2Library
                 result.ErrorInfo = strError;
                 return result;
             }
+            catch (AggregateException e) when (e.InnerException is TaskCanceledException castedException)
+            {
+                // 2021/11/6
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = "API 被服务器取消";
+                return result;
+            }
             catch (Exception ex)
             {
                 string strErrorText = "dp2Library GetOperLogs() API出现异常: " + ExceptionUtil.GetDebugText(ex);

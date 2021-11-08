@@ -2585,7 +2585,12 @@ out strError);
                         // 分别用于询问新密码，和通知密码修改成功。前端一般可在接到密码修改成功通知后，更换自己储存的密码，便于下次用新密码来自动登录
                         if (this.RequestPasswordEvent != null)
                         {
-                            RequestPasswordEventArgs e1 = new RequestPasswordEventArgs();
+                            RequestPasswordEventArgs e1 = new RequestPasswordEventArgs
+                            {
+                                Reason = strError,
+                                UserName = ea.UserName,
+                                OldPassword = ea.Password,
+                            };
                             // 请求获得自动重设密码的新密码
                             this.RequestPasswordEvent(this, e1);
                             if (e1.Canceled == false)
@@ -2603,8 +2608,10 @@ out strError);
                                     this.PasswordChangedEvent?.Invoke(this,
                                         new PasswordChangedEventArgs
                                         {
+                                            UserName = ea.UserName,
                                             OldPassword = oldPassword,
                                             NewPassword = newPassword,
+                                            Reason = strError,
                                         });
                                     ea.Password = newPassword;
                                     goto REDOLOGIN_1;
@@ -2612,7 +2619,14 @@ out strError);
                                 else
                                 {
                                     // 修改密码发生错误(原因可能是新密码强度不够等)。触发通知
-                                    this.PasswordChangedEvent?.Invoke(this, new PasswordChangedEventArgs { ErrorInfo = strError });
+                                    this.PasswordChangedEvent?.Invoke(this, new PasswordChangedEventArgs
+                                    {
+                                        UserName = ea.UserName,
+                                        OldPassword = oldPassword,
+                                        NewPassword = newPassword,
+                                        Reason = strError,
+                                        ErrorInfo = strTempError
+                                    });
                                 }
                             }
                         }
@@ -10741,10 +10755,15 @@ Stack:
     /// </summary>
     public class RequestPasswordEventArgs : EventArgs
     {
-        // public string ErrorInfo = "";
+        // [in] 原因
+        public string Reason { get; set; }
+        // [in] 用户名
+        public string UserName { get; set; }
+        // [in] 旧密码
         public string OldPassword { get; set; }
+        // [out] 返回新密码
         public string NewPassword { get; set; }
-
+        // [out] 是否要放弃这次修改密码动作?
         public bool Canceled { get; set; }
     }
 
@@ -10762,9 +10781,16 @@ Stack:
     /// </summary>
     public class PasswordChangedEventArgs : EventArgs
     {
+        // [in] 如果非空，表示修改密码动作已经出错，这里是错误信息
         public string ErrorInfo { get; set; }
+        // [in] 用户名
+        public string UserName { get; set; }
+        // [in] 旧密码
         public string OldPassword { get; set; }
+        // [in] 新密码
         public string NewPassword { get; set; }
+        // [in] 引起密码修改的原因
+        public string Reason { get; set; }
     }
 
     // https://stackoverflow.com/questions/18454292/system-net-certificatepolicy-to-servercertificatevalidationcallback-accept-all-c

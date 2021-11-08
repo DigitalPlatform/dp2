@@ -1,6 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.WPF;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,6 +9,9 @@ using System.Windows.Controls;
 
 using Xceed.Wpf.Toolkit.PropertyGrid;
 
+using DigitalPlatform;
+using DigitalPlatform.WPF;
+
 namespace dp2SSL
 {
     /// <summary>
@@ -18,12 +19,15 @@ namespace dp2SSL
     /// </summary>
     public partial class ConfigWindow : Window
     {
+        ConfigParams _configParams = null;
+
         public ConfigWindow()
         {
             InitializeComponent();
 
-            ConfigParams param = new ConfigParams(WpfClientInfo.Config);
-            _propertyGrid.SelectedObject = param;
+            _configParams = new ConfigParams(WpfClientInfo.Config);
+            _configParams.LoadData();
+            _propertyGrid.SelectedObject = _configParams;
         }
 
         public void Initial()
@@ -59,6 +63,13 @@ namespace dp2SSL
 
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
+            string error = _configParams.Validate();
+            if (string.IsNullOrEmpty(error) == false)
+            {
+                MessageBox.Show(error);
+                return;
+            }
+            _configParams.SaveData();
             this.Close();
         }
 

@@ -22,7 +22,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <ManifestCertificateThumbprint>3EC46D6B99520A1DCDAD027B726C38528625A83D</ManifestCertificateThumbprint>
     <ManifestKeyFile>数字平台（北京）软件有限责任公司.pfx</ManifestKeyFile>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -35,7 +35,7 @@
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>c:\publish\dp2circulation\v3_dev\</PublishUrl>
+    <PublishUrl>c:\publish\dp2circulation\v3\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -45,15 +45,15 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/dp2Circulation/v3_dev/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/dp2Circulation/v3_dev/</UpdateUrl>
+    <InstallUrl>http://dp2003.com/dp2Circulation/v3/</InstallUrl>
+    <UpdateUrl>http://dp2003.com/dp2Circulation/v3/</UpdateUrl>
     <TargetCulture>zh-CN</TargetCulture>
     <ProductName>dp2内务 V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>193</ApplicationRevision>
+    <ApplicationRevision>195</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
