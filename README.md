@@ -70,3 +70,51 @@ Git 命令执行以后，需要重新打开 dp2 Solution 变动才能生效
 ```
 
 需要将一些 .exe 的 Project (例如 dp2Catalog)的“签名”属性页中“为 ClickOnce 清单签名”这个 checkbox 清除选择。
+
+
+***
+第3步详细执行结果
+```
+D:\code\dp2>git submodule init
+
+D:\code\dp2>git submodule update
+
+D:\code\dp2>cd dp-library
+
+D:\code\dp2\dp-library>git pull
+You are not currently on a branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull <remote> <branch>
+
+
+D:\code\dp2\dp-library>git pull origin master
+fatal: unable to access 'https://github.com/DigitalPlatform/dp-library.git/': OpenSSL SSL_read: Connection was reset, errno 10054
+
+D:\code\dp2\dp-library>git pull origin master
+From https://github.com/DigitalPlatform/dp-library
+ * branch            master     -> FETCH_HEAD
+Updating 7fbbf14..e22781d
+Fast-forward
+ DigitalPlatform.Core/CompactLog.cs                 |  34 ++-
+ DigitalPlatform.Core/ConfigSetting.cs              | 286 +++++++++++++++++-
+ DigitalPlatform.Core/StringUtil.cs                 |  11 +
+ DigitalPlatform.Core/deleted.txt                   | 333 +++++++++++++++++++++
+ DigitalPlatform.SIP/BaseMessage.cs                 |   2 +-
+ DigitalPlatform.SIP/Request/Checkin_09.cs          |   2 +-
+ DigitalPlatform.SIP/Request/Checkout_11.cs         |   2 +-
+ DigitalPlatform.SIP/Request/Login_93.cs            |   7 +-
+ .../Request/PatronInformation_63.cs                |   2 +-
+ DigitalPlatform.SIP/Request/Renew_29.cs            |   2 +-
+ DigitalPlatform.SIP/SCHelper.cs                    |  12 +-
+ DigitalPlatform.Z3950/BerNode.cs                   |  16 +-
+ UnitTestCompactLog/UnitTest1.cs                    |   2 -
+ UnitTestCompactLog/UnitTestCompactData.cs          |  31 ++
+ UnitTestCompactLog/UnitTestCompactLog.csproj       |  16 +-
+ 15 files changed, 730 insertions(+), 28 deletions(-)
+ create mode 100644 DigitalPlatform.Core/deleted.txt
+ create mode 100644 UnitTestCompactLog/UnitTestCompactData.cs
+
+D:\code\dp2\dp-library>
+```
