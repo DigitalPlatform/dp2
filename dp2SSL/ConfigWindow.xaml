@@ -39,11 +39,12 @@
                 </xctk:EditorTemplateDefinition>
             </xctk:PropertyGrid.EditorDefinitions>
         </xctk:PropertyGrid>
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Name="openKeyboard" 
                     Width="100" Height="30" 
                     FontSize="14" FontWeight="ExtraBold" Margin="10"
                     Foreground="White" Background="DarkGray" BorderThickness="0"
+                    HorizontalAlignment="Left"
                     Click="openKeyboard_Click">打开触摸键盘</Button>
 
             <Button Name="okButton" 
@@ -51,7 +52,15 @@
                     Width="200" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
-                    Click="okButton_Click">关闭</Button>
+                    Click="okButton_Click">确定</Button>
+
+            <Button Name="cancelButton" 
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="160" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                    Margin="10,0,10,0"
+                    Click="cancelButton_Click">取消</Button>
 
         </StackPanel>
     </Grid>

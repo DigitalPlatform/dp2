@@ -235,7 +235,7 @@ namespace dp2SSL
                             progress.Close();
                         }));
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         WpfClientInfo.WriteErrorLog($"ErrorBox() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
@@ -509,11 +509,13 @@ string color = "red")
 
                     if (App.Function == "智能书柜")
                     {
+                        /*
                         // 2021/7/30
                         // 如果 App.messageServerUrl 被增配上，则启动发送消息的任务
                         if (string.IsNullOrEmpty(old_messageServerUrl)
                             && string.IsNullOrEmpty(App.messageServerUrl) == false)
                             _ = App.StartMessageSendingAsync("配置界面启用消息发送");
+                        */
 
                         // _ = App.ConnectMessageServerAsync();
 
@@ -800,6 +802,10 @@ string color = "red")
             {
                 string filename = Path.Combine(WpfClientInfo.UserDir, "daily_wallpaper");
                 await DownloadBingWallPaperAsync(filename);
+
+                // 2021/11/16
+                if (PageMenu.MenuPage != null)
+                    PageMenu.MenuPage.InitWallpaper();
             }
             finally
             {
@@ -837,7 +843,6 @@ string color = "red")
                 {
                     using (WebClient client = new WebClient())
                     {
-
                         ProgressWindow progress = null;
                         App.Invoke(new Action(() =>
                         {
@@ -901,7 +906,7 @@ string color = "red")
                         */
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"DownloadBingWallPaperAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }

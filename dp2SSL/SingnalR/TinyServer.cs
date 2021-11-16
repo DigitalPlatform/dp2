@@ -62,7 +62,8 @@ namespace dp2SSL
         // 启动发送消息任务。此任务长期在后台运行
         public static void StartSendTask(CancellationToken token = default)
         {
-            if (_sendTask != null)
+            if (_sendTask != null 
+                && (_sendTask.Status == TaskStatus.Running || _sendTask.Status == TaskStatus.Created))
                 return;
 
             token.Register(() =>

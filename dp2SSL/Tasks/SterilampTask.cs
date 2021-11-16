@@ -68,12 +68,21 @@ namespace dp2SSL
             // 每日亮灯时间点
             string time_range = WpfClientInfo.Config.Get("tasks", "sterilamp", null);
             string weekdays = WpfClientInfo.Config.Get("tasks", "sterilamp_weekday", null);
+
+            /*
             List<string> results = new List<string>();
             if (time_range != null)
                 results.Add(time_range);
             if (weekdays != null)
                 results.Add(weekdays);
             return StringUtil.MakePathList(results, " ");
+            */
+            string result = "";
+            if (string.IsNullOrEmpty(time_range) == false)
+                result = time_range;
+            if (string.IsNullOrEmpty(weekdays) == false)
+                result += $" -weekday:{weekdays}";
+            return result;
         }
 
         // 启动每日定时亮灯过程

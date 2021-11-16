@@ -22,13 +22,16 @@ namespace dp2SSL
     /// </summary>
     public static class ShutdownTask
     {
+        // parameters:
+        //      time_list   返回时间点列表
+        //      weekdays    返回周内日期列表
         public static void ParseParam(
             string param,
             bool validate,
-            out string time_range,
+            out string time_list,
             out string weekdays)
         {
-            time_range = null;
+            time_list = null;
             weekdays = null;
 
             List<string> parameters = StringUtil.SplitList(param, " ");
@@ -44,12 +47,12 @@ namespace dp2SSL
                 }
                 else
                 {
-                    name = "range";
+                    name = "time";
                     value = parameter;
                 }
 
-                if (name == "range")
-                    time_range = value;
+                if (name == "time")
+                    time_list = value;
                 else if (name == "weekday")
                     weekdays = value;
                 else
@@ -61,9 +64,9 @@ namespace dp2SSL
             // 验证参数合法性
             if (validate)
             {
-                if (string.IsNullOrEmpty(time_range) == false)
+                if (string.IsNullOrEmpty(time_list) == false)
                 {
-                    var times = ParseTimeList(time_range);
+                    var times = ParseTimeList(time_list);
                 }
 
                 if (string.IsNullOrEmpty(weekdays) == false)
@@ -106,6 +109,21 @@ namespace dp2SSL
             // 每日关机时间点
             string time_range = WpfClientInfo.Config.Get("tasks", "shutdown", null);
             string weekdays = WpfClientInfo.Config.Get("tasks", "shutdown_weekday", null);
+
+            string result = "";
+            if (string.IsNullOrEmpty(time_range) == false)
+                result = time_range;
+            if (string.IsNullOrEmpty(weekdays) == false)
+                result += $" -weekday:{weekdays}";
+            return result;
+        }
+
+#if REMOVED
+        public static string GetPerdayTask()
+        {
+            // 每日关机时间点
+            string time_range = WpfClientInfo.Config.Get("tasks", "shutdown", null);
+            string weekdays = WpfClientInfo.Config.Get("tasks", "shutdown_weekday", null);
             List<string> results = new List<string>();
             if (string.IsNullOrEmpty(time_range) == false)
                 results.Add(time_range);
@@ -113,6 +131,7 @@ namespace dp2SSL
                 results.Add(weekdays);
             return StringUtil.MakePathList(results, " ");
         }
+#endif
 
         // 启动每日定时关机任务
         public static NormalResult StartPerdayTask()

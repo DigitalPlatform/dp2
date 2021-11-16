@@ -78,7 +78,7 @@ ref sessioninfo) == false)
                     {
                         OpacApplication.OutputImage(this,
                             Color.FromArgb(200, Color.Blue),
-                            "*",
+                            "*(未启用外部链接计数)",
                             nFontSize); // 星号表示尚未启用外部链接计数功能
                         this.Response.End();
                         return;

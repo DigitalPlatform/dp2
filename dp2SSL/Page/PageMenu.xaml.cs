@@ -217,7 +217,7 @@ namespace dp2SSL
 
         List<string> _temp_filenames = new List<string>();
 
-        void InitWallpaper()
+        public void InitWallpaper()
         {
             string filename = System.IO.Path.Combine(WpfClientInfo.UserDir,
                 "daily_wallpaper");
@@ -229,6 +229,7 @@ namespace dp2SSL
                     return;
             }
 
+            /*
             // 复制到一个临时文件
             string temp_filename = System.IO.Path.Combine(WpfClientInfo.UserTempDir, "~" + Guid.NewGuid().ToString());
             File.Copy(filename, temp_filename, true);
@@ -239,6 +240,16 @@ namespace dp2SSL
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
             bitmap.UriSource = new Uri(filename, UriKind.Absolute);
             bitmap.EndInit();
+            */
+
+            var bitmap = new BitmapImage();
+
+            {
+                var stream = new MemoryStream(File.ReadAllBytes(filename));
+                bitmap.BeginInit();
+                bitmap.StreamSource = stream;
+                bitmap.EndInit();
+            }
 
             var brush = new ImageBrush(bitmap);
             brush.Stretch = Stretch.UniformToFill;
@@ -253,7 +264,7 @@ namespace dp2SSL
                 {
                     File.Delete(filename);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"DeleteTempFiles() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }

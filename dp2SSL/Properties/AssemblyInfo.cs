@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.55")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.55.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.57")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.57.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -148,3 +148,5 @@ using System.Windows;
 //                          写入标签的对话框现在改为占满全部屏幕显示(以前版本是随机的显示位置)
 //      1.8.54 (2021/10/12) 针对 DisplayCount() 出现异常: “Type: System.InvalidOperationException, Message: 集合已修改；可能无法执行枚举操作。”加固了代码
 //      1.8.55 (2021/10/20) 减少了各种通讯探测更新的频率。书柜远程查询支持 SyncCount 用范围 0- 或 -100 这样的范围检索式
+//      1.8.56 (2021/11/15) 远程命令增加 set shutdown time 命令。配置参数画面增加了每日关机参数。配置参数对话框增加了放弃修改的“取消”按钮
+//      1.8.57 (2021/11/15) dp2ssl 更新 entiryframework 和 sqlite nuget 包版本(从 3.1.5)到 3.1.21

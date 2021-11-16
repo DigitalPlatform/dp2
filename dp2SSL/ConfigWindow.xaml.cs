@@ -61,6 +61,7 @@ namespace dp2SSL
             item.Value = "";
         }
 
+        // “确定”
         private void okButton_Click(object sender, RoutedEventArgs e)
         {
             string error = _configParams.Validate();
@@ -83,6 +84,12 @@ namespace dp2SSL
             {
                 WpfClientInfo.WriteErrorLog($"打开触摸键盘时出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
+        }
+
+        // “取消”
+        private void cancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

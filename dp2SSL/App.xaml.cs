@@ -563,6 +563,8 @@ namespace dp2SSL
             }
         }
 
+        static CancellationTokenSource _cancelSendingMessage = new CancellationTokenSource();
+
         public static async Task StartMessageSendingAsync(string message)
         {
             // TODO: 注意，从自助借还状态切换到智能书柜状态，需要补充执行以下一段
@@ -577,10 +579,23 @@ namespace dp2SSL
                 await ConnectMessageServerAsync();
 
                 await TinyServer.DeleteAllResultsetAsync();
-                TinyServer.StartSendTask(_cancelApp.Token);
+
+                _cancelSendingMessage?.Cancel();
+                _cancelSendingMessage = new CancellationTokenSource();
+                TinyServer.StartSendTask(_cancelSendingMessage.Token); // _cancelApp.Token
 
                 if (string.IsNullOrEmpty(message) == false)
                     PageShelf.TrySetMessage(null, message);    // "我这台智能书柜启动了！"
+            }
+            else
+            {
+                TinyServer.CloseConnection();
+                // stop send task
+                {
+                    _cancelSendingMessage?.Cancel();
+                    _cancelSendingMessage?.Dispose();
+                    _cancelSendingMessage = null;
+                }
             }
         }
 
@@ -610,11 +625,12 @@ namespace dp2SSL
         {
             try
             {
+                TinyServer.CloseConnection();
+
                 if (string.IsNullOrEmpty(messageServerUrl) == false)
                 {
                     //_messageServerConnected.Reset();
 
-                    TinyServer.CloseConnection();
                     var result = await TinyServer.ConnectAsync(messageServerUrl, messageUserName, messagePassword, "");
                     if (result.Value == -1)
                         WpfClientInfo.WriteLogInternal("error", $"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
@@ -957,6 +973,7 @@ namespace dp2SSL
             _cancelApp?.Cancel();
             _cancelProcessMonitor?.Cancel();
             _cancelRfid?.Cancel();
+            _cancelSendingMessage?.Cancel();
             ShelfData.CancelAll();
 
             // 最后关灯
@@ -1080,6 +1097,7 @@ namespace dp2SSL
             _cancelApp?.Cancel();
             _cancelProcessMonitor?.Cancel();
             _cancelRfid?.Cancel();
+            _cancelSendingMessage?.Cancel();
             ShelfData.CancelAll();
 
             WaitAllTaskFinish();

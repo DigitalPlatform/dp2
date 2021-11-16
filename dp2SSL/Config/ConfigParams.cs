@@ -12,9 +12,13 @@ using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 using DigitalPlatform.Core;
 using DigitalPlatform.Text;
+using System.Collections;
 
 namespace dp2SSL
 {
+    /// <summary>
+    /// 这是提供给 PropertySheet 进行编辑时使用的代表配置参数的内存模型
+    /// </summary>
     public class ConfigParams : DataErrorInfoImpl, INotifyPropertyChanged
     {
         ConfigSetting _config = null;
@@ -24,14 +28,37 @@ namespace dp2SSL
             _config = config;
         }
 
+        #region 记忆修改过的参数名
+
+        // 修改了的参数名
+        // name --> true
+        Hashtable _changedParams = new Hashtable();
+
+        bool IsParamChanged(string name)
+        {
+            if (_changedParams.ContainsKey(name))
+                return true;
+            return false;
+        }
+
+        #endregion
+
+        #region INotifyPropertyChanged 接口实现
+
         internal void OnPropertyChanged(string name)
         {
+            // 记载下来
+            _changedParams[name] = true;
+
             if (this.PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        #endregion
+
+        // 从 XML 文件中装载配置参数到内存
         public void LoadData()
         {
             SipServerUrl = _config.Get("global", "sipServerUrl", "");
@@ -39,15 +66,15 @@ namespace dp2SSL
             SipPassword = App.DecryptPasssword(_config.Get("global", "sipPassword", ""));
             SipEncoding = _config.Get("global", "sipEncoding", "utf-8");
             SipInstitution = _config.Get("global", "sipInstitution", "");
-            
+
             Dp2ServerUrl = _config.Get("global", "dp2ServerUrl", "");
             Dp2UserName = _config.Get("global", "dp2UserName", "");
             Dp2Password = App.DecryptPasssword(_config.Get("global", "dp2Password", ""));
-            
+
             RfidURL = _config.Get("global", "rfidUrl", "");
             FingerprintURL = _config.Get("global", "fingerprintUrl", "");
             FaceURL = _config.Get("global", "faceUrl", "");
-            
+
             FullScreen = _config.GetInt("global", "fullScreen", 1) == 1 ? true : false;
             AutoTrigger = _config.GetBoolean("ssl_operation", "auto_trigger", false);
             PatronInfoLasting = _config.GetBoolean("ssl_operation", "patron_info_lasting", false);
@@ -61,13 +88,16 @@ namespace dp2SSL
             CacheWorkerPasswordLength = _config.Get("global", "memory_worker_password", "无");
             AutoBackMainMenuSeconds = _config.GetInt("global", "autoback_mainmenu_seconds", -1);
             AutoShutdownParam = ShutdownTask.GetPerdayTask();
-            
+
             MessageServerUrl = _config.Get("global", "messageServerUrl", "");
             MessageUserName = _config.Get("global", "messageUserName", "");
             MessagePassword = App.DecryptPasssword(_config.Get("global", "messagePassword", ""));
+
+            _changedParams.Clear();
         }
 
-        public void SaveData()
+        // 将内存中(修改了的)配置参数保存回到 XML 文件
+        public string SaveData()
         {
             List<string> errors = new List<string>();
 
@@ -76,18 +106,18 @@ namespace dp2SSL
             _config.Set("global", "sipPassword", App.EncryptPassword(SipPassword));
             _config.Set("global", "sipEncoding", SipEncoding);
             _config.Set("global", "sipInstitution", SipInstitution);
+
             {
                 _config.Set("global", "dp2ServerUrl", Dp2ServerUrl);
-                App.CurrentApp.ClearChannelPool();
-            }
-            {
                 _config.Set("global", "dp2UserName", Dp2UserName);
-                App.CurrentApp.ClearChannelPool();
-            }
-            {
                 _config.Set("global", "dp2Password", App.EncryptPassword(Dp2Password));
-                App.CurrentApp.ClearChannelPool();
+
+                if (IsParamChanged("Dp2ServerUrl")
+                    || IsParamChanged("Dp2UserName")
+                    || IsParamChanged("Dp2Password"))
+                    App.CurrentApp.ClearChannelPool();
             }
+
             _config.Set("global", "rfidUrl", RfidURL);
             _config.Set("global", "fingerprintUrl", FingerprintURL);
             _config.Set("global", "faceUrl", FaceURL);
@@ -103,37 +133,54 @@ namespace dp2SSL
             _config.Set("global", "pos_print_style", PosPrintStyle);
             _config.Set("global", "memory_worker_password", CacheWorkerPasswordLength);
             _config.SetInt("global", "autoback_mainmenu_seconds", AutoBackMainMenuSeconds);
-            
-            var result = ShutdownTask.ChangePerdayTask(AutoShutdownParam);
-            if (result.Value == -1)
-                errors.Add(result.ErrorInfo);
+
+            if (IsParamChanged("AutoShutdownParam"))
+            {
+                var result = ShutdownTask.ChangePerdayTask(AutoShutdownParam);
+                if (result.Value == -1)
+                    errors.Add(result.ErrorInfo);
+            }
 
             {
                 _config.Set("global", "messageServerUrl", MessageServerUrl);
-                App.CurrentApp.ClearChannelPool();
-            }
-            {
                 _config.Set("global", "messageUserName", MessageUserName);
-                App.CurrentApp.ClearChannelPool();
-            }
-            {
                 _config.Set("global", "messagePassword", App.EncryptPassword(MessagePassword));
-                App.CurrentApp.ClearChannelPool();
+
+                if (IsParamChanged("MessageServerUrl")
+                    || IsParamChanged("MessageUserName")
+                    || IsParamChanged("MessagePassword"))
+                {
+                    // 2021/11/10 增加
+                    _ = App.StartMessageSendingAsync("配置界面修改了消息发送相关参数");
+                }
             }
 
             // 有错误
             if (errors.Count > 0)
             {
-
+                return (StringUtil.MakePathList(errors, "; "));
             }
+
+            return null;
         }
 
         public string Validate()
         {
             List<string> errors = new List<string>();
-            string error = ValidateProperty("AutoShutdownParam");
-            if (error != null)
-                errors.Add(error);
+            /*
+            List<string> names = new List<string>(_changedParams.Keys.Cast<string>());
+            if (names.IndexOf("AutoBackMainMenuSeconds") == -1)
+                names.Add("AutoBackMainMenuSeconds");
+            */
+            foreach (string name in _changedParams.Keys)
+            {
+                string error = ValidateProperty(name);  // "AutoShutdownParam"
+                if (error != null)
+                    errors.Add(error);
+            }
+
+            if (errors.Count == 0)
+                return null;
 
             return StringUtil.MakePathList(errors, "\r\n");
         }
@@ -701,6 +748,7 @@ Name = "休眠返回主菜单秒数",
 Description = "当没有操作多少秒以后，自动返回主菜单页面"
 )]
         [Category("全局")]
+        [Range(-1, 36000)]
         public int AutoBackMainMenuSeconds
         {
             get => _autoBackMainMenuSeconds;
