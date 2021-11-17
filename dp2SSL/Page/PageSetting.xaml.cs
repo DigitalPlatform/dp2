@@ -800,17 +800,46 @@ string color = "red")
             this.downloadDailyWallpaper.IsEnabled = false;
             try
             {
-                string filename = Path.Combine(WpfClientInfo.UserDir, "daily_wallpaper");
-                await DownloadBingWallPaperAsync(filename);
-
-                // 2021/11/16
-                if (PageMenu.MenuPage != null)
-                    PageMenu.MenuPage.InitWallpaper();
+                await DownloadDailyWallpaperAsync(this, false);
             }
             finally
             {
                 this.downloadDailyWallpaper.IsEnabled = true;
             }
+        }
+
+        static string _last_wallpaper_url = "";
+
+        // parameters:
+        //      detect_date 是否检测日期。检测日期是说同一天内不会重复下载
+        public static async Task DownloadDailyWallpaperAsync(PageSetting page,
+            bool detect_date)
+        {
+            string filename = Path.Combine(WpfClientInfo.UserDir, "daily_wallpaper");
+            
+            if (File.Exists(filename) && detect_date)
+            {
+                var last_time = File.GetLastWriteTime(filename);
+                string date = last_time.ToString("yyyyMMdd");
+                // 如果当天的文件已经下载过了，则跳过下载
+                if (date == DateTime.Now.ToString("yyyyMMdd"))
+                    return;
+            }
+            
+            var result = await DownloadBingWallPaperAsync(
+                page,
+                _last_wallpaper_url,
+                filename);
+            if (result.Value == -1 || result.Value == 0)
+                return;
+
+            _last_wallpaper_url = result.URL;
+            // 2021/11/16
+            App.Invoke(new Action(() =>
+            {
+                if (PageMenu.MenuPage != null)
+                    PageMenu.MenuPage.InitWallpaper();
+            }));
         }
 
 #if REMOVED
@@ -833,17 +862,30 @@ string color = "red")
             _dialogs.Add(dialog);
         }
 #endif
+        class DownloadBingWallPaperResult : NormalResult
+        {
+            // 本次下载所用的 URL
+            public string URL { get; set; }
+        }
 
         // https://blog.csdn.net/m0_37682004/article/details/82314055
-        Task DownloadBingWallPaperAsync(string filename)
+        // parameters:
+        //      exist_url   先前用过的 URL。如果本次探测到依然是这个 URL，则放弃下载图片文件
+        // result:
+        //      .Value  -1 出错; 0: 因 URL 没有变化，没有下载; 1: 成功下载
+        static async Task<DownloadBingWallPaperResult>
+            DownloadBingWallPaperAsync(
+            PageSetting page,
+            string exist_url,
+            string filename)
         {
-            return Task.Run(() =>
+            try
             {
-                try
+                using (WebClient client = new WebClient())
                 {
-                    using (WebClient client = new WebClient())
+                    ProgressWindow progress = null;
+                    if (page != null)
                     {
-                        ProgressWindow progress = null;
                         App.Invoke(new Action(() =>
                         {
                             progress = new ProgressWindow();
@@ -856,17 +898,26 @@ string color = "red")
                             };
                             progress.Show();
                         }));
+                    }
 
-                        try
+                    try
+                    {
+                        byte[] bytes = await client.DownloadDataTaskAsync("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN");
+                        dynamic obj = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
+                        string url = obj.images[0].url;
+
+                        if (exist_url == url)
+                            return new DownloadBingWallPaperResult { Value = 0 };
+
+                        url = $"https://cn.bing.com{url}";
+                        await client.DownloadFileTaskAsync(url, filename);
+
+                        // 2021/11/17
+                        File.SetLastWriteTime(filename, DateTime.Now);
+
+                        if (progress != null)
                         {
-                            byte[] bytes = client.DownloadData("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN");
-                            dynamic obj = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
-                            string url = obj.images[0].url;
-                            url = $"https://cn.bing.com{url}";
-                            client.DownloadFile(url, filename);
-
-                            // _dialogs.Add(progress);
-                            MemoryDialog(progress);
+                            page.MemoryDialog(progress);
 
                             App.Invoke(new Action(() =>
                             {
@@ -875,12 +926,20 @@ string color = "red")
                                 progress = null;
                             }));
                         }
-                        catch (Exception ex)
-                        {
-                            WpfClientInfo.WriteErrorLog($"DownloadBingWallPaperAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
 
-                            // _dialogs.Add(progress);
-                            MemoryDialog(progress);
+                        return new DownloadBingWallPaperResult
+                        {
+                            Value = 1,
+                            URL = url,
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        WpfClientInfo.WriteErrorLog($"DownloadBingWallPaperAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                        if (progress != null)
+                        {
+                            page.MemoryDialog(progress);
 
                             App.Invoke(new Action(() =>
                             {
@@ -889,28 +948,37 @@ string color = "red")
                                 progress = null;
                             }));
                         }
-                        finally
+
+                        return new DownloadBingWallPaperResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"下载 bing 壁纸过程出现异常: {ex.Message}",
+                            ErrorCode = ex.GetType().ToString(),
+                        };
+                    }
+                    finally
+                    {
+                        if (progress != null)
                         {
                             App.Invoke(new Action(() =>
                             {
-                                if (progress != null)
-                                    progress.Close();
+                                progress.Close();
+                                page.ForgetDialog(progress);
                             }));
                         }
-
-                        /*
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            MessageBox.Show(message);
-                        }));
-                        */
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"DownloadBingWallPaperAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return new DownloadBingWallPaperResult
                 {
-                    WpfClientInfo.WriteErrorLog($"DownloadBingWallPaperAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                }
-            });
+                    Value = -1,
+                    ErrorInfo = $"DownloadBingWallPaperAsync() 出现异常: {ex.Message}",
+                    ErrorCode = ex.GetType().ToString(),
+                };
+            }
         }
 
         private void AddShortcut_Click(object sender, RoutedEventArgs e)

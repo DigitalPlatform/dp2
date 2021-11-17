@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Collections;
 
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 using DigitalPlatform.Core;
 using DigitalPlatform.Text;
-using System.Collections;
 
 namespace dp2SSL
 {
@@ -88,6 +88,7 @@ namespace dp2SSL
             CacheWorkerPasswordLength = _config.Get("global", "memory_worker_password", "无");
             AutoBackMainMenuSeconds = _config.GetInt("global", "autoback_mainmenu_seconds", -1);
             AutoShutdownParam = ShutdownTask.GetPerdayTask();
+            AutoUpdateWallpaper = _config.GetBoolean("global", "auto_update_wallpaper", false);
 
             MessageServerUrl = _config.Get("global", "messageServerUrl", "");
             MessageUserName = _config.Get("global", "messageUserName", "");
@@ -140,6 +141,8 @@ namespace dp2SSL
                 if (result.Value == -1)
                     errors.Add(result.ErrorInfo);
             }
+
+            _config.SetBoolean("global", "auto_update_wallpaper", AutoUpdateWallpaper);
 
             {
                 _config.Set("global", "messageServerUrl", MessageServerUrl);
@@ -785,6 +788,30 @@ Description = "每日自动执行关机的时间定义。例如 17:30,18:30"
             }
         }
         private string _autoShutdownParam;
+
+
+        // 2021/11/17
+        // 默认值 true
+        [Display(
+Order = 16,
+Name = "每日自动更新壁纸",
+Description = "是否每日自动更新一次壁纸"
+)]
+        [Category("全局")]
+        public bool AutoUpdateWallpaper
+        {
+            get => _autoUpdateWallpaper;
+            set
+            {
+                if (_autoUpdateWallpaper != value)
+                {
+                    _autoUpdateWallpaper = value;
+                    OnPropertyChanged("AutoUpdateWallpaper");
+                }
+            }
+        }
+        private bool _autoUpdateWallpaper;
+
 
         /*
         // 默认值 空

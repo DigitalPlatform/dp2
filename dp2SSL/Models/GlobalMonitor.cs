@@ -36,6 +36,12 @@ namespace dp2SSL.Models
 
         static AutoResetEvent _eventMonitor = new AutoResetEvent(false);
 
+        // 最近一次下载壁纸的时刻
+        static DateTime _lastWallpaperTime = DateTime.MinValue;
+        // 检查壁纸的时间间隔
+        static TimeSpan _wallpaperPeriod = TimeSpan.FromMinutes(12 * 60);
+
+
         // 激活 Monitor 任务
         public static void ActivateMonitor()
         {
@@ -179,6 +185,16 @@ namespace dp2SSL.Models
                             }
 
                             _lastUpdateTime = DateTime.Now;
+                        }
+
+                        // 下载新的每日壁纸
+                        if (_lastWallpaperTime == DateTime.MinValue)
+                            _lastWallpaperTime = DateTime.Now;
+
+                        if (App.AutoUpdateWallpaper
+                            && DateTime.Now - _lastWallpaperTime > _wallpaperPeriod)
+                        {
+                            await PageSetting.DownloadDailyWallpaperAsync(null, true);
                         }
 
                         // 每隔一段时间写入紧凑日志一次

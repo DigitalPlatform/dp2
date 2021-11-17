@@ -1446,6 +1446,17 @@ namespace dp2SSL
             }
         }
 
+        public static bool AutoUpdateWallpaper
+        {
+            get
+            {
+                if (WpfClientInfo.Config == null)
+                    return true;
+
+                return WpfClientInfo.Config.GetBoolean("global", "auto_update_wallpaper", false);
+            }
+        }
+
         public static bool ProcessMonitor
         {
             get
