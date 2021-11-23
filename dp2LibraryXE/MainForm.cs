@@ -5971,6 +5971,38 @@ MessageBoxDefaultButton.Button2);
 
 
         #endregion
+
+        // 2021/11/19
+        // 配置消息服务器参数
+        private void MenuItem_configMessageServer_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strDataDir = this.LibraryDataDir;
+            if (string.IsNullOrEmpty(strDataDir))
+            {
+                strError = "尚未指定 dp2library 数据目录";
+                goto ERROR1;
+            }
+
+            string strLibraryXmlFileName = Path.Combine(strDataDir, "library.xml");
+            if (File.Exists(strLibraryXmlFileName) == false)
+            {
+                strError = "配置文件 '" + strLibraryXmlFileName + "' 不存在，无法进行进一步配置";
+                goto ERROR1;
+            }
+
+            using (dp2MServerDialog dlg = new dp2MServerDialog())
+            {
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.LibraryXmlFilePath = strLibraryXmlFileName;
+                dlg.ShowDialog(this);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 
     /*

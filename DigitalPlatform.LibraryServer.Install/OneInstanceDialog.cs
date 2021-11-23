@@ -1346,9 +1346,35 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
+        // 配置消息服务器
         private void ToolStripMenuItem_configMessageServer_Click(object sender, EventArgs e)
         {
+            string strError = "";
 
+            string strDataDir = this.textBox_dataDir.Text;
+            if (string.IsNullOrEmpty(strDataDir))
+            {
+                strError = "尚未指定数据目录";
+                goto ERROR1;
+            }
+
+            string strLibraryXmlFileName = Path.Combine(strDataDir, "library.xml");
+            if (File.Exists(strLibraryXmlFileName) == false)
+            {
+                strError = "配置文件 '" + strLibraryXmlFileName + "' 不存在，无法进行进一步配置";
+                goto ERROR1;
+            }
+
+            using (dp2MServerDialog dlg = new dp2MServerDialog())
+            {
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.LibraryXmlFilePath = strLibraryXmlFileName;
+                dlg.ShowDialog(this);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
     }
 }

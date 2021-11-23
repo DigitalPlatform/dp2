@@ -498,7 +498,7 @@ namespace dp2SSL
                 else
                     item.PII = oi + "." + barcode;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"SetPII() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -644,6 +644,70 @@ namespace dp2SSL
                 {
                     Value = -1,
                     ErrorInfo = $"DetectNetwork() 出现异常：{ex.Message}",
+                    ErrorCode = ex.GetType().ToString(),
+                };
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                App.CurrentApp.ReturnChannel(channel);
+            }
+        }
+
+        public class GetVersionResult : NormalResult
+        {
+            public string Version { get; set; }
+            public string ServerUid { get; set; }
+        }
+
+        // 2021/11/22
+        public static GetVersionResult GetVersion()
+        {
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(5);  // 设置 5 秒超时，避免等待太久
+            try
+            {
+                int nRedoCount = 0;
+            REDO:
+                long lRet = channel.GetVersion(null,
+                    out string version,
+                    out string uid,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    // 一次重试机会
+                    if (lRet == -1
+                        && (channel.ErrorCode == ErrorCode.RequestCanceled || channel.ErrorCode == ErrorCode.RequestError)
+                        && nRedoCount < 2)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
+
+                    return new GetVersionResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString(),
+                    };
+                }
+
+                return new GetVersionResult
+                {
+                    Value = 1,
+                    Version = version,
+                    ServerUid = uid,
+                };
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"GetVersion() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new GetVersionResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"GetVersion() 出现异常：{ex.Message}",
                     ErrorCode = ex.GetType().ToString(),
                 };
             }
@@ -1518,6 +1582,8 @@ AccountItem item)
         {
             public string Xml { get; set; }
             public string LibraryName { get; set; }
+            // 2021/11/22
+            public string ServerUid { get; set; }
 
             public override string ToString()
             {
@@ -1530,6 +1596,7 @@ AccountItem item)
         {
             string strOutputInfo = "";
             string libraryName = "";
+            string serverUid = "";
 
             LibraryChannel channel = App.CurrentApp.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
@@ -1556,6 +1623,12 @@ AccountItem item)
                     "library",
                     "name",
                     out libraryName,
+                    out strError);
+
+                // 2021/11/22
+                lRet = channel.GetVersion(null,
+                    out string version,
+                    out serverUid,
                     out strError);
             }
             finally
@@ -1592,14 +1665,19 @@ AccountItem item)
                 strOutputInfo);
 
             WpfClientInfo.Config.Set("cache",
-    "libraryName",
-    libraryName);
+                "libraryName",
+                libraryName);
+
+            WpfClientInfo.Config.Set("cache",
+                "serverUid",
+                serverUid);
 
             return new GetRfidCfgResult
             {
                 Value = 1,
                 Xml = strOutputInfo,
                 LibraryName = libraryName,
+                ServerUid = serverUid,
             };
         }
 
@@ -1618,7 +1696,10 @@ AccountItem item)
                 Xml = value,
                 LibraryName = WpfClientInfo.Config.Get("cache",
     "libraryName",
-    null)
+    null),
+                ServerUid = WpfClientInfo.Config.Get("cache",
+    "serverUid",
+    null),
             };
         }
 

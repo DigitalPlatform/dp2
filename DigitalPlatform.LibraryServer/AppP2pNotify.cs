@@ -81,25 +81,103 @@ userNameAndUrl);
         {
             if (string.IsNullOrEmpty(_mserverUrl)
                 || string.IsNullOrEmpty(_mserverUserName))
+            {
+                if (_connection != null)
+                {
+                    _connection.CloseConnection();
+                    _connection.AddMessage -= _connection_AddMessage;
+                    _connection = null;
+                }
+
                 return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = "点对点消息功能尚未启用",
                     ErrorCode = "notEnabled"
                 };
+            }
 
             if (_connection == null)
+            {
                 _connection = new P2PConnection();
+                _connection.AddMessage += _connection_AddMessage;
+            }
 
             if (_connection.IsDisconnected)
             {
-                return await _connection.ConnectAsync(_mserverPassword,
+                return await _connection.ConnectAsync(_mserverUrl,
     _mserverUserName,
     _mserverPassword,
     "");
             }
 
             return new NormalResult();
+        }
+
+        private void _connection_AddMessage(object sender, AddMessageEventArgs e)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (e.Action == "create")
+                    {
+                        foreach (var message in e.Records)
+                        {
+                            // 响应 dp2ssl 发来的 hello 消息
+                            // "gn:_62637a12-1965-4876-af3a-fc1d3009af8a"
+                            if (message.groups[0] == $"gn:_dp2library_{this.UID}"
+                                && message.data == "hello, dp2library")
+                            {
+                                var message_sender = message.creator;
+                                await _connection.SetMessageAsyncLite(new SetMessageRequest {
+                                    Action = "create",
+                                    Records = new List<MessageRecord> {
+                                        new MessageRecord{ 
+                                            groups = new string [] { message.groups[0] },
+                                            subjects = new string [] { "hello" },
+                                            data = $"hello, {message_sender}",
+                                        }
+                                    },
+                                    Style = "dontNotifyMe",
+                                });
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.WriteErrorLog($"_connection_AddMessage() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
+            });
+        }
+
+        public bool MessageServerConnected
+        {
+            get
+            {
+                return _connection != null;
+            }
+        }
+
+        public Task<SetMessageResult> SendMessageAsync(string[] groups,
+            string subject,
+            string content)
+        {
+            if (_connection == null)
+                return Task.FromResult<SetMessageResult>(new SetMessageResult());
+
+            SetMessageRequest request = new SetMessageRequest("create",
+                "dontNotifyMe",
+                new List<MessageRecord> {
+                        new MessageRecord {
+                            groups= groups,
+                            subjects = new string [] { subject },
+                            data = content,
+                            expireTime = DateTime.Now + TimeSpan.FromMinutes(5) // 5 分钟以后消息自动失效
+                        }
+                });
+            return _connection.SetMessageAsyncLite(request);
         }
     }
 }

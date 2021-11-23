@@ -62,7 +62,7 @@ namespace dp2SSL
         // 启动发送消息任务。此任务长期在后台运行
         public static void StartSendTask(CancellationToken token = default)
         {
-            if (_sendTask != null 
+            if (_sendTask != null
                 && (_sendTask.Status == TaskStatus.Running || _sendTask.Status == TaskStatus.Created))
                 return;
 
@@ -504,9 +504,8 @@ TaskScheduler.Default);
             _ = LoadGapMessageAsync();
         }
 
-#if REMOVED
         // 准备群名列表
-        public static async Task<NormalResult> PrepareGroupNames()
+        public static async Task<NormalResult> PrepareGroupNamesAsync()
         {
             if (string.IsNullOrEmpty(_userName))
                 throw new ArgumentException("_userName 为空");
@@ -526,6 +525,23 @@ TaskScheduler.Default);
                 };
 
             _groups = new List<string>(result.Users[0].groups);
+            _userId = result.Users[0].id;
+
+            // 对 dp2library 发出一条 hello 消息
+            var send_result = await SetMessageAsync(new SetMessageRequest
+            {
+                Action = "create",
+                Records = new List<MessageRecord> {
+                    new MessageRecord{
+                        groups = new string [] { $"gn:_dp2library_{App.ServerUid}" },
+                        subjects = new string [] { "hello" },
+                        data = "hello, dp2library",
+                    }
+                },
+                Style = "dontNotifyMe"
+            });
+            if (send_result.Value == -1)
+                WpfClientInfo.WriteErrorLog($"尝试给 dp2library 发送 hello 消息时出错: {send_result.ErrorInfo}");
 
             return new NormalResult();
         }
@@ -541,7 +557,16 @@ TaskScheduler.Default);
                 return _groups.ToArray();
             }
         }
-#endif
+
+        // 消息用户对应的 ID
+        static string _userId = null;
+        public static string UserID
+        {
+            get
+            {
+                return _userId;
+            }
+        }
 
         public static string GetExceptionText(AggregateException exception)
         {
@@ -584,6 +609,15 @@ IList<MessageRecord> messages)
             {
                 foreach (var message in messages)
                 {
+                    // dp2library 操作日志通知消息
+                    // "gn:_62637a12-1965-4876-af3a-fc1d3009af8a"
+                    if (message.groups[0] == $"gn:_dp2library_{App.ServerUid}")
+                    {
+                        WpfClientInfo.WriteInfoLog($"收到 dp2library 操作日志变化通知 data={message.data}");
+                        ShelfData.ActivateReplication();
+                        continue;
+                    }
+
                     // TODO: 忽略自己发出的消息?
                     if (message.data.StartsWith($"@{_userName} ")
                         && _instantMessageIDs.ContainsKey(message.id) == false)

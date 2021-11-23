@@ -93,6 +93,8 @@
             this.toolStripStatusLabel_update = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.MenuItem_configMessageServer = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -288,6 +290,8 @@
             this.toolStripSeparator10,
             this.MenuItem_dp2library_setupMongoDB,
             this.MenuItem_configLibraryXmlMongoDB,
+            this.toolStripSeparator13,
+            this.MenuItem_configMessageServer,
             this.toolStripSeparator9,
             this.MenuItem_startIISExpress,
             this.MenuItem_iisExpressVersion,
@@ -579,6 +583,18 @@
             this.webBrowser1.Size = new System.Drawing.Size(682, 417);
             this.webBrowser1.TabIndex = 7;
             // 
+            // MenuItem_configMessageServer
+            // 
+            this.MenuItem_configMessageServer.Name = "MenuItem_configMessageServer";
+            this.MenuItem_configMessageServer.Size = new System.Drawing.Size(508, 40);
+            this.MenuItem_configMessageServer.Text = "配置消息服务器参数";
+            this.MenuItem_configMessageServer.Click += new System.EventHandler(this.MenuItem_configMessageServer_Click);
+            // 
+            // toolStripSeparator13
+            // 
+            this.toolStripSeparator13.Name = "toolStripSeparator13";
+            this.toolStripSeparator13.Size = new System.Drawing.Size(505, 6);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -671,6 +687,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_buildGreenUpdatePack;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_updateByGreenUpdatePack;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator13;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_configMessageServer;
     }
 }
 

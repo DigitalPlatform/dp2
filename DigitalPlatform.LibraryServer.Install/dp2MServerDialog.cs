@@ -14,12 +14,16 @@ namespace DigitalPlatform.LibraryServer
 {
     public partial class dp2MServerDialog : Form
     {
-        // library.xml
+        // library.xml 的 XmlDocument 对象(注: 调用本对话框前，CfgDom 和 LibraryXmlFilePath 二者设置其一即可)
         public XmlDocument CfgDom { get; set; }
+
+        // library.xml 文件全路径(注: 调用本对话框前，CfgDom 和 LibraryXmlFilePath 二者设置其一即可)
+        public string LibraryXmlFilePath { get; set; }
 
         // dp2mserver 超级用户账户名
         string ManagerUserName { get; set; }
         string ManagerPassword { get; set; }
+        // bool ManagerLoggedIn { get; set; }  // 超级用户是否登录过？
 
         public dp2MServerDialog()
         {
@@ -59,6 +63,9 @@ namespace DigitalPlatform.LibraryServer
 
             if (SaveToCfgDom() == false)
                 return;
+
+            if (string.IsNullOrEmpty(this.LibraryXmlFilePath) == false)
+                this.CfgDom.Save(this.LibraryXmlFilePath);
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
@@ -119,7 +126,12 @@ namespace DigitalPlatform.LibraryServer
                     GetPassword(),
                     "");
                 if (connect_result.Value == -1)
-                    return false;
+                {
+                    // return false;
+                    strError = $"用户 '{GetUserName()}' 登录失败: {connect_result.ErrorInfo}";
+                    goto ERROR1;
+                }
+
                 {
                     CancellationToken cancel_token = _cancel.Token;
 
@@ -225,12 +237,29 @@ namespace DigitalPlatform.LibraryServer
             this.textBox_password.Text = "";
         }
 
-        // 从 CfgDom 中填充信息到控件
+        void PrepareCfgDom()
+        {
+            if (string.IsNullOrEmpty(this.LibraryXmlFilePath) == false)
+            {
+                this.CfgDom = new XmlDocument();
+                this.CfgDom.Load(this.LibraryXmlFilePath);
+            }
+            else
+            {
+                if (this.CfgDom == null)
+                    throw new ArgumentException("dp2MServerDialog::CfgDom 不应为空");
+            }
+        }
+
+        // 从 CfgDom 或 LibraryXmlFileName 填充信息到控件
+        // exception: 可能会抛出 ArgumentException 或其它异常
         void FillInfo()
         {
-            XmlDocument dom = this.CfgDom;
+            PrepareCfgDom();
 
-            XmlElement element = dom.DocumentElement.SelectSingleNode("dp2mserver") as XmlElement;
+            var dom = this.CfgDom;
+
+            XmlElement element = dom.DocumentElement.SelectSingleNode("messageServer") as XmlElement;
             if (element == null)
             {
                 element = dom.CreateElement("messageServer");
@@ -246,6 +275,7 @@ namespace DigitalPlatform.LibraryServer
 
                 string strPassword = Cryptography.Decrypt(element.GetAttribute("password"), EncryptKey);
                 this.textBox_password.Text = strPassword;
+                this.textBox_confirmManagePassword.Text = strPassword;
             }
         }
 
@@ -254,7 +284,7 @@ namespace DigitalPlatform.LibraryServer
             StringBuilder text = new StringBuilder();
             XmlDocument dom = CfgDom;
 
-            XmlElement element = dom.DocumentElement.SelectSingleNode("dp2mserver") as XmlElement;
+            XmlElement element = dom.DocumentElement.SelectSingleNode("messageServer") as XmlElement;
             if (element == null)
                 return "";
 
@@ -330,12 +360,25 @@ namespace DigitalPlatform.LibraryServer
 
         private async void button_createUser_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
             if (this.textBox_confirmManagePassword.Text != this.textBox_password.Text)
             {
-                MessageBox.Show(this, "密码 和 确认密码 不一致，请重新输入");
-                return;
+                strError = "密码 和 确认密码 不一致，请重新输入";
+                goto ERROR1;
             }
-            await CreateLibraryUser();
+
+            var result = await CreateLibraryUser();
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+
+            MessageBox.Show(this, $"账户 {this.textBox_userName.Text} 在服务器 {this.textBox_url.Text} 上创建成功");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         /*
@@ -353,6 +396,7 @@ namespace DigitalPlatform.LibraryServer
         }
         */
 
+
         /*
 dp2library 服务器在 dp2mserver 中开辟的账号
 命名：dp2library_图书馆英文或中文简称（如dp2library_cctb,dp2library_tjsyzx）
@@ -362,7 +406,7 @@ dp2library 服务器在 dp2mserver 中开辟的账号
 群组：gn:_xxx|-n (xxx 为 dp2library 服务器 UID)
          * */
 
-        async Task<bool> CreateLibraryUser()
+        async Task<NormalResult> CreateLibraryUser()
         {
             string strError = "";
             EnableControls(false);
@@ -370,21 +414,68 @@ dp2library 服务器在 dp2mserver 中开辟的账号
             {
                 P2PConnection connection = new P2PConnection();
 
-                string userName = "supervisor";
-                string password = "";
+                string userName = this.ManagerUserName;
+                string password = this.ManagerPassword;
+
+                if (string.IsNullOrEmpty(userName))
+                    userName = "supervisor";
+
+                string login_error = "";
+
+            REDO:
+                // 询问超级用户的用户名和密码
+                if (string.IsNullOrEmpty(login_error) == false
+                    || string.IsNullOrEmpty(userName) == true)
+                {
+                    using (ConfirmSupervisorDialog dlg = new ConfirmSupervisorDialog())
+                    {
+                        // FontUtil.AutoSetDefaultFont(dlg);
+                        dlg.Font = this.Font;
+                        dlg.Text = "以超级用户身份登录";
+                        dlg.ServerUrl = this.textBox_url.Text;
+                        dlg.Comment = "为在 dp2mserver 服务器上创建图书馆账户，请使用超级用户登录\r\n" + login_error;
+                        dlg.UserName = userName;
+                        dlg.Password = password;
+                        dlg.PhoneNumberVisible = false;
+                        dlg.StartPosition = FormStartPosition.CenterScreen;
+
+                        dlg.ShowDialog(this);
+
+                        if (dlg.DialogResult == DialogResult.Cancel)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "放弃创建"
+                            };
+
+                        userName = dlg.UserName;
+                        password = dlg.Password;
+                    }
+                }
 
                 var connect_result = await connection.ConnectAsync(GetUrl(),
     userName,
     password,
     "");
-                if (connect_result.Value == -1)
-                    return false;
+                if (connect_result.Value == -1
+                    && connect_result.ErrorCode == "Unauthorized")
+                {
+                    // 登录失败
+                    if (string.IsNullOrEmpty(login_error))
+                        login_error = "首次登录";
+                    else
+                        login_error = connect_result.ErrorInfo;
+                    goto REDO;
+                }
 
-                /*
-                    // 记忆用过的超级用户名和密码
-                    this.ManagerUserName = connection.UserName;
-                    this.ManagerPassword = connection.Password;
-                */
+                if (connect_result.Value == -1)
+                    return connect_result;
+
+                login_error = "";
+
+                // 记忆用过的超级用户名和密码
+                this.ManagerUserName = userName;
+                this.ManagerPassword = password;
 
                 // 图书馆名字
                 string libraryName = GetLibraryName();
@@ -402,7 +493,7 @@ dp2library 服务器在 dp2mserver 中开辟的账号
                 user.password = this.textBox_password.Text;
                 user.rights = "";
                 user.duty = "";
-                user.groups = new string[] { $"gn:_{libraryUID}|-n" };
+                user.groups = new string[] { $"gn:_dp2library_{libraryUID}" };   // |-n
                 user.department = libraryName;
                 user.binding = "ip:[current]";
                 user.comment = "dp2library 专用账号";
@@ -420,7 +511,7 @@ dp2library 服务器在 dp2mserver 中开辟的账号
                     goto ERROR1;
                 }
 
-                return true;
+                return new NormalResult { Value = 0 };
             }
             /*
             catch (MessageException ex)
@@ -456,11 +547,17 @@ dp2library 服务器在 dp2mserver 中开辟的账号
                 EnableControls(true);
             }
         ERROR1:
+            /*
             this.Invoke(new Action(() =>
             {
                 MessageBox.Show(this, strError);
             }));
-            return false;
+            */
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
         }
 
 #if NO
@@ -520,7 +617,7 @@ dp2library 服务器在 dp2mserver 中开辟的账号
          * */
         public string GetLibraryUid()
         {
-            return this.CfgDom.DocumentElement.SelectSingleNode("root/@uid")?.Value;
+            return this.CfgDom.DocumentElement.GetAttribute("uid");
         }
 
     }

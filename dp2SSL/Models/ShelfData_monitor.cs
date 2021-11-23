@@ -37,9 +37,13 @@ namespace dp2SSL
         static DateTime _lastDetectTime;
 
         // 两次零星同步之间的间隔
+        // 当启用了 dp2library 操作日志通知功能以后，这个间隔可以延长
         static TimeSpan _replicatePeriod = TimeSpan.FromMinutes(10);
         // 最近一次零星同步的时间
         static DateTime _lastReplicateTime;
+        // 2021/11/23
+        // 立即同步一次
+        static bool _replicateOnce = false;
 
         static Task _monitorTask = null;
 
@@ -84,6 +88,18 @@ namespace dp2SSL
             _eventMonitor.Set();
         }
 
+        // 激活，立即同步一次读者信息
+        public static void ActivateReplication()
+        {
+            var long_period = TimeSpan.FromMinutes(60);
+            if (_replicatePeriod < long_period)
+            {
+                WpfClientInfo.WriteInfoLog($"_replicatePeriod 从 {_replicatePeriod} 变为 {long_period}");
+                _replicatePeriod = long_period;    // 延长间隔
+            }
+            _replicateOnce = true;
+            ActivateMonitor();
+        }
 
         // 启动一般监控任务
         public static void StartMonitorTask()
@@ -193,8 +209,10 @@ namespace dp2SSL
                             else
                             {
                                 // 进行零星同步
-                                if (DateTime.Now - _lastReplicateTime > _replicatePeriod)
+                                if (_replicateOnce
+                                    || DateTime.Now - _lastReplicateTime > _replicatePeriod)
                                 {
+                                    _replicateOnce = false;
                                     // string startDate = LoadStartDate();
 
                                     // testing

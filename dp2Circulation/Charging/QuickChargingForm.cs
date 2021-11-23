@@ -2493,7 +2493,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         {
             if (string.IsNullOrEmpty(strText))
                 return "";
-            if (strText.IndexOf(":") == -1)
+            if (strText.IndexOf(":") == -1
+                || strText.StartsWith("PQR:"))  // 2021/11/22
                 return strText;
             Hashtable table = StringUtil.ParseParameters(strText, ',', ':');
             string strBarcode = GetValue(table, "pii");

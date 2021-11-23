@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.49.*")]
-[assembly: AssemblyFileVersion("3.49.0.0")]
+[assembly: AssemblyVersion("3.50.*")]
+[assembly: AssemblyFileVersion("3.50.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -132,3 +132,4 @@ using System.Runtime.InteropServices;
 //                  MARC 编辑器中“重新排序字段”功能没有设置 Changed = true 的 bug (种册窗在字段重新排序后保存和全部保存按钮没有变成 Enabled)已经修正
 // 3.48 2021/11/2 框架窗口增加了“掌纹识别”浮动窗口，用于观察掌纹图像。读者窗登记掌纹对话框增加了掌纹图像显示区域
 // 3.49 2021/11/8 “掌纹识别”浮动窗口功能正式发布
+// 3.50 2021/11/22 修正快捷出纳窗中 textbox 输入 PQR: (读者证二维码) 无法识别的 bug

@@ -1187,6 +1187,7 @@ namespace DigitalPlatform.LibraryServer
                 || strAction == "delete")
             {
                 nRet = VerifyReadWriteSet(sessioninfo,
+                    element_names,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -2179,6 +2180,7 @@ strLibraryCode);    // 读者所在的馆代码
         // 检查用户权限中的 getreaderinfo:xxx 和 setreaderinfo:xxx 之间的元素集包含关系
         // TODO: 可以考虑在 xxx 中增加一个 s_bypassverifyset 来故意越过这种检查
         static int VerifyReadWriteSet(SessionInfo sessioninfo,
+            string[] full_element_names,
             out string strError)
         {
             // return:
@@ -2201,7 +2203,20 @@ strLibraryCode);    // 读者所在的馆代码
                     strError = $"用户权限定义不合法。当前用户对读者记录的可写元素集中下列部分元素越出了可读元素集范围: '{string.Join("|", overflow_names)}'。请修改账户权限，让可读元集完全包含可写元素集";
                     return -1;
                 }
+            }
 
+            // 2021/11/23
+            if (string.IsNullOrEmpty(write_level) == true
+    && string.IsNullOrEmpty(read_level) == false)
+            {
+                var write_names = new List<string>(full_element_names);
+                var read_names = GetElementNames(read_level);
+                var overflow_names = write_names.Except(read_names).ToArray();
+                if (overflow_names.Count() > 0)
+                {
+                    strError = $"用户权限定义不合法。当前用户对读者记录的可写元素集(完全集)中下列部分元素越出了可读元素集范围: '{string.Join("|", overflow_names)}'。请修改账户权限，让可读元集完全包含可写元素集";
+                    return -1;
+                }
             }
 
             return 0;
@@ -7006,7 +7021,7 @@ out strError);
 
                         nRet = LibraryServerUtil.MatchUserPassword(
                             account.PasswordType,
-                            strPassword, 
+                            strPassword,
                             account.Password,
                             true, out strError);
                         if (nRet == -1)

@@ -374,6 +374,7 @@ namespace dp2SSL
                     var result = LibraryChannelUtil.GetRfidCfg();
                     // WpfClientInfo.WriteInfoLog($"GetRfidCfg() return {result.ToString()}");
                     LibraryName = result.LibraryName;
+                    ServerUid = result.ServerUid;
                 }
                 catch (Exception ex)
                 {
@@ -420,6 +421,13 @@ namespace dp2SSL
                 _libraryName = value;
                 PageMenu.MenuPage.SetLibraryName(value);
             }
+        }
+
+        static string _serverUid;
+        public static string ServerUid
+        {
+            get { return _serverUid; }
+            set { _serverUid = value; }
         }
 
         /*
@@ -621,6 +629,7 @@ namespace dp2SSL
         static ManualResetEvent _messageServerConnected = new ManualResetEvent(false);
         */
 
+        // 首次连接到消息服务器
         public static async Task ConnectMessageServerAsync()
         {
             try
@@ -636,11 +645,9 @@ namespace dp2SSL
                         WpfClientInfo.WriteLogInternal("error", $"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
                     else
                     {
-                        /*
-                        var prepare_result = await TinyServer.PrepareGroupNames();
+                        var prepare_result = await TinyServer.PrepareGroupNamesAsync();
                         if (prepare_result.Value == -1)
                             WpfClientInfo.WriteErrorLog($"准备群名失败: {prepare_result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={prepare_result.ErrorCode}");
-                            */
                     }
                     //_messageServerConnected.Set();
                 }
@@ -680,11 +687,10 @@ namespace dp2SSL
                 }
                 else
                 {
-                    /*
-                    var prepare_result = await TinyServer.PrepareGroupNames();
+                    var prepare_result = await TinyServer.PrepareGroupNamesAsync();
                     if (prepare_result.Value == -1)
                         WpfClientInfo.WriteErrorLog($"准备群名失败: {prepare_result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={prepare_result.ErrorCode}");
-                        */
+
                     return true;
                 }
             }

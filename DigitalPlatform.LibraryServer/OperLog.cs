@@ -1202,6 +1202,22 @@ namespace DigitalPlatform.LibraryServer
                     this.App.operLogThread.AddOperLog(dom);
             }
 
+            // 2021/11/21
+            // 向 dp2mserver 发送操作日志通知
+            if (this.App != null && this.App.MessageServerConnected)
+            {
+                string strOperation = DomUtil.GetElementText(dom.DocumentElement,
+"operation");
+                string strAction = DomUtil.GetElementText(dom.DocumentElement,
+"action");
+                string uid = DomUtil.GetElementText(dom.DocumentElement,
+"uid");
+                if (strOperation != "memo")
+                    _ = this.App.SendMessageAsync(null,
+                        "operlog",
+                        $"operation:{strOperation},action={strAction},uid={uid}");
+            }
+
             // ReOpen();          
             return 0;
         }

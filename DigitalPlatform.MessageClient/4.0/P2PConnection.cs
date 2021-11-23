@@ -276,7 +276,7 @@ namespace DigitalPlatform.MessageClient
                             return;
                         }
 
-                        proc(
+                        proc?.Invoke(
                             cache,
                             resultCount,
                             start,

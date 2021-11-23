@@ -271,6 +271,16 @@ namespace DigitalPlatform.LibraryServer
                     this.App.WriteErrorLog(strErrorText);
                 }
             }
+
+            // 2021/11/21
+            // 确保连接到 dp2mserver
+            {
+                var result = this.App.EnsureConnectMessageServerAsync().Result;
+                if (result.Value == -1 && result.ErrorCode != "notEnabled")
+                {
+                    this.App.WriteErrorLog($"尝试连接到 dp2mserver 服务器时出错: {result.ErrorInfo}");
+                }
+            }
         }
 
         public void ClearRetryDelay()
