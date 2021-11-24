@@ -203,7 +203,8 @@ TaskScheduler.Default);
                 new List<MessageRecord> {
                         new MessageRecord {
                             groups = groups,    // new string[] { groupName},
-                            data = content}
+                            data = content,
+                        }
                 });
 
             // 2020/4/27 增加 chunk 能力
@@ -527,23 +528,38 @@ TaskScheduler.Default);
             _groups = new List<string>(result.Users[0].groups);
             _userId = result.Users[0].id;
 
-            // 对 dp2library 发出一条 hello 消息
-            var send_result = await SetMessageAsync(new SetMessageRequest
+            // 检查 groups 里面是否包含了 _dp2library_xxx 组名
+            if (_groups.IndexOf(BuildGroupName()) != -1)
             {
-                Action = "create",
-                Records = new List<MessageRecord> {
+                // 对 dp2library 发出一条 hello 消息
+                var send_result = await SetMessageAsync(new SetMessageRequest
+                {
+                    Action = "create",
+                    Records = new List<MessageRecord> {
                     new MessageRecord{
-                        groups = new string [] { $"gn:_dp2library_{App.ServerUid}" },
+                        groups = new string [] { BuildGroupName()/*$"gn:_dp2library_{App.ServerUid}"*/ },
                         subjects = new string [] { "hello" },
                         data = "hello, dp2library",
+                        expireTime = DateTime.Now + TimeSpan.FromMinutes(5) // 5 分钟以后消息自动失效
                     }
                 },
-                Style = "dontNotifyMe"
-            });
-            if (send_result.Value == -1)
-                WpfClientInfo.WriteErrorLog($"尝试给 dp2library 发送 hello 消息时出错: {send_result.ErrorInfo}");
+                    Style = "dontNotifyMe"
+                });
+                if (send_result.Value == -1)
+                    WpfClientInfo.WriteErrorLog($"尝试给 dp2library 发送 hello 消息时出错: {send_result.ErrorInfo}");
+            }
+            else
+            {
+                WpfClientInfo.WriteInfoLog($"因为消息用户 '{_userName}' 的账户中没有定义 _dp2library_xxx 群组，所以 dp2ssl 感知 dp2library 操作日志变化的方式依然沿用 dp2library GetOperLogs() API 轮询");
+            }
 
             return new NormalResult();
+        }
+
+        // 构造 _dp2library_xxx 群名
+        static string BuildGroupName()
+        {
+            return $"gn:_dp2library_{App.ServerUid}";
         }
 
         static List<string> _groups = null;
@@ -613,7 +629,12 @@ IList<MessageRecord> messages)
                     // "gn:_62637a12-1965-4876-af3a-fc1d3009af8a"
                     if (message.groups[0] == $"gn:_dp2library_{App.ServerUid}")
                     {
-                        WpfClientInfo.WriteInfoLog($"收到 dp2library 操作日志变化通知 data={message.data}");
+                        // dp2library 对其它 dp2ssl 回复的 hello 要忽略
+                        if (message.data.StartsWith("hello,")
+                            && message.data != $"hello, {TinyServer.UserID}")
+                            continue;
+
+                        WpfClientInfo.WriteInfoLog($"收到 dp2library 操作日志变化通知 data='{message.data}'");
                         ShelfData.ActivateReplication();
                         continue;
                     }
@@ -2652,8 +2673,9 @@ text.ToString());
             SetMessageRequest request = new SetMessageRequest("create", "dontNotifyMe",
                 new List<MessageRecord> {
                         new MessageRecord {
-                            groups= groups, // new string[] { groupName},
-                            data = content}
+                            groups = groups, // new string[] { groupName},
+                            data = content,
+                        }
                 });
             return SetMessageAsync(request);
         }

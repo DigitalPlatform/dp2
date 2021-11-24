@@ -120,25 +120,60 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 P2PConnection connection = new P2PConnection();
-
+                string userName = GetUserName();
+                string password = GetPassword();
                 var connect_result = await connection.ConnectAsync(GetUrl(),
-                    GetUserName(),
-                    GetPassword(),
+                    userName,
+                    password,
                     "");
                 if (connect_result.Value == -1)
                 {
                     // return false;
-                    strError = $"用户 '{GetUserName()}' 登录失败: {connect_result.ErrorInfo}";
+                    strError = $"用户 '{userName}' 登录失败: {connect_result.ErrorInfo}";
                     goto ERROR1;
                 }
 
+                // TODO: 要检查防范两个 dp2library 在 dp2mserver 使用了相同的 UID 创建群
+
+                // 获得用户账户信息，并进行检查
+                {
+                    var result = await connection.GetUsersAsync(userName, 0, -1);
+                    if (result.Value == -1)
+                    {
+                        strError = $"获得用户 '{userName}' 的账户信息失败: {result.ErrorInfo}";
+                        goto ERROR1;
+                    }
+
+                    if (result.Users == null || result.Users.Count == 0)
+                    {
+                        strError = $"当前 dp2mserver 服务器中不存在名为 '{userName}' 的用户";
+                        goto ERROR1;
+                    }
+
+                    // 检查 groups
+                    var user = result.Users[0];
+                    if (user.groups.Length != 1)
+                    {
+                        strError = $"用户 '{userName}' 所定义的 group 数量不为 1 (而是 {user.groups.Length})";
+                        goto ERROR1;
+                    }
+
+                    var spect_group = BuildGroupName(GetLibraryUid());
+                    if (user.groups[0] != spect_group)
+                    {
+                        strError = $"用户 '{userName}' 所定义的 group 为 '{user.groups[0]}'，不符合预期的 '{spect_group}'";
+                        goto ERROR1;
+                    }
+                }
+
+                // 尝试从 _dp2library_xxx 群中读一条消息
                 {
                     CancellationToken cancel_token = _cancel.Token;
 
                     string id = Guid.NewGuid().ToString();
                     var range = DateTime.Now.ToString("yyyy-MM-dd") + "~";
                     GetMessageRequest request = new GetMessageRequest(id,
-                        "gn:<default>", // "<default>" 表示默认群组
+                        BuildGroupName(GetLibraryUid()),    // "gn:<default>", // "<default>" 表示默认群组
                         "",
                         range,
                         0,
@@ -403,7 +438,7 @@ dp2library 服务器在 dp2mserver 中开辟的账号
 权限：空
 义务：空
 单位：图书馆名称
-群组：gn:_xxx|-n (xxx 为 dp2library 服务器 UID)
+群组：gn:_xxx (xxx 为 dp2library 服务器 UID)
          * */
 
         async Task<NormalResult> CreateLibraryUser()
@@ -493,7 +528,7 @@ dp2library 服务器在 dp2mserver 中开辟的账号
                 user.password = this.textBox_password.Text;
                 user.rights = "";
                 user.duty = "";
-                user.groups = new string[] { $"gn:_dp2library_{libraryUID}" };   // |-n
+                user.groups = new string[] { BuildGroupName(libraryUID) }; // $"gn:_dp2library_{libraryUID}"  // |-n
                 user.department = libraryName;
                 user.binding = "ip:[current]";
                 user.comment = "dp2library 专用账号";
@@ -558,6 +593,11 @@ dp2library 服务器在 dp2mserver 中开辟的账号
                 Value = -1,
                 ErrorInfo = strError
             };
+        }
+
+        static string BuildGroupName(string libraryUID)
+        {
+            return $"gn:_dp2library_{libraryUID}";
         }
 
 #if NO

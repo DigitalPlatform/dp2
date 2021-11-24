@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.58")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.58.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.59")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.59.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -152,3 +152,4 @@ using System.Windows;
 //      1.8.57 (2021/11/15) dp2ssl 更新 entiryframework 和 sqlite nuget 包版本(从 3.1.5)到 3.1.21
 //      1.8.58 (2021/11/17) 参数配置画面增加“每日自动更新壁纸”选项，缺省为 false。如果这里勾选了，则 dp2ssl 会每天都尝试更新壁纸，壁纸图像是存储在用户文件夹内 daily_wallpaper 文件中。
 //                          如果要显示固定的壁纸，需要先清除“每日自动更新壁纸”，然后拷贝壁纸文件到用户文件夹里面，文件名为 wallpaper
+//      1.8.59 (2021/11/24) dp2ssl 启动时会自动探测消息账户是否属于 _dp2library_xxx 群组，如果属于，则自动拉上操作日志轮询时间间隔，主要靠接受该群组里面的变动消息来感知操作日志变化

@@ -1075,6 +1075,21 @@ CancellationToken token)
 
         #endregion
 
+
+        #region GetUsers()
+
+        public Task<GetUserResult> GetUsersAsync(string userName,
+            int start,
+            int count)
+        {
+            return HubProxy.Invoke<GetUserResult>("GetUsers",
+                userName,
+                start,
+                count);
+        }
+
+        #endregion
+
         #region SetUsers() API
 
         public Task<MessageResult> SetUsersTaskAsync(

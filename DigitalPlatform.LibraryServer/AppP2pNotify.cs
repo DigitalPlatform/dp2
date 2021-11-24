@@ -137,6 +137,7 @@ userNameAndUrl);
                                             groups = new string [] { message.groups[0] },
                                             subjects = new string [] { "hello" },
                                             data = $"hello, {message_sender}",
+                                            expireTime = DateTime.Now + TimeSpan.FromMinutes(5) // 5 分钟以后消息自动失效
                                         }
                                     },
                                     Style = "dontNotifyMe",
