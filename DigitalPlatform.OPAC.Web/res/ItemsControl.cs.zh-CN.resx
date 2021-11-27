@@ -180,6 +180,9 @@
   <data name="当前为访客身份，不能使用预约功能" xml:space="preserve">
     <value>当前为访客身份，不能使用预约功能</value>
   </data>
+  <data name="当前位置" xml:space="preserve">
+    <value>当前位置</value>
+  </data>
   <data name="我自己" xml:space="preserve">
     <value>(我自己)</value>
   </data>

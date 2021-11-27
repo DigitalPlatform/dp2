@@ -13,6 +13,7 @@ using System.Runtime.Serialization;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1213,9 +1214,21 @@ namespace DigitalPlatform.LibraryServer
                 string uid = DomUtil.GetElementText(dom.DocumentElement,
 "uid");
                 if (strOperation != "memo")
-                    _ = this.App.SendMessageAsync(null,
-                        "operlog",
-                        $"operation:{strOperation},action={strAction},uid={uid}");
+                {
+                    Task.Run(async () =>
+                    {
+                        var result = await this.App.SendMessageAsync(null,
+                            "operlog",
+                            $"operation:{strOperation},action={strAction},uid={uid}");
+                        /*
+                        if (result.Value == -1)
+                        {
+                            // 尝试确保连接消息服务器
+                            await this.App.EnsureConnectMessageServerAsync();
+                        }
+                        */
+                    });
+                }
             }
 
             // ReOpen();          

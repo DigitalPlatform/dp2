@@ -186,6 +186,9 @@
   <data name="当前为访客身份，不能使用预约功能" xml:space="preserve">
     <value>Can't use reservation func because you are guest login</value>
   </data>
+  <data name="当前位置" xml:space="preserve">
+    <value>Current Location</value>
+  </data>
   <data name="我自己" xml:space="preserve">
     <value>(Myself)</value>
   </data>

@@ -739,6 +739,12 @@ namespace DigitalPlatform.OPAC.Web
                 + "</td>";    // 2009/4/7
 
             if (hideColumns == null
+    || hideColumns.IndexOf("currentLocation") == -1)
+                strText += "<td nowrap class='shelfNo'>"
+                + this.GetString("当前位置")
+                + "</td>";    // 2021/11/26
+
+            if (hideColumns == null
                 || hideColumns.IndexOf("publishTime") == -1)
                 strText += "<td nowrap class='publishTime'>"
                 + this.GetString("出版日期")
@@ -1185,7 +1191,7 @@ namespace DigitalPlatform.OPAC.Web
                 sessioninfo.ReturnChannel(channel);
             }
 
-            ERROR1:
+        ERROR1:
             // output.Write(strError);
             // 2011/4/21
             this.SetDebugInfo("errorinfo", strError);
@@ -1551,7 +1557,15 @@ namespace DigitalPlatform.OPAC.Web
 
             // 馆藏地点
             string strLocation = DomUtil.GetElementText(dom.DocumentElement, "location");
+            // 永久架位
+            string strShelfNo = DomUtil.GetElementText(dom.DocumentElement, "shelfNo");
 
+            /*
+            // 2021/11/25
+            string strLocationAndShelfNo = strLocation;
+            if (string.IsNullOrEmpty(strShelfNo) == false)
+                strLocationAndShelfNo += ":" + strShelfNo;
+            */
 #if NO
             bool bResultValue = false;
             string strMessageText = "";
@@ -1683,11 +1697,17 @@ namespace DigitalPlatform.OPAC.Web
             {
                 if (String.IsNullOrEmpty(strLocationUrl) == false)
                 {
-                    strDisplayText = "<a href='" + strLocationUrl + "'>" + strLocationCaption + "</a>";
+                    if (string.IsNullOrEmpty(strShelfNo))
+                        strDisplayText = "<a href='" + strLocationUrl + "'>" + strLocationCaption + "</a>";
+                    else
+                        strDisplayText = "<a href='" + strLocationUrl + "'>" + strLocationCaption + ":" + HttpUtility.HtmlEncode(strShelfNo) + "</a>";
                 }
                 else
                 {
-                    strDisplayText = strLocationCaption;
+                    if (string.IsNullOrEmpty(strShelfNo))
+                        strDisplayText = strLocationCaption;
+                    else
+                        strDisplayText = strLocationCaption + ":" + HttpUtility.HtmlEncode(strShelfNo);
                 }
             }
 
@@ -1715,6 +1735,28 @@ namespace DigitalPlatform.OPAC.Web
                 }
 
                 strResult += "<td class='accessNo'>" + (strAccessNoText == "" ? "&nbsp;" : strAccessNoText) + "</td>";
+            }
+
+            // 当前架位
+            // 2021/11/26
+            if (this.m_hidecolumns.IndexOf("currentLocation") == -1)
+            {
+                string currentLocationString = DomUtil.GetElementText(dom.DocumentElement, "currentLocation");
+                /*
+                // 把 currentLocation 调整为 currentLocation 和 currentShelfNo
+                var parts = StringUtil.ParseTwoPart(currentLocationString, ":");
+                var currentLocation = parts[0];
+                var currentShelfNo = parts[1];
+
+                StringBuilder displayText = new StringBuilder();
+                if (string.IsNullOrEmpty(currentShelfNo) == false)
+                    displayText.Append($"{currentShelfNo} ");
+                if (string.IsNullOrEmpty(currentLocation) == false)
+                    displayText.Append($"{currentLocation} ");
+                if (string.IsNullOrEmpty(strShelfNo) == false)
+                    displayText.Append($"(永久架位: {strShelfNo})");
+                */
+                strResult += "<td class='shelfNo'>" + (currentLocationString.Length == 0 ? "&nbsp;" : HttpUtility.HtmlEncode(currentLocationString).Replace(" ", "&nbsp;")) + "</td>";
             }
 
             // 出版日期
@@ -2026,7 +2068,7 @@ namespace DigitalPlatform.OPAC.Web
                     // 对于读者，隐去除自己以外的其他人的证条码号
                     if (loginstate == LoginState.NotLogin
                         || loginstate == LoginState.Public  // 2009/4/10
-                                                            /*sessioninfo.Account == null*/
+                        /*sessioninfo.Account == null*/
                         || (loginstate == LoginState.Reader
                             /*sessioninfo.Account != null
                             && sessioninfo.Account.Type == "reader"*/
@@ -2084,7 +2126,7 @@ namespace DigitalPlatform.OPAC.Web
 
             right.Text = strResult;
             return;
-            ERROR1:
+        ERROR1:
             // tempOutput += strError;
             this.Page.Response.Write(strError);
         }

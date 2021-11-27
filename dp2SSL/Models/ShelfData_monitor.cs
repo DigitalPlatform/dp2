@@ -91,7 +91,12 @@ namespace dp2SSL
         // 激活，立即同步一次读者信息
         public static void ActivateReplication()
         {
+#if TESTING
+            var long_period = TimeSpan.FromMinutes(11);
+#else
             var long_period = TimeSpan.FromMinutes(60);
+#endif
+
             if (_replicatePeriod < long_period)
             {
                 WpfClientInfo.WriteInfoLog($"_replicatePeriod 从 {_replicatePeriod} 变为 {long_period}");
@@ -208,10 +213,19 @@ namespace dp2SSL
                             }
                             else
                             {
+                                // testing
                                 // 进行零星同步
                                 if (_replicateOnce
                                     || DateTime.Now - _lastReplicateTime > _replicatePeriod)
                                 {
+#if TESTING
+                                    {
+                                        if (DateTime.Now - _lastReplicateTime > _replicatePeriod
+                                            /*&& _replicateOnce == false*/)
+                                            App.CurrentApp.SpeakSequence("轮询日志");
+                                    }
+#endif
+
                                     _replicateOnce = false;
                                     // string startDate = LoadStartDate();
 
@@ -447,6 +461,6 @@ TaskScheduler.Default).Unwrap();
             return StringUtil.MakePathList(names, ", ");
         }
 
-        #endregion
+#endregion
     }
 }

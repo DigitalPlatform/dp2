@@ -508,34 +508,44 @@ TaskScheduler.Default);
         // 准备群名列表
         public static async Task<NormalResult> PrepareGroupNamesAsync()
         {
+            /*
             if (string.IsNullOrEmpty(_userName))
                 throw new ArgumentException("_userName 为空");
-
-            var result = await GetUsersAsync(_userName, 0, -1);
-            if (result.Value == -1)
+            */
+            if (string.IsNullOrEmpty(_userName))
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = result.ErrorInfo
-                };
-            if (result.Users == null || result.Users.Count == 0)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = $"当前 dp2mserver 服务器中不存在名为 '{_userName}' 的用户"
+                    ErrorInfo = "_userName 不应为空"
                 };
 
-            _groups = new List<string>(result.Users[0].groups);
-            _userId = result.Users[0].id;
-
-            // 检查 groups 里面是否包含了 _dp2library_xxx 组名
-            if (_groups.IndexOf(BuildGroupName()) != -1)
-            {
-                // 对 dp2library 发出一条 hello 消息
-                var send_result = await SetMessageAsync(new SetMessageRequest
+                try
                 {
-                    Action = "create",
-                    Records = new List<MessageRecord> {
+                var result = await GetUsersAsync(_userName, 0, -1);
+                if (result.Value == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = result.ErrorInfo
+                    };
+                if (result.Users == null || result.Users.Count == 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"当前 dp2mserver 服务器中不存在名为 '{_userName}' 的用户"
+                    };
+
+                _groups = new List<string>(result.Users[0].groups);
+                _userId = result.Users[0].id;
+
+                // 检查 groups 里面是否包含了 _dp2library_xxx 组名
+                if (_groups.IndexOf(BuildGroupName()) != -1)
+                {
+                    // 对 dp2library 发出一条 hello 消息
+                    var send_result = await SetMessageAsync(new SetMessageRequest
+                    {
+                        Action = "create",
+                        Records = new List<MessageRecord> {
                     new MessageRecord{
                         groups = new string [] { BuildGroupName()/*$"gn:_dp2library_{App.ServerUid}"*/ },
                         subjects = new string [] { "hello" },
@@ -543,18 +553,94 @@ TaskScheduler.Default);
                         expireTime = DateTime.Now + TimeSpan.FromMinutes(5) // 5 分钟以后消息自动失效
                     }
                 },
-                    Style = "dontNotifyMe"
-                });
-                if (send_result.Value == -1)
-                    WpfClientInfo.WriteErrorLog($"尝试给 dp2library 发送 hello 消息时出错: {send_result.ErrorInfo}");
+                        Style = "dontNotifyMe"
+                    });
+                    if (send_result.Value == -1)
+                        WpfClientInfo.WriteErrorLog($"尝试给 dp2library 发送 hello 消息时出错: {send_result.ErrorInfo}");
+                }
+                else
+                {
+                    WpfClientInfo.WriteInfoLog($"因为消息用户 '{_userName}' 的账户中没有定义 _dp2library_xxx 群组，所以 dp2ssl 感知 dp2library 操作日志变化的方式依然沿用 dp2library GetOperLogs() API 轮询");
+                }
+
+                return new NormalResult();
             }
-            else
+            catch(Exception ex)
             {
-                WpfClientInfo.WriteInfoLog($"因为消息用户 '{_userName}' 的账户中没有定义 _dp2library_xxx 群组，所以 dp2ssl 感知 dp2library 操作日志变化的方式依然沿用 dp2library GetOperLogs() API 轮询");
+                WpfClientInfo.WriteErrorLog($"PrepareGroupNamesAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"PrepareGroupNamesAsync() 出现异常: {ex.Message}"
+                };
+            }
+        }
+
+#if REMOVED
+        // 上一次调用 DetectGapMessageAsync() 的时间
+        static DateTime _lastDetectGapTime = DateTime.MinValue;
+
+        // 探测(断开)间隙期间是否有通知消息
+        public static async Task<int> DetectGapMessageAsync()
+        {
+            if (_lastNotifyMessageTime == DateTime.MinValue)
+                return 0;
+
+            // 防止过分频繁探测
+            if (DateTime.Now - _lastDetectGapTime < TimeSpan.FromMinutes(1))
+            {
+                _lastDetectGapTime = DateTime.Now;
+                return 0;
             }
 
-            return new NormalResult();
+            _lastDetectGapTime = DateTime.Now;
+
+            try
+            {
+
+                // 时间范围，不包含起点
+                var range = "<" + _lastNotifyMessageTime.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "~";
+                GetMessageRequest request = new GetMessageRequest(null,
+                    BuildGroupName(),
+                    "",
+                    range,
+                    0,
+                    1);
+
+                int count = 0;
+                var result = await GetMessageAsyncLite(
+                    request,
+                    (StringBuilder cache,
+                    long totalCount,
+                    long start,
+                    IList<MessageRecord> records,
+                    string errorInfo,
+                    string errorCode) =>
+                    {
+                        if (records != null)
+                        {
+                            foreach (var message in records)
+                            {
+                            // 排除 "hello," 开头的消息
+                            if (message.data.StartsWith("hello,") == false)
+                                    count++;
+                            }
+                        }
+                    },
+                    TimeSpan.FromMinutes(1),
+                    App.CancelToken);
+                if (result.Value == -1)
+                    return 0;
+                return count;
+            }
+            catch(Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"DetectGapMessageAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return 0;
+            }
         }
+
+#endif
 
         // 构造 _dp2library_xxx 群名
         static string BuildGroupName()
@@ -619,6 +705,9 @@ IList<MessageRecord> messages)
             });
         }
 
+        // _dp2library_xxx 群发来的最后一条通知消息的发布时间
+        static DateTime _lastNotifyMessageTime = DateTime.MinValue;
+
         static async Task ProcessMessages(IList<MessageRecord> messages)
         {
             try
@@ -629,10 +718,20 @@ IList<MessageRecord> messages)
                     // "gn:_62637a12-1965-4876-af3a-fc1d3009af8a"
                     if (message.groups[0] == $"gn:_dp2library_{App.ServerUid}")
                     {
+                        _lastNotifyMessageTime = message.publishTime;
+
                         // dp2library 对其它 dp2ssl 回复的 hello 要忽略
                         if (message.data.StartsWith("hello,")
                             && message.data != $"hello, {TinyServer.UserID}")
                             continue;
+
+                        // testing
+#if TESTING
+                        if (message.data.StartsWith("hello,"))
+                            App.CurrentApp.SpeakSequence("切换到即时感知日志状态");
+                        else
+                            App.CurrentApp.SpeakSequence("有新日志");
+#endif
 
                         WpfClientInfo.WriteInfoLog($"收到 dp2library 操作日志变化通知 data='{message.data}'");
                         ShelfData.ActivateReplication();
@@ -884,7 +983,7 @@ cancellation_token);
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
-        // 当前获得的最后一条消息
+        // 当前获得的最后一条(远程维护群)消息
         static MessageRecord _lastMessage = null;
 
         // 消息 ID --> 消息创建时间
@@ -892,7 +991,7 @@ cancellation_token);
 
         static int _inGetMessage = 0;  // 防止因为 ConnectionStateChange 事件导致重入
 
-        // 主动装载间隙期间的消息
+        // 主动装载间隙期间的(远程维护群)消息
         public static async Task LoadGapMessageAsync()
         {
             if (_lastMessage != null)
@@ -978,7 +1077,7 @@ cancellation_token);
 #endif
 
                 {
-                    CancellationToken cancel_token = new CancellationToken();
+                    // CancellationToken cancel_token = new CancellationToken();
 
                     string id = Guid.NewGuid().ToString();
                     GetMessageRequest request = new GetMessageRequest(id,
@@ -993,7 +1092,7 @@ cancellation_token);
                             request,
                             FillMessage,
                             new TimeSpan(0, 1, 0),
-                            cancel_token);
+                            App.CancelToken);
                         if (result.Value == -1)
                         {
                             //strError = result.ErrorInfo;

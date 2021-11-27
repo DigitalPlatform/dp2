@@ -130,7 +130,7 @@ userNameAndUrl);
                                 && message.data == "hello, dp2library")
                             {
                                 var message_sender = message.creator;
-                                await _connection.SetMessageAsyncLite(new SetMessageRequest {
+                                var send_result = await _connection.SetMessageAsyncLite(new SetMessageRequest {
                                     Action = "create",
                                     Records = new List<MessageRecord> {
                                         new MessageRecord{ 

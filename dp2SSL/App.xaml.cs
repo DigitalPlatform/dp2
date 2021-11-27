@@ -690,7 +690,31 @@ namespace dp2SSL
                     var prepare_result = await TinyServer.PrepareGroupNamesAsync();
                     if (prepare_result.Value == -1)
                         WpfClientInfo.WriteErrorLog($"准备群名失败: {prepare_result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={prepare_result.ErrorCode}");
+                    else
+                    {
+                        /*
+                        // 探测稍早(断开)间隙期间是否有通知消息
+                        var count = await TinyServer.DetectGapMessageAsync();
+                        if (count > 0)
+                        {
+                            // testing
+#if TESTING
+                            App.CurrentApp.SpeakSequence($"中断期间有 {count} 条未读消息");
+#endif
+                            ShelfData.ActivateReplication();
+                        }
+                        */
 
+                        // 简单
+                        // 重新连接以后默认激活同步一次
+                        {
+                            // testing
+#if TESTING
+                            App.CurrentApp.SpeakSequence($"重新连接以后激活同步一次");
+#endif
+                            ShelfData.ActivateReplication();
+                        }
+                    }
                     return true;
                 }
             }
