@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>227</ApplicationRevision>
+    <ApplicationRevision>229</ApplicationRevision>
     <ApplicationVersion>1.5.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -542,6 +542,7 @@
     <Compile Include="Models\NewTagList2.cs" />
     <Compile Include="Models\PasswordCache.cs" />
     <Compile Include="Models\PatronReplication.cs" />
+    <Compile Include="NetworkUsage.cs" />
     <Compile Include="Tasks\LampPerdayTask.cs" />
     <Compile Include="Models\RequestContext.cs" />
     <Compile Include="Models\DelayAction.cs" />

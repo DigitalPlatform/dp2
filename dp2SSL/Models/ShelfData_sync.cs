@@ -105,8 +105,15 @@ namespace dp2SSL
                     while (token.IsCancellationRequested == false)
                     {
                         // TODO: 无论是整体退出，还是需要激活，都需要能中断 Delay
-                        // Task.Delay(TimeSpan.FromSeconds(10)).Wait(token);
-                        _eventSync.WaitOne(_syncIdleLength);
+                        // _eventSync.WaitOne(_syncIdleLength);
+                        int index = WaitHandle.WaitAny(new WaitHandle[] {
+                            _eventSync,
+                            token.WaitHandle,
+                            },
+                            _syncIdleLength);
+                        if (index == 1)
+                            return;
+
                         token.ThrowIfCancellationRequested();
 
 #if REMOVED

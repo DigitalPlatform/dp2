@@ -48,8 +48,14 @@ namespace dp2SSL
                 {
                     while (token.IsCancellationRequested == false)
                     {
-                        // await Task.Delay(TimeSpan.FromSeconds(10));
-                        _activate.WaitOne(_idleLength);
+                        // _activate.WaitOne(_idleLength);
+                        int index = WaitHandle.WaitAny(new WaitHandle[] {
+                            _activate,
+                            token.WaitHandle,
+                            },
+                            _idleLength);
+                        if (index == 1)
+                            return;
 
                         token.ThrowIfCancellationRequested();
 

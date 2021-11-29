@@ -1002,8 +1002,14 @@ get_result.Result.AE_PersonalName_r);
                 {
                     while (token.IsCancellationRequested == false)
                     {
-                        // await Task.Delay(TimeSpan.FromSeconds(10));
-                        _eventMonitor.WaitOne(_monitorIdleLength);
+                        // _eventMonitor.WaitOne(_monitorIdleLength);
+                        int index = WaitHandle.WaitAny(new WaitHandle[] {
+                            _eventMonitor,
+                            token.WaitHandle,
+                            },
+                            _monitorIdleLength);
+                        if (index == 1)
+                            return;
 
                         token.ThrowIfCancellationRequested();
 

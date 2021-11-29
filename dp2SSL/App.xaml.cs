@@ -50,6 +50,8 @@ namespace dp2SSL
     /// </summary>
     public partial class App : Application, INotifyPropertyChanged
     {
+        public NetworkUsage _networkUsage = new NetworkUsage();
+
         public static event UpdatedEventHandler Updated = null;
 
         public static event LineFeedEventHandler LineFeed = null;
@@ -681,8 +683,11 @@ namespace dp2SSL
                 {
                     _ = GlobalMonitor.CompactLog.Add("连接消息服务器失败: {0}。url={1},userName={2},errorCode={3}",
                         new object[] { result.ErrorInfo, messageServerUrl, messageUserName, result.ErrorCode });
-
                     // WpfClientInfo.WriteErrorLog($"连接消息服务器失败: {result.ErrorInfo}。url={messageServerUrl},userName={messageUserName},errorCode={result.ErrorCode}");
+
+                    // 2021/11/29
+                    // 恢复短时间轮询
+                    ShelfData.SetShortReplication();
                     return false;
                 }
                 else
@@ -1050,6 +1055,13 @@ namespace dp2SSL
 
             }
 
+            // 2021/11/29
+            // 网络流量统计
+            {
+                var data = _networkUsage.GetData();
+                WpfClientInfo.WriteInfoLog($"本次 dp2ssl 运行期间({data.StartTime.ToString()}-{data.EndTime.ToString()})利用网络共发送字节 {StringUtil.GetLengthText(data.BytesSent)}，接收字节 {StringUtil.GetLengthText(data.BytesReceived)}");
+            }
+
             base.OnSessionEnding(e);
         }
 
@@ -1122,6 +1134,13 @@ namespace dp2SSL
             catch
             {
 
+            }
+
+            // 2021/11/29
+            // 网络流量统计
+            {
+                var data = _networkUsage.GetData();
+                WpfClientInfo.WriteInfoLog($"本次 dp2ssl 运行期间({data.StartTime.ToString()}-{data.EndTime.ToString()})利用网络共发送字节 {StringUtil.GetLengthText(data.BytesSent)}，接收字节 {StringUtil.GetLengthText(data.BytesReceived)}");
             }
 
             _cancelApp?.Cancel();

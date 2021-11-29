@@ -573,8 +573,14 @@ out chip);
                 {
                     while (token.IsCancellationRequested == false)
                     {
-                        // await Task.Delay(TimeSpan.FromSeconds(10));
-                        _eventInventory.WaitOne(_inventoryIdleLength);
+                        // _eventInventory.WaitOne(_inventoryIdleLength);
+                        int index = WaitHandle.WaitAny(new WaitHandle[] {
+                            _eventInventory,
+                            token.WaitHandle,
+                            },
+                            _inventoryIdleLength);
+                        if (index == 1)
+                            return;
 
                         token.ThrowIfCancellationRequested();
 

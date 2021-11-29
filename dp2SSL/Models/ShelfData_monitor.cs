@@ -39,6 +39,12 @@ namespace dp2SSL
         // 两次零星同步之间的间隔
         // 当启用了 dp2library 操作日志通知功能以后，这个间隔可以延长
         static TimeSpan _replicatePeriod = TimeSpan.FromMinutes(10);
+        // 长间隔
+        static TimeSpan _replicate_long_period = TimeSpan.FromMinutes(60);
+        // 短间隔
+        static TimeSpan _replicate_short_period = TimeSpan.FromMinutes(10);
+
+
         // 最近一次零星同步的时间
         static DateTime _lastReplicateTime;
         // 2021/11/23
@@ -91,19 +97,23 @@ namespace dp2SSL
         // 激活，立即同步一次读者信息
         public static void ActivateReplication()
         {
-#if TESTING
-            var long_period = TimeSpan.FromMinutes(11);
-#else
-            var long_period = TimeSpan.FromMinutes(60);
-#endif
-
-            if (_replicatePeriod < long_period)
+            if (_replicatePeriod < _replicate_long_period)
             {
-                WpfClientInfo.WriteInfoLog($"_replicatePeriod 从 {_replicatePeriod} 变为 {long_period}");
-                _replicatePeriod = long_period;    // 延长间隔
+                WpfClientInfo.WriteInfoLog($"_replicatePeriod 从 {_replicatePeriod} 变为 {_replicate_long_period}(长)");
+                _replicatePeriod = _replicate_long_period;    // 延长间隔
             }
             _replicateOnce = true;
             ActivateMonitor();
+        }
+
+        // 设置同步间隔为短时间
+        public static void SetShortReplication()
+        {
+            if (_replicatePeriod > _replicate_short_period)
+            {
+                WpfClientInfo.WriteInfoLog($"_replicatePeriod 从 {_replicatePeriod} 变为 {_replicate_short_period}(短)");
+                _replicatePeriod = _replicate_short_period;    // 缩短间隔
+            }
         }
 
         // 启动一般监控任务
@@ -131,8 +141,14 @@ namespace dp2SSL
                 {
                     while (token.IsCancellationRequested == false)
                     {
-                        // await Task.Delay(TimeSpan.FromSeconds(10));
-                        _eventMonitor.WaitOne(_monitorIdleLength);
+                        // _eventMonitor.WaitOne(_monitorIdleLength);
+                        int index = WaitHandle.WaitAny(new WaitHandle[] {
+                            _eventMonitor,
+                            token.WaitHandle,
+                            },
+                            _monitorIdleLength);
+                        if (index == 1)
+                            return;
 
                         token.ThrowIfCancellationRequested();
 

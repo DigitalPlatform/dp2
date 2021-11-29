@@ -78,7 +78,15 @@ namespace dp2SSL
                 {
                     while (token.IsCancellationRequested == false)
                     {
-                        _eventSend.WaitOne(_idleLength);
+                        // _eventSend.WaitOne(_idleLength);
+                        int index = WaitHandle.WaitAny(new WaitHandle[] {
+                            _eventSend,
+                            token.WaitHandle,
+                            },
+                            _idleLength);
+                        if (index == 1)
+                            return;
+
                         token.ThrowIfCancellationRequested();
 
                         // 如果暂时没有配置消息服务器
@@ -297,13 +305,20 @@ TaskScheduler.Default);
 
             DisposeHandlers();
 
-            if (Connection != null)
+            try
             {
-                Connection.Reconnected -= Connection_Reconnected;
+                if (Connection != null)
+                {
+                    Connection.Reconnected -= Connection_Reconnected;
 
-                Connection.Stop();
-                Connection.Dispose();
-                Connection = null;
+                    Connection?.Stop();
+                    Connection?.Dispose();
+                    Connection = null;
+                }
+            }
+            catch
+            {
+
             }
 
             _userName = "";
