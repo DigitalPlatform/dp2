@@ -558,6 +558,8 @@ namespace DigitalPlatform.LibraryClient
             });
         }
 
+        List<string> _task_ids = new List<string>();
+
         Task<GetMd5Result> GetRemoteMd5(CancellationToken token)
         {
             return Task.Run<GetMd5Result>(() =>
@@ -569,6 +571,7 @@ namespace DigitalPlatform.LibraryClient
         this.ServerFilePath,
         this.Prompt,
         token,
+        _task_ids,
     out byte[] server_md5,
     out string strError);
                 if (nRet != 1)
@@ -757,6 +760,8 @@ namespace DigitalPlatform.LibraryClient
         // static CancellationToken _token;
 
         // 探测 MD5 (用轮询任务法)
+        // parameters:
+        //      task_ids    处理过程中应该删除而没有删除的 dp2library 一端的 task id 集合。函数内外，后面会想办法删除这些 task
         // return:
         //      -1  出错
         //      0   文件没有找到
@@ -767,6 +772,7 @@ namespace DigitalPlatform.LibraryClient
             string strServerPath,
             MessagePromptEventHandler prompt,
             CancellationToken token,
+            List<string> task_ids_param,
             out byte[] md5,
             out string strError)
         {
@@ -795,6 +801,7 @@ namespace DigitalPlatform.LibraryClient
             channel.Timeout = TimeSpan.FromSeconds(10);
             try
             {
+            // TODO: 如何节省获得版本号的动作?
             // 检查 dp2library 版本号
             REDO_GETVERSION:
                 long lRet = channel.GetVersion(stop,
@@ -833,6 +840,26 @@ out md5,
 out strError);
                 }
 
+                List<string> task_ids = new List<string>();
+                // 从 task_id_param 中复制过来
+                if (task_ids_param != null)
+                    lock (task_ids_param)
+                    {
+                        task_ids.AddRange(task_ids_param);
+                    }
+
+                // 3.99 版本以上，支持 beginTask:xxxx 方式
+                bool beginTaskID = StringUtil.CompareVersion(version, "3.99") >= 0;
+                string style = "md5,beginTask";
+                string taskID = "";
+                if (beginTaskID)
+                {
+                    // 由前端准备好 task id
+                    taskID = Guid.NewGuid().ToString();
+                    style += ":" + taskID;
+                    task_ids.Add(taskID);
+                }
+
                 // TODO: 如果此请求出现通讯错误，再次重试请求的时候记得 removeTask 前一次的 task
                 // 启动任务
                 // return:
@@ -844,7 +871,7 @@ out strError);
                     strServerPath,
                     0,
                     0,
-                    "md5,beginTask",
+                    style,
                     out byte[] baContent,
                     out string strMetadata,
                     out string strOutputPath,
@@ -857,12 +884,25 @@ out strError);
 
                     // TODO: 遇到通讯出错，需要重试操作
 
-
-
                     return -1;
                 }
 
-                string taskID = Encoding.UTF8.GetString(md5);
+                string outputTaskID = Encoding.UTF8.GetString(md5);
+
+                // 核对返回的 task id 和请求的 task id 是否一致
+                if (string.IsNullOrEmpty(taskID) == false
+                    && taskID != outputTaskID)
+                {
+                    strError = $"返回的 task id 为 '{outputTaskID}'，和期望值 '{taskID}' 不匹配";
+                    return -1;
+                }
+
+                taskID = outputTaskID;
+                if (beginTaskID == false)
+                {
+                    // 这是服务器负责发生的 task id
+                    task_ids.Add(taskID);
+                }
 
                 // 轮询，获得任务结果
                 while (true)
@@ -879,13 +919,20 @@ out strError);
                         return -1;
                     }
 
-                REDO_CHECKTASK:
+                    string strStyle = $"md5,getTaskResult,taskID:{taskID}";
+
+                    // 3.99 版本以上，采用单独 removeTask 的方式
+                    bool removeTask = StringUtil.CompareVersion(version, "3.99") >= 0;
+                    if (removeTask)
+                        strStyle = $"md5,getTaskResult,taskID:{taskID},dontRemove";
+
+                    REDO_CHECKTASK:
                     lRet = channel.GetRes(
     stop,
     strServerPath,
     0,
     0,
-    $"md5,getTaskResult,taskID:{taskID}",
+    strStyle,
     out baContent,
     out strMetadata,
     out strOutputPath,
@@ -908,7 +955,42 @@ out strError);
                         return -1;
                     }
                     if (lRet == 1)
+                    {
+                        if (removeTask)
+                        {
+                            List<string> removed_ids = new List<string>();
+                            foreach (var current_id in task_ids)
+                            {
+                                int nRet = RemoveTask(
+            channel,
+            stop,
+            strServerPath,
+            current_id,
+            prompt,
+            token,
+            out strError);
+                                if (nRet == -1 && channel.ErrorCode != localhost.ErrorCode.NotFound)
+                                {
+                                    // taskID 没有完成删除
+                                }
+                                else
+                                {
+                                    // 完成删除
+                                    removed_ids.Add(current_id);
+                                }
+                            }
+
+                            // 兑现到 task_id_param 集合中
+                            lock (task_ids_param)
+                            {
+                                foreach (var id in removed_ids)
+                                {
+                                    task_ids.Remove(id);
+                                }
+                            }
+                        }
                         return 1;
+                    }
 
                     Task.Delay(TimeSpan.FromSeconds(1), token).Wait();
                 }
@@ -922,6 +1004,56 @@ out strError);
             {
                 channel.Timeout = old_timeout;
             }
+        }
+
+        // 2021/11/30
+        // 移除一个 md5 task
+        static int RemoveTask(
+            LibraryChannel channel,
+            Stop stop,
+            string strServerPath,
+            string taskID,
+            MessagePromptEventHandler prompt,
+            CancellationToken token,
+            out string strError)
+        {
+            strError = "";
+
+            // string strStyle = $"md5,getTaskResult,taskID:{taskID}";
+            string strStyle = $"md5,removeTask,taskID:{taskID}";
+
+        REDO_CHECKTASK:
+            long lRet = channel.GetRes(
+stop,
+strServerPath,
+0,
+0,
+strStyle,
+out byte[] baContent,
+out string strMetadata,
+out string strOutputPath,
+out byte[] output_timestamp,
+out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == localhost.ErrorCode.NotFound)
+                    return 0;
+
+                if (prompt != null
+&& !(stop != null && stop.IsStopped == true))
+                {
+                    MessagePromptEventArgs e = new MessagePromptEventArgs();
+                    e.MessageText = $"删除文件 {strServerPath} MD5 任务状态时发生错误: {strError}";
+                    e.Actions = "yes,no,cancel";
+                    prompt(null, e);
+                    if (e.ResultAction == "yes")
+                        goto REDO_CHECKTASK;
+                }
+
+                return -1;
+            }
+
+            return 0;
         }
 
         // 探测 MD5

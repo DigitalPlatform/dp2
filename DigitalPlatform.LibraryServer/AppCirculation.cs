@@ -7102,6 +7102,12 @@ start_time_1,
                             goto ERROR1;
                         }
 
+                        // testing
+                        {
+                            strError = "调拨 error testing";
+                            goto ERROR1;
+                        }
+
                         // 2020/11/10
                         // 新的永久架位
                         string strNewShelfNo = StringUtil.GetParameterByPrefix(strStyle, "shelfNo");

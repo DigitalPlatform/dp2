@@ -594,7 +594,7 @@ namespace DigitalPlatform.LibraryServer
         //                  "getTaskResult" 获取任务是否结束的信息和两个返回参数值
         //                  "stopTask" 停止一个任务
         // return:
-        //      -2      文件不存在
+        //      -2      文件不存在(或者 taskID 不存在)
         //		-1      出错
         //		>= 0	成功，返回最大长度
         public long GetFile(
@@ -787,13 +787,17 @@ namespace DigitalPlatform.LibraryServer
             // 取 MD5
             if (StringUtil.IsInList("md5", strStyle) == true)
             {
-                if (StringUtil.IsInList("beginTask", strStyle))
+                // 增加 beginTask:xxxx 用法，由前端指定 task id
+                string beginTaskID = StringUtil.GetParameterByPrefix(strStyle, "beginTask");
+                if (/*StringUtil.IsInList("beginTask", strStyle)*/
+                    beginTaskID != null)
                 {
-                    var taskID = _md5Tasks.StartMd5Task(strFilePath);
+                    var taskID = _md5Tasks.StartMd5Task(strFilePath, beginTaskID);
                     outputTimestamp = Encoding.UTF8.GetBytes(taskID);
                 }
                 else if (StringUtil.IsInList("getTaskResult", strStyle)
-                    || StringUtil.IsInList("stopTask", strStyle))
+                    || StringUtil.IsInList("stopTask", strStyle)
+                    || StringUtil.IsInList("removeTask", strStyle))
                 {
                     var taskID = StringUtil.GetParameterByPrefix(strStyle, "taskID");
                     if (string.IsNullOrEmpty(taskID))
@@ -805,8 +809,16 @@ namespace DigitalPlatform.LibraryServer
                     if (task == null)
                     {
                         strError = $"没有找到 taskID 为 '{taskID}' 的 MD5 任务";
-                        return -1;
+                        return -2;  // 2021/11/30 从 -1 改为 -2
                     }
+
+                    // 3.99 增加 removeTask 功能
+                    if (StringUtil.IsInList("removeTask", strStyle))
+                    {
+                        _md5Tasks.RemoveMd5Task(taskID);
+                        return 0;
+                    }
+
                     if (StringUtil.IsInList("getTaskResult", strStyle))
                     {
                         if (task.Result == null)
@@ -814,8 +826,20 @@ namespace DigitalPlatform.LibraryServer
                             outputTimestamp = null;
                             return 0;   // 表示任务尚未完成
                         }
+
+                        // 2021/12/1
+                        // 如果任务是以出错方式结束的
+                        if (task.Result.Value == -1)
+                        {
+                            strError = task.Result.ErrorInfo;
+                            return -1;
+                        }
+
                         outputTimestamp = ByteArray.GetTimeStampByteArray(task.Result.ErrorCode);
-                        _md5Tasks.RemoveMd5Task(taskID);
+                        // 3.99 增加 dontRemove 参数
+                        var dont_remove = StringUtil.IsInList("dontRemove", strStyle);
+                        if (dont_remove == false)
+                            _md5Tasks.RemoveMd5Task(taskID);
                         return 1;   // 表示任务已经完成
                     }
 

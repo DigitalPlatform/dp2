@@ -198,6 +198,13 @@ namespace dp2SSL
                             // 2021/8/21
                             token.ThrowIfCancellationRequested();
 
+                            // 2021/12/2
+                            // 检查 group 的第一条记录是否为 normalerror 状态，并超过阈值同步次数
+                            {
+                                if (NeedDelay(group))
+                                    continue;
+                            }
+
                             int current_count = group.Count;    // 当前 group 包含的动作数量
 
                             var result = await SubmitCheckInOutAsync(
@@ -355,6 +362,87 @@ namespace dp2SSL
 token,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
+        }
+
+        // 需要拖延处理的 syncCount 次数阈值
+        static int _delaySyncCountThreshold = 5;   // 10
+        // 较长的同步间隔时间
+        static TimeSpan _longSyncLength = TimeSpan.FromMinutes(60);
+
+        // 拖延处理的信息对照表
+        // 图书 PII --> DelayInfo
+        static Hashtable _delayTable = new Hashtable();
+
+        class DelayInfo
+        {
+            // 动作库记录 ID
+            public string ActionID { get; set; }
+            // 册记录的 PII
+            public string ItemPII { get; set; }
+            // 最近一次同步尝试处理的时间
+            public DateTime LastSyncTime { get; set; }
+            // 最近一次写入错误日志警告的时间(主要是希望不要太密集写入日志)
+            public DateTime LastWriteLogTime { get; set; }
+        }
+
+        // 检查一个 group 是否应当拖延处理
+        // 算法是，检查 group 的第一条记录是否为 normalerror 状态，并超过阈值同步次数
+        static bool NeedDelay(List<ActionInfo> actions)
+        {
+            if (actions.Count == 0)
+                return false;
+            var first = actions[0];
+            // string pii = first.Entity.GetOiPii();
+            string pii = GetUiiString(first.Entity);
+
+            if (first.State == "normalerror" && first.SyncCount >= _delaySyncCountThreshold)
+            {
+                // 找到 DelayInfo 对象，如果没有，则创建一个
+                DelayInfo delay = _delayTable[pii] as DelayInfo;
+                if (delay == null)
+                {
+                    // 限制 _delayTable 的最大尺寸
+                    if (_delayTable.Count > 10000)
+                    {
+                        WpfClientInfo.WriteInfoLog($"_delayTable 因元素数达到 {_delayTable.Count} 而被保护性清空一次");
+                        _delayTable.Clear();
+                    }
+
+                    delay = new DelayInfo
+                    {
+                        ActionID = first.ID.ToString(),
+                        ItemPII = pii,
+                    };
+                    _delayTable[pii] = delay;
+                }
+
+                var now = DateTime.Now;
+                var delta = now - delay.LastSyncTime;
+                if (delta > _longSyncLength)
+                {
+                    // 立即同步
+                    delay.LastSyncTime = DateTime.Now;
+                    WpfClientInfo.WriteInfoLog($"和册 {pii} 有关的同步动作 {first.ID} 在延迟 {delta.ToString()} 后被提交重试同步一次(是否同步成功请见 dp2ssl 本地动作库记录 {first.ID} 状态)。它是一个包含 {actions.Count} 个动作的 group 中的第一个动作。此动作详情如下：\r\n{first.ToString()}");
+                    return false;
+                }
+                else
+                {
+                    // 打算拖延
+
+                    // 第一次拖延的时候写入日志，然后每 1 天只写入一次这类日志
+                    if (now - delay.LastWriteLogTime > TimeSpan.FromDays(1))
+                    {
+                        WpfClientInfo.WriteInfoLog($"和册 {pii} 有关的同步动作 {first.ID} 被有意延迟重试(一般是至少间隔 {_longSyncLength} 时间再重试)。它是一个包含 {actions.Count} 个动作的 group 中的第一个动作。此动作详情如下：\r\n{first.ToString()}");
+                        delay.LastWriteLogTime = now;
+                    }
+                    return true;
+                }
+            }
+
+            // 普通正常状态
+            _delayTable.Remove(pii);    // 尝试从 table 中删除这个事项
+            // 立即同步
+            return false;
         }
 
         // 根据全部和已处理集合得到未处理(被跳过的)集合
@@ -761,8 +849,14 @@ TaskScheduler.Default);
                     var items = context.Requests.Where(o => o.State != "sync" && o.State != "dontsync")
                         .OrderBy(o => o.ID).ToList();
                     var actions = FromRequests(items);
+                    /*
                     if (actions.Count > 0)
                         WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。内容如下：\r\n{ActionInfo.ToString(actions)}");
+                    */
+                    // 注：因为这里会反复频繁写入错误日志文件，所以无法写入集合详细内容(那样会让错误日志文件尺寸极大膨胀)
+                    if (actions.Count > 0)
+                        WpfClientInfo.WriteInfoLog($"从本地数据库装载 Actions 成功。共 {actions.Count} 个记录");
+
                     return actions;
                 }
             }

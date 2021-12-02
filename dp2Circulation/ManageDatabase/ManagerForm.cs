@@ -138,6 +138,8 @@ namespace dp2Circulation
             Program.MainForm.BeginUploadFiles(e);
         }
 
+        List<string> _task_ids = new List<string>();
+
         void GetMd5(DownloadFilesEventArgs e,
             MessagePromptEventHandler prompt)
         {
@@ -171,6 +173,7 @@ namespace dp2Circulation
                         filepath,
                         prompt,
                         new System.Threading.CancellationToken(),
+                        _task_ids,
                         out byte[] server_md5,
                         out strError);
                     if (nRet != 1)

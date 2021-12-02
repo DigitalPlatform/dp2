@@ -78,6 +78,8 @@ namespace dp2Circulation
     });
         }
 
+        List<string> _task_ids = new List<string>();
+
         // result.Value:
         //      -1  出错
         //      0   不匹配
@@ -140,6 +142,7 @@ namespace dp2Circulation
                         }));
                     }),
                     new CancellationToken(),
+                    _task_ids,
                     out byte[] server_md5,
                     out strError);
                 // TODO: 遇到出错要可以 UI 交互重试

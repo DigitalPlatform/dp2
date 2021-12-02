@@ -2337,7 +2337,7 @@ string strHtml)
         }
         */
 
-
+        List<string> _task_ids = new List<string>();
 
         // result.Value:
         //      -1  出错
@@ -2419,6 +2419,7 @@ string strHtml)
                         }));
                     }),
                     token,
+                    _task_ids,
                     out byte[] server_md5,
                     out string strError);
                 if (nRet != 1)

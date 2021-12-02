@@ -43,15 +43,29 @@ namespace DigitalPlatform.LibraryServer
             return true;
         }
 
-        public string StartMd5Task(string strFilePath)
+        // parameters:
+        //      taskID  任务 ID。如果为空，表示服务器自动发生 task id。否则会采用这个 task id
+        public string StartMd5Task(string strFilePath,
+            string taskID = null)
         {
             // 做一下清理
             RemoveIdleMd5Task();
 
+            if (string.IsNullOrEmpty(taskID))
+                taskID = Guid.NewGuid().ToString();
+            else
+            {
+                // 对 taskID 进行查重
+                var dup_task = FindMd5Task(taskID);
+                // 发现已经存在的 task, 先移走
+                if (dup_task != null)
+                    RemoveMd5Task(dup_task.TaskID);
+            }
+
             Md5Task task = new Md5Task
             {
                 FilePath = strFilePath,
-                TaskID = Guid.NewGuid().ToString(),
+                TaskID = taskID,
                 StartTime = DateTime.Now
             };
 
@@ -62,12 +76,16 @@ namespace DigitalPlatform.LibraryServer
                 _md5Tasks.Add(task);
             }
 
-            task.Task = Task.Run(() =>
+            task.Task = Task.Run( /*async*/ () =>
             {
                 try
                 {
                     task.Begin();
                     var outputTimestamp = Md5Task.GetFileMd5(strFilePath, task.Token);
+
+                    // testing
+                    // await Task.Delay(TimeSpan.FromSeconds(10));
+                    
                     task.Result = new NormalResult
                     {
                         Value = 0,

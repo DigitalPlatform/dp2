@@ -1058,8 +1058,8 @@ namespace dp2SSL
             // 2021/11/29
             // 网络流量统计
             {
-                var data = _networkUsage.GetData();
-                WpfClientInfo.WriteInfoLog($"本次 dp2ssl 运行期间({data.StartTime.ToString()}-{data.EndTime.ToString()})利用网络共发送字节 {StringUtil.GetLengthText(data.BytesSent)}，接收字节 {StringUtil.GetLengthText(data.BytesReceived)}");
+                var data = NetworkUsage.ToString(_networkUsage.GetData());
+                WpfClientInfo.WriteInfoLog($"本次 dp2ssl 运行期间网络流量统计:\r\n{data}");
             }
 
             base.OnSessionEnding(e);
@@ -1139,8 +1139,8 @@ namespace dp2SSL
             // 2021/11/29
             // 网络流量统计
             {
-                var data = _networkUsage.GetData();
-                WpfClientInfo.WriteInfoLog($"本次 dp2ssl 运行期间({data.StartTime.ToString()}-{data.EndTime.ToString()})利用网络共发送字节 {StringUtil.GetLengthText(data.BytesSent)}，接收字节 {StringUtil.GetLengthText(data.BytesReceived)}");
+                var data = NetworkUsage.ToString(_networkUsage.GetData());
+                WpfClientInfo.WriteInfoLog($"本次 dp2ssl 运行期间网络流量统计:\r\n{data}");
             }
 
             _cancelApp?.Cancel();

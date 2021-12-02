@@ -167,6 +167,8 @@ out strError);
             }));
         }
 
+        List<string> _task_ids = new List<string>();
+
         void GetMd5(DownloadFilesEventArgs e)
         {
             string strError = "";
@@ -219,6 +221,7 @@ out strError);
                         filepath,
                         (MessagePromptEventHandler)null,
                         cancel.Token,
+                        _task_ids,
                         out byte[] server_md5,
                         out strError);
                     if (nRet != 1)

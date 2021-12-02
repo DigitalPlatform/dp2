@@ -479,6 +479,8 @@ out strError);
             // stop 对中断 MD5 会起作用
             Debug.Assert(stop != null, "");
 
+            List<string> task_ids = new List<string>();
+
             // 2020/2/26 改为 ...ByTask()
             // 检查 MD5
             // return:
@@ -508,6 +510,7 @@ out strError);
                     e1.ResultAction = prompt_func(channel, e1.MessageText, buttons, 20);
                 },
                 new System.Threading.CancellationToken(),
+                task_ids,
                 out byte[] server_md5,
                 out string strError); ;
             if (nRet != 1)

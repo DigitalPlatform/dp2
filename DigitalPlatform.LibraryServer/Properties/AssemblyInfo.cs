@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.98.*")]
-[assembly: AssemblyFileVersion("3.98.0.0")]
+[assembly: AssemblyVersion("3.99.*")]
+[assembly: AssemblyFileVersion("3.99.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -299,3 +299,5 @@ ItemCanReturn()
 //		3.98 (2021/11/24) library.xml 中增加 messageServer 元素用于定义 dp2mserver 消息服务器参数。当定义了消息服务器参数的情况下，
 //							dp2library 写入操作日志的时候会自动向 _dp2library_xxx 群发送一条通知消息，其它前端可以据此即时感知到操作日志的变动
 //							SetReaderInfo() API 会对账户权限 getreaderinfo:xxx 和 setreaderinfo 的情况返回“账户定义错误”(因为读字段权限范围小于写字段范围)，防止此时覆盖损坏读者记录
+//		3.99 (2021/11/30) GetRes() API 中 strStyle 中 getTaskResult 功能增加 dontRemove 参数，表示不删除 task
+//							另外 strStyle 增加了 removeTask 功能
