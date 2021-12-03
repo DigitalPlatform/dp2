@@ -361,8 +361,9 @@ namespace DigitalPlatform.LibraryClient
                         // 探测下载状态
                         // return:
                         //      -1  出错
-                        //      0   文件没有找到
-                        //      1   文件找到
+                        //      0   strServerPath 和 .~state 文件均没有找到
+                        //      1   .~state 文件找到
+                        //      2   strServerPath 文件找到
                         int nRet = DetectDownloadState(this.ServerFilePath,
                 out string strState,
                 out strError);
@@ -371,6 +372,11 @@ namespace DigitalPlatform.LibraryClient
                             strError = "探测状态文件过程出错: " + strError;
                             goto ERROR1;
                         }
+
+                        // 2021/12/3
+                        // 发现文件其实是存在的。重新去做普通文件处理
+                        if (nRet == 2)
+                            continue;
 
                         if (nRet == 0 && bNotFound)
                         {
@@ -639,8 +645,9 @@ namespace DigitalPlatform.LibraryClient
         // 探测下载状态
         // return:
         //      -1  出错
-        //      0   文件没有找到
-        //      1   文件找到
+        //      0   strServerPath 和 .~state 文件均没有找到
+        //      1   .~state 文件找到
+        //      2   strServerPath 文件找到
         int DetectDownloadState(string strServerPath,
             out string strResult,
             out string strError)
@@ -673,7 +680,11 @@ namespace DigitalPlatform.LibraryClient
             if (lRet == -1)
             {
                 if (this.Channel.ErrorCode == localhost.ErrorCode.NotFound)
-                    return 0;
+                {
+                    // xxx.~state 文件没有找到。需要再探测一下 xxx 文件是否存在?
+                    goto DETECT_FILE;
+                    // return 0;
+                }
 
                 if (this.Prompt != null
                     && !(this.Stop != null && this.Stop.IsStopped == true))
@@ -694,6 +705,46 @@ namespace DigitalPlatform.LibraryClient
             }
 
             return 1;
+            // 2021/12/3
+            // 探测不带有 .~state 的原始文件名这个文件是否存在
+            DETECT_FILE:
+            lRet = this.Channel.GetRes(
+    this.Stop,
+    strServerPath,
+    0,  // lStart
+    0,  // nPerLength
+    strStyle,
+    out byte [] baContent,
+    out strMetadata,
+    out strOutputPath,
+    out byte [] timestamp,
+    out strError);
+            if (lRet == -1)
+            {
+                if (this.Channel.ErrorCode == localhost.ErrorCode.NotFound)
+                {
+                    return 0;
+                }
+
+                if (this.Prompt != null
+                    && !(this.Stop != null && this.Stop.IsStopped == true))
+                {
+                    MessagePromptEventArgs e = new MessagePromptEventArgs();
+                    e.MessageText = "获得服务器文件 '" + strPath + "' 时发生错误： " + strError;
+                    e.Actions = "yes,no,cancel";
+                    this.Prompt(this, e);
+                    if (e.ResultAction == "cancel")
+                        return -1;
+                    else if (e.ResultAction == "yes")
+                        goto DETECT_FILE;
+                    else
+                        return -1;
+                }
+                else
+                    return -1;
+            }
+
+            return 2;
         }
 
         long DetectFileLength(long lStart,

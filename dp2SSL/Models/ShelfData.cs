@@ -7607,7 +7607,7 @@ TaskScheduler.Default);
 
         public override string ToString()
         {
-            return $"Action={Action},TransferDirection={TransferDirection},Location={Location},CurrentShelfNo={CurrentShelfNo},Operator=[{Operator}],Entity=[{ToString(this.Entity)}],BatchNo={BatchNo}";
+            return $"Action={Action},TransferDirection={TransferDirection},Location={Location},CurrentShelfNo={CurrentShelfNo},Operator=[{Operator}],Entity=[{ToString(this.Entity)}],BatchNo={BatchNo},State=[{State}],SyncErrorInfo=[{SyncErrorInfo}],SyncErrorCode=[{SyncErrorCode}],SyncCount=[{SyncCount}],SyncOperTime=[{SyncOperTime}],ID={ID},ActionString=[{ActionString}]";
         }
 
         public static string ToString(Entity entity)

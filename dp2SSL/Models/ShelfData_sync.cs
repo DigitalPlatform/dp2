@@ -383,8 +383,15 @@ TaskScheduler.Default);
             public DateTime LastSyncTime { get; set; }
             // 最近一次写入错误日志警告的时间(主要是希望不要太密集写入日志)
             public DateTime LastWriteLogTime { get; set; }
+
+            public DelayInfo()
+            {
+                LastSyncTime = DateTime.MinValue;
+                LastWriteLogTime = DateTime.MinValue;
+            }
         }
 
+        // 2021/12/2
         // 检查一个 group 是否应当拖延处理
         // 算法是，检查 group 的第一条记录是否为 normalerror 状态，并超过阈值同步次数
         static bool NeedDelay(List<ActionInfo> actions)
@@ -392,7 +399,6 @@ TaskScheduler.Default);
             if (actions.Count == 0)
                 return false;
             var first = actions[0];
-            // string pii = first.Entity.GetOiPii();
             string pii = GetUiiString(first.Entity);
 
             if (first.State == "normalerror" && first.SyncCount >= _delaySyncCountThreshold)
@@ -418,11 +424,15 @@ TaskScheduler.Default);
 
                 var now = DateTime.Now;
                 var delta = now - delay.LastSyncTime;
-                if (delta > _longSyncLength)
+                if (delay.LastSyncTime == DateTime.MinValue
+                    || delta > _longSyncLength)
                 {
                     // 立即同步
                     delay.LastSyncTime = DateTime.Now;
-                    WpfClientInfo.WriteInfoLog($"和册 {pii} 有关的同步动作 {first.ID} 在延迟 {delta.ToString()} 后被提交重试同步一次(是否同步成功请见 dp2ssl 本地动作库记录 {first.ID} 状态)。它是一个包含 {actions.Count} 个动作的 group 中的第一个动作。此动作详情如下：\r\n{first.ToString()}");
+                    if (delay.LastSyncTime == DateTime.MinValue)
+                        WpfClientInfo.WriteInfoLog($"和册 {pii} 有关的同步动作 {first.ID} 在 dp2ssl 启动后被提交重试同步一次(是否同步成功请见 dp2ssl 本地动作库记录 {first.ID} 状态)。它是一个包含 {actions.Count} 个动作的 group 中的第一个动作。此动作详情如下：\r\n{first.ToString()}");
+                    else
+                        WpfClientInfo.WriteInfoLog($"和册 {pii} 有关的同步动作 {first.ID} 在延迟 {delta.ToString()} 后被提交重试同步一次(是否同步成功请见 dp2ssl 本地动作库记录 {first.ID} 状态)。它是一个包含 {actions.Count} 个动作的 group 中的第一个动作。此动作详情如下：\r\n{first.ToString()}");
                     return false;
                 }
                 else
