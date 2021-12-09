@@ -821,7 +821,6 @@ namespace DigitalPlatform.rms.Client
                 out x,
                 out y);
             label_message.Text = "Ln " + Convert.ToString(y + 1) + "   Ch " + (x >= 0 ? Convert.ToString(x + 1) : "?");
-
         }
 
         private void CfgFileEditDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)

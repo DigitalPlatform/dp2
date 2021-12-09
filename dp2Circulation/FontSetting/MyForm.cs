@@ -1884,6 +1884,16 @@ out string strError)
             if (nRet == -1)
                 goto ERROR1;
 
+            // 2021/12/4
+            // 对于 USMARC 格式的记录，如果有 880 字段，则转为平行模式，并尽量采用其中的汉字内容
+            if (strMarcSyntax == "usmarc")
+            {
+                MarcRecord record = new MarcRecord(strMARC);
+                MarcQuery.ToParallel(record);
+
+                strMARC = record.Text;
+            }
+
             try
             {
                 nRet = filter.DoRecord(null,

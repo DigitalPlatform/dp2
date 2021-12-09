@@ -14,6 +14,13 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO;
 using System.Web;
+using System.Reflection;
+
+//using Z.Expressions;
+//using DynamicExpresso;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 
 using ClosedXML.Excel;
 
@@ -33,7 +40,6 @@ using DigitalPlatform.LibraryServer;
 using dp2Circulation.OperLog;
 using static dp2Circulation.OperLog.OperLogReport;
 using DigitalPlatform.dp2.Statis;
-using Z.Expressions;
 
 namespace dp2Circulation
 {
@@ -7084,6 +7090,11 @@ MessageBoxDefaultButton.Button1);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
+            // TODO: 要根据源代码的 MD5 来进行缓存，如果源代码没有发生改变，则沿用已有的 Assembly
+            var assembly = BuildAssembly(dlg.Script, out strError);
+            if (assembly == null)
+                goto ERROR1;
+
             int nRemoveCount = 0;
 
             this.ShowMessage("正在筛选 ...");
@@ -7125,8 +7136,19 @@ MessageBoxDefaultButton.Button1);
 
                     string strOperation = ListViewUtil.GetItemText(item, COLUMN_OPERATION);
 
+                    /*
                     var ret = Eval.Execute<bool>(dlg.Script, new { dom = dom, col_operation = strOperation });
-
+                    */
+                    /*
+                    // https://github.com/dynamicexpresso/DynamicExpresso
+                    var target = new Interpreter();
+                    target.SetVariable<XmlDocument>("dom", dom);
+                    target.SetVariable<string>("col_operation", strOperation);
+                    var ret = target.Eval<bool>(dlg.Script);
+                    */
+                    var ret = RunScript(assembly,
+    dom,
+    strOperation);
                     if (ret)
                         reserves.Add(item);
                 }
@@ -7157,6 +7179,140 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
+        #region Roslyn 脚本运行
+
+        static Assembly BuildAssembly(string script, out string strError)
+        {
+            strError = "";
+
+            string strCode = @"
+    using System;
+    using System.Windows.Forms;
+    using System.Xml;
+
+    namespace OperLogScript
+    {
+        public class Scripter
+        {
+            public bool Script(XmlDocument dom, string col_operation)
+            {
+"
+            + script
+            + @"
+            }
+        }
+    }
+";
+            try
+            {
+                return CreateAssembly(strCode, 10);
+            }
+            catch(Exception ex)
+            {
+                strError = ex.Message;
+                return null;
+            }
+        }
+
+        static bool RunScript(Assembly assembly,
+            XmlDocument dom,
+            string strOperation)
+        {
+            Type type = assembly.GetType("OperLogScript.Scripter");
+            object obj = Activator.CreateInstance(type);
+            return (bool)type.InvokeMember("Script",
+                BindingFlags.Default | BindingFlags.InvokeMethod,
+                null,
+                obj,
+                new object[] { dom, strOperation });
+        }
+
+
+        static Assembly CreateAssembly(string strCode,
+            int start_line_number)
+        {
+            var tree = SyntaxFactory.ParseSyntaxTree(strCode);
+            string fileName = Guid.NewGuid().ToString();
+
+            MetadataReference[] references = new MetadataReference[]
+{
+    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+    // MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+    MetadataReference.CreateFromFile(typeof(XmlDocument).Assembly.Location),
+    MetadataReference.CreateFromFile(typeof(Form).Assembly.Location)
+};
+
+            // A single, immutable invocation to the compiler
+            // to produce a library
+            var compilation = CSharpCompilation.Create(fileName)
+              .WithOptions(
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+              .AddReferences(references)
+              .AddSyntaxTrees(tree);
+
+            // string strBinDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);   //  Environment.CurrentDirectory;
+
+            // string path = Path.Combine(strBinDir/*Directory.GetCurrentDirectory()*/, fileName);
+
+            using (var stream = new MemoryStream())
+            {
+                EmitResult compilationResult = compilation.Emit(stream);
+
+                List<string> errors = new List<string>();
+                List<string> warnings = new List<string>();
+
+                if (compilationResult.Success)
+                {
+
+                    // Load the assembly
+                    // assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    return Assembly.Load(stream.ToArray());
+
+                    // return AssemblyLoadContext.Default.LoadFromStream(stream);
+                }
+                else
+                {
+                    foreach (Diagnostic codeIssue in compilationResult.Diagnostics)
+                    {
+                        int line_number = codeIssue.Location.GetLineSpan().StartLinePosition.Line;
+                        int line_character = codeIssue.Location.GetLineSpan().StartLinePosition.Character;
+
+                        line_number -= start_line_number;
+
+                        if (codeIssue.Severity == DiagnosticSeverity.Error)
+                        {
+                            string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()}, 行: {line_number} 字符: {line_character}, Severity: { codeIssue.Severity}";
+                            errors.Add(issue);
+                        }
+                        else
+                        {
+                            string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()}, 行: {line_number} 字符: {line_character}, Severity: { codeIssue.Severity}";
+                            warnings.Add(issue);
+                        }
+                    }
+                }
+
+                if (errors.Count > 0)
+                {
+                    string error = string.Join("\r\n", errors);
+                    throw new Exception(error);
+                }
+
+                /*
+                if (errors.Count > 0)
+                {
+                    strError = StringUtil.MakePathList(errors, "\r\n");
+                    return -1;
+                }
+
+                strWarning = StringUtil.MakePathList(warnings, "\r\n");
+                */
+                return null;
+            }
+        }
+
+        #endregion
 
         // 筛选
         void menu_filter_Click(object sender, EventArgs e)

@@ -34,8 +34,8 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 // https://stackoverflow.com/questions/53782085/visual-studio-assemblyversion-with-dont-work
-[assembly: AssemblyVersion("1.4.4")]
-[assembly: AssemblyFileVersion("1.4.4.0")]
+[assembly: AssemblyVersion("1.4.5")]
+[assembly: AssemblyFileVersion("1.4.5.0")]
 
 // v1.1 (2020/2/25) 获取 MD5 采用了新的任务方式。会检查 dp2library 的版本号是否为 3.23 以上
 // v1.2 (2020/2/26) 服务器管理对话框里面增加了 UID 列，新增服务器节点时会检查 UID 是否重复，重复的不允许加入
@@ -55,3 +55,4 @@ using System.Runtime.InteropServices;
 //                      书柜查询窗的时间范围值可以输入类似 20200101 这样的表示一天范围的值了
 //      1.4.3 (2021/9/7) 书柜查询窗增加命令按钮。可以执行 write tag 命令。用的是点对点 SetInfo() API
 //      1.4.4 (2021/12/1) GetRes() API 的获得服务器文件 MD5 码的功能，在面对 dp2library 3.99 以上版本时，改用 getTaskResult,dontRemove，并且启动任务也改用 beginTask:xxxx 方式
+//      1.4.5 (2021/12/6) 以前版本下载文件时探测 .~state 文件过程逻辑有缺陷。最新版增加了找不到 .~state 文件以后再探测一次原始文件是否存在的步骤

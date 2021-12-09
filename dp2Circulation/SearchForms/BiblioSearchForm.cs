@@ -9840,7 +9840,6 @@ message,
                         if (string.IsNullOrEmpty(strRecPath) == true)
                             continue;
 
-
                         stop.SetMessage("正在获取书目记录 " + strRecPath);
 
                         long lRet = Channel.GetBiblioInfos(

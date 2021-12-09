@@ -33,6 +33,7 @@
             this.button_Cancel = new System.Windows.Forms.Button();
             this.textBox_script = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.label_message = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button_OK
@@ -67,6 +68,7 @@
             this.textBox_script.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_script.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_script.Location = new System.Drawing.Point(22, 35);
             this.textBox_script.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_script.MaxLength = 0;
@@ -75,6 +77,8 @@
             this.textBox_script.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_script.Size = new System.Drawing.Size(824, 352);
             this.textBox_script.TabIndex = 7;
+            this.textBox_script.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBox_script_KeyUp);
+            this.textBox_script.MouseUp += new System.Windows.Forms.MouseEventHandler(this.textBox_script_MouseUp);
             // 
             // label3
             // 
@@ -86,6 +90,14 @@
             this.label3.TabIndex = 6;
             this.label3.Text = "脚本:";
             // 
+            // label_message
+            // 
+            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_message.Location = new System.Drawing.Point(22, 396);
+            this.label_message.Name = "label_message";
+            this.label_message.Size = new System.Drawing.Size(534, 57);
+            this.label_message.TabIndex = 8;
+            // 
             // OperLogScriptDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -93,6 +105,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(873, 462);
+            this.Controls.Add(this.label_message);
             this.Controls.Add(this.textBox_script);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.button_Cancel);
@@ -112,5 +125,6 @@
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.TextBox textBox_script;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label_message;
     }
 }

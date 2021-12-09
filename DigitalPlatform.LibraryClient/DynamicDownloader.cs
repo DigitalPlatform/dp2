@@ -139,6 +139,8 @@ namespace DigitalPlatform.LibraryClient
 
         // parameters:
         //      getMd5NewStyle  获得服务器文件 MD5 的时候是否使用新轮询风格? (注：只能对 dp2library 本地文件用新轮询风格)
+        // exceptions:
+        //      创建文件时可能抛出 DirectoryNotFoundException
         public Task StartDownload(bool bContinue,
             bool getMd5NewStyle = false)
         {

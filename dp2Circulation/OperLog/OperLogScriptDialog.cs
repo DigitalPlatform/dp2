@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 
@@ -65,6 +65,27 @@ namespace dp2Circulation
             {
                 this.textBox_script.Text = value;
             }
+        }
+
+        void DisplayCurLineNo()
+        {
+            int x = 0;
+            int y = 0;
+            API.GetEditCurrentCaretPos(
+                this.textBox_script,
+                out x,
+                out y);
+            label_message.Text = "Ln " + Convert.ToString(y + 1) + "   Ch " + (x >= 0 ? Convert.ToString(x + 1) : "?");
+        }
+
+        private void textBox_script_MouseUp(object sender, MouseEventArgs e)
+        {
+            DisplayCurLineNo();
+        }
+
+        private void textBox_script_KeyUp(object sender, KeyEventArgs e)
+        {
+            DisplayCurLineNo();
         }
     }
 }

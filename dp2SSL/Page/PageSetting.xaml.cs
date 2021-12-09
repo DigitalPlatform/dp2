@@ -1345,11 +1345,11 @@ MessageBoxOptions.DefaultDesktopOnly);
             // ping dp2003.com
             var ret = NetUtil.Ping("dp2003.com", out string strInfomation);
             if (ret == false)
-                App.ErrorBox("检测网络", "网络不通");
+                App.ErrorBox("检测网络(功能尚未完成)", "网络不通");
             else
-                App.ErrorBox("检测网络", "网络通畅", "green");
+                App.ErrorBox("检测网络(功能尚未完成)", "网络通畅", "green");
 
-            // 尝试连接 dp2library
+            // TODO: 尝试连接 dp2library
         }
 
         // 2020/12/3

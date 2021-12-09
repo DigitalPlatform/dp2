@@ -1026,7 +1026,16 @@ MessageBoxDefaultButton.Button1);
                 RemoveDownloader(downloader);
             });
 
-            downloader.StartDownload(bAppend);
+            try
+            {
+                _ = downloader.StartDownload(bAppend);
+            }
+            catch(Exception ex)
+            {
+                strError = $"开始下载时出现异常: {ex.Message}";
+                WriteErrorLog($"开始下载时出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                return -1;
+            }
             return 1;
         }
 
@@ -1227,7 +1236,7 @@ MessageBoxDefaultButton.Button1);
                     current_downloaders.Add(downloader);
                 }
 
-                Task.Factory.StartNew(() => SequenceDownloadFiles(current_downloaders,
+                _ = Task.Factory.StartNew(async () => await SequenceDownloadFilesAsync(current_downloaders,
                     bAppend,
                     (bError) =>
                     {
@@ -1281,7 +1290,7 @@ MessageBoxDefaultButton.Button1);
         public delegate void Delegate_end(bool bError);
 
         // 顺序执行每个 DynamicDownloader
-        void SequenceDownloadFiles(List<DynamicDownloader> downloaders,
+        private async Task SequenceDownloadFilesAsync(List<DynamicDownloader> downloaders,
             bool bAppend,
             Delegate_end func_end)
         {
@@ -1300,8 +1309,11 @@ MessageBoxDefaultButton.Button1);
                     dlg.TargetFilePath = downloader.LocalFilePath;
                     dlg.Text = "正在下载 " + strNo + dlg.SourceFilePath;
                 }));
+                /*
                 Task task = downloader.StartDownload(bAppend);
                 task.Wait();    // TODO: 这里要允许中断
+                */
+                await downloader.StartDownload(bAppend);    // 2021/12/8 改为 await
                 if (downloader.IsCancellationRequested)
                 {
                     bError = true;
