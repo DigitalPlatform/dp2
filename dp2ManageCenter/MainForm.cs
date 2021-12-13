@@ -4210,7 +4210,7 @@ string strHtml)
 
                             if (func_end != null)
                                 func_end(bError);
-                        });
+                        }).ConfigureAwait(false);
                     if (result.Value == -1)
                         return result;
 #if NO
@@ -4332,7 +4332,7 @@ string strHtml)
                         SetItemText(item, OPERLOG_COLUMN_STATE, $"正在下载 {strNo} {downloader.ServerFilePath}");
                     }));
                     // 下载。包含 MD5 校验过程
-                    await downloader.StartDownload(bAppend, true);
+                    await downloader.StartDownload(bAppend, true).ConfigureAwait(false);
                     if (downloader.IsCancellationRequested
                         || token.IsCancellationRequested)
                     {

@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.51.*")]
-[assembly: AssemblyFileVersion("3.51.0.0")]
+[assembly: AssemblyVersion("3.52.*")]
+[assembly: AssemblyFileVersion("3.52.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -134,3 +134,4 @@ using System.Runtime.InteropServices;
 // 3.49 2021/11/8 “掌纹识别”浮动窗口功能正式发布
 // 3.50 2021/11/22 修正快捷出纳窗中 textbox 输入 PQR: (读者证二维码) 无法识别的 bug
 // 3.51 2021/12/9 日志窗里面的“智能筛选”改用 Roslyn 实现。大备份和系统管理窗“内核”属性页的下载服务器文件功能做了(探测 .~state 时)算法改进
+// 3.52 2021/12/13 ReaderInfoForm 中增加 ConvertDt1000ReaderMarcToXml() 函数，提供转换 dt1000 读者 MARC 到 dp2 读者 XML 格式的功能，方便二次开发脚本调用

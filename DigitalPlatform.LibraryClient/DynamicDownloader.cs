@@ -361,23 +361,31 @@ namespace DigitalPlatform.LibraryClient
                     {
                         // 探测文件状态。
                         // 探测下载状态
+                        // parameters:
+                        //      origin_file_found   当本函数返回 0 时，进一步返回原始文件(也就是没有 .~state 扩展名的那个文件 strServerPath)是否找到。true 表示找到
+                        //      strResult   返回 .~state 文件内容
                         // return:
                         //      -1  出错
-                        //      0   strServerPath 和 .~state 文件均没有找到
+                        //      0   .~state 文件均没有找到
                         //      1   .~state 文件找到
-                        //      2   strServerPath 文件找到
                         int nRet = DetectDownloadState(this.ServerFilePath,
-                out string strState,
-                out strError);
+                            out bool origin_file_found,
+                            out string strState,
+                            out strError);
                         if (nRet == -1)
                         {
                             strError = "探测状态文件过程出错: " + strError;
                             goto ERROR1;
                         }
 
-                        // 2021/12/3
+                        /*
+                        if (nRet == 2 && lStart >= lRet)
+                            nRet = 0;
+                        */
+
+                        // 2021/12/10
                         // 发现文件其实是存在的。重新去做普通文件处理
-                        if (nRet == 2)
+                        if (bNotFound == true && origin_file_found == true)
                             continue;
 
                         if (nRet == 0 && bNotFound)
@@ -645,17 +653,21 @@ namespace DigitalPlatform.LibraryClient
         }
 
         // 探测下载状态
+        // parameters:
+        //      origin_file_found   当本函数返回 0 时，进一步返回原始文件(也就是没有 .~state 扩展名的那个文件 strServerPath)是否找到。true 表示找到
+        //      strResult   返回 .~state 文件内容
         // return:
         //      -1  出错
-        //      0   strServerPath 和 .~state 文件均没有找到
+        //      0   .~state 文件均没有找到
         //      1   .~state 文件找到
-        //      2   strServerPath 文件找到
         int DetectDownloadState(string strServerPath,
+            out bool origin_file_found,
             out string strResult,
             out string strError)
         {
             strError = "";
             strResult = "";
+            origin_file_found = false;
 
             string strPath = strServerPath + ".~state"; // LibraryServerUtil.STATE_EXTENSION
 
@@ -745,8 +757,8 @@ namespace DigitalPlatform.LibraryClient
                 else
                     return -1;
             }
-
-            return 2;
+            origin_file_found = true;
+            return 0;
         }
 
         long DetectFileLength(long lStart,

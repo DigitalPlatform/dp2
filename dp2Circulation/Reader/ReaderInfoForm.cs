@@ -33,6 +33,8 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using System.Linq;
+using DigitalPlatform.Marc;
+using System.Globalization;
 
 namespace dp2Circulation
 {
@@ -7344,7 +7346,7 @@ MessageBoxDefaultButton.Button1);
             RegisterPalmprintDialog dlg = new RegisterPalmprintDialog();
             dlg.FormClosed += (s, e) =>
             {
-                { 
+                {
                     if (MainForm.AppInfo != null)
                         MainForm.AppInfo.UnlinkFormState(dlg);
                 }
@@ -7637,5 +7639,1286 @@ MessageBoxDefaultButton.Button1);
             AddImportantField("palmprint");
         }
 
+
+        #region 将 dt1000 读者 MARC 记录转换为 dp2 的 XML 格式
+
+        public static int ConvertDt1000ReaderMarcToXml(MarcRecord record,
+            out XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+            string strWarning = "";
+            int nRet = 0;
+
+            dom = new XmlDocument();
+            dom.LoadXml("<root />");
+
+            // 读者证条码
+            string strBarcode = "";
+
+            // 以字段/子字段名从记录中得到第一个子字段内容。
+            // parameters:
+            //		strMARC	机内格式MARC记录
+            //		strFieldName	字段名。内容为字符
+            //		strSubfieldName	子字段名。内容为1字符
+            // return:
+            //		""	空字符串。表示没有找到指定的字段或子字段。
+            //		其他	子字段内容。注意，这是子字段纯内容，其中并不包含子字段名。
+            strBarcode = record.select("field[@name='100']/subfield[@name='a']").FirstContent;
+
+            if (String.IsNullOrEmpty(strBarcode) == true)
+            {
+                strWarning += "MARC记录中缺乏100$a读者证条码号; ";
+            }
+            else
+            {
+                strBarcode = strBarcode.ToUpper();
+            }
+
+            DomUtil.SetElementText(dom.DocumentElement, "barcode", strBarcode);
+
+
+            // 证号
+            // 2008/10/14 new add
+            string strCardNumber = "";
+
+            strCardNumber = record.select("field[@name='100']/subfield[@name='b']").FirstContent;
+            if (String.IsNullOrEmpty(strCardNumber) == false)
+                DomUtil.SetElementText(dom.DocumentElement, "cardNumber", strCardNumber);
+
+            // 密码
+            string strPassword = record.select("field[@name='080']/subfield[@name='a']").FirstContent;
+            if (String.IsNullOrEmpty(strPassword) == false)
+            {
+                try
+                {
+                    // TODO:
+                    strPassword = Cryptography.GetSHA1(strPassword);
+                }
+                catch
+                {
+                    strError = "将密码明文转换为SHA1时发生错误";
+                    return -1;
+                }
+
+                DomUtil.SetElementText(dom.DocumentElement, "password", strPassword);
+            }
+
+            // 读者类型
+            string strReaderType = record.select("field[@name='110']/subfield[@name='a']").FirstContent;
+
+            DomUtil.SetElementText(dom.DocumentElement, "readerType", strReaderType);
+
+            /*
+            // 发证日期
+            DomUtil.SetElementText(dom.DocumentElement, "createDate", strCreateDate);
+             * */
+
+            // 失效期
+            string strExpireDate = record.select("field[@name='110']/subfield[@name='d']").FirstContent;
+
+            if (String.IsNullOrEmpty(strExpireDate) == false)
+            {
+                string strToday = DateTimeUtil.DateTimeToString8(DateTime.Now);
+
+                // 2009/2/26 new add
+                // 兼容4/6字符形态
+                if (strExpireDate.Length == 4)
+                {
+                    strExpireDate = strExpireDate + "0101";
+                }
+                else if (strExpireDate.Length == 6)
+                {
+                    strExpireDate = strExpireDate + "01";
+                }
+
+                if (strExpireDate.Length != 8)
+                {
+                    strWarning += "110$d中的失效期  '" + strExpireDate + "' 应为8字符。升级程序自动以 " + strToday + " 充当失效期; ";
+                    strExpireDate = strToday;   // 2008/8/26 new add
+                }
+
+                Debug.Assert(strExpireDate.Length == 8, "");
+
+                {
+                    string strTarget = "";
+                    nRet = Date8toRfc1123(strExpireDate,
+                        out strTarget,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strWarning += "MARC数据中110$d日期字符串转换格式为rfc1123时发生错误: " + strError;
+                        strExpireDate = strToday;   // 2008/8/26 new add
+
+                        // 2008/10/28 new add
+                        nRet = Date8toRfc1123(strExpireDate,
+                            out strTarget,
+                            out strError);
+                        Debug.Assert(nRet != -1, "");
+                    }
+
+                    strExpireDate = strTarget;
+                }
+
+
+                DomUtil.SetElementText(dom.DocumentElement, "expireDate", strExpireDate);
+            }
+
+            // 押金
+            // 2008/11/13 new add
+            string strForegift = record.select("field[@name='110']/subfield[@name='e']").FirstContent;
+
+            if (String.IsNullOrEmpty(strForegift) == false)
+            {
+                long foregift = 0;
+                try
+                {
+                    foregift = Convert.ToInt64(strForegift);
+                }
+                catch (Exception /*ex*/)
+                {
+                    strWarning += "MARC数据中110$e押金字符串 '" + strForegift + "' 格式错误";
+                    strForegift = "";
+                    goto SKIP_COMPUTE_FOREGIFT;
+                }
+
+                double new_foregift = (double)foregift / (double)100;
+                strForegift = "CNY" + new_foregift.ToString();
+            }
+
+        SKIP_COMPUTE_FOREGIFT:
+            if (String.IsNullOrEmpty(strForegift) == false)
+            {
+                DomUtil.SetElementText(dom.DocumentElement, "foregift", strForegift);
+            }
+
+
+            // 停借原因
+            string strState = record.select("field[@name='982']/subfield[@name='b']").FirstContent;
+
+            if (String.IsNullOrEmpty(strState) == false)
+            {
+                DomUtil.SetElementText(dom.DocumentElement, "state", strState);
+            }
+
+            // 姓名
+            string strName = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+            if (String.IsNullOrEmpty(strName) == true)
+            {
+                strWarning += "MARC记录中缺乏200$a读者姓名; ";
+            }
+
+            DomUtil.SetElementText(dom.DocumentElement, "name", strName);
+
+            // 姓名拼音
+            string strNamePinyin = record.select("field[@name='200']/subfield[@name='A']").FirstContent;
+
+            if (String.IsNullOrEmpty(strNamePinyin) == false)
+            {
+                DomUtil.SetElementText(dom.DocumentElement, "namePinyin", strNamePinyin);
+            }
+
+            // 性别
+            string strGender = record.select("field[@name='200']/subfield[@name='b']").FirstContent;
+
+            DomUtil.SetElementText(dom.DocumentElement, "gender", strGender);
+
+            /*
+            // 生日
+            // 2008/10/14 new add 未证实
+            string strBirthday = "";
+            strBirthday = MarcUtil.GetFirstSubfield(strMARC,
+                "200",
+                "c");
+
+            DomUtil.SetElementText(dom.DocumentElement, "birthday", strBirthday);
+             * */
+
+            // 身份证号
+
+            // 单位
+            string strDepartment = record.select("field[@name='300']/subfield[@name='a']").FirstContent;
+
+            DomUtil.SetElementText(dom.DocumentElement, "department", strDepartment);
+
+            // 地址
+            string strAddress = record.select("field[@name='400']/subfield[@name='b']").FirstContent;
+
+            DomUtil.SetElementText(dom.DocumentElement, "address", strAddress);
+
+            // 邮政编码
+            string strZipCode = record.select("field[@name='400']/subfield[@name='a']").FirstContent;
+            if (string.IsNullOrEmpty(strZipCode) == false)
+                DomUtil.SetElementText(dom.DocumentElement, "zipcode", strZipCode);
+
+            // 电话
+            string strTel = record.select("field[@name='300']/subfield[@name='b']").FirstContent;
+            if (string.IsNullOrEmpty(strTel) == false)
+                DomUtil.SetElementText(dom.DocumentElement, "tel", strTel);
+
+            // email
+
+            // 所借阅的各册
+            string strField986 = "";
+            string strNextFieldName = "";
+            // 从记录中得到一个字段
+            // parameters:
+            //		strMARC		机内格式MARC记录
+            //		strFieldName	字段名。如果本参数==null，表示想获取任意字段中的第nIndex个
+            //		nIndex		同名字段中的第几个。从0开始计算(任意字段中，序号0个则表示头标区)
+            //		strField	[out]输出字段。包括字段名、必要的字段指示符、字段内容。不包含字段结束符。
+            //					注意头标区当作一个字段返回，此时strField中不包含字段名，其中一开始就是头标区内容
+            //		strNextFieldName	[out]顺便返回所找到的字段其下一个字段的名字
+            // return:
+            //		-1	出错
+            //		0	所指定的字段没有找到
+            //		1	找到。找到的字段返回在strField参数中
+            nRet = MarcUtil.GetField(record.Text,
+    "986",
+    0,
+    out strField986,
+    out strNextFieldName);
+            if (nRet == -1)
+            {
+                strError = "从MARC记录中获得986字段时出错";
+                return -1;
+            }
+            if (nRet == 1)
+            {
+                XmlNode nodeBorrows = dom.CreateElement("borrows");
+                nodeBorrows = dom.DocumentElement.AppendChild(nodeBorrows);
+
+                string strWarningParam = "";
+                nRet = CreateBorrowsNode(nodeBorrows,
+                    strField986,
+                    out strWarningParam,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "根据986字段内容创建<borrows>节点时出错: " + strError;
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strWarningParam) == false)
+                    strWarning += strWarningParam + "; ";
+
+            }
+
+
+            string strField988 = "";
+            // 违约金记录
+            nRet = MarcUtil.GetField(record.Text,
+    "988",
+    0,
+    out strField988,
+    out strNextFieldName);
+            if (nRet == -1)
+            {
+                strError = "从MARC记录中获得988字段时出错";
+                return -1;
+            }
+            if (nRet == 1)
+            {
+                XmlNode nodeOverdues = dom.CreateElement("overdues");
+                nodeOverdues = dom.DocumentElement.AppendChild(nodeOverdues);
+
+                string strWarningParam = "";
+                nRet = CreateOverduesNode(nodeOverdues,
+                    strField988,
+                    out strWarningParam,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "根据988字段内容创建<overdues>节点时出错: " + strError;
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strWarningParam) == false)
+                    strWarning += strWarningParam + "; ";
+
+            }
+
+
+            string strField984 = "";
+            // 预约信息
+            nRet = MarcUtil.GetField(record.Text,
+    "984",
+    0,
+    out strField984,
+    out strNextFieldName);
+            if (nRet == -1)
+            {
+                strError = "从MARC记录中获得984字段时出错";
+                return -1;
+            }
+            if (nRet == 1)
+            {
+                XmlNode nodeReservations = dom.CreateElement("reservations");
+                nodeReservations = dom.DocumentElement.AppendChild(nodeReservations);
+
+                string strWarningParam = "";
+                nRet = CreateReservationsNode(nodeReservations,
+                    strField984,
+                    out strWarningParam,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "根据984字段内容创建<reservations>节点时出错: " + strError;
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strWarningParam) == false)
+                    strWarning += strWarningParam + "; ";
+
+            }
+
+            string strField989 = "";
+            // 借阅历史
+            nRet = MarcUtil.GetField(record.Text,
+    "989",
+    0,
+    out strField989,
+    out strNextFieldName);
+            if (nRet == -1)
+            {
+                strError = "从MARC记录中获得989字段时出错";
+                return -1;
+            }
+            if (nRet == 1)
+            {
+                XmlNode nodeBorrowHistory = dom.CreateElement("borrowHistory");
+                nodeBorrowHistory = dom.DocumentElement.AppendChild(nodeBorrowHistory);
+
+                string strWarningParam = "";
+                nRet = CreateBorrowHistoryNode(nodeBorrowHistory,
+                    strField989,
+                    out strWarningParam,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "根据989字段内容创建<borrowHistory>节点时出错: " + strError;
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strWarningParam) == false)
+                    strWarning += strWarningParam + "; ";
+
+            }
+
+            // 遮盖MARC记录中的808$a内容
+            strPassword = record.select("field[@name='080']/subfield[@name='a']").FirstContent;
+            if (String.IsNullOrEmpty(strPassword) == false)
+            {
+                record.setFirstSubfield("080", "a", "********");
+            }
+
+            // 保留原始记录供参考
+            {
+                // 删除 997 字段
+                record.select("field[@name='997']").detach();
+
+                string strPlainText = record.Text.Replace(MarcUtil.SUBFLD, '$');
+                strPlainText = strPlainText.Replace(new String(MarcUtil.FLDEND, 1), "#\r\n");
+                if (strPlainText.Length > 24)
+                    strPlainText = strPlainText.Insert(24, "\r\n");
+
+                DomUtil.SetElementText(dom.DocumentElement, "originMARC", strPlainText);
+            }
+
+            strError = strWarning;
+            return 0;
+        }
+
+        public static string HtmlEncode(string text)
+        {
+           return HttpUtility.HtmlEncode(text);
+        }
+
+        public static int Date8toRfc1123(string strOrigin,
+out string strTarget,
+out string strError)
+        {
+            strError = "";
+            strTarget = "";
+
+            // strOrigin = strOrigin.Replace("-", "");
+
+            // 格式为 20060625， 需要转换为rfc
+            if (strOrigin.Length != 8)
+            {
+                strError = "源日期字符串 '" + strOrigin + "' 格式不正确，应为8字符";
+                return -1;
+            }
+
+
+            IFormatProvider culture = new CultureInfo("zh-CN", true);
+
+            DateTime time;
+            try
+            {
+                time = DateTime.ParseExact(strOrigin, "yyyyMMdd", culture);
+            }
+            catch
+            {
+                strError = "日期字符串 '" + strOrigin + "' 字符串转换为DateTime对象时出错";
+                return -1;
+            }
+
+            time = time.ToUniversalTime();
+            strTarget = DateTimeUtil.Rfc1123DateTimeString(time);
+
+
+            return 0;
+        }
+
+        // 创建<borrows>节点的下级内容
+        static int CreateBorrowsNode(XmlNode nodeBorrows,
+            string strField986,
+            // int nEntityBarcodeLength,
+            out string strWarning,
+            out string strError)
+        {
+            strError = "";
+            strWarning = "";
+
+            int nRet = 0;
+
+            // 进行子字段组循环
+            for (int g = 0; ; g++)
+            {
+                string strGroup = "";
+                // 从字段中得到子字段组
+                // parameters:
+                //		strField	字段。其中包括字段名、必要的指示符，字段内容。也就是调用GetField()函数所得到的字段。
+                //		nIndex	子字段组序号。从0开始计数。
+                //		strGroup	[out]得到的子字段组。其中包括若干子字段内容。
+                // return:
+                //		-1	出错
+                //		0	所指定的子字段组没有找到
+                //		1	找到。找到的子字段组返回在strGroup参数中
+                nRet = MarcUtil.GetGroup(strField986,
+                    g,
+                    out strGroup);
+                if (nRet == -1)
+                {
+                    strError = "从MARC记录字段中获得子字段组 " + Convert.ToString(g) + " 时出错";
+                    return -1;
+                }
+
+                if (nRet == 0)
+                    break;
+
+                string strSubfield = "";
+                string strNextSubfieldName = "";
+
+                string strBarcode = "";
+
+                // 从字段或子字段组中得到一个子字段
+                // parameters:
+                //		strText		字段内容，或者子字段组内容。
+                //		textType	表示strText中包含的是字段内容还是组内容。若为ItemType.Field，表示strText参数中为字段；若为ItemType.Group，表示strText参数中为子字段组。
+                //		strSubfieldName	子字段名，内容为1位字符。如果==null，表示任意子字段
+                //					形式为'a'这样的。
+                //		nIndex			想要获得同名子字段中的第几个。从0开始计算。
+                //		strSubfield		[out]输出子字段。子字段名(1字符)、子字段内容。
+                //		strNextSubfieldName	[out]下一个子字段的名字，内容一个字符
+                // return:
+                //		-1	出错
+                //		0	所指定的子字段没有找到
+                //		1	找到。找到的子字段返回在strSubfield参数中
+                nRet = MarcUtil.GetSubfield(strGroup,
+                    ItemType.Group,
+                    "a",
+                    0,
+                    out strSubfield,
+                    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strBarcode = strSubfield.Substring(1);
+
+                }
+
+                if (String.IsNullOrEmpty(strBarcode) == true)
+                    continue;
+
+                /*
+                // return:
+                //      -1  error
+                //      0   OK
+                //      1   Invalid
+                nRet = VerifyBarcode(
+                    false,
+                    strBarcode,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (nRet != 0)
+                {
+                    strWarning += "986字段中 册条码 '" + strBarcode + "' 不合法 -- " + strError + "; ";
+                }
+                 * */
+                strBarcode = strBarcode.ToUpper();  // 2008/10/24 new add
+
+                XmlNode nodeBorrow = nodeBorrows.OwnerDocument.CreateElement("borrow");
+                nodeBorrow = nodeBorrows.AppendChild(nodeBorrow);
+
+                DomUtil.SetAttr(nodeBorrow, "barcode", strBarcode);
+
+                // borrowDate属性
+                // 第一次借书日期
+                string strBorrowDate = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "t",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strBorrowDate = strSubfield.Substring(1);
+
+                    if (strBorrowDate.Length != 8)
+                    {
+                        strWarning += "986$t子字段内容 '" + strBorrowDate + "' 的长度不是8字符; ";
+                    }
+
+                }
+
+                if (String.IsNullOrEmpty(strBorrowDate) == false)
+                {
+                    string strTarget = "";
+                    nRet = Date8toRfc1123(strBorrowDate,
+                        out strTarget,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strWarning += "986字段中$t日期字符串转换格式为rfc1123时发生错误: " + strError;
+                        strBorrowDate = "";
+                    }
+                    else
+                    {
+                        strBorrowDate = strTarget;
+                    }
+
+                }
+
+                if (String.IsNullOrEmpty(strBorrowDate) == false)
+                {
+                    DomUtil.SetAttr(nodeBorrow, "borrowDate", strBorrowDate);
+                }
+
+                // no属性
+                // 从什么数字开始计数？
+                string strNo = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "y",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strNo = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strNo) == false)
+                {
+                    DomUtil.SetAttr(nodeBorrow, "no", strNo);
+                }
+
+
+
+
+                // borrowPeriod属性
+
+                // 根据应还日期计算出来?
+
+                // 应还日期
+                string strReturnDate = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "v",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strReturnDate = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strReturnDate) == false)
+                {
+                    if (strReturnDate.Length != 8)
+                    {
+                        strWarning += "986$v子字段内容 '" + strReturnDate + "' 的长度不是8字符; ";
+                    }
+                }
+                else
+                {
+                    if (strBorrowDate != "")
+                    {
+                        strWarning += "986字段中子字段组 " + Convert.ToString(g + 1) + " 有 $t 子字段内容而没有 $v 子字段内容, 不正常; ";
+                    }
+                }
+
+                if (String.IsNullOrEmpty(strReturnDate) == false)
+                {
+                    string strTarget = "";
+                    nRet = Date8toRfc1123(strReturnDate,
+                        out strTarget,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strWarning += "986字段中$v日期字符串转换格式为rfc1123时发生错误: " + strError;
+                        strReturnDate = "";
+                    }
+                    else
+                    {
+                        strReturnDate = strTarget;
+                    }
+                }
+
+                if (String.IsNullOrEmpty(strReturnDate) == false
+                    && String.IsNullOrEmpty(strBorrowDate) == false)
+                {
+                    // 计算差额天数
+                    DateTime timestart = DateTimeUtil.FromRfc1123DateTimeString(strBorrowDate);
+                    DateTime timeend = DateTimeUtil.FromRfc1123DateTimeString(strReturnDate);
+
+                    TimeSpan delta = timeend - timestart;
+
+                    string strBorrowPeriod = Convert.ToString(delta.TotalDays) + "day";
+                    DomUtil.SetAttr(nodeBorrow, "borrowPeriod", strBorrowPeriod);
+                }
+
+                // 续借的日期
+                if (strNo != "")
+                {
+                    string strRenewDate = "";
+                    nRet = MarcUtil.GetSubfield(strGroup,
+                        ItemType.Group,
+                        "x",
+                        0,
+                        out strSubfield,
+                        out strNextSubfieldName);
+                    if (strSubfield.Length >= 1)
+                    {
+                        strRenewDate = strSubfield.Substring(1);
+
+                        if (strRenewDate.Length != 8)
+                        {
+                            strWarning += "986$x子字段内容 '" + strRenewDate + "' 的长度不是8字符; ";
+                        }
+                    }
+
+                    if (String.IsNullOrEmpty(strRenewDate) == false)
+                    {
+                        string strTarget = "";
+                        nRet = Date8toRfc1123(strRenewDate,
+                            out strTarget,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strWarning += "986字段中$x日期字符串转换格式为rfc1123时发生错误: " + strError;
+                            strRenewDate = "";
+                        }
+                        else
+                        {
+                            strRenewDate = strTarget;
+                        }
+                    }
+
+                    if (String.IsNullOrEmpty(strRenewDate) == false)
+                    {
+                        DomUtil.SetAttr(nodeBorrow, "borrowDate", strRenewDate);
+                    }
+
+                    if (String.IsNullOrEmpty(strRenewDate) == false
+    && String.IsNullOrEmpty(strReturnDate) == false)    // && String.IsNullOrEmpty(strBorrowDate) == false
+                    {
+                        // 重新计算差额天数
+                        DateTime timestart = DateTimeUtil.FromRfc1123DateTimeString(strRenewDate);
+                        DateTime timeend = DateTimeUtil.FromRfc1123DateTimeString(strReturnDate);
+
+                        TimeSpan delta = timeend - timestart;
+
+                        string strBorrowPeriod = Convert.ToString(delta.TotalDays) + "day";
+                        DomUtil.SetAttr(nodeBorrow, "borrowPeriod", strBorrowPeriod);
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        // 创建<overdues>节点的下级内容
+        static int CreateOverduesNode(XmlNode nodeOverdues,
+            string strField988,
+            // int nEntityBarcodeLength,
+            out string strWarning,
+            out string strError)
+        {
+            strError = "";
+            strWarning = "";
+
+            int nRet = 0;
+
+            // 进行子字段组循环
+            for (int g = 0; ; g++)
+            {
+                string strGroup = "";
+                // 从字段中得到子字段组
+                // parameters:
+                //		strField	字段。其中包括字段名、必要的指示符，字段内容。也就是调用GetField()函数所得到的字段。
+                //		nIndex	子字段组序号。从0开始计数。
+                //		strGroup	[out]得到的子字段组。其中包括若干子字段内容。
+                // return:
+                //		-1	出错
+                //		0	所指定的子字段组没有找到
+                //		1	找到。找到的子字段组返回在strGroup参数中
+                nRet = MarcUtil.GetGroup(strField988,
+                    g,
+                    out strGroup);
+                if (nRet == -1)
+                {
+                    strError = "从MARC记录字段中获得子字段组 " + Convert.ToString(g) + " 时出错";
+                    return -1;
+                }
+
+                if (nRet == 0)
+                    break;
+
+                string strSubfield = "";
+                string strNextSubfieldName = "";
+
+                string strBarcode = "";
+
+                // 从字段或子字段组中得到一个子字段
+                // parameters:
+                //		strText		字段内容，或者子字段组内容。
+                //		textType	表示strText中包含的是字段内容还是组内容。若为ItemType.Field，表示strText参数中为字段；若为ItemType.Group，表示strText参数中为子字段组。
+                //		strSubfieldName	子字段名，内容为1位字符。如果==null，表示任意子字段
+                //					形式为'a'这样的。
+                //		nIndex			想要获得同名子字段中的第几个。从0开始计算。
+                //		strSubfield		[out]输出子字段。子字段名(1字符)、子字段内容。
+                //		strNextSubfieldName	[out]下一个子字段的名字，内容一个字符
+                // return:
+                //		-1	出错
+                //		0	所指定的子字段没有找到
+                //		1	找到。找到的子字段返回在strSubfield参数中
+                nRet = MarcUtil.GetSubfield(strGroup,
+                    ItemType.Group,
+                    "a",
+                    0,
+                    out strSubfield,
+                    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strBarcode = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strBarcode) == true)
+                    continue;
+
+                /*
+                // return:
+                //      -1  error
+                //      0   OK
+                //      1   Invalid
+                nRet = VerifyBarcode(
+                    false,
+                    strBarcode,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+
+                if (nRet != 0)
+                {
+                    strWarning += "988字段中 册条码 '" + strBarcode + "' 不合法 -- " + strError + "; ";
+                }
+                 * */
+                strBarcode = strBarcode.ToUpper();  // 2008/10/24 new add
+
+                string strCompleteDate = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "d",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strCompleteDate = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strCompleteDate) == false)
+                    continue; // 如果已经交了罚金，这个子字段组就忽略了
+
+                XmlNode nodeOverdue = nodeOverdues.OwnerDocument.CreateElement("overdue");
+                nodeOverdue = nodeOverdues.AppendChild(nodeOverdue);
+
+                DomUtil.SetAttr(nodeOverdue, "barcode", strBarcode);
+
+                // borrowDate属性
+                string strBorrowDate = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "e",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strBorrowDate = strSubfield.Substring(1);
+
+                    if (strBorrowDate.Length != 8)
+                    {
+                        strWarning += "988$e子字段内容 '" + strBorrowDate + "' 的长度不是8字符; ";
+                    }
+                }
+
+                if (String.IsNullOrEmpty(strBorrowDate) == false)
+                {
+                    string strTarget = "";
+                    nRet = Date8toRfc1123(strBorrowDate,
+                        out strTarget,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strWarning += "988字段中$e日期字符串转换格式为rfc1123时发生错误: " + strError;
+                        strBorrowDate = "";
+                    }
+                    else
+                    {
+                        strBorrowDate = strTarget;
+                    }
+
+                }
+
+                if (String.IsNullOrEmpty(strBorrowDate) == false)
+                {
+                    DomUtil.SetAttr(nodeOverdue, "borrowDate", strBorrowDate);
+                }
+
+                // returnDate属性
+                string strReturnDate = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "t",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strReturnDate = strSubfield.Substring(1);
+
+                    if (strReturnDate.Length != 8)
+                    {
+                        strWarning += "988$t子字段内容 '" + strReturnDate + "' 的长度不是8字符; ";
+                    }
+                }
+
+                if (String.IsNullOrEmpty(strReturnDate) == false)
+                {
+                    string strTarget = "";
+                    nRet = Date8toRfc1123(strReturnDate,
+                        out strTarget,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strWarning += "988字段中$t日期字符串转换格式为rfc1123时发生错误: " + strError;
+                        strReturnDate = "";
+                    }
+                    else
+                    {
+                        strReturnDate = strTarget;
+                    }
+
+                }
+
+                if (String.IsNullOrEmpty(strReturnDate) == false)
+                {
+                    DomUtil.SetAttr(nodeOverdue, "returnDate", strReturnDate);  // 2006/12/29 changed
+                }
+
+                // borrowPeriod未知
+                //   DomUtil.SetAttr(nodeOverdue, "borrowPeriod", strBorrowPeriod);
+
+                // price和type属性是为兼容dt1000数据而设立的属性
+                // 而over超期天数属性就空缺了
+
+                // price属性
+                string strPrice = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "c",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strPrice = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strPrice) == false)
+                {
+                    // 是否需要转换为带货币单位的, 带小数部分的字符串?
+                    if (StringUtil.IsPureNumber(strPrice) == true)
+                    {
+                        // 只有纯数字才作
+
+                        long lOldPrice = 0;
+
+                        try
+                        {
+                            lOldPrice = Convert.ToInt64(strPrice);
+                        }
+                        catch
+                        {
+                            strWarning += "价格字符串 '' 格式不正确，应当为纯数字。";
+                            goto SKIP_11;
+                        }
+
+                        // 转换为元
+                        double dPrice = ((double)lOldPrice) / 100;
+
+                        strPrice = "CNY" + dPrice.ToString();
+                    }
+
+                SKIP_11:
+
+                    DomUtil.SetAttr(nodeOverdue, "price", strPrice);
+                }
+
+                // type属性
+                string strType = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "b",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strType = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strType) == false)
+                {
+                    DomUtil.SetAttr(nodeOverdue, "type", strType);
+                }
+
+                // 2007/9/27 new add
+                DomUtil.SetAttr(nodeOverdue, "id", "upgrade-" + Guid.NewGuid().ToString()/*this.GetOverdueID()*/);   // 2008/2/8 new add "upgrade-"
+            }
+
+            return 0;
+        }
+
+
+        // 创建<reservations>节点的下级内容
+        // 待做内容：
+        // 1)如果实体库已经存在，这里需要增加相关操作实体库的代码。
+        // 也可以专门用一个读者记录和实体记录对照修改的阶段，来处理相互的关系
+        // 2)暂时没有处理已到的预约册的信息升级功能，而是丢弃了这些信息
+        static int CreateReservationsNode(XmlNode nodeReservations,
+            string strField984,
+            // int nEntityBarcodeLength,
+            out string strWarning,
+            out string strError)
+        {
+            strError = "";
+            strWarning = "";
+
+            int nRet = 0;
+
+            // 进行子字段组循环
+            for (int g = 0; ; g++)
+            {
+                string strGroup = "";
+                // 从字段中得到子字段组
+                // parameters:
+                //		strField	字段。其中包括字段名、必要的指示符，字段内容。也就是调用GetField()函数所得到的字段。
+                //		nIndex	子字段组序号。从0开始计数。
+                //		strGroup	[out]得到的子字段组。其中包括若干子字段内容。
+                // return:
+                //		-1	出错
+                //		0	所指定的子字段组没有找到
+                //		1	找到。找到的子字段组返回在strGroup参数中
+                nRet = MarcUtil.GetGroup(strField984,
+                    g,
+                    out strGroup);
+                if (nRet == -1)
+                {
+                    strError = "从MARC记录字段中获得子字段组 " + Convert.ToString(g) + " 时出错";
+                    return -1;
+                }
+
+                if (nRet == 0)
+                    break;
+
+                string strSubfield = "";
+                string strNextSubfieldName = "";
+
+                string strBarcode = "";
+
+                // 从字段或子字段组中得到一个子字段
+                // parameters:
+                //		strText		字段内容，或者子字段组内容。
+                //		textType	表示strText中包含的是字段内容还是组内容。若为ItemType.Field，表示strText参数中为字段；若为ItemType.Group，表示strText参数中为子字段组。
+                //		strSubfieldName	子字段名，内容为1位字符。如果==null，表示任意子字段
+                //					形式为'a'这样的。
+                //		nIndex			想要获得同名子字段中的第几个。从0开始计算。
+                //		strSubfield		[out]输出子字段。子字段名(1字符)、子字段内容。
+                //		strNextSubfieldName	[out]下一个子字段的名字，内容一个字符
+                // return:
+                //		-1	出错
+                //		0	所指定的子字段没有找到
+                //		1	找到。找到的子字段返回在strSubfield参数中
+                nRet = MarcUtil.GetSubfield(strGroup,
+                    ItemType.Group,
+                    "a",
+                    0,
+                    out strSubfield,
+                    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strBarcode = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strBarcode) == true)
+                    continue;
+
+                /*
+                // return:
+                //      -1  error
+                //      0   OK
+                //      1   Invalid
+                nRet = VerifyBarcode(
+                    false,
+                    strBarcode,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (nRet != 0)
+                {
+                    strWarning += "984字段中 册条码 '" + strBarcode + "' 不合法 -- " + strError + "; ";
+                }
+                 * */
+                strBarcode = strBarcode.ToUpper();  // 2008/10/24 new add
+
+                string strArriveDate = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "c",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strArriveDate = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strArriveDate) == false)
+                    continue; // 如果已经到书，这个子字段组就忽略了
+
+                XmlNode nodeRequest = nodeReservations.OwnerDocument.CreateElement("request");
+                nodeRequest = nodeReservations.AppendChild(nodeRequest);
+
+                DomUtil.SetAttr(nodeRequest, "items", strBarcode);
+
+                // requestDate属性
+                string strRequestDate = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+    ItemType.Group,
+    "b",
+    0,
+    out strSubfield,
+    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strRequestDate = strSubfield.Substring(1);
+
+                    if (strRequestDate.Length != 8)
+                    {
+                        strWarning += "984$b子字段内容 '" + strRequestDate + "' 的长度不是8字符; ";
+                    }
+                }
+
+                if (String.IsNullOrEmpty(strRequestDate) == false)
+                {
+                    string strTarget = "";
+                    nRet = Date8toRfc1123(strRequestDate,
+                        out strTarget,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strWarning += "984字段中$b日期字符串转换格式为rfc1123时发生错误: " + strError;
+                        strRequestDate = "";
+                    }
+                    else
+                    {
+                        strRequestDate = strTarget;
+                    }
+
+                }
+
+                if (String.IsNullOrEmpty(strRequestDate) == false)
+                {
+                    DomUtil.SetAttr(nodeRequest, "requestDate", strRequestDate);
+                }
+
+            }
+
+            return 0;
+        }
+
+        // 创建<borrowHistory>节点的下级内容
+        static int CreateBorrowHistoryNode(XmlNode nodeBorrowHistory,
+            string strField989,
+            out string strWarning,
+            out string strError)
+        {
+            strError = "";
+            strWarning = "";
+
+            int nRet = 0;
+
+            XmlNode nodePrev = null;    // 插入参考节点
+            // 进行子字段组循环
+            for (int g = 0; ; g++)
+            {
+                string strGroup = "";
+                // 从字段中得到子字段组
+                // parameters:
+                //		strField	字段。其中包括字段名、必要的指示符，字段内容。也就是调用GetField()函数所得到的字段。
+                //		nIndex	子字段组序号。从0开始计数。
+                //		strGroup	[out]得到的子字段组。其中包括若干子字段内容。
+                // return:
+                //		-1	出错
+                //		0	所指定的子字段组没有找到
+                //		1	找到。找到的子字段组返回在strGroup参数中
+                nRet = MarcUtil.GetGroup(strField989,
+                    g,
+                    out strGroup);
+                if (nRet == -1)
+                {
+                    strError = "从MARC记录字段中获得子字段组 " + Convert.ToString(g) + " 时出错";
+                    return -1;
+                }
+
+                if (nRet == 0)
+                    break;
+
+                string strSubfield = "";
+                string strNextSubfieldName = "";
+
+                string strBarcode = "";
+
+                // 从字段或子字段组中得到一个子字段
+                // parameters:
+                //		strText		字段内容，或者子字段组内容。
+                //		textType	表示strText中包含的是字段内容还是组内容。若为ItemType.Field，表示strText参数中为字段；若为ItemType.Group，表示strText参数中为子字段组。
+                //		strSubfieldName	子字段名，内容为1位字符。如果==null，表示任意子字段
+                //					形式为'a'这样的。
+                //		nIndex			想要获得同名子字段中的第几个。从0开始计算。
+                //		strSubfield		[out]输出子字段。子字段名(1字符)、子字段内容。
+                //		strNextSubfieldName	[out]下一个子字段的名字，内容一个字符
+                // return:
+                //		-1	出错
+                //		0	所指定的子字段没有找到
+                //		1	找到。找到的子字段返回在strSubfield参数中
+                nRet = MarcUtil.GetSubfield(strGroup,
+                    ItemType.Group,
+                    "a",
+                    0,
+                    out strSubfield,
+                    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strBarcode = strSubfield.Substring(1);
+                }
+
+                if (String.IsNullOrEmpty(strBarcode) == true)
+                    continue;
+
+
+                strBarcode = strBarcode.ToUpper();
+
+                XmlNode nodeBorrow = nodeBorrowHistory.OwnerDocument.CreateElement("borrow");
+
+                // If refChild is a null reference (Nothing in Visual Basic), insert newChild at the end of the list of child nodes
+                nodeBorrow = nodeBorrowHistory.InsertBefore(nodeBorrow, nodePrev);
+                nodePrev = nodeBorrow;
+
+                // 删除超过100个的子节点
+                if (nodeBorrowHistory.ChildNodes.Count > 100)
+                {
+                    XmlNode temp = nodeBorrowHistory.ChildNodes[nodeBorrowHistory.ChildNodes.Count - 1];
+                    nodeBorrowHistory.RemoveChild(temp);
+                }
+
+                DomUtil.SetAttr(nodeBorrow, "barcode", strBarcode);
+
+                // borrowDate属性
+                string strBorrowDate = "";
+                nRet = MarcUtil.GetSubfield(strGroup,
+                    ItemType.Group,
+                    "t",
+                    0,
+                    out strSubfield,
+                    out strNextSubfieldName);
+                if (strSubfield.Length >= 1)
+                {
+                    strBorrowDate = strSubfield.Substring(1);
+
+                    if (strBorrowDate.Length != 8)
+                    {
+                        strBorrowDate = "";
+                    }
+                }
+
+                if (String.IsNullOrEmpty(strBorrowDate) == false)
+                {
+                    string strTarget = "";
+                    nRet = Date8toRfc1123(strBorrowDate,
+                        out strTarget,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strBorrowDate = "";
+                    }
+                    else
+                    {
+                        strBorrowDate = strTarget;
+                    }
+
+                }
+
+                if (String.IsNullOrEmpty(strBorrowDate) == false)
+                {
+                    DomUtil.SetAttr(nodeBorrow, "borrowDate", strBorrowDate);
+                }
+            }
+
+            /*
+            // delete more than 100
+            if (nodeBorrowHistory.ChildNodes.Count > 100)
+            {
+                XmlNodeList nodes = nodeBorrowHistory.SelectNodes("borrow");
+                for (int i = 100; i < nodes.Count; i++)
+                {
+                    nodeBorrowHistory.RemoveChild(nodes[i]);
+                }
+            }*/
+
+            return 0;
+        }
+
+
+        #endregion
     }
 }

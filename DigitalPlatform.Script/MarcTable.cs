@@ -1252,7 +1252,7 @@ namespace DigitalPlatform.Marc
         }
 
         static string[] unimarc_210_relations = new string[] {
-            "c| : ",
+                "c| : ",
                 "d|, ",
                 "e|" + Left_Parentheses,
                 "g| : ",
