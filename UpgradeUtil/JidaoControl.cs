@@ -1287,6 +1287,9 @@ namespace UpgradeUtil
             }
         }
 
+        // parameters:
+        //      strText 要解析的字符串。
+        //              "1(1-2):5" 注: 括号内是注释。冒号右侧是复本数
         static void ParseNoCommentCopy(string strText,
             out string strNo,
             out string strComment,
@@ -1323,6 +1326,7 @@ namespace UpgradeUtil
 
         // 展开号码字符串
         // 1:20,2-11
+        // "1(1-2):0,2-6" 注: 括号内是注释。冒号右侧是复本数
         // 可能抛出异常
         static void ExpandNoSequence(string strText,
             out List<string> numbers,
@@ -1349,26 +1353,31 @@ namespace UpgradeUtil
 
                     // -
                     int nRet = strPart.IndexOf("-");
-                    if (nRet != -1)
+                    if (nRet != -1 
+                        && strPart.Contains("(") == false/* 2021/12/14*/)
                     {
                         string strStart = strPart.Substring(0, nRet);
                         string strEnd = strPart.Substring(nRet + 1);
 
+                        /*
                         string strStartNo = "";
                         string strStartComment = "";
                         string strStartCopy = "";
+                        */
                         ParseNoCommentCopy(strStart,
-                            out strStartNo,
-                            out strStartComment,
-                            out strStartCopy);
+                            out string strStartNo,
+                            out string strStartComment,
+                            out string strStartCopy);
 
+                        /*
                         string strEndNo = "";
                         string strEndComment = "";
                         string strEndCopy = "";
+                        */
                         ParseNoCommentCopy(strEnd,
-                            out strEndNo,
-                            out strEndComment,
-                            out strEndCopy);
+                            out string strEndNo,
+                            out string strEndComment,
+                            out string strEndCopy);
 
                         string strCopy = "";
                         if (String.IsNullOrEmpty(strStartCopy) == false)
@@ -1402,13 +1411,15 @@ namespace UpgradeUtil
                         string strValue = strPart.Substring(0, nRet);
                         string strCount = strPart.Substring(nRet + 1);
 
+                        /*
                         string strNo = "";
                         string strComment = "";
                         string strCopy = "";
+                        */
                         ParseNoCommentCopy(strValue,
-                            out strNo,
-                            out strComment,
-                            out strCopy);
+                            out string strNo,
+                            out string strComment,
+                            out string strCopy);
                         int count = 1;
 
                         if (String.IsNullOrEmpty(strCount) == true)
@@ -1432,13 +1443,15 @@ namespace UpgradeUtil
                     }
 
                     {
+                        /*
                         string strNo = "";
                         string strComment = "";
                         string strCopy = "";
+                        */
                         ParseNoCommentCopy(strPart,
-                            out strNo,
-                            out strComment,
-                            out strCopy);
+                            out string strNo,
+                            out string strComment,
+                            out string strCopy);
 
                         numbers.Add(strNo);
                         comments.Add(strComment);
