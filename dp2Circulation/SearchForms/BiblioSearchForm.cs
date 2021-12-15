@@ -8969,7 +8969,7 @@ message,
             // 询问文件名
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "请指定要创建的书目转储件名";
+            dlg.Title = "请指定要创建的书目转储文件名";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = true;
             dlg.FileName = "";

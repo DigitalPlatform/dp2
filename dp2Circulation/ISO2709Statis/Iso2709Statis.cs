@@ -60,6 +60,10 @@ namespace dp2Circulation
             }
         }
 
+        // 2021/12/15
+        // MARC 格式
+        public string Syntax { get; set; }
+
 #if NO
         // TODO: 容易造成 mem leak。建议用 Dispose() 改写
         // Use C# destructor syntax for finalization code.

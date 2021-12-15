@@ -21,7 +21,7 @@ namespace UpgradeUtil
             int nRet = strText.IndexOf("-");
             if (nRet == -1)
             {
-                strError = "È±·¦ÆÆÕÛºÅ '-'";
+                strError = $"Ê±¼ä·¶Î§×Ö·û´® '{strText}' ÄÚÈ±·¦ÆÆÕÛºÅ '-'";
                 return -1;
             }
 

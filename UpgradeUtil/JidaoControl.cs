@@ -834,6 +834,10 @@ namespace UpgradeUtil
                 if (nRet != 1)
                     break;
 
+                // 2021/12/15
+                if (GetSubfieldCount(strGroup) <= 1)
+                    continue;
+
                 string strSubfield = "";
                 string strNextSubfieldName = "";
                 // parameters:
@@ -857,15 +861,17 @@ namespace UpgradeUtil
                 if (String.IsNullOrEmpty(strTimeRange) == true)
                     continue;
 
+                /*
                 string strStart = "";
                 string strEnd = "";
+                */
 
                 // 展开时间范围
                 nRet = EnsureTimeRange(
                     strFieldName,
                     strTimeRange,
-                    out strStart,
-                    out strEnd,
+                    out string strStart,
+                    out string strEnd,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -1027,8 +1033,24 @@ namespace UpgradeUtil
 
             }
 
-
             return 0;
+        }
+
+        // 2021/12/15
+        // 统计一个 group 中的子字段个数
+        static int GetSubfieldCount(string strGroup)
+        {
+            if (string.IsNullOrEmpty(strGroup))
+                return 0;
+
+            int count = 0;
+            foreach(var ch in strGroup.ToCharArray())
+            {
+                if (ch == MarcUtil.SUBFLD)
+                    count++;
+            }
+
+            return count;
         }
 
         int SetIssueNos(
@@ -1714,8 +1736,11 @@ namespace UpgradeUtil
 
             // 如果是月份风格，则只使用每个月的第一个格子
 
+            /*
             strStart = "";
             strEnd = "";
+            */
+
             nRet = Global.ParseTimeRangeString(strTimeRange,
             out strStart,
             out strEnd,

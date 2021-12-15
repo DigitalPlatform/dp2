@@ -14,6 +14,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using System.ServiceModel.Channels;
+using dp2Circulation.ISO2709Statis;
 
 namespace dp2Circulation
 {
@@ -144,7 +145,7 @@ namespace dp2Circulation
     false);
 
             // 方案名
-            this.textBox_projectName.Text = Program.MainForm.AppInfo.GetString(
+            this.comboBox_projectName.Text = Program.MainForm.AppInfo.GetString(
                 "iso2709statisform",
                 "projectname",
                 "");
@@ -212,7 +213,7 @@ namespace dp2Circulation
                 Program.MainForm.AppInfo.SetString(
                     "iso2709statisform",
                     "projectname",
-                    this.textBox_projectName.Text);
+                    this.comboBox_projectName.Text);
             }
 
 #if NO
@@ -335,12 +336,19 @@ namespace dp2Circulation
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
 
-                nRet = PrepareScript(strProjectName,
-                    strProjectLocate,
-                    out objStatis,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                if (strProjectName == "#将dt1000书目MARC转换为bdf格式")
+                {
+                    objStatis = new ConvertDt1000ToBdf();
+                }
+                else
+                {
+                    nRet = PrepareScript(strProjectName,
+                        strProjectLocate,
+                        out objStatis,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
 
                 if (strInitialParamString == "test_compile")
                     return 0;
@@ -681,6 +689,7 @@ namespace dp2Circulation
                         {
                             objStatis.MARC = strMARC;
                             objStatis.CurrentRecordIndex = i;
+                            objStatis.Syntax = this._openMarcFileDialog.MarcSyntax;
 
                             StatisEventArgs args = new StatisEventArgs();
                             objStatis.OnRecord(this, args);
@@ -749,35 +758,40 @@ namespace dp2Circulation
 
             if (this.tabControl_main.SelectedTab == this.tabPage_selectProject)
             {
-                string strProjectName = this.textBox_projectName.Text;
+                string strProjectName = this.comboBox_projectName.Text;
 
                 if (String.IsNullOrEmpty(strProjectName) == true)
                 {
                     strError = "尚未指定方案名";
-                    this.textBox_projectName.Focus();
+                    this.comboBox_projectName.Focus();
                     goto ERROR1;
                 }
+
+                int nRet = 0;
 
                 string strProjectLocate = "";
-                // 获得方案参数
-                // strProjectNamePath	方案名，或者路径
-                // return:
-                //		-1	error
-                //		0	not found project
-                //		1	found
-                int nRet = this.ScriptManager.GetProjectData(
-                    strProjectName,
-                    out strProjectLocate);
 
-                if (nRet == 0)
+                if (strProjectName.StartsWith("#") == false)
                 {
-                    strError = "方案 " + strProjectName + " 没有找到...";
-                    goto ERROR1;
-                }
-                if (nRet == -1)
-                {
-                    strError = "scriptManager.GetProjectData() error ...";
-                    goto ERROR1;
+                    // 获得方案参数
+                    // strProjectNamePath	方案名，或者路径
+                    // return:
+                    //		-1	error
+                    //		0	not found project
+                    //		1	found
+                    nRet = this.ScriptManager.GetProjectData(
+                        strProjectName,
+                        out strProjectLocate);
+                    if (nRet == 0)
+                    {
+                        strError = "方案 " + strProjectName + " 没有找到...";
+                        goto ERROR1;
+                    }
+                    if (nRet == -1)
+                    {
+                        strError = "scriptManager.GetProjectData() error ...";
+                        goto ERROR1;
+                    }
                 }
 
                 // 切换到执行page
@@ -786,11 +800,9 @@ namespace dp2Circulation
                 this.Running = true;
                 try
                 {
-
                     nRet = RunScript(strProjectName,
                         strProjectLocate,
                         out strError);
-
                     if (nRet == -1)
                         goto ERROR1;
                 }
@@ -859,7 +871,7 @@ namespace dp2Circulation
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.scriptManager = this.ScriptManager;
-            dlg.ProjectName = this.textBox_projectName.Text;
+            dlg.ProjectName = this.comboBox_projectName.Text;
             dlg.NoneProject = false;
 
             Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
@@ -870,7 +882,7 @@ namespace dp2Circulation
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            this.textBox_projectName.Text = dlg.ProjectName;
+            this.comboBox_projectName.Text = dlg.ProjectName;
         }
 
 #if NO
