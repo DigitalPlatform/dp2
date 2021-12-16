@@ -2235,6 +2235,16 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             else
                 menuItem.Enabled = false;
 
+            // 2021/12/16
+            // 从 工作单 粘贴整个记录
+            menuItem = new MenuItem("从 工作单 粘贴整个记录");
+            menuItem.Click += new System.EventHandler(this.menuItem_PasteFromWorksheet);
+            contextMenu.MenuItems.Add(menuItem);
+            if (ido.GetDataPresent(DataFormats.Text)
+                && this.ReadOnly == false)    // 原来是==1
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
 
             //粘贴覆盖
             menuItem = new MenuItem("粘贴覆盖字段");// + strName);
@@ -4299,6 +4309,57 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             return strResult;
         }
 
+        /*
+01310nam0 2200157   45__
+-01/132.147.160.100/读者库/ctlno/0002118|7badce52100000002b
+-01/读者库(临时)/ctlno/0000002|883947414000000022
+100  ǂaD000002ǂc工作证号
+110  ǂa教工ǂd在职
+2001 ǂa测试姓名ǂAWu Mei Juǂb女
+300  ǂa中文系
+400  ǂa6550171ǂc家庭住址
+980  ǂa2006ǂb1ǂa2008ǂb11ǂa2009ǂb6ǂa2010ǂb5ǂa2011ǂb9ǂa2013ǂb3ǂa2014ǂb3
+982  ǂa教工ǂAJiao Gongǂc3
+986  ǂaA0170967ǂfǂt20140109ǂv20140331ǂaA0137758ǂfǂt20140109ǂv20140331ǂaA0154258ǂfǂt20140109ǂv20140331
+989  ǂaA0079821ǂt20060219ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0090491ǂt20080107ǂaA0083852ǂt20090608ǂaA0133097ǂt20090612ǂaA0133097ǂt20090612ǂaA0133097ǂt20090612ǂaA0133097ǂt20090612ǂaA0133097ǂt20090612ǂaA0041328ǂt20100702ǂaA0000232ǂt20100702ǂaA0086399ǂt20100702ǂaA0086503ǂt20100702ǂaA0010970ǂt20100702ǂaA0109749ǂt20110617ǂaA0097770ǂt20110617ǂaA0146162ǂt20110617ǂaA0146160ǂt20110617ǂaA0146144ǂt20110617ǂaA0107659ǂt20110703ǂaA0124241ǂt20110703ǂaA0109749ǂt20110703ǂaA0087051ǂt20111129ǂaA0170776ǂt20130617ǂaA0010989ǂt20130617ǂaA0055348ǂt20130617ǂaA0170967ǂt20140109ǂaA0137758ǂt20140109ǂaA0154258ǂt20140109
+997  ǂa|吴梅菊||,|ǂh1b0463476e6d0a593b1c1b79abf082a2ǂv0.04
+***
+** */
+        static string ConvertWorksheetMarcString(string strMARC)
+        {
+            string strResult = strMARC.Replace("\r\n", "\r");
+            string[] lines = strResult.Split(new char[] { '\r' });
+            string strTotal = "";
+            int i = 0;
+            foreach (string s in lines)
+            {
+                if (string.IsNullOrEmpty(s) == true)
+                    continue;
+
+                if (i == 0)
+                {
+                    string strTemp = s.PadRight(24, ' ').Replace("_", " ");
+                    strTotal += strTemp;
+                }
+                else
+                {
+                    if (s.Length >= 5)
+                    {
+                        strTotal += s + new string((char)30, 1);
+                    }
+                    else
+                    {
+                        string strTemp = s.PadRight(5, ' ');
+                        strTotal += strTemp + new string((char)30, 1);
+                    }
+                }
+                i++;
+            }
+
+            strResult = strTotal.Replace("ǂ", new string((char)31, 1));
+            return strResult;
+        }
+
         // 从 XML 粘贴整个记录
         void menuItem_PasteFromMarcXml(object sender,
             System.EventArgs e)
@@ -4337,6 +4398,40 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             catch (Exception ex)
             {
                 MessageBox.Show(this, $"异常: {ex.Message}");
+            }
+        }
+
+        // 从 工作单 粘贴整个记录
+        void menuItem_PasteFromWorksheet(object sender,
+            System.EventArgs e)
+        {
+            bool bHasFocus = this.Focused;
+
+            // 先删除所有字段
+            this.record.Fields.Clear();
+            this.SelectedFieldIndices.Clear();
+
+            int nFirstIndex = 0;
+
+            int nNewFieldsCount = 0;
+            string strFieldsMarc = MarcEditor.ClipboardToText();
+            strFieldsMarc = ConvertWorksheetMarcString(strFieldsMarc);
+
+            // TODO: 这个函数可以改造为两步实现：
+            // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
+            // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+            this.record.Fields.InsertInternal(nFirstIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+
+            this.SetScrollBars(ScrollBarMember.Both);
+            this.Invalidate();
+
+            // 设第一个节点为当前活动焦点
+            if (bHasFocus == true)
+            {
+                if (this.record.Fields.Count > 0)
+                    this.SetActiveField(0, 3, true);
             }
         }
 

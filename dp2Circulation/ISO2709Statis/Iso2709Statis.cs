@@ -13,6 +13,7 @@ namespace dp2Circulation
 {
     /// <summary>
     /// Iso2709StatisForm (ISO2709统计窗) 统计方案的宿主类
+    /// 对应内置方案名 "#将dt1000书目MARC转换为bdf格式"
     /// </summary>
     public class Iso2709Statis : StatisHostBase
     {

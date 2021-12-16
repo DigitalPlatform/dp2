@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.53.*")]
-[assembly: AssemblyFileVersion("3.53.0.0")]
+[assembly: AssemblyVersion("3.54.*")]
+[assembly: AssemblyFileVersion("3.54.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -136,3 +136,4 @@ using System.Runtime.InteropServices;
 // 3.51 2021/12/9 日志窗里面的“智能筛选”改用 Roslyn 实现。大备份和系统管理窗“内核”属性页的下载服务器文件功能做了(探测 .~state 时)算法改进
 // 3.52 2021/12/13 ReaderInfoForm 中增加 ConvertDt1000ReaderMarcToXml() 函数，提供转换 dt1000 读者 MARC 到 dp2 读者 XML 格式的功能，方便二次开发脚本调用
 // 3.53 2021/12/14 JidaoControl 里面改了一处 bug。可正确处理 "1(1-2):0,2-6" 注: 括号内是注释。冒号右侧是复本数
+// 3.54 2021/12/16 ISO2709 统计窗中增加内置的统计方案“#将dt1000书目MARC转换为bdf格式”

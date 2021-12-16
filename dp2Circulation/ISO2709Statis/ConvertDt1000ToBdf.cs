@@ -115,7 +115,7 @@ namespace dp2Circulation.ISO2709Statis
 
             var g01 = record.select("field[@name='-01']").FirstContent;
             var parts = StringUtil.ParseTwoPart(g01, "|");
-            string path = parts[0];
+            string path = ToDp2Path(parts[0]);
             string timestamp = parts[1];
 
             string strXml = "";
@@ -1583,6 +1583,41 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
             return 0;
         }
 
+        // 将 dt1000 的记录路径转换为 dp2 形态
+        // /132.147.160.100/图书总库/ctlno/0000001
+        static string ToDp2Path(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return path;
+            if (path.StartsWith("/"))
+                path = path.Substring(1);
+
+            if (path.IndexOf("/ctlno/") != -1)
+                path = path.Replace("/ctlno/", "/");
+
+            // 132.147.160.100/图书总库/0000001 --> 图书总库/0000001
+            if (Count(path) == 2)
+            {
+                int index = path.IndexOf("/");
+                if (index != -1)
+                    path = path.Substring(index + 1);
+            }
+
+            return path;
+        }
+
+        static int Count(string path)
+        {
+            int count = 0;
+            foreach(var ch in path.ToCharArray())
+            {
+                if (ch == '/')
+                    count++;
+            }
+
+            return count;
+        }
+
         // 针对一个（册信息）子字段组的描述
         class ItemGroup
         {
@@ -2189,6 +2224,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
             if (nCopy > 0)
                 DomUtil.SetElementText(dom.DocumentElement, "copy", nCopy.ToString());
 
+            string strComment = "";
 
             // $x 订购价(单价)
             string strPrice = "";
@@ -2204,6 +2240,11 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 if (String.IsNullOrEmpty(strPrice) == false)
                 {
                     // TODO: 是否需要格式检查和转换?
+                    if (CheckPrice(strPrice, out string error) == false)
+                    {
+                        strComment = "$x " + error;
+                        strPrice = "";
+                    }
                 }
             }
 
@@ -2236,7 +2277,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
             }
 
             // 如果$d没有内容而$x $p有内容，仍可以计算出出版频次
-            if (strIssueCount == ""
+            if (string.IsNullOrEmpty(strIssueCount)
                 && (String.IsNullOrEmpty(strPrice) == false && String.IsNullOrEmpty(strJiduPrice) == false))
             {
                 // TODO: 从$p(全年)除以$x(单价)的倍数，可以得出一年出多少期
@@ -2267,6 +2308,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
 
             if (String.IsNullOrEmpty(strIssueCount) == false)
             {
+                strIssueCount = ConvertIssueCount(strIssueCount);
                 DomUtil.SetElementText(dom.DocumentElement, "issueCount", strIssueCount);
             }
 
@@ -2299,7 +2341,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
 
 
             // 附注 $z
-            string strComment = "";
+            // string strComment = "";
             nRet = MarcUtil.GetSubfield(strGroup,
                 ItemType.Group,
                 "z",
@@ -2308,6 +2350,8 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 out strNextSubfieldName);
             if (strSubfield.Length >= 1)
             {
+                if (string.IsNullOrEmpty(strComment) == false)
+                    strComment += "; ";
                 strComment = strSubfield.Substring(1);
             }
 
@@ -2413,6 +2457,116 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
             strXml = dom.OuterXml;
             return 0;
         }
+
+        // 把 “双月刊”翻译为“6”；“月刊”翻译为“12”
+        static string ConvertIssueCount(string issue_count)
+        {
+            if (string.IsNullOrEmpty(issue_count))
+                return issue_count;
+            issue_count = issue_count.Trim();
+            if (string.IsNullOrEmpty(issue_count))
+                return issue_count;
+
+            if (StringUtil.IsPureNumber(issue_count))
+                return issue_count;
+            if (issue_count == "不定期")
+                return "12";    // TODO: 可以用问号?
+            if (issue_count == "年刊")
+                return "1";
+            if (issue_count == "半年刊")
+                return "2";
+            if (issue_count == "季刊")
+                return "4";
+            if (issue_count == "双月刊")
+                return "6";
+            if (issue_count == "月刊")
+                return "12";
+            if (issue_count == "半月刊")
+                return "24";
+            if (issue_count == "旬刊")
+                return "36";
+            if (issue_count == "双周刊")
+                return "26";
+            if (issue_count == "周刊")
+                return "52";
+            if (issue_count == "日刊" || issue_count == "日报")
+                return "356";
+
+            // 周2刊等
+            if (issue_count.StartsWith("周") && issue_count.EndsWith("刊"))
+                return "52";
+            // 年xx期 年xx册
+            if (issue_count.StartsWith("年") && (issue_count.EndsWith("期") || issue_count.EndsWith("册")))
+            {
+                // 取出纯数字部分
+                return StringUtil.GetStringNumber(issue_count);
+            }
+
+            return issue_count;
+        }
+
+        static bool CheckPrice(string price, out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(price))
+                return true;
+
+            var errors = VerifyPrice(price);
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return false;
+            }
+
+            return true;
+        }
+
+        static string VerifyPricePrefix(string prefix)
+        {
+            foreach (var ch in prefix)
+            {
+                if (char.IsLetter(ch) == false)
+                    return $"货币名称 '{prefix}' 中出现了非字母的字符";
+            }
+
+            return null;
+        }
+
+        public static List<string> VerifyPrice(string strPrice)
+        {
+            List<string> errors = new List<string>();
+
+            // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+            int nRet = PriceUtil.ParseSinglePrice(strPrice,
+                out CurrencyItem item,
+                out string strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
+            // 2020/7/8
+            // 检查货币字符串中是否出现了字母以外的字符
+            if (string.IsNullOrEmpty(item.Postfix) == false)
+                errors.Add($"金额字符串 '{strPrice}' 中出现了后缀 '{item.Postfix}' ，这很不常见，一般意味着错误");
+
+            string error1 = VerifyPricePrefix(item.Prefix);
+            if (error1 != null)
+                errors.Add(error1);
+
+            string new_value = StringUtil.ToDBC(strPrice);
+            if (new_value.IndexOfAny(new char[] { '(', ')' }) != -1)
+            {
+                errors.Add("价格字符串中不允许出现括号 '" + strPrice + "'");
+            }
+
+            if (new_value.IndexOf(',') != -1)
+            {
+                errors.Add("价格字符串中不允许出现逗号 '" + strPrice + "'");
+            }
+
+            return errors;
+        }
+
 
         // 构造图书订购XML记录
         // parameters:
@@ -2586,6 +2740,8 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 }
             }
 
+            string strComment = "";
+
             // 订购价(单价)
             string strPrice = "";
             nRet = MarcUtil.GetSubfield(strGroup,
@@ -2600,6 +2756,11 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 if (String.IsNullOrEmpty(strPrice) == false)
                 {
                     // TODO: 是否需要格式检查和转换?
+                    if (CheckPrice(strPrice, out string error) == false)
+                    {
+                        strComment = "$f " + error;
+                        strPrice = "";
+                    }
                 }
             }
 
@@ -2717,6 +2878,11 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 if (String.IsNullOrEmpty(strAcceptedPrice) == false)
                 {
                     // TODO: 是否需要格式检查和转换?
+                    if (CheckPrice(strAcceptedPrice, out string error) == false)
+                    {
+                        strComment += "; $m " + error;
+                        strAcceptedPrice = "";
+                    }
                 }
             }
 
@@ -2817,7 +2983,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
 
 
             // 附注 $z
-            string strComment = "";
+            // string strComment = "";
             nRet = MarcUtil.GetSubfield(strGroup,
                 ItemType.Group,
                 "z",
@@ -2826,7 +2992,9 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 out strNextSubfieldName);
             if (strSubfield.Length >= 1)
             {
-                strComment = strSubfield.Substring(1);
+                if (string.IsNullOrEmpty(strComment) == false)
+                    strComment += "; ";
+                strComment += strSubfield.Substring(1);
             }
 
             // 加上从已到复本数中剥离的文字
@@ -2843,7 +3011,6 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
             }
 
             strXml = dom.OuterXml;
-
             return 0;
         }
 

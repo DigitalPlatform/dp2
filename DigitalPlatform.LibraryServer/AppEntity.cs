@@ -3227,7 +3227,7 @@ out strError);
                             &&*/ (info.Action == "new"
                                 || info.Action == "change"
                                 || info.Action == "move")       // delete操作不查重
-                            && String.IsNullOrEmpty(strNewBarcode) == false
+                            // && String.IsNullOrEmpty(strNewBarcode) == false
                             && bNoCheckDup == false    // 2008/10/6 
                                                        // && bSimulate == false    // 要想跳过查重，可以使用 nocheckdup
                             )
@@ -3319,6 +3319,7 @@ out strError);
 
 #endif
 
+                            if (string.IsNullOrEmpty(strNewBarcode) == false)   // 2021/12/16
                             {
                                 int old_count = ErrorInfos.Count;
                                 // return:

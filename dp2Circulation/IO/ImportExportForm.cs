@@ -1934,6 +1934,8 @@ int nCount)
             v++;
             _itemBarcodeTable[strItemBarcode] = v;
 
+            if (errorInfo.Length > 0)
+                errorInfo.Append("; ");
             errorInfo.Append("册条码号 '" + strItemBarcode + "' 在源文件中发生重复(出现 " + v + " 次)");
         }
 
@@ -1956,6 +1958,8 @@ int nCount)
             v++;
             _itemRegisterNoTable[strRegisterNo] = v;
 
+            if (errorInfo.Length > 0)
+                errorInfo.Append("; ");
             errorInfo.Append("登录号 '" + strRegisterNo + "' 在源文件中发生重复(出现 " + v + " 次)");
         }
 
