@@ -47,6 +47,7 @@ namespace dp2Circulation
             this.textBox_objectDirectoryName = new System.Windows.Forms.TextBox();
             this.label_objectDirectoryName = new System.Windows.Forms.Label();
             this.checkBox_object = new System.Windows.Forms.CheckBox();
+            this.checkBox_autoPostfix = new System.Windows.Forms.CheckBox();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -65,14 +66,14 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_patronXmlFileName.Location = new System.Drawing.Point(17, 38);
             this.textBox_patronXmlFileName.Name = "textBox_patronXmlFileName";
-            this.textBox_patronXmlFileName.Size = new System.Drawing.Size(676, 31);
+            this.textBox_patronXmlFileName.Size = new System.Drawing.Size(694, 31);
             this.textBox_patronXmlFileName.TabIndex = 1;
             this.textBox_patronXmlFileName.TextChanged += new System.EventHandler(this.textBox_patronXmlFileName_TextChanged);
             // 
             // button_getFileName
             // 
             this.button_getFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getFileName.Location = new System.Drawing.Point(699, 33);
+            this.button_getFileName.Location = new System.Drawing.Point(717, 33);
             this.button_getFileName.Name = "button_getFileName";
             this.button_getFileName.Size = new System.Drawing.Size(71, 36);
             this.button_getFileName.TabIndex = 2;
@@ -86,7 +87,7 @@ namespace dp2Circulation
             this.label2.Location = new System.Drawing.Point(13, 198);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(105, 21);
-            this.label2.TabIndex = 3;
+            this.label2.TabIndex = 7;
             this.label2.Text = "导入方式:";
             // 
             // comboBox_appendMode
@@ -99,44 +100,44 @@ namespace dp2Circulation
             this.comboBox_appendMode.Location = new System.Drawing.Point(131, 195);
             this.comboBox_appendMode.Name = "comboBox_appendMode";
             this.comboBox_appendMode.Size = new System.Drawing.Size(302, 29);
-            this.comboBox_appendMode.TabIndex = 4;
+            this.comboBox_appendMode.TabIndex = 8;
             this.comboBox_appendMode.SelectedIndexChanged += new System.EventHandler(this.comboBox_appendMode_SelectedIndexChanged);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(13, 248);
+            this.label3.Location = new System.Drawing.Point(13, 303);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(84, 21);
-            this.label3.TabIndex = 5;
+            this.label3.TabIndex = 11;
             this.label3.Text = "目标库:";
             // 
             // comboBox_targetDbName
             // 
             this.comboBox_targetDbName.FormattingEnabled = true;
-            this.comboBox_targetDbName.Location = new System.Drawing.Point(131, 245);
+            this.comboBox_targetDbName.Location = new System.Drawing.Point(131, 300);
             this.comboBox_targetDbName.Name = "comboBox_targetDbName";
             this.comboBox_targetDbName.Size = new System.Drawing.Size(302, 29);
-            this.comboBox_targetDbName.TabIndex = 6;
+            this.comboBox_targetDbName.TabIndex = 12;
             this.comboBox_targetDbName.DropDown += new System.EventHandler(this.comboBox_targetDbName_DropDown);
             this.comboBox_targetDbName.SelectedIndexChanged += new System.EventHandler(this.comboBox_targetDbName_SelectedIndexChanged);
             // 
             // button_begin
             // 
-            this.button_begin.Location = new System.Drawing.Point(131, 355);
+            this.button_begin.Location = new System.Drawing.Point(131, 382);
             this.button_begin.Name = "button_begin";
             this.button_begin.Size = new System.Drawing.Size(141, 43);
-            this.button_begin.TabIndex = 7;
+            this.button_begin.TabIndex = 14;
             this.button_begin.Text = "开始导入";
             this.button_begin.UseVisualStyleBackColor = true;
             this.button_begin.Click += new System.EventHandler(this.button_begin_Click);
             // 
             // button_stop
             // 
-            this.button_stop.Location = new System.Drawing.Point(278, 355);
+            this.button_stop.Location = new System.Drawing.Point(278, 382);
             this.button_stop.Name = "button_stop";
             this.button_stop.Size = new System.Drawing.Size(141, 43);
-            this.button_stop.TabIndex = 8;
+            this.button_stop.TabIndex = 15;
             this.button_stop.Text = "停止";
             this.button_stop.UseVisualStyleBackColor = true;
             this.button_stop.Click += new System.EventHandler(this.button_stop_Click);
@@ -147,10 +148,10 @@ namespace dp2Circulation
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 413);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 453);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(800, 37);
-            this.statusStrip1.TabIndex = 9;
+            this.statusStrip1.Size = new System.Drawing.Size(818, 37);
+            this.statusStrip1.TabIndex = 16;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripProgressBar1
@@ -167,31 +168,31 @@ namespace dp2Circulation
             // checkBox_refreshRefID
             // 
             this.checkBox_refreshRefID.AutoSize = true;
-            this.checkBox_refreshRefID.Location = new System.Drawing.Point(131, 280);
+            this.checkBox_refreshRefID.Location = new System.Drawing.Point(131, 230);
             this.checkBox_refreshRefID.Name = "checkBox_refreshRefID";
             this.checkBox_refreshRefID.Size = new System.Drawing.Size(219, 25);
-            this.checkBox_refreshRefID.TabIndex = 10;
+            this.checkBox_refreshRefID.TabIndex = 9;
             this.checkBox_refreshRefID.Text = "更新 RefID (慎用)";
             this.checkBox_refreshRefID.UseVisualStyleBackColor = true;
             // 
             // checkBox_restoreMode
             // 
             this.checkBox_restoreMode.AutoSize = true;
-            this.checkBox_restoreMode.Location = new System.Drawing.Point(131, 311);
+            this.checkBox_restoreMode.Location = new System.Drawing.Point(131, 335);
             this.checkBox_restoreMode.Name = "checkBox_restoreMode";
             this.checkBox_restoreMode.Size = new System.Drawing.Size(405, 25);
-            this.checkBox_restoreMode.TabIndex = 11;
+            this.checkBox_restoreMode.TabIndex = 13;
             this.checkBox_restoreMode.Text = "恢复模式 (危险，会强制写入借阅信息)";
             this.checkBox_restoreMode.UseVisualStyleBackColor = true;
             // 
             // button_getObjectDirectoryName
             // 
             this.button_getObjectDirectoryName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getObjectDirectoryName.Location = new System.Drawing.Point(699, 129);
+            this.button_getObjectDirectoryName.Location = new System.Drawing.Point(717, 129);
             this.button_getObjectDirectoryName.Margin = new System.Windows.Forms.Padding(5);
             this.button_getObjectDirectoryName.Name = "button_getObjectDirectoryName";
             this.button_getObjectDirectoryName.Size = new System.Drawing.Size(71, 36);
-            this.button_getObjectDirectoryName.TabIndex = 17;
+            this.button_getObjectDirectoryName.TabIndex = 6;
             this.button_getObjectDirectoryName.Text = "...";
             this.button_getObjectDirectoryName.UseVisualStyleBackColor = true;
             this.button_getObjectDirectoryName.Click += new System.EventHandler(this.button_getObjectDirectoryName_Click);
@@ -204,8 +205,8 @@ namespace dp2Circulation
             this.textBox_objectDirectoryName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_objectDirectoryName.Name = "textBox_objectDirectoryName";
             this.textBox_objectDirectoryName.ReadOnly = true;
-            this.textBox_objectDirectoryName.Size = new System.Drawing.Size(637, 31);
-            this.textBox_objectDirectoryName.TabIndex = 16;
+            this.textBox_objectDirectoryName.Size = new System.Drawing.Size(655, 31);
+            this.textBox_objectDirectoryName.TabIndex = 5;
             // 
             // label_objectDirectoryName
             // 
@@ -214,7 +215,7 @@ namespace dp2Circulation
             this.label_objectDirectoryName.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label_objectDirectoryName.Name = "label_objectDirectoryName";
             this.label_objectDirectoryName.Size = new System.Drawing.Size(180, 21);
-            this.label_objectDirectoryName.TabIndex = 15;
+            this.label_objectDirectoryName.TabIndex = 4;
             this.label_objectDirectoryName.Text = "对象文件目录(&O):";
             // 
             // checkBox_object
@@ -226,17 +227,28 @@ namespace dp2Circulation
             this.checkBox_object.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_object.Name = "checkBox_object";
             this.checkBox_object.Size = new System.Drawing.Size(111, 25);
-            this.checkBox_object.TabIndex = 14;
+            this.checkBox_object.TabIndex = 3;
             this.checkBox_object.Text = "对象(&O)";
             this.checkBox_object.UseVisualStyleBackColor = true;
             this.checkBox_object.CheckedChanged += new System.EventHandler(this.checkBox_object_CheckedChanged);
+            // 
+            // checkBox_autoPostfix
+            // 
+            this.checkBox_autoPostfix.AutoSize = true;
+            this.checkBox_autoPostfix.Location = new System.Drawing.Point(131, 261);
+            this.checkBox_autoPostfix.Name = "checkBox_autoPostfix";
+            this.checkBox_autoPostfix.Size = new System.Drawing.Size(372, 25);
+            this.checkBox_autoPostfix.TabIndex = 10;
+            this.checkBox_autoPostfix.Text = "遭遇条码号重复时自动添加随机后缀";
+            this.checkBox_autoPostfix.UseVisualStyleBackColor = true;
             // 
             // ImportPatronForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(818, 490);
+            this.Controls.Add(this.checkBox_autoPostfix);
             this.Controls.Add(this.button_getObjectDirectoryName);
             this.Controls.Add(this.textBox_objectDirectoryName);
             this.Controls.Add(this.label_objectDirectoryName);
@@ -287,5 +299,6 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_objectDirectoryName;
         private System.Windows.Forms.Label label_objectDirectoryName;
         private System.Windows.Forms.CheckBox checkBox_object;
+        private System.Windows.Forms.CheckBox checkBox_autoPostfix;
     }
 }

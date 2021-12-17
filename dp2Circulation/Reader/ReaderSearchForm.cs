@@ -3895,7 +3895,6 @@ MessageBoxDefaultButton.Button2);
                         DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, respathtemp.FullPath);
                         DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(timestamp));
 
-
                         // 导出对象文件
                         if (dlg.IncludeObjectFile)
                         {

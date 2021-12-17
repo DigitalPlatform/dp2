@@ -7647,11 +7647,26 @@ MessageBoxDefaultButton.Button1);
             out string strError)
         {
             strError = "";
-            string strWarning = "";
             int nRet = 0;
+            List<string> warnings = new List<string>();
+
+            /*
+            var g01 = record.select("field[@name='-01']").FirstContent;
+            var parts = StringUtil.ParseTwoPart(g01, "|");
+            string path = ToDp2Path(parts[0]);
+            string timestamp = parts[1];
+            */
+            ParseDt1000G01(record,
+    out string path,
+    out string timestamp);
 
             dom = new XmlDocument();
             dom.LoadXml("<root />");
+
+            // 2021/12/17
+            // 给根元素设置几个参数
+            DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, path);
+            DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, timestamp);
 
             // 读者证条码
             string strBarcode = "";
@@ -7668,14 +7683,15 @@ MessageBoxDefaultButton.Button1);
 
             if (String.IsNullOrEmpty(strBarcode) == true)
             {
-                strWarning += "MARC记录中缺乏100$a读者证条码号; ";
+                warnings.Add("MARC记录中缺乏100$a读者证条码号");
             }
             else
             {
                 strBarcode = strBarcode.ToUpper();
             }
 
-            DomUtil.SetElementText(dom.DocumentElement, "barcode", strBarcode);
+            if (string.IsNullOrEmpty(strBarcode) == false)
+                DomUtil.SetElementText(dom.DocumentElement, "barcode", strBarcode);
 
 
             // 证号
@@ -7734,7 +7750,7 @@ MessageBoxDefaultButton.Button1);
 
                 if (strExpireDate.Length != 8)
                 {
-                    strWarning += "110$d中的失效期  '" + strExpireDate + "' 应为8字符。升级程序自动以 " + strToday + " 充当失效期; ";
+                    warnings.Add("110$d中的失效期  '" + strExpireDate + "' 应为8字符。升级程序自动以 " + strToday + " 充当失效期");
                     strExpireDate = strToday;   // 2008/8/26 new add
                 }
 
@@ -7742,16 +7758,16 @@ MessageBoxDefaultButton.Button1);
 
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strExpireDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strExpireDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
                     {
-                        strWarning += "MARC数据中110$d日期字符串转换格式为rfc1123时发生错误: " + strError;
+                        warnings.Add("MARC数据中110$d日期字符串转换格式为rfc1123时发生错误: " + strError);
                         strExpireDate = strToday;   // 2008/8/26 new add
 
                         // 2008/10/28 new add
-                        nRet = Date8toRfc1123(strExpireDate,
+                        nRet = DateTimeUtil.Date8toRfc1123(strExpireDate,
                             out strTarget,
                             out strError);
                         Debug.Assert(nRet != -1, "");
@@ -7777,7 +7793,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception /*ex*/)
                 {
-                    strWarning += "MARC数据中110$e押金字符串 '" + strForegift + "' 格式错误";
+                    warnings.Add("MARC数据中110$e押金字符串 '" + strForegift + "' 格式错误");
                     strForegift = "";
                     goto SKIP_COMPUTE_FOREGIFT;
                 }
@@ -7792,7 +7808,6 @@ MessageBoxDefaultButton.Button1);
                 DomUtil.SetElementText(dom.DocumentElement, "foregift", strForegift);
             }
 
-
             // 停借原因
             string strState = record.select("field[@name='982']/subfield[@name='b']").FirstContent;
 
@@ -7805,7 +7820,7 @@ MessageBoxDefaultButton.Button1);
             string strName = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
             if (String.IsNullOrEmpty(strName) == true)
             {
-                strWarning += "MARC记录中缺乏200$a读者姓名; ";
+                warnings.Add("MARC记录中缺乏200$a读者姓名");
             }
 
             DomUtil.SetElementText(dom.DocumentElement, "name", strName);
@@ -7900,8 +7915,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 if (String.IsNullOrEmpty(strWarningParam) == false)
-                    strWarning += strWarningParam + "; ";
-
+                    warnings.Add(strWarningParam);
             }
 
 
@@ -7934,7 +7948,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 if (String.IsNullOrEmpty(strWarningParam) == false)
-                    strWarning += strWarningParam + "; ";
+                    warnings.Add(strWarningParam);
 
             }
 
@@ -7968,7 +7982,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 if (String.IsNullOrEmpty(strWarningParam) == false)
-                    strWarning += strWarningParam + "; ";
+                    warnings.Add(strWarningParam);
 
             }
 
@@ -8001,7 +8015,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 if (String.IsNullOrEmpty(strWarningParam) == false)
-                    strWarning += strWarningParam + "; ";
+                    warnings.Add(strWarningParam);
 
             }
 
@@ -8025,50 +8039,93 @@ MessageBoxDefaultButton.Button1);
                 DomUtil.SetElementText(dom.DocumentElement, "originMARC", strPlainText);
             }
 
-            strError = strWarning;
+            if (warnings.Count > 0)
+            {
+                strError = StringUtil.MakePathList(warnings, "; ");
+                DomUtil.SetElementText(dom.DocumentElement, "comment", strError);
+            }
+
+            // 2021/12/17
+            DomUtil.RemoveEmptyElements(dom.DocumentElement);
             return 0;
+        }
+
+        // 解析 dt1000 MARC 记录中的 -01 字段
+        public static void ParseDt1000G01(MarcRecord record,
+            out string path,
+            out string timestamp)
+        {
+            path = "";
+            timestamp = "";
+
+            List<string> paths = new List<string>();
+            List<string> timestamps = new List<string>();
+
+            var fields = record.select("field[@name='-01']");
+            foreach (MarcField field in fields)
+            {
+                var g01 = field.Content;
+                var parts = StringUtil.ParseTwoPart(g01, "|");
+                path = parts[0];
+                timestamp = parts[1];
+
+
+                // 优先选择 /132.147.160.100/图书总库/ctlno/0000001
+                if (Count(path) == 4)
+                {
+                    path = ToDp2Path(parts[0]);
+                    return;
+                }
+
+                paths.Add(path);
+                timestamps.Add(timestamp);
+            }
+
+            if (paths.Count > 0)
+            {
+                path = ToDp2Path(paths[0]);
+                timestamp = timestamps[0];
+            }
+        }
+
+        // 将 dt1000 的记录路径转换为 dp2 形态
+        // /132.147.160.100/图书总库/ctlno/0000001
+        static string ToDp2Path(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return path;
+            if (path.StartsWith("/"))
+                path = path.Substring(1);
+
+            if (path.IndexOf("/ctlno/") != -1)
+                path = path.Replace("/ctlno/", "/");
+
+            // 132.147.160.100/图书总库/0000001 --> 图书总库/0000001
+            if (Count(path) == 2)
+            {
+                int index = path.IndexOf("/");
+                if (index != -1)
+                    path = path.Substring(index + 1);
+            }
+
+            return path;
+        }
+
+        static int Count(string path)
+        {
+            int count = 0;
+            foreach (var ch in path.ToCharArray())
+            {
+                if (ch == '/')
+                    count++;
+            }
+
+            return count;
         }
 
         public static string HtmlEncode(string text)
         {
-           return HttpUtility.HtmlEncode(text);
-        }
-
-        public static int Date8toRfc1123(string strOrigin,
-out string strTarget,
-out string strError)
-        {
-            strError = "";
-            strTarget = "";
-
-            // strOrigin = strOrigin.Replace("-", "");
-
-            // 格式为 20060625， 需要转换为rfc
-            if (strOrigin.Length != 8)
-            {
-                strError = "源日期字符串 '" + strOrigin + "' 格式不正确，应为8字符";
-                return -1;
-            }
-
-
-            IFormatProvider culture = new CultureInfo("zh-CN", true);
-
-            DateTime time;
-            try
-            {
-                time = DateTime.ParseExact(strOrigin, "yyyyMMdd", culture);
-            }
-            catch
-            {
-                strError = "日期字符串 '" + strOrigin + "' 字符串转换为DateTime对象时出错";
-                return -1;
-            }
-
-            time = time.ToUniversalTime();
-            strTarget = DateTimeUtil.Rfc1123DateTimeString(time);
-
-
-            return 0;
+            return HttpUtility.HtmlEncode(text);
         }
 
         // 创建<borrows>节点的下级内容
@@ -8188,7 +8245,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strBorrowDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strBorrowDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strBorrowDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -8265,7 +8322,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strReturnDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strReturnDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strReturnDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -8315,7 +8372,7 @@ out string strError)
                     if (String.IsNullOrEmpty(strRenewDate) == false)
                     {
                         string strTarget = "";
-                        nRet = Date8toRfc1123(strRenewDate,
+                        nRet = DateTimeUtil.Date8toRfc1123(strRenewDate,
                             out strTarget,
                             out strError);
                         if (nRet == -1)
@@ -8482,7 +8539,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strBorrowDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strBorrowDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strBorrowDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -8523,7 +8580,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strReturnDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strReturnDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strReturnDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -8751,7 +8808,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strRequestDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strRequestDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strRequestDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -8884,7 +8941,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strBorrowDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strBorrowDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strBorrowDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)

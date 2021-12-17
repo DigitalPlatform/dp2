@@ -751,7 +751,7 @@ namespace UpgradeDt1000ToDp2
 
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strExpireDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strExpireDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -760,7 +760,7 @@ namespace UpgradeDt1000ToDp2
                         strExpireDate = strToday;   // 2008/8/26 new add
 
                         // 2008/10/28 new add
-                        nRet = Date8toRfc1123(strExpireDate,
+                        nRet = DateTimeUtil.Date8toRfc1123(strExpireDate,
                             out strTarget,
                             out strError);
                         Debug.Assert(nRet != -1, "");
@@ -2331,7 +2331,7 @@ out strNextSubfieldName);
 
                     string strTarget = "";
 
-                    nRet = Date8toRfc1123(strBorrowDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strBorrowDate,
                     out strTarget,
                     out strError);
                     if (nRet == -1)
@@ -2552,6 +2552,7 @@ out strNextSubfieldName);
             return 0;
         }
 
+#if REMOVED
         public static int Date8toRfc1123(string strOrigin,
 out string strTarget,
 out string strError)
@@ -2588,7 +2589,7 @@ out string strError)
 
             return 0;
         }
-
+#endif
 
         // 根据一个MARC字段，创建Group数组
         // 必须符合下列定义：
@@ -3170,7 +3171,7 @@ out string strError)
 
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strExpireDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strExpireDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -3179,7 +3180,7 @@ out string strError)
                         strExpireDate = strToday;   // 2008/8/26 new add
 
                         // 2008/10/28 new add
-                        nRet = Date8toRfc1123(strExpireDate,
+                        nRet = DateTimeUtil.Date8toRfc1123(strExpireDate,
                             out strTarget,
                             out strError);
                         Debug.Assert(nRet != -1, "");
@@ -3648,7 +3649,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strBorrowDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strBorrowDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strBorrowDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -3725,7 +3726,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strReturnDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strReturnDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strReturnDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -3775,7 +3776,7 @@ out string strError)
                     if (String.IsNullOrEmpty(strRenewDate) == false)
                     {
                         string strTarget = "";
-                        nRet = Date8toRfc1123(strRenewDate,
+                        nRet = DateTimeUtil.Date8toRfc1123(strRenewDate,
                             out strTarget,
                             out strError);
                         if (nRet == -1)
@@ -3942,7 +3943,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strBorrowDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strBorrowDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strBorrowDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -3983,7 +3984,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strReturnDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strReturnDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strReturnDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -4211,7 +4212,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strRequestDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strRequestDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strRequestDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -4344,7 +4345,7 @@ out string strError)
                 if (String.IsNullOrEmpty(strBorrowDate) == false)
                 {
                     string strTarget = "";
-                    nRet = Date8toRfc1123(strBorrowDate,
+                    nRet = DateTimeUtil.Date8toRfc1123(strBorrowDate,
                         out strTarget,
                         out strError);
                     if (nRet == -1)
@@ -4544,7 +4545,7 @@ out string strError)
             return -1;	// 出错
         }
 
-        #region 期数据的升级
+#region 期数据的升级
 
         // 将一条MARC记录中包含的期信息变成XML格式并上传
         // parameters:
@@ -4680,9 +4681,9 @@ out string strError)
             return -1;
         }
 
-        #endregion
+#endregion
 
-        #region 订购数据的升级
+#region 订购数据的升级
 
         // 将一条MARC记录中包含的期刊采购信息变成XML格式并上传
         // parameters:
@@ -5187,7 +5188,7 @@ out string strError)
                 {
                     string strTarget = "";
 
-                    nRet = Date8toRfc1123(strOrderTime,
+                    nRet = DateTimeUtil.Date8toRfc1123(strOrderTime,
                     out strTarget,
                     out strError);
                     if (nRet == -1)
@@ -5612,7 +5613,7 @@ out string strError)
                 {
                     string strTarget = "";
 
-                    nRet = Date8toRfc1123(strOrderTime,
+                    nRet = DateTimeUtil.Date8toRfc1123(strOrderTime,
                     out strTarget,
                     out strError);
                     if (nRet == -1)
@@ -6016,7 +6017,7 @@ out string strError)
             return -1;
         }
 
-        #endregion
+#endregion
     }
 
 

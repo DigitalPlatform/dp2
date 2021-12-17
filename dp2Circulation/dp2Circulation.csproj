@@ -54,7 +54,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>202</ApplicationRevision>
+    <ApplicationRevision>203</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -628,6 +628,7 @@
     <Compile Include="IO\TwoStringDialog.Designer.cs">
       <DependentUpon>TwoStringDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="ISO2709Statis\ConvertDt1000ReaderToXml.cs" />
     <Compile Include="ISO2709Statis\ConvertDt1000ToBdf.cs" />
     <Compile Include="ISO2709Statis\ImportMarcForm.cs">
       <SubType>Form</SubType>

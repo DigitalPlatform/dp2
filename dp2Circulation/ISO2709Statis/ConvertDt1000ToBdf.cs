@@ -19,6 +19,7 @@ namespace dp2Circulation.ISO2709Statis
     // 2021/12/15
     /// <summary>
     /// 将 dt1000 的书目 MARC 记录转换为 dp2 的 bdf 格式
+    /// #将dt1000书目MARC转换为dp2的bdf格式
     /// </summary>
     public class ConvertDt1000ToBdf : Iso2709Statis
     {
@@ -113,10 +114,15 @@ namespace dp2Circulation.ISO2709Statis
 
             MarcRecord record = new MarcRecord(this.MARC);
 
+            /*
             var g01 = record.select("field[@name='-01']").FirstContent;
             var parts = StringUtil.ParseTwoPart(g01, "|");
             string path = ToDp2Path(parts[0]);
             string timestamp = parts[1];
+            */
+            ReaderInfoForm.ParseDt1000G01(record,
+out string path,
+out string timestamp);
 
             string strXml = "";
             int nRet = MarcUtil.Marc2XmlEx(this.MARC,
@@ -806,7 +812,7 @@ out strNextSubfieldName);
 
                         string strTarget = "";
 
-                        nRet = ReaderInfoForm.Date8toRfc1123(strBorrowDate,
+                        nRet = DateTimeUtil.Date8toRfc1123(strBorrowDate,
                         out strTarget,
                         out strError);
                         if (nRet == -1)
@@ -1583,6 +1589,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
             return 0;
         }
 
+#if REMOVED
         // 将 dt1000 的记录路径转换为 dp2 形态
         // /132.147.160.100/图书总库/ctlno/0000001
         static string ToDp2Path(string path)
@@ -1617,6 +1624,8 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
 
             return count;
         }
+
+#endif
 
         // 针对一个（册信息）子字段组的描述
         class ItemGroup
@@ -2121,7 +2130,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 {
                     string strTarget = "";
 
-                    nRet = ReaderInfoForm.Date8toRfc1123(strOrderTime,
+                    nRet = DateTimeUtil.Date8toRfc1123(strOrderTime,
                     out strTarget,
                     out strError);
                     if (nRet == -1)
@@ -2662,7 +2671,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
                 {
                     string strTarget = "";
 
-                    nRet = ReaderInfoForm.Date8toRfc1123(strOrderTime,
+                    nRet = DateTimeUtil.Date8toRfc1123(strOrderTime,
                     out strTarget,
                     out strError);
                     if (nRet == -1)

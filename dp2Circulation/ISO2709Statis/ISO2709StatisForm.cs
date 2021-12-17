@@ -6,6 +6,7 @@ using System.Xml;
 using System.Reflection;
 using System.Diagnostics;
 
+using dp2Circulation.ISO2709Statis;
 using DigitalPlatform;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
@@ -13,8 +14,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
-using System.ServiceModel.Channels;
-using dp2Circulation.ISO2709Statis;
 
 namespace dp2Circulation
 {
@@ -336,9 +335,13 @@ namespace dp2Circulation
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
 
-                if (strProjectName == "#将dt1000书目MARC转换为bdf格式")
+                if (strProjectName == "#将dt1000书目MARC转换为dp2的bdf格式")
                 {
                     objStatis = new ConvertDt1000ToBdf();
+                }
+                else if (strProjectName == "#将dt1000读者MARC转换为dp2的XML格式")
+                {
+                    objStatis = new ConvertDt1000ReaderToXml();
                 }
                 else
                 {

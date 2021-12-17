@@ -72,6 +72,7 @@ namespace dp2Circulation
                 controls.Add(this.checkBox_refreshRefID);
                 controls.Add(this.checkBox_object);
                 controls.Add(this.textBox_objectDirectoryName);
+                controls.Add(this.checkBox_autoPostfix);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -83,6 +84,7 @@ namespace dp2Circulation
                 controls.Add(this.checkBox_refreshRefID);
                 controls.Add(this.checkBox_object);
                 controls.Add(this.textBox_objectDirectoryName);
+                controls.Add(this.checkBox_autoPostfix);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -111,6 +113,7 @@ namespace dp2Circulation
 
             this.checkBox_refreshRefID.Enabled = bEnable;
             this.checkBox_restoreMode.Enabled = bEnable;
+            this.checkBox_autoPostfix.Enabled = bEnable;
 
             this.button_begin.Enabled = bEnable;
             this.button_stop.Enabled = !bEnable;
@@ -136,6 +139,10 @@ namespace dp2Circulation
                 info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_refreshRefID.Checked;
+                }));
+                info.AutoPostfix = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_autoPostfix.Checked;
                 }));
                 info.RestoreMode = (bool)this.Invoke(new Func<bool>(() =>
                 {
@@ -181,6 +188,8 @@ namespace dp2Circulation
             this.Invoke((Action)(() =>
     EnableControls(false)
     ));
+
+            OutputText($"{DateTime.Now.ToString()} 开始导入读者 XML 记录", 0);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -263,6 +272,8 @@ namespace dp2Circulation
 
                 info.Channel.Timeout = old_timeout;
                 this.ReturnChannel(info.Channel);
+
+                OutputText($"{DateTime.Now.ToString()} 结束导入读者 XML 记录", 0);
 
                 this.Invoke((Action)(() =>
                     EnableControls(true)
@@ -371,6 +382,7 @@ EnableControls(false)
 
             public bool NewRefID { get; set; }
             public bool RestoreMode { get; set; }
+            public bool AutoPostfix { get; set; }
 
             public LibraryChannel Channel = null;
             public Stop stop = null;
@@ -469,6 +481,8 @@ EnableControls(false)
                 timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
             }
 
+            OutputText($"{strPath}-->{strTargetRecPath}", 0);
+
         REDO:
             long lRet = info.Channel.SetReaderInfo(
     stop,
@@ -485,6 +499,16 @@ EnableControls(false)
     out string strError);
             if (lRet == -1)
             {
+                if (info.Channel.ErrorCode == ErrorCode.ReaderBarcodeDup
+                    && info.AutoPostfix == true)
+                {
+                    // 自动加后缀
+                    barcode = barcode + "_" + Guid.NewGuid().ToString();
+                    DomUtil.SetElementText(root, "barcode", barcode);
+                    OutputText($"册条码号发生重复，尝试添加后缀({barcode})并重新写入记录", 1);
+                    goto REDO;
+                }
+
                 // 2021/9/14
                 // 这里很有可能是通讯错误
                 if (info.patron_dont_display_retry_dialog == false)
@@ -508,6 +532,7 @@ new string[] { "重试", "跳过", "中断" },
                 if (info.patron_retry_result == DialogResult.Yes)
                     goto REDO;
 
+                OutputText($"{strAction} 读者记录 {strTargetRecPath} (证条码号:{barcode},姓名:{name}) 时出错: {strError}", 2);
                 return;
             }
 
@@ -698,6 +723,15 @@ new string[] { "重试", "跳过", "中断" },
         {
             if (this.comboBox_appendMode.Text == "覆盖到原有路径")
                 this.comboBox_targetDbName.Text = "<覆盖到原有路径>";
+        }
+
+        public override void OutputText(string strText, int nWarningLevel = 0)
+        {
+            base.OutputText(strText, nWarningLevel);
+            /*
+            if (nWarningLevel == 2)
+                WriteHtml(HttpUtility.HtmlEncode(strText) + "\r\n");
+            */
         }
     }
 }
