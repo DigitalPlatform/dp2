@@ -276,6 +276,12 @@
     <Compile Include="FormProperty.cs" />
     <Compile Include="ProgramUtil.cs" />
     <Compile Include="Result.cs" />
+    <Compile Include="SelectDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectDlg.Designer.cs">
+      <DependentUpon>SelectDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="WebBrowserExtension.cs" />
     <EmbeddedResource Include="..\AutoCloseMessageBox.resx">
       <DependentUpon>AutoCloseMessageBox.cs</DependentUpon>
@@ -309,6 +315,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FileDownloadDialog.resx">
       <DependentUpon>FileDownloadDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectDlg.resx">
+      <DependentUpon>SelectDlg.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

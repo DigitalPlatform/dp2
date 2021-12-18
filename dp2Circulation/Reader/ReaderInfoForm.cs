@@ -7643,6 +7643,8 @@ MessageBoxDefaultButton.Button1);
         #region 将 dt1000 读者 MARC 记录转换为 dp2 的 XML 格式
 
         public static int ConvertDt1000ReaderMarcToXml(MarcRecord record,
+            string path,
+            string timestamp,
             out XmlDocument dom,
             out string strError)
         {
@@ -7656,17 +7658,21 @@ MessageBoxDefaultButton.Button1);
             string path = ToDp2Path(parts[0]);
             string timestamp = parts[1];
             */
+            /*
             ParseDt1000G01(record,
     out string path,
     out string timestamp);
+            */
 
             dom = new XmlDocument();
             dom.LoadXml("<root />");
 
             // 2021/12/17
             // 给根元素设置几个参数
-            DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, path);
-            DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, timestamp);
+            if (path != null)
+                DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, path);
+            if (timestamp != null)
+                DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, timestamp);
 
             // 读者证条码
             string strBarcode = "";
@@ -7704,11 +7710,17 @@ MessageBoxDefaultButton.Button1);
 
             // 密码
             string strPassword = record.select("field[@name='080']/subfield[@name='a']").FirstContent;
-            if (String.IsNullOrEmpty(strPassword) == false)
+            if (String.IsNullOrEmpty(strPassword) == true)
+            {
+                // 2021/12/17
+                // 如果读者记录原来没有密码，则产生随机密码。对读者记录起到保护作用
+                strPassword = Guid.NewGuid().ToString();
+            }
+
             {
                 try
                 {
-                    // TODO:
+                    // TODO: 用最新 hash 算法
                     strPassword = Cryptography.GetSHA1(strPassword);
                 }
                 catch
@@ -7775,7 +7787,6 @@ MessageBoxDefaultButton.Button1);
 
                     strExpireDate = strTarget;
                 }
-
 
                 DomUtil.SetElementText(dom.DocumentElement, "expireDate", strExpireDate);
             }
@@ -8050,16 +8061,23 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
-        // 解析 dt1000 MARC 记录中的 -01 字段
-        public static void ParseDt1000G01(MarcRecord record,
+        // 从 dt1000 MARC 记录中的若干 -01 字段中选择一个来源数据库
+        // /132.147.160.100/图书总库/ctlno/0000001
+        public static int SelectDt1000G01Source(
+            Form owner,
+            MarcRecord record,
             out string path,
             out string timestamp)
         {
             path = "";
             timestamp = "";
 
-            List<string> paths = new List<string>();
+            // 来源。去掉后面 /ctlno/xxxxx 部分的
+            List<string> sources = new List<string>();
             List<string> timestamps = new List<string>();
+
+            // 原始路径
+            // List<string> paths = new List<string>();
 
             var fields = record.select("field[@name='-01']");
             foreach (MarcField field in fields)
@@ -8069,23 +8087,73 @@ MessageBoxDefaultButton.Button1);
                 path = parts[0];
                 timestamp = parts[1];
 
+                // paths.Add(path);
 
-                // 优先选择 /132.147.160.100/图书总库/ctlno/0000001
-                if (Count(path) == 4)
+                // path 去掉后面两截 /ctlno/0000001
                 {
-                    path = ToDp2Path(parts[0]);
-                    return;
+                    int pos = path.LastIndexOf("/ctlno/");
+                    if (pos != -1)
+                        path = path.Substring(0, pos);
+                    sources.Add(path);
                 }
 
-                paths.Add(path);
                 timestamps.Add(timestamp);
             }
 
-            if (paths.Count > 0)
+            if (timestamps.Count == 0)
+                return -1;
+
+            int index = 0;
+            if (timestamps.Count > 1)
             {
-                path = ToDp2Path(paths[0]);
-                timestamp = timestamps[0];
+                bool temp = false;
+                var result = SelectDlg.GetSelect(
+                    owner,
+                    "dt1000 数据来源",
+                    "请选择数据来源",
+                    sources.ToArray(),
+                    0,
+                    null,
+                    ref temp,
+                    owner.Font);
+                if (result == null)
+                    return 0;
+                index = sources.IndexOf(result);
             }
+
+            path = sources[index];
+            timestamp = timestamps[index];
+            return 1;
+        }
+
+        // 根据 source 定位并获得 -01 字段中的记录路径
+        public static int GetDt1000G01Path(
+    MarcRecord record,
+    string source,
+    out string path,
+    out string timestamp)
+        {
+            path = "";
+            timestamp = "";
+
+            var fields = record.select("field[@name='-01']");
+            foreach (MarcField field in fields)
+            {
+                var g01 = field.Content;
+                var parts = StringUtil.ParseTwoPart(g01, "|");
+                path = parts[0];
+                timestamp = parts[1];
+
+                if (path.StartsWith(source + "/"))
+                {
+                    path = ToDp2Path(path);
+                    return 1;
+                }
+            }
+
+            path = null;
+            timestamp = null;
+            return 0;
         }
 
         // 将 dt1000 的记录路径转换为 dp2 形态

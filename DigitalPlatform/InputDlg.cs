@@ -62,9 +62,9 @@ namespace DigitalPlatform
             this.label_title.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_title.Location = new System.Drawing.Point(11, 10);
+            this.label_title.Location = new System.Drawing.Point(12, 11);
             this.label_title.Name = "label_title";
-            this.label_title.Size = new System.Drawing.Size(474, 79);
+            this.label_title.Size = new System.Drawing.Size(472, 58);
             this.label_title.TabIndex = 0;
             this.label_title.Text = "请输入字符串:";
             this.label_title.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
@@ -74,18 +74,18 @@ namespace DigitalPlatform
             this.textBox_value.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_value.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_value.Location = new System.Drawing.Point(12, 92);
+            this.textBox_value.Location = new System.Drawing.Point(13, 72);
             this.textBox_value.Name = "textBox_value";
-            this.textBox_value.Size = new System.Drawing.Size(470, 28);
+            this.textBox_value.Size = new System.Drawing.Size(467, 31);
             this.textBox_value.TabIndex = 1;
             // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_OK.Location = new System.Drawing.Point(228, 185);
+            this.button_OK.Location = new System.Drawing.Point(201, 178);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(124, 33);
+            this.button_OK.Size = new System.Drawing.Size(136, 38);
             this.button_OK.TabIndex = 2;
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
@@ -94,17 +94,18 @@ namespace DigitalPlatform
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(360, 185);
+            this.button_Cancel.Location = new System.Drawing.Point(346, 178);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(125, 33);
+            this.button_Cancel.Size = new System.Drawing.Size(138, 38);
             this.button_Cancel.TabIndex = 3;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // checkBox1
             // 
+            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(12, 127);
+            this.checkBox1.Location = new System.Drawing.Point(13, 145);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(22, 21);
             this.checkBox1.TabIndex = 4;
@@ -114,7 +115,7 @@ namespace DigitalPlatform
             // InputDlg
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleBaseSize = new System.Drawing.Size(10, 21);
+            this.AutoScaleBaseSize = new System.Drawing.Size(11, 24);
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(500, 232);
             this.Controls.Add(this.checkBox1);
