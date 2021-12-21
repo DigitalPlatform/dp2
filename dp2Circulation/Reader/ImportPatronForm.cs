@@ -115,6 +115,11 @@ namespace dp2Circulation
             this.checkBox_restoreMode.Enabled = bEnable;
             this.checkBox_autoPostfix.Enabled = bEnable;
 
+            // 2021/12/19
+            this.checkBox_object.Enabled = bEnable;
+            this.textBox_objectDirectoryName.Enabled = bEnable;
+            this.button_getObjectDirectoryName.Enabled = bEnable;
+
             this.button_begin.Enabled = bEnable;
             this.button_stop.Enabled = !bEnable;
         }
