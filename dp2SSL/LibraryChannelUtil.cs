@@ -377,6 +377,7 @@ namespace dp2SSL
                 // 保存到本地数据库
                 context.BiblioSummaries.Add(item);
                 await context.SaveChangesAsync();
+                return; // 2021/12/22
             }
             catch (Exception ex)
             {
@@ -515,6 +516,7 @@ namespace dp2SSL
                 // 保存到本地数据库
                 context.Entities.Add(item);
                 await context.SaveChangesAsync();
+                return; // 2021/12/22
             }
             catch (Exception ex)
             {

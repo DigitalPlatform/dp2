@@ -433,6 +433,7 @@ channel.ErrorCode == ErrorCode.RequestTimeOut)
                 // 保存到本地数据库
                 context.Entities.Add(item);
                 await context.SaveChangesAsync();
+                return; // 2021/12/22
             }
             catch (Exception ex)
             {

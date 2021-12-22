@@ -312,6 +312,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Gate", "dp2Gate\dp2Gate.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRoslyn", "TestRoslyn\TestRoslyn.csproj", "{31765FE8-9B1F-4441-B9AC-50F3AEAED60E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Gate.Install", "dp2Gate.Install\dp2Gate.Install.csproj", "{E2256B05-D931-490D-8A7E-9BF595A856E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2662,6 +2664,24 @@ Global
 		{31765FE8-9B1F-4441-B9AC-50F3AEAED60E}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{31765FE8-9B1F-4441-B9AC-50F3AEAED60E}.Test|x86.ActiveCfg = Debug|Any CPU
 		{31765FE8-9B1F-4441-B9AC-50F3AEAED60E}.Test|x86.Build.0 = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Release|x86.Build.0 = Release|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Test|x86.ActiveCfg = Debug|Any CPU
+		{E2256B05-D931-490D-8A7E-9BF595A856E7}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

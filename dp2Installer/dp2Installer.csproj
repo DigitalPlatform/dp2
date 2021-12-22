@@ -284,6 +284,10 @@
       <Project>{C5B517C1-7344-45A5-89DC-06A9B130AE36}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\dp2Gate.Install\dp2Gate.Install.csproj">
+      <Project>{e2256b05-d931-490d-8a7e-9bf595a856e7}</Project>
+      <Name>dp2Gate.Install</Name>
+    </ProjectReference>
     <ProjectReference Include="..\dp2ZServer.Install\dp2ZServer.Install.csproj">
       <Project>{1ae049e3-3215-48ac-b64b-3e99e13e0933}</Project>
       <Name>dp2ZServer.Install</Name>
@@ -429,7 +433,8 @@ CALL copykernel.bat
 CALL copylibrary.bat
 CALL copyopac.bat
 CALL copyzserver.bat
-CALL copypalm.bat</PreBuildEvent>
+CALL copypalm.bat
+CALL copygate.bat</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

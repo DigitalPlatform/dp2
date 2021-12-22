@@ -1781,6 +1781,31 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
+
+            // 2021/12/22
+            // ---
+            {
+                string strProgramDir = GetProductDirectory("dp2gate");
+                strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+
+                if (File.Exists(strExePath) == true)
+                {
+                    // (ClickOnce 安装时)确保文件已经下载到本地
+                    var ret = await PrepareDataFile("gate_app.zip");
+                    if (ret.Value == -1)
+                    {
+                        AppendString($"*** 出错: 准备 gate_app.zip 文件失败: {ret.ErrorInfo}\r\n");
+                    }
+                    else
+                    {
+                        strZipFileName = Path.Combine(this.DataDir, "gate_app.zip");
+
+                        if (DetectChange(strZipFileName) == true)
+                            names.Add("dp2Gate");
+                    }
+                }
+            }
+
             if (names.Count > 0)
             {
                 DialogResult result = MessageBox.Show(this,
@@ -1803,6 +1828,8 @@ MessageBoxDefaultButton.Button1);
                         MenuItem_dp2ZServer_update_Click(this, new EventArgs());
                     else if (name == "palmCenter")
                         MenuItem_palmCenter_update_Click(this, new EventArgs());
+                    else if (name == "dp2Gate")
+                        MenuItem_dp2Gate_update_Click(this, new EventArgs());
                 }
             }
             else
@@ -6067,7 +6094,7 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     // 注册为 Windows Service
-                    strExePath = Path.Combine(strProgramDir, "dp2kernel.exe");
+                    // strExePath = Path.Combine(strProgramDir, "palmcenter.exe");
 
                     AppendString("注册 Windows Service ...\r\n");
 
@@ -6516,5 +6543,389 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        // 首次安装 dp2Gate
+        private async void MenuItem_dp2Gate_install_Click(object sender, EventArgs e)
+        {
+            await installdp2Gate();
+        }
+
+        // 更新 dp2Gate
+        private async void MenuItem_dp2Gate_update_Click(object sender, EventArgs e)
+        {
+            await installdp2Gate("update");
+        }
+
+        // 打开数据文件夹
+        private void MenuItem_dp2Gate_openDataDir_Click(object sender, EventArgs e)
+        {
+            string dir = Utility.GetServiceUserDirectory("dp2gate");
+            if (Directory.Exists(dir) == false)
+            {
+                MessageBox.Show(this, $"文件夹 {dir} 不存在");
+                return;
+            }
+            try
+            {
+                System.Diagnostics.Process.Start(dir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        // 打开程序文件夹
+        private void MenuItem_dp2Gate_openProgramFolder_Click(object sender, EventArgs e)
+        {
+            string strProgramDir = GetProductDirectory("dp2gate");
+            if (Directory.Exists(strProgramDir) == false)
+            {
+                MessageBox.Show(this, $"文件夹 {strProgramDir} 不存在");
+                return;
+            }
+            try
+            {
+                System.Diagnostics.Process.Start(strProgramDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        // 配置 dp2Gate
+        private void MenuItem_dp2Gate_config_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strProgramDir = GetProductDirectory("dp2gate");
+            string strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "dp2gate 未曾安装过";
+                goto ERROR1;
+            }
+
+            AppendString("正在配置 dp2gate 参数 ...\r\n");
+
+            using (var dlg = new PalmCenter.Install.SettingDialog())
+            {
+                dlg.ShowDialog(this);
+            }
+
+            AppendString("配置 dp2gate 参数完成\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2Gate_startService_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strProgramDir = GetProductDirectory("dp2gate");
+            string strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "dp2gate 未曾安装过";
+                goto ERROR1;
+            }
+            // strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+            AppendString("正在启动 dp2gate 服务 ...\r\n");
+            Application.DoEvents();
+
+            nRet = InstallHelper.StartService("dp2GateService",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            AppendString("dp2Gate 服务成功启动\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2Gate_stopService_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strProgramDir = GetProductDirectory("dp2gate");
+            string strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "dp2gate 未曾安装过";
+                goto ERROR1;
+            }
+
+            AppendString("正在停止 dp2gate 服务 ...\r\n");
+            Application.DoEvents();
+
+            nRet = InstallHelper.StopService("dp2GateService",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            AppendString("dp2Gate 服务已经停止\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2Gate_installService_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = installGateService("install", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2Gate_uninstallService_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = installGateService("uninstall", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 卸载 dp2Gate
+        private void MenuItem_dp2Gate_uninstall_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            DialogResult result = MessageBox.Show(this,
+"确实要卸载 dp2Gate?\r\n\r\n注意: 卸载后程序文件将被删除",
+"dp2Installer",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;   // cancelled
+
+            string strProgramDir = GetProductDirectory("dp2gate");
+            string strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+
+            // 注销
+            int nRet = installGateService("uninstall", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // 等待结束
+
+            // 删除程序目录
+            DeleteProgramDir(strProgramDir);
+
+            AppendSectionTitle("卸载 dp2Gate 结束");
+            this.Refresh_palmCenter_MenuItems();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private async Task installdp2Gate(string style = "")
+        {
+            string strError = "";
+            int nRet = 0;
+
+            bool update = StringUtil.IsInList("update", style);
+            string actionName = "安装";
+            if (update)
+                actionName = "更新";
+
+            string strProgramDir = "";
+
+            this._floatingMessage.Text = $"正在{actionName} dp2Gate - 门禁中心 ...";
+
+            try
+            {
+                AppendSectionTitle($"{actionName} dp2Gate 开始");
+
+                AppendString("正在获得可执行文件目录 ...\r\n");
+
+                Application.DoEvents();
+
+                strProgramDir = GetProductDirectory("dp2gate");
+                string strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+                if (update == false && File.Exists(strExePath) == true)
+                {
+                    strError = "dp2Gate 已经安装过了，不能重复安装";
+                    goto ERROR1;
+                }
+
+                PathUtil.TryCreateDir(strProgramDir);
+
+                if (update)
+                {
+                    // 停止 service
+                    AppendString("正在停止 dp2Gate 服务 ...\r\n");
+                    Application.DoEvents();
+
+                    nRet = InstallHelper.StopService("dp2GateService",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    AppendString("dp2Gate 服务已经停止\r\n");
+                }
+
+                // (ClickOnce 安装时)确保文件已经下载到本地
+                var ret = await PrepareDataFile("gate_app.zip");
+                if (ret.Value == -1)
+                {
+                    strError = $"准备 gate_app.zip 文件失败: {ret.ErrorInfo}";
+                    goto ERROR1;
+                }
+
+                string strZipFileName = Path.Combine(this.DataDir, "gate_app.zip");
+
+                AppendString($"{actionName}可执行文件 ...\r\n");
+
+                // 更新可执行目录
+                // return:
+                //      -1  出错
+                //      0   没有必要刷新
+                //      1   已经刷新
+                nRet = RefreshBinFiles(
+                    false,
+                    strZipFileName,
+                    strProgramDir,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (update == false)
+                {
+                    // 配置参数
+                    AppendString("配置参数 ...\r\n");
+
+                    try
+                    {
+                        using (var dlg = new dp2Gate.Install.SettingDialog())
+                        {
+                            GuiUtil.AutoSetDefaultFont(dlg);
+                            var dlg_result = dlg.ShowDialog(this);
+                            if (dlg_result == DialogResult.Cancel)
+                            {
+                                // TODO: 注意清理干净可执行文件，以便后面可以重新安装
+                                strError = "放弃配置";
+                                goto ERROR1;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        AppendString("配置参数结束 ...\r\n");
+                    }
+
+                    // 注册为 Windows Service
+                    strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+
+                    AppendString("注册 Windows Service ...\r\n");
+
+                    nRet = installGateService("install start",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                else
+                {
+                    // 启动 service
+                    AppendString("正在启动 dp2gate 服务 ...\r\n");
+                    Application.DoEvents();
+
+                    nRet = InstallHelper.StartService("dp2GateService",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    AppendString("dp2Gate 服务成功启动\r\n");
+                }
+                // 此后不再删除程序目录
+                strProgramDir = "";
+
+                AppendSectionTitle($"{actionName} dp2Gate 结束");
+                Refresh_dp2Gate_MenuItems();
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+            return;
+        ERROR1:
+            if (string.IsNullOrEmpty(strProgramDir) == false)
+                DeleteProgramDir(strProgramDir);
+
+            MessageBox.Show(this, strError);
+        }
+
+        void Refresh_dp2Gate_MenuItems()
+        {
+            string strProgramDir = GetProductDirectory("dp2gate");
+            string strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+
+            if (File.Exists(strExePath) == false)
+            {
+                this.MenuItem_dp2Gate_install.Enabled = true;
+                this.MenuItem_dp2Gate_update.Enabled = false;
+                this.MenuItem_dp2Gate_uninstall.Enabled = false;
+            }
+            else
+            {
+                this.MenuItem_dp2Gate_install.Enabled = false;
+                this.MenuItem_dp2Gate_update.Enabled = true;
+                this.MenuItem_dp2Gate_uninstall.Enabled = true;
+            }
+        }
+
+
+        int installGateService(string action,
+    out string strError)
+        {
+            strError = "";
+
+            string strProgramDir = GetProductDirectory("dp2gate");
+            string strExePath = Path.Combine(strProgramDir, "dp2gate.exe");
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "dp2gate 未曾安装过";
+                return 0;
+            }
+
+            try
+            {
+                string arguments = action;
+                var process = System.Diagnostics.Process.Start(strExePath, arguments);
+                process.WaitForExit();
+                var code = process.ExitCode;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            AppendString($"dp2gate 服务{(action.StartsWith("install") ? "注册" : "注销")}成功\r\n");
+            return 1;
+        }
+
     }
 }

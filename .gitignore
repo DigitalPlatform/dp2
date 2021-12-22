@@ -22,6 +22,7 @@ opac_style.zip
 zserver_app.zip
 zserver_data.zip
 palm_app.zip
+gate_app.zip
 
 *.dll
 *.exe
@@ -33,6 +34,7 @@ library_app/
 opac_app/
 zserver_app/
 palm_app/
+gate_app/
 .vs/
 
 # Build results
