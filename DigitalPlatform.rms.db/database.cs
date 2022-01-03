@@ -361,6 +361,14 @@ namespace DigitalPlatform.rms
             if (String.IsNullOrEmpty(strLang) == true)
                 goto END1;
 
+            // 2021/12/29
+            if (this.PropertyNode == null)
+            {
+                this.PropertyNode = this.m_selfNode.SelectSingleNode("property");
+                if (this.PropertyNode == null)
+                    return this.FullID;
+            }
+
             // 1.按语言版本精确找
             nodeCaption = this.PropertyNode.SelectSingleNode("logicname/caption[@lang='" + strLang + "']");
             if (nodeCaption != null)
@@ -410,7 +418,6 @@ namespace DigitalPlatform.rms
             }
             if (string.IsNullOrEmpty(strCaption) == false)
                 return strCaption;
-
 
             // 5.最后一个语言版本信息都没有时，返回数据库的id
             return this.FullID; // TODO: 是不是还要加上方括号之类?

@@ -60,6 +60,7 @@
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_deleteShortcut = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_checkUpdate = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -111,7 +112,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.MenuItem_checkUpdate = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -363,6 +363,13 @@
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(430, 6);
+            // 
+            // MenuItem_checkUpdate
+            // 
+            this.MenuItem_checkUpdate.Name = "MenuItem_checkUpdate";
+            this.MenuItem_checkUpdate.Size = new System.Drawing.Size(433, 40);
+            this.MenuItem_checkUpdate.Text = "检查更新";
+            this.MenuItem_checkUpdate.Click += new System.EventHandler(this.MenuItem_checkUpdate_Click);
             // 
             // MenuItem_manual
             // 
@@ -844,7 +851,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(751, 35);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(691, 35);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
@@ -872,7 +879,7 @@
             this.toolStripButton_cfg_setHongnibaServer});
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
-            this.toolStrip_server.Size = new System.Drawing.Size(751, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(691, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -912,13 +919,6 @@
             this.notifyIcon1.Text = "dp2-指纹中心";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
-            // 
-            // MenuItem_checkUpdate
-            // 
-            this.MenuItem_checkUpdate.Name = "MenuItem_checkUpdate";
-            this.MenuItem_checkUpdate.Size = new System.Drawing.Size(433, 40);
-            this.MenuItem_checkUpdate.Text = "检查更新";
-            this.MenuItem_checkUpdate.Click += new System.EventHandler(this.MenuItem_checkUpdate_Click);
             // 
             // MainForm
             // 

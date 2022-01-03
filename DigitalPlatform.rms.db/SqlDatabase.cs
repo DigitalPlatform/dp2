@@ -776,7 +776,7 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
             //************对数据库加写锁********************
             m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("Initialize()，对'" + this.GetCaption("zh-CN") + "'数据库加写锁。");
+			this.container.WriteDebugInfo("InitialPhysicalDatabase()，对'" + this.GetCaption("zh-CN") + "'数据库加写锁。");
 #endif
 
             try
@@ -1331,7 +1331,7 @@ ex);
                 //*********************对数据库解写锁******
                 m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Initialize()，对'" + this.GetCaption("zh-CN") + "'数据库解写锁。");
+				this.container.WriteDebugInfo("InitialPhysicalDatabase()，对'" + this.GetCaption("zh-CN") + "'数据库解写锁。");
 #endif
             }
             return 0;
@@ -1543,7 +1543,7 @@ ex);
             //************对数据库加写锁********************
             m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("Refresh()，对'" + this.GetCaption("zh-CN") + "'数据库加写锁。");
+			this.container.WriteDebugInfo($"ManageKeysIndex({strAction})，对'{ this.GetCaption("zh-CN") }'数据库加写锁。");
 #endif
             try
             {
@@ -1731,7 +1731,7 @@ ex);
                 //*********************对数据库解写锁******
                 m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Refresh()，对'" + this.GetCaption("zh-CN") + "'数据库解写锁。");
+				this.container.WriteDebugInfo($"ManageKeysIndex({strAction})，对'{ this.GetCaption("zh-CN") }'数据库解写锁。");
 #endif
             }
 
@@ -1758,7 +1758,7 @@ ex);
             //************对数据库加写锁********************
             m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("Refresh()，对'" + this.GetCaption("zh-CN") + "'数据库加写锁。");
+			this.container.WriteDebugInfo("RefreshPhysicalDatabase()，对'" + this.GetCaption("zh-CN") + "'数据库加写锁。");
 #endif
             try
             {
@@ -1938,7 +1938,7 @@ ex);
                 //*********************对数据库解写锁******
                 m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Refresh()，对'" + this.GetCaption("zh-CN") + "'数据库解写锁。");
+				this.container.WriteDebugInfo("RefreshPhysicalDatabase()，对'" + this.GetCaption("zh-CN") + "'数据库解写锁。");
 #endif
             }
 
@@ -12478,7 +12478,7 @@ handle.CancelTokenSource.Token).Result;
                 //**********对记录加写锁***************
                 this.m_recordLockColl.LockForWrite(ref locked_ids, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("WriteRecords()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录加写锁。");
+				this.container.WriteDebugInfo("WriteRecords()，对'" + this.GetCaption("zh-CN") + "/" + StringUtil.MakePathList(locked_ids) + "'记录加写锁。");
 #endif
                 try // 记录锁
                 {
@@ -12663,7 +12663,7 @@ handle.CancelTokenSource.Token).Result;
                     //******对记录解写锁****************************
                     m_recordLockColl.UnlockForWrite(locked_ids);
 #if DEBUG_LOCK_SQLDATABASE
-					this.container.WriteDebugInfo("WriteRecords()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录解写锁。");
+					this.container.WriteDebugInfo("WriteRecords()，对'" + this.GetCaption("zh-CN") + "/" + StringUtil.MakePathList(locked_ids) + "'记录解写锁。");
 #endif
                 }
 
@@ -19257,7 +19257,7 @@ handle.CancelTokenSource.Token).Result;
                 //*********对记录加写锁**********
                 m_recordLockColl.LockForWrite(strRecordID, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("DeleteRecordForce()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录加写锁。");
+				this.container.WriteDebugInfo("DeleteRecord()，对'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'记录加写锁。");
 #endif
                 try
                 {
@@ -19467,7 +19467,7 @@ handle.CancelTokenSource.Token).Result;
                     //**************对记录解写锁**********
                     m_recordLockColl.UnlockForWrite(strRecordID);
 #if DEBUG_LOCK_SQLDATABASE
-					this.container.WriteDebugInfo("DeleteRecord()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录解写锁。");
+					this.container.WriteDebugInfo("DeleteRecord()，对'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'记录解写锁。");
 #endif
 
                 }
@@ -19477,7 +19477,7 @@ handle.CancelTokenSource.Token).Result;
                 //***************对数据库解读锁*****************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("DeleteRecordForce()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
+				this.container.WriteDebugInfo("DeleteRecord()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
             }
 
@@ -19589,7 +19589,7 @@ handle.CancelTokenSource.Token).Result;
                     //*********对记录加写锁**********
                     m_recordLockColl.LockForWrite(strRecordID, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("RebuildRecordKeys()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录加写锁。");
+				this.container.WriteDebugInfo("RebuildRecordKeys()，对'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'记录加写锁。");
 #endif
                     try // lock record
                     {
@@ -19668,7 +19668,7 @@ handle.CancelTokenSource.Token).Result;
                         //**************对记录解写锁**********
                         m_recordLockColl.UnlockForWrite(strRecordID);
 #if DEBUG_LOCK_SQLDATABASE
-					this.container.WriteDebugInfo("RebuildRecordKeys()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录解写锁。");
+					this.container.WriteDebugInfo("RebuildRecordKeys()，对'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'记录解写锁。");
 #endif
                     }
 

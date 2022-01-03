@@ -56,7 +56,5 @@ namespace DigitalPlatform
         {
             this.ExitWriteLock();
         }
-
-
     }
 }

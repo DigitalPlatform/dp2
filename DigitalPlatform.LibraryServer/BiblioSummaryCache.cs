@@ -1,5 +1,5 @@
 ﻿using System.Runtime.Caching;
-
+using System.Xml;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
@@ -95,6 +95,23 @@ namespace DigitalPlatform.LibraryServer
                     CreateBiblioSummaryIndex();
                 }
             }
+
+            // 2021/12/23
+            // 执行 library.xml 中的 commands/command
+            var commands = this.LibraryCfgDom.DocumentElement.SelectNodes("commands/command[@name='_initial_biblioSummary_db']");
+            if (commands.Count > 0)
+            {
+                ClearBiblioSummaryDb();
+                foreach(XmlElement command in commands)
+                {
+                    command.ParentNode.RemoveChild(command);
+                }
+
+                // 通知 library.xml 发生了变化
+                this.Changed = true;
+                this.ActivateManagerThread();
+            }
+
             return 0;
         }
 

@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace DigitalPlatform
 {
     // 记录锁集合
-    public class RecordLockCollection
+    public class RecordLockCollection : IDisposable
     {
 #if OLD_LOCK
         ReaderWriterLock m_lock = new ReaderWriterLock();
@@ -121,6 +121,8 @@ namespace DigitalPlatform
 
         // 试图移走锁对象
         // 应当在RecordLock:m_lock解锁以后进行
+        // 算法说明：如果 m_nUseCount 没有回归到 0，则不急于移走。也许下一次本函数被调用时 m_nUseCount 就为 0 从而可以被移走了
+        // TODO: 是否可以计算 RecordLock 对象生存的时间，如果时间太长就意味着出现了故障？
         void TryRemoveLock(RecordLock reclock)
         {
             // 加写锁
@@ -131,6 +133,8 @@ namespace DigitalPlatform
                 if (nRet == 1) // 说明增量以前为0
                 {
                     this.RecordLocks.Remove(reclock.m_strID);
+                    // 2021/12/28
+                    reclock.Dispose();
                 }
                 else
                 {
@@ -141,8 +145,6 @@ namespace DigitalPlatform
             {
                 this._unlockForWrite();
             }
-
-
         }
 
         // 读锁定
@@ -258,7 +260,10 @@ namespace DigitalPlatform
             catch (Exception ex)
             {
                 Interlocked.Decrement(ref reclock.m_nUseCount);
-                // 是否还要删除?
+
+                // 2021/12/28
+                // 尝试移除
+                TryRemoveLock(reclock);
 
                 throw ex;
             }
@@ -269,7 +274,7 @@ namespace DigitalPlatform
             RecordLock reclock = GetLock(strID, false);
 
             if (reclock == null)
-                throw new Exception("id '"+strID+"' 没有找到对应的记录锁");
+                throw new Exception("id '" + strID + "' 没有找到对应的记录锁");
 
             try
             {
@@ -308,12 +313,37 @@ namespace DigitalPlatform
             }
         }
 
+        public bool IsEmpty()
+        {
+            return this.RecordLocks.Count == 0;
+        }
+
+        // 2021/12/28
+        public void Dispose()
+        {
+            if (this.m_lock != null)
+            {
+                this.m_lock.Dispose();
+                this.m_lock = null;
+            }
+
+            // Dispose() hashtable 中的全部 RecordLock 对象
+            {
+                foreach (string key in RecordLocks.Keys)
+                {
+                    RecordLock onelock = (RecordLock)this.RecordLocks[key];
+                    if (onelock != null)
+                        onelock.Dispose();
+                }
+                RecordLocks.Clear();
+            }
+        }
     }
 
     /// <summary>
     /// 记录锁
     /// </summary>
-    public class RecordLock
+    public class RecordLock : IDisposable
     {
 #if OLD_LOCK
         private ReaderWriterLock m_lock = new ReaderWriterLock();
@@ -373,6 +403,21 @@ namespace DigitalPlatform
         public int GetLockHashCode()
         {
             return this.m_lock.GetHashCode();
+        }
+
+        // 2021/12/28
+        public void Dispose()
+        {
+            if (this.m_lock != null)
+            {
+                if (this.m_lock.IsWriteLockHeld == true)
+                    this.m_lock.ExitWriteLock();
+                if (this.m_lock.IsReadLockHeld == true)
+                    this.m_lock.ExitReadLock();
+
+                this.m_lock.Dispose();
+                this.m_lock = null;
+            }
         }
     }
 }

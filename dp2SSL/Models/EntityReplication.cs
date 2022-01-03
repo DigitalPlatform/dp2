@@ -675,7 +675,6 @@ strOldRecord);
             if (IsManaged(libraryCode, currentLibraryCodeList) == false)
                 return new NormalResult();
 
-
             string oi = InventoryData.GetInstitution(location);
 
             var item = new EntityItem

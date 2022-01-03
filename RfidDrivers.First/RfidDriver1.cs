@@ -2272,7 +2272,74 @@ namespace RfidDrivers.First
     </function>
   </device>
 
+<!-- 新的 2021/12/24 -->
   <!--M22-->
+  <device product='M22'>
+    <basic>
+      <id>690022</id>
+      <driver>690201</driver>
+      <type>reader</type>
+      <picture>M22.jpg</picture>
+      <cfg_name>M22</cfg_name>
+      <noise>true</noise>
+      <range>middle</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <buffer_mode>false</buffer_mode>
+      <save_block>true</save_block>
+      <communication usb ='true' com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output enable='true'>
+          <port id='1' name='M22_o1'/>
+          <port id='2' name='M22_o2'/>
+          <port id='3' name='M22_o3'/>
+          <port id='4' name='M22_o4'/>
+          <port id='5' name='M22_o5'/>
+        </set_output>
+        <input_status enable='true'>
+          <port id='1' name='M22_i1'/>
+          <port id='2' name='M22_i2'/>
+          <port id='3' name='M22_i3'/>
+          <port id='4' name='M22_i4'/>
+          <port id='5' name='M22_i5'/>
+        </input_status>
+        <RF_Operation>true</RF_Operation>
+        <reset_sys>true</reset_sys>
+      </command>
+      <multiple_tags/>
+      <single_tag>
+        <Transceive>
+          <ISO15693_Transceive Multiple_Antenna='true'/>
+        </Transceive>
+      </single_tag>
+      <device_diagnosis>
+        <temperature_check RF_Power='true' PA_Current='true'>true</temperature_check>
+        <error_check>
+          <DiagnosisFlg>
+            <Content Bit='0' Des='M22_b0'/>
+            <Content Bit='1' Des='M22_b1'/>
+            <Content Bit='2' Des='M22_b2'/>
+            <Content Bit='3' Des='M22_b3'/>
+            <Content Bit='4' Des='M22_b4'/>
+          </DiagnosisFlg>
+        </error_check>
+        <noise_check   Get_Nosiebase='true'>true</noise_check>
+      </device_diagnosis>
+    </function>
+  </device>
+
+  <!--M22-->
+<!-- 旧的
   <device product='M22'>
     <basic>
       <id>690022</id>
@@ -2316,6 +2383,7 @@ namespace RfidDrivers.First
       </device_diagnosis>
     </function>
   </device>
+-->
 
   <!-- 2021/8/10 -->
   <device product='URL105'>

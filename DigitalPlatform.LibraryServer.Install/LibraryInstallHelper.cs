@@ -968,6 +968,10 @@ RestoreLibraryParam param
                             return false;
                         }
 
+                        // 2021/12/23
+                        // 在 library.xml 中写入初始化书目摘要 mongodb 数据库的 commands
+                        AddCommands(target_dom);
+
                         // TODO: 备份操作前的 library.xml ?
                         target_dom.Save(strLibraryXmlFileName);
                     }
@@ -1018,6 +1022,30 @@ RestoreLibraryParam param
             }
 
             return true;
+        }
+
+        // 2021/12/23
+        // 在 library.xml 中写入 commands
+        static void AddCommands(XmlDocument library_dom)
+        {
+            // 观察根下面是否已有 mongoDB 元素
+            //     <mongoDB connectionString="mongodb://127.0.0.1" instancePrefix="xe" />
+            var mongoDB = library_dom.DocumentElement.SelectSingleNode("mongoDB") as XmlElement;
+            if (mongoDB == null)
+                return;
+
+            var root = library_dom.DocumentElement.SelectSingleNode("commands") as XmlElement;
+            if (root == null)
+            {
+                root = library_dom.CreateElement("commands");
+                library_dom.DocumentElement.AppendChild(root);
+            }
+
+            var command = library_dom.CreateElement("command");
+            root.AppendChild(command);
+
+            // 初始化书目摘要 mongodb 数据库
+            command.SetAttribute("name", "_initial_biblioSummary_db");
         }
 
         // 删除 dp2library 数据目录中的临时文件。一般用于恢复了一个实例以后，清除以前实例残留的临时文件
@@ -1695,6 +1723,14 @@ RestoreLibraryParam param
 #endif
                 if (bFastMode == true)
                 {
+                    /*
+                    // testing
+                    {
+                        List<string> temp = new List<string>(target_dburls);
+                        temp.AddRange(target_dburls);
+                        target_dburls = temp;
+                    }
+                    */
                     EndFastAppend(stop,
     channel,
     target_dburls);
@@ -1754,7 +1790,8 @@ RestoreLibraryParam param
                 catch (Exception ex)
                 {
                     LibraryChannelManager.Log?.Debug($"对数据库{url}进行快速导入模式的最后收尾工作阶段出现异常: {ExceptionUtil.GetExceptionText(ex)}\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}");
-                    throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
+                    // throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
+                    throw new Exception($"对数据库 {url} 进行收尾时候出现异常: {ExceptionUtil.GetExceptionText(ex)}\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
                 }
                 finally
                 {

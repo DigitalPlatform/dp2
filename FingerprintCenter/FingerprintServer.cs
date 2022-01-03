@@ -583,5 +583,20 @@ Exception rethrown at [0]:
         {
             Program.FingerPrint?.CancelRegisterString();
         }
+
+        // 2021/12/24 尚未实现
+        // 获得一副图像。
+        // parameters:
+        //      strStyle    风格。
+        //                  camera，或者默认，从摄像头抓取一副图像
+        //                  patron:xxx  读者头像。xxx 为证条码号
+        public GetImageResult GetImage(string strStyle)
+        {
+            return new GetImageResult
+            {
+                Value = -1,
+                ErrorInfo = "尚未实现 GetImage() API 功能"
+            };
+        }
     }
 }

@@ -501,6 +501,26 @@ namespace DigitalPlatform.rms
                 this.DelayTables.Dispose();
                 this.DelayTables = null;
             }
+
+            // 2021/12/30
+            if (_swDebug != null)
+            {
+                _swDebug.Close();
+                _swDebug = null;
+            }
+        }
+
+        StreamWriter _swDebug = null;
+
+        public StreamWriter GetDebugWriter()
+        {
+            if (_swDebug == null)
+            {
+                string fileName = Path.Combine(this.DataDir, "debug.txt");
+                _swDebug = new StreamWriter(fileName);
+            }
+
+            return _swDebug;
         }
 
         // 把错误信息写到日志文件里
@@ -508,8 +528,15 @@ namespace DigitalPlatform.rms
         {
             string strTime = DateTime.Now.ToString();
 
-            StreamUtil.WriteText(this.DataDir + "\\debug.txt",
+            /*
+            string fileName = Path.Combine(this.DataDir, "debug.txt");
+            StreamUtil.WriteText(fileName,
                  strTime + " " + strText + "\r\n");
+            */
+            // 2021/12/30
+            var writer = GetDebugWriter();
+            writer.WriteLine($"{strTime}  {strText}");
+            writer.Flush();
         }
 
         // 清除 StreamCache (流缓存，这是为了加快普通文件访问速度而设计的一套机制)
@@ -1748,7 +1775,7 @@ namespace DigitalPlatform.rms
 
                 if (db.FastAppendTaskCount == 0)
                 {
-                    strError = "对数据库 '" + db.GetCaption("zh-CN") + "' endfastappend 动作的次数多于 beginfastappend 的次数，本次 endfastappend 操作被拒绝";
+                    strError = $"对数据库 '{ db.GetCaption("zh-CN") }' {strAction} 动作的次数多于 beginfastappend 的次数，本次 {strAction} 操作被拒绝";
                     return -1;
                 }
                 db.FastAppendTaskCount--;
@@ -1832,6 +1859,13 @@ namespace DigitalPlatform.rms
 
                 if (strAction == "start_endfastappend")
                 {
+                    // 2021/12/30
+                    if (db._tasks.Count > 0)
+                    {
+                        strError = $"错误: 数据库 '{strDbName}' 中已经有 {db._tasks.Count} 个 end task，无法再启动 task";
+                        return -1;
+                    }
+
                     var task = Task.Factory.StartNew<NormalResult>(() => EndFastAppend(db));
 
                     // 如果以前累积的太多任务其实已经完成，需要清除。以避免集合无限膨胀
@@ -1839,6 +1873,7 @@ namespace DigitalPlatform.rms
                         && Task.WaitAll(db._tasks.ToArray(), TimeSpan.FromSeconds(1)) == true)
                         db._tasks.Clear();
 
+                    // TODO: 对 _tasks 集合里面的数据库查重一下。避免同一个数据库反复提交 start
                     db._tasks.Add(task);
 
                     /*
@@ -1906,9 +1941,16 @@ namespace DigitalPlatform.rms
             }
 
             if (error_count == 0)
-                return new NormalResult { ErrorInfo = StringUtil.MakePathList(messages, "; ") };
+                return new NormalResult
+                {
+                    ErrorInfo = StringUtil.MakePathList(messages, "; ")
+                };
 
-            return new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(messages, "; ") };
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = StringUtil.MakePathList(messages, "; ")
+            };
         }
 
         NormalResult EndFastAppend(Database db)
@@ -1920,6 +1962,11 @@ namespace DigitalPlatform.rms
             {
                 Debug.Assert(db.FastAppendTaskCount == 0, "");
 
+                /*
+                // testing
+                Thread.Sleep(TimeSpan.FromSeconds(30));
+                */
+
                 {
                     // 如果需要刷新检索点
                     // 这是因为快速模式中间如果遇到覆盖的情况，当时不方便处理检索点，所以存储下来ID最后处理
@@ -1930,7 +1977,6 @@ namespace DigitalPlatform.rms
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-
 
                         // 将所有延迟堆积的行成批写入相关 keys 表
                         int nKeysCount = nRet;
@@ -1957,7 +2003,10 @@ namespace DigitalPlatform.rms
                     if (lSize > 10 * 1024 * 1024)   // 10 M
                         bNeedDropIndex = true;
 
-                    // bNeedDropTree = true;   // testing
+                    /*
+                    // testing !!!
+                    bNeedDropIndex = true;   // testing
+                    */
 
                     if (bNeedDropIndex == true)
                     {
@@ -1995,7 +2044,7 @@ namespace DigitalPlatform.rms
                 strError = $"EndFastAppend() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
                 goto ERROR1;
             }
-            ERROR1:
+        ERROR1:
             return new NormalResult { Value = -1, ErrorInfo = strError };
         }
 
@@ -3826,11 +3875,11 @@ namespace DigitalPlatform.rms
                         bObject = false;
                     }
 
-                    //------------------------------------------------
-                    //开始处理资源
-                    //---------------------------------------------------
+                //------------------------------------------------
+                //开始处理资源
+                //---------------------------------------------------
 
-                    DOWRITE:
+                DOWRITE:
 
                     // ****************************************
                     string strOutputRecordID = "";
@@ -4701,7 +4750,7 @@ namespace DigitalPlatform.rms
                 baOutputTimestamp = DatabaseUtil.CreateTimestampForCfg(strNewFilePath);
             }
 
-            END1:
+        END1:
 
             // 写metadata
             if (strMetadata != "")
@@ -5711,7 +5760,7 @@ namespace DigitalPlatform.rms
 #endif
             }
 
-            CHECK_CHANGED:
+        CHECK_CHANGED:
             //及时保存database.xml // 是用加锁的函数吗？
             if (this.Changed == true)
                 this.SaveXmlSafety(true);
@@ -6135,7 +6184,7 @@ namespace DigitalPlatform.rms
 #endif
             }
 
-            END1:
+        END1:
             // 列出实际需要的项
             nTotalLength = aItem.Count;
             long lOutputLength;
@@ -6323,7 +6372,7 @@ namespace DigitalPlatform.rms
 
                     count++;
 
-                    CONTINUE:
+                CONTINUE:
                     i++;
                 }
 

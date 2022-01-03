@@ -3826,6 +3826,7 @@ namespace DigitalPlatform.LibraryServer
                             "reportStorage",    // 2021/9/19
                             "reportReplication",    // 2021/9/20
                             "messageServer", // 2021/10/21
+                            "commands", // 2021/12/23
                         };
 
                             RestoreElements(cfg_dom, writer, elements);

@@ -6,10 +6,10 @@ using System.Xml;
 using System.IO;
 using System.Diagnostics;
 using System.Web;
+using System.Runtime.Serialization;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using System.Runtime.Serialization;
 
 namespace DigitalPlatform.rms
 {

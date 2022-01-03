@@ -4737,11 +4737,14 @@ out string strError);
             try
             {
                 string strTotalPrice = this.TotalPrice;
+                bool compute_price = false;
                 string strNewTotalPrice = InputDlg.GetInput(
                     this.Container,
                     "请输入总价格",
                     "总价格: ",
                     strTotalPrice,
+                    "反向计算单价",
+                    ref compute_price,
                     this.Container.Font);
                 if (strNewTotalPrice == null)
                     return;
@@ -4750,7 +4753,28 @@ out string strError);
 
                 // 如果具有了总价格，则册价格为空
                 if (String.IsNullOrEmpty(strNewTotalPrice) == false)
-                    this.Price = "";
+                {
+                    if (compute_price == false)
+                        this.Price = "";
+                    else
+                    {
+                        // 2022/1/3
+                        // 从总价格计算出单册价格
+                        {
+                            int old_copy = Convert.ToInt32(this.OldCopyString);
+                            int nCount = (old_copy * this.IssueCountValue);
+                            string price = "";
+                            if (nCount == 1)
+                                price = strTotalPrice;
+                            else
+                                price = strTotalPrice + "/" + nCount;
+
+                            this.Price = price;
+                        }
+
+                        this.TotalPrice = "";
+                    }
+                }
 
                 // 刷新显示
                 this.OtherXml = this.OtherXml;

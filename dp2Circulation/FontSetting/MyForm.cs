@@ -49,8 +49,19 @@ namespace dp2Circulation
         {
             if (disposing)
             {
-                _cancel?.Cancel();
-                _cancel?.Dispose();
+                try
+                {
+                    if (_cancel != null)
+                    {
+                        if (_cancel.IsCancellationRequested == false)
+                            _cancel?.Cancel();
+                        _cancel?.Dispose();
+                        _cancel = null;
+                    }
+                }
+                catch (ObjectDisposedException) // 2021/12/30
+                {
+                }
 
                 if (this.Channel != null)
                     this.Channel.Dispose();
@@ -304,9 +315,11 @@ namespace dp2Circulation
         {
             try
             {
-                _cancel?.Cancel();
+                if (_cancel != null
+                    && _cancel.IsCancellationRequested == false)
+                    _cancel?.Cancel();
             }
-            catch(ObjectDisposedException)
+            catch (ObjectDisposedException)
             {
             }
 

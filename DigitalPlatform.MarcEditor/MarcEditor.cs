@@ -15,6 +15,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using System.Text;
 
 namespace DigitalPlatform.Marc
 {
@@ -2205,46 +2206,64 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             IDataObject ido = GetClipboardDataObject(); // Clipboard.GetDataObject();
 
-            // 从dp2OPAC粘贴整个记录
-            menuItem = new MenuItem("从 dp2OPAC 粘贴整个记录");// + strName);
-            menuItem.Click += new System.EventHandler(this.menuItem_PasteFromDp2OPAC);
-            contextMenu.MenuItems.Add(menuItem);
-            if (ido.GetDataPresent(DataFormats.Text)
-                && this.ReadOnly == false)    // 原来是==1
-                menuItem.Enabled = true;
-            else
+            // 插入字段
+            menuItem = new MenuItem("从特定格式粘贴 ...");
+            if (this.ReadOnly == true)
                 menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
 
-            // 从tcmarc粘贴整个记录
-            menuItem = new MenuItem("从 tcmarc 粘贴整个记录");// + strName);
-            menuItem.Click += new System.EventHandler(this.menuItem_PasteFromTcMarc);
-            contextMenu.MenuItems.Add(menuItem);
-            if (ido.GetDataPresent(DataFormats.Text)
-                && this.ReadOnly == false)    // 原来是==1
-                menuItem.Enabled = true;
-            else
-                menuItem.Enabled = false;
+            {
+                // 从dp2OPAC粘贴整个记录
+                subMenuItem = new MenuItem("从 dp2OPAC 粘贴整个记录");// + strName);
+                subMenuItem.Click += new System.EventHandler(this.menuItem_PasteFromDp2OPAC);
+                menuItem.MenuItems.Add(subMenuItem);
+                if (ido.GetDataPresent(DataFormats.Text)
+                    && this.ReadOnly == false)    // 原来是==1
+                    subMenuItem.Enabled = true;
+                else
+                    subMenuItem.Enabled = false;
 
-            // 从 XML 粘贴整个记录
-            menuItem = new MenuItem("从 MARCXML 粘贴整个记录");// + strName);
-            menuItem.Click += new System.EventHandler(this.menuItem_PasteFromMarcXml);
-            contextMenu.MenuItems.Add(menuItem);
-            if (ido.GetDataPresent(DataFormats.Text)
-                && this.ReadOnly == false)    // 原来是==1
-                menuItem.Enabled = true;
-            else
-                menuItem.Enabled = false;
+                // 从 NLC 粘贴整个记录
+                subMenuItem = new MenuItem("从 NLC 粘贴整个记录");// + strName);
+                subMenuItem.Click += new System.EventHandler(this.menuItem_PasteFromNlcMarc);
+                menuItem.MenuItems.Add(subMenuItem);
+                if (ido.GetDataPresent(DataFormats.Text)
+                    && this.ReadOnly == false)
+                    subMenuItem.Enabled = true;
+                else
+                    subMenuItem.Enabled = false;
 
-            // 2021/12/16
-            // 从 工作单 粘贴整个记录
-            menuItem = new MenuItem("从 工作单 粘贴整个记录");
-            menuItem.Click += new System.EventHandler(this.menuItem_PasteFromWorksheet);
-            contextMenu.MenuItems.Add(menuItem);
-            if (ido.GetDataPresent(DataFormats.Text)
-                && this.ReadOnly == false)    // 原来是==1
-                menuItem.Enabled = true;
-            else
-                menuItem.Enabled = false;
+                // 从tcmarc粘贴整个记录
+                subMenuItem = new MenuItem("从 tcmarc 粘贴整个记录");// + strName);
+                subMenuItem.Click += new System.EventHandler(this.menuItem_PasteFromTcMarc);
+                menuItem.MenuItems.Add(subMenuItem);
+                if (ido.GetDataPresent(DataFormats.Text)
+                    && this.ReadOnly == false)    // 原来是==1
+                    subMenuItem.Enabled = true;
+                else
+                    subMenuItem.Enabled = false;
+
+                // 从 XML 粘贴整个记录
+                subMenuItem = new MenuItem("从 MARCXML 粘贴整个记录");// + strName);
+                subMenuItem.Click += new System.EventHandler(this.menuItem_PasteFromMarcXml);
+                menuItem.MenuItems.Add(subMenuItem);
+                if (ido.GetDataPresent(DataFormats.Text)
+                    && this.ReadOnly == false)    // 原来是==1
+                    subMenuItem.Enabled = true;
+                else
+                    subMenuItem.Enabled = false;
+
+                // 2021/12/16
+                // 从 工作单 粘贴整个记录
+                subMenuItem = new MenuItem("从 工作单 粘贴整个记录");
+                subMenuItem.Click += new System.EventHandler(this.menuItem_PasteFromWorksheet);
+                menuItem.MenuItems.Add(subMenuItem);
+                if (ido.GetDataPresent(DataFormats.Text)
+                    && this.ReadOnly == false)    // 原来是==1
+                    subMenuItem.Enabled = true;
+                else
+                    subMenuItem.Enabled = false;
+            }
 
             //粘贴覆盖
             menuItem = new MenuItem("粘贴覆盖字段");// + strName);
@@ -4260,6 +4279,97 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             return strMARC;
         }
 
+        // 2022/1/2
+        /*
+FMT	BK
+LDR	-----nam0 22-----   450 
+001	011528318
+005	20211208153309.0
+010	|a 978-7-5001-6208-7 |d CNY32.00
+100	|a 20211208d2022    em y0chiy50      ea
+1011	|a chi |c fre
+102	|a CN |b 110000
+105	|a a   z   000fy
+106	|a r
+2001	|a 小王子 |b 专著 |d Le petit prince |f (法)安托万·德·圣·埃克苏佩里著 |g 李玉民译 |z fre
+210	|a 北京 |c 中译出版社 |d 2022
+215	|a 10,112页 |c 图 |d 21cm
+096	|a I565.8 |b aks
+CAT	|a ZWCFWB11 |b 01 |c 20211208 |l NLC01 |h 1533
+OWN	|a ZC161
+SYS	011528318
+         * */
+        static string ConvertNlcMarcString(string strMARC)
+        {
+            string strResult = strMARC.Replace("\r\n", "\r");
+            string[] lines = strResult.Split(new char[] { '\r' });
+            string strHeader = "01034nam0 2200277   45  ";   // 头标区缺省内容
+            string strTotal = "";
+            foreach (string s in lines)
+            {
+                if (string.IsNullOrEmpty(s) == true)
+                    continue;
+
+                {
+                    string strTemp = s;
+                    if (strTemp[3] == '\t' && strTemp.Length >= 4)
+                        strTemp = strTemp.Remove(3, 1).Insert(3, "  ");
+                    else if (strTemp[4] == '\t' && strTemp.Length >= 5)
+                        strTemp = strTemp.Remove(4, 1).Insert(4, " ");
+
+                    if (strTemp.Length >= 5 && MarcUtil.IsControlFieldName(strTemp.Substring(0, 3)) == true)
+                        strTemp = strTemp.Remove(3, 2);
+
+                    if (strTemp.StartsWith("LDR"))
+                    {
+                        strTemp = strTemp.Substring(5);
+                        if (strTemp.Length > 24)
+                            strTemp = strTemp.Substring(0, 24);
+                        else if (strTemp.Length < 24)
+                            strTemp = strTemp.PadRight(24, ' ');
+
+                        // 放到最开头
+                        strHeader = strTemp;
+                    }
+                    else
+                        strTotal += RemoveBlank(strTemp) + new string((char)30, 1);
+                }
+            }
+
+            return strHeader + strTotal.Replace("|", new string((char)31, 1));
+        }
+
+        // 移走 '|' 左右的空格
+        static string RemoveBlank(string text)
+        {
+            StringBuilder result = new StringBuilder();
+            int offs = -1;  // 当前字符处于当前子字段内哪个偏移位置
+            int dollar_index = -1;  // 子字段的序号
+            foreach (char ch in text.ToCharArray())
+            {
+                if (ch == '|')
+                {
+                    dollar_index++;
+                    // 删除 | 前面的一个空格(从第二个子字段开始)
+                    if (dollar_index > 0
+                        && result.Length > 0
+                        && result[result.Length - 1] == ' ')
+                        result.Remove(result.Length - 1, 1);
+                    offs = 0;
+                }
+                else if (offs >= 0)
+                    offs++;
+
+                if (offs == 2 && ch == ' ')
+                {
+
+                }
+                else
+                    result.Append(ch);
+            }
+
+            return result.ToString().TrimEnd();
+        }
 
         /* http://z39.tcmarc.net/Index.asp?one=1
 001    012012004066
@@ -4434,6 +4544,41 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     this.SetActiveField(0, 3, true);
             }
         }
+
+        // 从 NLC 粘贴整个记录
+        void menuItem_PasteFromNlcMarc(object sender,
+            System.EventArgs e)
+        {
+            bool bHasFocus = this.Focused;
+
+            // 先删除所有字段
+            this.record.Fields.Clear();
+            this.SelectedFieldIndices.Clear();
+
+            int nFirstIndex = 0;
+
+            int nNewFieldsCount = 0;
+            string strFieldsMarc = MarcEditor.ClipboardToText();
+            strFieldsMarc = ConvertNlcMarcString(strFieldsMarc);
+
+            // TODO: 这个函数可以改造为两步实现：
+            // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
+            // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+            this.record.Fields.InsertInternal(nFirstIndex,
+                strFieldsMarc,
+                out nNewFieldsCount);
+
+            this.SetScrollBars(ScrollBarMember.Both);
+            this.Invalidate();
+
+            // 设第一个节点为当前活动焦点
+            if (bHasFocus == true)
+            {
+                if (this.record.Fields.Count > 0)
+                    this.SetActiveField(0, 3, true);
+            }
+        }
+
 
         // 从 tcmarc 粘贴整个记录
         void menuItem_PasteFromTcMarc(object sender,
