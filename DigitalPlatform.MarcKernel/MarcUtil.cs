@@ -235,6 +235,7 @@ namespace DigitalPlatform.Marc
                     }
 
                     result.Append("<span class='subfield'>");
+                    result.Append((char)0x200e);
                     result.Append(SubFieldChar);
                     if (i < strContent.Length - 1)
                     {
@@ -244,6 +245,10 @@ namespace DigitalPlatform.Marc
                     else
                         result.Append(SubFieldChar);
 
+                    // 2022/1/6
+                    // 为 $9 后面加一个空格。解决 Unicode bidi 问题
+                    if (result.Length > 0 && char.IsDigit(result[result.Length - 1]))
+                        result.Append(' ');
                     result.Append("</span>");
                     continue;
                 }

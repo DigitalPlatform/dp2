@@ -66,7 +66,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 FilePath = strFilePath,
                 TaskID = taskID,
-                StartTime = DateTime.Now
+                StartTime = DateTime.Now,
+                FinishTime = DateTime.MinValue  // 表示尚未结束
             };
 
             lock (_syncRoot_md5Tasks)
@@ -85,7 +86,8 @@ namespace DigitalPlatform.LibraryServer
 
                     // testing
                     // await Task.Delay(TimeSpan.FromSeconds(10));
-                    
+
+                    task.FinishTime = DateTime.Now; // 2022/1/7
                     task.Result = new NormalResult
                     {
                         Value = 0,
@@ -116,6 +118,8 @@ namespace DigitalPlatform.LibraryServer
                 foreach (var task in _md5Tasks)
                 {
                     if (task.Result != null
+                        && task.FinishTime > DateTime.MinValue // 2022/1/7
+                        && task.FinishTime >= task.StartTime
                         && DateTime.Now - task.FinishTime > period)
                         tasks.Add(task);
                     // 或者开始运行超过一天的

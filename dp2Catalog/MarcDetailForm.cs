@@ -7632,7 +7632,7 @@ Keys keyData)
 
             Assembly assembly = null;
             string strWarning = "";
-            string strLibPaths = "";
+            // string strLibPaths = "";
 
             string[] saRef2 = filter.GetRefs();
 
@@ -7644,7 +7644,7 @@ Keys keyData)
             // 本函数内对saRef不再进行宏替换
             nRet = ScriptManager.CreateAssembly_1(strCode,
                 saRef,
-                strLibPaths,
+                "", // strLibPaths,
                 out assembly,
                 out strError,
                 out strWarning);

@@ -353,7 +353,8 @@ namespace DigitalPlatform.Marc
 
             strFieldMarc = strFieldMarc.Replace(Record.KERNEL_SUBFLD, Record.SUBFLD);
 #if BIDI_SUPPORT
-            strFieldMarc = strFieldMarc.Replace("\x200e", "");
+            // strFieldMarc = strFieldMarc.Replace("\x200e", "");
+            strFieldMarc = MarcEditor.RemoveBidi(strFieldMarc);
 #endif
             return strFieldMarc;
         }
@@ -493,7 +494,8 @@ namespace DigitalPlatform.Marc
                     new StringFormat());
                  */
 #if BIDI_SUPPORT
-                string strValue = this.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+                // string strValue = this.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+                string strValue = MarcEditor.AddBidi(this.m_strValue);
 #endif
                 size = TextRenderer.MeasureText(g,
 #if BIDI_SUPPORT
@@ -887,7 +889,8 @@ namespace DigitalPlatform.Marc
                     else
                     {   // 内容
 #if BIDI_SUPPORT
-                        strText = strText.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+                        // strText = strText.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+                        strText = MarcEditor.AddBidi(strText);
 #endif
                         TextRenderer.DrawText(
                             g,

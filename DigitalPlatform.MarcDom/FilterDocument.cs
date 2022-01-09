@@ -1622,18 +1622,10 @@ namespace DigitalPlatform.MarcDom
             System.CodeDom.Compiler.CompilerResults results = null;
             try
             {
-                /*
-				provider = new CSharpCodeProvider();
-				compiler = provider.CreateCompiler();
-				results = compiler.CompileAssemblyFromSource(
-					compilerParams, 
-					strCode);
-                 */
                 provider = new CSharpCodeProvider();
                 results = provider.CompileAssemblyFromSource(
                     compilerParams,
                     strCode);
-
             }
             catch (Exception ex)
             {

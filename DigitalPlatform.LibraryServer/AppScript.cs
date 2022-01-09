@@ -23,6 +23,9 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryServer.Common;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -405,6 +408,8 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
+
+#if OLD
         // 创建Assembly
         // parameters:
         //		strCode:		脚本代码
@@ -489,10 +494,114 @@ namespace DigitalPlatform.LibraryServer
             if (nErrorCount != 0)
                 return -1;
 
-
             assembly = results.CompiledAssembly;// compilerParams.OutputAssembly;
-
             return 0;
+        }
+#endif
+
+        // 创建Assembly
+        // parameters:
+        //		strCode:		脚本代码
+        //		refs:			连接的外部assembly
+        //		strLibPaths:	类库路径, 可以为""或者null,则此参数无效
+        //		strOutputFile:	输出文件名, 可以为""或者null,则此参数无效
+        //		strErrorInfo:	出错信息
+        //		strWarningInfo:	警告信息
+        // result:
+        //		-1  出错
+        //		0   成功
+        public static int CreateAssembly(string strCode,
+            string[] refs,
+            out Assembly assembly,
+            out string strError,
+            out string strWarning)
+        {
+            strError = "";
+            strWarning = "";
+            assembly = null;
+
+            try
+            {
+                // 2019/4/5
+                if (refs != null
+                    && Array.IndexOf(refs, "netstandard.dll") == -1)
+                {
+                    List<string> temp = new List<string>(refs);
+                    temp.Add("netstandard.dll");
+                    refs = temp.ToArray();
+                }
+
+                var tree = SyntaxFactory.ParseSyntaxTree(strCode);
+                string fileName = Guid.NewGuid().ToString();
+
+                string basePath = Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location);
+
+                List<MetadataReference> ref_list = new List<MetadataReference>();
+                foreach (string one in refs)
+                {
+                    string path = one;
+                    if (path.IndexOf("/") == -1 && path.IndexOf("\\") == -1)
+                        path = Path.Combine(basePath, path);
+
+                    ref_list.Add(MetadataReference.CreateFromFile(path));
+                }
+
+                ref_list.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+
+                var compilation = CSharpCompilation.Create(fileName)
+      .WithOptions(
+        new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+      .AddReferences(ref_list.ToArray())
+      .AddSyntaxTrees(tree);
+
+                using (var stream = new MemoryStream())
+                {
+                    EmitResult compilationResult = compilation.Emit(stream);
+
+                    List<string> errors = new List<string>();
+                    List<string> warnings = new List<string>();
+
+                    if (compilationResult.Success)
+                    {
+                        // Load the assembly
+                        // assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+                        stream.Seek(0, SeekOrigin.Begin);
+                        assembly = Assembly.Load(stream.ToArray());
+
+                        return 0;
+                    }
+                    else
+                    {
+                        foreach (Diagnostic codeIssue in compilationResult.Diagnostics)
+                        {
+                            if (codeIssue.Severity == DiagnosticSeverity.Error)
+                            {
+                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: { codeIssue.Location.GetLineSpan()},Severity: { codeIssue.Severity}";
+                                errors.Add(issue);
+                            }
+                            else
+                            {
+                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: { codeIssue.Location.GetLineSpan()},Severity: { codeIssue.Severity}";
+                                warnings.Add(issue);
+                            }
+                        }
+                    }
+
+                    if (errors.Count > 0)
+                    {
+                        strError = StringUtil.MakePathList(errors, "\r\n");
+                        return -1;
+                    }
+
+                    strWarning = StringUtil.MakePathList(warnings, "\r\n");
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "CreateAssemblyFile() 出错 " + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
         }
 
         // 构造出错信息字符串

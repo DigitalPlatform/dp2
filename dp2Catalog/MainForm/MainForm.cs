@@ -4356,7 +4356,7 @@ out string strError)
 
             Assembly assembly = null;
             string strWarning = "";
-            string strLibPaths = "";
+            // string strLibPaths = "";
 
             string[] saRef2 = filter.GetRefs();
 
@@ -4367,7 +4367,7 @@ out string strError)
             // 创建Script的Assembly
             nRet = ScriptManager.CreateAssembly_1(strCode,
                 saRef,
-                strLibPaths,
+                "", // strLibPaths,
                 out assembly,
                 out strError,
                 out strWarning);

@@ -1498,7 +1498,8 @@ namespace DigitalPlatform.Marc
                 else if (this.m_nFocusCol == 3)
                 {
 #if BIDI_SUPPORT
-                    string strNewText = curEdit.Text.Replace("\x200e", "");
+                    // string strNewText = curEdit.Text.Replace("\x200e", "");
+                    string strNewText = RemoveBidi(curEdit.Text);
                     if (this.FocusedField.m_strValue != strNewText)
                     {
                         this.FocusedField.m_strValue = strNewText;
@@ -1554,7 +1555,8 @@ namespace DigitalPlatform.Marc
             else if (this.m_nFocusCol == 3)
             {
 #if BIDI_SUPPORT
-                string strNewValue = this.FocusedField.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+                // string strNewValue = this.FocusedField.m_strValue.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+                string strNewValue = AddBidi(this.FocusedField.m_strValue);
                 if (strNewValue != curEdit.Text)
                 {
                     curEdit.Text = strNewValue;
@@ -1575,6 +1577,63 @@ namespace DigitalPlatform.Marc
 
             // 为了避免在最后一个字段的字段名最后一个字符输入后，小edit转向指示符域的时候，当前焦点突然不在可视范围内了的一个bug
             curEdit.SelectionStart = 0; // 2006/5/27 xietao add
+        }
+
+        // 添加 BIDI 字符
+        public static string AddBidi(string value)
+        {
+            // return value.Replace(new string(Record.KERNEL_SUBFLD, 1), "\x200e" + new string(Record.KERNEL_SUBFLD, 1));
+            StringBuilder result = new StringBuilder();
+            int delta = -1;
+            foreach (var ch in value.ToCharArray())
+            {
+
+                if (ch == Record.KERNEL_SUBFLD)
+                {
+                    result.Append((char)0x200e);  // 0x200e
+                    delta = 0;
+                }
+
+                // $9 后面加一个空格字符
+                if (delta == 2 && ch != ' ' && result.Length > 0 && char.IsDigit(result[result.Length - 1]))
+                    result.Append((char)' ');  // 0x202c
+
+                result.Append(ch);
+
+                if (delta >= 0)
+                    delta++;
+            }
+
+            return result.ToString();
+        }
+
+        // 移走 BIDI 字符
+        public static string RemoveBidi(string value)
+        {
+            // return value.Replace("\x200e", "");
+            StringBuilder result = new StringBuilder();
+            int delta = -1;
+            foreach (var ch in value.ToCharArray())
+            {
+                if (ch == (char)0x200e)
+                    continue;
+
+                if (ch == Record.KERNEL_SUBFLD)
+                {
+                    delta = 0;
+                }
+
+                // $9 后面删除一个空格字符
+                if (delta == 2 && ch == ' ')
+                    continue;
+
+                result.Append(ch);
+
+                if (delta >= 0)
+                    delta++;
+            }
+
+            return result.ToString();
         }
 
         #endregion
@@ -4064,7 +4123,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         internal static void TextToClipboard(string strText)
         {
 #if BIDI_SUPPORT
-            strText = strText.Replace("\x200e", "");
+            // strText = strText.Replace("\x200e", "");
+            strText = RemoveBidi(strText);
 #endif
             StringUtil.RunClipboard(() => { Clipboard.SetDataObject(strText); });
         }
@@ -4083,7 +4143,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         internal static void TextToClipboardFormat(string strText)
         {
 #if BIDI_SUPPORT
-            strText = strText.Replace("\x200e", "");
+            // strText = strText.Replace("\x200e", "");
+            strText = RemoveBidi(strText);
 #endif
 
             // Make a DataObject.
@@ -4668,6 +4729,8 @@ SYS	011528318
             strResult = strResult.Replace("‡", new string((char)31, 1));
             strResult = strResult.Replace("¶", new string((char)30, 1));
 
+            // 2022/1/6
+            strResult = RemoveBidi(strResult);
             return strResult;
         }
 
