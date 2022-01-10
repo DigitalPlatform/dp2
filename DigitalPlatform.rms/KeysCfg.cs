@@ -8,8 +8,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Reflection;
-using System.CodeDom;
-using System.CodeDom.Compiler;
+//using System.CodeDom;
+//using System.CodeDom.Compiler;
+using System.Globalization;
 
 using Microsoft.CSharp;
 using Microsoft.VisualBasic;
@@ -19,7 +20,9 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
-using System.Globalization;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 
 namespace DigitalPlatform.rms
 {
@@ -164,7 +167,7 @@ namespace DigitalPlatform.rms
             {
                 Assembly assembly = null;
                 string strWarning = "";
-                nRet = CreateAssembly(strCode,
+                nRet = ScriptUtility.CreateAssembly(strCode,
                     saRef,
                     out assembly,
                     out strError,
@@ -219,6 +222,7 @@ namespace DigitalPlatform.rms
             }
         }
 
+#if OLD
         // 创建Assembly
         // parameters:
         //		strCode:		脚本代码
@@ -305,7 +309,9 @@ namespace DigitalPlatform.rms
             assembly = results.CompiledAssembly;// compilerParams.OutputAssembly;
             return 0;
         }
+#endif
 
+#if OLD
         // 构造出错信息字符串
         // parameter:
         //		errors:    CompilerResults对象
@@ -334,7 +340,7 @@ namespace DigitalPlatform.rms
             }
             return nCount;
         }
-
+#endif
 
 
 

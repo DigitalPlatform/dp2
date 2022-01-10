@@ -139,7 +139,16 @@ namespace dp2Circulation
              * */
 
             // 2020/3/30
-            this.Channel = null;    // testing
+            // this.Channel = null;    // testing
+        }
+
+        // 2022/1/10
+        public new LibraryChannel Channel
+        {
+            get
+            {
+                throw new Exception("OperLogStatisForm 的 Channel 成员已经废止");
+            }
         }
 
         private void OperLogStatisForm_FormClosing(object sender, FormClosingEventArgs e)

@@ -397,6 +397,7 @@ namespace DigitalPlatform.OPAC.Server
 #endif
 
                         Assembly assembly1 = null;
+                        /*
                         // 创建Script的Assembly
                         // 本函数内对saRef不再进行宏替换
                         nRet = ScriptManager.CreateAssembly_1(strCode,
@@ -407,9 +408,19 @@ namespace DigitalPlatform.OPAC.Server
                             out strWarning);
                         if (nRet == -2)
                             throw new Exception(strError1);
+                        */
+                        // 2022/1/10
+                        // result:
+                        //		-1  出错
+                        //		0   成功
+                        nRet = ScriptUtility.CreateAssembly(strCode,
+                            saRef,
+                            out assembly1,
+                            out strError1,
+                            out strWarning);
                         if (nRet == -1)
                         {
-                            if (string.IsNullOrEmpty(strWarning) == true)
+                            // if (string.IsNullOrEmpty(strWarning) == true)
                                 throw new Exception(strError1);
                         }
 

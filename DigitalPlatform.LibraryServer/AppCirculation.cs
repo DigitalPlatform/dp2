@@ -19829,8 +19829,6 @@ start_time_1,
                                     goto ERROR1;
                                 }
 
-
-
                                 if (strOutputReaderBarcode == strReaderBarcode)
                                 {
                                     linkedPath.Add(aDupPath[j]);
@@ -19841,7 +19839,6 @@ start_time_1,
                                         nErrorCount++;
                                     }
                                 }
-
                             } // end of for
 
                             if (linkedPath.Count == 0)

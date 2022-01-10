@@ -52,6 +52,7 @@ namespace DigitalPlatform.rms.Client
 			return 0;
 		}
 
+#if OLD
 		// 创建Assembly
 		// parameters:
 		//	strCode:	脚本代码
@@ -147,7 +148,10 @@ namespace DigitalPlatform.rms.Client
  
 			return results.CompiledAssembly;
 		}
+#endif
 
+
+#if OLD
 		// parameters:
 		//		refs	附加的refs文件路径。路径中可能包含宏%installdir%
 		public static int CreateAssemblyFile(string strCode,
@@ -238,6 +242,7 @@ namespace DigitalPlatform.rms.Client
  
 			return 0;
 		}
+#endif
 
 		// 构造出错信息字符串
 		public static int getErrorInfo(CompilerErrorCollection errors,

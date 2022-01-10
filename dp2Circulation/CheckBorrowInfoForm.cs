@@ -1182,7 +1182,7 @@ out strError);
                     "repairreaderside",
                     strReaderBarcode,
                     strItemBarcode,
-                    strConfirmItemRecPath,
+                    "", // 2022/1/10 // strConfirmItemRecPath,
                     0,
                     -1,
                     out int nProcessedBorrowItems,   // 2008/10/27 

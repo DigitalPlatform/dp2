@@ -1583,6 +1583,7 @@ namespace DigitalPlatform.MarcDom
             return results;
         }
 
+#if OLD
         // 创建Assembly
         // parameters:
         //	strCode:	脚本代码
@@ -1667,6 +1668,8 @@ namespace DigitalPlatform.MarcDom
             }
             return strResult;
         }
+
+#endif
 
         #endregion
     }

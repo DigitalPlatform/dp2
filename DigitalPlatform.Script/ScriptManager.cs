@@ -1125,20 +1125,6 @@ namespace DigitalPlatform.Script
             strCodeFileName = strLocate + "\\" + strSourceFileName;
 
             string strCode = "";
-#if NO
-            try
-            {
-                using (StreamReader sr = new StreamReader(strCodeFileName, true))
-                {
-                    strCode = sr.ReadToEnd();
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = ExceptionUtil.GetAutoText(ex);
-                return -1;
-            }
-#endif
             nRet = LoadCode(strCodeFileName, out strCode, out strError);
             if (nRet == -1)
                 return -1;
@@ -1149,8 +1135,7 @@ namespace DigitalPlatform.Script
                 strOutputFileName,
                 out strError,
                 out strWarning);
-
-            if (strError != "")
+            if (nRet == -1/*strError != ""*/)
             {
                 strError = "宿主 " + strHostName + " 方案 '" + strProjectNamePath
                     + "' 中文件 '" + strSourceFileName + "' 编译发现错误或警告:\r\n" + strError;
@@ -2013,6 +1998,7 @@ namespace DigitalPlatform.Script
 		 * 
 		 */
 
+#if OLD
 
         // 创建Assembly
         // parameters:
@@ -2111,6 +2097,36 @@ namespace DigitalPlatform.Script
             return results.CompiledAssembly;
         }
 
+#endif
+
+        // 2022/1/10
+        // 创建Assembly
+        // parameters:
+        //	strCode:	脚本代码
+        //	refs:	连接的外部assembly
+        // strResult:处理信息
+        // objDb:数据库对象，在出错调getErrorInfo用到
+        // 返回值:创建好的Assembly
+        public static Assembly CreateAssembly(string strCode,
+            string[] refs,
+            string strLibPaths,
+            string strOutputFile,
+            out string strErrorInfo,
+            out string strWarningInfo)
+        {
+            // 正规化路径，去除里面的宏字符串
+            RemoveRefsBinDirMacro(ref refs);
+
+            int nRet = ScriptUtility.CreateAssembly(strCode,
+                refs,
+                out Assembly assembly,
+                out strErrorInfo,
+                out strWarningInfo);
+            if (nRet == -1)
+                return null;
+            return assembly;
+        }
+
         int GetErrorCount(CompilerErrorCollection errors)
         {
             int nCount = 0;
@@ -2162,9 +2178,9 @@ namespace DigitalPlatform.Script
                     true);
                 refs[i] = strNew;
             }
-
         }
 
+#if OLD
         // parameters:
         //		refs	附加的refs文件路径。路径中可能包含宏%installdir%
         public static int CreateAssemblyFile(string strCode,
@@ -2257,6 +2273,28 @@ namespace DigitalPlatform.Script
 
             return 0;
         }
+#endif
+        // parameters:
+        //		refs	附加的refs文件路径。路径中可能包含宏%installdir%
+        public static int CreateAssemblyFile(string strCode,
+            string[] refs,
+            string strLibPaths,
+            string strOutputFile,
+            out string strErrorInfo,
+            out string strWarningInfo)
+        {
+            // 正规化路径，去除里面的宏字符串
+            RemoveRefsBinDirMacro(ref refs);
+
+            // result:
+            //		-1  出错
+            //		0   成功
+            return ScriptUtility.CreateAssembly(strCode,
+                refs,
+                strOutputFile,
+                out strErrorInfo,
+                out strWarningInfo);
+            }
 
         // 从 .ref 获取附加的库文件路径
         public static int GetRef(string strCsFileName,
@@ -2309,6 +2347,7 @@ namespace DigitalPlatform.Script
             return 1;
         }
 
+#if OLD
         // (对refs中的宏不加以处理)
         // 直接编译到内存
         // parameters:
@@ -2402,6 +2441,27 @@ namespace DigitalPlatform.Script
             assembly = results.CompiledAssembly;
 
             return 0;
+        }
+#endif
+
+        // 2022/1/10
+        // (对refs中的宏不加以处理)
+        // 直接编译到内存
+        // parameters:
+        //		refs	附加的refs文件路径。本函数对路径中可能包含宏%...%未加以处理，需要在函数调用前先处理好
+        public static int CreateAssembly_1(string strCode,
+            string[] refs,
+            string strLibPaths,
+            // AppDomain appDomain,
+            out Assembly assembly,
+            out string strErrorInfo,
+            out string strWarningInfo)
+        {
+            return ScriptUtility.CreateAssembly(strCode,
+                refs,
+                out assembly,
+                out strErrorInfo,
+                out strWarningInfo);
         }
 
         // 构造出错信息字符串

@@ -2589,6 +2589,7 @@ namespace dp2rms
                 saRef = saTemp;
             }
 
+            /*
             Assembly assembly = Script.CreateAssembly(
                 strCode,
                 saRef,
@@ -2597,6 +2598,19 @@ namespace dp2rms
                 out strError,
                 out strWarning);
             if (assembly == null)
+            {
+                strError = "脚本编译发现错误或警告:\r\n" + strError;
+                return -1;
+            }
+
+            */
+            // 2022/1/10
+            nRet = ScriptUtility.CreateAssembly(strCode,
+                saRef,
+                out Assembly assembly,
+                out strError,
+                out strWarning);
+            if (nRet == -1)
             {
                 strError = "脚本编译发现错误或警告:\r\n" + strError;
                 return -1;
