@@ -46,20 +46,8 @@ namespace DigitalPlatform
                 var tree = SyntaxFactory.ParseSyntaxTree(strCode);
                 string fileName = Guid.NewGuid().ToString();
 
-                string basePath = Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location);
-
-                List<MetadataReference> ref_list = new List<MetadataReference>();
-                foreach (string one in refs)
-                {
-                    string path = one;
-                    if (path.IndexOf("/") == -1 && path.IndexOf("\\") == -1)
-                        path = Path.Combine(basePath, path);
-
-                    ref_list.Add(MetadataReference.CreateFromFile(path));
-                }
-
-                ref_list.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
-                ref_list.Add(MetadataReference.CreateFromFile(typeof(Span<>).Assembly.Location));
+                // 
+                List<MetadataReference> ref_list = GetRefList(refs);
 
                 var compilation = CSharpCompilation.Create(fileName)
       .WithOptions(
@@ -87,19 +75,9 @@ namespace DigitalPlatform
                     }
                     else
                     {
-                        foreach (Diagnostic codeIssue in compilationResult.Diagnostics)
-                        {
-                            if (codeIssue.Severity == DiagnosticSeverity.Error)
-                            {
-                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: { codeIssue.Location.GetLineSpan()},Severity: { codeIssue.Severity}";
-                                errors.Add(issue);
-                            }
-                            else
-                            {
-                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: { codeIssue.Location.GetLineSpan()},Severity: { codeIssue.Severity}";
-                                warnings.Add(issue);
-                            }
-                        }
+                        GetErrors(compilationResult,
+    errors,
+    warnings);
                     }
 
                     if (errors.Count > 0)
@@ -117,6 +95,68 @@ namespace DigitalPlatform
                 strError = "CreateAssemblyFile() 出错 " + GetDebugText(ex);
                 return -1;
             }
+        }
+
+        static void GetErrors(EmitResult result,
+            List<string> errors,
+            List<string> warnings)
+        {
+            foreach (Diagnostic codeIssue in result.Diagnostics)
+            {
+                var line_span = codeIssue.Location.GetLineSpan();
+                string position = $"{line_span.StartLinePosition.Line}, {line_span.StartLinePosition.Character}";
+                string issue = $"({position}) {codeIssue.Severity} {codeIssue.GetMessage()} {codeIssue.Id}";
+
+                if (codeIssue.Severity == DiagnosticSeverity.Error)
+                {
+                    errors.Add(issue);
+                }
+                else
+                {
+                    warnings.Add(issue);
+                }
+            }
+        }
+
+        static List<MetadataReference> GetRefList(string[] refs)
+        {
+            List<string> dirs = new List<string>() {
+            Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location),
+            Environment.CurrentDirectory,
+            };
+
+            List<MetadataReference> ref_list = new List<MetadataReference>();
+            foreach (string one in refs)
+            {
+                string path = one;
+                if (path.IndexOf("/") == -1 && path.IndexOf("\\") == -1)
+                {
+                    path = MakePath(dirs, path);
+                    if (path == null)
+                    {
+                        throw new Exception($"无法定位 {one} 的所在目录");
+                    }
+                }
+
+                ref_list.Add(MetadataReference.CreateFromFile(path));
+            }
+
+            ref_list.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+            // ref_list.Add(MetadataReference.CreateFromFile(typeof(Task).Assembly.Location));
+
+            return ref_list;
+        }
+
+        static string MakePath(List<string> dirs, string filename)
+        {
+            foreach (var dir in dirs)
+            {
+                string path = Path.Combine(dir, filename);
+                if (File.Exists(path))
+                    return path;
+            }
+
+            return null;
         }
 
         // result:
@@ -146,20 +186,8 @@ namespace DigitalPlatform
                 var tree = SyntaxFactory.ParseSyntaxTree(strCode);
                 string fileName = Guid.NewGuid().ToString();
 
-                string basePath = Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location);
-
-                List<MetadataReference> ref_list = new List<MetadataReference>();
-                foreach (string one in refs)
-                {
-                    string path = one;
-                    if (path.IndexOf("/") == -1 && path.IndexOf("\\") == -1)
-                        path = Path.Combine(basePath, path);
-
-                    ref_list.Add(MetadataReference.CreateFromFile(path));
-                }
-
-                ref_list.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
-                ref_list.Add(MetadataReference.CreateFromFile(typeof(Span<>).Assembly.Location));
+                // 
+                List<MetadataReference> ref_list = GetRefList(refs);
 
                 var compilation = CSharpCompilation.Create(fileName)
       .WithOptions(
@@ -185,19 +213,9 @@ namespace DigitalPlatform
                     }
                     else
                     {
-                        foreach (Diagnostic codeIssue in compilationResult.Diagnostics)
-                        {
-                            if (codeIssue.Severity == DiagnosticSeverity.Error)
-                            {
-                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: { codeIssue.Location.GetLineSpan()},Severity: { codeIssue.Severity}";
-                                errors.Add(issue);
-                            }
-                            else
-                            {
-                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: { codeIssue.Location.GetLineSpan()},Severity: { codeIssue.Severity}";
-                                warnings.Add(issue);
-                            }
-                        }
+                        GetErrors(compilationResult,
+    errors,
+    warnings);
                     }
 
                     if (errors.Count > 0)

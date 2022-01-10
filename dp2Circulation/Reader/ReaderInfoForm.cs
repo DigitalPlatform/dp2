@@ -2030,6 +2030,12 @@ strNewDefault);
             }
         }
 
+        // 为了兼容以前脚本里面的调用
+        public int SaveRecord(string strStyle = "displaysuccess,verifybarcode")
+        {
+            return SaveRecordAsync(strStyle).Result;
+        }
+
         // return:
         //      -1  error
         //      0   canceled
@@ -2039,7 +2045,7 @@ strNewDefault);
         /// </summary>
         /// <param name="strStyle">风格。为 displaysuccess/verifybarcode/changereaderbarcode/changestate/changereaderforce 之一或者组合。缺省值为 displaysuccess,verifybarcode</param>
         /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
-        public async Task<int> SaveRecord(string strStyle = "displaysuccess,verifybarcode")
+        public async Task<int> SaveRecordAsync(string strStyle = "displaysuccess,verifybarcode")
         {
             string strError = "";
             int nRet = 0;
@@ -2451,8 +2457,8 @@ strNewDefault);
             }
             catch (Exception ex)
             {
-                MainForm.WriteErrorLog($"SaveRecord() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                strError = $"SaveRecord() 出现异常: {ex.Message}。详情已写入错误日志";
+                MainForm.WriteErrorLog($"SaveRecordAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                strError = $"SaveRecordAsync() 出现异常: {ex.Message}。详情已写入错误日志";
                 goto ERROR1;
             }
 
@@ -3936,7 +3942,7 @@ MessageBoxDefaultButton.Button2);
                                 this.commander,
                                 msg) == true)
                             {
-                                await this.SaveRecord("displaysuccess");  // ,verifybarcode
+                                await this.SaveRecordAsync("displaysuccess");  // ,verifybarcode
                             }
                         }
                         finally
@@ -3955,7 +3961,7 @@ MessageBoxDefaultButton.Button2);
                                 this.commander,
                                 msg) == true)
                             {
-                                await this.SaveRecord("displaysuccess,changereaderbarcode");  // verifybarcode,
+                                await this.SaveRecordAsync("displaysuccess,changereaderbarcode");  // verifybarcode,
                             }
                         }
                         finally
@@ -3974,7 +3980,7 @@ MessageBoxDefaultButton.Button2);
                                 this.commander,
                                 msg) == true)
                             {
-                                await this.SaveRecord("displaysuccess,changestate");
+                                await this.SaveRecordAsync("displaysuccess,changestate");
                             }
                         }
                         finally
@@ -3993,7 +3999,7 @@ MessageBoxDefaultButton.Button2);
                                 this.commander,
                                 msg) == true)
                             {
-                                await this.SaveRecord("displaysuccess,changereaderforce");
+                                await this.SaveRecordAsync("displaysuccess,changereaderforce");
                             }
                         }
                         finally
