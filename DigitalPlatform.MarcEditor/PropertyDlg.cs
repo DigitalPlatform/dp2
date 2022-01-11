@@ -33,6 +33,8 @@ namespace DigitalPlatform.Marc
             AddLangCodeIfNeed(this.MarcEditor.Lang);
 
             this.comboBox_uiLanguage.Text = this.MarcEditor.Lang;
+
+            this.checkBox_bidiAdjust.Checked = MarcEditor.BidiAdjust;
         }
 
         // 获得纯粹的语言代码
@@ -55,6 +57,8 @@ namespace DigitalPlatform.Marc
                 this.MarcEditor.Lang = strNewLang;
                 this.MarcEditor.RefreshNameCaption();
             }
+
+            MarcEditor.BidiAdjust = this.checkBox_bidiAdjust.Checked;
 
             this.DialogResult = DialogResult.OK;
             this.Close();

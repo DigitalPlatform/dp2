@@ -145,6 +145,10 @@ namespace DigitalPlatform.OPAC.Web
                     }
 
                     result.Append("<span class='subfield'>");
+
+                    // 2022/1/11
+                    result.Append((char)0x200e);
+
                     result.Append(SubFieldChar);
                     if (i < strContent.Length - 1)
                     {
@@ -153,6 +157,11 @@ namespace DigitalPlatform.OPAC.Web
                     }
                     else
                         result.Append(SubFieldChar);
+
+                    // 2022/1/11
+                    // 为 $9 后面加一个空格。解决 Unicode bidi 问题
+                    if (result.Length > 0 && char.IsDigit(result[result.Length - 1]))
+                        result.Append(' ');
 
                     result.Append("</span>");
                     continue;

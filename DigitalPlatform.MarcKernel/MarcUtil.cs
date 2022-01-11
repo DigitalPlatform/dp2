@@ -235,7 +235,10 @@ namespace DigitalPlatform.Marc
                     }
 
                     result.Append("<span class='subfield'>");
+
+                    // 2022/1/6
                     result.Append((char)0x200e);
+
                     result.Append(SubFieldChar);
                     if (i < strContent.Length - 1)
                     {

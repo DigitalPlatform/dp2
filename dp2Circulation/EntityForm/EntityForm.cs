@@ -760,11 +760,10 @@ namespace dp2Circulation
                 this.binaryResControl1.TempDir = Program.MainForm.UserTempDir;
 
                 LoadFontToMarcEditor();
+                LoadMarcEditorParam();
 
                 this.m_marcEditor.AppInfo = Program.MainForm.AppInfo;    // 2009/9/18 
             }
-
-
 
             if (this.AcceptMode == true)
             {
@@ -2622,6 +2621,8 @@ true);
         private void EntityForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             ReleaseProtectedTailNumbers();
+
+            SaveMarcEditorParam();
 
             Program.MainForm.StreamProgressChanged -= MainForm_StreamProgressChanged;
 
@@ -10644,6 +10645,19 @@ out strError);
             return false;
         }
 
+        // 2022/1/11
+        void LoadMarcEditorParam()
+        {
+            MarcEditor.BidiAdjust = MainForm.AppInfo.GetBoolean(
+                "marceditor",
+                "bidi_adjust",
+                false);
+            this.m_marcEditor.FieldNameCaptionWidth = MainForm.AppInfo.GetInt(
+                "marceditor",
+                "name_width",
+                100);
+        }
+
         void LoadFontToMarcEditor()
         {
             string strFontString = MainForm.AppInfo.GetString(
@@ -10673,6 +10687,19 @@ out strError);
 
                 this.m_marcEditor.ContentTextColor = (Color)converter.ConvertFromString(strFontColor);
             }
+        }
+
+        // 2022/1/11
+        void SaveMarcEditorParam()
+        {
+            MainForm.AppInfo.SetBoolean(
+    "marceditor",
+    "bidi_adjust",
+    MarcEditor.BidiAdjust);
+            MainForm.AppInfo.SetInt(
+    "marceditor",
+    "name_width",
+    this.m_marcEditor.FieldNameCaptionWidth);
         }
 
         void SaveFontForMarcEditor()

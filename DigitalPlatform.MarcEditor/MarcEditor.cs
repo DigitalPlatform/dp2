@@ -8,6 +8,7 @@ using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Xml;
+using System.Text;
 
 using Newtonsoft.Json;
 
@@ -15,7 +16,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
-using System.Text;
 
 namespace DigitalPlatform.Marc
 {
@@ -682,6 +682,21 @@ namespace DigitalPlatform.Marc
 
                 this.Invalidate();  // 失效窗口，重新显示
                 this.Update();
+            }
+        }
+
+        static bool _bidiAdjust = false;
+
+        // 是否通过在后部加一个空格字符来达到自动调整 $9 的显示顺序的效果？
+        public static bool BidiAdjust
+        {
+            get
+            {
+                return _bidiAdjust;
+            }
+            set
+            {
+                _bidiAdjust = value;
             }
         }
 
@@ -1594,9 +1609,12 @@ namespace DigitalPlatform.Marc
                     delta = 0;
                 }
 
-                // $9 后面加一个空格字符
-                if (delta == 2 && ch != ' ' && result.Length > 0 && char.IsDigit(result[result.Length - 1]))
-                    result.Append((char)' ');  // 0x202c
+                if (BidiAdjust)
+                {
+                    // $9 后面加一个空格字符
+                    if (delta == 2 && ch != ' ' && result.Length > 0 && char.IsDigit(result[result.Length - 1]))
+                        result.Append((char)' ');  // 0x202c
+                }
 
                 result.Append(ch);
 
@@ -1624,8 +1642,11 @@ namespace DigitalPlatform.Marc
                 }
 
                 // $9 后面删除一个空格字符
-                if (delta == 2 && ch == ' ')
-                    continue;
+                if (BidiAdjust)
+                {
+                    if (delta == 2 && ch == ' ')
+                        continue;
+                }
 
                 result.Append(ch);
 
@@ -2090,7 +2111,6 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                             this.record.NameCaptionPureWidth -= 20;
                         if (this.record.NameCaptionPureWidth < 0)
                             this.record.NameCaptionPureWidth = 0;
-
                     }
                     // 迫使每个单元重新测算高度
                     this.record.CalculateFieldsHeight(0, -1, true);
