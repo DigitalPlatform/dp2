@@ -19695,7 +19695,6 @@ start_time_1,
         //      0   检查无错。
         //      1   检查发现有错。
         public LibraryServerResult CheckReaderBorrowInfo(
-            // RmsChannelCollection Channels,
             RmsChannel channel,
             string strReaderBarcode,
             int nStart,
@@ -19736,7 +19735,7 @@ start_time_1,
                 if (nRet == 0)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "读者证条码号 '" + strReaderBarcode + "' 不存在";
+                    result.ErrorInfo = "读者证条码号 '" + PatronBarcodeLink(strReaderBarcode) + "' 不存在";
                     result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                     return result;
                 }
@@ -19835,7 +19834,7 @@ start_time_1,
 
                                     if (result_2.Value == 1)
                                     {
-                                        strCheckError += "检查读者记录中借阅册条码号 " + strItemBarcode + " 关联的册记录(记录路径 " + aDupPath[j] + ") 时发现错误: " + result_1.ErrorInfo + "。";
+                                        strCheckError += "检查读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录(记录路径 " + aDupPath[j] + ") 时发现错误: " + result_1.ErrorInfo + "。";
                                         nErrorCount++;
                                     }
                                 }
@@ -19843,13 +19842,13 @@ start_time_1,
 
                             if (linkedPath.Count == 0)
                             {
-                                strCheckError += "读者记录中借阅册条码号 " + strItemBarcode + " 关联了 " + aDupPath.Length + " 条册记录，可是这些册记录中没有任何一条中有关联回读者证条码号的借阅信息。";
+                                strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联了 " + aDupPath.Length + " 条册记录，可是这些册记录中没有任何一条中有关联回读者证条码号的借阅信息。";
                                 nErrorCount++;
                             }
 
                             if (linkedPath.Count > 1)
                             {
-                                strCheckError += "读者记录中借阅册条码号 " + strItemBarcode + " 关联了 " + aDupPath.Length + " 条册记录，这些册记录中有 " + linkedPath.Count.ToString() + "条中有关联回读者证条码号的借阅信息。";
+                                strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联了 " + aDupPath.Length + " 条册记录，这些册记录中有 " + linkedPath.Count.ToString() + "条中有关联回读者证条码号的借阅信息。";
                                 nErrorCount++;
                             }
 
@@ -19858,19 +19857,19 @@ start_time_1,
 
                         if (result_1.ErrorCode == ErrorCode.ReaderBarcodeNotFound)
                         {
-                            strCheckError += "读者记录中借阅册条码号 " + strItemBarcode + " 关联的册记录中，其<borrower>字段关联回的读者证条码号是 " + strOutputReaderBarcode_0 + "，而不是出发的读者证条码号 " + strReaderBarcode + "。并且证条码号为 " + strOutputReaderBarcode_0 + " 的读者记录不存在。";
+                            strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 " + PatronBarcodeLink(strOutputReaderBarcode_0) + "，而不是出发的读者证条码号 " + PatronBarcodeLink(strReaderBarcode) + "。并且证条码号为 " + PatronBarcodeLink(strOutputReaderBarcode_0) + " 的读者记录不存在。";
                             nErrorCount++;
                             continue;
                         }
 
                         if (result_1.Value == -1)
                         {
-                            strCheckError += "检查读者记录中借阅册条码号 " + strItemBarcode + " 关联的册记录时发生错误: " + result_1.ErrorInfo + "。";
+                            strCheckError += "检查读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录时发生错误: " + result_1.ErrorInfo + "。";
                             nErrorCount++;
                         }
                         if (result_1.Value == 1)
                         {
-                            strCheckError += "检查读者记录中借阅册条码号 " + strItemBarcode + " 关联的册记录时发现错误: " + result_1.ErrorInfo + "。";
+                            strCheckError += "检查读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录时发现错误: " + result_1.ErrorInfo + "。";
                             nErrorCount++;
                         }
                         continue;
@@ -19879,7 +19878,7 @@ start_time_1,
 
                     if (strOutputReaderBarcode_0 != strReaderBarcode)
                     {
-                        strCheckError += "读者记录中借阅册条码号 " + strItemBarcode + " 关联的册记录中，其<borrower>字段关联回的读者证条码号是 " + strOutputReaderBarcode_0 + "，而不是出发的读者证条码号 " + strReaderBarcode + "。";
+                        strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 " + PatronBarcodeLink(strOutputReaderBarcode_0) + "，而不是出发的读者证条码号 " + PatronBarcodeLink(strReaderBarcode) + "。";
                         nErrorCount++;
                     }
                 }
@@ -19906,6 +19905,16 @@ start_time_1,
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        public static string ItemBarcodeLink(string strItemBarcode)
+        {
+            return "<ib>" + HttpUtility.HtmlEncode(strItemBarcode) + "</ib>";
+        }
+
+        public static string PatronBarcodeLink(string strPatronBarcode)
+        {
+            return "<pb>" + HttpUtility.HtmlEncode(strPatronBarcode) + "</pb>";
         }
 
         // 检查一个实体记录的借还信息是否异常。
@@ -20014,7 +20023,7 @@ start_time_1,
                 if (nRet == 0)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "册条码号 '" + strItemBarcode + "' 不存在";
+                    result.ErrorInfo = "册条码号 '" + ItemBarcodeLink(strItemBarcode) + "' 不存在";
                     result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
                     return result;
                 }
@@ -20034,7 +20043,7 @@ start_time_1,
                      * */
 
                     result.Value = -1;
-                    result.ErrorInfo = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
+                    result.ErrorInfo = "册条码号为 '" + ItemBarcodeLink(strItemBarcode) + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
                     result.ErrorCode = ErrorCode.ItemBarcodeDup;
 
                     aDupPath = new string[aPath.Count];
@@ -20073,7 +20082,7 @@ start_time_1,
     "borrower");
             if (String.IsNullOrEmpty(strOutputReaderBarcode) == true)
             {
-                strError = "册记录中<borrower>元素值表明该册当前并未被任何读者借阅";
+                strError = "册记录中 borrower 元素值表明该册当前并未被任何读者借阅";
                 result.Value = 0;   // 2008/1/25 comment 此时无法断定是否为错误。还需要strOutputReaderBarcode返回后进行比较才能确定
                 result.ErrorInfo = strError;
                 return result;
@@ -20111,7 +20120,7 @@ start_time_1,
                     if (nRet == 0)
                     {
                         result.Value = 1;
-                        result.ErrorInfo = "读者证条码号 '" + strOutputReaderBarcode + "' 不存在";
+                        result.ErrorInfo = "读者证条码号 '" + PatronBarcodeLink(strOutputReaderBarcode) + "' 不存在";
                         result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                         return result;
                     }
@@ -20241,7 +20250,7 @@ start_time_1,
                     out strError);
                 if (nRet == 0)
                 {
-                    strError = "读者证条码号 '" + strReaderBarcode + "' 不存在";
+                    strError = "读者证条码号 '" + PatronBarcodeLink(strReaderBarcode) + "' 不存在";
                     goto ERROR1;
                 }
                 if (nRet == -1)
@@ -20298,7 +20307,7 @@ start_time_1,
                 XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
                 if (nodeBorrow == null)
                 {
-                    strError = "修复操作被拒绝。读者记录 " + strReaderBarcode + " 中并不存在有关册 " + strItemBarcode + " 的借阅信息。";
+                    strError = "修复操作被拒绝。读者记录 " + PatronBarcodeLink(strReaderBarcode) + " 中并不存在有关册 " + ItemBarcodeLink(strItemBarcode) + " 的借阅信息。";
                     goto ERROR1;
                 }
 
@@ -20372,7 +20381,7 @@ start_time_1,
                         {
                             /*
                             result.Value = -1;
-                            result.ErrorInfo = "册条码号 '" + strItemBarcode + "' 不存在";
+                            result.ErrorInfo = "册条码号 '" + ItemBarcodeLink(strItemBarcode) + "' 不存在";
                             result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
                             return result;
                              * */
@@ -20389,7 +20398,7 @@ start_time_1,
                         if (aPath.Count > 1)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
+                            result.ErrorInfo = "册条码号为 '" + ItemBarcodeLink(strItemBarcode) + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
                             result.ErrorCode = ErrorCode.ItemBarcodeDup;
 
                             aDupPath = new string[aPath.Count];
@@ -20771,7 +20780,7 @@ start_time_1,
                         if (nRet == 0)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "册条码号 '" + strItemBarcode + "' 不存在";
+                            result.ErrorInfo = "册条码号 '" + ItemBarcodeLink(strItemBarcode) + "' 不存在";
                             result.ErrorCode = ErrorCode.ItemBarcodeNotFound;
                             return result;
                         }
@@ -20784,7 +20793,7 @@ start_time_1,
                         if (aPath.Count > 1)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
+                            result.ErrorInfo = "册条码号为 '" + ItemBarcodeLink(strItemBarcode) + "' 的册记录有 " + aPath.Count.ToString() + " 条，无法进行修复操作。请在附加册记录路径后重新提交修复操作。";
                             result.ErrorCode = ErrorCode.ItemBarcodeDup;
 
                             aDupPath = new string[aPath.Count];
@@ -20864,13 +20873,13 @@ start_time_1,
                         "borrower");
                     if (String.IsNullOrEmpty(strBorrower) == true)
                     {
-                        strError = "修复操作被拒绝。您所请求要修复的册记录中，本来就没有借阅信息，因此谈不上修复。";
+                        strError = "修复操作被拒绝。您所请求要修复的册记录中，本来就没有借阅信息，因此无需修复。";
                         goto CORRECT;
                     }
 
                     if (strBorrower != strReaderBarcode)
                     {
-                        strError = "修复操作被拒绝。您所请求要修复的册记录中，并没有指明借阅者是读者 " + strReaderBarcode + "。";
+                        strError = "修复操作被拒绝。您所请求要修复的册记录中，并没有指明借阅者是读者 " + PatronBarcodeLink(strReaderBarcode) + "。";
                         goto ERROR1;
                     }
 

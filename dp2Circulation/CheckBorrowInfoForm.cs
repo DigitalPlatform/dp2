@@ -11,6 +11,7 @@ using System.IO;
 using System.Collections;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -54,7 +55,8 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            Global.ClearForPureTextOutputing(this.webBrowser_resultInfo);
+            // Global.ClearForPureTextOutputing(this.webBrowser_resultInfo);
+            ClearHtml();
 
             this.checkBox_displayPriceString.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "check_borrowinfo_form",
@@ -70,6 +72,12 @@ namespace dp2Circulation
                 "check_borrowinfo_form",
                 "overwrite_exist_price",
                 false);
+
+            {
+                this.tabControl_main.TabPages.Remove(this.tabPage_batchAddItemPrice);
+                this.tabPage_batchAddItemPrice.Dispose();
+                this.tabPage_batchAddItemPrice = null;
+            }
 
             this.Channel = null;    // testing
         }
@@ -139,18 +147,30 @@ namespace dp2Circulation
 
         private void button_beginCheckFromReader_Click(object sender, EventArgs e)
         {
+            bool bAutoRepair = Control.ModifierKeys == Keys.Control;
+            BeginCheckFromReader(bAutoRepair);
+        }
+
+        void BeginCheckFromReader(bool bAutoRepair)
+        {
             string strError = "";
 
             // barcode --> 重复次数
             Hashtable barcode_table = new Hashtable();
 
-            bool bAutoRepair = Control.ModifierKeys == Keys.Control;
             bool checkDup = this.checkBox_checkReaderBarcodeDup.Checked;
 
             CancellationToken token = new CancellationToken();
             _ = Task.Factory.StartNew(
                 () =>
                 {
+                    DateTime start = DateTime.Now;
+
+                    if (bAutoRepair)
+                        DisplayText($"{start} 正在进行检查和自动修复...");
+                    else
+                        DisplayText($"{start} 正在进行检查...");
+
                     stop.OnStop += new StopEventHandler(this.DoStop);
                     stop.Initial("正在检索 ...");
                     stop.BeginLoop();
@@ -158,14 +178,21 @@ namespace dp2Circulation
                     EnableControls(false);
                     try
                     {
+                        int count = 0;
+                        int repaired_count = 0;
                         // result.Value
                         //      -1  出错
                         //      >=0 实际获得的读者记录条数
                         var result = DownloadAllPatronRecord(
                             (channel, record) =>
                             {
+                                count++;
                                 // parameters:
                                 //      bAutoRepair 是否同时自动修复
+                                // return:
+                                //      -1  出错
+                                //      0   没有必要处理
+                                //      1   已经处理
                                 int ret = CheckReaderRecord(channel,
                                         record.Path,
                                         record.RecordBody.Xml,
@@ -174,17 +201,30 @@ namespace dp2Circulation
                                         out string error);
                                 if (ret == -1)
                                 {
-                                    // TODO: 显示 error
+                                    if (channel.ErrorCode == ErrorCode.RequestCanceled)
+                                        throw new ChannelException(channel.ErrorCode, error);
                                 }
+                                else
+                                    repaired_count += ret;
                             },
                             (text) =>
                             {
                             },
                             token);
                         if (result.Value == -1)
+                        {
+                            DisplayError(result.ErrorInfo);
                             ShowMessageBox(result.ErrorInfo);
+                        }
                         else
                             ShowMessageBox("OK");
+
+                        DateTime end = DateTime.Now;
+
+                        if (bAutoRepair)
+                            DisplayText($"{end} 修复结束。共检查读者记录 {count} 条，修复有问题的读者记录 {repaired_count} 条。");
+                        else
+                            DisplayText($"{end} 检查结束。共检查读者记录 {count} 条。");
                         return;
                     }
                     catch (Exception ex)
@@ -274,6 +314,7 @@ namespace dp2Circulation
                 long hitcount = lRet;
 
                 writeLog?.Invoke($"共检索命中读者记录 {hitcount} 条");
+                DisplayText($"共有 {hitcount} 条读者记录。");
 
                 // 把超时时间改短一点
                 channel.Timeout = TimeSpan.FromSeconds(20);
@@ -365,6 +406,10 @@ namespace dp2Circulation
 
         // parameters:
         //      bAutoRepair 是否同时自动修复
+        // return:
+        //      -1  出错
+        //      0   没有必要处理
+        //      1   已经处理
         int CheckReaderRecord(LibraryChannel channel,
             string recpath,
             string xml,
@@ -374,6 +419,9 @@ namespace dp2Circulation
         {
             strError = "";
             long lRet = 0;
+
+            int nRepairedCount = 0;
+            int nCount = 0;
 
             // string[] aDupPath = null;
             try
@@ -399,9 +447,6 @@ namespace dp2Circulation
                 string strReaderBarcode = DomUtil.GetElementText(reader_dom.DocumentElement, "barcode");
 
                 string caption = $"{strReaderBarcode}({recpath})";
-
-                int nCount = 0;
-                int nRepairedCount = 0;
 
                 // string strReaderBarcode = barcodes[i];
                 string strOutputReaderBarcode = "";
@@ -437,6 +482,11 @@ namespace dp2Circulation
 
                     if (lRet == -1)
                     {
+                        if (channel.ErrorCode == ErrorCode.RequestCanceled)
+                        {
+                            DisplayError(strError);
+                            return -1;
+                        }
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
                         e.MessageText = "检查读者记录时发生错误： " + strError;
                         e.Actions = "yes,no,cancel";
@@ -446,11 +496,12 @@ namespace dp2Circulation
                         else if (e.ResultAction == "yes")
                             goto REDO_REPAIR;
 
-                        DisplayText("检查读者记录 " + caption + " 时" + strOffsComment + "出错: " + strError);
+                        DisplayError($"检查读者记录 { caption} 时{ strOffsComment }出错: { strError}");
                     }
                     if (lRet == 1)
                     {
-                        DisplayText("检查读者记录 " + caption + " 时" + strOffsComment + "发现问题: " + strError);
+                        DisplayCheckError($"检查读者记录 { caption } 时{ strOffsComment }发现问题: ", PlainText(strError));
+                        DisplayRecord(strError);
                         bFoundError = true;
                     }
 
@@ -483,7 +534,7 @@ namespace dp2Circulation
 
                     if (dup_count > 1)
                     {
-                        DisplayText($"读者证条码号 { strReaderBarcode } 有重复记录 { (lRet) }条。({recpath})");
+                        DisplayCheckError($"读者证条码号 { strReaderBarcode } 有重复记录 { (lRet) }条。({recpath})");
                     }
                 }
 
@@ -498,11 +549,11 @@ namespace dp2Circulation
                         out strError);
                     if (nRet == -1)
                     {
-                        DisplayText("*** 修复读者记录 " + caption + " 内链条问题时出错: " + strError);
+                        DisplayRepairError("*** 修复读者记录 " + caption + " 内链条问题时出错: " + strError);
                     }
                     else
                     {
-                        DisplayText("- 成功修复读者记录 " + caption + " 内链条问题");
+                        DisplaySucceed("- 成功修复读者记录 " + caption + " 内链条问题");
                         nRepairedCount++;
                     }
                 }
@@ -513,15 +564,254 @@ namespace dp2Circulation
             {
             }
 
-            return 0;
+            if (bAutoRepair)
+                return nCount;
+            return nRepairedCount;
+        }
+
+        public void ClearHtml()
+        {
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "checkborrowinfo.css");
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+            string strJs = "";
+
+            {
+                HtmlDocument doc = webBrowser_resultInfo.Document;
+
+                if (doc == null)
+                {
+                    webBrowser_resultInfo.Navigate("about:blank");
+                    doc = webBrowser_resultInfo.Document;
+                }
+                doc = doc.OpenNew(true);
+            }
+
+            Global.WriteHtml(this.webBrowser_resultInfo,
+                "<html><head>" + strLink + strJs + "</head><body>");
+        }
+
+        // Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(text) + "</div>");
+
+        static string PlainText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            string xml = "<root>" + text + "</root>";
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+            }
+            catch
+            {
+                return text;
+            }
+
+            return dom.DocumentElement.InnerText.Trim();
+        }
+
+        // 显示文字中的 <ib> 或者 <pb> 标记中所指的册记录或者读者记录
+        void DisplayRecord(string strError)
+        {
+            if (string.IsNullOrEmpty(strError))
+                return;
+
+            string xml = "<root>" + strError + "</root>";
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+            }
+            catch
+            {
+                return;
+            }
+
+            List<string> barcodes = new List<string>();
+            var nodes = dom.DocumentElement.SelectNodes("ib");
+            foreach (XmlElement ib in nodes)
+            {
+                barcodes.Add(ib.InnerText.Trim());
+            }
+
+            StringUtil.RemoveDupNoSort(ref barcodes);
+
+            StringBuilder text = new StringBuilder();
+            foreach (string barcode in barcodes)
+            {
+                string html = BuildItemHtml(barcode);
+                if (html != null)
+                    text.AppendLine($"<span class='record'><div>册 {barcode} 之 XML:</div>" + html + "</span>");
+            }
+
+            if (text.Length > 0)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    Global.WriteHtml(this.webBrowser_resultInfo,
+                        text.ToString()
+                        );
+                }));
+            }
+        }
+
+        string BuildItemHtml(string strItemBarcode)
+        {
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+                long lRet = channel.GetItemInfo(
+                    null,
+                    strItemBarcode,
+                    "xml",
+                    out string strItemXml,
+                    out string strItemRecPath,
+                    out _,
+                    "",  // strBiblioType
+                    out _,
+                    out _,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    return $"获取册 {strItemBarcode} 时出错: {strError}";
+                }
+                if (lRet == 0)
+                {
+                    return null;
+                    // return $"册 {strItemBarcode} 不存在";
+                }
+
+                XmlDocument item_dom = new XmlDocument();
+                try
+                {
+                    item_dom.LoadXml(strItemXml);
+                }
+                catch (Exception ex)
+                {
+                    return $"册 {strItemBarcode} 的 XML 记录装入 XMLDOM 出错: {ex.Message}";
+                }
+
+                DomUtil.RemoveEmptyElements(item_dom.DocumentElement);
+                string[] names = new string[] {
+                "borrowHistory"
+                };
+                foreach (var name in names)
+                {
+                    DomUtil.DeleteElement(item_dom.DocumentElement, name);
+                }
+
+                return DigitalPlatform.Marc.MarcUtil.GetHtmlOfXml(item_dom.DocumentElement.OuterXml,
+    false);
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+#if NO
+        public static string GetHtmlOfXml(string strFragmentXml,
+    bool bSubfieldReturn)
+        {
+            StringBuilder strResult = new StringBuilder("\r\n<table class='item'>", 4096);
+
+            if (string.IsNullOrEmpty(strFragmentXml) == false)
+            {
+                strResult.Append(DigitalPlatform.Marc.MarcUtil.GetFragmentHtml(strFragmentXml));
+            }
+
+            strResult.Append("\r\n</table>");
+            return strResult.ToString();
+        }
+#endif
+
+        void DisplayError(string title, string strText)
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser_resultInfo,
+                    "<div>"
+                    + "<div class='debug warning'>" + HttpUtility.HtmlEncode(title) + "</div>"
+                    + "<div class='debug error'>" + HttpUtility.HtmlEncode(strText).Replace("。", "。<br/>") + "</div>"
+                    + "</div>"
+                    );
+            }));
+        }
+
+        void DisplayError(string strText)
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser_resultInfo,
+                    "<div>"
+                    + "<div class='debug error'>" + HttpUtility.HtmlEncode(strText) + "</div>"
+                    + "</div>"
+                    );
+            }));
+        }
+
+        void DisplayCheckError(string title, string strText)
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser_resultInfo,
+                    "<div>"
+                    + "<div class='debug warning'>" + HttpUtility.HtmlEncode(title) + "</div>"
+                    + "<div class='debug check'>" + HttpUtility.HtmlEncode(strText).Replace("。", "。<br/>") + "</div>"
+                    + "</div>"
+                    );
+            }));
+        }
+
+        void DisplayCheckError(string strText)
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser_resultInfo,
+                    "<div>"
+                    + "<div class='debug check'>" + HttpUtility.HtmlEncode(strText) + "</div>"
+                    + "</div>"
+                    );
+            }));
+        }
+
+        void DisplayRepairError(string strText)
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser_resultInfo,
+                    "<div>"
+                    + "<div class='debug error'>" + HttpUtility.HtmlEncode(strText) + "</div>"
+                    + "</div>"
+                    );
+            }));
+        }
+
+        void DisplaySucceed(string strText)
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser_resultInfo,
+                    "<div>"
+                    + "<div class='debug green'>" + HttpUtility.HtmlEncode(strText) + "</div>"
+                    + "</div>"
+                    );
+            }));
         }
 
         void DisplayText(string strText)
         {
             this.Invoke((Action)(() =>
             {
+                /*
                 Global.WriteHtml(this.webBrowser_resultInfo,
     strText + "\r\n");
+                */
+                Global.WriteHtml(this.webBrowser_resultInfo,
+"<br/>" + HttpUtility.HtmlEncode(strText));
+
             }));
         }
 
@@ -874,11 +1164,15 @@ namespace dp2Circulation
                 this.button_beginCheckFromReader.Enabled = bEnable;
                 this.button_beginCheckFromItem.Enabled = bEnable;
                 this.button_clearInfo.Enabled = bEnable;
+                this.button_beginRepairFromItem.Enabled = bEnable;
+                this.button_beginRepairFromReader.Enabled = bEnable;
 
+                /*
                 this.button_repairReaderSide.Enabled = bEnable;
                 this.button_repairItemSide.Enabled = bEnable;
                 this.textBox_itemBarcode.Enabled = bEnable;
                 this.textBox_readerBarcode.Enabled = bEnable;
+                */
 
                 this.button_batchAddItemPrice.Enabled = bEnable;
 
@@ -893,6 +1187,9 @@ namespace dp2Circulation
                 this.textBox_single_itemBarcode.Enabled = bEnable;
                 this.button_single_checkFromItem.Enabled = bEnable;
                 this.button_single_checkFromReader.Enabled = bEnable;
+
+                this.button_single_repairFromItem.Enabled = bEnable;
+                this.button_single_repairFromReader.Enabled = bEnable;
             }));
         }
 
@@ -926,18 +1223,29 @@ namespace dp2Circulation
 
         private void button_beginCheckFromItem_Click(object sender, EventArgs e)
         {
+            bool bAutoRepair = Control.ModifierKeys == Keys.Control;
+            BeginCheckFromItem(bAutoRepair);
+        }
+
+        void BeginCheckFromItem(bool bAutoRepair)
+        {
             string strError = "";
 
             // barcode --> 重复次数
             Hashtable barcode_table = new Hashtable();
 
-            bool bAutoRepair = Control.ModifierKeys == Keys.Control;
             bool checkDup = this.checkBox_checkItemBarcodeDup.Checked;
 
             CancellationToken token = new CancellationToken();
             _ = Task.Factory.StartNew(
                 () =>
                 {
+                    DateTime start = DateTime.Now;
+                    if (bAutoRepair)
+                        DisplayText($"{start} 正在进行检查和自动修复...");
+                    else
+                        DisplayText($"{start} 正在进行检查...");
+
                     stop.OnStop += new StopEventHandler(this.DoStop);
                     stop.Initial("正在检索 ...");
                     stop.BeginLoop();
@@ -945,6 +1253,9 @@ namespace dp2Circulation
                     EnableControls(false);
                     try
                     {
+                        int count = 0;
+                        int repaired_count = 0;
+
                         List<string> unprocessed_dbnames = new List<string>();
 
                         // result.Value
@@ -955,6 +1266,8 @@ namespace dp2Circulation
                             unprocessed_dbnames,
                             (channel, record) =>
                             {
+                                count++;
+
                                 // parameters:
                                 //      bAutoRepair 是否同时自动修复
                                 int ret = CheckItemRecord(channel,
@@ -965,17 +1278,31 @@ namespace dp2Circulation
                                         out string error);
                                 if (ret == -1)
                                 {
-                                    // TODO: 显示 error
+                                    if (channel.ErrorCode == ErrorCode.RequestCanceled)
+                                        throw new ChannelException(channel.ErrorCode, error);
                                 }
+                                else
+                                    repaired_count += ret;
+
                             },
                             (text) =>
                             {
                             },
                             token);
                         if (result.Value == -1)
+                        {
+                            DisplayError(result.ErrorInfo);
                             ShowMessageBox(result.ErrorInfo);
+                        }
                         else
                             ShowMessageBox("OK");
+
+                        DateTime end = DateTime.Now;
+
+                        if (bAutoRepair)
+                            DisplayText($"{end} 修复结束。共检查册记录 {count} 条，修复有问题的册记录 {repaired_count} 条。");
+                        else
+                            DisplayText($"{end} 检查结束。共检查册记录 {count} 条。");
                         return;
                     }
                     catch (Exception ex)
@@ -1046,6 +1373,8 @@ namespace dp2Circulation
                 }
 
                 unprocessed_dbnames.AddRange(item_dbnames);
+
+                DisplayText($"共有 {item_dbnames.Count} 个实体库。");
 
                 int db_index = -1;
                 foreach (string name in item_dbnames)
@@ -1124,6 +1453,7 @@ namespace dp2Circulation
                     long hitcount = lRet;
 
                     writeLog?.Invoke($"{dbName} 共检索命中册记录 {hitcount} 条");
+                    DisplayText($"(库 {db_index + 1}/{item_dbnames.Count}) {dbName} 中有 {hitcount} 条册记录。");
 
                     // 把超时时间改短一点
                     channel.Timeout = TimeSpan.FromSeconds(20);
@@ -1199,6 +1529,25 @@ namespace dp2Circulation
                 return new NormalResult
                 {
                     Value = total_processed,
+                };
+            }
+            catch (ChannelException ex)
+            {
+                if (ex.ErrorCode == ErrorCode.RequestCanceled)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "用户中断",
+                    };
+
+                ClientInfo.WriteErrorLog($"DownloadAllEntityRecordAsync() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                writeLog?.Invoke($"DownloadAllEntityRecordAsync() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"DownloadAllEntityRecordAsync() 出现异常：{ex.Message}"
                 };
             }
             catch (Exception ex)
@@ -1377,18 +1726,21 @@ namespace dp2Circulation
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
         {
-            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
-            if (e.Actions == "yes,no,cancel")
+            this.Invoke((Action)(() =>
             {
-                DialogResult result = AutoCloseMessageBox.Show(this,
-    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
-    20 * 1000,
-    "CheckBorrowInfoForm");
-                if (result == DialogResult.Cancel)
-                    e.ResultAction = "no";
-                else
-                    e.ResultAction = "yes";
-            }
+                // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+                if (e.Actions == "yes,no,cancel")
+                {
+                    DialogResult result = AutoCloseMessageBox.Show(this,
+        e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+        20 * 1000,
+        "CheckBorrowInfoForm");
+                    if (result == DialogResult.Cancel)
+                        e.ResultAction = "no";
+                    else
+                        e.ResultAction = "yes";
+                }
+            }));
         }
 
 #if OLD
@@ -1522,6 +1874,10 @@ namespace dp2Circulation
 #endif
         // parameters:
         //      bAutoRepair 是否同时自动修复
+        // return:
+        //      -1  出错
+        //      0   没有必要处理
+        //      1   已经处理
         int CheckItemRecord(LibraryChannel channel,
             string recpath,
             string xml,
@@ -1530,6 +1886,9 @@ namespace dp2Circulation
             out string strError)
         {
             strError = "";
+
+            int nCount = 0;
+            int nRepairedCount = 0;
 
             string[] aDupPath = null;
             try
@@ -1556,9 +1915,6 @@ namespace dp2Circulation
 
                 string caption = $"{strItemBarcode}({recpath})";
 
-                int nCount = 0;
-                int nRepairedCount = 0;
-
                 string strOutputReaderBarcode = "";
 
                 //stop.SetMessage("正在检查第 " + (i + 1).ToString() + " 个册记录，条码为 " + strItemBarcode);
@@ -1567,7 +1923,7 @@ namespace dp2Circulation
                 int nProcessedBorrowItems = 0;
                 int nTotalBorrowItems = 0;
 
-                REDO_REPAIR:
+            REDO_REPAIR:
                 long lRet = channel.RepairBorrowInfo(
                     stop,
                     "checkfromitem",
@@ -1583,11 +1939,18 @@ namespace dp2Circulation
                     out strError);
                 if (lRet == -1 || lRet == 1)
                 {
+                    if (lRet == -1
+                        && channel.ErrorCode == ErrorCode.RequestCanceled)
+                    {
+                        DisplayError(strError);
+                        return -1;
+                    }
+
                     if (channel.ErrorCode == ErrorCode.ItemBarcodeDup)
                     {
                         List<string> linkedPath = new List<string>();
 
-                        DisplayText("检查册记录 " + caption + " 时发现册条码号命中重复记录 " + aDupPath.Length.ToString() + "个 -- " + StringUtil.MakePathList(aDupPath) + "。");
+                        DisplayCheckError("检查册记录 " + caption + " 时发现册条码号命中重复记录 " + aDupPath.Length.ToString() + "个 -- " + StringUtil.MakePathList(aDupPath) + "。");
 
                         for (int j = 0; j < aDupPath.Length; j++)
                         {
@@ -1616,7 +1979,7 @@ namespace dp2Circulation
                             {
                                 strText += "发现问题: " + strError;
 
-                                DisplayText(strText);
+                                DisplayCheckError(strText);
 
                                 if (bAutoRepair)
                                 {
@@ -1627,11 +1990,11 @@ namespace dp2Circulation
                                         out strError);
                                     if (nRet == -1)
                                     {
-                                        DisplayText("*** 修复册记录 " + caption + " 内链条问题时出错: " + strError);
+                                        DisplayRepairError("*** 修复册记录 " + caption + " 内链条问题时出错: " + strError);
                                     }
                                     else
                                     {
-                                        DisplayText("- 成功修复册记录 " + caption + " 内链条问题");
+                                        DisplaySucceed("- 成功修复册记录 " + caption + " 内链条问题");
                                         nRepairedCount++;
                                     }
                                 }
@@ -1657,11 +2020,13 @@ namespace dp2Circulation
                         else if (e.ResultAction == "yes")
                             goto REDO_REPAIR;
 
-                        DisplayText("检查册记录 " + caption + " 时出错: " + strError);
+                        DisplayError($"检查册记录 { caption } 时出错: ", PlainText(strError));
+                        DisplayRecord(strError);
                     }
                     if (lRet == 1)
                     {
-                        DisplayText("检查册记录 " + caption + " 时发现问题: " + strError);
+                        DisplayError($"检查册记录 { caption } 时发现问题: ", PlainText(strError));
+                        DisplayRecord(strError);
 
                         if (bAutoRepair)
                         {
@@ -1672,11 +2037,11 @@ namespace dp2Circulation
                                 out strError);
                             if (nRet == -1)
                             {
-                                DisplayText("*** 修复册记录 " + caption + " 内链条问题时出错: " + strError);
+                                DisplayRepairError("*** 修复册记录 " + caption + " 内链条问题时出错: " + strError);
                             }
                             else
                             {
-                                DisplayText("- 成功修复册记录 " + caption + " 内链条问题");
+                                DisplaySucceed("- 成功修复册记录 " + caption + " 内链条问题");
                                 nRepairedCount++;
                             }
                         }
@@ -1704,7 +2069,9 @@ namespace dp2Circulation
             {
             }
 
-            return 0;
+            if (bAutoRepair)
+                return nRepairedCount;
+            return nCount;
         ERROR1:
             return -1;
         }
@@ -1915,16 +2282,34 @@ namespace dp2Circulation
         }
 #endif
 
-        private void button_repairReaderSide_Click(object sender, EventArgs e)
+        // 零星修复，从读者侧
+        private void button_single_repairFromReader_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            nRet = RepairError(
-                "repairreaderside",
-                this.textBox_readerBarcode.Text,
-                this.textBox_itemBarcode.Text,
-                out strError);
+            if (string.IsNullOrEmpty(this.textBox_single_itemBarcode.Text))
+            {
+                // return:
+                //      -1  错误。可能有部分册已经修复成功
+                //      其他  共修复多少个册事项
+                nRet = RepairAllErrorFromReaderSide(
+                    this.textBox_single_readerBarcode.Text,
+                    out strError);
+                if (nRet == 0)
+                {
+                    strError = "没有发现任何错误";
+                    goto ERROR1;
+                }
+            }
+            else
+            {
+                nRet = RepairError(
+                    "repairreaderside",
+                    this.textBox_single_readerBarcode.Text,
+                    this.textBox_single_itemBarcode.Text,
+                    out strError);
+            }
             if (nRet == -1)
                 goto ERROR1;
 
@@ -1932,7 +2317,6 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         // 从册侧出发，修复一个册记录和相关读者记录的链条错误
@@ -2056,6 +2440,67 @@ out strError);
                 return 1;
         }
 
+        // return:
+        //      -1  错误。可能有部分册已经修复成功
+        //      其他  共修复多少个册事项
+        int RepairAllErrorFromReaderSide(
+    string strReaderBarcode,
+    out string strError)
+        {
+            strError = "";
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行修复 ...");
+            stop.BeginLoop();
+
+            EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                long lRet = channel.GetReaderInfo(stop,
+        strReaderBarcode,
+        "xml",
+        out string[] results,
+        out string strReaderRecPath,
+        out _,
+        out strError);
+                if (lRet == -1)
+                    return -1;
+                if (lRet == 0)
+                {
+                    strError = $"证条码号 '{strReaderBarcode}' 没有找到";
+                    return -1;
+                }
+
+                if (results == null || results.Length == 0)
+                {
+                    strError = "results error";
+                    return -1;
+                }
+
+                string strReaderXml = results[0];
+
+                // return:
+                //      -1  错误。可能有部分册已经修复成功
+                //      其他  共修复多少个册事项
+                return RepairAllErrorFromReaderSide(
+                    channel,
+                    strReaderRecPath,
+                    strReaderXml,
+                    out strError);
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+
+                EnableControls(true);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+            }
+        }
+
         // 从读者侧出发，修复一个读者记录中，所有册记录的链条错误
         // parameters:
         //      strReaderXml    读者记录 XML。从中可以获知有哪些册条码号(相关的链)需要尝试进行修复
@@ -2131,6 +2576,7 @@ out strError);
                 strError = StringUtil.MakePathList(errors, "; ");
                 return -1;
             }
+
             return nRepairedCount;
         }
 
@@ -2218,7 +2664,6 @@ out strError);
 
                     goto ERROR1;
                 } // end of return -1
-
             }
             finally
             {
@@ -2236,13 +2681,77 @@ out strError);
             return -1;
         }
 
-        private void button_repairItemSide_Click(object sender, EventArgs e)
+        // 零星修复，从册侧
+        private void button_single_repairFromItem_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = RepairError(
+            int nRet = 0;
+
+            string strItemBarcode = this.textBox_single_itemBarcode.Text;
+            string strReaderBarcode = this.textBox_single_readerBarcode.Text;
+
+            if (string.IsNullOrEmpty(strReaderBarcode))
+            {
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在获取册记录 ...");
+                stop.BeginLoop();
+
+                EnableControls(false);
+
+                LibraryChannel channel = this.GetChannel();
+
+                try
+                {
+                    // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+                    long lRet = channel.GetItemInfo(
+                        stop,
+                        strItemBarcode,
+                        "xml",
+                        out string strItemXml,
+                        out string strItemRecPath,
+                        out _,
+                        "",  // strBiblioType
+                        out _,
+                        out _,
+                        out strError);
+                    if (lRet == -1 || lRet == 0)
+                        goto ERROR1;
+
+                    XmlDocument item_dom = new XmlDocument();
+                    try
+                    {
+                        item_dom.LoadXml(strItemXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"册记录 XML 装入 XMLDOM 出错: {ex.Message}";
+                        goto ERROR1;
+                    }
+
+                    string borrower = DomUtil.GetElementText(item_dom.DocumentElement, "borrower");
+                    if (string.IsNullOrEmpty(borrower))
+                    {
+                        strError = $"册 {strItemBarcode} 处于在架状态，无法单独进行修复。请输入证条码号再尝试修复一次";
+                        goto ERROR1;
+                    }
+                    strReaderBarcode = borrower;
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+
+                    EnableControls(true);
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                }
+            }
+
+            nRet = RepairError(
                 "repairitemside",
-                this.textBox_readerBarcode.Text,
-                this.textBox_itemBarcode.Text,
+                strReaderBarcode,
+                strItemBarcode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -2672,7 +3181,8 @@ out strError);
 
         private void button_clearInfo_Click(object sender, EventArgs e)
         {
-            Global.ClearForPureTextOutputing(this.webBrowser_resultInfo);
+            // Global.ClearForPureTextOutputing(this.webBrowser_resultInfo);
+            ClearHtml();
         }
 
 #if OLD
@@ -2992,7 +3502,7 @@ out strError);
 
                 string xml = results[0];
                 string recpath = results[1];
-                
+
                 nRet = CheckReaderRecord(channel,
                     recpath,
                     xml,
@@ -3021,6 +3531,18 @@ out strError);
 
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 批修复，从读者侧
+        private void button_beginRepairFromReader_Click(object sender, EventArgs e)
+        {
+            BeginCheckFromReader(true);
+        }
+
+        // 批修复，从册侧
+        private void button_beginRepairFromItem_Click(object sender, EventArgs e)
+        {
+            BeginCheckFromItem(true);
         }
     }
 }

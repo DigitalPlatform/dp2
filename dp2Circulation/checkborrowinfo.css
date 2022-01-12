@@ -1,0 +1,372 @@
+body {
+    font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    margin: 0px;
+    padding: 0px;
+}
+
+A:link, A:visited, A:active {
+    text-decoration: none;
+    color: #aaaaaa;
+}
+
+A:hover {
+    font-weight: bold;
+}
+
+.record {
+    margin: 8px;
+    padding: 32px;
+    border-width: 0px;
+
+    width: 440px;
+    background-color: #c4d9ea;
+}
+
+.debug {
+    padding: 2px;
+    padding-left: 8px;
+    border-width: 0px;
+    border-left-width: 4px;
+    border-color: Gray;
+    border-style: solid;
+}
+
+    .debug.begin {
+        margin-top: 8px;
+        background-color: #bbbbbb;
+        color: White;
+    }
+
+    .debug.end {
+        margin-bottom: 8px;
+        background-color: #bbbbbb;
+        color: White;
+    }
+
+    .debug.warning {
+        background-color: #ffff99;
+        color: Black;
+    }
+
+    .debug.error {
+        background-color: #990000;
+        color: White;
+    }
+
+    .debug.check {
+        background-color: White;
+        color: #990000;
+    }
+
+    .debug.green {
+        background-color: #009900;
+        color: White;
+    }
+
+DIV.item {
+    padding: 2px;
+}
+
+DIV.odd {
+    /*background-color: #fefeff;*/
+    background-color: #ffffff;
+}
+
+DIV.even {
+    background-color: #eeeeff;
+}
+
+DIV.time_line {
+    clear: both;
+    float: right;
+    padding: 0px;
+    font-size: 7pt;
+    font-weight: lighter;
+}
+
+
+    DIV.time_line .time {
+        float: right;
+        margin-right: 8px;
+    }
+
+    DIV.time_line .time_span {
+        float: right;
+        margin-right: 8px;
+    }
+
+DIV.reader_line {
+    clear: both;
+    float: left;
+    width: 100%;
+    margin: 0px;
+    margin-left: 10px;
+    margin-top: 6px;
+    padding: 0px;
+    padding-left: 20px;
+    border-left: 4px solid #bbbbbb;
+}
+
+    DIV.reader_line .reader_prefix_text {
+        float: left;
+        margin-right: 8px;
+        /* font-size: 9pt; */
+        font-weight: normal;
+        color: #aaaaaa;
+    }
+
+
+    DIV.reader_line .reader_barcode {
+        float: left;
+        margin-right: 8px;
+        /* font-size: 10pt; */
+        font-weight: normal;
+        color: #aaaaaa;
+    }
+
+    DIV.reader_line .reader_summary {
+        float: left;
+        margin-right: 8px;
+        font-size: 10pt;
+        font-weight: bolder;
+    }
+
+.clear {
+    clear: both;
+}
+
+DIV.opername_line {
+    clear: both;
+    float: left;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+.opername {
+    padding: 0px;
+    font-size: 10pt;
+    font-weight: bolder;
+}
+
+.borrow .opername {
+    color: Blue;
+}
+
+.return .opername {
+    color: Green;
+}
+
+DIV.item_line {
+    clear: both;
+    float: left;
+    width: 100%;
+    margin: 0px;
+    margin-left: 10px;
+    margin-bottom: 6px;
+    padding: 0px;
+    padding-left: 20px;
+    border-left: 4px solid #cccccc;
+}
+
+    DIV.item_line .item_prefix_text {
+        float: left;
+        margin-right: 8px;
+        /* font-size: 9pt; */
+        font-weight: normal;
+        color: #aaaaaa;
+    }
+
+    DIV.item_line .item_barcode {
+        float: left;
+        margin-right: 8px;
+        /* font-size: 10pt; */
+        font-weight: normal;
+        color: #aaaaaa;
+    }
+
+    DIV.item_line .item_summary {
+        float: left;
+        margin-right: 8px;
+        /* font-size: 8pt; */
+        font-weight: normal;
+    }
+
+    DIV.item_line .item_location {
+        clear: both;
+        float: left;
+        white-space: nowrap;
+        font-size: 10pt;
+        font-weight: bolder;
+        border: 2px dotted #cccccc;
+        padding: 2px 4px 2px 4px;
+    }
+
+TABLE.amerce_item {
+    font-size: 9pt;
+    width: 100%;
+    border-width: 0px;
+    border-style: solid;
+    border-collapse: collapse;
+}
+
+    TABLE.amerce_item TD {
+        padding: 4px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+        TABLE.amerce_item TD.name {
+            text-align: right;
+            color: #777777;
+            width: 10%;
+            border: 0px;
+            border-right: 1px;
+            border-color: #999999;
+            border-style: solid;
+            text-align: right;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+
+
+TABLE.marc {
+    font-size: 8pt;
+    width: auto;
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+}
+
+    TABLE.marc TD {
+        vertical-align: text-top;
+    }
+
+        TABLE.marc TD.inserted {
+            background-color: #99ff99;
+            font-weight: bolder;
+        }
+
+        TABLE.marc TD.modified {
+            background-color: #ffff99;
+            font-weight: bolder;
+        }
+
+        TABLE.marc TD.deleted {
+            color: #ff0000;
+            font-weight: bolder;
+        }
+
+    TABLE.marc TR.header {
+        /* background-color: #eeeeee; */
+    }
+
+    TABLE.marc TR.datafield {
+    }
+
+
+    TABLE.marc TD.fieldname {
+        width: 2.6em;
+        white-space: nowrap;
+        text-align: center;
+        margin: 0px;
+        padding-left: 0px;
+        padding-right: 0px;
+        border: 0px;
+        border-top: 1px;
+        border-style: dotted;
+        border-color: #cccccc;
+    }
+
+    TABLE.marc TD.sep {
+        width: 1px;
+        height: 100%;
+        overflow: hidden;
+        display: inline-block;
+        white-space: nowrap;
+        /* margin-left: 2px; */
+        border: 0px;
+        border-left-width: 1px;
+        border-left-style: solid;
+        border-left-color: #999999;
+    }
+
+    TABLE.marc TD.sepline {
+        height: 2px;
+        border: 0px;
+        border-bottom-width: 1px;
+        border-bottom-style: dotted;
+        border-bottom-color: #999999;
+    }
+
+    TABLE.marc TD.cross {
+        height: 2px;
+        width: 2px;
+        border: 0px;
+        border-left-width: 1px;
+        border-left-style: solid;
+        border-left-color: #999999;
+        border-bottom-width: 1px;
+        border-bottom-style: dotted;
+        border-bottom-color: #999999;
+    }
+
+    TABLE.marc TD.fieldname, TABLE.marc TD.indicator, TABLE.marc TR.header TD.content, TABLE.marc SPAN {
+        font-family: "Courier New", Tahoma, Arial, Helvetica, sans-serif;
+        font-weight: bold;
+    }
+
+    TABLE.marc TD.indicator {
+        width: 2em;
+        white-space: nowrap;
+        padding-left: 4px;
+        padding-right: 4px;
+        border: 0px;
+        border-left: 1px;
+        border-right: 1px;
+        border-style: dotted;
+        border-color: #eeeeee;
+    }
+
+    TABLE.marc TD.content {
+        word-break: break-all;
+    }
+
+    TABLE.marc SPAN.subfield {
+        margin: 2px;
+        margin-left: 0px;
+        line-height: 140%;
+        border: 1px;
+        border-style: solid;
+        border-color: #cccccc;
+        padding-top: 1px;
+        padding-bottom: 1px;
+        padding-left: 3px;
+        padding-right: 3px;
+        font-weight: bold;
+        /* color: Blue; */
+        /* background-color: Yellow; */
+        /*direction:ltr;*/
+        /*unicode-bidi:isolate;*/
+    }
+
+    TABLE.marc SPAN.fieldend {
+        margin: 2px;
+        margin-left: 4px;
+        border: 1px;
+        border-style: solid;
+        border-color: White;
+        padding-top: 1px;
+        padding-bottom: 1px;
+        padding-left: 3px;
+        padding-right: 3px;
+        font-weight: bold;
+        color: White;
+    }
+
+.record_title {
+    FONT-SIZE: 8pt;
+}
+

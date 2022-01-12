@@ -131,6 +131,10 @@ namespace DigitalPlatform.LibraryClient
 
                 if (lRet == -1)
                 {
+                    // 2022/1/12
+                    if (Channel.ErrorCode == ErrorCode.RequestCanceled)
+                        throw new InterruptException($"用户中断");
+
                     if (this.Prompt != null)
                     {
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
