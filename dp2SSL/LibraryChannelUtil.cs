@@ -1974,8 +1974,6 @@ out string strError);
 
                     WpfClientInfo.WriteInfoLog($"{dbName} 共检索命中册记录 {hitcount} 条");
 
-                    // 把超时时间改短一点
-                    channel.Timeout = TimeSpan.FromSeconds(20);
 
                     DateTime search_time = DateTime.Now;
 
@@ -1986,67 +1984,78 @@ out string strError);
                     {
                         // string strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/uid";
 
-                        // 获取和存储记录
-                        ResultSetLoader loader = new ResultSetLoader(channel,
-            null,
-            null,
-            "id,xml",
-            "zh");
+                        // 把超时时间改短一点
+                        var timeout0 = channel.Timeout;
+                        channel.Timeout = TimeSpan.FromSeconds(20);
 
-                        // loader.Prompt += this.Loader_Prompt;
-                        int i = 0;
-                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                        try
                         {
-                            if (token.IsCancellationRequested)
-                                return new TagsInfoResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = "用户中断"
-                                };
+                            // 获取和存储记录
+                            ResultSetLoader loader = new ResultSetLoader(channel,
+                null,
+                null,
+                "id,xml",
+                "zh");
 
-                            var xml = record.RecordBody.Xml;
-
-                            XmlDocument dom = new XmlDocument();
-                            dom.LoadXml(xml);
-
-                            var info = new SimuTagInfo();
-                            info.PII = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-
-                            if (string.IsNullOrEmpty(info.PII))
-                                continue;
-
-                            if (info.PII.Contains("_"))
-                                continue;
-
+                            // loader.Prompt += this.Loader_Prompt;
+                            int i = 0;
+                            foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                             {
-                                string oi = "";
-                                string location = DomUtil.GetElementText(dom.DocumentElement, "location");
-                                location = StringUtil.GetPureLocation(location);
-                                var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
-                                if (ret == true)
+                                if (token.IsCancellationRequested)
+                                    return new TagsInfoResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = "用户中断"
+                                    };
+
+                                var xml = record.RecordBody.Xml;
+
+                                XmlDocument dom = new XmlDocument();
+                                dom.LoadXml(xml);
+
+                                var info = new SimuTagInfo();
+                                info.PII = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+
+                                if (string.IsNullOrEmpty(info.PII))
+                                    continue;
+
+                                if (info.PII.Contains("_"))
+                                    continue;
+
                                 {
-                                    if (string.IsNullOrEmpty(isil) == false)
-                                        oi = isil;
-                                    else if (string.IsNullOrEmpty(alternative) == false)
-                                        oi = alternative;
+                                    string oi = "";
+                                    string location = DomUtil.GetElementText(dom.DocumentElement, "location");
+                                    location = StringUtil.GetPureLocation(location);
+                                    var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
+                                    if (ret == true)
+                                    {
+                                        if (string.IsNullOrEmpty(isil) == false)
+                                            oi = isil;
+                                        else if (string.IsNullOrEmpty(alternative) == false)
+                                            oi = alternative;
+                                    }
+                                    info.OI = oi;
                                 }
-                                info.OI = oi;
+
+                                // info.OI = DomUtil.GetElementText(dom.DocumentElement, "oi");
+
+                                if (string.IsNullOrEmpty(info.OI))
+                                    continue;
+
+                                info.UID = DomUtil.GetElementText(dom.DocumentElement, "uid");
+                                info.AccessNo = DomUtil.GetElementText(dom.DocumentElement, "accessNo");
+                                infos.Add(info);
+                                i++;
+
+                                if (i >= max_count)
+                                    break;
                             }
 
-                            // info.OI = DomUtil.GetElementText(dom.DocumentElement, "oi");
-
-                            if (string.IsNullOrEmpty(info.OI))
-                                continue;
-
-                            info.UID = DomUtil.GetElementText(dom.DocumentElement, "uid");
-                            info.AccessNo = DomUtil.GetElementText(dom.DocumentElement, "accessNo");
-                            infos.Add(info);
-                            i++;
-
-                            if (i >= max_count)
-                                break;
                         }
-
+                        finally
+                        {
+                            channel.Timeout = timeout0;
+                        }
                     }
 
                     WpfClientInfo.WriteInfoLog($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");

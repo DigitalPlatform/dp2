@@ -19912,9 +19912,19 @@ start_time_1,
             return "<ib>" + HttpUtility.HtmlEncode(strItemBarcode) + "</ib>";
         }
 
+        public static string ItemRecPathLink(string strItemRecPath)
+        {
+            return "<ip>" + HttpUtility.HtmlEncode(strItemRecPath) + "</ip>";
+        }
+
         public static string PatronBarcodeLink(string strPatronBarcode)
         {
             return "<pb>" + HttpUtility.HtmlEncode(strPatronBarcode) + "</pb>";
+        }
+
+        public static string PatronRecPathLink(string strPatronRecPath)
+        {
+            return "<pp>" + HttpUtility.HtmlEncode(strPatronRecPath) + "</pp>";
         }
 
         // 检查一个实体记录的借还信息是否异常。
@@ -19926,7 +19936,6 @@ start_time_1,
         //      0   实体记录中没有借阅信息，或者检查发现无错。
         //      1   检查发现有错。
         public LibraryServerResult CheckItemBorrowInfo(
-            // RmsChannelCollection Channels,
             RmsChannel channel,
             string strLockedReaderBarcode,
             XmlDocument exist_readerdom,
@@ -19997,7 +20006,7 @@ start_time_1,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "根据strConfirmItemRecPath '" + strConfirmItemRecPath + "' 获得册记录失败: " + strError;
+                    strError = "根据strConfirmItemRecPath '" + ItemRecPathLink(strConfirmItemRecPath) + "' 获得册记录失败: " + strError;
                     goto ERROR1;
                 }
             }
@@ -20148,12 +20157,12 @@ start_time_1,
                 XmlNodeList nodesBorrow = readerdom.DocumentElement.SelectNodes("borrows/borrow[@barcode='" + strItemBarcode + "']");
                 if (nodesBorrow.Count == 0)
                 {
-                    strCheckError += "虽然册记录 " + strOutputItemRecPath + " 中表明了被读者 '" + strOutputReaderBarcode + "' 借阅，但是读者记录 " + strOutputReaderRecPath + " 中并没有关于册条码号 '" + strItemBarcode + "' 的借阅记录。";
+                    strCheckError += "虽然册记录 " + ItemRecPathLink(strOutputItemRecPath) + " 中表明了被读者 '" + PatronBarcodeLink(strOutputReaderBarcode) + "' 借阅，但是读者记录 " + PatronRecPathLink(strOutputReaderRecPath) + " 中并没有关于册条码号 '" + ItemBarcodeLink(strItemBarcode) + "' 的借阅记录。";
                     goto END1;
                 }
                 if (nodesBorrow.Count > 1)
                 {
-                    strCheckError = "读者记录有 " + strOutputReaderRecPath + " 中关于册条码号 '" + strItemBarcode + "' 的 " + nodesBorrow.Count.ToString() + " 条含糊借阅记录。";
+                    strCheckError = "读者记录 " + PatronRecPathLink(strOutputReaderRecPath) + " 中有关于册条码号 '" + ItemBarcodeLink(strItemBarcode) + "' 的 " + nodesBorrow.Count.ToString() + " 条含糊借阅记录。";
                     goto END1;
                 }
 
@@ -20264,7 +20273,7 @@ start_time_1,
                     sessioninfo.LibraryCodeList,
                     out string strLibraryCode) == false)
                 {
-                    strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                    strError = "读者记录路径 '" + PatronRecPathLink(strOutputReaderRecPath) + "' 的读者库不在当前用户管辖范围内";
                     goto ERROR1;
                 }
 
@@ -20354,7 +20363,7 @@ start_time_1,
                             out strError);
                         if (lRet == -1)
                         {
-                            strError = "根据strConfirmItemRecPath '" + strConfirmItemRecPath + "' 获得册记录失败: " + strError;
+                            strError = "根据strConfirmItemRecPath '" + ItemRecPathLink(strConfirmItemRecPath) + "' 获得册记录失败: " + strError;
                             goto ERROR1;
                         }
                     }
@@ -20648,7 +20657,7 @@ start_time_1,
                 }
                 else if (nRet > 1)
                 {
-                    strError = "证条码号为 '" + strReaderBarcode + "' 的读者记录存在 " + nRet + " 条。请先修复此问题，再重试修复册记录的链问题";
+                    strError = "证条码号为 '" + PatronBarcodeLink(strReaderBarcode) + "' 的读者记录存在 " + nRet + " 条。请先修复此问题，再重试修复册记录的链问题";
                     goto ERROR1;
                 }
                 else
@@ -20662,7 +20671,7 @@ start_time_1,
                         sessioninfo.LibraryCodeList,
                         out strLibraryCode) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                        strError = "读者记录路径 '" + PatronRecPathLink(strOutputReaderRecPath) + "' 的读者库不在当前用户管辖范围内";
                         goto ERROR1;
                     }
                 }
@@ -20754,7 +20763,7 @@ start_time_1,
                             out strError);
                         if (lRet == -1)
                         {
-                            strError = "根据strConfirmItemRecPath '" + strConfirmItemRecPath + "' 获得册记录失败: " + strError;
+                            strError = "根据strConfirmItemRecPath '" + ItemRecPathLink(strConfirmItemRecPath) + "' 获得册记录失败: " + strError;
                             goto ERROR1;
                         }
                     }
@@ -20839,7 +20848,7 @@ start_time_1,
                     }
                     if (nRet == 1)
                     {
-                        strError = "册记录 '" + strOutputItemRecPath + "' 不在当前用户管辖范围内";
+                        strError = "册记录 '" + ItemRecPathLink(strOutputItemRecPath) + "' 不在当前用户管辖范围内";
                         goto ERROR1;
                     }
 

@@ -809,9 +809,6 @@ TaskScheduler.Default);
 
                     WpfClientInfo.WriteInfoLog($"{dbName} 共检索命中册记录 {hitcount} 条");
 
-                    // 把超时时间改短一点
-                    channel.Timeout = TimeSpan.FromSeconds(20);
-
                     DateTime search_time = DateTime.Now;
 
                     int skip_count = 0;
@@ -821,75 +818,84 @@ TaskScheduler.Default);
                     {
                         string strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/uid";
 
-                        // 获取和存储记录
-                        ResultSetLoader loader = new ResultSetLoader(channel,
-            null,
-            null,
-            strStyle,   // $"id,xml,timestamp",
-            "zh");
-
-                        // loader.Prompt += this.Loader_Prompt;
-                        int i = 0;
-                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                        // 把超时时间改短一点
+                        var timeout0 = channel.Timeout;
+                        channel.Timeout = TimeSpan.FromSeconds(20);
+                        try
                         {
-                            if (token.IsCancellationRequested)
-                                return new NormalResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = "用户中断"
-                                };
+                            // 获取和存储记录
+                            ResultSetLoader loader = new ResultSetLoader(channel,
+                null,
+                null,
+                strStyle,   // $"id,xml,timestamp",
+                "zh");
 
-                            if (record.Cols != null)
+                            // loader.Prompt += this.Loader_Prompt;
+                            int i = 0;
+                            foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                             {
-                                string barcode = "";
-                                if (record.Cols.Length > 0)
-                                    barcode = record.Cols[0];
-                                string location = "";
-                                if (record.Cols.Length > 1)
-                                    location = record.Cols[1];
-
-                                // 2021/1/31
-                                // 推算出 OI
-                                /*
-                                string oi = "";
-                                {
-                                    location = StringUtil.GetPureLocation(location);
-                                    var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
-                                    if (ret == true)
+                                if (token.IsCancellationRequested)
+                                    return new NormalResult
                                     {
-                                        if (string.IsNullOrEmpty(isil) == false)
-                                            oi = isil;
-                                        else if (string.IsNullOrEmpty(alternative) == false)
-                                            oi = alternative;
-                                    }
-                                }
-                                */
-                                location = StringUtil.GetPureLocation(location);
-                                string oi = "";
-                                if (oi_table.ContainsKey(location))
-                                    oi = (string)oi_table[location];
-                                else
+                                        Value = -1,
+                                        ErrorInfo = "用户中断"
+                                    };
+
+                                if (record.Cols != null)
                                 {
-                                    oi = GetInstitution(location);
-                                    oi_table[location] = oi;
+                                    string barcode = "";
+                                    if (record.Cols.Length > 0)
+                                        barcode = record.Cols[0];
+                                    string location = "";
+                                    if (record.Cols.Length > 1)
+                                        location = record.Cols[1];
+
+                                    // 2021/1/31
+                                    // 推算出 OI
+                                    /*
+                                    string oi = "";
+                                    {
+                                        location = StringUtil.GetPureLocation(location);
+                                        var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
+                                        if (ret == true)
+                                        {
+                                            if (string.IsNullOrEmpty(isil) == false)
+                                                oi = isil;
+                                            else if (string.IsNullOrEmpty(alternative) == false)
+                                                oi = alternative;
+                                        }
+                                    }
+                                    */
+                                    location = StringUtil.GetPureLocation(location);
+                                    string oi = "";
+                                    if (oi_table.ContainsKey(location))
+                                        oi = (string)oi_table[location];
+                                    else
+                                    {
+                                        oi = GetInstitution(location);
+                                        oi_table[location] = oi;
+                                    }
+
+                                    string uid = "";
+                                    if (record.Cols.Length > 2)
+                                        uid = record.Cols[2];
+                                    if (string.IsNullOrEmpty(barcode) == false
+                                        && string.IsNullOrEmpty(uid) == false)
+                                        uid_table[uid] = oi + "." + barcode;
                                 }
 
-                                string uid = "";
-                                if (record.Cols.Length > 2)
-                                    uid = record.Cols[2];
-                                if (string.IsNullOrEmpty(barcode) == false
-                                    && string.IsNullOrEmpty(uid) == false)
-                                    uid_table[uid] = oi + "." + barcode;
-                            }
+                                i++;
 
-                            i++;
-
-                            if ((i % 100) == 0)
-                            {
-                                func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}/{hitcount}) {record.Path} ...");
+                                if ((i % 100) == 0)
+                                {
+                                    func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}/{hitcount}) {record.Path} ...");
+                                }
                             }
                         }
-
+                        finally
+                        {
+                            channel.Timeout = timeout0;
+                        }
                     }
 
                     WpfClientInfo.WriteInfoLog($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");

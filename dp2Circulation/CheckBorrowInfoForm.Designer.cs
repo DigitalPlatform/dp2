@@ -34,6 +34,9 @@
             this.button_beginCheckFromItem = new System.Windows.Forms.Button();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_batchCheck = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button_beginRepairFromItem = new System.Windows.Forms.Button();
+            this.button_beginRepairFromReader = new System.Windows.Forms.Button();
             this.checkBox_checkItemBarcodeDup = new System.Windows.Forms.CheckBox();
             this.checkBox_checkReaderBarcodeDup = new System.Windows.Forms.CheckBox();
             this.tabPage_batchAddItemPrice = new System.Windows.Forms.TabPage();
@@ -42,6 +45,8 @@
             this.checkBox_forceCNY = new System.Windows.Forms.CheckBox();
             this.button_batchAddItemPrice = new System.Windows.Forms.Button();
             this.tabPage_singleCheck = new System.Windows.Forms.TabPage();
+            this.button_single_repairFromItem = new System.Windows.Forms.Button();
+            this.button_single_repairFromReader = new System.Windows.Forms.Button();
             this.button_single_checkFromReader = new System.Windows.Forms.Button();
             this.button_single_checkFromItem = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -50,11 +55,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.button_clearInfo = new System.Windows.Forms.Button();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
-            this.button_single_repairFromReader = new System.Windows.Forms.Button();
-            this.button_single_repairFromItem = new System.Windows.Forms.Button();
-            this.button_beginRepairFromReader = new System.Windows.Forms.Button();
-            this.button_beginRepairFromItem = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox_displayRecords = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_batchCheck.SuspendLayout();
             this.tabPage_batchAddItemPrice.SuspendLayout();
@@ -68,7 +69,7 @@
             // button_beginCheckFromReader
             // 
             this.button_beginCheckFromReader.Location = new System.Drawing.Point(7, 9);
-            this.button_beginCheckFromReader.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_beginCheckFromReader.Margin = new System.Windows.Forms.Padding(4);
             this.button_beginCheckFromReader.Name = "button_beginCheckFromReader";
             this.button_beginCheckFromReader.Size = new System.Drawing.Size(242, 38);
             this.button_beginCheckFromReader.TabIndex = 0;
@@ -80,7 +81,7 @@
             // 
             this.webBrowser_resultInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_resultInfo.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_resultInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser_resultInfo.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser_resultInfo.MinimumSize = new System.Drawing.Size(28, 28);
             this.webBrowser_resultInfo.Name = "webBrowser_resultInfo";
             this.webBrowser_resultInfo.Size = new System.Drawing.Size(785, 300);
@@ -89,7 +90,7 @@
             // button_beginCheckFromItem
             // 
             this.button_beginCheckFromItem.Location = new System.Drawing.Point(411, 9);
-            this.button_beginCheckFromItem.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_beginCheckFromItem.Margin = new System.Windows.Forms.Padding(4);
             this.button_beginCheckFromItem.Name = "button_beginCheckFromItem";
             this.button_beginCheckFromItem.Size = new System.Drawing.Size(242, 38);
             this.button_beginCheckFromItem.TabIndex = 2;
@@ -104,7 +105,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_singleCheck);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
             this.tabControl_main.Size = new System.Drawing.Size(785, 136);
@@ -120,13 +121,43 @@
             this.tabPage_batchCheck.Controls.Add(this.button_beginCheckFromReader);
             this.tabPage_batchCheck.Controls.Add(this.button_beginCheckFromItem);
             this.tabPage_batchCheck.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_batchCheck.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_batchCheck.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_batchCheck.Name = "tabPage_batchCheck";
-            this.tabPage_batchCheck.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_batchCheck.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage_batchCheck.Size = new System.Drawing.Size(777, 101);
             this.tabPage_batchCheck.TabIndex = 0;
             this.tabPage_batchCheck.Text = "批检查借阅信息链";
             this.tabPage_batchCheck.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Location = new System.Drawing.Point(387, 3);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(4, 85);
+            this.groupBox1.TabIndex = 3;
+            this.groupBox1.TabStop = false;
+            // 
+            // button_beginRepairFromItem
+            // 
+            this.button_beginRepairFromItem.Location = new System.Drawing.Point(657, 9);
+            this.button_beginRepairFromItem.Margin = new System.Windows.Forms.Padding(4);
+            this.button_beginRepairFromItem.Name = "button_beginRepairFromItem";
+            this.button_beginRepairFromItem.Size = new System.Drawing.Size(113, 38);
+            this.button_beginRepairFromItem.TabIndex = 4;
+            this.button_beginRepairFromItem.Text = "修复(&N)";
+            this.button_beginRepairFromItem.UseVisualStyleBackColor = true;
+            this.button_beginRepairFromItem.Click += new System.EventHandler(this.button_beginRepairFromItem_Click);
+            // 
+            // button_beginRepairFromReader
+            // 
+            this.button_beginRepairFromReader.Location = new System.Drawing.Point(257, 8);
+            this.button_beginRepairFromReader.Margin = new System.Windows.Forms.Padding(4);
+            this.button_beginRepairFromReader.Name = "button_beginRepairFromReader";
+            this.button_beginRepairFromReader.Size = new System.Drawing.Size(113, 38);
+            this.button_beginRepairFromReader.TabIndex = 1;
+            this.button_beginRepairFromReader.Text = "修复(&E)";
+            this.button_beginRepairFromReader.UseVisualStyleBackColor = true;
+            this.button_beginRepairFromReader.Click += new System.EventHandler(this.button_beginRepairFromReader_Click);
             // 
             // checkBox_checkItemBarcodeDup
             // 
@@ -134,7 +165,7 @@
             this.checkBox_checkItemBarcodeDup.Checked = true;
             this.checkBox_checkItemBarcodeDup.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox_checkItemBarcodeDup.Location = new System.Drawing.Point(411, 56);
-            this.checkBox_checkItemBarcodeDup.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_checkItemBarcodeDup.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_checkItemBarcodeDup.Name = "checkBox_checkItemBarcodeDup";
             this.checkBox_checkItemBarcodeDup.Size = new System.Drawing.Size(162, 25);
             this.checkBox_checkItemBarcodeDup.TabIndex = 5;
@@ -147,7 +178,7 @@
             this.checkBox_checkReaderBarcodeDup.Checked = true;
             this.checkBox_checkReaderBarcodeDup.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox_checkReaderBarcodeDup.Location = new System.Drawing.Point(7, 56);
-            this.checkBox_checkReaderBarcodeDup.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_checkReaderBarcodeDup.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_checkReaderBarcodeDup.Name = "checkBox_checkReaderBarcodeDup";
             this.checkBox_checkReaderBarcodeDup.Size = new System.Drawing.Size(204, 25);
             this.checkBox_checkReaderBarcodeDup.TabIndex = 2;
@@ -161,7 +192,7 @@
             this.tabPage_batchAddItemPrice.Controls.Add(this.checkBox_forceCNY);
             this.tabPage_batchAddItemPrice.Controls.Add(this.button_batchAddItemPrice);
             this.tabPage_batchAddItemPrice.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_batchAddItemPrice.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_batchAddItemPrice.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_batchAddItemPrice.Name = "tabPage_batchAddItemPrice";
             this.tabPage_batchAddItemPrice.Size = new System.Drawing.Size(777, 101);
             this.tabPage_batchAddItemPrice.TabIndex = 2;
@@ -174,7 +205,7 @@
             this.checkBox_displayPriceString.Checked = true;
             this.checkBox_displayPriceString.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox_displayPriceString.Location = new System.Drawing.Point(491, 66);
-            this.checkBox_displayPriceString.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_displayPriceString.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_displayPriceString.Name = "checkBox_displayPriceString";
             this.checkBox_displayPriceString.Size = new System.Drawing.Size(288, 25);
             this.checkBox_displayPriceString.TabIndex = 4;
@@ -185,7 +216,7 @@
             // 
             this.checkBox_overwriteExistPrice.AutoSize = true;
             this.checkBox_overwriteExistPrice.Location = new System.Drawing.Point(262, 66);
-            this.checkBox_overwriteExistPrice.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_overwriteExistPrice.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_overwriteExistPrice.Name = "checkBox_overwriteExistPrice";
             this.checkBox_overwriteExistPrice.Size = new System.Drawing.Size(225, 25);
             this.checkBox_overwriteExistPrice.TabIndex = 3;
@@ -196,7 +227,7 @@
             // 
             this.checkBox_forceCNY.AutoSize = true;
             this.checkBox_forceCNY.Location = new System.Drawing.Point(4, 66);
-            this.checkBox_forceCNY.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_forceCNY.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_forceCNY.Name = "checkBox_forceCNY";
             this.checkBox_forceCNY.Size = new System.Drawing.Size(238, 25);
             this.checkBox_forceCNY.TabIndex = 2;
@@ -206,7 +237,7 @@
             // button_batchAddItemPrice
             // 
             this.button_batchAddItemPrice.Location = new System.Drawing.Point(4, 18);
-            this.button_batchAddItemPrice.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_batchAddItemPrice.Margin = new System.Windows.Forms.Padding(4);
             this.button_batchAddItemPrice.Name = "button_batchAddItemPrice";
             this.button_batchAddItemPrice.Size = new System.Drawing.Size(185, 38);
             this.button_batchAddItemPrice.TabIndex = 0;
@@ -225,18 +256,42 @@
             this.tabPage_singleCheck.Controls.Add(this.textBox_single_readerBarcode);
             this.tabPage_singleCheck.Controls.Add(this.label4);
             this.tabPage_singleCheck.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_singleCheck.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_singleCheck.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_singleCheck.Name = "tabPage_singleCheck";
             this.tabPage_singleCheck.Size = new System.Drawing.Size(777, 101);
             this.tabPage_singleCheck.TabIndex = 3;
             this.tabPage_singleCheck.Text = "零星检查";
             this.tabPage_singleCheck.UseVisualStyleBackColor = true;
             // 
+            // button_single_repairFromItem
+            // 
+            this.button_single_repairFromItem.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_single_repairFromItem.Location = new System.Drawing.Point(597, 59);
+            this.button_single_repairFromItem.Margin = new System.Windows.Forms.Padding(4);
+            this.button_single_repairFromItem.Name = "button_single_repairFromItem";
+            this.button_single_repairFromItem.Size = new System.Drawing.Size(156, 38);
+            this.button_single_repairFromItem.TabIndex = 7;
+            this.button_single_repairFromItem.Text = "从册侧修复";
+            this.button_single_repairFromItem.UseVisualStyleBackColor = true;
+            this.button_single_repairFromItem.Click += new System.EventHandler(this.button_single_repairFromItem_Click);
+            // 
+            // button_single_repairFromReader
+            // 
+            this.button_single_repairFromReader.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_single_repairFromReader.Location = new System.Drawing.Point(597, 16);
+            this.button_single_repairFromReader.Margin = new System.Windows.Forms.Padding(4);
+            this.button_single_repairFromReader.Name = "button_single_repairFromReader";
+            this.button_single_repairFromReader.Size = new System.Drawing.Size(156, 38);
+            this.button_single_repairFromReader.TabIndex = 3;
+            this.button_single_repairFromReader.Text = "从读者侧修复";
+            this.button_single_repairFromReader.UseVisualStyleBackColor = true;
+            this.button_single_repairFromReader.Click += new System.EventHandler(this.button_single_repairFromReader_Click);
+            // 
             // button_single_checkFromReader
             // 
             this.button_single_checkFromReader.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_single_checkFromReader.Location = new System.Drawing.Point(433, 16);
-            this.button_single_checkFromReader.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_single_checkFromReader.Margin = new System.Windows.Forms.Padding(4);
             this.button_single_checkFromReader.Name = "button_single_checkFromReader";
             this.button_single_checkFromReader.Size = new System.Drawing.Size(156, 38);
             this.button_single_checkFromReader.TabIndex = 2;
@@ -248,7 +303,7 @@
             // 
             this.button_single_checkFromItem.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_single_checkFromItem.Location = new System.Drawing.Point(433, 60);
-            this.button_single_checkFromItem.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_single_checkFromItem.Margin = new System.Windows.Forms.Padding(4);
             this.button_single_checkFromItem.Name = "button_single_checkFromItem";
             this.button_single_checkFromItem.Size = new System.Drawing.Size(156, 38);
             this.button_single_checkFromItem.TabIndex = 6;
@@ -270,8 +325,9 @@
             // 
             this.textBox_single_itemBarcode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_single_itemBarcode.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_single_itemBarcode.Location = new System.Drawing.Point(174, 60);
-            this.textBox_single_itemBarcode.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_single_itemBarcode.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_single_itemBarcode.Name = "textBox_single_itemBarcode";
             this.textBox_single_itemBarcode.Size = new System.Drawing.Size(250, 31);
             this.textBox_single_itemBarcode.TabIndex = 5;
@@ -280,8 +336,9 @@
             // 
             this.textBox_single_readerBarcode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_single_readerBarcode.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_single_readerBarcode.Location = new System.Drawing.Point(174, 16);
-            this.textBox_single_readerBarcode.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_single_readerBarcode.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_single_readerBarcode.Name = "textBox_single_readerBarcode";
             this.textBox_single_readerBarcode.Size = new System.Drawing.Size(250, 31);
             this.textBox_single_readerBarcode.TabIndex = 1;
@@ -300,7 +357,7 @@
             // 
             this.button_clearInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_clearInfo.Location = new System.Drawing.Point(678, 474);
-            this.button_clearInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_clearInfo.Margin = new System.Windows.Forms.Padding(4);
             this.button_clearInfo.Name = "button_clearInfo";
             this.button_clearInfo.Size = new System.Drawing.Size(123, 38);
             this.button_clearInfo.TabIndex = 0;
@@ -314,7 +371,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(17, 18);
-            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(4);
             this.splitContainer_main.Name = "splitContainer_main";
             this.splitContainer_main.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -330,69 +387,27 @@
             this.splitContainer_main.SplitterWidth = 14;
             this.splitContainer_main.TabIndex = 11;
             // 
-            // button_single_repairFromReader
+            // checkBox_displayRecords
             // 
-            this.button_single_repairFromReader.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_single_repairFromReader.Location = new System.Drawing.Point(597, 16);
-            this.button_single_repairFromReader.Margin = new System.Windows.Forms.Padding(4);
-            this.button_single_repairFromReader.Name = "button_single_repairFromReader";
-            this.button_single_repairFromReader.Size = new System.Drawing.Size(156, 38);
-            this.button_single_repairFromReader.TabIndex = 3;
-            this.button_single_repairFromReader.Text = "从读者侧修复";
-            this.button_single_repairFromReader.UseVisualStyleBackColor = true;
-            this.button_single_repairFromReader.Click += new System.EventHandler(this.button_single_repairFromReader_Click);
-            // 
-            // button_single_repairFromItem
-            // 
-            this.button_single_repairFromItem.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_single_repairFromItem.Location = new System.Drawing.Point(597, 59);
-            this.button_single_repairFromItem.Margin = new System.Windows.Forms.Padding(4);
-            this.button_single_repairFromItem.Name = "button_single_repairFromItem";
-            this.button_single_repairFromItem.Size = new System.Drawing.Size(156, 38);
-            this.button_single_repairFromItem.TabIndex = 7;
-            this.button_single_repairFromItem.Text = "从册侧修复";
-            this.button_single_repairFromItem.UseVisualStyleBackColor = true;
-            this.button_single_repairFromItem.Click += new System.EventHandler(this.button_single_repairFromItem_Click);
-            // 
-            // button_beginRepairFromReader
-            // 
-            this.button_beginRepairFromReader.Location = new System.Drawing.Point(257, 8);
-            this.button_beginRepairFromReader.Margin = new System.Windows.Forms.Padding(4);
-            this.button_beginRepairFromReader.Name = "button_beginRepairFromReader";
-            this.button_beginRepairFromReader.Size = new System.Drawing.Size(113, 38);
-            this.button_beginRepairFromReader.TabIndex = 1;
-            this.button_beginRepairFromReader.Text = "修复(&E)";
-            this.button_beginRepairFromReader.UseVisualStyleBackColor = true;
-            this.button_beginRepairFromReader.Click += new System.EventHandler(this.button_beginRepairFromReader_Click);
-            // 
-            // button_beginRepairFromItem
-            // 
-            this.button_beginRepairFromItem.Location = new System.Drawing.Point(657, 9);
-            this.button_beginRepairFromItem.Margin = new System.Windows.Forms.Padding(4);
-            this.button_beginRepairFromItem.Name = "button_beginRepairFromItem";
-            this.button_beginRepairFromItem.Size = new System.Drawing.Size(113, 38);
-            this.button_beginRepairFromItem.TabIndex = 4;
-            this.button_beginRepairFromItem.Text = "修复(&N)";
-            this.button_beginRepairFromItem.UseVisualStyleBackColor = true;
-            this.button_beginRepairFromItem.Click += new System.EventHandler(this.button_beginRepairFromItem_Click);
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Location = new System.Drawing.Point(387, 3);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(4, 85);
-            this.groupBox1.TabIndex = 3;
-            this.groupBox1.TabStop = false;
+            this.checkBox_displayRecords.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkBox_displayRecords.AutoSize = true;
+            this.checkBox_displayRecords.Location = new System.Drawing.Point(17, 475);
+            this.checkBox_displayRecords.Name = "checkBox_displayRecords";
+            this.checkBox_displayRecords.Size = new System.Drawing.Size(195, 25);
+            this.checkBox_displayRecords.TabIndex = 12;
+            this.checkBox_displayRecords.Text = "显示相关记录(&R)";
+            this.checkBox_displayRecords.UseVisualStyleBackColor = true;
             // 
             // CheckBorrowInfoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(818, 530);
+            this.Controls.Add(this.checkBox_displayRecords);
             this.Controls.Add(this.splitContainer_main);
             this.Controls.Add(this.button_clearInfo);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "CheckBorrowInfoForm";
             this.ShowInTaskbar = false;
             this.Text = "检查借阅信息";
@@ -412,6 +427,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).EndInit();
             this.splitContainer_main.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -443,5 +459,6 @@
         private System.Windows.Forms.Button button_beginRepairFromItem;
         private System.Windows.Forms.Button button_beginRepairFromReader;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.CheckBox checkBox_displayRecords;
     }
 }

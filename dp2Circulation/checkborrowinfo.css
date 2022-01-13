@@ -2,7 +2,7 @@ body {
     font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif;
     font-size: 9pt;
     margin: 0px;
-    padding: 0px;
+    padding: 16px;
 }
 
 A:link, A:visited, A:active {
@@ -15,13 +15,27 @@ A:hover {
 }
 
 .record {
-    margin: 8px;
+    margin: 16px;
     padding: 32px;
     border-width: 0px;
 
     width: 440px;
     background-color: #c4d9ea;
+
+    vertical-align: top;
 }
+
+.record.patron {
+    background-color: #eebcfa;
+}
+
+    .record .title {
+        padding: 8px;
+        border-width: 0px;
+        border-bottom-width: 1px;
+        border-color: Black;
+        border-style: dotted;
+    }
 
 .debug {
     padding: 2px;
@@ -233,6 +247,7 @@ TABLE.amerce_item {
 
 
 TABLE.marc {
+    font-family: 'Courier New';
     font-size: 8pt;
     width: auto;
     border-collapse: collapse;

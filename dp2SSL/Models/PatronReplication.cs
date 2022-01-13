@@ -147,14 +147,15 @@ out string strError);
 
                 writeLog?.Invoke($"共检索命中读者记录 {hitcount} 条");
 
-                // 把超时时间改短一点
-                channel.Timeout = TimeSpan.FromSeconds(20);
-
                 DateTime search_time = DateTime.Now;
 
                 Hashtable pii_table = new Hashtable();
                 int skip_count = 0;
                 int error_count = 0;
+
+                // 把超时时间改短一点
+                var timeout0 = channel.Timeout;
+                channel.Timeout = TimeSpan.FromSeconds(20);
 
                 // 获取和存储记录
                 ResultSetLoader loader = new ResultSetLoader(channel,
@@ -162,69 +163,76 @@ out string strError);
     null,
     $"id,xml,timestamp",
     "zh");
-                using (BiblioCacheContext context = new BiblioCacheContext())
+                try
                 {
-                    context.Database.EnsureCreated();
-
-                    // 删除 Patrons 里面的已有记录
-                    context.Patrons.RemoveRange(context.Patrons.ToList());
-                    await context.SaveChangesAsync(token);
-
-                    // loader.Prompt += this.Loader_Prompt;
-                    if (hitcount > 0)
+                    using (BiblioCacheContext context = new BiblioCacheContext())
                     {
-                        int i = 0;
-                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
-                        {
-                            if (token.IsCancellationRequested)
-                                return new ReplicationPlan
-                                {
-                                    Value = -1,
-                                    ErrorInfo = "用户中断"
-                                };
+                        context.Database.EnsureCreated();
 
-                            PatronItem item = new PatronItem();
-
-                            // result.Value:
-                            //      -1  出错
-                            //      0   需要跳过这条读者记录
-                            //      1   成功
-                            var result = Set(item, record, search_time);
-                            if (result.Value == -1 || result.Value == 0)
-                            {
-                                // TODO: 是否汇总报错信息？
-
-                                if (result.Value == -1)
-                                {
-                                    writeLog?.Invoke($"Set() ({item.RecPath}) 出错: {result.ErrorInfo}");
-                                    error_count++;
-                                }
-                                if (result.Value == 0)
-                                    skip_count++;
-                                continue;
-                            }
-
-                            // 
-                            if (pii_table.ContainsKey(result.PII))
-                            {
-                                string recpath = (string)pii_table[result.PII];
-                                writeLog?.Invoke($"发现读者记录 {item.RecPath} 的 PII '{result.PII}' 和 {recpath} 的 PII 重复了。跳过它");
-                                continue;
-                            }
-
-                            pii_table[result.PII] = item.RecPath;
-
-                            // TODO: PII 应该是包含 OI 的严格形态
-                            context.Patrons.Add(item);
-
-                            if ((i % 10) == 0)
-                                await context.SaveChangesAsync(token);
-
-                            i++;
-                        }
-
+                        // 删除 Patrons 里面的已有记录
+                        context.Patrons.RemoveRange(context.Patrons.ToList());
                         await context.SaveChangesAsync(token);
+
+                        // loader.Prompt += this.Loader_Prompt;
+                        if (hitcount > 0)
+                        {
+                            int i = 0;
+                            foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                            {
+                                if (token.IsCancellationRequested)
+                                    return new ReplicationPlan
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = "用户中断"
+                                    };
+
+                                PatronItem item = new PatronItem();
+
+                                // result.Value:
+                                //      -1  出错
+                                //      0   需要跳过这条读者记录
+                                //      1   成功
+                                var result = Set(item, record, search_time);
+                                if (result.Value == -1 || result.Value == 0)
+                                {
+                                    // TODO: 是否汇总报错信息？
+
+                                    if (result.Value == -1)
+                                    {
+                                        writeLog?.Invoke($"Set() ({item.RecPath}) 出错: {result.ErrorInfo}");
+                                        error_count++;
+                                    }
+                                    if (result.Value == 0)
+                                        skip_count++;
+                                    continue;
+                                }
+
+                                // 
+                                if (pii_table.ContainsKey(result.PII))
+                                {
+                                    string recpath = (string)pii_table[result.PII];
+                                    writeLog?.Invoke($"发现读者记录 {item.RecPath} 的 PII '{result.PII}' 和 {recpath} 的 PII 重复了。跳过它");
+                                    continue;
+                                }
+
+                                pii_table[result.PII] = item.RecPath;
+
+                                // TODO: PII 应该是包含 OI 的严格形态
+                                context.Patrons.Add(item);
+
+                                if ((i % 10) == 0)
+                                    await context.SaveChangesAsync(token);
+
+                                i++;
+                            }
+
+                            await context.SaveChangesAsync(token);
+                        }
                     }
+                }
+                finally
+                {
+                    channel.Timeout = timeout0;
                 }
 
                 writeLog?.Invoke($"plan.StartDate='{plan.StartDate}'。skip_count={skip_count}, error_count={error_count}。返回");

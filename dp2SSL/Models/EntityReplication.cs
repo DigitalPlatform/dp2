@@ -165,9 +165,6 @@ namespace dp2SSL.Models
 
                         writeLog?.Invoke($"{dbName} 共检索命中册记录 {hitcount} 条");
 
-                        // 把超时时间改短一点
-                        channel.Timeout = TimeSpan.FromSeconds(20);
-
                         DateTime search_time = DateTime.Now;
 
                         int skip_count = 0;
@@ -178,112 +175,123 @@ namespace dp2SSL.Models
                         {
                             // string strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/uid";
 
-                            // 获取和存储记录
-                            ResultSetLoader loader = new ResultSetLoader(channel,
-                null,
-                "download111",
-                $"id,xml,timestamp",
-                "zh");
-                            loader.Start = start;
+                            // 把超时时间改短一点
+                            var timeout0 = channel.Timeout;
+                            channel.Timeout = TimeSpan.FromSeconds(20);
 
-                            // loader.Prompt += this.Loader_Prompt;
-                            long i = start;
-                            foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                            try
                             {
-                                if (token.IsCancellationRequested)
+                                // 获取和存储记录
+                                ResultSetLoader loader = new ResultSetLoader(channel,
+                    null,
+                    "download111",
+                    $"id,xml,timestamp",
+                    "zh");
+                                loader.Start = start;
+
+                                // loader.Prompt += this.Loader_Prompt;
+                                long i = start;
+                                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                                 {
-                                    int index = IndexOf(unprocessed_dbnames, dbName);
-                                    if (index != -1)
+                                    if (token.IsCancellationRequested)
                                     {
-                                        unprocessed_dbnames.RemoveAt(index);
-                                        unprocessed_dbnames.Insert(index, dbName + ":" + i);
+                                        int index = IndexOf(unprocessed_dbnames, dbName);
+                                        if (index != -1)
+                                        {
+                                            unprocessed_dbnames.RemoveAt(index);
+                                            unprocessed_dbnames.Insert(index, dbName + ":" + i);
+                                        }
+
+                                        string error = "用户中断";
+                                        writeLog?.Invoke($"下载全部册记录到本地缓存出错: {error}");
+                                        return new NormalResult
+                                        {
+                                            Value = -1,
+                                            ErrorInfo = error
+                                        };
                                     }
 
-                                    string error = "用户中断";
-                                    writeLog?.Invoke($"下载全部册记录到本地缓存出错: {error}");
-                                    return new NormalResult
+                                    string item_xml = record.RecordBody.Xml;
+                                    var timestamp = record.RecordBody.Timestamp;
+                                    string item_recpath = record.Path;
+
+                                    XmlDocument itemdom = new XmlDocument();
+                                    try
                                     {
-                                        Value = -1,
-                                        ErrorInfo = error
+                                        itemdom.LoadXml(item_xml);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        error_count++;
+                                        writeLog?.Invoke($"警告: 册记录 {item_recpath} 的 XML 装入 DOM 时出错: {ex.Message}");
+                                        continue;
+                                    }
+
+                                    string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+                                    if (string.IsNullOrEmpty(barcode))
+                                    {
+                                        skip_count++;
+                                        continue;
+                                    }
+
+                                    string location = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+
+                                    location = StringUtil.GetPureLocation(location);
+
+                                    // 2021/3/10
+                                    // 用馆藏地筛选一下，只下载当前用户可以管辖的分馆的记录
+                                    string currentLibraryCodeList = channel.LibraryCodeList;    // App.CurrentUserLibraryCodeList;
+                                    string libraryCode = dp2StringUtil.GetLibraryCode(location);
+                                    if (IsManaged(libraryCode, currentLibraryCodeList) == false)
+                                    {
+                                        skip_count++;
+                                        continue;
+                                    }
+
+                                    string oi = "";
+                                    if (oi_table.ContainsKey(location))
+                                        oi = (string)oi_table[location];
+                                    else
+                                    {
+                                        oi = InventoryData.GetInstitution(location);
+                                        oi_table[location] = oi;
+                                    }
+
+                                    var item = new EntityItem
+                                    {
+                                        // PII = pii,
+                                        Xml = item_xml,
+                                        RecPath = item_recpath,
+                                        Timestamp = timestamp,
                                     };
+
+                                    // 调整 PII 字段，尽量规整为 OI.PII 形态
+                                    SetPII(item, oi);
+
+                                    // 保存册记录到本地数据库
+                                    await AddOrUpdateAsync(context,
+                                        item);
+
+                                    // 保存书目摘要到本地数据库
+                                    await GetBiblioSummaryAsync(
+        channel,
+        context,
+        item.PII,
+        item_recpath);
+
+                                    i++;
+                                    succeed_count++;
+                                    /*
+                                    if ((i % 100) == 0)
+                                    {
+                                        // func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}) {record.Path} ...");
+                                    }
+                                    */
                                 }
-
-                                string item_xml = record.RecordBody.Xml;
-                                var timestamp = record.RecordBody.Timestamp;
-                                string item_recpath = record.Path;
-
-                                XmlDocument itemdom = new XmlDocument();
-                                try
-                                {
-                                    itemdom.LoadXml(item_xml);
-                                }
-                                catch (Exception ex)
-                                {
-                                    error_count++;
-                                    writeLog?.Invoke($"警告: 册记录 {item_recpath} 的 XML 装入 DOM 时出错: {ex.Message}");
-                                    continue;
-                                }
-
-                                string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
-                                if (string.IsNullOrEmpty(barcode))
-                                {
-                                    skip_count++;
-                                    continue;
-                                }
-
-                                string location = DomUtil.GetElementText(itemdom.DocumentElement, "location");
-
-                                location = StringUtil.GetPureLocation(location);
-
-                                // 2021/3/10
-                                // 用馆藏地筛选一下，只下载当前用户可以管辖的分馆的记录
-                                string currentLibraryCodeList = channel.LibraryCodeList;    // App.CurrentUserLibraryCodeList;
-                                string libraryCode = dp2StringUtil.GetLibraryCode(location);
-                                if (IsManaged(libraryCode, currentLibraryCodeList) == false)
-                                {
-                                    skip_count++;
-                                    continue;
-                                }
-
-                                string oi = "";
-                                if (oi_table.ContainsKey(location))
-                                    oi = (string)oi_table[location];
-                                else
-                                {
-                                    oi = InventoryData.GetInstitution(location);
-                                    oi_table[location] = oi;
-                                }
-
-                                var item = new EntityItem
-                                {
-                                    // PII = pii,
-                                    Xml = item_xml,
-                                    RecPath = item_recpath,
-                                    Timestamp = timestamp,
-                                };
-
-                                // 调整 PII 字段，尽量规整为 OI.PII 形态
-                                SetPII(item, oi);
-
-                                // 保存册记录到本地数据库
-                                await AddOrUpdateAsync(context,
-                                    item);
-
-                                // 保存书目摘要到本地数据库
-                                await GetBiblioSummaryAsync(
-    channel,
-    context,
-    item.PII,
-    item_recpath);
-
-                                i++;
-                                succeed_count++;
-                                /*
-                                if ((i % 100) == 0)
-                                {
-                                    // func_showProgress?.Invoke($"正在从 {dbName} 获取信息 ({i.ToString()}) {record.Path} ...");
-                                }
-                                */
+                            }
+                            finally
+                            {
+                                channel.Timeout = timeout0;
                             }
                         }
 
