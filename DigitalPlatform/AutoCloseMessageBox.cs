@@ -25,6 +25,8 @@ namespace DigitalPlatform
 
         public System.Windows.Forms.Label label_message;
         private System.Windows.Forms.Button button_OK;
+        private Button button_skip;
+
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -69,6 +71,7 @@ namespace DigitalPlatform
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AutoCloseMessageBox));
             this.label_message = new System.Windows.Forms.Label();
             this.button_OK = new System.Windows.Forms.Button();
+            this.button_skip = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label_message
@@ -94,6 +97,19 @@ namespace DigitalPlatform
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
+            // button_skip
+            // 
+            this.button_skip.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.button_skip.AutoSize = true;
+            this.button_skip.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.button_skip.Location = new System.Drawing.Point(419, 341);
+            this.button_skip.Name = "button_skip";
+            this.button_skip.Size = new System.Drawing.Size(105, 60);
+            this.button_skip.TabIndex = 2;
+            this.button_skip.Text = "跳过";
+            this.button_skip.Visible = false;
+            this.button_skip.Click += new System.EventHandler(this.button_skip_Click);
+            // 
             // AutoCloseMessageBox
             // 
             this.AcceptButton = this.button_OK;
@@ -101,6 +117,7 @@ namespace DigitalPlatform
             this.BackColor = System.Drawing.SystemColors.Window;
             this.CancelButton = this.button_OK;
             this.ClientSize = new System.Drawing.Size(719, 417);
+            this.Controls.Add(this.button_skip);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.label_message);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -265,6 +282,51 @@ namespace DigitalPlatform
             if (strTitle != null)
                 dlg.Text = strTitle;
             dlg.label_message.Text = strText;
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            return dlg.ShowDialog(owner);
+        }
+
+        // 跳过
+        private void button_skip_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Ignore;
+            this.Close();
+        }
+
+        public bool SkipButtonVisible
+        {
+            get
+            {
+                return this.button_skip.Visible;
+            }
+            set
+            {
+                this.button_skip.Visible = value;
+            }
+        }
+
+        // return:
+        //      DialogResult.Retry 表示超时了
+        //      DialogResult.OK 表示点了 OK 按钮
+        //      DialogResult.Cancel 表示点了右上角的 Close 按钮
+        //      DialogResult.Ignore 表示点了 跳过 按钮
+        public static DialogResult ShowIgnore(IWin32Window owner,
+            string strText,
+            int nTimeout = -1,
+            string strTitle = null)
+        {
+            AutoCloseMessageBox dlg = new AutoCloseMessageBox();
+            Font font = GuiUtil.GetDefaultFont();
+            if (font != null)
+                dlg.Font = font;
+
+            if (nTimeout != -1)
+                dlg.m_nTimeOut = nTimeout;
+
+            if (strTitle != null)
+                dlg.Text = strTitle;
+            dlg.label_message.Text = strText;
+            dlg.SkipButtonVisible = true;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             return dlg.ShowDialog(owner);
         }

@@ -1347,6 +1347,13 @@ dlg.UiState);
                 return 1;
             }
 
+            // 2022/1/14
+            if (StringUtil.HasHead(strBarcode, "@refID:", true) == true)
+            {
+                strError = "这是册参考ID";
+                return 2;
+            }
+
             // 2019/1/9
             string prefix = ""; //  "pii:";
             string type_of_usage = "";  // "10";    // 10 流通馆藏; 80 读者证
@@ -2494,14 +2501,29 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             if (string.IsNullOrEmpty(strText))
                 return "";
             if (strText.IndexOf(":") == -1
-                || strText.StartsWith("PQR:"))  // 2021/11/22
-                return strText;
+                || strText.StartsWith("PQR:")  // 2021/11/22
+                || StringUtil.HasHead(strText, "@refID:", true)    // 2022/1/14
+                )
+                return ItemBarcode(strText);
             Hashtable table = StringUtil.ParseParameters(strText, ',', ':');
             string strBarcode = GetValue(table, "pii");
             if (string.IsNullOrEmpty(strBarcode) == false)
                 return strBarcode;
             return GetValue(table, "uid");
         }
+
+        // 把内容中的 @refID: 复原。避免全大写影响发送到 dp2library API 的效果
+        static string ItemBarcode(string text)
+        {
+            if (text == null)
+                return text;
+            if (StringUtil.HasHead(text, "@refID:", true) == true)
+            {
+                return "@refID:" + text.Substring("@refID:".Length);
+            }
+            return text;
+        }
+
 
         // 注意本函数可能会返回 null
         static string GetValue(Hashtable table, string name)
