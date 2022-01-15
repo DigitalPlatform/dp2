@@ -37,10 +37,11 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_searchReaderSafety = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_searchBiblioSafety = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_searchItemSafety = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_setReaderInfoApi = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_test_setReaderInfoApi = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,7 +80,8 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_searchReaderSafety,
             this.MenuItem_test_searchBiblioSafety,
             this.MenuItem_test_searchItemSafety,
-            this.MenuItem_test_setReaderInfoApi});
+            this.MenuItem_test_setReaderInfoApi,
+            this.MenuItem_test_prepareCheckBorrow});
             this.MenuItem_test.Name = "MenuItem_test";
             this.MenuItem_test.Size = new System.Drawing.Size(72, 33);
             this.MenuItem_test.Text = "测试";
@@ -112,6 +114,13 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_searchItemSafety.Text = "测试 SearchItem 安全性";
             this.MenuItem_test_searchItemSafety.Click += new System.EventHandler(this.MenuItem_test_searchItemSafety_Click);
             // 
+            // MenuItem_test_setReaderInfoApi
+            // 
+            this.MenuItem_test_setReaderInfoApi.Name = "MenuItem_test_setReaderInfoApi";
+            this.MenuItem_test_setReaderInfoApi.Size = new System.Drawing.Size(385, 40);
+            this.MenuItem_test_setReaderInfoApi.Text = "测试 SerReaderInfo() API";
+            this.MenuItem_test_setReaderInfoApi.Click += new System.EventHandler(this.MenuItem_test_setReaderInfoApi_Click);
+            // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
@@ -139,12 +148,12 @@ namespace dp2LibraryApiTester
             this.webBrowser1.Size = new System.Drawing.Size(800, 366);
             this.webBrowser1.TabIndex = 3;
             // 
-            // MenuItem_test_setReaderInfoApi
+            // MenuItem_test_prepareCheckBorrow
             // 
-            this.MenuItem_test_setReaderInfoApi.Name = "MenuItem_test_setReaderInfoApi";
-            this.MenuItem_test_setReaderInfoApi.Size = new System.Drawing.Size(385, 40);
-            this.MenuItem_test_setReaderInfoApi.Text = "测试 SerReaderInfo() API";
-            this.MenuItem_test_setReaderInfoApi.Click += new System.EventHandler(this.MenuItem_test_setReaderInfoApi_Click);
+            this.MenuItem_test_prepareCheckBorrow.Name = "MenuItem_test_prepareCheckBorrow";
+            this.MenuItem_test_prepareCheckBorrow.Size = new System.Drawing.Size(385, 40);
+            this.MenuItem_test_prepareCheckBorrow.Text = "准备借阅信息链测试环境";
+            this.MenuItem_test_prepareCheckBorrow.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_Click);
             // 
             // MainForm
             // 
@@ -182,6 +191,7 @@ namespace dp2LibraryApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_searchBiblioSafety;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_searchItemSafety;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_setReaderInfoApi;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow;
     }
 }
 

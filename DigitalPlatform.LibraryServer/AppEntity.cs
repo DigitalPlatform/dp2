@@ -3448,11 +3448,12 @@ out strError);
                         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
                         // TODO: 如果strNewXml中出现了流通字段，是否需要警告前端，甚至直接报错？因为这样可以引起前端的注意，避免前端以为自己通过新创建实体记录加借还信息“成功”了。
                         // 当然这个警告任务，也可以主要由前端自己承担，最好
-                        string strNewXml = "";
+                        // string strNewXml = "";
+                        XmlDocument new_xml_dom = null;
                         if (bForce == false)
                         {
                             nRet = BuildNewEntityRecord(info.NewRecord,
-                                out strNewXml,
+                                out string strNewXml,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -3466,13 +3467,13 @@ out strError);
                             }
 
                             // 2010/4/8
-                            XmlDocument temp = new XmlDocument();
-                            temp.LoadXml(strNewXml);
+                            new_xml_dom = new XmlDocument();
+                            new_xml_dom.LoadXml(strNewXml);
                             if (bForce == false && bNoOperations == false)
                             {
                                 // 注意强制创建记录的时候，不要覆盖<operations>里面的内容
                                 nRet = SetOperation(
-                                    ref temp,
+                                    ref new_xml_dom,
                                     "create",
                                     sessioninfo.UserID,
                                     "",
@@ -3488,12 +3489,15 @@ out strError);
                                     continue;
                                 }
                             }
-                            strNewXml = temp.DocumentElement.OuterXml;
+
+                            // strNewXml = temp.DocumentElement.OuterXml;
                         }
                         else
                         {
                             // 2008/5/29 
-                            strNewXml = info.NewRecord;
+                            // strNewXml = info.NewRecord;
+                            new_xml_dom = new XmlDocument();
+                            new_xml_dom.LoadXml(info.NewRecord);
                         }
 
                         if (bSimulate)
@@ -3511,7 +3515,7 @@ out strError);
                             //      -1  检查过程出错
                             //      0   符合要求
                             //      1   不符合要求
-                            nRet = CheckItemLibraryCode(strNewXml,
+                            nRet = CheckItemLibraryCode(new_xml_dom.DocumentElement.OuterXml,   // strNewXml,
                                 sessioninfo,
                                 // sessioninfo.LibraryCodeList,
                                 out string strLibraryCode,
@@ -3565,8 +3569,8 @@ out strError);
                                     goto ERROR1;
                                 }
 
-                                XmlDocument domTemp = new XmlDocument();
-                                domTemp.LoadXml(strNewXml);
+                                //XmlDocument domTemp = new XmlDocument();
+                                //domTemp.LoadXml(strNewXml);
 
                                 // 检查一个册记录的图书类型是否符合值列表要求
                                 // parameters:
@@ -3574,7 +3578,7 @@ out strError);
                                 //      -1  检查过程出错
                                 //      0   符合要求
                                 //      1   不符合要求
-                                nRet = CheckItemBookType(domTemp,
+                                nRet = CheckItemBookType(new_xml_dom,   // domTemp,
                                     strEntityDbName,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
@@ -3591,9 +3595,9 @@ out strError);
                             // 2021/4/6
                             // 检查 uid 重复
                             {
-                                XmlDocument domTemp = new XmlDocument();
-                                domTemp.LoadXml(strNewXml);
-                                string new_uid = DomUtil.GetElementText(domTemp.DocumentElement, "uid");
+                                //XmlDocument domTemp = new XmlDocument();
+                                //domTemp.LoadXml(strNewXml);
+                                string new_uid = DomUtil.GetElementText(/*domTemp*/new_xml_dom.DocumentElement, "uid");
                                 if (string.IsNullOrEmpty(new_uid) == false)
                                 {
                                     // 删除其他册记录中重复的 UID
@@ -3610,13 +3614,13 @@ out strError);
                             }
 
                             // 2021/8/31
-                            if (CheckParent(strNewXml, out strError) != 1)
+                            if (CheckParent(new_xml_dom, strBiblioRecId, out strError) != 1)
                             {
                                 goto ERROR1;
                             }
 
                             lRet = channel.DoSaveTextRes(info.NewRecPath,
-                                strNewXml,
+                                new_xml_dom.DocumentElement.OuterXml,    // strNewXml,
                                 false,   // include preamble?
                                 "content" + (bSimulate ? ",simulate" : ""),
                                 info.OldTimestamp,
@@ -3649,7 +3653,7 @@ out strError);
                                     // 不创建<oldRecord>元素
 
                                     XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                                        "record", strNewXml);
+                                        "record", /*strNewXml*/new_xml_dom.DocumentElement.OuterXml);
                                     DomUtil.SetAttr(node, "recPath", strOutputPath);
                                 }
 
@@ -3658,7 +3662,7 @@ out strError);
                                 EntityInfo error = new EntityInfo(info);
                                 error.NewRecPath = strOutputPath;
 
-                                error.NewRecord = strNewXml;    // 所真正保存的记录，可能稍有变化, 因此需要返回给前端
+                                error.NewRecord = new_xml_dom.DocumentElement.OuterXml; // strNewXml;    // 所真正保存的记录，可能稍有变化, 因此需要返回给前端
                                 error.NewTimestamp = output_timestamp;
 
                                 error.ErrorInfo = "保存新记录的操作成功。NewTimeStamp中返回了新的时间戳, RecPath中返回了实际存入的记录路径。";
@@ -5299,7 +5303,7 @@ out strError);
                 goto ERROR1;
 
             // 合并新旧记录
-            string strNewXml = "";
+            // string strNewXml = "";
             if (bForce == false)
             {
                 if (bNoOperations == false)
@@ -5326,10 +5330,13 @@ out strError);
                     domNew,
                     elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                     StringUtil.IsInList("outofrangeAsError", strStyle),
-                    out strNewXml,
+                    out string strNewXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                domNew = new XmlDocument();
+                domNew.LoadXml(strNewXml);
             }
             else
             {
@@ -5342,7 +5349,7 @@ out strError);
                 }
 
                 // 2008/5/29 
-                strNewXml = domNew.OuterXml;
+                // strNewXml = domNew.OuterXml;
             }
 
             string strTargetLibraryCode = "";
@@ -5352,7 +5359,7 @@ out strError);
                 //      -1  检查过程出错
                 //      0   符合要求
                 //      1   不符合要求
-                nRet = CheckItemLibraryCode(strNewXml,
+                nRet = CheckItemLibraryCode(domNew.DocumentElement.OuterXml,    // strNewXml,
                     sessioninfo,
                     // sessioninfo.LibraryCodeList,
                     out strTargetLibraryCode,
@@ -5389,8 +5396,8 @@ out strError);
                     goto ERROR1;
                 }
 
-                XmlDocument domTemp = new XmlDocument();
-                domTemp.LoadXml(strNewXml);
+                //XmlDocument domTemp = new XmlDocument();
+                //domTemp.LoadXml(strNewXml);
 
                 // 检查一个册记录的读者类型是否符合值列表要求
                 // parameters:
@@ -5398,7 +5405,7 @@ out strError);
                 //      -1  检查过程出错
                 //      0   符合要求
                 //      1   不符合要求
-                nRet = CheckItemBookType(domTemp,
+                nRet = CheckItemBookType(/*domTemp*/domNew,
                     strEntityDbName,
                     out strError);
                 if (nRet == -1 || nRet == 1)
@@ -5415,13 +5422,13 @@ out strError);
             else
             {
                 // 2021/8/31
-                if (CheckParent(strNewXml, out strError) != 1)
+                if (CheckParent(/*strNewXml*/domNew, null, out strError) != 1)
                 {
                     goto ERROR1;
                 }
 
                 lRet = channel.DoSaveTextRes(info.NewRecPath,
-        strNewXml,
+        domNew.DocumentElement.OuterXml,    // strNewXml,
         false,   // include preamble?
         "content" + (bSimulate ? ",simulate" : ""),
         exist_timestamp,
@@ -5466,7 +5473,7 @@ out strError);
 
                     // 新记录
                     XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "record", strNewXml);
+                        "record", /*strNewXml*/domNew.DocumentElement.OuterXml);
                     DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
                     // 旧记录
@@ -5478,7 +5485,7 @@ out strError);
                 // 保存成功，需要返回信息元素。因为需要返回新的时间戳
                 error = new EntityInfo(info);
                 error.NewTimestamp = output_timestamp;
-                error.NewRecord = strNewXml;
+                error.NewRecord = /*strNewXml*/domNew.DocumentElement.OuterXml;
 
                 error.ErrorInfo = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
                 error.ErrorCode = ErrorCodeValue.NoError;
@@ -5501,11 +5508,13 @@ out strError);
         //      -1  检查过程出错
         //      0   不合法
         //      1   合法
-        static int CheckParent(string xml,
+        static int CheckParent(XmlDocument dom,
+            string parent_id,
             out string strError)
         {
             strError = "";
 
+            /*
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -5516,18 +5525,38 @@ out strError);
                 strError = $"CheckParent() 时出错，XML 装入 XMLDOM 时出现异常: {ex.Message}";
                 return -1;
             }
+            */
 
-            string parent = DomUtil.GetElementText(dom.DocumentElement, "parent");
-            if (string.IsNullOrEmpty(parent))
+            if (string.IsNullOrEmpty(parent_id))
             {
-                strError = "parent 元素缺乏";
-                return 0;
+                string parent = DomUtil.GetElementText(dom.DocumentElement, "parent");
+                if (string.IsNullOrEmpty(parent))
+                {
+                    strError = "parent 元素缺乏";
+                    return 0;
+                }
+
+                if (StringUtil.IsPureNumber(parent) == false)
+                {
+                    strError = $"parent 元素内容 '{parent}' 不合法。应为一个纯数字字符串";
+                    return 0;
+                }
             }
-
-            if (StringUtil.IsPureNumber(parent) == false)
+            else
             {
-                strError = $"parent 元素内容 '{parent}' 不合法。应为一个纯数字字符串";
-                return 0;
+                string exist = DomUtil.GetElementText(dom.DocumentElement, "parent");
+                if (string.IsNullOrEmpty(exist) == true)
+                {
+                    DomUtil.SetElementText(dom.DocumentElement, "parent", parent_id);
+                }
+                else
+                {
+                    if (exist != parent_id)
+                    {
+                        strError = $"strBiblioRecPath 中的 id '{parent_id}' 与 XML 中的 parent 元素内容 '{exist}' 不符";
+                        return 0;
+                    }
+                }
             }
 
             return 1;

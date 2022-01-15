@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataModel.cs" />
+    <Compile Include="EnvCase\PrepareCheckBorrow.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

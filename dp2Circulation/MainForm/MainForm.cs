@@ -4563,6 +4563,10 @@ barcodes[0],
             {
                 if (strText.ToLower().StartsWith("@bibliorecpath:") == true)
                     return strText; // 特殊地，不要转为大写
+                // 2022/1/14
+                if (strText.ToLower().StartsWith("@refid:") == true)
+                    return strText; // 特殊地，不要转为大写
+
                 return strText.ToUpper();
             }
 

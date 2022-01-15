@@ -385,5 +385,21 @@ string style = "")
                 }
             });
         }
+
+        // 准备借阅信息链测试环境
+        private void MenuItem_test_prepareCheckBorrow_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    PrepareCheckBorrow.TestAll();
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
     }
 }
