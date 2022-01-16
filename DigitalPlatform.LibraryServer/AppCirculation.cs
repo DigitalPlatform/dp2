@@ -19857,7 +19857,7 @@ start_time_1,
 
                         if (result_1.ErrorCode == ErrorCode.ReaderBarcodeNotFound)
                         {
-                            strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 " + PatronBarcodeLink(strOutputReaderBarcode_0) + "，而不是出发的读者证条码号 " + PatronBarcodeLink(strReaderBarcode) + "。并且证条码号为 " + PatronBarcodeLink(strOutputReaderBarcode_0) + " 的读者记录不存在。";
+                            strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "'，而不是出发的读者证条码号 '" + PatronBarcodeLink(strReaderBarcode) + "'。并且证条码号为 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "' 的读者记录不存在。";
                             nErrorCount++;
                             continue;
                         }
@@ -19878,7 +19878,7 @@ start_time_1,
 
                     if (strOutputReaderBarcode_0 != strReaderBarcode)
                     {
-                        strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 " + PatronBarcodeLink(strOutputReaderBarcode_0) + "，而不是出发的读者证条码号 " + PatronBarcodeLink(strReaderBarcode) + "。";
+                        strCheckError += "读者记录中借阅册条码号 " + ItemBarcodeLink(strItemBarcode) + " 关联的册记录中，其 borrower 元素关联回的读者证条码号是 '" + PatronBarcodeLink(strOutputReaderBarcode_0) + "'，而不是出发的读者证条码号 '" + PatronBarcodeLink(strReaderBarcode) + "'。";
                         nErrorCount++;
                     }
                 }
@@ -20316,7 +20316,7 @@ start_time_1,
                 XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
                 if (nodeBorrow == null)
                 {
-                    strError = "修复操作被拒绝。读者记录 " + PatronBarcodeLink(strReaderBarcode) + " 中并不存在有关册 " + ItemBarcodeLink(strItemBarcode) + " 的借阅信息。";
+                    strError = "修复操作被拒绝。读者记录 '" + PatronBarcodeLink(strReaderBarcode) + "' 中并不存在有关册 " + ItemBarcodeLink(strItemBarcode) + " 的借阅信息。";
                     goto ERROR1;
                 }
 
@@ -20888,7 +20888,7 @@ start_time_1,
 
                     if (strBorrower != strReaderBarcode)
                     {
-                        strError = "修复操作被拒绝。您所请求要修复的册记录中，并没有指明借阅者是读者 " + PatronBarcodeLink(strReaderBarcode) + "。";
+                        strError = "修复操作被拒绝。您所请求要修复的册记录中，并没有指明借阅者是读者 '" + PatronBarcodeLink(strReaderBarcode) + "'。";
                         goto ERROR1;
                     }
 

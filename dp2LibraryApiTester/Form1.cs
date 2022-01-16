@@ -387,13 +387,13 @@ string style = "")
         }
 
         // 准备借阅信息链测试环境
-        private void MenuItem_test_prepareCheckBorrow_Click(object sender, EventArgs e)
+        private void MenuItem_test_prepareCheckBorrow_prepare_Click(object sender, EventArgs e)
         {
             Task.Run(() =>
             {
                 try
                 {
-                    PrepareCheckBorrow.TestAll();
+                    PrepareCheckBorrow.TestAll("");
                 }
                 catch (Exception ex)
                 {
@@ -401,5 +401,102 @@ string style = "")
                 }
             });
         }
+
+        private void MenuItem_test_prepareCheckBorrow_clear_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    PrepareCheckBorrow.Finish();
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        // "册记录缺 borrower"
+        private void MenuItem_test_prepareCheckBorrow_prepare_condition1_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    PrepareCheckBorrow.TestAll("册记录缺 borrower");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        // "册记录 borrower 错位"
+        private void MenuItem_test_prepareCheckBorrow_prepare_condition2_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    PrepareCheckBorrow.TestAll("册记录 borrower 错位");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        // "册记录不存在"
+        private void MenuItem_test_prepareCheckBorrow_prepare_condition3_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    PrepareCheckBorrow.TestAll("册记录不存在");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        // "读者记录缺 borrow"
+        private void MenuItem_test_prepareCheckBorrow_prepare_condition4_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    PrepareCheckBorrow.TestAll("读者记录缺 borrow");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        // "读者记录不存在"
+        private void MenuItem_test_prepareCheckBorrow_prepare_condition5_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    PrepareCheckBorrow.TestAll("读者记录不存在");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+
     }
 }

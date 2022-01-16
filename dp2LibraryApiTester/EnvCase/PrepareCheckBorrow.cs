@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
@@ -11,26 +11,30 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2LibraryApiTester
 {
     // 准备借阅信息链测试环境
     public static class PrepareCheckBorrow
     {
-        public static NormalResult TestAll()
+        public static NormalResult TestAll(string condition)
         {
             NormalResult result = null;
 
             result = PrepareEnvironment();
             if (result.Value == -1) return result;
 
-            result = CreateBiblioRecords("test_normal");
+            result = CreateBiblioRecords("test_normal", condition);
             if (result.Value == -1) return result;
 
+            result = TestCreateReaderRecord("test_normal", condition);
+            if (result.Value == -1) return result;
 
+            /*
             result = Finish();
             if (result.Value == -1) return result;
-
+            */
             return new NormalResult();
         }
 
@@ -173,9 +177,14 @@ namespace dp2LibraryApiTester
             };
         }
 
-        static int _recordCount = 1000;
+        static int _recordCount = 100;
 
-        public static NormalResult CreateBiblioRecords(string userName)
+        // "册记录缺 borrower"
+        // "册记录 borrower 错位"
+        // "册记录不存在"
+        public static NormalResult CreateBiblioRecords(
+            string userName,
+            string condition)
         {
             string strError = "";
 
@@ -217,32 +226,41 @@ namespace dp2LibraryApiTester
 
                     DataModel.SetMessage($"{output_biblio_recpath}");
 
-                    // 创建册记录
-                    EntityInfo[] errorinfos = null;
+                    if (condition != "册记录不存在")
+                    {
+                        // 创建册记录
+                        EntityInfo[] errorinfos = null;
 
-                    string borrower = "G" + (i + 1).ToString().PadLeft(7, '0'); // G0000001
-                    string borrow_date = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
+                        string borrower = "G" + (i + 1).ToString().PadLeft(7, '0'); // G0000001
+                        string borrow_date = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
 
-                    var entities = BuildEntityRecords(
-                        "TEST" + (i + 1).ToString().PadLeft(7, '0'),
-                        borrower,
-                        borrow_date);
-                    lRet = channel.SetEntities(null,
-                        output_biblio_recpath,
-                        entities,
-                        out errorinfos,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
+                        if (condition == "册记录缺 borrower")
+                            borrower = "";
+                        else if (condition == "册记录 borrower 错位")
+                            borrower = "G" + (i + 2).ToString().PadLeft(7, '0'); // G0000001
 
-                    strError = GetError(errorinfos);
-                    if (string.IsNullOrEmpty(strError) == false)
-                        goto ERROR1;
+                        var entities = BuildEntityRecords(
+                            "TEST" + (i + 1).ToString().PadLeft(7, '0'),
+                            borrower,
+                            borrow_date,
+                            condition);
+                        lRet = channel.SetEntities(null,
+                            output_biblio_recpath,
+                            entities,
+                            out errorinfos,
+                            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
 
-                    string itemRecPath = errorinfos[0].NewRecPath;
+                        strError = GetError(errorinfos);
+                        if (string.IsNullOrEmpty(strError) == false)
+                            goto ERROR1;
+
+                        string itemRecPath = errorinfos[0].NewRecPath;
+                    }
                 }
 
-                DataModel.SetMessage("书目记录和册记录创建完成");
+                DataModel.SetMessage("书目记录和册记录创建完成", "green");
                 return new NormalResult();
             }
             catch (Exception ex)
@@ -287,7 +305,8 @@ namespace dp2LibraryApiTester
 
         static EntityInfo[] BuildEntityRecords(string barcode,
             string borrower,
-            string borrower_date)
+            string borrower_date,
+            string condition)
         {
             // X0000001
             string item_template = @"<root>
@@ -302,6 +321,8 @@ namespace dp2LibraryApiTester
             xml = item_template.Replace("{barcode}", barcode)
                 .Replace("{borrower}", borrower)
                 .Replace("{borrow_date}", borrower_date);
+
+            xml = DomUtil.RemoveEmptyElements(xml);
 
             List<EntityInfo> results = new List<EntityInfo>();
             EntityInfo entity = new EntityInfo
@@ -328,9 +349,16 @@ namespace dp2LibraryApiTester
         }
 
         // 创建读者记录
-        public static NormalResult TestCreateReaderRecord(string userName)
+        // "读者记录缺 borrow"
+        // "读者记录不存在"
+        public static NormalResult TestCreateReaderRecord(
+            string userName,
+            string condition)
         {
             string strError = "";
+
+            if (condition == "读者记录不存在")
+                return new NormalResult();
 
             LibraryChannel channel = DataModel.NewChannel(userName, "");
             TimeSpan old_timeout = channel.Timeout;
@@ -341,6 +369,7 @@ namespace dp2LibraryApiTester
                 DataModel.SetMessage($"正在以用户 {userName} 身份创建读者记录 ...");
                 long lRet = 0;
 
+                /*
                 // 要校验条码号
                 lRet = channel.SetSystemParameter(null,
                     "circulation",
@@ -542,6 +571,7 @@ namespace dp2LibraryApiTester
                     out strError);
                 if (ret == -1)
                     goto ERROR1;
+                */
 
                 string path = _globalPatronDbName + "/?";
 
@@ -554,13 +584,12 @@ namespace dp2LibraryApiTester
 <borrow barcode='{item_barcode}' recPath='{item_recpath}' biblioRecPath='{biblio_recpath}' location='阅览室' borrowDate='{borrow_date}' borrowPeriod='31day' returningDate='{returningDate}' operator='{operator}' /> 
 </borrows>
 </root>";
-                DataModel.SetMessage($"正在创建读者记录 {path}");
 
-                for (int i = 0; i < 1000; i++)
+                for (int i = 0; i < _recordCount; i++)
                 {
                     string barcode = "G" + (i + 1).ToString().PadLeft(7, '0'); // G0000001
                     string name = $"读者" + (i + 1).ToString();
-                    string item_barcode = (i + 1).ToString().PadLeft(7, '0');
+                    string item_barcode = "TEST" + (i + 1).ToString().PadLeft(7, '0');
                     string item_recpath = _itemDbName + "/" + (i + 1).ToString();
                     string biblio_recpath = _biblioDbName + "/" + (i + 1).ToString();
                     string borrow_date = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
@@ -575,8 +604,21 @@ namespace dp2LibraryApiTester
                         .Replace("{returning_date}", returning_date)
                         .Replace("{operator}", operator_string);
 
+                    if (condition == "读者记录缺 borrow")
+                    {
+                        XmlDocument dom = new XmlDocument();
+                        dom.LoadXml(xml);
+                        var nodes = dom.DocumentElement.SelectNodes("borrows/borrow");
+                        foreach(XmlElement borrow in nodes)
+                        {
+                            borrow.ParentNode.RemoveChild(borrow);
+                        }
+
+                        xml = dom.DocumentElement.OuterXml;
+                    }
+
                     lRet = channel.SetReaderInfo(null,
-                        "new",
+                        "forcenew",
                         path,
                         xml,
                         null,
@@ -589,7 +631,9 @@ namespace dp2LibraryApiTester
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
+                DataModel.SetMessage($"正在创建读者记录 {saved_recpath}");
                 }
+
 
                 /*
                 if (errors.Count > 0)
@@ -602,7 +646,7 @@ namespace dp2LibraryApiTester
                     };
                 }
                 */
-                DataModel.SetMessage("正确", "green");
+                DataModel.SetMessage("读者记录全部创建完成", "green");
                 return new NormalResult();
             }
             catch (Exception ex)

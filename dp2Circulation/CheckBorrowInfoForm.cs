@@ -697,6 +697,10 @@ namespace dp2Circulation
             var nodes = dom.DocumentElement.SelectNodes("*");
             foreach (XmlElement node in nodes)
             {
+                // 可能有空的 link 文字
+                if (string.IsNullOrEmpty(node.InnerText.Trim()))
+                    continue;
+
                 LinkInfo current = null;
                 if (node.Name == "ib")
                 {
@@ -755,6 +759,8 @@ namespace dp2Circulation
                             if (current.Type.StartsWith("patron"))
                                 strClass = "record patron";
                             text.AppendLine($"<span class='{strClass}'><div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div></span>");
+
+                            // LinkInfo.RemoveLink(targets, current);
                             continue;
                         }
                     }
@@ -811,6 +817,11 @@ namespace dp2Circulation
                 return RecPath;
             }
 
+            public static bool RemoveLink(List<LinkInfo> links, LinkInfo link)
+            {
+                return links.Remove(link);
+            }
+
             // 尝试加入一个 LinkInfo 对象到集合中。如果在集合中已经存在相同的记录，则不会加入
             // return:
             //      false   没有加入
@@ -823,6 +834,11 @@ namespace dp2Circulation
                     {
                         if (link.Type.StartsWith("item") == false)
                             continue;
+
+                        if (link.Type == "itemBarcode"
+    && link.Value == current.Value)
+                            return false;
+
                         if (link.Type == "itemBarcode"
                             && link.Value == current.Barcode)
                             return false;
@@ -837,6 +853,11 @@ namespace dp2Circulation
                     {
                         if (link.Type.StartsWith("patron") == false)
                             continue;
+
+                        if (link.Type == "patronBarcode"
+    && link.Value == current.Value)
+                            return false;
+
                         if (link.Type == "patronBarcode"
                             && link.Value == current.Barcode)
                             return false;

@@ -1853,7 +1853,7 @@ namespace dp2Library
         // 了API的可用性。如果实际运用中不允许发回旧记录，可发来空字符串，就会牺牲上述
         // 可用性，变成，不论数据库中当前记录的改变具体在那些字段范围，都只能报错返回了。
         // paramters:
-        //      strOperation    操作。new change delete
+        //      strAction    操作。new change delete changestate changeforegift forcenew forcechange forcedelete changereaderbarcode
         //      strRecPath  希望保存到的记录路径。可以为空。
         //      strNewXml   希望保存的记录体
         //      strOldXml   原先获得的旧记录体。可以为空。

@@ -38,10 +38,17 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_searchBiblioSafety = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_searchItemSafety = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_setReaderInfoApi = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow_prepare = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow_clear = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_test_prepareCheckBorrow = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition5 = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition4 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -121,6 +128,34 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_setReaderInfoApi.Text = "测试 SerReaderInfo() API";
             this.MenuItem_test_setReaderInfoApi.Click += new System.EventHandler(this.MenuItem_test_setReaderInfoApi_Click);
             // 
+            // MenuItem_test_prepareCheckBorrow
+            // 
+            this.MenuItem_test_prepareCheckBorrow.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_test_prepareCheckBorrow_prepare,
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition1,
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition2,
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition3,
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition4,
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition5,
+            this.MenuItem_test_prepareCheckBorrow_clear});
+            this.MenuItem_test_prepareCheckBorrow.Name = "MenuItem_test_prepareCheckBorrow";
+            this.MenuItem_test_prepareCheckBorrow.Size = new System.Drawing.Size(385, 40);
+            this.MenuItem_test_prepareCheckBorrow.Text = "准备借阅信息链测试环境";
+            // 
+            // MenuItem_test_prepareCheckBorrow_prepare
+            // 
+            this.MenuItem_test_prepareCheckBorrow_prepare.Name = "MenuItem_test_prepareCheckBorrow_prepare";
+            this.MenuItem_test_prepareCheckBorrow_prepare.Size = new System.Drawing.Size(356, 40);
+            this.MenuItem_test_prepareCheckBorrow_prepare.Text = "准备正确环境";
+            this.MenuItem_test_prepareCheckBorrow_prepare.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_prepare_Click);
+            // 
+            // MenuItem_test_prepareCheckBorrow_clear
+            // 
+            this.MenuItem_test_prepareCheckBorrow_clear.Name = "MenuItem_test_prepareCheckBorrow_clear";
+            this.MenuItem_test_prepareCheckBorrow_clear.Size = new System.Drawing.Size(356, 40);
+            this.MenuItem_test_prepareCheckBorrow_clear.Text = "清除环境";
+            this.MenuItem_test_prepareCheckBorrow_clear.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_clear_Click);
+            // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
@@ -148,12 +183,40 @@ namespace dp2LibraryApiTester
             this.webBrowser1.Size = new System.Drawing.Size(800, 366);
             this.webBrowser1.TabIndex = 3;
             // 
-            // MenuItem_test_prepareCheckBorrow
+            // MenuItem_test_prepareCheckBorrow_prepare_condition1
             // 
-            this.MenuItem_test_prepareCheckBorrow.Name = "MenuItem_test_prepareCheckBorrow";
-            this.MenuItem_test_prepareCheckBorrow.Size = new System.Drawing.Size(385, 40);
-            this.MenuItem_test_prepareCheckBorrow.Text = "准备借阅信息链测试环境";
-            this.MenuItem_test_prepareCheckBorrow.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_Click);
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition1.Name = "MenuItem_test_prepareCheckBorrow_prepare_condition1";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition1.Size = new System.Drawing.Size(356, 40);
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition1.Text = "\"册记录缺 borrower\"";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition1.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_prepare_condition1_Click);
+            // 
+            // MenuItem_test_prepareCheckBorrow_prepare_condition5
+            // 
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition5.Name = "MenuItem_test_prepareCheckBorrow_prepare_condition5";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition5.Size = new System.Drawing.Size(356, 40);
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition5.Text = "\"读者记录不存在\"";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition5.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_prepare_condition5_Click);
+            // 
+            // MenuItem_test_prepareCheckBorrow_prepare_condition2
+            // 
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition2.Name = "MenuItem_test_prepareCheckBorrow_prepare_condition2";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition2.Size = new System.Drawing.Size(356, 40);
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition2.Text = "\"册记录 borrower 错位\"";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition2.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_prepare_condition2_Click);
+            // 
+            // MenuItem_test_prepareCheckBorrow_prepare_condition3
+            // 
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition3.Name = "MenuItem_test_prepareCheckBorrow_prepare_condition3";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition3.Size = new System.Drawing.Size(356, 40);
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition3.Text = "\"册记录不存在\"";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition3.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_prepare_condition3_Click);
+            // 
+            // MenuItem_test_prepareCheckBorrow_prepare_condition4
+            // 
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition4.Name = "MenuItem_test_prepareCheckBorrow_prepare_condition4";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition4.Size = new System.Drawing.Size(356, 40);
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition4.Text = "\"读者记录缺 borrow\"";
+            this.MenuItem_test_prepareCheckBorrow_prepare_condition4.Click += new System.EventHandler(this.MenuItem_test_prepareCheckBorrow_prepare_condition4_Click);
             // 
             // MainForm
             // 
@@ -192,6 +255,13 @@ namespace dp2LibraryApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_searchItemSafety;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_setReaderInfoApi;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_clear;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition1;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition2;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition3;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition4;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition5;
     }
 }
 
