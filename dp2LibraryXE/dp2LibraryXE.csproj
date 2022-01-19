@@ -20,7 +20,7 @@
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>c:\publish\dp2libraryxe\v3_dev\</PublishUrl>
+    <PublishUrl>c:\publish\dp2libraryxe\v3\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -30,15 +30,15 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>https://dp2003.com/dp2LibraryXE/v3_dev/</InstallUrl>
-    <UpdateUrl>https://dp2003.com/dp2LibraryXE/v3_dev/</UpdateUrl>
+    <InstallUrl>https://dp2003.com/dp2LibraryXE/v3/</InstallUrl>
+    <UpdateUrl>https://dp2003.com/dp2LibraryXE/v3/</UpdateUrl>
     <TargetCulture>zh-CN</TargetCulture>
     <ProductName>dp2Library XE V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>192</ApplicationRevision>
+    <ApplicationRevision>194</ApplicationRevision>
     <ApplicationVersion>3.1.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>

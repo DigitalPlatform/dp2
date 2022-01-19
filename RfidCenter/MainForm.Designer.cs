@@ -1090,10 +1090,10 @@
             // 
             // notifyIcon1
             // 
-            this.notifyIcon1.BalloonTipText = "dp2-RFID中心";
-            this.notifyIcon1.BalloonTipTitle = "dp2-RFID中心";
+            this.notifyIcon1.BalloonTipText = "RFID中心";
+            this.notifyIcon1.BalloonTipTitle = "RFID中心";
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
-            this.notifyIcon1.Text = "dp2-RFID中心";
+            this.notifyIcon1.Text = "RFID中心";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
@@ -1110,7 +1110,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
-            this.Text = "dp2-RFID中心";
+            this.Text = "RFID中心";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);

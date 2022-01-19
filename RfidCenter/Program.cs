@@ -66,8 +66,8 @@ namespace RfidCenter
                 if (createdNew
                     || args.IndexOf("newinstance") != -1)
                 {
-                    // ClientInfo.AddShortcutToStartupGroup("dp2-RFID中心");
-                    ClientInfo.RemoveShortcutFromStartupGroup("dp2-RFID中心");
+                    // ClientInfo.AddShortcutToStartupGroup("RFID中心");
+                    ClientInfo.RemoveShortcutFromStartupGroup("RFID中心");
 
                     ProgramUtil.SetDpiAwareness();
 

@@ -22,6 +22,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -612,7 +613,10 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.tabControl_main.Enabled = bEnable;
+            this.Invoke((Action)(() =>
+            {
+                this.tabControl_main.Enabled = bEnable;
+            }));
         }
 
         // 评估网络速度
@@ -1468,13 +1472,23 @@ MessageBoxDefaultButton.Button2);
             this.stop.BeginLoop();
             try
             {
+                int count = this.textBox_textLines_source1.Lines.Length;
+                stop.SetProgressRange(0, count);
+                int i = 0;
+
                 foreach (string line in this.textBox_textLines_source1.Lines)
                 {
                     if (string.IsNullOrEmpty(line))
+                    {
+                        i++;
                         continue;
+                    }
                     string strLine = line.Trim();
                     if (string.IsNullOrEmpty(strLine))
+                    {
+                        i++;
                         continue;
+                    }
 
 #if NO
                     Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
@@ -1522,6 +1536,8 @@ MessageBoxDefaultButton.Button2);
                         result1.Append("error: " + strError + "\r\n");
                         result2.Append(strLine + "\terror: " + strError + "\r\n");
                     }
+
+                    i++;
                 }
 
                 this.textBox_textLines_source2.Text = result1.ToString();
@@ -1868,6 +1884,96 @@ MessageBoxDefaultButton.Button2);
             }
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 取书目摘要
+        private void toolStrip_textLines_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            this.textBox_textLines_target.Text = "";
+            this.textBox_textLines_source2.Text = "";
+
+            _ = Task.Run(() =>
+            {
+                string strError = "";
+
+                StringBuilder result1 = new StringBuilder();
+                StringBuilder result2 = new StringBuilder();
+
+                this.EnableControls(false);
+
+                this.stop.OnStop += new StopEventHandler(this.DoStop);
+                this.stop.Initial("正在取书目摘要 ...");
+                this.stop.BeginLoop();
+
+                var channel = this.GetChannel();
+                try
+                {
+                    int count = this.textBox_textLines_source1.Lines.Length;
+                    stop.SetProgressRange(0, count);
+                    int i = 0;
+                    foreach (string line in this.textBox_textLines_source1.Lines)
+                    {
+                        // Application.DoEvents(); // 出让界面控制权
+                        if (this.stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        stop.SetProgressValue(i);
+
+                        if (string.IsNullOrEmpty(line))
+                        {
+                            result1.AppendLine();
+                            result2.AppendLine();
+                            i++;
+                            continue;
+                        }
+                        string strLine = line.Trim();
+                        if (string.IsNullOrEmpty(strLine))
+                        {
+                            result2.AppendLine();
+                            i++;
+                            continue;
+                        }
+
+                        stop.SetMessage("正在取书目摘要 '" + strLine + "' ...");
+
+                        long lRet = channel.GetBiblioSummary(stop,
+                            strLine,
+                            null,
+                            null,
+                            out _,
+                            out string summary,
+                            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                        result1.AppendLine(summary);
+                        result2.AppendLine(strLine + "\t" + summary);
+
+                        i++;
+                    }
+
+                    this.Invoke((Action)(() =>
+                    {
+                        this.textBox_textLines_source2.Text = result1.ToString();
+                        this.textBox_textLines_target.Text = result2.ToString();
+                    }));
+                    return;
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+
+                    this.stop.EndLoop();
+                    this.stop.OnStop -= new StopEventHandler(this.DoStop);
+                    this.stop.Initial("");
+
+                    this.EnableControls(true);
+                }
+            ERROR1:
+                ShowMessageBox(strError);
+            });
         }
     }
 }

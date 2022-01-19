@@ -2062,7 +2062,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 
         private void ToolStripMenuItem_deleteShortcut_Click(object sender, EventArgs e)
         {
-            ClientInfo.RemoveShortcutFromStartupGroup("dp2-RFID中心", true);
+            ClientInfo.RemoveShortcutFromStartupGroup("RFID中心", true);
         }
 
         bool _inSimuLock = false;   // 是否处于模拟门锁状态

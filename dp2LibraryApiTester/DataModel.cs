@@ -116,11 +116,11 @@ namespace dp2LibraryApiTester
         {
             Free();
 
-            if (string.IsNullOrEmpty(DataModel.dp2libraryServerUrl))
-                return new NormalResult { Value = 0 };
-
             _channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             _channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+
+            if (string.IsNullOrEmpty(DataModel.dp2libraryServerUrl))
+                return new NormalResult { Value = 0 };
 
             return new NormalResult { Value = 1 };
         }

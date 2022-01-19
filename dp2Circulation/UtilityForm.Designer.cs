@@ -81,6 +81,7 @@
             this.toolStripButton_textLines_getAuthorNumber = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_uidToDecimal = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_uidToHex = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_textLines_getBiblioSummary = new System.Windows.Forms.ToolStripButton();
             this.textBox_textLines_target = new System.Windows.Forms.TextBox();
             this.tabPage_isbn = new System.Windows.Forms.TabPage();
             this.toolStrip_isbn = new System.Windows.Forms.ToolStrip();
@@ -124,6 +125,7 @@
             this.textBox_biblioRecPath = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
             this.tabPage_addCrLf = new System.Windows.Forms.TabPage();
+            this.label19 = new System.Windows.Forms.Label();
             this.button_addCrLf_begin = new System.Windows.Forms.Button();
             this.label18 = new System.Windows.Forms.Label();
             this.textBox_addCrLf_targetFilename = new System.Windows.Forms.TextBox();
@@ -131,7 +133,6 @@
             this.label17 = new System.Windows.Forms.Label();
             this.textBox_addCrLf_sourceFilename = new System.Windows.Forms.TextBox();
             this.button_addCrLf_getSourceFileName = new System.Windows.Forms.Button();
-            this.label19 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -186,7 +187,7 @@
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(5);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(994, 628);
+            this.tabControl_main.Size = new System.Drawing.Size(951, 627);
             this.tabControl_main.TabIndex = 0;
             // 
             // tabPage_sjhm
@@ -609,7 +610,7 @@
             this.tabPage_textLines.Location = new System.Drawing.Point(4, 31);
             this.tabPage_textLines.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_textLines.Name = "tabPage_textLines";
-            this.tabPage_textLines.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_textLines.Size = new System.Drawing.Size(943, 592);
             this.tabPage_textLines.TabIndex = 4;
             this.tabPage_textLines.Text = "文本行";
             this.tabPage_textLines.UseVisualStyleBackColor = true;
@@ -631,8 +632,8 @@
             // 
             this.splitContainer_textLines_main.Panel2.Controls.Add(this.tableLayoutPanel_textLines_down);
             this.splitContainer_textLines_main.Panel2.Padding = new System.Windows.Forms.Padding(0, 0, 0, 10);
-            this.splitContainer_textLines_main.Size = new System.Drawing.Size(986, 593);
-            this.splitContainer_textLines_main.SplitterDistance = 298;
+            this.splitContainer_textLines_main.Size = new System.Drawing.Size(943, 592);
+            this.splitContainer_textLines_main.SplitterDistance = 297;
             this.splitContainer_textLines_main.SplitterWidth = 14;
             this.splitContainer_textLines_main.TabIndex = 6;
             // 
@@ -650,8 +651,8 @@
             // splitContainer_textLines_up.Panel2
             // 
             this.splitContainer_textLines_up.Panel2.Controls.Add(this.tableLayoutPanel_text_source2);
-            this.splitContainer_textLines_up.Size = new System.Drawing.Size(986, 288);
-            this.splitContainer_textLines_up.SplitterDistance = 483;
+            this.splitContainer_textLines_up.Size = new System.Drawing.Size(943, 287);
+            this.splitContainer_textLines_up.SplitterDistance = 461;
             this.splitContainer_textLines_up.SplitterWidth = 15;
             this.splitContainer_textLines_up.TabIndex = 5;
             // 
@@ -668,7 +669,7 @@
             this.tableLayoutPanel_text_source1.RowCount = 2;
             this.tableLayoutPanel_text_source1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_text_source1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_text_source1.Size = new System.Drawing.Size(483, 288);
+            this.tableLayoutPanel_text_source1.Size = new System.Drawing.Size(461, 287);
             this.tableLayoutPanel_text_source1.TabIndex = 2;
             // 
             // label7
@@ -693,6 +694,7 @@
             this.textBox_textLines_source1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_textLines_source1.Size = new System.Drawing.Size(473, 257);
             this.textBox_textLines_source1.TabIndex = 0;
+            this.textBox_textLines_source1.WordWrap = false;
             // 
             // tableLayoutPanel_text_source2
             // 
@@ -707,7 +709,7 @@
             this.tableLayoutPanel_text_source2.RowCount = 2;
             this.tableLayoutPanel_text_source2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_text_source2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_text_source2.Size = new System.Drawing.Size(488, 288);
+            this.tableLayoutPanel_text_source2.Size = new System.Drawing.Size(467, 287);
             this.tableLayoutPanel_text_source2.TabIndex = 4;
             // 
             // label8
@@ -732,6 +734,7 @@
             this.textBox_textLines_source2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_textLines_source2.Size = new System.Drawing.Size(478, 257);
             this.textBox_textLines_source2.TabIndex = 2;
+            this.textBox_textLines_source2.WordWrap = false;
             // 
             // tableLayoutPanel_textLines_down
             // 
@@ -746,11 +749,15 @@
             this.tableLayoutPanel_textLines_down.RowCount = 2;
             this.tableLayoutPanel_textLines_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_textLines_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_textLines_down.Size = new System.Drawing.Size(986, 271);
+            this.tableLayoutPanel_textLines_down.Size = new System.Drawing.Size(943, 271);
             this.tableLayoutPanel_textLines_down.TabIndex = 2;
             // 
             // toolStrip_textLines
             // 
+            this.toolStrip_textLines.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.toolStrip_textLines.AutoSize = false;
+            this.toolStrip_textLines.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip_textLines.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip_textLines.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.toolStrip_textLines.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -760,12 +767,14 @@
             this.toolStripButton_textLines_sort1removedup,
             this.toolStripButton_textLines_getAuthorNumber,
             this.toolStripButton_uidToDecimal,
-            this.toolStripButton_uidToHex});
+            this.toolStripButton_uidToHex,
+            this.toolStripButton_textLines_getBiblioSummary});
             this.toolStrip_textLines.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_textLines.Name = "toolStrip_textLines";
-            this.toolStrip_textLines.Size = new System.Drawing.Size(1094, 38);
+            this.toolStrip_textLines.Size = new System.Drawing.Size(943, 38);
             this.toolStrip_textLines.TabIndex = 2;
             this.toolStrip_textLines.Text = "toolStrip1";
+            this.toolStrip_textLines.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip_textLines_ItemClicked);
             // 
             // toolStripButton_textLines_sub
             // 
@@ -841,6 +850,15 @@
             this.toolStripButton_uidToHex.Text = "UID 转十六进制";
             this.toolStripButton_uidToHex.Click += new System.EventHandler(this.toolStripButton_uidToHex_Click);
             // 
+            // toolStripButton_textLines_getBiblioSummary
+            // 
+            this.toolStripButton_textLines_getBiblioSummary.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_textLines_getBiblioSummary.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_textLines_getBiblioSummary.Image")));
+            this.toolStripButton_textLines_getBiblioSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_textLines_getBiblioSummary.Name = "toolStripButton_textLines_getBiblioSummary";
+            this.toolStripButton_textLines_getBiblioSummary.Size = new System.Drawing.Size(121, 32);
+            this.toolStripButton_textLines_getBiblioSummary.Text = "取书目摘要";
+            // 
             // textBox_textLines_target
             // 
             this.textBox_textLines_target.AcceptsReturn = true;
@@ -853,8 +871,9 @@
             this.textBox_textLines_target.Multiline = true;
             this.textBox_textLines_target.Name = "textBox_textLines_target";
             this.textBox_textLines_target.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_target.Size = new System.Drawing.Size(1084, 233);
+            this.textBox_textLines_target.Size = new System.Drawing.Size(933, 233);
             this.textBox_textLines_target.TabIndex = 1;
+            this.textBox_textLines_target.WordWrap = false;
             // 
             // tabPage_isbn
             // 
@@ -1341,6 +1360,21 @@
             this.tabPage_addCrLf.Text = "添加回车换行";
             this.tabPage_addCrLf.UseVisualStyleBackColor = true;
             // 
+            // label19
+            // 
+            this.label19.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label19.BackColor = System.Drawing.Color.AntiqueWhite;
+            this.label19.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label19.Location = new System.Drawing.Point(23, 275);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(941, 300);
+            this.label19.TabIndex = 13;
+            this.label19.Text = "温馨提示：\r\n\r\n1) 标准的 ISO2709 文件里面是没有回车换行符号的；\r\n\r\n2) 本功能是为了让那些不能接受标准的 ISO2709 文件的图书馆软件能导" +
+    "入数据，给 ISO2709 文件内的每一条记录的记录结束符后面添加一个回车和一个换行符号；\r\n\r\n3) 请务必提醒这些接口不标准的图书馆软件的开发者，尽早修改软" +
+    "件，按照标准来导入 ISO2709 文件。";
+            // 
             // button_addCrLf_begin
             // 
             this.button_addCrLf_begin.Location = new System.Drawing.Point(23, 197);
@@ -1413,26 +1447,11 @@
             this.button_addCrLf_getSourceFileName.Text = "...";
             this.button_addCrLf_getSourceFileName.Click += new System.EventHandler(this.button_addCrLf_getSourceFileName_Click);
             // 
-            // label19
-            // 
-            this.label19.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label19.BackColor = System.Drawing.Color.AntiqueWhite;
-            this.label19.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label19.Location = new System.Drawing.Point(23, 275);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(941, 300);
-            this.label19.TabIndex = 13;
-            this.label19.Text = "温馨提示：\r\n\r\n1) 标准的 ISO2709 文件里面是没有回车换行符号的；\r\n\r\n2) 本功能是为了让那些不能接受标准的 ISO2709 文件的图书馆软件能导" +
-    "入数据，给 ISO2709 文件内的每一条记录的记录结束符后面添加一个回车和一个换行符号；\r\n\r\n3) 请务必提醒这些接口不标准的图书馆软件的开发者，尽早修改软" +
-    "件，按照标准来导入 ISO2709 文件。";
-            // 
             // UtilityForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(994, 628);
+            this.ClientSize = new System.Drawing.Size(951, 627);
             this.Controls.Add(this.tabControl_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(5);
@@ -1600,5 +1619,6 @@
         private System.Windows.Forms.TextBox textBox_addCrLf_sourceFilename;
         private System.Windows.Forms.Button button_addCrLf_getSourceFileName;
         private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.ToolStripButton toolStripButton_textLines_getBiblioSummary;
     }
 }

@@ -650,6 +650,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                                 line.ItemBarcode = "@refID:" + searchresult.Cols[11];
 
                             line.Location = searchresult.Cols[1];
+
                             line.AccessNo = searchresult.Cols[2];
 
                             line.State = searchresult.Cols[4];
@@ -4429,6 +4430,12 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
         // 1) 201 9201 按照图书种分类的借书册数表 
         // 2) 202 9202 从来没有借出的图书 *种* 。册数列表示种下属的册数，不是被借出的册数
         // 4) 212 9212 按照图书 *分类* 分类的借书册数表
+        // parameters:
+        //      strLocation 馆藏地。
+        //      如果为 "/"，表示希望包含全局的馆藏地。注意全局馆藏地里面没有 / 字符
+        //      如果为 "望湖小学/"，表示希望包含此分馆的所有馆藏地
+        //      如果为 "主楼"，表示希望等于一个具体的全局馆藏地，注意并不希望纳入 "主楼亲子书架"
+        //      如果为 "望湖小学/阅览室"，表示希望包含此分馆的一个具体的馆藏地，注意并不希望包含 "望湖小学/阅览室1"
         int CreateBookReportCommand(
             string strLocation, // "名称/"
             string strDateRange,
@@ -4471,9 +4478,12 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
             // if (string.IsNullOrEmpty(Global.GetLocationRoom(strLocation)) == false)
             {
                 // 改为沿用以前的方法。会出现 [全部]
-                strLocationLike = " item.location like '" + strLocation + "%' ";
+                strLocationLike = " item.location like '" + strLocation + "%'";
                 if (string.IsNullOrEmpty(strLocation) == true)
                     strLocationLike = " item.location = '' ";   // 2014/5/28
+                // 一个具体的馆藏地
+                else if (strLocation.Length > 0 && strLocation[strLocation.Length - 1] != '/')
+                    strLocationLike = $" item.location = '{strLocation}' ";   // 2022/1/17
                 else if (strLocation == "/")
                     strLocationLike = " (item.location like '/%' OR item.location not like '%/%') ";   // 全局的馆藏点比较特殊
             }
@@ -4482,6 +4492,9 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
             string strLocationLike_item = " item.location like '" + strLocation + "%' ";
             if (string.IsNullOrEmpty(strLocation) == true)
                 strLocationLike_item = " item.location = '' ";
+            // 一个具体的馆藏地
+            else if (strLocation.Length > 0 && strLocation[strLocation.Length - 1] != '/')
+                strLocationLike_item = $" item.location = '{strLocation}' ";   // 2022/1/17
             else if (strLocation == "/")
                 strLocationLike_item = " (item.location like '/%' OR item.location not like '%/%') ";   // 全局的馆藏点比较特殊
 
@@ -4951,7 +4964,19 @@ out strError);
                 } // end of using command
             }
 
-            END1:
+        END1:
+
+            {
+                // 2022/1/17
+                // 去掉字符串中的 #reservation 部分
+                List<string> temp_list = new List<string>();
+                foreach (var location in results)
+                {
+                    temp_list.Add(StringUtil.GetPureLocation(location));
+                }
+                results = temp_list;
+            }
+
             // 去重
             StringUtil.RemoveDupNoSort(ref results);
 

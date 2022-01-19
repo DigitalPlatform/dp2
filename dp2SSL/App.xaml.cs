@@ -911,7 +911,7 @@ namespace dp2SSL
                     infos.Add(new ProcessInfo
                     {
                         Name = "RFID中心",
-                        ShortcutPath = "DigitalPlatform/dp2 V3/dp2-RFID中心",
+                        ShortcutPath = "DigitalPlatform/dp2 V3/RFID中心",
                         MutexName = "{CF1B7B4A-C7ED-4DB8-B5CC-59A067880F92}"
                     });
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false
