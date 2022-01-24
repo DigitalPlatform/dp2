@@ -1275,7 +1275,8 @@ MessageBoxDefaultButton.Button1);
                     MessageBox.Show(this, strError);
                 }
 
-                this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2circulation.xml"));
+                // this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2circulation.xml"));
+                this.AppInfo = new NewApplicationInfo(ClientInfo.Config);   // 2022/1/24
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
                 PathUtil.TryCreateDir(this.UserTempDir);

@@ -41,7 +41,7 @@ namespace dp2Circulation
         /// <summary>
         /// 期刊控件所关联的 ApplicationInfo 对象
         /// </summary>
-        public ApplicationInfo AppInfo
+        public IApplicationInfo AppInfo
         {
             get
             {

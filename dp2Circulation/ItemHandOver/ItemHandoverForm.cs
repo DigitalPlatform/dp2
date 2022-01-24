@@ -7344,7 +7344,7 @@ new string[] { "summary", "@isbnissn", "targetrecpath" });
             this.Columns.Add(column);
         }
 
-        public override void LoadData(ApplicationInfo ai,
+        public override void LoadData(NewApplicationInfo ai,
 string strPath)
         {
             string strNamePath = strPath;
@@ -7353,7 +7353,7 @@ string strPath)
             base.LoadData(ai, strNamePath);
         }
 
-        public override void SaveData(ApplicationInfo ai,
+        public override void SaveData(NewApplicationInfo ai,
             string strPath)
         {
             string strNamePath = strPath;

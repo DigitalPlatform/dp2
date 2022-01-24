@@ -24,7 +24,7 @@ namespace dp2Circulation
         /// <summary>
         /// ApplicationInfo 对象
         /// </summary>
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
 
         /// <summary>
         /// 配置文件名

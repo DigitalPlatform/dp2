@@ -44,7 +44,6 @@ namespace dp2Catalog
 
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
-
         }
 
         void Channels_AfterLogin(object sender, AfterLoginEventArgs e)
@@ -304,11 +303,9 @@ namespace dp2Catalog
 
                 this.Channel = this.Channels.GetChannel(strServerUrl);
 
-
                 // 非强制修改密码，即本人修改
                 if (this.checkBox_dp2library_force.Checked == false)
                 {
-
                     // return:
                     //      -1  error
                     //      0   登录未成功
@@ -370,8 +367,6 @@ namespace dp2Catalog
                         goto ERROR1;
 
                 }
-
-
             }
             finally
             {

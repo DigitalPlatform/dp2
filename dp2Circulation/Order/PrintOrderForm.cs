@@ -13123,7 +13123,7 @@ string strFileName)
     {
         string PublicationType = "图书"; // 图书 连续出版物
 
-        public override void LoadData(ApplicationInfo ai,
+        public override void LoadData(NewApplicationInfo ai,
             string strPath)
         {
             string strNamePath = strPath;
@@ -13132,7 +13132,7 @@ string strFileName)
             base.LoadData(ai, strNamePath);
         }
 
-        public override void SaveData(ApplicationInfo ai,
+        public override void SaveData(NewApplicationInfo ai,
             string strPath)
         {
             string strNamePath = strPath;

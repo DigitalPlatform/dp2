@@ -59,7 +59,7 @@ namespace dp2Circulation
         public List<TemplatePageParam> TemplatePages = new List<TemplatePageParam>();   // 定制的页面
 
         // 从Application对象中装载数据
-        public virtual void LoadData(ApplicationInfo ai,
+        public virtual void LoadData(NewApplicationInfo ai,
             string strPath)
         {
             this.PageHeader = ai.GetString(strPath,
@@ -144,7 +144,7 @@ namespace dp2Circulation
             }
         }
 
-        public virtual void SaveData(ApplicationInfo ai,
+        public virtual void SaveData(NewApplicationInfo ai,
             string strPath)
         {
             ai.SetString(strPath, "PageHeader",

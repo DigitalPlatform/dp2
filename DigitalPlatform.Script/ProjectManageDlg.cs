@@ -34,7 +34,7 @@ namespace DigitalPlatform.Script
 
         public ScriptManager scriptManager = null;
 
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
 
         public string DataDir = ""; // 数据目录
 

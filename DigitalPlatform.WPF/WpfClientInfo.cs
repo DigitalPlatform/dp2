@@ -179,12 +179,26 @@ namespace DigitalPlatform.WPF
             }
         }
 
+        static string _settingsFileName = "settings.xml";
+
+        public static string SettingsFileName
+        {
+            get
+            {
+                return _settingsFileName;
+            }
+            set
+            {
+                _settingsFileName = value;
+            }
+        }
+
         public static void InitialConfig()
         {
             if (string.IsNullOrEmpty(UserDir))
                 throw new ArgumentException("UserDir 尚未初始化");
 
-            string filename = Path.Combine(UserDir, "settings.xml");
+            string filename = Path.Combine(UserDir, _settingsFileName/*"settings.xml"*/);
             _config = ConfigSetting.Open(filename, true);
         }
 

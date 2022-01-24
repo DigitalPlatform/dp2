@@ -26,7 +26,7 @@ namespace dp2Circulation
         /// </summary>
         public event ParamChangedEventHandler ParamChanged = null;
 
-        public ApplicationInfo ap = null;
+        public NewApplicationInfo ap = null;
 
         /// <summary>
         /// 框架窗口

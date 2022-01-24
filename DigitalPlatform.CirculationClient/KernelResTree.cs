@@ -21,7 +21,7 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public partial class KernelResTree : System.Windows.Forms.TreeView
     {
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
 
         public event UploadFilesEventHandler UploadFiles = null;
 

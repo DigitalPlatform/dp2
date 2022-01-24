@@ -17,7 +17,7 @@ namespace DigitalPlatform.Script
     /// </summary>
     public class CompileErrorDlg : System.Windows.Forms.Form
     {
-        public ApplicationInfo applicationInfo = null;
+        public IApplicationInfo applicationInfo = null;
 
         public bool IsFltx = false;	// 是否为.fltx.cs文件
 

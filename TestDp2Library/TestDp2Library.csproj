@@ -75,6 +75,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BarcodeValidator\TestBarcodeMultiMatch.cs" />
+    <Compile Include="ResultSet\TestResultSet.cs" />
     <Compile Include="TestAdjustOverflow.cs" />
     <Compile Include="TestAuthorNumber.cs" />
     <Compile Include="BarcodeValidator\TestBarcodeValidator.cs" />
@@ -104,6 +105,10 @@
     <ProjectReference Include="..\DigitalPlatform.LibraryServer\DigitalPlatform.LibraryServer.csproj">
       <Project>{E153CC55-DA01-4403-A53F-AF801BDDF4BA}</Project>
       <Name>DigitalPlatform.LibraryServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
+      <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
+      <Name>DigitalPlatform.ResultSet</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
       <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>

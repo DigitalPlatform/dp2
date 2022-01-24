@@ -149,7 +149,7 @@ namespace dp2Circulation
 
         public string[] GroupTextLineNames = null;
 
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
 
         /// <summary>
         /// 是否为新创建的册记录设置“加工中”状态

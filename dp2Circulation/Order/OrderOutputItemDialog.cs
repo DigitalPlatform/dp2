@@ -21,7 +21,7 @@ namespace dp2Circulation
         const int WM_FINDOUTPUTFORMAT = API.WM_USER + 201;
 
         public ScriptManager ScriptManager = null;
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
 
         /// <summary>
         /// 获得值列表

@@ -12,7 +12,7 @@ namespace dp2Circulation
         bool m_bCellContentsChanged = false;
         bool m_bGroupContentsChanged = false;
 
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
 
         public string[] DefaultTextLineNames = null;
         public string[] DefaultGroupTextLineNames = null;

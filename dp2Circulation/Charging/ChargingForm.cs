@@ -3493,7 +3493,7 @@ Keys keyData)
         /// <summary>
         /// ApplicationInfo
         /// </summary>
-        public ApplicationInfo ap = null;
+        public IApplicationInfo ap = null;
         /// <summary>
         /// 宿主窗口
         /// </summary>

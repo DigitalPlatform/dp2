@@ -12,7 +12,7 @@ namespace DigitalPlatform.Xml
     /// <summary>
     /// 用 XML 文件保存程序的各种配置信息
     /// </summary>
-    public class ApplicationInfo : IApplicationInfo
+    public class ApplicationInfo
     {
         public XmlDocument dom = new XmlDocument();
         public string PureFileName = "";

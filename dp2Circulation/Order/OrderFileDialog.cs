@@ -42,7 +42,7 @@ namespace dp2Circulation
         /// <summary>
         /// 系统配置参数存储对象
         /// </summary>
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
 
         /// <summary>
         /// 数据目录

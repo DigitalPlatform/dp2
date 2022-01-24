@@ -46,12 +46,12 @@ namespace DigitalPlatform.rms
 
         //静态成员m_precedenceTable,string数组，存放操作符与对应的优先级
         public static string[] m_precedenceTable = {"NOT","2",
-													   "OR","1",
-													   "AND","1",
-													   "SUB","1",
-													   "!","2",
-													   "+","1",
-													   "-","1"};
+                                                       "OR","1",
+                                                       "AND","1",
+                                                       "SUB","1",
+                                                       "!","2",
+                                                       "+","1",
+                                                       "-","1"};
         // 构造函数
         // paramter:
         //		dbColl  数据库集合指针
@@ -561,6 +561,7 @@ namespace DigitalPlatform.rms
 
             bool bFirst = StringUtil.IsInList("first", strHint);    // 是否为 命中则停止继续检索
 
+            int hit_database_count = 0; // 检索真正发生命中的数据库数量
             // 将 target 以 ; 号分成多个库
             string[] aDatabase = strTarget.Split(new Char[] { ';' });
             foreach (string strOneDatabase in aDatabase)
@@ -619,6 +620,8 @@ namespace DigitalPlatform.rms
                 searchItem.OrderBy = strOrderBy;
                 searchItem.MaxCount = nMaxCount;
 
+                long prev_count = resultSet.Count;
+
                 // 注: SearchByUnion不清空resultSet，从而使多个库的结果集放在一起
                 string strWarningInfo = "";
                 //		-1	出错
@@ -639,7 +642,12 @@ namespace DigitalPlatform.rms
                 bSearched = true;
 
                 if (nRet == 1)
+                {
                     bNeedSort = true;
+                }
+
+                if (prev_count < resultSet.Count)
+                    hit_database_count++;
 
                 if (nRet >= 1 && bFirst == true)
                     break;
@@ -650,6 +658,33 @@ namespace DigitalPlatform.rms
             {
                 // 2010/5/11
                 resultSet.EnsureCreateIndex();   // 确保创建了索引
+
+                // 2022/1/24
+                // 把相同的 key 后面的 count 合并
+                if (StringUtil.IsInList("keycount", strOutputStyle)
+                    && hit_database_count > 1)
+                {
+                    if (DoSort(resultSet, handle/*isConnected*/) == true)
+                    {
+                        strError = "前端中断";
+                        return -1;
+                    }
+
+                    DpResultSet oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
+                    StringBuilder debugInfo = null;
+
+                    // 合并
+                    nRet = DpResultSetManager.MergeCount(resultSet,
+    oTargetMiddle,
+    querystop,
+    handle,
+    ref debugInfo,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    resultSet.Close();
+                    resultSet = oTargetMiddle;
+                }
 
                 // 排序
                 // TODO: 其实可以使用EnsureSorted()函数
@@ -1133,7 +1168,7 @@ namespace DigitalPlatform.rms
         null,
         oTargetMiddle,
         null,
-                                                // false,
+        // false,
         querystop,
         handle,
         ref debugInfo,
@@ -1207,7 +1242,7 @@ namespace DigitalPlatform.rms
                                     null,    //oTargetLeft
                                     oTargetMiddle,
                                     null,   //oTargetRight
-                                    // false,
+                                            // false,
                                     querystop,
                                     handle,
                                     ref debugInfo,
@@ -1279,7 +1314,7 @@ namespace DigitalPlatform.rms
                                     oTargetLeft,
                                     null, //oTargetMiddle
                                     null, //oTargetRight
-                                    // false,
+                                          // false,
                                     querystop,
                                     handle,
                                     ref debugInfo,
@@ -1328,6 +1363,12 @@ namespace DigitalPlatform.rms
                             out strError);
                         if (ret <= -1)
                             return ret;
+                        // 2022/1/24
+                        // TODO: 需要把里面的 count 值归并
+                        if (StringUtil.IsInList("keycount", strOutputStyle))
+                        {
+
+                        }
                     }
                     else if (nTemp == 1)
                     {

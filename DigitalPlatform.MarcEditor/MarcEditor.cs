@@ -40,7 +40,7 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 饮用外部的 ApplicationInfo 对象。用于获取和存储一些需要持久的值
         /// </summary>
-        public ApplicationInfo AppInfo = null;  // 用于获取和存储一些需要持久的值
+        public IApplicationInfo AppInfo = null;  // 用于获取和存储一些需要持久的值
 
         internal bool m_bAutoComplete = true;
         internal bool m_bInsertBefore = false;

@@ -370,6 +370,118 @@ namespace DigitalPlatform.ResultSet
 
         public delegate bool QueryStop(object param);
 
+        public static int MergeCount(DpResultSet resultSet,
+            DpResultSet targetSet,
+            QueryStop query_stop,
+            object param,
+            ref StringBuilder debugInfo,
+            out string strError)
+        {
+            strError = "";
+
+            if (resultSet.m_streamSmall == null)
+            {
+                throw new Exception("resultSet结果集对象未建索引");
+            }
+
+            if (resultSet.Sorted == false)
+            {
+                strError = "调用Merge()前resultSet尚未排序";
+                return -1;
+            }
+
+            int nAsc = resultSet.Asc;
+
+            if (targetSet != null)
+                targetSet.Asc = nAsc;
+
+            int m_nLoopCount = 0;
+
+            int changed_count = 0;
+            int index = 0;
+            int ret = 0;
+            long pos = 0;
+
+            DpRecord left = null;
+            DpRecord right = null;
+
+            while (true)
+            {
+                if (m_nLoopCount++ % 1000 == 0)
+                {
+                    Thread.Sleep(1);
+                    if (query_stop != null)
+                    {
+                        if (query_stop(param) == true)
+                        {
+                            strError = "用户中断";
+                            return -1;
+                        }
+                    }
+                }
+
+
+                try
+                {
+                    if (index == 0)
+                        left = resultSet.GetFirstRecord(0, false, out pos);
+                    else if (left == null)
+                        left = resultSet.GetNextRecord(ref pos);
+                    if (left == null)
+                        goto END1;
+                    if (debugInfo != null)
+                    {
+                        debugInfo.Append($"取出 resultSet 集合中第 {index} 个元素，ID为" + left.ID + "<br/>");
+                    }
+                    index++;
+                }
+                catch (Exception e)
+                {
+                    Exception ex = new Exception($"取 resultSet 集合出错：index={index}----Count=" + Convert.ToString(resultSet.Count) + ", internel error :" + e.Message + "<br/>");
+                    throw (ex);
+                }
+
+                while (true)
+                {
+                    try
+                    {
+                        right = resultSet.GetNextRecord(ref pos);
+                        if (right == null)
+                        {
+                            targetSet.Add(left);
+                            goto END1;
+                        }
+                        if (debugInfo != null)
+                        {
+                            debugInfo.Append($"取出 resultSet 集合中第 {index} 个元素，ID为" + right.ID + "<br/>");
+                        }
+                        index++;
+                    }
+                    catch
+                    {
+                        Exception ex = new Exception($"index={index}----Count={ Convert.ToString(resultSet.Count)}<br/>");
+                        throw (ex);
+                    }
+
+                    ret = left.CompareTo(right);
+                    if (ret == 0)
+                    {
+                        left.Index = left.Index + right.Index;
+
+                        changed_count++;
+                    }
+                    else
+                    {
+                        targetSet.Add(left);
+
+                        left = right;
+                        break;
+                    }
+                }
+            }
+        END1:
+            return changed_count;
+        }
 
         // TODO: 尽量用 offset 进行比较，延迟获得 record  2013/2/13
 
@@ -929,7 +1041,7 @@ namespace DigitalPlatform.ResultSet
             }
         }
 
-        //功能:拷贝一个结集集到自己
+        //功能:拷贝一个结果集到自己
         public int Copy(DpResultSet sourceResultSet)
         {
             // 如果就是自己
@@ -2231,7 +2343,6 @@ namespace DigitalPlatform.ResultSet
             return System.Text.Encoding.UTF8.GetString(bufferText);
         }
 
-
         //GetRecordByOffset()不论正负数都可以找到记录，调用时，注意，如果不需要得到被删除的记录，自已做判断
         public DpRecord GetRecordByOffset(long lOffset)
         {
@@ -2353,7 +2464,6 @@ namespace DigitalPlatform.ResultSet
                 return record;
             }
         }
-
 
         //用*8的方法算到小文件的位置，包含已删除的记录，并取出大文件的编移量
         public long GetBigOffsetBySmall(long nIndex)

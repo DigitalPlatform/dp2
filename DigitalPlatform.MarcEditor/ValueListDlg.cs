@@ -20,7 +20,7 @@ namespace DigitalPlatform.Marc
         // 参与排序的列号数组
         SortColumns SortColumns = new SortColumns();
 
-        public ApplicationInfo AppInfo = null;  // 2009/9/18
+        public IApplicationInfo AppInfo = null;  // 2009/9/18
 
 		private System.Windows.Forms.ColumnHeader columnHeader_value;
 		private System.Windows.Forms.ColumnHeader columnHeader_description;

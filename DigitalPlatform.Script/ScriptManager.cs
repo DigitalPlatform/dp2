@@ -33,7 +33,7 @@ namespace DigitalPlatform.Script
     {
         public event CreateDefaultContentEventHandler CreateDefaultContent = null;
 
-        public ApplicationInfo applicationInfo = null;
+        public IApplicationInfo applicationInfo = null;
 
         public static int m_nLockTimeout = 5000;	// 5000=5秒
 

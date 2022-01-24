@@ -13,6 +13,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -52,6 +53,10 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
+            ClientInfo.TypeOfProgram = typeof(Program);
+            FormClientInfo.CopyrightKey = "dp2circulation_sn_key";
+            // string CopyrightKey = "dp2circulation_sn_key";
+
             ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
 
             List<string> args = StringUtil.GetCommandLineArgs();

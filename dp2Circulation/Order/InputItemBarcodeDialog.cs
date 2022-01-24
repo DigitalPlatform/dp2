@@ -24,7 +24,7 @@ namespace dp2Circulation
     {
         FloatingMessageForm _floatingMessage = null;
 
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
 
         public bool SeriesMode = false;
 

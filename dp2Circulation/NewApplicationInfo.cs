@@ -1,23 +1,32 @@
 ﻿using System;
 using System.Collections;
-using System.Windows.Forms;
-using System.Drawing;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
-using System.Deployment.Application;
 
-namespace DigitalPlatform.Xml
+using DigitalPlatform.Core;
+using DigitalPlatform.Xml;
+
+namespace dp2Circulation
 {
     /// <summary>
     /// 用 XML 文件保存程序的各种配置信息
     /// </summary>
-    public class ApplicationInfo : IApplicationInfo
+    public class NewApplicationInfo : IApplicationInfo
     {
-        public XmlDocument dom = new XmlDocument();
-        public string PureFileName = "";
-        public string CurrentDirectory = "";
-        public string FileName = "";
+        // public XmlDocument dom = new XmlDocument();
+
+        ConfigSetting _config = null;   // 引用
+
+        // public string PureFileName = "";
+        // public string CurrentDirectory = "";
+        // public string FileName = "";
 
         Hashtable titleTable = null;
 
@@ -29,7 +38,7 @@ namespace DigitalPlatform.Xml
         // 2017/12/20
         public event AppInfoChangedEventHandler AppInfoChanged = null;
 
-        public ApplicationInfo()
+        public NewApplicationInfo()
         {
         }
 
@@ -50,8 +59,10 @@ namespace DigitalPlatform.Xml
         // 本函数将XML文件中的内容装入内存。
         // parameters:
         //		strPureFileName	要打开的XML文件名，注意这是一个纯文件名，不包含路径部分。本函数自动从模块的当前目录中装载此文件。
-        public ApplicationInfo(string strPureFileName)
+        public NewApplicationInfo(ConfigSetting config)
         {
+            this._config = config;
+            /*
             PrepareFileName(strPureFileName);
 
             string strErrorInfo;
@@ -60,16 +71,21 @@ namespace DigitalPlatform.Xml
             {
                 CreateBlank();
             }
+            */
         }
 
         // 将内存中的内容保存回XML文件
         public void Save()
         {
+            /*
             if (FileName != "")
             {
                 Save(out string strErrorInfo);
             }
+            */
         }
+
+#if REMOVED
 
         // parameters:
         //      strFileName 文件名字符串。如果是纯文件名，则自动按照 ClickOnce 安装和绿色安装获得数据目录；如果是全路径，则直接使用这个路径
@@ -156,6 +172,8 @@ namespace DigitalPlatform.Xml
             return 0;
         }
 
+#endif
+
         // Hashtable _cacheTable = new Hashtable();    // path --> string value
 
         // 获得一个布尔值
@@ -169,27 +187,6 @@ namespace DigitalPlatform.Xml
             string strName,
             bool bDefault)
         {
-#if NO
-            strPath = GetSectionPath(strPath);
-
-            XmlNode node = dom.SelectSingleNode(strPath);
-            string strText = null;
-
-            if (node == null)
-                return bDefault;
-
-            strText = DomUtil.GetAttrOrDefault(node, strName, null);
-            if (strText == null)
-                return bDefault;
-
-            if (String.Compare(strText, "true", true) == 0)
-                return true;
-
-            if (String.Compare(strText, "false", true) == 0)
-                return false;
-
-            return false;
-#endif
             string value = GetString(strPath,
 strName,
 null);
@@ -215,26 +212,12 @@ null);
             string strName,
             bool bValue)
         {
-#if NO
-            strPath = GetSectionPath(strPath);
-
-            string[] aPath = strPath.Split(new char[] { '/' });
-            XmlNode node = DomUtil.CreateNode(dom, aPath);
-
-            if (node == null)
-            {
-                throw (new Exception("SetInt() set error ..."));
-            }
-
-            DomUtil.SetAttr(node,
-                strName,
-                (bValue == true ? "true" : "false"));
-#endif
             SetString(strPath,
 strName,
 (bValue == true ? "true" : "false"));
         }
 
+        /*
         //
         static string GetSectionPath(string strPath)
         {
@@ -244,6 +227,7 @@ strName,
                 return "/root/n_" + strPath;
             return "/root/" + strPath;
         }
+        */
 
         // 获得一个整数值
         // parameters:
@@ -256,29 +240,6 @@ strName,
             string strName,
             int nDefault)
         {
-#if NO
-			strPath = GetSectionPath(strPath);
-
-            XmlNode node = null;
-            try
-            {
-                node = dom.SelectSingleNode(strPath);
-            }
-            catch(Exception ex)
-            {
-                throw new Exception("strPath 名称 '"+strPath+"' 不合法。应符合 XML 元素命名规则", ex);
-            }
-			string strText = null;
-
-			if (node == null)
-				return nDefault;
-
-			strText = DomUtil.GetAttrOrDefault(node, strName, null);
-			if (strText == null)
-				return nDefault;
-
-			return Convert.ToInt32(strText);
-#endif
             string value = GetString(strPath,
             strName,
             null);
@@ -296,21 +257,6 @@ strName,
             string strName,
             int nValue)
         {
-#if NO
-            strPath = GetSectionPath(strPath);
-
-            string[] aPath = strPath.Split(new char[] { '/' });
-            XmlNode node = DomUtil.CreateNode(dom, aPath);
-
-            if (node == null)
-            {
-                throw (new Exception("SetInt() set error ..."));
-            }
-
-            DomUtil.SetAttr(node,
-                strName,
-                Convert.ToString(nValue));
-#endif
             SetString(strPath,
 strName,
 Convert.ToString(nValue));
@@ -327,6 +273,8 @@ Convert.ToString(nValue));
             string strName,
             string strDefault)
         {
+            return _config.Get(strPath, strName, strDefault);
+            /*
             strPath = GetSectionPath(strPath);
 
             XmlNode node = null;
@@ -344,6 +292,7 @@ Convert.ToString(nValue));
                 return strDefault;
 
             return DomUtil.GetAttrOrDefault(node, strName, strDefault);
+            */
         }
 
         // 设置一个字符串
@@ -355,6 +304,22 @@ Convert.ToString(nValue));
             string strName,
             string strValue)
         {
+            string oldValue = _config.Get(strPathParam, strName, null);
+            _config.Set(strPathParam, strName, strValue);
+
+            var handler = this.AppInfoChanged;
+            if (handler != null)
+            {
+                AppInfoChangedEventArgs e = new AppInfoChangedEventArgs
+                {
+                    Path = strPathParam,
+                    Name = strName,
+                    Value = strValue,
+                    OldValue = oldValue
+                };
+                handler(this, e);
+            }
+            /*
             string strPath = GetSectionPath(strPathParam);
 
             string[] aPath = strPath.Split(new char[] { '/' });
@@ -383,6 +348,7 @@ Convert.ToString(nValue));
                 };
                 handler(this, e);
             }
+            */
         }
 
         ////
@@ -397,29 +363,6 @@ Convert.ToString(nValue));
             string strName,
             float fDefault)
         {
-#if NO
-            strPath = GetSectionPath(strPath);
-
-            XmlNode node = dom.SelectSingleNode(strPath);
-
-            if (node == null)
-                return fDefault;
-
-            string strDefault = fDefault.ToString();
-
-            string strValue = DomUtil.GetAttrOrDefault(node, 
-                strName,
-                strDefault);
-
-            try
-            {
-                return (float)Convert.ToDouble(strValue);
-            }
-            catch
-            {
-                return fDefault;
-            }
-#endif
             string value = GetString(strPath,
 strName,
 null);
@@ -436,7 +379,6 @@ null);
             }
         }
 
-
         // 设置一个浮点数
         // parameters:
         //		strPath	参数路径
@@ -446,21 +388,6 @@ null);
             string strName,
             float fValue)
         {
-#if NO
-            strPath = GetSectionPath(strPath);
-
-            string[] aPath = strPath.Split(new char[] { '/' });
-            XmlNode node = DomUtil.CreateNode(dom, aPath);
-
-            if (node == null)
-            {
-                throw (new Exception("SetString() error ..."));
-            }
-
-            DomUtil.SetAttr(node,
-                strName,
-                fValue.ToString());
-#endif
             SetString(strPath,
             strName,
             fValue.ToString());
@@ -588,39 +515,6 @@ null);
             }
         }
 
-#if NO
-		// 从ApplicationInfo中读取信息，设置MDI Child form尺寸位置状态
-		// 和一般Form的区别是,不修改x,y信息
-		// parameters:
-		//		form	Form对象
-		//		strCfgTitle	配置信息路径。本函数将用此值作为GetString()或GetInt()的strPath参数使用
-		public void LoadMdiChildFormStates(Form form,
-			string strCfgTitle,
-            int nDefaultWidth,
-            int nDefaultHeight)
-		{
-            // 2009/11/9
-            FormWindowState savestate = form.WindowState;
-            bool bStateChanged = false;
-            if (form.WindowState != FormWindowState.Normal)
-            {
-                form.WindowState = FormWindowState.Normal;
-                bStateChanged = true;
-            }
-			form.Width = this.GetInt(
-                strCfgTitle, "width", nDefaultWidth);
-			form.Height = this.GetInt(
-                strCfgTitle, "height", nDefaultHeight);
-
-            if (this.LoadMdiSize != null)
-                this.LoadMdiSize(form, null);
-
-            // 2009/11/9
-            if (bStateChanged == true)
-                form.WindowState = savestate;
-		}
-#endif
-
         public void SaveMdiChildFormStates(Form form,
             string strCfgTitle)
         {
@@ -638,7 +532,6 @@ null);
         {
             if ((style & SizeStyle.Size) != 0)
             {
-
                 FormWindowState savestate = form.WindowState;
 
                 Size size = form.Size;
@@ -790,23 +683,4 @@ null);
         }
     }
 
-    [Flags]
-    public enum SizeStyle
-    {
-        Size = 0x01,
-        Layout = 0x02,
-        All = Size | Layout,
-    }
-
-    // AppInfo 值发生改变的事件
-    public delegate void AppInfoChangedEventHandler(object sender,
-AppInfoChangedEventArgs e);
-
-    public class AppInfoChangedEventArgs : EventArgs
-    {
-        public string Path { get; set; }
-        public string Name { get; set; }
-        public string Value { get; set; }
-        public string OldValue { get; set; }    // 2019/8/25
-    }
 }

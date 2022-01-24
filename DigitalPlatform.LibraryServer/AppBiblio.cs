@@ -1752,7 +1752,8 @@ namespace DigitalPlatform.LibraryServer
         // 从册条码号(+册记录路径)获得种记录摘要，或者从订购记录路径、期记录路径、评注记录路径获得种记录摘要
         // 权限:   需要具有getbibliosummary权限
         // parameters:
-        //      strConfirmItemRecPath   如果 strComfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
+        //      strConfirmItemRecPath       册、订购、期、评注记录路径
+        //                                  如果 strComfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
         //      strBiblioRecPathExclude   除开列表中的这些种路径, 才返回摘要内容, 否则仅仅返回种路径即可
         //                                  如果包含 "coverimage"，表示要在 strSummary 头部包含封面图像的 <img ... /> 片段
         public LibraryServerResult GetBiblioSummary(
@@ -1821,7 +1822,8 @@ namespace DigitalPlatform.LibraryServer
 
             // 特殊情况，通过种路径
             string strHead = "@bibliorecpath:";
-            if (strItemBarcode.Length > strHead.Length
+            if (strItemBarcode != null
+                && strItemBarcode.Length > strHead.Length
                 && strItemBarcode.Substring(0, strHead.Length).ToLower() == strHead)
             {
                 strBiblioRecPath = strItemBarcode.Substring(strHead.Length);
@@ -1941,7 +1943,6 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet != 1)
                     goto ERROR1;
-
 
 #if NO
                 lRet = channel.GetRes(strConfirmItemRecPath,

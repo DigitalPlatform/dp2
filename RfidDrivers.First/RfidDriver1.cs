@@ -632,6 +632,7 @@ namespace RfidDrivers.First
                     return new List<Reader>();
                 }
 
+                // 注: 预先探测的这一次，readers.xml 中 reader 元素的 @driverName 属性，如果不能确知驱动 ID，则建议删除这个属性，这样程序会自动探测 driver 型号
                 StringBuilder debugInfo = new StringBuilder();
                 OpenReaderResult result = OpenReader(reader.DriverName,
                     reader.Type,
@@ -2108,7 +2109,79 @@ namespace RfidDrivers.First
     </function>
   </device>
 
-  <!--RD5200-->
+  <!-- RD5200 2022/1/20 -->
+  <device product='RD5200'>
+    <basic>
+      <id>680600</id>
+      <driver>680530</driver><!-- 2022/1/21 试图重定向到 RD5100 (正确)-->
+      <driver>690050</driver><!-- 2022/1/20 试图重定向到旧的 RD5200 -->
+      <driver>680600</driver>
+      <type>reader</type>
+      <picture>RD5200.jpg</picture>
+      <noise>true</noise>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>0</antena_count>
+      <buffer_mode>false</buffer_mode>
+      <save_block>true</save_block>
+      <cfg_antenna auto_check='true' antenna_cnt='36'/>
+      <communication usb ='true' com='true' tcp_ip='true'/>
+
+      <sub_id>680601</sub_id>
+      
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output enable='true'>
+          <port id='1' name='RD5200_o1'/>
+          <port id='2' name='RD5200_o2'/>
+          <port id='3' name='RD5200_o3'/>
+          <port id='4' name='RD5200_o4'/>
+          <port id='5' name='RD5200_o5'/>
+          <port id='6' name='RD5200_o6'/>
+        </set_output>
+        <input_status enable='true'>
+          <port id='1' name='RD5200_i1'/>
+          <port id='2' name='RD5200_i2'/>
+          <port id='3' name='RD5200_i3'/>
+          <port id='4' name='RD5200_i4'/>
+          <port id='5' name='RD5200_i5'/>
+        </input_status>
+        <RF_Operation>true</RF_Operation>
+        <reset_sys>true</reset_sys>
+      </command>
+      <multiple_tags/>
+      <single_tag>
+        <Transceive>
+          <ISO15693_Transceive Multiple_Antenna='true'/>
+        </Transceive>
+      </single_tag>
+      <device_diagnosis>
+        <antennas_check>true</antennas_check>
+        <temperature_check RF_Power='true' PA_Current='true'>true</temperature_check>
+        <error_check>
+          <DiagnosisFlg>
+            <Content Bit='0' Des='RD5200_b0'/>
+            <Content Bit='1' Des='RD5200_b1'/>
+            <Content Bit='2' Des='RD5200_b2'/>
+            <Content Bit='3' Des='RD5200_b3'/>
+            <Content Bit='4' Des='RD5200_b4'/>
+          </DiagnosisFlg>
+        </error_check>
+        <noise_check  Get_Nosiebase='true'>true</noise_check>
+      </device_diagnosis>
+    </function>
+  </device>
+
+  <!-- RD5200 旧的 -->
   <device product='RD5200'>
     <basic>
       <id>690050</id>
@@ -2159,7 +2232,7 @@ namespace RfidDrivers.First
   <device product='RD2104'>
     <basic>
       <id>680701</id>
-      <driver>680530</driver><!-- 这个 ID 是从 RF5100 那儿抄过来的-->
+      <driver>680530</driver><!-- 这个 ID 是从 RD5100 那儿抄过来的-->
       <type>reader</type>
       <picture>RD2100.jpg</picture>
       <noise>true</noise>
@@ -2450,20 +2523,29 @@ namespace RfidDrivers.First
 
             // return _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{product_id}']]/@product")?.Value;
 
+            XmlElement node_device = null;
             {
                 XmlNode node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../driver/text()");
                 if (node == null)
-                    return false;
+                {
+                    // 2022/1/20
+                    node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/sub_id[text()='{product_id}']/../driver/text()");
+                    if (node == null)
+                        return false;
+                }
                 // driver id
                 driver_name = node.Value;
+
+                node_device = node.ParentNode.ParentNode.ParentNode as XmlElement;
             }
 
-            product_name = _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{product_id}']]/@product")?.Value;
+            // product_name = _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{product_id}']]/@product")?.Value;
+            product_name = node_device.GetAttribute("product");
 
             {
                 List<string> list = new List<string>();
                 {
-                    XmlElement hf = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../../protocol/HF") as XmlElement;
+                    XmlElement hf = node_device.SelectSingleNode($"protocol/HF") as XmlElement;
                     if (hf != null)
                     {
                         foreach (XmlAttribute attr in hf.Attributes)
@@ -2477,7 +2559,7 @@ namespace RfidDrivers.First
                 }
 
                 {
-                    XmlElement uhf = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../../protocol/UHF") as XmlElement;
+                    XmlElement uhf = node_device.SelectSingleNode($"protocol/UHF") as XmlElement;
                     if (uhf != null)
                     {
                         foreach (XmlAttribute attr in uhf.Attributes)
@@ -2495,20 +2577,23 @@ namespace RfidDrivers.First
 
             // 2019/9/27
             {
-                XmlElement count = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../antena_count") as XmlElement;
+                XmlElement count = node_device.SelectSingleNode($"basic/antena_count") as XmlElement;
                 if (count != null)
                 {
                     var ret = Int32.TryParse(count.InnerText.Trim(), out antenna_count);
                     if (ret == false)
                         throw new Exception($"product_id {product_id} 中 antenna_count 值({count.InnerText.Trim()})不合法");
                     if (antenna_count <= 0)
-                        throw new Exception($"product_id {product_id} 中 antenna_count 值({count.InnerText.Trim()})不合法，不应小于 1");
+                    {
+                        antenna_count = 1;  // 2022/1/21
+                        // throw new Exception($"product_id {product_id} 中 antenna_count 值({count.InnerText.Trim()})不合法，不应小于 1");
+                    }
                 }
             }
 
             // 2020/10/15
             {
-                XmlElement count = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../min_antenna_id") as XmlElement;
+                XmlElement count = node_device.SelectSingleNode($"basic/min_antenna_id") as XmlElement;
                 if (count != null)
                 {
                     var ret = Int32.TryParse(count.InnerText.Trim(), out min_antenna_id);
@@ -2537,6 +2622,11 @@ namespace RfidDrivers.First
         static NormalResult FillReaderInfo(Reader reader, string baudRate)
         {
             StringBuilder debugInfo = new StringBuilder();
+            /*
+            string driverName = reader.DriverName;
+            if (reader.Type == "NET" && string.IsNullOrEmpty(driverName))
+                driverName = "RD5100";
+            */
             var result = OpenReader(reader.DriverName,  // "",
                 reader.Type,
                 reader.SerialNumber,
@@ -2625,6 +2715,8 @@ namespace RfidDrivers.First
             {
                 if (comm_type == "BLUETOOTH")
                     readerDriverName = "RPAN";
+                else if (comm_type == "NET")    // 2022/1/21
+                    readerDriverName = "RD5100";
                 else
                     readerDriverName = "M201";  // "RL8000";
                                                 // readerDriverName = readerDriverInfoList[0].m_name;

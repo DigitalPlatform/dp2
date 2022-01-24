@@ -1937,11 +1937,19 @@ MessageBoxDefaultButton.Button2);
                             continue;
                         }
 
+                        string recpath = null;
+                        string barcode = strLine;
+                        if (strLine.IndexOf("/") != -1)
+                        {
+                            recpath = strLine;
+                            barcode = null;
+                        }
+
                         stop.SetMessage("正在取书目摘要 '" + strLine + "' ...");
 
                         long lRet = channel.GetBiblioSummary(stop,
-                            strLine,
-                            null,
+                            barcode,
+                            recpath,
                             null,
                             out _,
                             out string summary,

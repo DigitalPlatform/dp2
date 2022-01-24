@@ -219,7 +219,7 @@ namespace dp2Circulation
         /// <summary>
         /// 配置存储
         /// </summary>
-        public ApplicationInfo AppInfo = null;  // new ApplicationInfo("dp2circulation.xml");
+        public NewApplicationInfo AppInfo = null;  // new ApplicationInfo("dp2circulation.xml");
 
         /// <summary>
         /// Stop 管理器
@@ -358,6 +358,9 @@ namespace dp2Circulation
         /// </summary>
         public MainForm()
         {
+            ClientInfo.ProgramName = "dp2circulation";
+            FormClientInfo.MainForm = this;
+
             InitializeComponent();
 
             try
@@ -426,6 +429,16 @@ namespace dp2Circulation
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            ClientInfo.SettingsFileName = "dp2circulation.xml";
+            FormClientInfo.SerialNumberMode = "loose";   // "must";
+            var bRet = FormClientInfo.Initial("dp2circulation_v2", null/*() => StringUtil.IsDevelopMode()*/);
+            if (bRet == false)
+            {
+                ClientInfo.Finish();
+                Application.Exit();
+                return;
+            }
+
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
@@ -852,6 +865,9 @@ Stack:
                 AppInfo.Save();
                 AppInfo = null;	// 避免后面再用这个对象
             }
+
+            // 2022/1/24
+            ClientInfo.Finish();
 
             if (Stop != null) // 脱离关联
             {
@@ -3016,7 +3032,9 @@ false);
             _currentLibraryCodeList = channel.LibraryCodeList;
 
 #if SN
-            if (_verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
+            if (_verified == false
+                && FormClientInfo.SerialNumberMode == "must"    // 2022/1/24
+                && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
             {
                 string strError = "";
                 int nRet = this.VerifySerialCode("", true, out strError);
@@ -8168,6 +8186,34 @@ Keys keyData)
             bool bReinput,
             out string strError)
         {
+
+            // parameters:
+            //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
+            //      strStyle    风格
+            //                  reinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
+            //                  reset   执行重设序列号任务。意思就是无论当前序列号是否可用，都直接出现序列号对话框
+            //                  skipVerify  不验证序列号合法性，只关注 function list 是否符合要求
+            // return:
+            //      -1  出错
+            //      0   正确
+            return FormClientInfo.VerifySerialCode(
+            "",
+            strRequirFuncList,
+            bReinput ? "reinput" : "",
+            out strError);
+        }
+
+#if REMOVED
+        // parameters:
+        //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
+        //      bReinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
+        // return:
+        //      -1  出错
+        //      0   正确
+        internal int VerifySerialCode(string strRequirFuncList,
+            bool bReinput,
+            out string strError)
+        {
             strError = "";
             int nRet = 0;
 
@@ -8252,6 +8298,8 @@ Keys keyData)
             }
             return 0;
         }
+
+#endif
 
         // return:
         //      false   不满足
@@ -8341,8 +8389,7 @@ Keys keyData)
         }
 #endif
 
-        string CopyrightKey = "dp2circulation_sn_key";
-
+#if REMOVED
         // return:
         //      0   Cancel
         //      1   OK
@@ -8398,11 +8445,13 @@ Keys keyData)
             this.AppInfo.Save();
             return 1;
         }
+#endif
 
 #endif
 
         #endregion
 
+#if REMOVED
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
         {
 #if SN
@@ -8481,6 +8530,26 @@ Keys keyData)
                 this.AppInfo.Save();
                 goto REDO_VERIFY;
             }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+#endif
+        }
+#endif
+
+        private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
+        {
+#if SN
+            // return:
+            //      -1  出错
+            //      0   正确
+            int nRet = FormClientInfo.VerifySerialCode(
+                "", // strTitle,
+                "", // strRequirFuncList,
+                "reset",
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
             return;
         ERROR1:
             MessageBox.Show(this, strError);

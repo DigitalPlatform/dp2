@@ -170,9 +170,11 @@
     <Compile Include="DomUtil.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="IApplicationInfo.cs" />
     <Compile Include="StringTable.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Content Include="ApplicationInfo.old.cs.txt" />
     <Content Include="NoUse.txt" />
   </ItemGroup>
   <ItemGroup>

@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.14.7")]   // 1.11.*
+[assembly: AssemblyVersion("1.14.16")]   // 1.11.*
 [assembly: AssemblyFileVersion("1.14.0.0")]
 
 // V1.1 2019/2/21 支持 32-bit Windows 环境
@@ -63,5 +63,10 @@ using System.Runtime.InteropServices;
 //      1.14.4 (2021/8/10) RfidDriver 中增加 URL105 型号数据
 //      1.14.5 (2021/8/13) 为 LED 驱动的 Display() API 增加了 uninitialized 错误码
 //      1.14.6 (2021/12/24) 修改 M22 型号 XML 信息
-// 1.14.7
+//      1.14.7
+//      1.14.8 (2022/1/20) 安装后 Windows 程序组 DigitalPlatform 里面的名字从“dp2-RFID中心”改为“RFID中心”
+//      1.14.9 (2022/1/20) 增加 RD5200 型号的元数据 (<sub_id>680601</sub_id>)
+//      1.14.10
+//      1.14.16 NET 类型在 driverName 为空时候尝试用 RD5100 探测
+
 
