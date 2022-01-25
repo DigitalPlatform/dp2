@@ -907,7 +907,11 @@ namespace DigitalPlatform.rms.Client
 
             }
 
-            Clipboard.SetDataObject(root);
+            // Clipboard.SetDataObject(root);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(root);
+            });
 
             if (Control.ModifierKeys == Keys.Control)
                 MessageBox.Show(this, root.Dump());
@@ -1073,7 +1077,11 @@ namespace DigitalPlatform.rms.Client
             */
             DatabaseObject root = this.Root.Clone();
 
-            Clipboard.SetDataObject(root);
+            // Clipboard.SetDataObject(root);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(root);
+            });
         }
 
         /*

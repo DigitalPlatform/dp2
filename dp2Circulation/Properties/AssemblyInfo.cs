@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.57.*")]
-[assembly: AssemblyFileVersion("3.57.0.0")]
+[assembly: AssemblyVersion("3.58.*")]
+[assembly: AssemblyFileVersion("3.58.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -140,3 +140,4 @@ using System.Runtime.InteropServices;
 // 3.55 2022/1/6 MARC 编辑器针对 $9 在阿拉伯文环境下顺序颠倒的问题进行了改进。HTML 显示的 MARC 格式也对 $9 显示做了改进
 // 3.56 2022/1/13
 // 3.57 2022/1/18 检查借阅信息链窗功能重构
+// 3.58 2022/1/25 dp2circulation 中 ApplicationInfo 类更换为 NewApplicationInfo 类

@@ -1387,7 +1387,11 @@ namespace dp2Catalog
             if (nRet == 0)
                 strResult = "1";    // 如果当前从书目中无法统计出最大号，则视为得到"0"，而加1以后正好为"1"
 
-            Clipboard.SetDataObject(strResult);
+            // Clipboard.SetDataObject(strResult);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(strResult);
+            });
             return;
         ERROR1:
             MessageBox.Show(this, strError);

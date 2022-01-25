@@ -964,12 +964,11 @@ namespace dp2rms
         // 回调 复制主题词。复制到剪贴板
         void CopySubject(object sender, CopySubjectEventArgs e)
         {
-            Clipboard.SetDataObject(e.Subject);
-            /*
-            Class2SubjectDlg dlg = (Class2SubjectDlg)sender;
-            dlg.DialogResult = DialogResult.OK;
-            dlg.Close();
-            */
+            // Clipboard.SetDataObject(e.Subject);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(e.Subject);
+            });
         }
 
         private void MenuItem_registerItems_Click(object sender, EventArgs e)

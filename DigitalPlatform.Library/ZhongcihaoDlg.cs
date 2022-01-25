@@ -1531,7 +1531,11 @@ namespace DigitalPlatform.Library
                 MessageBox.Show(this, "为数字 '" + this.MaxNumber + "' 增量时发生错误: " + strError);
                 return;
             }
-            Clipboard.SetDataObject(strResult);
+            // Clipboard.SetDataObject(strResult);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(strResult);
+            });
         }
 
         private void button_resetTailNumber_Click(object sender, System.EventArgs e)

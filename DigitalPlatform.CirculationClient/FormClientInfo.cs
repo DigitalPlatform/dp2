@@ -25,6 +25,8 @@ namespace DigitalPlatform.CirculationClient
     {
         public static Form MainForm { get; set; }
 
+        public static event EventHandler CommunityModeChanged;
+
         // parameters:
         //      product_name    例如 "fingerprintcenter"
         // return:
@@ -71,7 +73,7 @@ namespace DigitalPlatform.CirculationClient
         #region 序列号
 
         // parameters:
-        //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
+        //      strRequireFuncList   要求必须具备的功能列表。逗号间隔的字符串
         //      strStyle    风格
         //                  reinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
         //                  reset   执行重设序列号任务。意思就是无论当前序列号是否可用，都直接出现序列号对话框
@@ -81,7 +83,7 @@ namespace DigitalPlatform.CirculationClient
         //      0   正确
         public static int VerifySerialCode(
         string strTitle,
-        string strRequirFuncList,
+        string strRequireFuncList,
         string strStyle,
         out string strError)
         {
@@ -107,20 +109,27 @@ namespace DigitalPlatform.CirculationClient
             }
 
         REDO_VERIFY:
-            if (bReset == false
-                && SerialNumberMode != "must"
-                && strSerialCode == "community")
+            if (bReset == false)
             {
-                if (string.IsNullOrEmpty(strRequirFuncList) == true)
+                if (SerialNumberMode != "must"
+                    && strSerialCode == "community")
                 {
-                    CommunityMode = true;
-                    ClientInfo.Config.Set("main_form", "last_mode", "community");
-                    return 0;
+                    if (string.IsNullOrEmpty(strRequireFuncList) == true)
+                    {
+                        CommunityMode = true;
+                        ClientInfo.Config.Set("main_form", "last_mode", "community");
+                        return 0;
+                    }
                 }
+
+                // 2022/1/25
+                if (string.IsNullOrEmpty(strSerialCode) == false
+                    && strSerialCode != "community")
+                    CommunityMode = false;
             }
 
             if (bReset == true
-                || CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false
+                || CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false
                 || (bSkipVerify == false && MatchLocalString(strSerialCode) == false)
                 || String.IsNullOrEmpty(strSerialCode) == true)
             {
@@ -135,13 +144,13 @@ namespace DigitalPlatform.CirculationClient
                     if (String.IsNullOrEmpty(strSerialCode) == false
                         && MatchLocalString(strSerialCode) == false)
                         MessageBox.Show(MainForm, "序列号无效。请重新输入");
-                    else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
-                        MessageBox.Show(MainForm, $"序列号中尚未许可功能 {strRequirFuncList}。请重新输入");
+                    else if (CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false)
+                        MessageBox.Show(MainForm, $"序列号中尚未许可功能 {strRequireFuncList}。请重新输入");
 
                     /*
                     if (String.IsNullOrEmpty(strSerialCode) == false)
                         MessageBox.Show(MainForm, "序列号无效。请重新输入");
-                    else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
+                    else if (CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false)
                         MessageBox.Show(MainForm, "序列号中 function 参数无效。请重新输入");
                 */
                 }
@@ -176,7 +185,10 @@ namespace DigitalPlatform.CirculationClient
             set
             {
                 _communityMode = value;
-                SetTitle();
+                // SetTitle();
+
+                // 2022/1/25
+                CommunityModeChanged?.Invoke(value, new EventArgs());
             }
         }
 

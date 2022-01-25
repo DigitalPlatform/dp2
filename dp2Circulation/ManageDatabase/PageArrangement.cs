@@ -196,9 +196,11 @@ namespace dp2Circulation
             this.Update();
             Program.MainForm.Update();
 
+            var channel = this.GetChannel();
+
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "circulation",
                     "callNumber",
@@ -210,6 +212,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -238,9 +242,10 @@ namespace dp2Circulation
             this.Update();
             Program.MainForm.Update();
 
+            var channel = this.GetChannel();
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "circulation",
                     "callNumber",
@@ -253,6 +258,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");

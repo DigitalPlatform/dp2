@@ -282,7 +282,9 @@ namespace GcatLite
         private void checkBox_copyResultToClipboard_CheckedChanged(object sender, EventArgs e)
         {
             if (this.checkBox_copyResultToClipboard.Checked == true)
+            {
                 Clipboard.SetDataObject(this.textBox_number.Text);
+            }
         }
 
         private void textBox_author_Enter(object sender, EventArgs e)

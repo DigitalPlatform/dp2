@@ -2228,7 +2228,7 @@ token);
             //      0   正确
             int nRet = FormClientInfo.VerifySerialCode(
                 "", // strTitle,
-                "", // strRequirFuncList,
+                "", // strRequireFuncList,
                 "reset",
                 out string strError);
             if (nRet == -1)
@@ -2249,7 +2249,7 @@ token);
                 strFirstMac = macs[0];
             }
 
-            string strRequirFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
+            string strRequireFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
 
             string strSerialCode = "";
             REDO_VERIFY:
@@ -2266,14 +2266,14 @@ token);
                 ClientInfo.Config.Set("main_form", "last_mode", "standard");
             }
 
-            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+            if (CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false ||
                 // strSha1 != GetCheckCode(strSerialCode) 
                 MatchLocalString(strSerialCode) == false
                 || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (String.IsNullOrEmpty(strSerialCode) == false)
                     MessageBox.Show(this, "序列号无效。请重新输入");
-                else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
+                else if (CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false)
                     MessageBox.Show(this, "序列号中 function 参数无效。请重新输入");
 
 

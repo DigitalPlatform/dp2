@@ -836,7 +836,7 @@ _cancel.Token,
             //      0   正确
             int nRet = FormClientInfo.VerifySerialCode(
                 "", // strTitle,
-                "", // strRequirFuncList,
+                "", // strRequireFuncList,
                 "reset",
                 out string strError);
             if (nRet == -1)

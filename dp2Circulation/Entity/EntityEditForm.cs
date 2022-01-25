@@ -1330,10 +1330,11 @@ namespace dp2Circulation
                 10);
             if (exceed == true)
             {
+                // 序列号中要求包含 function=rfid 参数
                 int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
                 if (nRet == -1)
                 {
-                    strError = "写入 RFID 标签功能尚未被许可";
+                    strError = "写入 RFID 标签功能尚未被许可('rfid')";
                     return -1;
                 }
             }

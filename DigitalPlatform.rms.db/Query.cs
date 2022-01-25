@@ -684,6 +684,8 @@ namespace DigitalPlatform.rms
                         return -1;
                     resultSet.Close();
                     resultSet = oTargetMiddle;
+
+                    bNeedSort = false;  // 已经排序了
                 }
 
                 // 排序

@@ -106,6 +106,8 @@ namespace dp2Circulation
             stop.Initial("正在获得全部日历 ...");
             stop.BeginLoop();
 
+            var channel = this.GetChannel();
+
             try
             {
                 int nStart = 0;
@@ -115,7 +117,7 @@ namespace dp2Circulation
                 {
                     CalenderInfo[] infos = null;
 
-                    long lRet = Channel.GetCalendar(
+                    long lRet = channel.GetCalendar(
                         stop,
                         (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0 ? "list" : "get"), // "list",
                         "",
@@ -127,6 +129,13 @@ namespace dp2Circulation
                         return -1;
                     if (lRet == 0)
                         break;
+
+                    // 2022/1/25
+                    if (infos == null)
+                    {
+                        strError = "infos == null";
+                        return -1;
+                    }
 
                     // 
                     foreach (CalenderInfo info in infos)
@@ -156,6 +165,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -305,6 +316,8 @@ namespace dp2Circulation
             this.Update();
             Program.MainForm.Update();
 
+            var channel = this.GetChannel();
+
             try
             {
                 int nErrorCount = 0;
@@ -334,7 +347,7 @@ namespace dp2Circulation
                         return -1;
                     }
 
-                    long lRet = Channel.SetCalendar(
+                    long lRet = channel.SetCalendar(
                         stop,
                         strAction,
                         info,
@@ -369,6 +382,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");

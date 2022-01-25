@@ -153,7 +153,7 @@ namespace dp2Circulation
 
             var channel = this.GetChannel();
 
-            // var old_timeout = channel.Timeout;
+            var old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 25, 0);
             this.ShowMessage("正在获取 MD5 ...");
             try
@@ -187,7 +187,7 @@ namespace dp2Circulation
             }
             finally
             {
-                //channel.Timeout = old_timeout;
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
                 this.ClearMessage();
 
@@ -318,6 +318,15 @@ namespace dp2Circulation
                 return nRet;
 
             return String.Compare(strRight1, strRight2);
+        }
+
+        // 2022/1/10
+        public new LibraryChannel Channel
+        {
+            get
+            {
+                throw new Exception("ManagerForm 的 Channel 成员已经废止");
+            }
         }
 
         private void ManagerForm_Load(object sender, EventArgs e)
@@ -769,12 +778,14 @@ namespace dp2Circulation
             stop.Initial("正在清除所有数据库内数据 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.ClearAllDbs(
+                long lRet = channel.ClearAllDbs(
                     stop,
                     out strError);
                 if (lRet == -1)
@@ -782,6 +793,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -935,12 +948,13 @@ namespace dp2Circulation
             stop.Initial("正在获取全部数据库名 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
 
+            var channel = this.GetChannel();
             try
             {
-                long lRet = Channel.ManageDatabase(
+                long lRet = channel.ManageDatabase(
                     stop,
                     "getinfo",
                     "",
@@ -954,6 +968,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -1092,12 +1108,14 @@ namespace dp2Circulation
             stop.Initial("正在创建数据库 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.ManageDatabase(
+                long lRet = channel.ManageDatabase(
                     stop,
                     bRecreate == false ? "create" : "recreate",
                     "",
@@ -1111,6 +1129,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -1144,12 +1164,14 @@ namespace dp2Circulation
             stop.Initial("正在删除数据库 " + strDatabaseNames + "...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.ManageDatabase(
+                long lRet = channel.ManageDatabase(
                     stop,
                     "delete",
                     strDatabaseNames,
@@ -1163,6 +1185,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -1200,12 +1224,14 @@ namespace dp2Circulation
             stop.Initial("正在刷新数据库 " + strDatabaseNames + " 的定义...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.ManageDatabase(
+                long lRet = channel.ManageDatabase(
                     stop,
                     "refresh",
                     strDatabaseNames,
@@ -1219,6 +1245,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -1252,12 +1280,14 @@ namespace dp2Circulation
             stop.Initial("正在初始化数据库 " + strDatabaseNames + "...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.ManageDatabase(
+                long lRet = channel.ManageDatabase(
                     stop,
                     "initialize",
                     strDatabaseNames,
@@ -1271,6 +1301,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -1306,12 +1338,14 @@ namespace dp2Circulation
             stop.Initial("正在修改数据库 " + strDatabaseNames + "...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.ManageDatabase(
+                long lRet = channel.ManageDatabase(
                     stop,
                     "change",
                     strDatabaseNames,
@@ -1325,6 +1359,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -2205,8 +2241,6 @@ namespace dp2Circulation
 
             // 重新获得各种库名、列表
             Program.MainForm.StartPrepareNames(false, false);
-
-
         }
 
         private void ReaderDatabaseDialog_HelpRequested(object sender, HelpEventArgs hlpevent)
@@ -2401,36 +2435,45 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(login_dlg.PhoneNumber) == false)
                 strParameters += ",phoneNumber=" + login_dlg.PhoneNumber;
 
-            // return:
-            //      -1  error
-            //      0   登录未成功
-            //      1   登录成功
-            long lRet = this.Channel.Login(login_dlg.UserName,
-                login_dlg.Password,
-                strParameters,
-                out strError);
-            if (lRet == -1)
-                return -1;
-
-            if (lRet == 0)
+            var channel = this.GetChannel();
+            try
             {
-                if (this.Channel.ErrorCode == ErrorCode.TempCodeMismatch
-                    || this.Channel.ErrorCode == ErrorCode.RetryLogin)
+                // return:
+                //      -1  error
+                //      0   登录未成功
+                //      1   登录成功
+                long lRet = channel.Login(login_dlg.UserName,
+                    login_dlg.Password,
+                    strParameters,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (lRet == 0)
                 {
-                    login_dlg.ActivateTempCode();
-                    login_dlg.RetryLogin = true;  // 尝试再次登录
-                    login_dlg.Comment = strError;
-                    goto REDO_LOGIN;
-                }
-                if (this.Channel.ErrorCode == ErrorCode.NeedSmsLogin)
-                {
-                    login_dlg.ActivatePhoneNumber();
-                    login_dlg.Comment = strError;
-                    goto REDO_LOGIN;
+                    if (channel.ErrorCode == ErrorCode.TempCodeMismatch
+                        || channel.ErrorCode == ErrorCode.RetryLogin)
+                    {
+                        login_dlg.ActivateTempCode();
+                        login_dlg.RetryLogin = true;  // 尝试再次登录
+                        login_dlg.Comment = strError;
+                        goto REDO_LOGIN;
+                    }
+                    if (channel.ErrorCode == ErrorCode.NeedSmsLogin)
+                    {
+                        login_dlg.ActivatePhoneNumber();
+                        login_dlg.Comment = strError;
+                        goto REDO_LOGIN;
+                    }
+
+                    // strError = "";
+                    return -1;
                 }
 
-                // strError = "";
-                return -1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
             }
 
             return 1;
@@ -2621,7 +2664,13 @@ namespace dp2Circulation
                         strError += "。不过下列内核数据库的检索点定义已经发生修改:\r\n---\r\n" + strKeysChangedDbpaths.Replace(";", "\r\n")
                             + strOtherComment;
                     if (style_dlg.AutoRebuildKeys == false)
-                        Clipboard.SetDataObject(strKeysChangedDbpaths);
+                    {
+                        // Clipboard.SetDataObject(strKeysChangedDbpaths);
+                        StringUtil.RunClipboard(() =>
+                        {
+                            Clipboard.SetDataObject(strKeysChangedDbpaths);
+                        });
+                    }
                     goto ERROR1;
                 }
 
@@ -2659,7 +2708,13 @@ namespace dp2Circulation
 
                     strError = "下列内核数据库的检索点定义已经发生修改: \r\n---\r\n" + strKeysChangedDbpaths.Replace(";", "\r\n") + strOtherComment;
                     if (style_dlg.AutoRebuildKeys == false)
-                        Clipboard.SetDataObject(strKeysChangedDbpaths);
+                    {
+                        // Clipboard.SetDataObject(strKeysChangedDbpaths);
+                        StringUtil.RunClipboard(() =>
+                        {
+                            Clipboard.SetDataObject(strKeysChangedDbpaths);
+                        });
+                    }
                 }
                 else
                     strError = "";
@@ -2952,12 +3007,14 @@ namespace dp2Circulation
             stop.Initial("正在获取全部 OPAC 数据库定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            // this.Update();
+            // Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "opac",
                     "databases",
@@ -2969,6 +3026,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -2992,12 +3051,14 @@ namespace dp2Circulation
             stop.Initial("正在设置全部OPAC数据库定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "opac",
                     "databases",
@@ -3009,6 +3070,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -3042,12 +3105,14 @@ namespace dp2Circulation
             stop.Initial("正在获取数据库 " + strDbName + " 的定义...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "database_def",
                     strDbName,
@@ -3059,6 +3124,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -4114,12 +4181,14 @@ namespace dp2Circulation
             stop.Initial("正在获取全部OPAC记录显示格式定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "opac",
                     "browseformats",
@@ -4131,6 +4200,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -4154,12 +4225,14 @@ namespace dp2Circulation
             stop.Initial("正在设置全部OPAC记录显示格式定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "opac",
                     "browseformats",
@@ -4171,6 +4244,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -5348,12 +5423,14 @@ namespace dp2Circulation
             stop.Initial("正在获取<locationTypes>配置 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "circulation",
                     "locationTypes",
@@ -5365,6 +5442,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -5387,12 +5466,14 @@ namespace dp2Circulation
             stop.Initial("正在设置<locationTypes>定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "circulation",
                     "locationTypes",
@@ -5404,6 +5485,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -6123,12 +6206,14 @@ namespace dp2Circulation
             stop.Initial("正在获取值列表定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "circulation",
                     "valueTables",
@@ -6140,6 +6225,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -6165,12 +6252,14 @@ namespace dp2Circulation
             stop.Initial("正在保存值列表定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "circulation",
                     "valueTables",
@@ -6186,6 +6275,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -6387,12 +6478,14 @@ namespace dp2Circulation
             stop.Initial("正在获取条码校验规则定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "circulation",
                     "barcodeValidation",
@@ -6404,6 +6497,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -6436,12 +6531,14 @@ namespace dp2Circulation
             stop.Initial("正在保存条码校验规则定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "circulation",
                     "barcodeValidation",
@@ -6454,6 +6551,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -6556,12 +6655,14 @@ namespace dp2Circulation
             stop.Initial("正在获取脚本定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "circulation",
                     "script",
@@ -6573,6 +6674,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -6598,12 +6701,14 @@ namespace dp2Circulation
             stop.Initial("正在保存脚本定义 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
+
+            var channel = this.GetChannel();
 
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "circulation",
                     "script",
@@ -6616,6 +6721,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -8119,7 +8226,7 @@ namespace dp2Circulation
 
             dlg.Text = "请指定馆藏地点";
             if (this.Channel != null)
-                dlg.LibraryCodeList = this.Channel.LibraryCodeList;
+                dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList; // this.Channel.LibraryCodeList;
             dlg.ExcludingLocationNames = used_locationnames;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
@@ -8304,7 +8411,7 @@ namespace dp2Circulation
 
                 dlg.Text = "修改馆藏地点名";
                 if (this.Channel != null)
-                    dlg.LibraryCodeList = this.Channel.LibraryCodeList;
+                    dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList; // this.Channel.LibraryCodeList;
                 dlg.LocationString = strLocationName;
                 dlg.ExcludingLocationNames = used_locationnames;
                 dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -9168,8 +9275,9 @@ namespace dp2Circulation
             out strLibraryCode,
             out strPureName);
 
-                if (Global.IsGlobalUser(this.Channel.LibraryCodeList) == false
-                    && StringUtil.IsInList(strLibraryCode, this.Channel.LibraryCodeList) == false)
+                var libraryCodeList = Program.MainForm._currentLibraryCodeList;
+                if (Global.IsGlobalUser(libraryCodeList) == false
+                    && StringUtil.IsInList(strLibraryCode, libraryCodeList) == false)
                     bOwner = false;
             }
 
@@ -9177,7 +9285,7 @@ namespace dp2Circulation
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.OwnerLibraryCodes = GetOwnerLibraryCodes();
-            dlg.IsGlobalUser = Global.IsGlobalUser(this.Channel.LibraryCodeList);
+            dlg.IsGlobalUser = Global.IsGlobalUser(Program.MainForm._currentLibraryCodeList);
             dlg.CreateMode = false;
             dlg.ReadOnly = item.ImageIndex == ITEMTYPE_DELETED || bOwner == false;
             if (dlg.ReadOnly)
@@ -9222,10 +9330,10 @@ namespace dp2Circulation
             DateTime now = DateTime.Now;
 
             dlg.Text = "创建日历";
-            dlg.IsGlobalUser = Global.IsGlobalUser(this.Channel.LibraryCodeList);
+            dlg.IsGlobalUser = Global.IsGlobalUser(Program.MainForm._currentLibraryCodeList);
             dlg.OwnerLibraryCodes = GetOwnerLibraryCodes();
             dlg.CreateMode = true;
-            dlg.CalendarName = Global.BuildCalendarName(Global.GetFirstLibraryCode(this.Channel.LibraryCodeList), "新建日历");    // 当前用户所在分馆
+            dlg.CalendarName = Global.BuildCalendarName(Global.GetFirstLibraryCode(Program.MainForm._currentLibraryCodeList), "新建日历");    // 当前用户所在分馆
             dlg.Range = DateTimeUtil.DateTimeToString8(new DateTime(now.Year, 1, 1)) + "-" + DateTimeUtil.DateTimeToString8(new DateTime(now.Year + 2, 12, 31));   // 最近两年
             dlg.Comment = "";
             dlg.Content = "";

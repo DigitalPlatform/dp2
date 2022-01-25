@@ -15,6 +15,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Script
 {
@@ -1975,7 +1976,11 @@ namespace DigitalPlatform.Script
                     return;
                 }
 
-                Clipboard.SetDataObject(project);
+                // Clipboard.SetDataObject(project);
+                StringUtil.RunClipboard(() =>
+                {
+                    Clipboard.SetDataObject(project);
+                });
             }
         }
 

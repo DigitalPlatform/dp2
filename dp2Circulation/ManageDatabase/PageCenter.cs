@@ -48,9 +48,11 @@ namespace dp2Circulation
             this.Update();
             Program.MainForm.Update();
 
+            var channel = this.GetChannel();
+
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "center",
                     strAction,
@@ -62,6 +64,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -196,9 +200,11 @@ namespace dp2Circulation
             this.Update();
             Program.MainForm.Update();
 
+            var channel = this.GetChannel();
+
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "center",
                     "def",
@@ -210,6 +216,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");

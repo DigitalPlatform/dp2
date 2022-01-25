@@ -118,12 +118,105 @@ out string strError);
             CheckTargetResultSet(condition, target);
         }
 
+        // 测试没有重复的情况
+        [TestMethod]
+        public void Test_resultSet_mergeCount_05()
+        {
+            string condition = "";
+            var source = CreateSourceResultSet(condition);
+
+            var target = new DpResultSet(() =>
+            {
+                return Path.GetTempFileName();
+            });
+
+            StringBuilder debugInfo = null;
+
+            // 合并
+            int nRet = DpResultSetManager.MergeCount(source,
+target,
+null,
+null,
+ref debugInfo,
+out string strError);
+            Assert.AreEqual(0, nRet);
+            Assert.AreEqual(100, target.Count);
+            CheckTargetResultSet(condition, target);
+        }
+
+        // 测试空结果集
+        [TestMethod]
+        public void Test_resultSet_mergeCount_06()
+        {
+            using (var source = new DpResultSet(() =>
+            {
+                return Path.GetTempFileName();
+            }))
+            using (var target = new DpResultSet(() =>
+            {
+                return Path.GetTempFileName();
+            }))
+            {
+                source.Sort();
+
+                StringBuilder debugInfo = null;
+
+                // 合并
+                int nRet = DpResultSetManager.MergeCount(source,
+    target,
+    null,
+    null,
+    ref debugInfo,
+    out string strError);
+                Assert.AreEqual(0, nRet);
+                Assert.AreEqual(0, target.Count);
+            }
+        }
+
+        // 测试只有一条记录的情况
+        [TestMethod]
+        public void Test_resultSet_mergeCount_07()
+        {
+            string condition = "一条记录";
+            var source = CreateSourceResultSet(condition);
+
+            var target = new DpResultSet(() =>
+            {
+                return Path.GetTempFileName();
+            });
+
+            StringBuilder debugInfo = null;
+
+            // 合并
+            int nRet = DpResultSetManager.MergeCount(source,
+target,
+null,
+null,
+ref debugInfo,
+out string strError);
+            Assert.AreEqual(0, nRet);
+            Assert.AreEqual(1, target.Count);
+            CheckTargetResultSet(condition, target);
+        }
+
+
         static DpResultSet CreateSourceResultSet(string condition)
         {
             DpResultSet result = new DpResultSet(() =>
             {
                 return Path.GetTempFileName();
             });
+
+            if (condition == "一条记录")
+            {
+                DpRecord record = new DpRecord($"id1");
+                record.Index = 1;
+                record.BrowseText = $"browse1";
+                result.Add(record);
+
+                result.Sort();
+                return result;
+            }
 
             for (int i = 0; i < 100; i++)
             {
@@ -194,6 +287,29 @@ out string strError);
         static void CheckTargetResultSet(string condition,
             DpResultSet target)
         {
+            if (condition == "")
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    DpRecord record = target[i];
+                    Assert.AreEqual($"id{i.ToString().PadLeft(4, '0')}", record.ID);
+                    Assert.AreEqual(1, record.Index);
+                    Assert.AreEqual($"browse{i}", record.BrowseText);
+                }
+
+                return;
+            }
+
+            if (condition == "一条记录")
+            {
+                DpRecord record = target[0];
+                Assert.AreEqual($"id1", record.ID);
+                Assert.AreEqual(1, record.Index);
+                Assert.AreEqual($"browse1", record.BrowseText);
+
+                return;
+            }
+
             if (condition == "重复1")
             {
                 for (int i = 0; i < 100; i++)

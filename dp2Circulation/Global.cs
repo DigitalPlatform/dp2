@@ -1876,7 +1876,13 @@ namespace dp2Circulation
                 strTotal.Append(strLine + "\r\n");
             }
 
-            Clipboard.SetDataObject(strTotal.ToString(), true);
+            // Clipboard.SetDataObject(strTotal.ToString(), true);
+            StringUtil.RunClipboard(() =>
+            {
+                // https://stackoverflow.com/questions/930219/how-to-handle-a-blocked-clipboard-and-other-oddities
+                Clipboard.Clear();
+                Clipboard.SetDataObject(strTotal.ToString(), true, 5, 200);
+            });
 
             if (bCut == true)
             {
@@ -2053,7 +2059,13 @@ namespace dp2Circulation
                 strTotal.Append(strLine + "\r\n");
             }
 
-            Clipboard.SetDataObject(strTotal.ToString(), true);
+            // Clipboard.SetDataObject(strTotal.ToString(), true);
+            StringUtil.RunClipboard(() =>
+            {
+                // https://stackoverflow.com/questions/930219/how-to-handle-a-blocked-clipboard-and-other-oddities
+                Clipboard.Clear();
+                Clipboard.SetDataObject(strTotal.ToString(), true, 5, 200);
+            });
 
             if (bCut == true)
             {

@@ -130,8 +130,11 @@ namespace dp2Circulation
         internal string GetLibraryCodeList()
         {
             string strLibraryCodeList = "";
+            /*
             if (this.Channel != null)
                 strLibraryCodeList = this.Channel.LibraryCodeList;
+            */
+            strLibraryCodeList = Program.MainForm._currentLibraryCodeList;
 
 #if NO
             // 2014/5/27
@@ -206,9 +209,11 @@ namespace dp2Circulation
             this.Update();
             Program.MainForm.Update();
 
+            var channel = this.GetChannel();
+
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "circulation",
                     "rightsTable",
@@ -221,6 +226,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -246,9 +253,11 @@ namespace dp2Circulation
             stop.Initial("正在保存读者流通权限定义 ...");
             stop.BeginLoop();
 
+            var channel = this.GetChannel();
+
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "circulation",
                     "rightsTable",
@@ -261,6 +270,8 @@ namespace dp2Circulation
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");

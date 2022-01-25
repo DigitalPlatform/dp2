@@ -168,15 +168,21 @@ namespace DigitalPlatform.ResultSet
             if (sourceLeft.Count == 0 || sourceRight.Count == 0)
                 return 0;
 
+            /*
             if (sourceLeft.m_streamSmall == null)
             {
                 throw new Exception("sourceLeft结果集对象未建索引");
             }
+            */
+            ThrowIfSmallStreamNotPrepared(sourceLeft, nameof(sourceLeft));
 
+            /*
             if (sourceRight.m_streamSmall == null)
             {
                 throw new Exception("sourceRight结果集对象未建索引");
             }
+            */
+            ThrowIfSmallStreamNotPrepared(sourceRight, nameof(sourceRight));
 
             if (sourceLeft.Sorted == false)
             {
@@ -368,6 +374,16 @@ namespace DigitalPlatform.ResultSet
             return 0;
         }
 
+        public static void ThrowIfSmallStreamNotPrepared(DpResultSet resultSet,
+            string name)
+        {
+            if (resultSet.Count > 1
+    && resultSet.m_streamSmall == null)
+            {
+                throw new Exception($"{name} 结果集对象未建索引");
+            }
+        }
+
         public delegate bool QueryStop(object param);
 
         public static int MergeCount(DpResultSet resultSet,
@@ -379,10 +395,15 @@ namespace DigitalPlatform.ResultSet
         {
             strError = "";
 
-            if (resultSet.m_streamSmall == null)
+            // 当结果集中记录数少于 2 时，Sort() 可能会并不确保 CreateSmallFile() 执行
+            /*
+            if (resultSet.Count > 1
+                && resultSet.m_streamSmall == null)
             {
                 throw new Exception("resultSet结果集对象未建索引");
             }
+            */
+            ThrowIfSmallStreamNotPrepared(resultSet, nameof(resultSet));
 
             if (resultSet.Sorted == false)
             {
@@ -434,6 +455,10 @@ namespace DigitalPlatform.ResultSet
                         debugInfo.Append($"取出 resultSet 集合中第 {index} 个元素，ID为" + left.ID + "<br/>");
                     }
                     index++;
+                }
+                catch(EndOfStreamException e)
+                {
+                    goto END1;
                 }
                 catch (Exception e)
                 {
@@ -537,15 +562,22 @@ namespace DigitalPlatform.ResultSet
 
             // strLogicOper = strLogicOper.ToUpper();
 
+            /*
             if (sourceLeft.m_streamSmall == null)
             {
                 throw new Exception("sourceLeft结果集对象未建索引");
             }
+            */
+            ThrowIfSmallStreamNotPrepared(sourceLeft, nameof(sourceLeft));
 
+            /*
             if (sourceRight.m_streamSmall == null)
             {
                 throw new Exception("sourceRight结果集对象未建索引");
             }
+            */
+            ThrowIfSmallStreamNotPrepared(sourceRight, nameof(sourceRight));
+
 
             if (sourceLeft.Sorted == false)
             {
@@ -1937,6 +1969,10 @@ namespace DigitalPlatform.ResultSet
             {
                 if (nIndex * 8 >= m_streamSmall.Length || nIndex < 0)
                 {
+                    // 2022/1/25
+                    if (m_streamSmall.Length == 0)
+                        throw new EndOfStreamException("超过 m_streamSmall 文件末尾");
+
                     throw (new Exception("nIndex=" + Convert.ToString(nIndex) + "  m_streamSmall.Length=" + Convert.ToString(m_streamSmall.Length) + " 下标越界"));
                 }
                 //修改位置为负数
@@ -2561,15 +2597,16 @@ namespace DigitalPlatform.ResultSet
         // 排序
         public void Sort()
         {
+            if (this.ReadOnly)
+                throw new Exception("只读的结果集不允许发生修改");
+
             if (this.Count <= 1)
             {
                 this.Sorted = true;
                 Debug.WriteLine("QuickSort() 耗时 0 (优化)");
+                // 注: CreateSmallFile() 没有执行
                 return;
             }
-
-            if (this.ReadOnly)
-                throw new Exception("只读的结果集不允许发生修改");
 
             DateTime start_time = DateTime.Now;
 

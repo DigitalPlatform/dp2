@@ -199,9 +199,11 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             this.Update();
             Program.MainForm.Update();
 
+            var channel = this.GetChannel();
+
             try
             {
-                long lRet = Channel.GetSystemParameter(
+                long lRet = channel.GetSystemParameter(
                     stop,
                     "circulation",
                     "zhongcihao",
@@ -213,6 +215,8 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -241,9 +245,11 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             this.Update();
             Program.MainForm.Update();
 
+            var channel = this.GetChannel();
+
             try
             {
-                long lRet = Channel.SetSystemParameter(
+                long lRet = channel.SetSystemParameter(
                     stop,
                     "circulation",
                     "zhongcihao",
@@ -256,6 +262,8 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");

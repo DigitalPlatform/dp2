@@ -2521,7 +2521,11 @@ namespace DigitalPlatform.Xml
 		public void CopyToClipboard(Item item)
 		{
 			string strXml = item.OuterXml;
-			Clipboard.SetDataObject(strXml);
+			// Clipboard.SetDataObject(strXml);
+			StringUtil.RunClipboard(() =>
+			{
+				Clipboard.SetDataObject(strXml);
+			});
 		}
 
 		public void menuItem_Copy()
@@ -2547,7 +2551,11 @@ namespace DigitalPlatform.Xml
 		public void CutToClipboard(Item item)
 		{
 			string strXml = item.OuterXml;
-			Clipboard.SetDataObject(strXml);
+			// Clipboard.SetDataObject(strXml);
+			StringUtil.RunClipboard(() =>
+			{
+				Clipboard.SetDataObject(strXml);
+			});
 
 			// ???????虚根
 			if (item == this.VirtualRoot)

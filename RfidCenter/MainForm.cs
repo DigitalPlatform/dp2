@@ -2246,7 +2246,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             }));
 
             if (string.IsNullOrEmpty(port) == true
-                || port == "不使用")
+                || port == "不使用" || port == "<不使用>")
             {
                 _printerDriver.ReleaseDriver();
                 return;

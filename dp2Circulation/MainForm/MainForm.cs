@@ -363,6 +363,10 @@ namespace dp2Circulation
 
             InitializeComponent();
 
+            FormClientInfo.CommunityModeChanged += (s, e) => {
+                SetTitle();
+            };
+
             try
             {
                 this.qrRecognitionControl1 = new DigitalPlatform.Drawing.QrRecognitionControl();
@@ -438,6 +442,8 @@ namespace dp2Circulation
                 Application.Exit();
                 return;
             }
+
+            SetTitle();
 
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
@@ -8117,6 +8123,7 @@ Keys keyData)
             }
         }
 
+        /*
         bool _communityMode = false;
 
         public bool CommunityMode
@@ -8131,6 +8138,7 @@ Keys keyData)
                 SetTitle();
             }
         }
+        */
 
         void SetTitle()
         {
@@ -8142,7 +8150,7 @@ Keys keyData)
 
             if (this.TestMode == true)
                 this.Text = "dp2Circulation V3 -- 内务 [评估模式]";
-            else if (this.CommunityMode == true)
+            else if (FormClientInfo.CommunityMode == true)
                 this.Text = "dp2Circulation V3 -- 内务 [社区版]";
             else
                 this.Text = "dp2Circulation V3 -- 内务 [专业版]";
@@ -8177,18 +8185,18 @@ Keys keyData)
         }
 
         // parameters:
-        //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
+        //      strRequireFuncList   要求必须具备的功能列表。逗号间隔的字符串
         //      bReinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
         // return:
         //      -1  出错
         //      0   正确
-        internal int VerifySerialCode(string strRequirFuncList,
+        internal int VerifySerialCode(string strRequireFuncList,
             bool bReinput,
             out string strError)
         {
 
             // parameters:
-            //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
+            //      strRequireFuncList   要求必须具备的功能列表。逗号间隔的字符串
             //      strStyle    风格
             //                  reinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
             //                  reset   执行重设序列号任务。意思就是无论当前序列号是否可用，都直接出现序列号对话框
@@ -8197,20 +8205,20 @@ Keys keyData)
             //      -1  出错
             //      0   正确
             return FormClientInfo.VerifySerialCode(
-            "",
-            strRequirFuncList,
+            $"验证序列号 {strRequireFuncList}",
+            strRequireFuncList,
             bReinput ? "reinput" : "",
             out strError);
         }
 
 #if REMOVED
         // parameters:
-        //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
+        //      strRequireFuncList   要求必须具备的功能列表。逗号间隔的字符串
         //      bReinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
         // return:
         //      -1  出错
         //      0   正确
-        internal int VerifySerialCode(string strRequirFuncList,
+        internal int VerifySerialCode(string strRequireFuncList,
             bool bReinput,
             out string strError)
         {
@@ -8236,7 +8244,7 @@ Keys keyData)
 
             if (strSerialCode == "test")
             {
-                if (string.IsNullOrEmpty(strRequirFuncList) == true)
+                if (string.IsNullOrEmpty(strRequireFuncList) == true)
                 {
                     this.TestMode = true;
                     this.CommunityMode = false;
@@ -8248,7 +8256,7 @@ Keys keyData)
             }
             else if (strSerialCode == "community")
             {
-                if (string.IsNullOrEmpty(strRequirFuncList) == true)
+                if (string.IsNullOrEmpty(strRequireFuncList) == true)
                 {
                     this.TestMode = false;
                     this.CommunityMode = true;
@@ -8267,7 +8275,7 @@ Keys keyData)
 
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
-            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+            if (CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false ||
                     // strSha1 != GetCheckCode(strSerialCode)
                     MatchLocalString(strSerialCode) == false
                     || String.IsNullOrEmpty(strSerialCode) == true)
@@ -8280,7 +8288,7 @@ Keys keyData)
 
                 if (String.IsNullOrEmpty(strSerialCode) == false)
                     MessageBox.Show(this, "序列号无效。请重新输入");
-                else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
+                else if (CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false)
                     MessageBox.Show(this, "序列号中 function 参数无效。请重新输入");
 
                 // 出现设置序列号对话框
@@ -8466,7 +8474,7 @@ Keys keyData)
                 strFirstMac = macs[0];
             }
 
-            string strRequirFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
+            string strRequireeFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
 
             string strSerialCode = "";
         REDO_VERIFY:
@@ -8498,14 +8506,14 @@ Keys keyData)
 
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
-            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+            if (CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false ||
                     // strSha1 != GetCheckCode(strSerialCode) 
                     MatchLocalString(strSerialCode) == false
                     || String.IsNullOrEmpty(strSerialCode) == true)
             {
                 if (String.IsNullOrEmpty(strSerialCode) == false)
                     MessageBox.Show(this, "序列号无效。请重新输入");
-                else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
+                else if (CheckFunction(GetEnvironmentString(""), strRequireFuncList) == false)
                     MessageBox.Show(this, "序列号中 function 参数无效。请重新输入");
 
 
@@ -8544,8 +8552,8 @@ Keys keyData)
             //      -1  出错
             //      0   正确
             int nRet = FormClientInfo.VerifySerialCode(
-                "", // strTitle,
-                "", // strRequirFuncList,
+                "设置序列号", // strTitle,
+                "", // strRequireFuncList,
                 "reset",
                 out string strError);
             if (nRet == -1)

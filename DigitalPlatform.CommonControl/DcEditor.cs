@@ -11,6 +11,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -2054,8 +2055,11 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-
-            Clipboard.SetDataObject(strOutXml);
+            // Clipboard.SetDataObject(strOutXml);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(strOutXml);
+            });
         }
 
         // 粘贴替换整个记录
@@ -2933,8 +2937,11 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-            Clipboard.SetDataObject(strXml);
-
+            // Clipboard.SetDataObject(strXml);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(strXml);
+            });
 
             this.Container.DisableUpdate();
             try
@@ -2966,7 +2973,11 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
 
-            Clipboard.SetDataObject(strXml);
+            // Clipboard.SetDataObject(strXml);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(strXml);
+            });
         }
 
         // 粘贴插入[前]
