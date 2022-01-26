@@ -12984,6 +12984,7 @@ strLibraryCodeList);
         //      strOriginBiblioRecXml   发起的书目记录XML
         //      strProjectName  查重方案名
         //      strStyle    includeoriginrecord输出结果中包含发起记录(缺省为不包含)
+        //      strUsedProjectName  [out] 返回实际使用的查重方案名字。因为 strProjectName 可能会使用 null(表示希望使用默认的查重方案)，为了得知真正用到的查重方案名需要 strUsedProjectName 的返回值
         public LibraryServerResult SearchDup(
             string strOriginBiblioRecPath,
             string strOriginBiblioRecXml,

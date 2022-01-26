@@ -4458,65 +4458,68 @@ out string strErrorCode)
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_queryWord.Enabled = bEnable;
-
-            if (this.ItemsPageVisible == false)
+            this.Invoke((Action)(() =>
             {
-                this.textBox_itemBarcode.Enabled = false;
-                this.button_register.Enabled = false;
-            }
-            else
-            {
-                this.textBox_itemBarcode.Enabled = bEnable;
-                this.button_register.Enabled = bEnable;
-            }
+                this.textBox_queryWord.Enabled = bEnable;
 
-            if (bEnable == false)
-                this.button_save.Enabled = bEnable;
-            else
-                SetSaveAllButtonState(bEnable);
+                if (this.ItemsPageVisible == false)
+                {
+                    this.textBox_itemBarcode.Enabled = false;
+                    this.button_register.Enabled = false;
+                }
+                else
+                {
+                    this.textBox_itemBarcode.Enabled = bEnable;
+                    this.button_register.Enabled = bEnable;
+                }
 
-            this.button_search.Enabled = bEnable;
+                if (bEnable == false)
+                    this.button_save.Enabled = bEnable;
+                else
+                    SetSaveAllButtonState(bEnable);
 
-            try
-            {
-                this.toolStripButton_option.Enabled = bEnable;
-            }
-            catch
-            {
+                this.button_search.Enabled = bEnable;
 
-            }
+                try
+                {
+                    this.toolStripButton_option.Enabled = bEnable;
+                }
+                catch
+                {
 
-            this.entityControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
-            this.issueControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
-            this.orderControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
-            this.commentControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
-            this.binaryResControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+                }
 
-            this.comboBox_from.Enabled = bEnable;
-            this.checkedComboBox_biblioDbNames.Enabled = bEnable;
-            this.comboBox_matchStyle.Enabled = bEnable;
+                this.entityControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+                this.issueControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+                this.orderControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+                this.commentControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+                this.binaryResControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
 
-            // this.checkBox_autoDetectQueryBarcode.Enabled = bEnable;
-            this.checkBox_autoSavePrev.Enabled = bEnable;
+                this.comboBox_from.Enabled = bEnable;
+                this.checkedComboBox_biblioDbNames.Enabled = bEnable;
+                this.comboBox_matchStyle.Enabled = bEnable;
 
-            this.textBox_biblioRecPath.Enabled = bEnable;
+                // this.checkBox_autoDetectQueryBarcode.Enabled = bEnable;
+                this.checkBox_autoSavePrev.Enabled = bEnable;
 
-            try
-            {
-                this.toolStripButton_clear.Enabled = bEnable;
+                this.textBox_biblioRecPath.Enabled = bEnable;
 
-                if (this.toolStrip_marcEditor.Enabled != bEnable)
-                    this.toolStrip_marcEditor.Enabled = bEnable;
-            }
-            catch
-            {
+                try
+                {
+                    this.toolStripButton_clear.Enabled = bEnable;
 
-            }
+                    if (this.toolStrip_marcEditor.Enabled != bEnable)
+                        this.toolStrip_marcEditor.Enabled = bEnable;
+                }
+                catch
+                {
 
-            bool bValue = (this.m_bDeletedMode == true) ? false : bEnable;  // 2012/3/19
-            if (this.m_marcEditor.Enabled != bValue)
-                this.m_marcEditor.Enabled = bValue;
+                }
+
+                bool bValue = (this.m_bDeletedMode == true) ? false : bEnable;  // 2012/3/19
+                if (this.m_marcEditor.Enabled != bValue)
+                    this.m_marcEditor.Enabled = bValue;
+            }));
         }
 
         string GetMacroValue(string strMacroName)
@@ -13295,6 +13298,14 @@ out strError);
         {
             string strError = "";
 
+            // var control = ((Control.ModifierKeys & Keys.Control) == Keys.Control);
+
+            // 2022/1/26
+            string projectName = null;
+            var menuItem = sender as ToolStripMenuItem;
+            if (menuItem != null)
+                projectName = menuItem.Tag as string;
+
             // 获得书目记录XML格式
             string strXmlBody = "";
             int nRet = this.GetBiblioXml(
@@ -13305,7 +13316,6 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-
             DupForm form = Program.MainForm.GetTopChildWindow<DupForm>();
             if (form == null)
             {
@@ -13314,7 +13324,11 @@ out strError);
                 form.MainForm = Program.MainForm;
                 form.MdiParent = Program.MainForm;
 
-                form.ProjectName = "<默认>";
+                if (projectName == null)
+                    form.ProjectName = "<默认>";
+                else
+                    form.ProjectName = projectName;
+
                 form.XmlRecord = strXmlBody;
                 form.RecordPath = this.BiblioRecPath;
 
@@ -13328,7 +13342,11 @@ out strError);
                 if (form.WindowState == FormWindowState.Minimized)
                     form.WindowState = this.WindowState;
 
-                form.ProjectName = "<默认>";
+                if (projectName == null)
+                    form.ProjectName = "<默认>";
+                else
+                    form.ProjectName = projectName;
+
                 form.XmlRecord = strXmlBody;
                 form.RecordPath = this.BiblioRecPath;
 
@@ -14566,6 +14584,59 @@ out strError);
         {
             // 2020/1/10
             EntityEditControl.ToUpper(this.textBox_itemBarcode);
+        }
+
+        private async void ToolStripMenuItem_searchDupBySelected_DropDownOpening(object sender, EventArgs e)
+        {
+            if (this.ToolStripMenuItem_searchDupBySelected.DropDownItems.Count > 0)
+                return;
+
+            string strError = "";
+
+            // 先出现一个“请等待”菜单
+            var infoItem = new ToolStripMenuItem("正在获取查重方案名 ...", null, ToolStripMenuItem_searchDupInExistWindow_Click);
+            {
+                infoItem.Enabled = false;
+                this.ToolStripMenuItem_searchDupBySelected.DropDownItems.Add(infoItem);
+            }
+
+            try
+            {
+                string[] projectnames = null;
+                await Task.Run(() =>
+                {
+                    // 列出可用的查重方案名
+                    int nRet = ListProjectNames(null,
+                        out projectnames,
+                        out strError);
+                });
+
+                if (string.IsNullOrEmpty(strError) == false)
+                    goto ERROR1;
+
+                if (projectnames.Length == 0)
+                {
+                    infoItem.Text = "没有找到任何查重方案";
+                    infoItem = null;
+                }
+                else
+                {
+                    foreach (var name in projectnames)
+                    {
+                        var menuItem = new ToolStripMenuItem(name, null, ToolStripMenuItem_searchDupInExistWindow_Click);
+                        menuItem.Tag = name;
+                        this.ToolStripMenuItem_searchDupBySelected.DropDownItems.Add(menuItem);
+                    }
+                }
+                return;
+            }
+            finally
+            {
+                if (infoItem != null)
+                    this.ToolStripMenuItem_searchDupBySelected.DropDownItems.Remove(infoItem);
+            }
+        ERROR1:
+            ShowMessageBox(strError);
         }
 
 #if NO

@@ -510,6 +510,15 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
                 resultSet = source.Clone("handle");
+
+                // 2022/1/16
+                // 对即将 ReadOnly 的结果集先排序。因为一旦变成 ReadOnly 以后就不允许排序了
+                if (EnsureSorted(resultSet, handle, out strError) == -1)
+                {
+                    strError = $"在对克隆后的结果集排序时出现错误: {strError}";
+                    return -1;
+                }
+
                 resultSet.ReadOnly = true;
                 return 0;
             }

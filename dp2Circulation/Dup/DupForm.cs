@@ -326,7 +326,6 @@ this.checkBox_returnSearchDetail.Checked);
             {
                 this.EventFinish.Set();
             }
-
             return 0;
         }
 
@@ -564,66 +563,6 @@ this.checkBox_returnSearchDetail.Checked);
             MessageBox.Show(this, strError);
         }
 
-        // 
-        /// <summary>
-        /// 列出可用的查重方案名
-        /// </summary>
-        /// <param name="strRecPath">发起记录路径</param>
-        /// <param name="projectnames">返回可用的查重方案名字符串数组</param>
-        /// <param name="strError">返回出错信息</param>
-        /// <returns>-1: 出错; >=0: 成功</returns>
-        public int ListProjectNames(string strRecPath,
-            out string[] projectnames,
-            out string strError)
-        {
-            strError = "";
-            projectnames = null;
-
-            EnableControls(false);
-
-            LibraryChannel channel = this.GetChannel();
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取可用的查重方案名 ...");
-            stop.BeginLoop();
-
-            try
-            {
-                DupProjectInfo[] dpis = null;
-
-                string strBiblioDbName = Global.GetDbName(strRecPath);
-
-                long lRet = channel.ListDupProjectInfos(
-                    stop,
-                    strBiblioDbName,
-                    out dpis,
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-                projectnames = new string[dpis.Length];
-                for (int i = 0; i < projectnames.Length; i++)
-                {
-                    projectnames[i] = dpis[i].Name;
-                }
-
-                return (int)lRet;
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-
-                this.ReturnChannel(channel);
-
-                EnableControls(true);
-            }
-
-
-        ERROR1:
-            return -1;
-        }
 
         private void textBox_recordPath_TextChanged(object sender, EventArgs e)
         {

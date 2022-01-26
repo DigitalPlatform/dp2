@@ -134,6 +134,7 @@
             this.toolStripMenuItem_itemArea_ensureDisplay = new System.Windows.Forms.ToolStripMenuItem();
             this.imageList_itemType = new System.Windows.Forms.ImageList(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.ToolStripMenuItem_searchDupBySelected = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectRegisterType.SuspendLayout();
             this.contextMenuStrip_option.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
@@ -213,7 +214,7 @@
             this.button_save.AutoSize = true;
             this.button_save.Image = ((System.Drawing.Image)(resources.GetObject("button_save.Image")));
             this.button_save.Location = new System.Drawing.Point(1077, 3);
-            this.button_save.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_save.Margin = new System.Windows.Forms.Padding(5);
             this.button_save.Name = "button_save";
             this.button_save.Size = new System.Drawing.Size(254, 49);
             this.button_save.TabIndex = 4;
@@ -312,7 +313,7 @@
             this.comboBox_from.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_from.FormattingEnabled = true;
             this.comboBox_from.Location = new System.Drawing.Point(294, 10);
-            this.comboBox_from.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.comboBox_from.Margin = new System.Windows.Forms.Padding(5);
             this.comboBox_from.Name = "comboBox_from";
             this.comboBox_from.Size = new System.Drawing.Size(219, 29);
             this.comboBox_from.TabIndex = 1;
@@ -330,7 +331,7 @@
             "精确一致",
             "空值"});
             this.comboBox_matchStyle.Location = new System.Drawing.Point(523, 10);
-            this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(5);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
             this.comboBox_matchStyle.Size = new System.Drawing.Size(219, 29);
             this.comboBox_matchStyle.TabIndex = 11;
@@ -353,7 +354,7 @@
             this.textBox_queryWord.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_queryWord.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_queryWord.Location = new System.Drawing.Point(783, 9);
-            this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_queryWord.Name = "textBox_queryWord";
             this.textBox_queryWord.Size = new System.Drawing.Size(300, 31);
             this.textBox_queryWord.TabIndex = 3;
@@ -365,7 +366,7 @@
             this.button_search.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.button_search.Image = ((System.Drawing.Image)(resources.GetObject("button_search.Image")));
             this.button_search.Location = new System.Drawing.Point(1093, 5);
-            this.button_search.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_search.Margin = new System.Windows.Forms.Padding(5);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(137, 40);
             this.button_search.TabIndex = 4;
@@ -381,7 +382,7 @@
             this.checkBox_autoDetectQueryBarcode.Checked = true;
             this.checkBox_autoDetectQueryBarcode.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox_autoDetectQueryBarcode.Location = new System.Drawing.Point(5, 55);
-            this.checkBox_autoDetectQueryBarcode.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_autoDetectQueryBarcode.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_autoDetectQueryBarcode.Name = "checkBox_autoDetectQueryBarcode";
             this.checkBox_autoDetectQueryBarcode.Padding = new System.Windows.Forms.Padding(18, 5, 0, 5);
             this.checkBox_autoDetectQueryBarcode.Size = new System.Drawing.Size(215, 35);
@@ -447,7 +448,7 @@
             this.panel_biblioInfo.Controls.Add(this.tabControl_biblioInfo);
             this.panel_biblioInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_biblioInfo.Location = new System.Drawing.Point(5, 43);
-            this.panel_biblioInfo.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.panel_biblioInfo.Margin = new System.Windows.Forms.Padding(5);
             this.panel_biblioInfo.Name = "panel_biblioInfo";
             this.panel_biblioInfo.Size = new System.Drawing.Size(1332, 201);
             this.panel_biblioInfo.TabIndex = 12;
@@ -495,7 +496,7 @@
             this.tabPage_marc.Location = new System.Drawing.Point(60, 4);
             this.tabPage_marc.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage_marc.Name = "tabPage_marc";
-            this.tabPage_marc.Size = new System.Drawing.Size(1268, 186);
+            this.tabPage_marc.Size = new System.Drawing.Size(1268, 193);
             this.tabPage_marc.TabIndex = 1;
             this.tabPage_marc.Text = "MARC";
             this.tabPage_marc.UseVisualStyleBackColor = true;
@@ -529,7 +530,7 @@
             this.m_marcEditor.NameTextColor = System.Drawing.Color.Blue;
             this.m_marcEditor.ReadOnly = false;
             this.m_marcEditor.SelectionStart = -1;
-            this.m_marcEditor.Size = new System.Drawing.Size(1268, 186);
+            this.m_marcEditor.Size = new System.Drawing.Size(1268, 193);
             this.m_marcEditor.TabIndex = 0;
             this.m_marcEditor.Text = "marcEditor1";
             this.m_marcEditor.UiState = "{\"FieldNameCaptionWidth\":100}";
@@ -550,9 +551,9 @@
             // 
             this.tabPage_template.Controls.Add(this.easyMarcControl1);
             this.tabPage_template.Location = new System.Drawing.Point(60, 4);
-            this.tabPage_template.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_template.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_template.Name = "tabPage_template";
-            this.tabPage_template.Size = new System.Drawing.Size(1268, 186);
+            this.tabPage_template.Size = new System.Drawing.Size(1268, 193);
             this.tabPage_template.TabIndex = 2;
             this.tabPage_template.Text = "模板";
             this.tabPage_template.UseVisualStyleBackColor = true;
@@ -566,9 +567,9 @@
             this.easyMarcControl1.IncludeNumber = false;
             this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
             this.easyMarcControl1.MarcDefDom = null;
-            this.easyMarcControl1.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.easyMarcControl1.Margin = new System.Windows.Forms.Padding(7);
             this.easyMarcControl1.Name = "easyMarcControl1";
-            this.easyMarcControl1.Size = new System.Drawing.Size(1268, 186);
+            this.easyMarcControl1.Size = new System.Drawing.Size(1268, 193);
             this.easyMarcControl1.TabIndex = 0;
             this.easyMarcControl1.TextChanged += new System.EventHandler(this.easyMarcControl_TextChanged);
             this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.MarcEditor_GetConfigDom);
@@ -881,6 +882,7 @@
             // 
             this.toolStripSplitButton_searchDup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.toolStripSplitButton_searchDup.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_searchDupBySelected,
             this.ToolStripMenuItem_searchDupInExistWindow,
             this.ToolStripMenuItem_searchDupInNewWindow,
             this.ToolStripMenuItem_checkUnique});
@@ -1037,7 +1039,7 @@
             this.entityControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.entityControl1.ErrorInfo = "";
             this.entityControl1.Location = new System.Drawing.Point(4, 3);
-            this.entityControl1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.entityControl1.Margin = new System.Windows.Forms.Padding(5);
             this.entityControl1.Name = "entityControl1";
             this.entityControl1.Size = new System.Drawing.Size(1326, 198);
             this.entityControl1.TabIndex = 3;
@@ -1051,7 +1053,7 @@
             this.tabPage_issue.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_issue.Name = "tabPage_issue";
             this.tabPage_issue.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.tabPage_issue.Size = new System.Drawing.Size(1334, 203);
+            this.tabPage_issue.Size = new System.Drawing.Size(1334, 204);
             this.tabPage_issue.TabIndex = 1;
             this.tabPage_issue.Text = "期";
             this.tabPage_issue.UseVisualStyleBackColor = true;
@@ -1065,9 +1067,9 @@
             this.issueControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.issueControl1.ErrorInfo = "";
             this.issueControl1.Location = new System.Drawing.Point(4, 3);
-            this.issueControl1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.issueControl1.Margin = new System.Windows.Forms.Padding(5);
             this.issueControl1.Name = "issueControl1";
-            this.issueControl1.Size = new System.Drawing.Size(1326, 197);
+            this.issueControl1.Size = new System.Drawing.Size(1326, 198);
             this.issueControl1.TabIndex = 0;
             // 
             // tabPage_order
@@ -1076,7 +1078,7 @@
             this.tabPage_order.Location = new System.Drawing.Point(4, 31);
             this.tabPage_order.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_order.Name = "tabPage_order";
-            this.tabPage_order.Size = new System.Drawing.Size(1334, 203);
+            this.tabPage_order.Size = new System.Drawing.Size(1334, 204);
             this.tabPage_order.TabIndex = 3;
             this.tabPage_order.Text = "采购";
             this.tabPage_order.UseVisualStyleBackColor = true;
@@ -1093,7 +1095,7 @@
             this.orderControl1.Margin = new System.Windows.Forms.Padding(5, 6, 5, 6);
             this.orderControl1.Name = "orderControl1";
             this.orderControl1.SellerFilter = null;
-            this.orderControl1.Size = new System.Drawing.Size(1334, 203);
+            this.orderControl1.Size = new System.Drawing.Size(1334, 204);
             this.orderControl1.TabIndex = 0;
             // 
             // tabPage_object
@@ -1102,7 +1104,7 @@
             this.tabPage_object.Location = new System.Drawing.Point(4, 31);
             this.tabPage_object.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_object.Name = "tabPage_object";
-            this.tabPage_object.Size = new System.Drawing.Size(1334, 203);
+            this.tabPage_object.Size = new System.Drawing.Size(1334, 204);
             this.tabPage_object.TabIndex = 2;
             this.tabPage_object.Text = "对象";
             this.tabPage_object.UseVisualStyleBackColor = true;
@@ -1116,10 +1118,10 @@
             this.binaryResControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.binaryResControl1.ErrorInfo = "";
             this.binaryResControl1.Location = new System.Drawing.Point(0, 0);
-            this.binaryResControl1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.binaryResControl1.Margin = new System.Windows.Forms.Padding(5);
             this.binaryResControl1.Name = "binaryResControl1";
             this.binaryResControl1.RightsCfgFileName = null;
-            this.binaryResControl1.Size = new System.Drawing.Size(1334, 203);
+            this.binaryResControl1.Size = new System.Drawing.Size(1334, 204);
             this.binaryResControl1.TabIndex = 0;
             this.binaryResControl1.TempDir = null;
             this.binaryResControl1.Enter += new System.EventHandler(this.binaryResControl1_Enter);
@@ -1130,7 +1132,7 @@
             this.tabPage_comment.Location = new System.Drawing.Point(4, 31);
             this.tabPage_comment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_comment.Name = "tabPage_comment";
-            this.tabPage_comment.Size = new System.Drawing.Size(1334, 203);
+            this.tabPage_comment.Size = new System.Drawing.Size(1334, 204);
             this.tabPage_comment.TabIndex = 4;
             this.tabPage_comment.Text = "评注";
             this.tabPage_comment.UseVisualStyleBackColor = true;
@@ -1144,9 +1146,9 @@
             this.commentControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.commentControl1.ErrorInfo = "";
             this.commentControl1.Location = new System.Drawing.Point(0, 0);
-            this.commentControl1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.commentControl1.Margin = new System.Windows.Forms.Padding(5);
             this.commentControl1.Name = "commentControl1";
-            this.commentControl1.Size = new System.Drawing.Size(1334, 203);
+            this.commentControl1.Size = new System.Drawing.Size(1334, 204);
             this.commentControl1.TabIndex = 0;
             // 
             // panel_itemQuickInput
@@ -1159,7 +1161,7 @@
             this.panel_itemQuickInput.Controls.Add(this.toolStrip1);
             this.panel_itemQuickInput.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_itemQuickInput.Location = new System.Drawing.Point(5, 615);
-            this.panel_itemQuickInput.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.panel_itemQuickInput.Margin = new System.Windows.Forms.Padding(5);
             this.panel_itemQuickInput.Name = "panel_itemQuickInput";
             this.panel_itemQuickInput.Size = new System.Drawing.Size(1332, 51);
             this.panel_itemQuickInput.TabIndex = 6;
@@ -1170,7 +1172,7 @@
             this.button_register.ContextMenuStrip = this.contextMenuStrip_selectRegisterType;
             this.button_register.Image = ((System.Drawing.Image)(resources.GetObject("button_register.Image")));
             this.button_register.Location = new System.Drawing.Point(918, 3);
-            this.button_register.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.button_register.Margin = new System.Windows.Forms.Padding(5);
             this.button_register.Name = "button_register";
             this.button_register.Size = new System.Drawing.Size(169, 40);
             this.button_register.TabIndex = 2;
@@ -1196,7 +1198,7 @@
             this.textBox_itemBarcode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_itemBarcode.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_itemBarcode.Location = new System.Drawing.Point(237, 7);
-            this.textBox_itemBarcode.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_itemBarcode.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_itemBarcode.Name = "textBox_itemBarcode";
             this.textBox_itemBarcode.Size = new System.Drawing.Size(668, 31);
             this.textBox_itemBarcode.TabIndex = 1;
@@ -1259,6 +1261,13 @@
             // timer1
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // ToolStripMenuItem_searchDupBySelected
+            // 
+            this.ToolStripMenuItem_searchDupBySelected.Name = "ToolStripMenuItem_searchDupBySelected";
+            this.ToolStripMenuItem_searchDupBySelected.Size = new System.Drawing.Size(407, 40);
+            this.ToolStripMenuItem_searchDupBySelected.Text = "按照指定方案查重 ...";
+            this.ToolStripMenuItem_searchDupBySelected.DropDownOpening += new System.EventHandler(this.ToolStripMenuItem_searchDupBySelected_DropDownOpening);
             // 
             // EntityForm
             // 
@@ -1420,6 +1429,6 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_loadRecord;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_itemArea;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_itemArea_ensureDisplay;
-
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchDupBySelected;
     }
 }

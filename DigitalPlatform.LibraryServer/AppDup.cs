@@ -157,12 +157,12 @@ namespace DigitalPlatform.LibraryServer
 
         // 列出查重方案信息
         // parameters:
-        //      strOriginBiblioDbName  发起的书目库名
+        //      strOriginBiblioDbName  发起的书目库名。
+        //      如果为 null，表示希望获得全部方案名。否则是希望获得和发起的书目库关联的那些查重方案
         public LibraryServerResult ListDupProjectInfos(
             string strOriginBiblioDbName,
             out DupProjectInfo[] results)
         {
-            // string strError = "";
             results = null;
 
             LibraryServerResult result = new LibraryServerResult();

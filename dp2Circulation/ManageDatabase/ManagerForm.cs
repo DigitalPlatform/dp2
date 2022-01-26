@@ -8225,8 +8225,8 @@ namespace dp2Circulation
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.Text = "请指定馆藏地点";
-            if (this.Channel != null)
-                dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList; // this.Channel.LibraryCodeList;
+            // if (this.Channel != null)
+            dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList; // this.Channel.LibraryCodeList;
             dlg.ExcludingLocationNames = used_locationnames;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
@@ -8410,8 +8410,8 @@ namespace dp2Circulation
                 MainForm.SetControlFont(dlg, this.Font, false);
 
                 dlg.Text = "修改馆藏地点名";
-                if (this.Channel != null)
-                    dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList; // this.Channel.LibraryCodeList;
+                // if (this.Channel != null)
+                dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList; // this.Channel.LibraryCodeList;
                 dlg.LocationString = strLocationName;
                 dlg.ExcludingLocationNames = used_locationnames;
                 dlg.StartPosition = FormStartPosition.CenterScreen;
