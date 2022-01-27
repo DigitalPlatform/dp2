@@ -75,6 +75,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BarcodeValidator\TestBarcodeMultiMatch.cs" />
+    <Compile Include="Install\TestInstall.cs" />
     <Compile Include="ResultSet\TestResultSet.cs" />
     <Compile Include="TestAdjustOverflow.cs" />
     <Compile Include="TestAuthorNumber.cs" />
@@ -98,6 +99,10 @@
     <Compile Include="TestString.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.Install\DigitalPlatform.Install.csproj">
+      <Project>{fbb88810-6d4a-44fe-b220-cac22e4dbdcd}</Project>
+      <Name>DigitalPlatform.Install</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
       <Project>{2f085431-027a-4ddf-9b3d-83219e629fa1}</Project>
       <Name>DigitalPlatform.LibraryServer.Common</Name>

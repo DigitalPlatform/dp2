@@ -1,35 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using System.Web;
 using System.Deployment.Application;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Reflection;
+using System.Web;
+using System.Windows.Forms;
+using System.Xml;
 
-using Microsoft.Win32;
 using Ionic.Zip;
+using Microsoft.Win32;
 
-using dp2ZServer.Install;
 using PalmCenter.Install;
 
 using DigitalPlatform;
-using DigitalPlatform.IO;
-using DigitalPlatform.Install;
-using DigitalPlatform.Text;
-using DigitalPlatform.LibraryServer;
-using DigitalPlatform.GUI;
-using DigitalPlatform.OPAC;
-using DigitalPlatform.Xml;
-using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Install;
+using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryServer;
+using DigitalPlatform.OPAC;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using dp2ZServer.Install;
+
 
 namespace dp2Installer
 {
@@ -762,6 +764,75 @@ FormWindowState.Normal);
             _versionManager.AutoSave();
             return 1;
         }
+
+        // 2022/1/27
+        // 从 .zip 文件中解析出若干指定的文件
+        int ExtractFiles(
+    string strZipFileName,
+    string strTargetDir,
+    List<string> filenames,
+    out string strError)
+        {
+            strError = "";
+
+            if (filenames != null)
+            {
+                foreach (string filename in filenames)
+                {
+                    if (filename.ToLower() != filename)
+                    {
+                        strError = "filenames 中的字符串必须为小写形态";
+                        return -1;
+                    }
+                }
+            }
+
+            int count = 0;
+
+            // 要求在 xxx_app.zip 内准备要安装的可执行程序文件
+            try
+            {
+                using (ZipFile zip = ZipFile.Read(strZipFileName))
+                {
+                    for (int i = 0; i < zip.Count; i++)
+                    {
+                        ZipEntry e = zip[i];
+
+                        if (filenames != null && (e.Attributes & FileAttributes.Directory) == 0)
+                        {
+                            if (filenames.IndexOf(Path.GetFileName(e.FileName).ToLower()) == -1)
+                                continue;
+                        }
+
+                        string strPart = GetSubPath(e.FileName);
+                        string strFullPath = Path.Combine(strTargetDir, strPart);
+
+                        e.FileName = strPart;
+
+                        if ((e.Attributes & FileAttributes.Directory) == 0)
+                        {
+                            ExtractFile(e, strTargetDir);
+                            // AppendString("提取文件到 " + strFullPath + "\r\n");
+                            AppendString($"从 {strZipFileName} 提取文件 {e.FileName}\r\n");
+                            count++;
+                        }
+                        else
+                        {
+                            // e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+                        }
+                    }
+                }
+
+                return count;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+            return 1;
+        }
+
 
         void ExtractFile(ZipEntry e, string strTargetDir)
         {
@@ -1677,7 +1748,54 @@ MessageBoxDefaultButton.Button2);
         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    // 2022/1/27
+                    // 单独合并更新 web.config 文件
+                    if (nRet == 1)
+                    {
+                        string strTempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                        //string strTempFileName = "";
+                        try
+                        {
+                            nRet = ExtractFiles(
+        strZipFileName,
+        strTempDir,
+        new List<string>() { "web.config" },
+        out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            string sourceFileName = Path.Combine(strTempDir, "web.config");
+                            string targetFileName = Path.Combine(info.PhysicalPath, "web.config");
+
+                            //strTempFileName = sourceFileName;
+
+                            if (File.Exists(sourceFileName) && File.Exists(targetFileName))
+                            {
+                                nRet = InstallHelper.RefreshDependentAssembly(sourceFileName,
+            targetFileName,
+            out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                if (nRet == 0)
+                                    AppendString("web.config 文件没有变化\r\n");
+                                else if (nRet == 1)
+                                    AppendString("web.config 文件发生了局部更新\r\n");
+                            }
+                        }
+                        finally
+                        {
+                            /*
+                            if (File.Exists(strTempFileName))
+                                File.Delete(strTempFileName);
+                            */
+                            if (Directory.Exists(strTempDir))
+                                Directory.Delete(strTempDir, true);
+                        }
+                    }
                 }
+
+
 
                 nRet = UpdateOpacStyles(
                     true,

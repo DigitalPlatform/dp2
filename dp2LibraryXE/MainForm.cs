@@ -3847,7 +3847,12 @@ MessageBoxDefaultButton.Button2);
                         {
                             if (skip_webconfig
                                 && e.FileName.ToLower() == "opac_app/web.config")
+                            {
+                                // 将 web.config 展开到 TempDir 内
+                                ExtractFile(e, this.TempDir);
+                                AppendString("提取 " + e.FileName + "\r\n");
                                 continue;
+                            }
 
                             AppendString(e.FileName + "\r\n");
 
@@ -3866,6 +3871,28 @@ MessageBoxDefaultButton.Button2);
                 {
                     strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
+                }
+
+                // 替换 web.config 文件部分内容
+                if (skip_webconfig)
+                {
+                    string sourceFileName = Path.Combine(this.TempDir, "opac_app\\web.config");
+                    string targetFileName = Path.Combine(this.UserDir, "opac_app\\web.config");
+
+                    if (File.Exists(sourceFileName) && File.Exists(targetFileName))
+                    {
+                        nRet = InstallHelper.RefreshDependentAssembly(sourceFileName,
+    targetFileName,
+    out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 0)
+                            AppendString("web.config 文件没有变化\r\n");
+                        else if (nRet == 1)
+                            AppendString("web.config 文件发生了局部更新\r\n");
+
+                        File.Delete(sourceFileName);
+                    }
                 }
 
                 _versionManager.SetFileVersion(Path.GetFileName(strZipFileName), strNewTimestamp);

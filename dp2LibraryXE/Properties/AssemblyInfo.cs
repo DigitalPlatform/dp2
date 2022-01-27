@@ -33,9 +33,10 @@ using System.Runtime.InteropServices;
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("3.2.*")]
-[assembly: AssemblyFileVersion("3.2.0.0")]
+[assembly: AssemblyFileVersion("3.3.0.0")]
 
 // V1.2 (2016/10/11) 在面板上可以为 Windows 启用 MSMQ，可以为 library.xml 配置 MQ 参数
 // V3.0 (2018/6/23) 改为用 .NET Framework 4.6.1 编译
 // V3.1 (2018/4/12) 采用新的 dp-library submodule 的版本
 // V3.2 (2021/9/9) 主菜单增加创建绿色更新包和安装绿色更新包命令
+// V3.3 (2022/1/27) 升级 dp2OPAC 时，会自动把安装包中的 web.config 和当前 dp2OPAC 的 web.config 内容合并

@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有这些值，也可以使用“内部版本号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.5.1")]
-[assembly: AssemblyFileVersion("3.5.1.0")]
+[assembly: AssemblyVersion("3.5.2")]
+[assembly: AssemblyFileVersion("3.5.2.0")]
 
 // 1.1
 // 1.2 (2016/11/2) 增加安装 Z39.50 服务器功能
@@ -46,3 +46,4 @@ using System.Runtime.InteropServices;
 // 3.4 (2021/7/16) dp2installer 的 dp2library 实例对话框中增加了 checkbox “停用本实例”
 // 3.5 (2021/9/12) dp2installer 全面启用 ClientInfo。包括错误日志、 Config 体系(利用 settings.xml 文件保存配置参数)
 //      3.5.1 (2021/9/15) dp2kernel 和 dp2library 实例安装对话框里面的实例名做了检查，合法的实例名字符为数字或者字母，或者下划线。实例名也可以为空
+//      3.5.2 (2022/1/27) 升级 dp2OPAC 时，会自动把安装包中的 web.config 和当前 dp2OPAC 的 web.config 内容合并

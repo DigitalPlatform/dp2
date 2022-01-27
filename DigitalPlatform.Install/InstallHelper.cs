@@ -1115,7 +1115,7 @@ MessageBoxDefaultButton.Button1);
                     i,
                     out string strInstanceName,
                     out string strDataDir,
-                    out string [] existing_urls,
+                    out string[] existing_urls,
                     out string strCertificatSN,
                     out string strSerialNumber,
                     out string style);
@@ -2060,6 +2060,140 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 0;
+        }
+
+        /*
+<configuration>
+<runtime>
+<assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+<dependentAssembly>
+<assemblyIdentity name="System.Runtime" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+<bindingRedirect oldVersion="0.0.0.0-4.1.2.0" newVersion="4.1.2.0" />
+</dependentAssembly>
+<dependentAssembly>
+<assemblyIdentity name="System.Threading.Tasks" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+<bindingRedirect oldVersion="0.0.0.0-2.6.10.0" newVersion="2.6.10.0" />
+</dependentAssembly>
+* 
+ * 
+ * */
+        public static int RefreshDependentAssembly(string sourceFileName,
+            string targetFileName,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument source_dom = new XmlDocument();
+            try
+            {
+                source_dom.Load(sourceFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = $"文件 {sourceFileName} 装载到 XMLDOM 时出错: {ex.Message}";
+                return -1;
+            }
+
+            XmlDocument target_dom = new XmlDocument();
+            try
+            {
+                target_dom.Load(targetFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = $"文件 {targetFileName} 装载到 XMLDOM 时出错: {ex.Message}";
+                return -1;
+            }
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("asm", "urn:schemas-microsoft-com:asm.v1");
+
+            var source_assemblyBinding = source_dom.SelectSingleNode("configuration/runtime/asm:assemblyBinding", nsmgr) as XmlElement;
+            var target_assemblyBinding = target_dom.SelectSingleNode("configuration/runtime/asm:assemblyBinding", nsmgr) as XmlElement;
+
+            if (source_assemblyBinding == null
+                && target_assemblyBinding == null)
+                return 0;
+
+            string source_innerXml = "";
+            if (source_assemblyBinding != null)
+                source_innerXml = source_assemblyBinding.InnerXml;
+
+            string target_innerXml = "";
+            if (target_assemblyBinding != null)
+                target_innerXml = target_assemblyBinding.InnerXml;
+
+            /*
+            if (source_assemblyBinding != null && target_assemblyBinding != null)
+            {
+                if (CompareInnerXml(source_assemblyBinding, target_assemblyBinding) == true)
+                    return 0;
+            }
+            else */
+            {
+                if (source_innerXml == target_innerXml)
+                    return 0;
+            }
+
+            {
+                XmlElement runtime = target_dom.DocumentElement.SelectSingleNode("runtime", nsmgr) as XmlElement;
+                if (runtime == null)
+                    runtime = DomUtil.CreateNode(target_dom.DocumentElement, new string[] { "runtime" }) as XmlElement;
+                if (target_assemblyBinding == null)
+                {
+                    target_assemblyBinding = target_dom.CreateElement("asm", "assemblyBinding", "urn:schemas-microsoft-com:asm.v1");
+                    runtime.AppendChild(target_assemblyBinding);
+                }
+
+                target_assemblyBinding.InnerXml = source_innerXml;
+            }
+
+            using (XmlTextWriter w = new XmlTextWriter(targetFileName,
+    Encoding.UTF8))
+            {
+                w.Formatting = Formatting.Indented;
+                // w.Indentation = 4;
+                target_dom.WriteTo(w);
+            }
+            return 1;
+        }
+
+        // 注: 不比较文本节点
+        static bool CompareInnerXml(XmlElement element1, XmlElement element2)
+        {
+            var nodes1 = element1.SelectNodes("*");
+            var nodes2 = element1.SelectNodes("*");
+            if (nodes1.Count != nodes2.Count)
+                return false;
+            for (int i = 0; i < nodes1.Count; i++)
+            {
+                var node1 = nodes1[i] as XmlElement;
+                var node2 = nodes2[i] as XmlElement;
+                if (CompareAttributes(node1, node2) == false)
+                    return false;
+                if (CompareInnerXml(node1, node2) == false)
+                    return true;
+            }
+
+            return true;
+        }
+
+        static bool CompareAttributes(XmlElement element1, XmlElement element2)
+        {
+            if (element1.Attributes.Count != element2.Attributes.Count)
+                return false;
+            for(int i =0;i<element1.Attributes.Count;i++)
+            {
+                var attr1 = element1.Attributes[i];
+                var attr2 = element2.Attributes[i];
+
+                if (attr1.LocalName != attr2.LocalName
+                    || attr1.NamespaceURI != attr2.NamespaceURI
+                    || attr1.Value != attr2.Value)
+                    return false;
+            }
+
+            return true;
         }
 
 #if NOOOOOOOOOOOOOOOOOOO
