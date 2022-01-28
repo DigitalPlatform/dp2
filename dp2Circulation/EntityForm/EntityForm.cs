@@ -4683,6 +4683,7 @@ out string strErrorCode)
                         info.bBiblioSaved = true;
                         info.SavedNames.Add("书目信息");
                     }
+                    // 书目记录部分保存出错
                     if (nRet == -1)
                     {
                         info.ErrorCount++;
@@ -4691,16 +4692,33 @@ out string strErrorCode)
                         // TODO: 如果此时书目记录路径为 ? 形态，选择了继续保存也会报错。似乎应该自动放弃继续保存
 
                         // 询问是否继续保存下级记录
-                        DialogResult result = MessageBox.Show(this,
-        "是否继续保存下级记录? ",
-        "EntityForm",
-        MessageBoxButtons.YesNo,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button2);
-                        if (result == System.Windows.Forms.DialogResult.No)
+                        // 获得需要保存的下级记录总数
+                        nRet = GetSubRecordChangedCount(
+                            out List<string> changed_names,
+                            out string temp_error);
+                        if (nRet == -1)
+                        {
+                            MessageBox.Show(this, temp_error);
+                            return -1;
+                        }
+                        if (nRet == 0)
                         {
                             info.ErrorCount = -1;
                             return -2;
+                        }
+                        if (nRet > 0)
+                        {
+                            DialogResult result = MessageBox.Show(this,
+            $"是否继续保存下级记录? \r\n\r\n{StringUtil.MakePathList(changed_names, "\r\n")}",
+            "EntityForm",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button2);
+                            if (result == System.Windows.Forms.DialogResult.No)
+                            {
+                                info.ErrorCount = -1;
+                                return -2;
+                            }
                         }
                     }
                 }
@@ -4788,6 +4806,68 @@ out string strErrorCode)
             public int ErrorCount = 0;
             // 2022/1/28
             public List<string> Errors = new List<string>();
+        }
+
+        int GetSubRecordChangedCount(out List<string> changed_names,
+            out string strError)
+        {
+            strError = "";
+            changed_names = new List<string>();
+            int nRet = 0;
+
+            int count = 0;
+
+            if (this.entityControl1 != null)
+            {
+                nRet = this.entityControl1.DetectChangedCount(out strError);
+                if (nRet == -1)
+                    return -1;
+                count += nRet;
+                if (nRet > 0)
+                    changed_names.Add($"册:{nRet}");
+            }
+
+            if (this.orderControl1 != null)
+            {
+                nRet = this.orderControl1.DetectChangedCount(out strError);
+                if (nRet == -1)
+                    return -1;
+                count += nRet;
+                if (nRet > 0)
+                    changed_names.Add($"订购:{nRet}");
+            }
+
+            if (this.issueControl1 != null)
+            {
+                nRet = this.issueControl1.DetectChangedCount(out strError);
+                if (nRet == -1)
+                    return -1;
+                count += nRet;
+                if (nRet > 0)
+                    changed_names.Add($"期:{nRet}");
+            }
+
+            if (this.commentControl1 != null)
+            {
+                nRet = this.commentControl1.DetectChangedCount(out strError);
+                if (nRet == -1)
+                    return -1;
+                count += nRet;
+                if (nRet > 0)
+                    changed_names.Add($"评注:{nRet}");
+            }
+
+            if (this.Cataloging == true && this.binaryResControl1 != null)
+            {
+                nRet = this.binaryResControl1.DetectChangedCount(out strError);
+                if (nRet == -1)
+                    return -1;
+                count += nRet;
+                if (nRet > 0)
+                    changed_names.Add($"对象:{nRet}");
+            }
+
+            return count;
         }
 
         // parameters:

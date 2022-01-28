@@ -1016,6 +1016,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         // parameters:
         //      strStyle    风格。如果为 force，表示希望强制修改册记录
         //                  如果包含 outofrangeAsError，则 dp2library 会把超过范围的元素当作报错
+        //                  如果为 detect，表示只探测，不返回 entities。返回结果 >0 表示有值得保存的事项
         int BuildSaveEntities(
             string strStyle,
             out EntityInfo[] entities,
@@ -1027,6 +1028,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
             Debug.Assert(this.Items != null, "");
 
+            var detect = StringUtil.IsInList("detect", strStyle);
+            int count = 0;
             List<EntityInfo> entityArray = new List<EntityInfo>();
 
             foreach (T bookitem in this.Items)
@@ -1035,6 +1038,12 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                 if (bookitem.ItemDisplayState == ItemDisplayState.Normal)
                     continue;
+
+                if (detect)
+                {
+                    count++;
+                    continue;
+                }
 
                 EntityInfo info = new EntityInfo();
 
@@ -1105,13 +1114,16 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             }
 
             // 复制到目标
+            /*
             entities = new EntityInfo[entityArray.Count];
             for (int i = 0; i < entityArray.Count; i++)
             {
                 entities[i] = entityArray[i];
             }
-
-            return 0;
+            */
+            if (detect == false)
+                entities = entityArray.ToArray();
+            return count;
         }
 
         internal static EntityInfo[] GetPart(EntityInfo[] source,
@@ -1535,6 +1547,22 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             return 1;
         ERROR1:
             return -1;
+        }
+
+        // 2022/1/28
+        // 探测值得保存的事项的个数。(注: 待删除的事项也包括在内)
+        public virtual int DetectChangedCount(out string strError)
+        {
+            // 构造需要提交的实体信息数组
+            // parameters:
+            //      strStyle    风格。如果为 force，表示希望强制修改册记录
+            int nRet = BuildSaveEntities(
+                "detect",
+                out _,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            return nRet;
         }
 
         int m_nInSaveItems = 0;

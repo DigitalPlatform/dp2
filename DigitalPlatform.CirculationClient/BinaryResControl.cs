@@ -2008,6 +2008,34 @@ bool bChanged)
             return false;
         }
 
+        // 2022/1/28
+        public int DetectChangedCount(out string strError)
+        {
+            strError = "";
+
+            if (this.ListView.Items.Count == 0)
+                return 0;
+
+            int count = 0;
+            foreach(ListViewItem item in this.ListView.Items)
+            {
+                LineState state = GetLineState(item);
+
+                if (state == LineState.Changed ||
+    state == LineState.New)
+                {
+                }
+                else
+                {
+                    continue;
+                }
+
+                count++;
+            }
+
+            return count;
+        }
+
         // 保存资源到服务器
         // return:
         //		-1	error
