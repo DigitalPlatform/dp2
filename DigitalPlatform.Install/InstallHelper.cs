@@ -2158,6 +2158,7 @@ MessageBoxDefaultButton.Button1);
             return 1;
         }
 
+        // TODO: 单元测试
         // 注: 不比较文本节点
         static bool CompareInnerXml(XmlElement element1, XmlElement element2)
         {

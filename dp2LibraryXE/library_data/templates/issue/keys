@@ -47,13 +47,13 @@ public class MyKeysHost : KeysHost
     <caption lang="en">issue</caption>
   </table>
   <key>
-    <xpath>*/no</xpath>
-    <from>no</from>
-    <table ref="no" />
+    <xpath>*/zong</xpath>
+    <from>zong</from>
+    <table ref="zong" />
   </key>
-  <table name="no" id="4">
+  <table name="zong" id="4">
     <caption lang="zh-CN">总期号</caption>
-    <caption lang="en">no</caption>
+    <caption lang="en">zong</caption>
   </table>
   <key>
     <xpath>*/volume</xpath>

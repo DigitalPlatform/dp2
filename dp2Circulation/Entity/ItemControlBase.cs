@@ -1688,16 +1688,17 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
         public virtual int DoSaveItems(LibraryChannel channel,
-            string strStyle)
+            string strStyle,
+            out string strError)
         {
-            string strError = "";
+            strError = "";
             int nRet = SaveItems(channel,
                 strStyle,
                 out strError);
 
             if (nRet == -1)
             {
-                MessageBox.Show(this, strError);    // this/*ForegroundWindow.Instance*/
+                // MessageBox.Show(this, strError);    // this/*ForegroundWindow.Instance*/
                 return -1;
             }
 

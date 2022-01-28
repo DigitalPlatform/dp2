@@ -527,7 +527,7 @@ namespace TestDp2Library.Install
             File.Delete(targetFileName);
         }
 
-        // 去掉 target 中的 dependentAssembly。source 中 assemblyBinding 不存在(runtine 存在)
+        // 去掉 target 中的 dependentAssembly。source 中 assemblyBinding 不存在(runtime 存在)
         [TestMethod]
         public void Test_install_RefreshDependentAssembly_07()
         {

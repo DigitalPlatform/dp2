@@ -4676,6 +4676,7 @@ out string strErrorCode)
                         channel,
                         true,
                         out strHtml,
+                        out string error,
                         strStyle);
                     if (nRet >= 1)
                     {
@@ -4685,6 +4686,7 @@ out string strErrorCode)
                     if (nRet == -1)
                     {
                         info.ErrorCount++;
+                        info.Errors.Add(error);
 
                         // TODO: 如果此时书目记录路径为 ? 形态，选择了继续保存也会报错。似乎应该自动放弃继续保存
 
@@ -4756,7 +4758,12 @@ out string strErrorCode)
                     if (info.ErrorCount == 0)
                         this.ShowMessage("记录保存成功", "green", true);
                     else
-                        this.ShowMessage("记录保存失败", "red", true);
+                    {
+                        string succeed = "";
+                        if (info.SavedNames.Count > 0)
+                            succeed = "但同时 " + StringUtil.MakePathList(info.SavedNames, " ") + " 保存 成功";
+                        this.ShowMessage($"记录保存失败: \r\n{StringUtil.MakePathList(info.Errors, "; ")}\r\n{succeed}", "red", true);
+                    }
                 }
 
                 Progress.EndLoop();
@@ -4777,7 +4784,10 @@ out string strErrorCode)
             public bool bCommentsSaved = false;
             public bool bObjectSaved = false;
             public List<string> SavedNames = new List<string>();
+
             public int ErrorCount = 0;
+            // 2022/1/28
+            public List<string> Errors = new List<string>();
         }
 
         // parameters:
@@ -4832,7 +4842,7 @@ out string strErrorCode)
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.orderControl1.DoSaveItems(channel, strStyle);
+                nRet = this.orderControl1.DoSaveItems(channel, strStyle, out strError);
                 if (nRet == 1)
                 {
                     info.bOrdersSaved = true;
@@ -4841,6 +4851,8 @@ out string strErrorCode)
                 if (nRet == -1)
                 {
                     info.ErrorCount++;
+                    info.Errors.Add(strError);
+                    MessageBox.Show(this, strError);
 
                     // 2013/1/18
                     // 如果订购信息保存不成功，则不要继续保存后面的其他信息。这主要是为了订购验收环节考虑，避免在订购信息保存失败的情况下继续保存验收所创建的新的册信息
@@ -4855,7 +4867,7 @@ out string strErrorCode)
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.issueControl1.DoSaveItems(channel, strStyle);
+                nRet = this.issueControl1.DoSaveItems(channel, strStyle, out strError);
                 if (nRet == 1)
                 {
                     info.bIssuesSaved = true;
@@ -4864,6 +4876,10 @@ out string strErrorCode)
                 if (nRet == -1)
                 {
                     info.ErrorCount++;
+
+                    info.Errors.Add(strError);
+                    MessageBox.Show(this, strError);
+
                     info.bIssueError = true;
 
                     // 2013/1/18
@@ -4881,7 +4897,7 @@ out string strErrorCode)
                     //      -1  出错
                     //      0   没有必要保存
                     //      1   保存成功
-                    nRet = this.entityControl1.DoSaveItems(channel, strStyle + ",outofrangeAsError");
+                    nRet = this.entityControl1.DoSaveItems(channel, strStyle + ",outofrangeAsError", out strError);
                     if (nRet == 1)
                     {
                         ReleaseProtectedTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
@@ -4892,6 +4908,8 @@ out string strErrorCode)
                     if (nRet == -1)
                     {
                         info.ErrorCount++;
+                        info.Errors.Add(strError);
+                        MessageBox.Show(this, strError);
                     }
                 }
 
@@ -4902,7 +4920,7 @@ out string strErrorCode)
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.commentControl1.DoSaveItems(channel, strStyle);
+                nRet = this.commentControl1.DoSaveItems(channel, strStyle, out strError);
                 if (nRet == 1)
                 {
                     info.bCommentsSaved = true;
@@ -4911,6 +4929,8 @@ out string strErrorCode)
                 if (nRet == -1)
                 {
                     info.ErrorCount++;
+                    info.Errors.Add(strError);
+                    MessageBox.Show(this, strError);
                 }
 
                 // bool bObjectSaved = false;
@@ -4931,6 +4951,7 @@ out string strErrorCode)
                     {
                         MessageBox.Show(this, "保存对象信息时出错: " + strError);
                         info.ErrorCount++;
+                        info.Errors.Add("保存对象信息时出错: " + strError);
                     }
 
                     if (nRet >= 1)
@@ -8066,6 +8087,7 @@ out strError);
         /// <param name="channel_param">通讯通道。如果为 null，表示函数内使用自动获得的通道</param>
         /// <param name="bIncludeFileID">(书目记录XML)是否要根据当前对象控件内容合成&lt;dprms:file&gt;元素?</param>
         /// <param name="strHtml">返回新记录的 OPAC 格式内容</param>
+        /// <param name="strError"></param>
         /// <param name="strStyle">风格。由 displaysuccess / searchdup 之一或者逗号间隔组合而成。displaysuccess 显示最后的成功消息在框架窗口的状态条; searchdup 保存成功后发送查重消息。如果为 checkUnique 表示不是进行保存而是检查书目记录唯一性</param>
         /// <returns>
         /// <para>-1  出错</para>
@@ -8077,9 +8099,10 @@ out strError);
             LibraryChannel channel_param,
             bool bIncludeFileID,
             out string strHtml,
+            out string strError,
             string strStyle = "displaysuccess,searchdup")
         {
-            string strError = "";
+            strError = "";
             strHtml = "";
             int nRet = 0;
 
@@ -8255,7 +8278,7 @@ out strError);
                         }
 
                         if (StringUtil.IsInList("checkUnique", strStyle) == true)
-                            strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页";
+                            strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页。在浏览行上双击鼠标左键，可把书目记录装入第二个种册窗进行观察";
                         else
                             strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页，请合并重复书目记录后，重新提交保存";
                     }
@@ -9145,7 +9168,10 @@ out strError);
                 }
 
                 string strHtml = "";
-                SaveBiblioToDatabase(null, true, out strHtml);
+                SaveBiblioToDatabase(null,
+                    true,
+                    out strHtml,
+                    out _);
                 this.m_webExternalHost_biblio.SetHtmlString(strHtml,
         "entityform_biblio");
 
@@ -10542,9 +10568,12 @@ out strError);
                 if (IsISBnBarcode(this.textBox_itemBarcode.Text) == true)
                 {
                     // 保存当前册信息
-                    nRet = this.entityControl1.DoSaveItems(channel, "");
+                    nRet = this.entityControl1.DoSaveItems(channel, "", out strError);
                     if (nRet == -1)
+                    {
+                        MessageBox.Show(this, strError);
                         return; // 放弃进一步操作
+                    }
 
                     ReleaseProtectedTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
 
@@ -13182,6 +13211,7 @@ out strError);
                 if (nRet == -1)
                 {
                     info.ErrorCount++;
+                    info.Errors.Add(strError);
                     goto ERROR1; // 书目记录若保存不成功，后继的实体记录保存就没法定位正确的书目记录路径
                 }
 
@@ -13286,7 +13316,11 @@ out strError);
             try
             {
                 string strHtml = "";
-                SaveBiblioToDatabase(null, true, out strHtml, "checkUnique");
+                SaveBiblioToDatabase(null,
+                    true,
+                    out strHtml,
+                    out _,
+                    "checkUnique");
             }
             finally
             {

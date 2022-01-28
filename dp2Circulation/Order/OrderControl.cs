@@ -748,18 +748,20 @@ namespace dp2Circulation
         }
 
         public override int DoSaveItems(LibraryChannel channel,
-            string strStyle)
+            string strStyle,
+            out string strError)
         {
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.4") < 0)
             {
                 // 检查订购记录里面是否含有 fixedPrice 和 discount 元素，dp2library 是否在 3.4 版以上
-                if (ExistingFixedPrice(out string strError) != 0)
+                if (ExistingFixedPrice(out strError) != 0)
                 {
-                    MessageBox.Show(this, "保存操作无法进行。订购记录中含有码洋或折扣字段信息，必须在 dp2library 服务器 3.4 版以上才能无损保存。请系统管理员尽快升级 dp2library 到最新版本");
+                    // MessageBox.Show(this, "保存操作无法进行。订购记录中含有码洋或折扣字段信息，必须在 dp2library 服务器 3.4 版以上才能无损保存。请系统管理员尽快升级 dp2library 到最新版本");
+                    strError = "保存操作无法进行。订购记录中含有码洋或折扣字段信息，必须在 dp2library 服务器 3.4 版以上才能无损保存。请系统管理员尽快升级 dp2library 到最新版本";
                     return -1;
                 }
             }
-            return base.DoSaveItems(channel, strStyle);
+            return base.DoSaveItems(channel, strStyle, out strError);
         }
 
         // 检查即将保存的订购记录里面是否有 fixedPrice 和 discount 元素

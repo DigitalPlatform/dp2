@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.102.*")]
-[assembly: AssemblyFileVersion("3.102.0.0")]
+[assembly: AssemblyVersion("3.103.*")]
+[assembly: AssemblyFileVersion("3.103.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -304,3 +304,4 @@ ItemCanReturn()
 //		3.100 (2022/1/7) MD5 Task 管理模块修正了一个涉及到 FinishTime 的 bug。此 bug 会让任务过早被自动清除
 //		3.101 (2022/1/10) dp2library 的 C# 脚本编译改为 Roslyn
 //		3.102 (2022/1/18) RepairBorrowInfo() API 优化改进。返回的出错信息里面增加了 XML 标记
+//		3.103 (2022/1/28) SetBiblioInfo() API action 为 “checkUnique” 时，增加了对 library.xml 中未配置查重空间和发起记录不在查重空间内两种情况进行了报错(以前版本是不报错)

@@ -34,6 +34,10 @@ namespace dp2Circulation
         // TODO: 要根据左侧窗口宽度，把剩余宽度给右侧窗口
         public void SetFixedPosition(Form form, string strStyle)
         {
+            // 2022/1/28
+            if (this.PanelFixedVisible == false)
+                this.PanelFixedVisible = true;
+
             MdiClient client = this.MdiClient;  //  GetMdiClient();
             if (strStyle == "left")
             {
@@ -102,14 +106,17 @@ namespace dp2Circulation
                 search_form = new BiblioSearchForm();
                 search_form.Show();
                 search_form.DoDock(true);
+
+                if (this.CurrentBrowseControl != null)
+                    search_form = GetOwnerBiblioSearchForm(this.CurrentBrowseControl);
             }
             else
                 search_form.ClearListViewItems();
 
-            this.ActivateFixPage("browse");
+            var page = this.ActivateFixPage("browse");
 
             List<string> list = StringUtil.SplitList(strRecPathList);
-            search_form.EnableControls(false);
+            //search_form.EnableControls(false);
             if (list.Count == 0)
                 search_form.ClearListViewItems();
             else
@@ -119,10 +126,17 @@ namespace dp2Circulation
                     search_form.AddLineToBrowseList(recpath);
                 }
             }
-            search_form.EnableControls(true);
+            //search_form.EnableControls(true);
 
             if (list.Count > 0)
+            {
                 search_form.RefreshAllLines();
+
+                // 2022/1/28
+                // 确保固定面板被显示出来
+                if (this.PanelFixedVisible == false)
+                    this.PanelFixedVisible = true;
+            }
             return 0;
         }
     }

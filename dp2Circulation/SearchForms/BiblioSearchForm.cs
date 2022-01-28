@@ -2989,8 +2989,11 @@ Keys keyData)
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            EnableControlsInSearching(bEnable);
-            this.listView_records.Enabled = bEnable;
+            this.Invoke((Action)(() =>
+            {
+                EnableControlsInSearching(bEnable);
+                this.listView_records.Enabled = bEnable;
+            }));
         }
 
         bool InSearching

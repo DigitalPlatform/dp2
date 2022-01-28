@@ -312,12 +312,13 @@ value);
             }
         }
 
-        public void ActivateFixPage(string strName)
+        public TabPage ActivateFixPage(string strName)
         {
             TabPage page = GetFixPage(strName);
             if (page == null)
                 throw new ArgumentException("名字为 '" + strName + "' 的 fixpage 不存在");
             this.tabControl_panelFixed.SelectedTab = page;
+            return page;
         }
 
         public TabPage GetFixPage(string strName)

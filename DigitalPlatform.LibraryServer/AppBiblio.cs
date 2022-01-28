@@ -5194,6 +5194,7 @@ out strError);
                     strBiblio,
                     "setbiblio", // strResultSetName,
                     null,
+                    out string error_code,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -5208,6 +5209,18 @@ out strError);
 
                 if (strAction == "checkunique")
                 {
+                    if (nRet == 0 && string.IsNullOrEmpty(error_code) == false)
+                    {
+                        result.Value = -1;
+                        if (error_code == "notInUniqueSpace")
+                            result.ErrorInfo = $"发起记录 {strBiblioRecPath} 没有处在查重空间内，无法进行唯一性检查";
+                        else if (error_code == "undefined")
+                            result.ErrorInfo = "library.xml 中尚未定义查重空间参数。因此无法进行唯一性检查";
+                        else
+                            result.ErrorInfo = error_code;
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
                     result.Value = 0;   // 没有发现重复
                     return result;
                 }
@@ -5276,6 +5289,7 @@ out strError);
                         strBiblio,
                         "setbiblio", // strResultSetName,
                         null,
+                        out string error_code,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -5289,13 +5303,29 @@ out strError);
                         result.ErrorCode = ErrorCode.BiblioDup;
                         return result;
                     }
+
+                    if (strAction == "checkunique")
+                    {
+                        // 2022/1/28
+                        if (nRet == 0
+                            && string.IsNullOrEmpty(error_code) == false)
+                        {
+                            result.Value = -1;
+                            if (error_code == "notInUniqueSpace")
+                                result.ErrorInfo = $"发起记录 {strBiblioRecPath} 没有处在查重空间内，无法进行唯一性检查";
+                            else if (error_code == "undefined")
+                                result.ErrorInfo = "library.xml 中尚未定义查重空间参数。因此无法进行唯一性检查";
+                            else
+                                result.ErrorInfo = error_code;
+                            result.ErrorCode = ErrorCode.SystemError;
+                            return result;
+                        }
+                        result.Value = 0;   // 没有发现重复
+                        return result;
+                    }
                 }
 
-                if (strAction == "checkunique")
-                {
-                    result.Value = 0;   // 没有发现重复
-                    return result;
-                }
+                // ?
 
                 // 2009/11/2 
                 // 需要判断路径最后一级是否为问号？
@@ -5443,6 +5473,7 @@ out strError);
                         strBiblio,
                         "setbiblio", // strResultSetName,
                         null,
+                        out _,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -6851,6 +6882,7 @@ out strError);
                             strNewBiblio,
                             "copybiblio", // strResultSetName,
                             strAction == "move" || strAction == "onlymovebiblio" ? new List<string> { strBiblioRecPath } : null,
+                            out _,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -6910,6 +6942,7 @@ out strError);
                             strExistingSourceXml,
                             "copybiblio", // strResultSetName,
                             strAction == "move" || strAction == "onlymovebiblio" ? new List<string> { strBiblioRecPath } : null,
+                            out _,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -7914,7 +7947,11 @@ out strError);
 
         // 对书目或者规范库做强制查重
         // 注：书目库和规范库的名字即便混合起来配置在一个空间内也不怕
+        // parameters:
+        //      error_code [out] 返回出错码。undefined/notInUniqueSpace
         // return:
+        //      -3  查重空间尚未定义
+        //      -2  发起记录并不处在查重空间中
         //      -1  出错
         //      0   没有命中
         //      >0  命中条数。此时 strError 中返回发生重复的路径列表
@@ -7924,12 +7961,17 @@ out strError);
             string strBiblioXml,
             string strResultSetName,
             List<string> exclude_recpaths,
+            out string error_code,
             out string strError)
         {
             strError = "";
+            error_code = "";
 
             if (UniqueSpaceDefined() == false)
+            {
+                error_code = "undefined";   // library.xml 中尚未定义查重空间
                 return 0;
+            }
 
             string strKey = Get997a(strBiblioXml, out strError);
             if (strKey == null)
@@ -7942,7 +7984,10 @@ out strError);
             // 一个书目库同时处在多个 space 中怎么办？
             List<string> dbnames = GetUniqueSpaceDbNames(strBiblioDbName);
             if (dbnames.Count == 0)
+            {
+                error_code = "notInUniqueSpace";    // 发起记录并不处在查重空间中
                 return 0;
+            }
 
             // 构造检索书目库的 XML 检索式
             // return:
