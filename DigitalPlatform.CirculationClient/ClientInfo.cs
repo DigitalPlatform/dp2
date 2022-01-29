@@ -679,7 +679,7 @@ namespace DigitalPlatform.CirculationClient
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = "检查更新出现异常: " + ExceptionUtil.GetDebugText(ex)
+                        ErrorInfo = $"检查更新出现异常 ({DateTime.Now.ToString()}): { ExceptionUtil.GetDebugText(ex) }"
                     };
                 }
 
@@ -687,7 +687,7 @@ namespace DigitalPlatform.CirculationClient
                     return new NormalResult
                     {
                         Value = 0,
-                        ErrorInfo = "没有发现更新"
+                        ErrorInfo = $"没有发现更新 ({DateTime.Now.ToString()})"
                     };
                 try
                 {
@@ -695,7 +695,7 @@ namespace DigitalPlatform.CirculationClient
                     return new NormalResult
                     {
                         Value = 1,
-                        ErrorInfo = "自动更新完成。重启可使用新版本"
+                        ErrorInfo = $"自动更新完成。重启可使用新版本 ({DateTime.Now.ToString()})"
                     };
                     // Application.Restart();
                 }

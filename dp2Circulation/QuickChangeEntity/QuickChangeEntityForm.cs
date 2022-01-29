@@ -342,6 +342,9 @@ namespace dp2Circulation
             this.button_beginByRecPathFile.Enabled = bEnable;
         }
 
+        // 是否已经提示过修改动作
+        //bool _warningActions = false;
+
         private void button_loadBarcode_Click(object sender, EventArgs e)
         {
             int nRet = 0;
@@ -378,6 +381,23 @@ namespace dp2Circulation
                     return;
                 }
             }
+
+            // 检查是否至少有一个动作
+            var names = GetChangeNames();
+            if (names.Count == 0 /*&& _warningActions == false*/)
+            {
+                Program.MainForm.Speak("警告: 当前没有设置任何修改动作");
+                DialogResult result = MessageBox.Show(this,
+    "警告: 当前没有设置任何修改动作。请问是否继续操作？\r\n\r\n(点“动作参数”按钮可以设置修改动作)",
+    "QuickChangeEntityForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return;
+            }
+            //_warningActions = true;
+
         DOLOAD:
 
             nRet = LoadRecord(true, this.textBox_barcode.Text,
@@ -476,15 +496,33 @@ false);
             string strError = "";
 
 #if SN
+            string filename = Path.Combine(Program.MainForm.UserDir, $"daily_counter_{"rfid"}.txt");
+            var exceed = DailyCounter.IncDailyCounter(filename,
+                // "rfid",
+                10);
+            if (exceed == true)
             {
+                // 序列号中要求包含 function=rfid 参数
                 int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
-                if (nRet == -1 && DateTime.Now > new DateTime(2021, 5, 1))
+                if (nRet == -1)
                 {
-                    strError = "写入 RFID 标签功能尚未被许可";
+                    strError = "写入 RFID 标签功能尚未被许可('rfid')";
                     goto ERROR1;
                 }
             }
 #endif
+            /*
+#if SN
+            {
+                int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
+                if (nRet == -1 && DateTime.Now > new DateTime(2021, 5, 1))
+                {
+                    strError = "写入 RFID 标签功能尚未被许可('rfid')";
+                    goto ERROR1;
+                }
+            }
+#endif
+            */
 
             this.ShowMessage("正在写入 RFID 标签");
             try
@@ -746,6 +784,48 @@ out strError);
 
         #endregion
 
+        static List<string> GetChangeNames()
+        {
+            List<string> names = new List<string>();
+            string strStateAction = Program.MainForm.AppInfo.GetString(
+    "change_param",
+    "state",
+    "<不改变>");
+            if (strStateAction != "<不改变>")
+                names.Add("state");
+
+            string strLocation = Program.MainForm.AppInfo.GetString(
+    "change_param",
+    "location",
+    "<不改变>");
+
+            if (strLocation != "<不改变>")
+                names.Add("location");
+
+            string strBookType = Program.MainForm.AppInfo.GetString(
+    "change_param",
+    "bookType",
+    "<不改变>");
+
+            if (strBookType != "<不改变>")
+                names.Add("bookType");
+
+            string strBatchNo = Program.MainForm.AppInfo.GetString(
+    "change_param",
+    "batchNo",
+    "<不改变>");
+            if (strBatchNo != "<不改变>")
+                names.Add("batchNo");
+
+            var need = Program.MainForm.AppInfo.GetBoolean(
+"change_param",
+"writeToRfidTag",
+false);
+            if (need)
+                names.Add("writeToRfidTag");
+
+            return names;
+        }
 
         // return:
         //      0   没有实质性改变
@@ -887,7 +967,10 @@ out strError);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.OK)
+            {
+                // _warningActions = false;
                 return true;
+            }
             return false;
         }
 
@@ -1316,6 +1399,20 @@ out strError);
             out string strError)
         {
             strError = "";
+
+            // 检查是否至少有一个动作
+            var names = GetChangeNames();
+            if (names.Count == 0)
+            {
+                DialogResult result = MessageBox.Show(this,
+    "当前没有设置任何修改动作。请问是否继续操作？",
+    "QuickChangeEntityForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return 0;
+            }
 
             string strFilename = "";
             if (strFileType == "barcode")

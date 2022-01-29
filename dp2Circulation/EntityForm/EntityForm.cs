@@ -9002,7 +9002,7 @@ out strError);
             strError = "";
             strOutputPath = "";
 
-            Progress.Initial("正在检查书目记录的唯一性 ...");
+            Progress.Initial("正在进行 997 查重 ...");
 
             try
             {
@@ -9024,9 +9024,9 @@ out strError);
                 if (lRet == -1)
                 {
                     if (channel.ErrorCode == ErrorCode.BiblioDup)
-                        strError = "检查书目记录 '" + strPath + "' 唯一性时发现重复: " + strError;
+                        strError = "针对书目记录 '" + strPath + "' 进行 997 查重时发现重复: " + strError;
                     else
-                        strError = "检查书目记录 '" + strPath + "' 唯一性时出错: " + strError;
+                        strError = "针对书目记录 '" + strPath + "' 进行 997 查重时出错: " + strError;
                     return -1;
                 }
 

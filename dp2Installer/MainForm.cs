@@ -560,6 +560,7 @@ FormWindowState.Normal);
                     strZipFileName,
                     Path.GetDirectoryName(strExePath),
                     null,
+                    null,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -676,9 +677,19 @@ FormWindowState.Normal);
             return true;
         }
 
+        // parameters:
+        //      oldFileNames    拷贝以前已经存在的全部文件名
+        //      copiedFileNames 覆盖成功的全部文件名
+        //      restFileNames   没有被拷贝涉及到的全部文件名
+        public delegate void Delegate_clearStage(
+            string strTargetDir,
+            List<string> oldFileNames,
+            List<string> copiedFileNames,
+            List<string> restFileNames);
+
         // 更新可执行目录
         // parameters:
-        //      excludes    要排除的文件名。纯文件名。必须为小写形态
+        //      excludes    从 .zip 文件展开时要排除的文件名。纯文件名。必须为小写形态
         // return:
         //      -1  出错
         //      0   没有必要刷新
@@ -688,6 +699,7 @@ FormWindowState.Normal);
             string strZipFileName,
             string strTargetDir,
             List<string> excludes,
+            Delegate_clearStage proc_clear,
             out string strError)
         {
             strError = "";
@@ -713,6 +725,16 @@ FormWindowState.Normal);
                 return 0;
             }
 
+            // 记忆拷贝前原有的全部文件名
+            // 获得一个目录下的全部文件名。包括子目录中的
+            List<string> oldFileNames = null;
+            if (proc_clear != null && Directory.Exists(strTargetDir))
+                oldFileNames = PathUtil.GetFileNames(strTargetDir);
+            else
+                oldFileNames = new List<string>();
+
+            List<string> copiedFileNames = new List<string>();
+
             // 要求在 xxx_app.zip 内准备要安装的可执行程序文件
             try
             {
@@ -729,13 +751,17 @@ FormWindowState.Normal);
                         }
 
                         string strPart = GetSubPath(e.FileName);
-                        string strFullPath = Path.Combine(strTargetDir, strPart);
+                        string strFullPath = Path.Combine(strTargetDir, strPart).Replace("/", "\\");
 
                         e.FileName = strPart;
 
                         if ((e.Attributes & FileAttributes.Directory) == 0)
                         {
                             ExtractFile(e, strTargetDir);
+
+                            if (proc_clear != null)
+                                copiedFileNames.Add(strFullPath);
+
                             AppendString("更新文件 " + strFullPath + "\r\n");
                         }
                         else
@@ -747,6 +773,15 @@ FormWindowState.Normal);
             {
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
+            }
+
+            if (proc_clear != null)
+            {
+                List<string> restFileNames = new List<string>();
+                // 计算得到没有被拷贝涉及到的全部文件名
+                restFileNames = oldFileNames.AsQueryable().Except(copiedFileNames, StringComparer.OrdinalIgnoreCase).ToList();
+
+                proc_clear?.Invoke(strTargetDir, oldFileNames, copiedFileNames, restFileNames);
             }
 
 #if NO
@@ -1667,6 +1702,7 @@ MessageBoxDefaultButton.Button2);
                     strZipFileName,
                     Path.GetDirectoryName(strExePath),
                     null,
+                    null,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1745,6 +1781,25 @@ MessageBoxDefaultButton.Button2);
         strZipFileName,
         info.PhysicalPath,
         excludes,
+        (strTargetDir, oldFileNames, copiedFileNames, restFileNames) =>
+        {
+            // 找出以前残留的 system.*.dll 文件加以删除
+            List<string> delete_filenames = new List<string>();
+            string prefix = Path.Combine(strTargetDir, "bin").ToLower();
+            foreach (var s in restFileNames)
+            {
+                string fileName = s.ToLower();
+                if (fileName.StartsWith(prefix + "\\system.")
+                && fileName.EndsWith(".dll"))
+                    delete_filenames.Add(s);
+            }
+
+            foreach(var fileName in delete_filenames)
+            {
+                File.Delete(fileName);
+                AppendString($"删除以前版本残留的文件 {fileName}\r\n");
+            }
+        },
         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -3389,6 +3444,7 @@ MessageBoxDefaultButton.Button1);
                     strZipFileName,
                     strProgramDir,
                     null,
+                    null,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -3700,6 +3756,7 @@ out string strError)
                     false,
                     strZipFileName,
                     strProgramDir,
+                    null,
                     null,
                     out strError);
                 if (nRet == -1)
@@ -4307,6 +4364,7 @@ MessageBoxDefaultButton.Button2);
                     strZipFileName,
                     e.DataDir,
                     null,   // 包括了 web.config
+                    null,
                     out strError);
                 if (nRet == -1)
                 {
@@ -5349,6 +5407,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                     strZipFileName,
                     strProgramDir,
                     null,
+                    null,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -5590,6 +5649,7 @@ MessageBoxDefaultButton.Button2);
                     false,
                     strZipFileName,
                     Path.GetDirectoryName(strExePath),
+                    null,
                     null,
                     out strError);
                 if (nRet == -1)
@@ -6031,6 +6091,7 @@ MessageBoxDefaultButton.Button2);
                     strZipFileName,
                     strProgramDir,
                     null,
+                    null,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -6182,6 +6243,7 @@ MessageBoxDefaultButton.Button2);
                     false,
                     strZipFileName,
                     strProgramDir,
+                    null,
                     null,
                     out strError);
                 if (nRet == -1)
@@ -6925,6 +6987,7 @@ MessageBoxDefaultButton.Button2);
                     false,
                     strZipFileName,
                     strProgramDir,
+                    null,
                     null,
                     out strError);
                 if (nRet == -1)

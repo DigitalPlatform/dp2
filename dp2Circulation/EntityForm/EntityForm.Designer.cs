@@ -912,7 +912,7 @@
             // 
             this.ToolStripMenuItem_checkUnique.Name = "ToolStripMenuItem_checkUnique";
             this.ToolStripMenuItem_checkUnique.Size = new System.Drawing.Size(407, 40);
-            this.ToolStripMenuItem_checkUnique.Text = "检查唯一性[利用 997 字段] (&U)";
+            this.ToolStripMenuItem_checkUnique.Text = "利用 997 字段查重 (&U)";
             this.ToolStripMenuItem_checkUnique.Click += new System.EventHandler(this.ToolStripMenuItem_checkUnique_Click);
             // 
             // toolStripButton_verifyData

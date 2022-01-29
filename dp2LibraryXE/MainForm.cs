@@ -3750,7 +3750,8 @@ this.Font);
             return strPath.Substring(nRet + 1);
         }
 
-        void ExtractFile(ZipEntry e, string strTargetDir)
+        // 返回目标文件路径
+        string ExtractFile(ZipEntry e, string strTargetDir)
         {
 #if NO
             string strTempDir = Path.Combine(this.UserDir, "temp");
@@ -3800,6 +3801,7 @@ MessageBoxDefaultButton.Button2);
                 break;
             }
             File.Delete(strTempPath);
+            return strTargetPath;
         }
 
         // 刷新应用程序目录
@@ -3839,6 +3841,18 @@ MessageBoxDefaultButton.Button2);
                     PathUtil.DeleteDirectory(strAppCodeDir);
                 }
 
+                string strOpacDir = Path.Combine(this.UserDir, "opac_app");
+
+                // 记忆拷贝前原有的全部文件名
+                // 获得一个目录下的全部文件名。包括子目录中的
+                List<string> oldFileNames = null;
+                if (Directory.Exists(strOpacDir))
+                    oldFileNames = PathUtil.GetFileNames(strOpacDir);
+                else
+                    oldFileNames = new List<string>();
+
+                List<string> copiedFileNames = new List<string>();
+
                 try
                 {
                     using (ZipFile zip = ZipFile.Read(strZipFileName))
@@ -3856,11 +3870,14 @@ MessageBoxDefaultButton.Button2);
 
                             AppendString(e.FileName + "\r\n");
 
-                            // e.Extract(this.UserDir, ExtractExistingFileAction.OverwriteSilently);
                             string strTargetDir = this.UserDir;
+
+                            // e.Extract(this.UserDir, ExtractExistingFileAction.OverwriteSilently);
                             if ((e.Attributes & FileAttributes.Directory) == 0)
                             {
-                                ExtractFile(e, strTargetDir);
+                                var fileName = ExtractFile(e, strTargetDir);
+
+                                copiedFileNames.Add(fileName.Replace("/", "\\"));
                             }
                             else
                                 e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
@@ -3871,6 +3888,30 @@ MessageBoxDefaultButton.Button2);
                 {
                     strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
+                }
+
+                // 2022/1/29
+                {
+                    List<string> restFileNames = new List<string>();
+                    // 计算得到没有被拷贝涉及到的全部文件名
+                    restFileNames = oldFileNames.AsQueryable().Except(copiedFileNames, StringComparer.OrdinalIgnoreCase).ToList();
+
+                    // 找出以前残留的 system.*.dll 文件加以删除
+                    List<string> delete_filenames = new List<string>();
+                    string prefix = Path.Combine(strOpacDir, "bin").ToLower();
+                    foreach (var s in restFileNames)
+                    {
+                        string fileName = s.ToLower();
+                        if (fileName.StartsWith(prefix + "\\system.")
+                        && fileName.EndsWith(".dll"))
+                            delete_filenames.Add(s);
+                    }
+
+                    foreach (var fileName in delete_filenames)
+                    {
+                        File.Delete(fileName);
+                        AppendString($"删除以前版本残留的文件 {fileName}\r\n");
+                    }
                 }
 
                 // 替换 web.config 文件部分内容
