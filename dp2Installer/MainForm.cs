@@ -1783,22 +1783,43 @@ MessageBoxDefaultButton.Button2);
         excludes,
         (strTargetDir, oldFileNames, copiedFileNames, restFileNames) =>
         {
-            // 找出以前残留的 system.*.dll 文件加以删除
-            List<string> delete_filenames = new List<string>();
-            string prefix = Path.Combine(strTargetDir, "bin").ToLower();
-            foreach (var s in restFileNames)
+            // 观察 manifest 文件是否存在
+            if (InstallHelper.ExistsListFile(strTargetDir))
             {
-                string fileName = s.ToLower();
-                if (fileName.StartsWith(prefix + "\\system.")
-                && fileName.EndsWith(".dll"))
-                    delete_filenames.Add(s);
+                // 根据 manifest 文件中列出的文件名，删除以前安装过的文件
+                List<string> exclude = new List<string> { "web.config", "start.xml" };
+                foreach (var name in copiedFileNames)
+                {
+                    exclude.Add(InstallHelper.RemoveDirectory(name, strTargetDir));
+                }
+                InstallHelper.DeleteOldFiles(strTargetDir,
+                    exclude,
+                    (fileName) =>
+                    {
+                        AppendString($"删除以前版本残留的文件 {fileName}\r\n");
+                    });
+            }
+            else
+            {
+                // 找出以前残留的 system.*.dll 文件加以删除
+                List<string> delete_filenames = new List<string>();
+                string prefix = Path.Combine(strTargetDir, "bin").ToLower();
+                foreach (var s in restFileNames)
+                {
+                    string fileName = s.ToLower();
+                    if (fileName.StartsWith(prefix + "\\system.")
+                    && fileName.EndsWith(".dll"))
+                        delete_filenames.Add(s);
+                }
+
+                foreach (var fileName in delete_filenames)
+                {
+                    File.Delete(fileName);
+                    AppendString($"删除以前版本残留的文件 {fileName}\r\n");
+                }
             }
 
-            foreach(var fileName in delete_filenames)
-            {
-                File.Delete(fileName);
-                AppendString($"删除以前版本残留的文件 {fileName}\r\n");
-            }
+            InstallHelper.WriteFileListFile(strTargetDir, copiedFileNames);
         },
         out strError);
                     if (nRet == -1)
@@ -1849,8 +1870,6 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
                 }
-
-
 
                 nRet = UpdateOpacStyles(
                     true,

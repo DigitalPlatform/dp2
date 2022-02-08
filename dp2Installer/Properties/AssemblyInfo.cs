@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有这些值，也可以使用“内部版本号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.5.3")]
-[assembly: AssemblyFileVersion("3.5.3.0")]
+[assembly: AssemblyVersion("3.5.4")]
+[assembly: AssemblyFileVersion("3.5.4.0")]
 
 // 1.1
 // 1.2 (2016/11/2) 增加安装 Z39.50 服务器功能
@@ -48,4 +48,6 @@ using System.Runtime.InteropServices;
 //      3.5.1 (2021/9/15) dp2kernel 和 dp2library 实例安装对话框里面的实例名做了检查，合法的实例名字符为数字或者字母，或者下划线。实例名也可以为空
 //      3.5.2 (2022/1/27) 升级 dp2OPAC 时，会自动把安装包中的 web.config 和当前 dp2OPAC 的 web.config 内容合并
 //      3.5.3 (2022/1/29) 升级 dp2OPAC 时，会把虚拟目录 bin 子目录中以前版本残留的 system.*.dll 文件删除
+//      3.5.4 (2022/2/8) 升级 dp2OPAC 时，会观察虚拟目录中是否存在 __filelist.config 文件，如果存在，则按照它删除以前残留的文件；否则会把虚拟目录 bin 子目录中以前版本残留的 system.*.dll 文件删除
+
 

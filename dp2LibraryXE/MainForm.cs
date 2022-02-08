@@ -3892,26 +3892,51 @@ MessageBoxDefaultButton.Button2);
 
                 // 2022/1/29
                 {
-                    List<string> restFileNames = new List<string>();
-                    // 计算得到没有被拷贝涉及到的全部文件名
-                    restFileNames = oldFileNames.AsQueryable().Except(copiedFileNames, StringComparer.OrdinalIgnoreCase).ToList();
-
-                    // 找出以前残留的 system.*.dll 文件加以删除
-                    List<string> delete_filenames = new List<string>();
-                    string prefix = Path.Combine(strOpacDir, "bin").ToLower();
-                    foreach (var s in restFileNames)
+                    // 观察 manifest 文件是否存在
+                    if (InstallHelper.ExistsListFile(strOpacDir))
                     {
-                        string fileName = s.ToLower();
-                        if (fileName.StartsWith(prefix + "\\system.")
-                        && fileName.EndsWith(".dll"))
-                            delete_filenames.Add(s);
+                        // 根据 manifest 文件中列出的文件名，删除以前安装过的文件
+                        List<string> exclude = new List<string> { "web.config", "start.xml" };
+                        foreach (var name in copiedFileNames)
+                        {
+                            exclude.Add(InstallHelper.RemoveDirectory(name, strOpacDir));
+                        }
+                        InstallHelper.DeleteOldFiles(strOpacDir,
+                            exclude,
+                            (fileName) =>
+                            {
+                                AppendString($"删除以前版本残留的文件 {fileName}\r\n");
+                            });
+
+                    }
+                    else
+                    {
+
+                        List<string> restFileNames = new List<string>();
+                        // 计算得到没有被拷贝涉及到的全部文件名
+                        restFileNames = oldFileNames.AsQueryable().Except(copiedFileNames, StringComparer.OrdinalIgnoreCase).ToList();
+
+                        // 找出以前残留的 system.*.dll 文件加以删除
+                        {
+                            List<string> delete_filenames = new List<string>();
+                            string prefix = Path.Combine(strOpacDir, "bin").ToLower();
+                            foreach (var s in restFileNames)
+                            {
+                                string fileName = s.ToLower();
+                                if (fileName.StartsWith(prefix + "\\system.")
+                                && fileName.EndsWith(".dll"))
+                                    delete_filenames.Add(s);
+                            }
+
+                            foreach (var fileName in delete_filenames)
+                            {
+                                File.Delete(fileName);
+                                AppendString($"删除以前版本残留的文件 {fileName}\r\n");
+                            }
+                        }
                     }
 
-                    foreach (var fileName in delete_filenames)
-                    {
-                        File.Delete(fileName);
-                        AppendString($"删除以前版本残留的文件 {fileName}\r\n");
-                    }
+                    InstallHelper.WriteFileListFile(strOpacDir, copiedFileNames);
                 }
 
                 // 替换 web.config 文件部分内容

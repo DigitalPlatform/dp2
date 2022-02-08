@@ -31,6 +31,96 @@ namespace DigitalPlatform.Install
 {
     public class InstallHelper
     {
+        #region 升级时删除以前残留文件
+
+        static string LISTFILENAME = "__filelist.config";
+
+        public static bool ExistsListFile(string strTargetDir)
+        {
+            string fileListFileName = Path.Combine(strTargetDir, LISTFILENAME);
+            return (File.Exists(fileListFileName));
+        }
+
+        public static string RemoveDirectory(string path,
+    string directory)
+        {
+            if (directory[directory.Length - 1] == '/'
+                || directory[directory.Length - 1] == '\\')
+            {
+
+            }
+            else
+                directory += "\\";
+
+            // 检查
+            if (path.ToLower().StartsWith(directory.ToLower()) == false)
+                throw new ArgumentException($"path '{path}' 应该前导以 directory '{directory}'");
+            return path.Substring(directory.Length);
+        }
+
+        // parameters:
+        //      filenames   文件名集合。注意每个文件名都是全路径形态
+        public static void WriteFileListFile(string strTargetDir,
+            List<string> filenames)
+        {
+            List<string> lines = new List<string>();
+
+            string fileListFileName = Path.Combine(strTargetDir, LISTFILENAME);
+            foreach (var name in filenames)
+            {
+                /*
+                // 检查
+                if (name.StartsWith(strTargetDir) == false)
+                    throw new ArgumentException($"集合中的路径'{name}'格式有误，应该是前导以 '{strTargetDir}'");
+                */
+
+                // 得到相对路径
+                string filename = RemoveDirectory(name, strTargetDir);
+                lines.Add(filename);
+            }
+
+            File.WriteAllLines(fileListFileName, lines.ToArray());
+        }
+
+        public delegate void Delegate_deleted(string filePath);
+
+        // 根据 manifest 文件中列出的文件名，删除以前安装过的文件
+        public static void DeleteOldFiles(
+            string strTargetDir,
+            List<string> excludeFileNames,
+            Delegate_deleted proc_deleted)
+        {
+            string fileListFileName = Path.Combine(strTargetDir, LISTFILENAME);
+
+            var lines = File.ReadAllLines(fileListFileName);
+            foreach (string line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                    continue;
+                if (excludeFileNames != null
+                    && IndexOf(excludeFileNames, line) != -1)
+                    continue;
+                string path = Path.Combine(strTargetDir, line);
+                File.Delete(path);
+                proc_deleted?.Invoke(path);
+            }
+
+            int IndexOf(List<string> names, string name)
+            {
+                name = name.ToLower();
+                int i = 0;
+                foreach (var current in names)
+                {
+                    if (current.ToLower() == name)
+                        return i;
+                    i++;
+                }
+                return -1;
+            }
+        }
+
+        #endregion
+
         // 检测实例名里面的字符是否合法
         // 合法的字符指：数字，或者字母，下划线
         public static bool IsValidInstanceName(string name)
