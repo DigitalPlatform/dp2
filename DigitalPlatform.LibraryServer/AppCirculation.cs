@@ -668,6 +668,8 @@ namespace DigitalPlatform.LibraryServer
             strOutputReaderBarcodeParam = "";
             borrow_info = new BorrowInfo();
 
+            string api_summary = $"bRenew={bRenew}, strReaderBarcode={strReaderBarcodeParam}, strItemBarcode={strItemBarcodeParam}, strStyle={strStyle}";
+
             // 解析 strItemBarcodeParam 参数
             /*
             string strItemBarcode = "";
@@ -1751,7 +1753,7 @@ namespace DigitalPlatform.LibraryServer
                     if (lRet == -1)
                     {
                         // 2015/9/2
-                        this.WriteErrorLog("Borrow() 写入读者记录 '" + strOutputReaderRecPath + "' 时出错: " + strError);
+                        this.WriteErrorLog($"Borrow({api_summary}) 写入读者记录 '" + strOutputReaderRecPath + "' 时出错: " + strError);
 
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
@@ -1759,7 +1761,7 @@ namespace DigitalPlatform.LibraryServer
                             if (nRedoCount > 10)
                             {
                                 // text-level: 内部错误
-                                strError = "Borrow() 写回读者记录的时候,遇到时间戳冲突,并因此重试10次未能成功，只好放弃...";
+                                strError = $"Borrow({api_summary}) 写回读者记录的时候,遇到时间戳冲突,并因此重试10次未能成功，只好放弃...";
                                 this.WriteErrorLog(strError);
                                 goto ERROR1;
                             }
@@ -1794,7 +1796,7 @@ namespace DigitalPlatform.LibraryServer
                     if (lRet == -1)
                     {
                         // 2015/9/2
-                        this.WriteErrorLog("Borrow() 写入册记录 '" + strOutputItemRecPath + "' 时出错: " + strError);
+                        this.WriteErrorLog($"Borrow({api_summary}) 写入册记录 '" + strOutputItemRecPath + "' 时出错: " + strError);
 
                         // 要Undo刚才对读者记录的写入
                         string strError1 = "";
@@ -1825,7 +1827,7 @@ namespace DigitalPlatform.LibraryServer
                                 if (nRet == -1)
                                 {
                                     // text-level: 内部错误
-                                    strError = "Borrow() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为'" + strReaderBarcode + "') 借阅册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
+                                    strError = $"Borrow({api_summary}) Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为'" + strReaderBarcode + "') 借阅册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
                                     this.WriteErrorLog(strError);
                                     goto ERROR1;
                                 }
@@ -1835,7 +1837,7 @@ namespace DigitalPlatform.LibraryServer
                                 nRedoCount++;
                                 if (nRedoCount > 10)
                                 {
-                                    strError = "Borrow() Undo 读者记录(1)成功，试图重试 Borrow 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
+                                    strError = $"Borrow({api_summary}) Undo 读者记录(1)成功，试图重试 Borrow 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
                                     this.WriteErrorLog(strError);
                                     goto ERROR1;
                                 }
@@ -1844,7 +1846,7 @@ namespace DigitalPlatform.LibraryServer
 
                             // 以下为 不是时间戳冲突的其他错误情形
                             // text-level: 内部错误
-                            strError = "Borrow() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为'" + strReaderBarcode + "') 借阅册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
+                            strError = $"Borrow({api_summary}) Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为'" + strReaderBarcode + "') 借阅册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
                             // strError = strError + ", 并且Undo写回旧读者记录也失败: " + strError1;
                             this.WriteErrorLog(strError);
                             goto ERROR1;
@@ -1855,7 +1857,7 @@ namespace DigitalPlatform.LibraryServer
                         nRedoCount++;
                         if (nRedoCount > 10)
                         {
-                            strError = "Borrow() Undo 读者记录(2)成功，试图重试 Borrow 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
+                            strError = $"Borrow({api_summary}) Undo 读者记录(2)成功，试图重试 Borrow 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
                             this.WriteErrorLog(strError);
                             goto ERROR1;
                         }
@@ -2719,7 +2721,7 @@ start_time_1,
                         nRet = this.ConvertBiblioXmlToHtml(
                             strFilterFileName,
                             strBiblioXml,
-                                null,
+                            null,
                             strBiblioRecPath,
                             out strBiblio,
                             out strError);
@@ -5867,6 +5869,8 @@ start_time_1,
             strOutputReaderBarcodeParam = "";
             return_info = new ReturnInfo();
 
+            string api_summary = $"strAction={strAction}, strReaderBarcode={strReaderBarcodeParam0}, strItemBarcode={strItemBarcodeParam}, strStyle={strStyle}";
+
             // 解析 strItemBarcodeParam 参数
             /*
             string strItemBarcode = "";
@@ -7642,15 +7646,16 @@ start_time_1,
                         out strError);
                     if (lRet == -1)
                     {
+                       
                         // 2015/9/2
-                        this.WriteErrorLog("Return() 写入读者记录 '" + strOutputReaderRecPath + "' 时出错: " + strError);
+                        this.WriteErrorLog($"Return({api_summary}) 写入读者记录 '{ strOutputReaderRecPath }' 时出错: {strError}");
 
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
                             nRedoCount++;
                             if (nRedoCount > 10)
                             {
-                                strError = "Return() 写回读者记录的时候,遇到时间戳冲突,并因此重试超过 10 次未能成功, 只好放弃重试...";
+                                strError = $"Return({api_summary}) 写回读者记录的时候,遇到时间戳冲突,并因此重试超过 10 次未能成功, 只好放弃重试...";
                                 this.WriteErrorLog(strError);
                                 goto ERROR1;
                             }
@@ -7687,7 +7692,7 @@ start_time_1,
                     if (lRet == -1)
                     {
                         // 2015/9/2
-                        this.WriteErrorLog("Return() 写入册记录 '" + strOutputItemRecPath + "' 时出错: " + strError);
+                        this.WriteErrorLog($"Return({api_summary}) 写入册记录 '" + strOutputItemRecPath + "' 时出错: " + strError);
 
                         // 要Undo刚才对读者记录的写入
                         lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -7701,7 +7706,7 @@ start_time_1,
                         if (lRet == -1)
                         {
                             // 2015/9/2
-                            this.WriteErrorLog("Return() 写入读者记录 '" + strOutputReaderRecPath + "' 时出错: " + strError);
+                            this.WriteErrorLog($"Return({api_summary}) 写入读者记录 '" + strOutputReaderRecPath + "' 时出错: " + strError);
 
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
                                 && strAction != "boxing")
@@ -7722,7 +7727,7 @@ start_time_1,
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    strError = "Return() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '" + strReaderName + "') 还书册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
+                                    strError = $"Return({api_summary}) Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '" + strReaderName + "') 还书册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
                                     this.WriteErrorLog(strError);
                                     goto ERROR1;
                                 }
@@ -7732,7 +7737,7 @@ start_time_1,
                                 nRedoCount++;
                                 if (nRedoCount > 10)
                                 {
-                                    strError = "Return() Undo 读者记录(1)成功，试图重试 Return 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
+                                    strError = $"Return({api_summary}) Undo 读者记录(1)成功，试图重试 Return 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
                                     this.WriteErrorLog(strError);
                                     goto ERROR1;
                                 }
@@ -7744,7 +7749,7 @@ start_time_1,
 
 
                             // 以下为 不是时间戳冲突的其他错误情形
-                            strError = "Return() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '" + strReaderName + "') 还书册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
+                            strError = $"Return({api_summary}) Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '" + strReaderName + "') 还书册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
                             // strError = strError + ", 并且Undo写回旧读者记录也失败: " + strError1;
                             this.WriteErrorLog(strError);
                             goto ERROR1;
@@ -7755,7 +7760,7 @@ start_time_1,
                         nRedoCount++;
                         if (nRedoCount > 10)
                         {
-                            strError = "Return() Undo 读者记录(2)成功，试图重试 Return 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
+                            strError = $"Return({api_summary}) Undo 读者记录(2)成功，试图重试 Return 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
                             this.WriteErrorLog(strError);
                             goto ERROR1;
                         }

@@ -139,8 +139,8 @@ namespace DigitalPlatform.rms.Client
             List<string[]> logicNames = new List<string[]>();
 
             string[] cols = new string[2];
-            cols[1] = "zh";
             cols[0] = strDatabaseName;
+            cols[1] = "zh";
             logicNames.Add(cols);
 
             string strKeysDefFileName = PathUtil.MergePath(strTemplateDir, "keys");

@@ -435,7 +435,9 @@ namespace dp2Circulation
         {
             ClientInfo.SettingsFileName = "dp2circulation.xml";
             FormClientInfo.SerialNumberMode = "loose";   // "must";
-            var bRet = FormClientInfo.Initial("dp2circulation_v2", null/*() => StringUtil.IsDevelopMode()*/);
+            var bRet = FormClientInfo.Initial("dp2circulation",
+                null/*() => StringUtil.IsDevelopMode()*/,
+                "userDirName:dp2circulation_v2");
             if (bRet == false)
             {
                 ClientInfo.Finish();

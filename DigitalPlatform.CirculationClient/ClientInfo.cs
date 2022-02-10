@@ -147,6 +147,11 @@ namespace DigitalPlatform.CirculationClient
             ProductName = product_name;
             ClientVersion = Assembly.GetAssembly(TypeOfProgram).GetName().Version.ToString();
 
+            // 2022/2/3
+            var userDirName = StringUtil.GetParameterByPrefix(style, "userDirName");
+            if (string.IsNullOrEmpty(userDirName))
+                userDirName = product_name;
+
             if (ApplicationDeployment.IsNetworkDeployed == true)
             {
                 // MessageBox.Show(this, "network");
@@ -159,14 +164,14 @@ namespace DigitalPlatform.CirculationClient
 
             if (StringUtil.IsInList("service", style))
             {
-                UserDir = GetServiceUserDirectory(product_name);
+                UserDir = GetServiceUserDirectory(userDirName);
                 PathUtil.TryCreateDir(UserDir);
             }
             else
             {
                 UserDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        product_name);
+        userDirName);
                 PathUtil.TryCreateDir(UserDir);
             }
 

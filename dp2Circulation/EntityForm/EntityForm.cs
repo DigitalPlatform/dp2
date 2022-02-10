@@ -4780,6 +4780,8 @@ out string strErrorCode)
                         string succeed = "";
                         if (info.SavedNames.Count > 0)
                             succeed = "但同时 " + StringUtil.MakePathList(info.SavedNames, " ") + " 保存 成功";
+                        var errors = info.Errors;
+                        // if (errors.Count > )
                         this.ShowMessage($"记录保存失败: \r\n{StringUtil.MakePathList(info.Errors, "; ")}\r\n{succeed}", "red", true);
                     }
                 }
