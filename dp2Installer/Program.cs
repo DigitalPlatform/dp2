@@ -13,6 +13,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.IO;
 
 namespace dp2Installer
 {
@@ -47,19 +48,32 @@ namespace dp2Installer
 
             if (!runAsAdmin /*&& Environment.OSVersion.Version.Major >= 6*/)
             {
+                string strUserDir = Path.Combine(
+Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+"dp2installer_v1");
+
                 string strDataDir = "";
                 if (ApplicationDeployment.IsNetworkDeployed == true)
                 {
                     strDataDir = Application.LocalUserAppDataPath;
+
+                    // 2022/2/11
+                    // 拷贝到 strUserDir 下
+                    string new_dir = Path.Combine(strUserDir, "data");
+                    var ret = PathUtil.CopyDirectory(strDataDir, new_dir, true, out string error);
+                    if (ret == -1)
+                    {
+                        MessageBox.Show($"拷贝 {strDataDir} 到 {new_dir} 过程中出错: {error}");
+                        return;
+                    }
+
+                    strDataDir = new_dir;
                 }
                 else
                 {
                     strDataDir = Environment.CurrentDirectory;
                 }
 
-                string strUserDir = Path.Combine(
-Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-"dp2installer_v1");
                 // PathUtil.CreateDirIfNeed(strUserDir);
 
 

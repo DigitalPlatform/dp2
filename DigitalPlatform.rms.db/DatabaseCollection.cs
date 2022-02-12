@@ -5073,6 +5073,10 @@ namespace DigitalPlatform.rms
                         return -7;
                     }
 
+                    // return:
+                    //      -2      文件不存在
+                    //		-1      出错
+                    //		>= 0	成功，返回最大长度
                     lRet = GetFile(
     strPhysicalPath,
     lStart,
@@ -5087,6 +5091,9 @@ namespace DigitalPlatform.rms
                     {
                         strOutputResPath = strResPath;
                     }
+                    // 2022/2/11
+                    if (lRet == -2)
+                        return -4;
                     return lRet;
                 }
 
@@ -6101,6 +6108,8 @@ namespace DigitalPlatform.rms
                         strError = "您的帐户名为'" + user.Name + "'，对所有的数据库都没有'显示(list)'权限。";
                         return -6;
                     }
+                    // 2022/2/11
+                    nTotalLength = aItem.Count;
                 }
                 else
                 {
@@ -6123,6 +6132,8 @@ namespace DigitalPlatform.rms
                                 out strError);
                             if (nRet == -1)
                                 return -1;
+                            // 2022/2/11
+                            nTotalLength = aItem.Count;
                             goto END1;
                         }
                     }
@@ -6143,6 +6154,16 @@ namespace DigitalPlatform.rms
                             return -7;
                         }
 
+
+                        // 限制一下 lLength 的范围
+                        long limit = lLength;
+                        if (limit == -1 && lMaxLength != -1)
+                            limit = lMaxLength;
+                        else if (limit != -1
+                            && lMaxLength != -1
+                            && limit > lMaxLength)
+                            limit = lMaxLength;
+
                         // return:
                         //      -1  出错
                         //      其他  列出的事项总数。注意，不是 lLength 所指出的本次返回数
@@ -6151,11 +6172,17 @@ namespace DigitalPlatform.rms
                             strPhysicalPath,
                             "",
                             lStart,
-                            lLength,
+                            limit,  // lLength,
                             out aItem,
                             out strError);
                         if (nRet == -1)
                             return -1;
+                        if (aItem != null)
+                        {
+                            items = aItem.ToArray();
+                        }
+                        nTotalLength = nRet;
+                        return 0;
                     }
                     else
                     {
@@ -6171,6 +6198,8 @@ namespace DigitalPlatform.rms
                         //    return -1;
                         if (nRet < 0)
                             return nRet;
+                        // 2022/2/11
+                        nTotalLength = aItem.Count;
                     }
                 }
 
@@ -6324,7 +6353,7 @@ namespace DigitalPlatform.rms
             strError = "";
             infos = new List<ResInfoItem>();
 
-            int MAX_ITEMS = 100;    // 一次 API 最多返回的事项数量
+            int MAX_ITEMS = 1000;    // 一次 API 最多返回的事项数量
 
             try
             {
@@ -6344,7 +6373,7 @@ namespace DigitalPlatform.rms
 
                     if (i < lStart)
                         goto CONTINUE;
-                    if (lLength != -1 && count > lLength)
+                    if (lLength != -1 && count >= lLength)
                         goto CONTINUE;
 
                     if (count >= MAX_ITEMS)
@@ -6376,7 +6405,8 @@ namespace DigitalPlatform.rms
                     i++;
                 }
 
-                return i;
+                // return i;
+                return loader.Count;
             }
             catch (DirectoryNotFoundException)
             {
@@ -6415,7 +6445,7 @@ namespace DigitalPlatform.rms
             file.Refresh();
             if (file.Exists == false)
             {
-                strError = " dp2Library 服务器不存在物理路径为 '" + strFilePath + "' 的文件";
+                strError = " dp2Kernel 服务器不存在物理路径为 '" + strFilePath + "' 的文件";
                 return -2;
             }
 

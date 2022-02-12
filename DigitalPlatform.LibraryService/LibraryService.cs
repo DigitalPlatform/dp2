@@ -3123,7 +3123,7 @@ namespace dp2Library
                     string filePath = app.GetMemorySetFilePath(
                         sessioninfo,
                         strResultSetName);
-                    
+
                     BeginSearch();  // 如果创建本地结果集的时间太长，前端可以用 Stop() API 中断
                     channel.Idle += new IdleEventHandler(channel_IdleEvent);
                     try
@@ -10988,7 +10988,8 @@ true);
                     }
                 }
 
-                if (string.IsNullOrEmpty(strCategory) == false && strCategory[0] == '!')
+                if (string.IsNullOrEmpty(strCategory) == false
+                    && strCategory[0] == '!')
                 {
                     // TODO: 根据不同的权限限定不同的 root 起点
                     string strRoot = Path.Combine(app.DataDir, "upload");
@@ -11040,7 +11041,6 @@ true);
 
                     if (strAction == "cd")
                     {
-
                         nRet = LibraryApplication.ChangeDirectory(
                             strRoot,
                             strCurrentDirectory,
@@ -11124,6 +11124,61 @@ true);
 
                     strError = "未知的 strAction '" + strAction + "'";
                     goto ERROR1;
+                }
+                else if (string.IsNullOrEmpty(strCategory) == false
+                    && strCategory.StartsWith(KernelServerUtil.LOCAL_PREFIX))
+                {
+                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "不具备 managedatabase 权限，无法列出内核数据目录和文件";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "get channel error";
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+
+                    /*
+public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
+// TODO: 将此定义移动到 DigitalPlatform.rms 中
+ * */
+                    long lRet = channel.DoDir(
+    strCategory,
+    (int)lStart,
+    (int)lLength,
+    "zh",
+    "", // strStyle,
+    out ResInfoItem[] results,
+    out strError);
+                    if (results != null)
+                    {
+                        foreach (var item in results)
+                        {
+                            long size = -1;
+                            var size_string = StringUtil.GetParameterByPrefix(item.TypeString, "size");
+                            if (string.IsNullOrEmpty(size_string) == false)
+                            {
+                                if (Int64.TryParse(size_string, out size) == false)
+                                    size = -1;
+                            }
+                            infos.Add(new FileItemInfo
+                            {
+                                Name = item.Name,
+                                Size = size,
+                            });
+                        }
+                    }
+                    // kernel_errorcode = channel.OriginErrorCode;
+                    result.ErrorInfo = strError;
+                    result.Value = lRet;
+                    return result;
                 }
                 else
                 {
@@ -11897,7 +11952,7 @@ true);
                             {
                                 dom.LoadXml("<script>" + strValue + "</script>");
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 strError = "脚本代码 XML 结构错误。保存失败";
                                 goto ERROR1;

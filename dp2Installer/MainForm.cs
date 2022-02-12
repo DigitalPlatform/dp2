@@ -1759,6 +1759,11 @@ MessageBoxDefaultButton.Button2);
                     if (string.IsNullOrEmpty(info.PhysicalPath) == true)
                         continue;
 
+                    {
+                        int i = infos.IndexOf(info);
+                        this._floatingMessage.Text = $"正在更新 dp2OPAC - 读者公共查询...\r\n\r\n{(i + 1)}/{infos.Count} {info.IisPath} {info.PhysicalPath}";
+                    }
+
                     AppendString("*** 更新 IIS 虚拟目录 " + info.IisPath + " 对应的物理目录 " + info.PhysicalPath + " 中的可执行文件 ...\r\n");
 
                     // 2015/7/21

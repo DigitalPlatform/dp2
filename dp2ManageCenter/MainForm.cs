@@ -70,7 +70,7 @@ TimeSpan.FromMinutes(60),
 _cancel.Token,
 (text, level) =>
 {
-OutputHistory(text, level);
+    OutputHistory(text, level);
 });
 
 
@@ -112,6 +112,7 @@ OutputHistory(text, level);
             LoadBackupTasks();
             LoadOperLogTasks(this.listView_operLogTasks);
             LoadOperLogTasks(this.listView_errorLogTasks);
+            LoadOperLogTasks(this.listView_kernelErrorLogTasks);
 
             ClearHtml();
             ClearTaskConsole();
@@ -341,6 +342,7 @@ bool bClickClose = false)
             SaveBackupTasks();
             SaveOperLogTasks(this.listView_operLogTasks);
             SaveOperLogTasks(this.listView_errorLogTasks);
+            SaveOperLogTasks(this.listView_kernelErrorLogTasks);
 
             ClientInfo.Finish();
         }
@@ -1573,7 +1575,7 @@ string strHtml)
                     string strPath = path_item.Path;
 
                     string strCurrentDirectory = Path.GetDirectoryName(strPath);
-                    string strFileName = Path.GetFileName(strPath);
+                    string strFileName = GetFileName(strPath);
 
                     long nRet = channel.ListFile(
                         null,
@@ -1877,7 +1879,7 @@ string strHtml)
             foreach (DownloadFileInfo info in fileinfos)
             {
                 string filename = info.ServerPath;
-                string strTargetPath = Path.Combine(strOutputFolder, Path.GetFileName(filename));
+                string strTargetPath = Path.Combine(strOutputFolder, GetFileName(filename));
                 info.LocalPath = strTargetPath;
 
                 // all_target_filenames.Add(strTargetPath);
@@ -2478,7 +2480,7 @@ string strHtml)
             Delegate_finish func_finish,
             CancellationToken token)
         {
-            string strExt = Path.GetExtension(strPath);
+            string strExt = GetExtension(strPath);  // Path.GetExtension(strPath);
             if (strExt == ".~state")
             {
                 return new BeginDownloadResult
@@ -2488,7 +2490,7 @@ string strHtml)
                 };
             }
 
-            string strTargetPath = Path.Combine(strOutputFolder, Path.GetFileName(strPath));
+            string strTargetPath = Path.Combine(strOutputFolder, GetFileName(strPath));
 
             string strTargetTempPath = DynamicDownloader.GetTempFileName(strTargetPath);
 
@@ -3327,6 +3329,8 @@ string strHtml)
                     server_name = GetOperLogInfo(item).ServerName;
                 else if (listView == this.listView_errorLogTasks)
                     server_name = GetOperLogInfo(item).ServerName;
+                else if (listView == this.listView_kernelErrorLogTasks)
+                    server_name = GetOperLogInfo(item).ServerName;
                 else
                     throw new ArgumentException("未知的 listView");
 
@@ -3346,6 +3350,8 @@ string strHtml)
                     dlg.SelectedPath = "!operlog";
                 else if (listView == this.listView_errorLogTasks)
                     dlg.SelectedPath = "!log";
+                else if (listView == this.listView_kernelErrorLogTasks)
+                    dlg.SelectedPath = "<kernel>log";
                 else
                     throw new ArgumentException("未知的 listView");
                 dlg.Show(this);
@@ -3574,6 +3580,12 @@ string strHtml)
             string taskTypeName = "日备份任务";
             if (listView == this.listView_errorLogTasks)
                 taskTypeName = "错误日志下载任务";
+            else if (listView == this.listView_kernelErrorLogTasks)
+                taskTypeName = "dp2kernel 错误日志下载任务";
+            else
+            {
+                Debug.Assert(listView == this.listView_operLogTasks);
+            }
 
             var dup_result = (NormalResult)this.Invoke((Func<NormalResult>)(() =>
             {
@@ -3831,6 +3843,8 @@ string strHtml)
                 string pattern = "*.log";
                 if (item.ListView == this.listView_errorLogTasks)
                     pattern = "log_*.txt";
+                else if (item.ListView == this.listView_kernelErrorLogTasks)
+                    pattern = "log_*.txt";
                 List<OperLogFileInfo> local_files = GetLocalOperLogFileNames(
                     strOutputFolder,
                     pattern,
@@ -3843,6 +3857,8 @@ string strHtml)
                 string server_folder = "!operlog/";
                 if (item.ListView == this.listView_errorLogTasks)
                     server_folder = "!log/";
+                else if (item.ListView == this.listView_kernelErrorLogTasks)
+                    server_folder = "<kernel>log/";
                 List<DownloadFileInfo> fileinfos = GetDownloadFileList(
                     server_folder,
                     local_files,
@@ -3876,6 +3892,7 @@ string strHtml)
                     (bError) =>
                     {
                         // 写入记忆文件，然后提示结束
+                        // TODO: 即便是出错时，也把已经下载成功最后的日期写入？
                         if (bError == false)
                             WriteOperLogMemoryFile(item.ListView, strFolder, now);
                     },
@@ -4000,7 +4017,7 @@ string strHtml)
 
                     string strPath = fileinfo.ServerPath;
 
-                    string strExt = Path.GetExtension(strPath);
+                    string strExt = GetExtension(strPath);  // Path.GetExtension(strPath);
                     if (strExt == ".~state")
                     {
                         // strError = "状态文件是一种临时文件，不支持直接下载";
@@ -4008,7 +4025,7 @@ string strHtml)
                         continue;
                     }
 
-                    string strTargetPath = Path.Combine(strOutputFolder, Path.GetFileName(strPath));
+                    string strTargetPath = Path.Combine(strOutputFolder, GetFileName(strPath)/*Path.GetFileName(strPath)*/);
 
                     string strTargetTempPath = DynamicDownloader.GetTempFileName(strTargetPath);
 
@@ -4192,6 +4209,14 @@ string strHtml)
                                 current.Close();
                             }
 
+                            // 2022/2/11
+                            if (errors.Count == 0
+                                && bError && token.IsCancellationRequested)
+                            {
+                                int finish_count = GetDoneCount(current_downloaders);
+                                errors.Add($"中断 (已完成 {finish_count})");
+                            }
+
                             // 在 state 列中显示 errors 报错
                             if (errors.Count > 0)
                             {
@@ -4290,6 +4315,52 @@ string strHtml)
                     }
                 }
             }
+        }
+
+        static int GetDoneCount(List<DynamicDownloader> downloaders)
+        {
+            if (downloaders == null)
+                return 0;
+            int done_count = 0;
+            foreach (var item in downloaders)
+            {
+                if (item.State != null
+                    && (item.State == "end"
+                    || item.State.StartsWith("finish:")))
+                    done_count++;
+            }
+
+            return done_count;
+        }
+
+        static string GetExtension(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return "";
+            string temp = path.Replace("/", "\\");
+            int index = temp.LastIndexOf("\\");
+            if (index == -1)
+                return Path.GetExtension(path);
+
+            temp = temp.Substring(index + 1);
+            return Path.GetExtension(temp);
+        }
+
+        static string GetFileName(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return "";
+
+            if (path.IndexOf("<") == -1)
+                return Path.GetFileName(path);
+
+            string temp = path.Replace("/", "\\");
+            int index = temp.LastIndexOf("\\");
+            if (index == -1)
+                return path;
+
+            temp = temp.Substring(index + 1);
+            return temp;
         }
 
         /*
@@ -4505,6 +4576,11 @@ out string strError);
                     category = "!log";
                     pattern = "log_*.txt";
                 }
+                else if (item.ListView == this.listView_kernelErrorLogTasks)
+                {
+                    category = "<kernel>log";
+                    pattern = "log_*.txt";
+                }
 
                 FileItemLoader loader = new FileItemLoader(channel,
                     null,
@@ -4512,9 +4588,10 @@ out string strError);
                     pattern);
                 foreach (FileItemInfo info in loader)
                 {
-                    string strName = Path.GetFileName(info.Name);
+                    string strName = GetFileName(info.Name);
+                    string date_in_filename = GetDateInFileName(strName);
                     if (string.IsNullOrEmpty(strLastDate) == false
-    && string.Compare(strName, strLastDate) < 0)
+    && string.Compare(date_in_filename, strLastDate) < 0)
                         continue;
 
                     OperLogFileInfo result = new OperLogFileInfo();
@@ -4551,8 +4628,16 @@ out string strError);
             List<OperLogFileInfo> results = new List<OperLogFileInfo>();
             foreach (FileInfo fi in fis)
             {
+                /*
+                string date_in_filename = Path.GetFileNameWithoutExtension(fi.Name);
+                int index = date_in_filename.LastIndexOf("_");
+                if (index != -1)
+                    date_in_filename = date_in_filename.Substring(index + 1);
+                */
+                string date_in_filename = GetDateInFileName(fi.Name);
+
                 if (string.IsNullOrEmpty(strLastDate) == false
-                    && string.Compare(fi.Name, strLastDate) < 0)
+                    && string.Compare(date_in_filename, strLastDate) < 0)
                     continue;
 
                 OperLogFileInfo result = new OperLogFileInfo
@@ -4563,6 +4648,15 @@ out string strError);
                 results.Add(result);
             }
             return results;
+        }
+
+        static string GetDateInFileName(string pure_file_name)
+        {
+            string date_in_filename = Path.GetFileNameWithoutExtension(pure_file_name);
+            int index = date_in_filename.LastIndexOf("_");
+            if (index != -1)
+                date_in_filename = date_in_filename.Substring(index + 1);
+            return date_in_filename;
         }
 
         [JsonObject(MemberSerialization.OptIn)]
@@ -4611,7 +4705,8 @@ out string strError);
         {
             Debug.Assert(item.ListView == null
                 || item.ListView == this.listView_operLogTasks
-                || item.ListView == this.listView_errorLogTasks,
+                || item.ListView == this.listView_errorLogTasks
+                || item.ListView == this.listView_kernelErrorLogTasks,
                 "");
 
             this.Invoke((Action)(() =>
@@ -4723,8 +4818,10 @@ out string strError);
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            ListView listView = this.listView_operLogTasks;
+
             menuItem = new MenuItem("全选(&A)");
-            menuItem.Tag = this.listView_operLogTasks;
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -4733,21 +4830,21 @@ out string strError);
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("新建下载日备份任务 (&B)");
-            menuItem.Tag = this.listView_operLogTasks;
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.MenuItem_newOperLogTasks_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("停止下载 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&T)");
-            menuItem.Tag = this.listView_operLogTasks;
+            menuItem = new MenuItem("停止下载 [" + listView.SelectedItems.Count.ToString() + "] (&T)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.MenuItem_stopOperLogTasks_Click);
-            if (this.listView_operLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("重启下载 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&S)");
-            menuItem.Tag = this.listView_operLogTasks;
+            menuItem = new MenuItem("重启下载 [" + listView.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.MenuItem_continueOperLogTasks_Click);
-            if (this.listView_operLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -4755,22 +4852,22 @@ out string strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("打开服务器文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&S)");
-            menuItem.Tag = this.listView_operLogTasks;
+            menuItem = new MenuItem("打开服务器文件夹 [" + listView.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.menu_openServerFolder_Click);
-            if (this.listView_operLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("打开本地文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&F)");
-            menuItem.Tag = this.listView_operLogTasks;
+            menuItem = new MenuItem("打开本地文件夹 [" + listView.SelectedItems.Count.ToString() + "] (&F)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.menu_openOperLogLocalFolder_Click);
-            if (this.listView_operLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("验证本地和服务器文件 (&V)");
-            menuItem.Tag = this.listView_operLogTasks;
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.MenuItem_verifyLocalAndServerFile_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -4779,15 +4876,15 @@ out string strError);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("移除 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&D)");
-            menuItem.Tag = this.listView_operLogTasks;
+            menuItem = new MenuItem("移除 [" + listView.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.menu_removeOperLogTasks_Click);
-            if (this.listView_operLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_operLogTasks, new Point(e.X, e.Y));
+            contextMenu.Show(listView, new Point(e.X, e.Y));
         }
 
         // 验证全部本地和服务器文件
@@ -5042,6 +5139,8 @@ out string strError);
                 strOutputFolder = Path.Combine(GetOutputFolder(serverName), "operlog");
             else if (listView == this.listView_errorLogTasks)
                 strOutputFolder = Path.Combine(GetOutputFolder(serverName), "log");
+            else if (listView == this.listView_kernelErrorLogTasks)
+                strOutputFolder = Path.Combine(GetOutputFolder(serverName), "dp2kernel_log");
             else
                 throw new ArgumentException("未知的 listView");
 
@@ -5404,8 +5503,10 @@ MessageBoxDefaultButton.Button2);
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            ListView listView = this.listView_errorLogTasks;
+
             menuItem = new MenuItem("全选(&A)");
-            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5414,21 +5515,21 @@ MessageBoxDefaultButton.Button2);
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("新建下载错误日志任务 (&B)");
-            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.MenuItem_newOperLogTasks_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("停止下载 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&T)");
-            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem = new MenuItem("停止下载 [" + listView.SelectedItems.Count.ToString() + "] (&T)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.MenuItem_stopOperLogTasks_Click);
-            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("重启下载 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&S)");
-            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem = new MenuItem("重启下载 [" + listView.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.MenuItem_continueOperLogTasks_Click);
-            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5436,17 +5537,17 @@ MessageBoxDefaultButton.Button2);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("打开服务器文件夹 [" + this.listView_errorLogTasks.SelectedItems.Count.ToString() + "] (&S)");
-            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem = new MenuItem("打开服务器文件夹 [" + listView.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.menu_openServerFolder_Click);
-            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("打开本地文件夹 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&F)");
-            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem = new MenuItem("打开本地文件夹 [" + listView.SelectedItems.Count.ToString() + "] (&F)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.menu_openOperLogLocalFolder_Click);
-            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5455,15 +5556,14 @@ MessageBoxDefaultButton.Button2);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("移除 [" + this.listView_operLogTasks.SelectedItems.Count.ToString() + "] (&D)");
-            menuItem.Tag = this.listView_errorLogTasks;
+            menuItem = new MenuItem("移除 [" + listView.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Tag = listView;
             menuItem.Click += new System.EventHandler(this.menu_removeOperLogTasks_Click);
-            if (this.listView_errorLogTasks.SelectedItems.Count == 0)
+            if (listView.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-
-            contextMenu.Show(this.listView_errorLogTasks, new Point(e.X, e.Y));
+            contextMenu.Show(listView, new Point(e.X, e.Y));
         }
 
         // 设置消息账户
@@ -5561,6 +5661,78 @@ dlg.UiState);
                     FormProperty.SetProperty(state, dlg);
                 }
             }
+        }
+
+        private void listView_kernelErrorLogTasks_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            ListView listView = this.listView_kernelErrorLogTasks;
+
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Tag = listView;
+            menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("新建下载错误日志任务 (&B)");
+            menuItem.Tag = listView;
+            menuItem.Click += new System.EventHandler(this.MenuItem_newOperLogTasks_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("停止下载 [" + listView.SelectedItems.Count.ToString() + "] (&T)");
+            menuItem.Tag = listView;
+            menuItem.Click += new System.EventHandler(this.MenuItem_stopOperLogTasks_Click);
+            if (listView.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("重启下载 [" + listView.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = listView;
+            menuItem.Click += new System.EventHandler(this.MenuItem_continueOperLogTasks_Click);
+            if (listView.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("打开服务器文件夹 [" + listView.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Tag = listView;
+            menuItem.Click += new System.EventHandler(this.menu_openServerFolder_Click);
+            if (listView.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("打开本地文件夹 [" + listView.SelectedItems.Count.ToString() + "] (&F)");
+            menuItem.Tag = listView;
+            menuItem.Click += new System.EventHandler(this.menu_openOperLogLocalFolder_Click);
+            if (listView.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            menuItem = new MenuItem("移除 [" + listView.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Tag = listView;
+            menuItem.Click += new System.EventHandler(this.menu_removeOperLogTasks_Click);
+            if (listView.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            contextMenu.Show(listView, new Point(e.X, e.Y));
         }
     }
 }

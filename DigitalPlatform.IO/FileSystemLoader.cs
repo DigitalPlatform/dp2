@@ -273,6 +273,12 @@ namespace DigitalPlatform.IO
             return strPath;
         }
 
+        // 2022/2/11
+        public int Count
+        {
+            get;set;
+        }
+
         public IEnumerator GetEnumerator()
         {
             // 测试 ..
@@ -283,6 +289,8 @@ namespace DigitalPlatform.IO
             // \*.*
             // ..
             // .
+
+            Count = 0;
 
             string strDirectory = "";
             string strPattern = "";
@@ -319,6 +327,9 @@ namespace DigitalPlatform.IO
 
             DirectoryInfo di = new DirectoryInfo(strDirectory);
             FileSystemInfo[] sis = di.GetFileSystemInfos(strPattern);
+
+            // 2022/2/11
+            Count = sis.Length;
 
             foreach (FileSystemInfo si in sis)
             {
