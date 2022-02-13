@@ -5,17 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace dp2KernelApiTester
 {
     // 测试初始化和删除数据库
     public static class TestCreateDatabase
     {
-        public static NormalResult TestAll()
+        static string strDatabaseName = "__test";
+
+        public static NormalResult TestAll(string style = null)
         {
             string strError = "";
 
-            string strDatabaseName = "__test";
             var channel = DataModel.GetChannel();
 
             List<string[]> logicNames = new List<string[]>();
@@ -224,6 +226,36 @@ namespace dp2KernelApiTester
                 goto ERROR1;
             }
 
+            if (StringUtil.IsInList("refresh_database", style))
+            {
+                var result = RefreshDatabase(true);
+                if (result.Value == -1)
+                {
+                    DataModel.SetMessage($"RefreshDatabase() error: {result.ErrorInfo}", "error");
+                    return result;
+                }
+            }
+
+            if (StringUtil.IsInList("create_records", style))
+            {
+                var result = CreateRecords(1000);
+                if (result.Value == -1)
+                {
+                    DataModel.SetMessage($"CreateRecords() error: {result.ErrorInfo}", "error");
+                    return result;
+                }
+            }
+
+            if (StringUtil.IsInList("buildkeys", style))
+            {
+                var result = RebuildKeys();
+                if (result.Value == -1)
+                {
+                    DataModel.SetMessage($"RebuildKeys() error: {result.ErrorInfo}", "error");
+                    return result;
+                }
+            }
+
             ret = channel.DoDeleteDB(strDatabaseName, out strError);
             if (ret == -1)
             {
@@ -241,6 +273,103 @@ namespace dp2KernelApiTester
                 Value = -1,
                 ErrorInfo = strError
             };
+        }
+
+        public static NormalResult RebuildKeys()
+        {
+            var channel = DataModel.GetChannel();
+
+            var ret = channel.DoRefreshDB("disablekeysindex",
+    strDatabaseName,
+    false,
+    out string strError);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            ret = channel.DoRefreshDB("rebuildkeysindex",
+                strDatabaseName,
+                false,
+                out strError);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            DataModel.SetMessage($"刷新数据库定义成功");
+            return new NormalResult();
+        }
+
+
+        // 刷新数据库定义
+        public static NormalResult RefreshDatabase(bool bClearAllKeysTable)
+        {
+            var channel = DataModel.GetChannel();
+            var ret = channel.DoRefreshDB("begin", 
+                strDatabaseName,
+                bClearAllKeysTable,
+                out string strError);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            ret = channel.DoRefreshDB("end",
+    strDatabaseName,
+    bClearAllKeysTable,
+    out strError);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            DataModel.SetMessage($"刷新数据库定义成功");
+            return new NormalResult();
+        }
+
+        // 创建若干条数据库记录
+        public static NormalResult CreateRecords(int count)
+        {
+            var channel = DataModel.GetChannel();
+
+            for (int i = 0; i < count; i++)
+            {
+                string path = $"{strDatabaseName}/?";
+
+                string xml = @"<root>
+<barcode>{barcode}</barcode>
+</root>".Replace("{barcode}", (i + 1).ToString().PadLeft(10, '0'));
+                var bytes = Encoding.UTF8.GetBytes(xml);
+
+                var ret = channel.DoSaveTextRes(path,
+                    xml, // strMetadata,
+                    false,
+                    "",
+                    null,
+                    out byte[] output_timestamp,
+                    out string output_path,
+                    out string strError);
+                if (ret == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+
+                DataModel.SetMessage($"创建记录 {output_path} 成功");
+
+            }
+
+            return new NormalResult();
         }
 
         /*

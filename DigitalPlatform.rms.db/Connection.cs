@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -529,6 +530,41 @@ namespace DigitalPlatform.rms
                 return (OracleConnection)_connection;
             }
         }
+
+        public bool IsMsSqlServer()
+        {
+            return (this.SqlServerType == SqlServerType.MsSqlServer);
+        }
+
+        public bool IsSqlite()
+        {
+            return (this.SqlServerType == SqlServerType.SQLite);
+        }
+
+        public bool IsMySQL()
+        {
+            return (this.SqlServerType == SqlServerType.MySql);
+        }
+
+        public bool IsOracle()
+        {
+            return (this.SqlServerType == SqlServerType.Oracle);
+        }
+
+        public DbCommand NewCommand(string command)
+        {
+            if (IsMsSqlServer())
+                return new SqlCommand(command, this.SqlConnection);
+            else if (IsSqlite())
+                return new SQLiteCommand(command, this.SQLiteConnection);
+            else if (IsMySQL())
+                return new MySqlCommand(command, this.MySqlConnection);
+            else if (IsOracle())
+                return new OracleCommand(command, this.OracleConnection);
+            else
+                throw new Exception($"无法识别的数据库类型 '{this.SqlServerType}'");
+        }
+
     }
 
 }

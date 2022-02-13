@@ -296,7 +296,7 @@ string style = "")
             {
                 try
                 {
-                    TestCreateDatabase.TestAll();
+                    TestCreateDatabase.TestAll("refresh_database,create_records,buildkeys");
                 }
                 catch (Exception ex)
                 {
