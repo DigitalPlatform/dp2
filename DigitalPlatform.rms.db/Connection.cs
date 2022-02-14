@@ -9,20 +9,20 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MySqlConnector;
 
 //using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
+using MySqlConnector;
 
 namespace DigitalPlatform.rms
 {
     // 包装多种类型的Connection
-    public class Connection : IDisposable
+    public class Connection : IDisposable, IDbConnection
     {
         public SqlDatabase SqlDatabase = null;
         public SqlServerType SqlServerType = SqlServerType.None;
 
-        object _connection = null;
+        IDbConnection _connection = null;
         bool _bGlobal = false;
         internal IDbTransaction _globalTrans = null;
 
@@ -565,6 +565,48 @@ namespace DigitalPlatform.rms
                 throw new Exception($"无法识别的数据库类型 '{this.SqlServerType}'");
         }
 
+        #region 实现 IDbConnection 接口
+
+        public IDbTransaction BeginTransaction()
+        {
+            return _connection.BeginTransaction();
+        }
+
+        public IDbTransaction BeginTransaction(IsolationLevel il)
+        {
+            return _connection.BeginTransaction(il);
+        }
+
+        public void Close()
+        {
+            _connection.Close();
+        }
+
+        public void ChangeDatabase(string databaseName)
+        {
+            _connection.ChangeDatabase(databaseName);
+        }
+
+        public IDbCommand CreateCommand()
+        {
+            return _connection.CreateCommand();
+        }
+
+        public void Open()
+        {
+            _connection.Open();
+        }
+
+        public string ConnectionString { get => _connection.ConnectionString; set => _connection.ConnectionString = value; }
+
+        public int ConnectionTimeout => _connection.ConnectionTimeout;
+
+        public string Database => _connection.Database;
+
+        public ConnectionState State => _connection.State;
+
+
+        #endregion
     }
 
 }

@@ -40,7 +40,7 @@ string style = "")
         {
             using (SettingDialog dlg = new SettingDialog())
             {
-                GuiUtil.SetControlFont(dlg, parent.Font);
+                // GuiUtil.SetControlFont(dlg, parent.Font);
                 ClientInfo.MemoryState(dlg, "settingDialog", "state");
                 dlg.ShowDialog(parent);
             }
@@ -297,6 +297,23 @@ string style = "")
                 try
                 {
                     TestCreateDatabase.TestAll("refresh_database,create_records,buildkeys");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        private void MenuItem_test_records_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var result = TestRecord.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
                 }
                 catch (Exception ex)
                 {

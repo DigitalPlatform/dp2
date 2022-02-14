@@ -33,6 +33,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using MySqlConnector;
+using Dapper;
 
 namespace DigitalPlatform.rms
 {
@@ -6728,10 +6729,39 @@ handle.CancelTokenSource.Token).Result;
 
             // 通用
             {
+                byte[] textPtr = null;
+                string strDataFieldName = "data";
+
                 bool bObjectFile = false;
 
-                if (row_info != null)
+                bool bNeedPage = StringUtil.IsInList("metadata", strStyle) == true && string.IsNullOrEmpty(strPartCmd) == false;
+
+                if (row_info == null)
                 {
+                    // 需要即时获得行信息
+                    strID = DbPath.GetID10(strID);
+
+                    nRet = _getRowInfos(connection,
+    false,
+    new List<string> { strID },
+    out List<RecordRowInfo> row_infos,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    if (row_infos.Count == 0)
+                    {
+                        strError = $"ID 为 '{strID}' 的记录不存在";
+                        return -4;
+                    }
+
+                    row_info = row_infos[0];
+                    string strRange = row_info.Range;
+                }
+
+                {
+                    bool bReverse = false;  // 方向标志。如果为false，表示 data 为正式内容，newdata为暂时内容
+
                     string strRange = row_info.Range;
 
                     if (String.IsNullOrEmpty(strRange) == false
@@ -6744,12 +6774,35 @@ handle.CancelTokenSource.Token).Result;
                     }
                     else
                     {
-                        bObjectFile = true;
+                        if (String.IsNullOrEmpty(strRange) == false
+                            && strRange[0] == '!')
+                        {
+                            bReverse = true;
+                            strRange = strRange.Substring(1);
+                        }
+
+                        if (bTempField == true)
+                            bReverse = !bReverse;
+
+                        strDataFieldName = "data";
+                        if (bReverse == true)
+                            strDataFieldName = "newdata";
+
+                        if (bReverse == false)
+                        {
+                            lTotalLength = row_info.data_length;
+                            textPtr = row_info.data_textptr;
+                        }
+                        else
+                        {
+                            lTotalLength = row_info.newdata_length;
+                            textPtr = row_info.newdata_textptr;
+                        }
                     }
 
                     if (StringUtil.IsInList("timestamp", strStyle) == true)
                     {
-                        if (bObjectFile == true)
+                        if (bReverse == false || bObjectFile == true)
                             outputTimestamp = ByteArray.GetTimeStampByteArray(row_info.TimestampString);
                         else
                             outputTimestamp = ByteArray.GetTimeStampByteArray(row_info.NewTimestampString);
@@ -6759,199 +6812,9 @@ handle.CancelTokenSource.Token).Result;
                         || StringUtil.IsInList("incReadCount", strStyle) == true)
                         strMetadata = row_info.Metadata;
                 }
-                else
-                {
-                    // 需要即时获得行信息
-                    strID = DbPath.GetID10(strID);
-
-                    // 部分命令字符串
-                    string strPartComm = "";
-                    int nColIndex = 0;
-
-                    // filename 一定要有
-                    int nFileNameColIndex = -1;
-                    int nNewFileNameColIndex = -1;
-                    if (string.IsNullOrEmpty(strPartComm) == false)
-                        strPartComm += ",";
-                    strPartComm += " filename, ";
-                    nFileNameColIndex = nColIndex++;
-                    strPartComm += " newfilename";
-                    nNewFileNameColIndex = nColIndex++;
-
-                    // 3.timestamp
-                    int nTimestampColIndex = -1;
-                    int nNewTimestampColIndex = -1;
-                    if (StringUtil.IsInList("timestamp", strStyle) == true)
-                    {
-                        if (string.IsNullOrEmpty(strPartComm) == false)
-                            strPartComm += ",";
-                        strPartComm += " dptimestamp,";
-                        nTimestampColIndex = nColIndex++;
-                        strPartComm += " newdptimestamp";
-                        nNewTimestampColIndex = nColIndex++;
-                    }
-                    // 4.metadata
-                    int nMetadataColIndex = -1;
-                    if (StringUtil.IsInList("metadata", strStyle) == true
-                        || StringUtil.IsInList("incReadCount", strStyle) == true)
-                    {
-                        if (string.IsNullOrEmpty(strPartComm) == false)
-                            strPartComm += ",";
-                        strPartComm += " metadata";
-                        nMetadataColIndex = nColIndex++;
-                    }
-                    // 5.range，一定要有，用于判断方向
-                    int nRangeColIndex = -1;
-                    if (string.IsNullOrEmpty(strPartComm) == false)
-                        strPartComm += ",";
-
-                    // 注意这里特化
-                    if (connection.IsSqlite() || connection.IsOracle())
-                        strPartComm += " range";
-                    else if (connection.IsMySQL())
-                        strPartComm += " `range`";
-
-                    nRangeColIndex = nColIndex++;
-
-                    int nIdColIndex = -1;
-                    if (string.IsNullOrEmpty(strPartComm) == false)
-                        strPartComm += ",";
-                    strPartComm += " id";
-                    nIdColIndex = nColIndex++;
-
-                    string strCommand = "";
-                    // DataLength()函数int类型
-                    // 注意这里特化
-                    if (connection.IsSqlite())
-                        strCommand = " SELECT "
-                            + strPartComm + " "
-                            + " FROM records WHERE id=@id";
-                    else if (connection.IsMySQL())
-                        strCommand = " SELECT "
-    + strPartComm + " "
-    + " FROM `" + this.m_strSqlDbName + "`.records WHERE id=@id";
-                    else if (connection.IsOracle())
-                        strCommand = " SELECT "
-    + strPartComm + " "
-    + " FROM " + this.m_strSqlDbName + "_records WHERE id=:id";
-
-                    using (var command = connection.NewCommand(strCommand) as DbCommand)
-                    {
-                        /*
-                        SQLiteParameter idParam =
-                            command.Parameters.Add("@id",
-                            DbType.String);
-                        idParam.Value = strID;
-                        */
-
-                        if (connection.IsOracle())
-                        {
-                            OracleParameter idParam = new OracleParameter
-                            {
-                                ParameterName = ":id",
-                                OracleDbType = OracleDbType.NVarchar2,
-                                Value = strID,
-                            };
-                            command.Parameters.Add(idParam);
-                        }
-                        else
-                        {
-                            // 注: MySqlParamter 也许可以用 DbType(而不是 MySqlDbType)
-                            command.NewParameter("@id", DbType.String, -1, strID);
-                        }
-
-                        try
-                        {
-                            // 执行命令
-                            using (var dr = command.ExecuteReader(CommandBehavior.SingleResult))
-                            {
-                                if (dr == null || dr.HasRows == false)
-                                {
-                                    strError = "记录 '" + strID + "' 在库中不存在";
-                                    return -4;
-                                }
-
-                                dr.Read();
-
-                                // 5.range，一定会返回
-                                string strRange = "";
-
-                                if (!dr.IsDBNull(nRangeColIndex))
-                                    strRange = (string)dr[nRangeColIndex];
-
-                                bool bReverse = false;  // 方向标志。如果为false，表示 data 为正式内容，newdata为暂时内容
-
-                                if (String.IsNullOrEmpty(strRange) == false
-                && strRange[0] == '#')
-                                {
-                                    bObjectFile = true;
-                                    strRange = strRange.Substring(1);
-
-                                    lTotalLength = -1;  // 表示待取得
-
-                                    if (row_info == null)
-                                        row_info = new RecordRowInfo();
-                                    // 
-                                    if (nFileNameColIndex != -1 && !dr.IsDBNull(nFileNameColIndex))
-                                    {
-                                        row_info.FileName = (string)dr[nFileNameColIndex];
-                                    }
-
-                                    if (nNewFileNameColIndex != -1 && !dr.IsDBNull(nNewFileNameColIndex))
-                                    {
-                                        row_info.NewFileName = (string)dr[nNewFileNameColIndex];
-                                    }
-                                }
-
-                                // 注意，row_info 有可能为空
-
-                                // 3.timestamp
-                                if (StringUtil.IsInList("timestamp", strStyle) == true)
-                                {
-                                    if (bReverse == false || bObjectFile == true)
-                                    {
-                                        if (nTimestampColIndex != -1 && !dr.IsDBNull(nTimestampColIndex))
-                                        {
-                                            string strOutputTimestamp = (string)dr[nTimestampColIndex];
-                                            outputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);//Encoding.UTF8.GetBytes(strOutputTimestamp);
-                                        }
-                                        else
-                                            outputTimestamp = null;
-                                    }
-                                    else
-                                    {
-                                        if (nNewTimestampColIndex != -1 && !dr.IsDBNull(nNewTimestampColIndex))
-                                        {
-                                            string strOutputTimestamp = (string)dr[nNewTimestampColIndex];
-                                            outputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);//Encoding.UTF8.GetBytes(strOutputTimestamp);
-                                        }
-                                        else
-                                            outputTimestamp = null;
-                                    }
-                                }
-
-                                // 4.metadata
-                                if (StringUtil.IsInList("metadata", strStyle) == true
-                        || StringUtil.IsInList("incReadCount", strStyle) == true)
-                                {
-                                    if (nMetadataColIndex != -1 && !dr.IsDBNull(nMetadataColIndex))
-                                    {
-                                        strMetadata = (string)dr[nMetadataColIndex];
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            string strConnectionName = command.Connection.GetHashCode().ToString();
-                            this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
-                            throw ex;
-                        }
-                    } // end of using command
-                }
 
                 string strObjectFilename = "";
-
+                if (bObjectFile == true)
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                     {
@@ -6961,8 +6824,8 @@ handle.CancelTokenSource.Token).Result;
 
                     if (bTempField == false)
                     {
-                        if (row_info == null
-                            || string.IsNullOrEmpty(row_info.FileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
                             strError = "行信息中没有对象文件 正式文件名";
@@ -6979,8 +6842,8 @@ handle.CancelTokenSource.Token).Result;
                     }
                     else
                     {
-                        if (row_info == null
-                            || string.IsNullOrEmpty(row_info.NewFileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             // 尚没有临时的对象文件
                             destBuffer = new byte[0];
@@ -6992,32 +6855,17 @@ handle.CancelTokenSource.Token).Result;
                         strObjectFilename = GetObjectFileName(row_info.NewFileName);
                     }
 
-                    int nRedoCount = 0;
-                REDO:
                     FileInfo fi = new FileInfo(strObjectFilename);
                     // 2020/3/1
                     fi.Refresh();
                     if (fi.Exists == false)
                     {
-                        // 尝试补救一下
-                        string strTempFileName = strObjectFilename + ".bak";
-                        if (nRedoCount > 2 || File.Exists(strTempFileName) == false)
-                        {
-                            // TODO: 不要直接汇报物理文件名
-                            strError = "对象文件 '" + strObjectFilename + "' 不存在";
-                            return -100;
-                        }
-                        else
-                        {
-                            File.Copy(strTempFileName, strObjectFilename);
-                            nRedoCount++;
-                            goto REDO;
-                        }
+                        // TODO: 不要直接汇报物理文件名
+                        strError = "对象文件 '" + strObjectFilename + "' 不存在";
+                        return -100;
                     }
                     lTotalLength = fi.Length;
                 }
-
-                bool bNeedPage = StringUtil.IsInList("metadata", strStyle) == true && string.IsNullOrEmpty(strPartCmd) == false;
 
                 // 需要提取数据时,才会取数据
                 if (StringUtil.IsInList("data", strStyle) == true
@@ -7042,6 +6890,49 @@ handle.CancelTokenSource.Token).Result;
                         goto END1;
                     }
 
+                    if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == false)
+                    {
+                        bool bFreely = false;
+                        string strObjectFilePath = "";
+
+                        try
+                        {
+                            nRet = GetObjectFile(connection,
+        this.GetCacheRecPath(strID),    // this.m_strSqlDbName + "/" + strID,
+        strDataFieldName,
+        textPtr,
+        lTotalLength,
+        out bFreely,
+        out strObjectFilePath,
+        out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            // 得到一个 pdf 页面图像的指定范围的 byte []
+                            nRet = GetPageImagePart(
+                                GetCacheRecPath(strID),
+                                strObjectFilePath,
+                                strPartCmd,
+                                lStart,
+                                nReadLength,
+                                nMaxLength,
+                                ref lTotalLength,
+                                ref destBuffer,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                        }
+                        finally
+                        {
+                            // 释放对象文件
+                            if (bFreely && string.IsNullOrEmpty(strObjectFilePath) == false)
+                                _streamCache.FileDelete(strObjectFilePath);
+                        }
+
+                        goto END1;
+                    }
+
                     if (nReadLength == 0)  // 取0长度
                     {
                         destBuffer = new byte[0];
@@ -7054,13 +6945,15 @@ handle.CancelTokenSource.Token).Result;
                     //		-1  出错
                     //		0   成功
                     nRet = ConvertUtil.GetRealLengthNew(lStart,
-                        nReadLength,
-                        lTotalLength,
-                        nMaxLength,
-                        out long lOutputLength,
-                        out strError);
+                nReadLength,
+                lTotalLength,
+                nMaxLength,
+                out long lOutputLength,
+                out strError);
                     if (nRet == -1)
                         return -1;
+
+                    Debug.Assert(lOutputLength < Int32.MaxValue && lOutputLength > Int32.MinValue, "");
 
                     // 2012/1/21
                     if (lTotalLength == 0)  // 总长度为0
@@ -7083,7 +6976,73 @@ handle.CancelTokenSource.Token).Result;
             out strError);
                         if (nRet < 0)
                             return nRet;
+                        goto END1;
                     }
+
+                    if (textPtr == null)
+                    {
+                        strError = "textPtr为null";
+                        return -1;
+                    }
+
+                    // READTEXT命令:
+                    // text_ptr: 有效文本指针。text_ptr 必须是 binary(16)。
+                    // offset:   开始读取image数据之前跳过的字节数（使用 text 或 image 数据类型时）或字符数（使用 ntext 数据类型时）。
+                    //			 使用 ntext 数据类型时，offset 是在开始读取数据前跳过的字符数。
+                    //			 使用 text 或 image 数据类型时，offset 是在开始读取数据前跳过的字节数。
+                    // size:     是要读取数据的字节数（使用 text 或 image 数据类型时）或字符数（使用 ntext 数据类型时）。如果 size 是 0，则表示读取了 4 KB 字节的数据。
+                    // HOLDLOCK: 使文本值一直锁定到事务结束。其他用户可以读取该值，但是不能对其进行修改。
+
+                    string strCommand = "use " + this.m_strSqlDbName + " "
+                       + " READTEXT records." + strDataFieldName
+                       + " @text_ptr"
+                       + " @offset"
+                       + " @size"
+                       + " HOLDLOCK";
+
+                    strCommand += " use master " + "\n";
+
+                    using (SqlCommand command = new SqlCommand(strCommand,
+                        connection.SqlConnection))
+                    {
+
+                        SqlParameter text_ptrParam =
+                            command.Parameters.Add("@text_ptr",
+                            SqlDbType.VarBinary,
+                            16);
+                        text_ptrParam.Value = textPtr;
+
+                        SqlParameter offsetParam =
+                            command.Parameters.Add("@offset",
+                            SqlDbType.Int);  // old Int
+                        offsetParam.Value = lStart;
+
+                        SqlParameter sizeParam =
+                            command.Parameters.Add("@size",
+                            SqlDbType.Int);  // old Int
+                        sizeParam.Value = lOutputLength;
+
+                        destBuffer = new Byte[lOutputLength];
+
+                        using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
+                        {
+                            try
+                            {
+                                dr.Read();
+                                dr.GetBytes(0,
+                                    0,
+                                    destBuffer,
+                                    0,
+                                    System.Convert.ToInt32(sizeParam.Value));
+                            }
+                            catch (Exception ex)
+                            {
+                                string strConnectionName = command.Connection.GetHashCode().ToString();
+                                this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                                throw ex;
+                            }
+                        }
+                    } // end of using command
                 }
 
                 // return lTotalLength;
@@ -18539,6 +18498,7 @@ handle.CancelTokenSource.Token).Result;
                             }
                         }
 
+                        // ?? 2022/2/14 为何 Oracle 要特殊处理?
                         // 删除记录
                         if (this.container.SqlServerType == SqlServerType.Oracle)
                         {
@@ -18879,6 +18839,7 @@ handle.CancelTokenSource.Token).Result;
             int i = 0;
             foreach (string s in ids)
             {
+                /*
                 if (string.IsNullOrEmpty(s) == true || s.Length != 10)
                 {
                     strError = "ID字符串 '" + s + "' 不合法";
@@ -18889,6 +18850,10 @@ handle.CancelTokenSource.Token).Result;
                     strError = "ID '" + s + "' 必须是纯数字";
                     return -1;
                 }
+                */
+                strError = VerifyID(s);
+                if (strError != null)
+                    return -1;
                 if (i != 0)
                     idstring.Append(",");
                 idstring.Append("'" + s + "'");
@@ -18897,6 +18862,34 @@ handle.CancelTokenSource.Token).Result;
 
             strResult = idstring.ToString();
             return 0;
+        }
+
+        public static string VerifyID(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                return "ID 字符串不合法: 空字符串";
+
+            string left = s;
+            if (s.IndexOf("_") != -1)
+            {
+                var parts = StringUtil.ParseTwoPart(s, "_");
+                var right = parts[1];
+                if (string.IsNullOrEmpty(right))
+                    return $"ID 字符串 '{s}' 不合法: 横杠右侧部分字符数为 0";
+
+                left = parts[0];
+            }
+
+            if (string.IsNullOrEmpty(left) == true || left.Length != 10)
+            {
+                return $"ID 字符串 '{s}'不合法: 左侧数字部分字符数不为 10";
+            }
+            if (StringUtil.IsPureNumber(left) == false)
+            {
+                return $"ID 字符串 '{s}' 不合法: '{ left }' 必须是纯数字";
+            }
+
+            return null;
         }
 
         // 强制删除记录对应的检索点,检查所有的表
@@ -19303,6 +19296,47 @@ handle.CancelTokenSource.Token).Result;
 
             List<string> filenames = new List<string>();
 
+            // 通用
+            {
+                // 第一步：获得短文件名
+                if (bDeleteObjectFiles == true)
+                {
+                    if (row_info != null && bDeleteSubrecord == false)
+                    {
+                        // 后面可以通过 row_info 来删除记录的对象文件
+                    }
+                    else
+                    {
+                        nRet = GetFileNames(connection,
+new string[] { strID },
+bDeleteSubrecord,
+out filenames,
+out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                }
+
+                // 第二步：删除SQL行
+                {
+                    if (strID.Length != 10)
+                    {
+                        strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                        return -1;
+                    }
+                    Debug.Assert(strID.Length == 10, "");
+
+                    nRet = DeleteRecordLine(connection,
+                        new string[] { strID },
+                        bDeleteSubrecord,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    nDeletedCount = nRet;
+                }
+            }
+
+#if OLD_CODE
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 SqlConnection current_connection = null;
@@ -19779,6 +19813,8 @@ handle.CancelTokenSource.Token).Result;
                  * */
             }
 
+#endif
+
             // 第三步：删除对象文件
             if (this.m_lObjectStartSize != -1)
             {
@@ -19842,6 +19878,117 @@ handle.CancelTokenSource.Token).Result;
             }
 
             return nDeletedCount;
+        }
+
+        string db_prefix
+        {
+            get
+            {
+                string db_prefix = "";
+                if (this.IsMySQL())
+                    db_prefix = $"`{this.m_strSqlDbName}`.";
+                else if (this.IsOracle())
+                    db_prefix = $"{this.m_strSqlDbName}_";
+                else if (this.IsMsSqlServer())
+                    db_prefix = $"{this.m_strSqlDbName}..";
+                return db_prefix;
+            }
+        }
+
+        // 获得指定 records 表记录关联的对象文件名
+        // parameters:
+        //          include_subrecord   是否要包含 dprms:file 元素的对象文件名？
+        // return:
+        //      -1  出错
+        //      其它  涉及到的 record 记录条数
+        int GetFileNames(Connection connection,
+            IEnumerable<string> record_ids,
+            bool include_subrecord,
+            out List<string> filenames,
+            out string strError)
+        {
+            strError = "";
+            filenames = new List<string>();
+
+            string strCommand = "";
+
+            if (include_subrecord)
+                strCommand = $"SELECT filename, newfilename FROM {db_prefix}records WHERE id like @id1 OR id = @id2";
+            else
+                strCommand = $"SELECT filename, newfilename FROM {db_prefix}records WHERE id = @id";
+
+            if (connection.IsOracle())
+                strCommand = strCommand.Replace("@", ":");
+
+            int record_count = 0;   // 涉及到的 record 记录条数
+            foreach (var record_id in record_ids)
+            {
+                IEnumerable<dynamic> results;
+                if (include_subrecord)
+                    results = connection.Query(strCommand,
+                        new { id1 = record_id + "_%", id2 = record_id },
+                        null,
+                        true,
+                        m_nLongTimeout);
+                else
+                    results = connection.Query(strCommand,
+                        new { id = record_id },
+                        null,
+                        true,
+                        m_nLongTimeout);
+
+                foreach (var result in results)
+                {
+                    string filename = result.filename;
+                    string newfilename = result.newfilename;
+                    if (string.IsNullOrEmpty(filename) == false)
+                        filenames.Add(filename);
+                    if (string.IsNullOrEmpty(newfilename) == false)
+                        filenames.Add(newfilename);
+
+                    record_count++;
+                }
+            }
+
+            return record_count;
+        }
+
+        // 删除指定 records 表记录
+        // parameters:
+        //          include_subrecord   是否一并删除下级记录？
+        int DeleteRecordLine(Connection connection,
+            IEnumerable<string> record_ids,
+            bool include_subrecord,
+            out string strError)
+        {
+            strError = "";
+
+            string strCommand = "";
+
+            if (include_subrecord)
+                strCommand = $"DELETE FROM {db_prefix}records WHERE id like @id1 OR id = @id2";
+            else
+                strCommand = $"DELETE FROM {db_prefix}records WHERE id = @id";
+
+            if (connection.IsOracle())
+                strCommand = strCommand.Replace("@", ":");
+
+            int count = 0;
+            foreach (var record_id in record_ids)
+            {
+                if (include_subrecord)
+                    count += connection.Execute(strCommand,
+                        new { id1 = record_id + "_%", id2 = record_id },
+                        null,
+                        m_nLongTimeout);
+                else
+                    count += connection.Execute(strCommand,
+                        new { id = record_id },
+                        null,
+                        m_nLongTimeout);
+            }
+
+            return count;
         }
 
         string GetCacheRecPath(string strID)
