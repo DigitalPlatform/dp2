@@ -296,7 +296,9 @@ string style = "")
             {
                 try
                 {
-                    TestCreateDatabase.TestAll("refresh_database,create_records,buildkeys");
+                    var result = TestCreateDatabase.TestAll("refresh_database,create_records,buildkeys");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
                 }
                 catch (Exception ex)
                 {

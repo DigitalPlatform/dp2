@@ -16,21 +16,41 @@ namespace dp2KernelApiTester
 
         public static NormalResult TestAll(string style = null)
         {
-            var result = PrepareEnvironment();
-            if (result.Value == -1)
-                return result;
+            {
+                var result = PrepareEnvironment();
+                if (result.Value == -1)
+                    return result;
+            }
 
-            result = CreateRecords(1);
-            if (result.Value == -1)
-                return result;
+            {
+                var create_result = CreateRecords(1);
+                if (create_result.Value == -1)
+                    return create_result;
 
-            result = DeleteRecords(1);
-            if (result.Value == -1)
-                return result;
+                var result = DeleteRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
+                if (result.Value == -1)
+                    return result;
+            }
 
-            result = Finish();
-            if (result.Value == -1)
-                return result;
+            {
+                var create_result = CreateRecords(1);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "forcedeleteoldkeys");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var result = Finish();
+                if (result.Value == -1)
+                    return result;
+            }
 
             return new NormalResult();
         }
@@ -283,15 +303,33 @@ namespace dp2KernelApiTester
             };
         }
 
+        public class AccessPoint
+        {
+            public string Key { get; set; }
+
+            public string From { get; set; }
+
+            public string Path { get; set; }
+        }
+
+        public class CreateResult : NormalResult
+        {
+            public List<string> CreatedPaths { get; set; }
+            public List<AccessPoint> AccessPoints { get; set; }
+        }
+
         // 创建若干条数据库记录
-        public static NormalResult CreateRecords(int count)
+        public static CreateResult CreateRecords(int count)
         {
             var channel = DataModel.GetChannel();
+
+            List<string> created_paths = new List<string>();
+            List<AccessPoint> created_accesspoints = new List<AccessPoint>();
 
             for (int i = 0; i < count; i++)
             {
                 string path = $"{strDatabaseName}/?";
-
+                string current_barcode = (i + 1).ToString().PadLeft(10, '0');
                 string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
 <barcode>{barcode}</barcode>
 <dprms:file id='1' />
@@ -304,7 +342,7 @@ namespace dp2KernelApiTester
 <dprms:file id='8' />
 <dprms:file id='9' />
 <dprms:file id='10' />
-</root>".Replace("{barcode}", (i + 1).ToString().PadLeft(10, '0'));
+</root>".Replace("{barcode}", current_barcode);
                 // var bytes = Encoding.UTF8.GetBytes(xml);
 
                 var ret = channel.DoSaveTextRes(path,
@@ -316,18 +354,28 @@ namespace dp2KernelApiTester
                     out string output_path,
                     out string strError);
                 if (ret == -1)
-                    return new NormalResult
+                    return new CreateResult
                     {
                         Value = -1,
-                        ErrorInfo = strError
+                        ErrorInfo = strError,
+                        CreatedPaths = created_paths,
+                        AccessPoints = created_accesspoints,
                     };
+
+                created_paths.Add(output_path);
+                created_accesspoints.Add(new AccessPoint
+                {
+                    Key = current_barcode,
+                    From = "册条码号",
+                    Path = output_path,
+                });
 
                 // 上载对象
                 for (int j = 0; j < 10; j++)
                 {
                     byte[] bytes = new byte[4096];
-                    ret = channel.WriteRes($"{output_path}/object/{j+1}",
-                        $"0-{bytes.Length-1}",
+                    ret = channel.WriteRes($"{output_path}/object/{j + 1}",
+                        $"0-{bytes.Length - 1}",
                         bytes.Length,
                         bytes,
                         "",
@@ -337,30 +385,60 @@ namespace dp2KernelApiTester
                         out byte[] output_object_timestamp,
                         out strError);
                     if (ret == -1)
-                        return new NormalResult
+                        return new CreateResult
                         {
                             Value = -1,
-                            ErrorInfo = strError
+                            ErrorInfo = strError,
+                            CreatedPaths = created_paths,
+                            AccessPoints = created_accesspoints,
+                        };
+                }
+
+                // 检查检索点是否被成功创建
+                foreach (var accesspoint in created_accesspoints)
+                {
+                    string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+                    ret = channel.DoSearch(strQueryXml, "default", out strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    if (ret != 1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
                         };
                 }
 
                 DataModel.SetMessage($"创建记录 {output_path} 成功");
             }
 
-            return new NormalResult();
+            return new CreateResult
+            {
+                CreatedPaths = created_paths,
+                AccessPoints = created_accesspoints,
+            };
         }
 
-        public static NormalResult DeleteRecords(int count)
+        // parameters:
+        //      delete_style 如果为 "forcedeleteoldkeys" 表示希望强制删除记录的检索点
+        public static NormalResult DeleteRecords(IEnumerable<string> paths,
+            IEnumerable<AccessPoint> created_accesspoints,
+            string delete_style)
         {
             var channel = DataModel.GetChannel();
 
-            for (int i = 0; i < count; i++)
+            foreach (var path in paths)
             {
-                string path = $"{strDatabaseName}/{i+1}";
+                // string path = $"{strDatabaseName}/{i+1}";
 
                 var ret = channel.DoDeleteRes(path,
                     null,
-                    "ignorechecktimestamp",
+                    "ignorechecktimestamp," + delete_style,
                     out byte[] output_timestamp,
                     out string strError);
                 if (ret == -1)
@@ -373,11 +451,11 @@ namespace dp2KernelApiTester
                 // 检查对象是否被删除
                 for (int j = 0; j < 9; j++)
                 {
-                    ret = channel.GetRes($"{path}/object/{i + 1}",
+                    ret = channel.GetRes($"{path}/object/{j + 1}",
                         0,
                         1,
                         "content,data",
-                        out byte [] content,
+                        out byte[] content,
                         out string metadata,
                         out string output_object_path,
                         out byte[] output_object_timestamp,
@@ -395,6 +473,26 @@ namespace dp2KernelApiTester
                 }
 
                 DataModel.SetMessage($"删除记录 {path} 成功");
+            }
+
+            // 检查检索点是否被成功删除
+            foreach (var accesspoint in created_accesspoints)
+            {
+                string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+                var ret = channel.DoSearch(strQueryXml, "default", out string strError);
+                if (ret == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"DoSearch() 出错: {strError}"
+                    };
+                if (ret != 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"检索 '{accesspoint.Key}' 应当不命中。但命中了 {ret} 条",
+                    };
             }
 
             return new NormalResult();

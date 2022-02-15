@@ -1361,26 +1361,33 @@ ex);
                                 $"刷新表定义({strAction})",
                                 (ex) =>
                                 {
+                                    var is_delete = (strAction == "delete"
+                            || strAction == "disable"
+                            || strAction == "disableall");
+
+                                    // MS SQL Server
                                     if (connection.IsMsSqlServer()
                                     && ex is SqlException)
                                     {
-                                        if (strAction == "delete" && IsErrorCode3701(ex as SqlException) == true)
+                                        if (is_delete && IsErrorCode3701(ex as SqlException) == true)
                                             return false;
                                     }
 
                                     // SQLite 不处理
 
+                                    // Oracle
                                     if (connection.IsOracle()
                                     && ex is OracleException)
                                     {
-                                        if (strAction == "delete" && ((OracleException)ex).Number == 1418)
+                                        if (is_delete && ((OracleException)ex).Number == 1418)
                                             return false;
                                     }
 
+                                    // MySQL
                                     if (connection.IsMySQL()
                                     && ex is MySqlException)
                                     {
-                                        if (strAction == "delete" && ((MySqlException)ex).Number == 1091)
+                                        if (is_delete && ((MySqlException)ex).Number == 1091)
                                             return false;
                                     }
 
@@ -1955,9 +1962,9 @@ ex);
             {
                 // 创建records表
                 strCommand = "use " + this.m_strSqlDbName + "\n"
-                    + "if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[records]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n"
-                    + "drop table [dbo].[records]" + "\n"
-                    + "CREATE TABLE [dbo].[records]" + "\n"
+                    + $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[records]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n"
+                    + $"drop table [dbo].[records]" + "\n"
+                    + $"CREATE TABLE [dbo].[records]" + "\n"
                     + "(" + "\n"
                     + "[id] [nvarchar] (255) NULL UNIQUE," + "\n"
                     + "[data] [image] NULL ," + "\n"
@@ -1979,7 +1986,6 @@ ex);
 
                 if (keysCfg != null)
                 {
-
                     List<TableInfo> aTableInfo = null;
                     nRet = keysCfg.GetTableInfosRemoveDup(
                         out aTableInfo,
@@ -1987,16 +1993,15 @@ ex);
                     if (nRet == -1)
                         return -1;
 
-
                     // 建检索点表
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
 
                         strCommand += "\n" +
-                            "if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[" + tableInfo.SqlTableName + "]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
-                            "drop table [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
-                            "CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
+                            $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[{ tableInfo.SqlTableName }]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
+                            $"drop table [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
+                            $"CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
                             "(" + "\n" +
                             "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystring的长度由配置文件定
                             "[fromstring] [nvarchar] (255) NULL ," + "\n" +
@@ -2070,8 +2075,8 @@ ex);
 
                 // 创建records表
                 strCommand = // "use `" + this.m_strSqlDbName + "` ;\n" +
-                    "DROP TABLE IF EXISTS `" + this.m_strSqlDbName + "`.records" + " ;\n"
-                    + "CREATE TABLE `" + this.m_strSqlDbName + "`.records" + " \n"
+                    $"DROP TABLE IF EXISTS {db_prefix}records" + " ;\n"
+                    + $"CREATE TABLE {db_prefix}records" + " \n"
                     + "(" + "\n"
                     + "id varchar (255) " + strCharset + " NULL UNIQUE," + "\n"
                     + "`range` varchar (4000) " + strCharset + " NULL," + "\n"
@@ -2103,8 +2108,8 @@ ex);
                         TableInfo tableInfo = aTableInfo[i];
 
                         strCommand += "\n" +
-                            "DROP TABLE IF EXISTS `" + this.m_strSqlDbName + "`." + tableInfo.SqlTableName + "" + " ;\n" +
-                            "CREATE TABLE `" + this.m_strSqlDbName + "`." + tableInfo.SqlTableName + "\n" +
+                            $"DROP TABLE IF EXISTS {db_prefix}{ tableInfo.SqlTableName} ;\n" +
+                            $"CREATE TABLE {db_prefix}{ tableInfo.SqlTableName }\n" +
                             "(" + "\n" +
                             "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystring的长度由配置文件定
                             "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
@@ -2121,7 +2126,7 @@ ex);
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 // 创建records表
-                strCommand = "CREATE TABLE " + this.m_strSqlDbName + "_records " + "\n"
+                strCommand = $"CREATE TABLE {db_prefix}records " + "\n"
                     + "(" + "\n"
                     + "id nvarchar2 (255) NULL UNIQUE," + "\n"
                     + "range nvarchar2 (2000) NULL," + "\n"
@@ -2132,12 +2137,14 @@ ex);
                     + "newfilename nvarchar2 (255) NULL\n"
                     + ") \n";
 
+                /*
                 string strTemp = this.m_strSqlDbName + "_" + "_records";
                 if (strTemp.Length > 30)
                 {
                     strError = "表名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
                     return -1;
                 }
+                */
 
                 KeysCfg keysCfg = null;
                 int nRet = this.GetKeysCfg(out keysCfg,
@@ -2164,18 +2171,20 @@ ex);
 
                         // TODO 要防止keys表名和records撞车
 
+                        /*
                         strTemp = this.m_strSqlDbName + "_" + tableInfo.SqlTableName;
                         if (strTemp.Length > 30)
                         {
                             strError = "表名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
                             return -1;
                         }
+                        */
 
                         // int16 number(5)
                         // int32 number(10)
                         // int64 number(19)
 
-                        strCommand += " CREATE TABLE " + this.m_strSqlDbName + "_" + tableInfo.SqlTableName + " " + "\n" +
+                        strCommand += $" CREATE TABLE {db_prefix}{ tableInfo.SqlTableName } " + "\n" +
                             "(" + "\n" +
                             "keystring nvarchar2 (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
                             "fromstring nvarchar2 (255) NULL ," + "\n" +
@@ -2217,7 +2226,6 @@ ex);
 
             if (server_type == SqlServerType.MsSqlServer)
             {
-
                 strCommand = "use " + this.m_strSqlDbName + "\n";
 
                 if (keysCfg != null)
@@ -2239,10 +2247,10 @@ ex);
                         {
                             // 如果表已经存在，就先drop再创建
                             strCommand += "\n" +
-                                "if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[" + tableInfo.SqlTableName + "]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
-                                "DROP TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
+                                $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[{ tableInfo.SqlTableName }]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
+                                $"DROP TABLE {m_strSqlDbName}.[dbo].[{ tableInfo.SqlTableName }]" + "\n" +
                                 "\n" +
-                                "CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
+                                $"CREATE TABLE {m_strSqlDbName}.[dbo].[{ tableInfo.SqlTableName }]" + "\n" +
                                 "(" + "\n" +
                                 "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystring的长度由配置文件定
                                 "[fromstring] [nvarchar] (255) NULL ," + "\n" +
@@ -2251,20 +2259,20 @@ ex);
                                 ")" + "\n" + "\n";
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " \n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " \n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " \n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " \n";
                             // 2008/11/20 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " (idstring) \n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) \n";
                         }
                         else
                         {
                             // 表不存在才创建
                             strCommand += "\n" +
-                                "if not exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[" + tableInfo.SqlTableName + "]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
+                                $"if not exists (select * from {sysobjects} where id = object_id(N'[dbo].[{ tableInfo.SqlTableName }]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
                                 "BEGIN\n" +
-                                "CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
+                                $"CREATE TABLE {m_strSqlDbName}.[dbo].[{ tableInfo.SqlTableName }]" + "\n" +
                                 "(" + "\n" +
                                 "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystring的长度由配置文件定
                                 "[fromstring] [nvarchar] (255) NULL ," + "\n" +
@@ -2273,19 +2281,18 @@ ex);
                                 ")" + "\n" + "\n";
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " \n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " \n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " \n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " \n";
                             // 2008/11/20 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " (idstring) \n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) \n";
                             strCommand += "END\n";
                         }
                     }
                 }
 
                 strCommand += " use master " + "\n";
-
                 return 0;
             }
             else if (server_type == SqlServerType.SQLite)
@@ -2353,7 +2360,7 @@ ex);
             }
             else if (server_type == SqlServerType.MySql)
             {
-                strCommand = "use `" + this.m_strSqlDbName + "` ;\n";
+                // strCommand = "use `" + this.m_strSqlDbName + "` ;\n";
                 string strCharset = " CHARACTER SET utf8 "; // COLLATE utf8_bin ";
 
                 if (keysCfg != null)
@@ -2374,8 +2381,8 @@ ex);
                         {
                             // 如果表已经存在，就先drop再创建
                             strCommand +=
-                                "DROP TABLE if exists `" + tableInfo.SqlTableName + "` ;\n"
-                                + "CREATE TABLE `" + tableInfo.SqlTableName + "` \n" +
+                                $"DROP TABLE if exists {db_prefix}`{ tableInfo.SqlTableName }` ;\n"
+                                + $"CREATE TABLE {db_prefix}`{ tableInfo.SqlTableName }` \n" +
                                 "(" + "\n" +
                                 "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystring的长度由配置文件定
                                 "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
@@ -2384,11 +2391,11 @@ ex);
                                 ")" + " ;\n";
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " ;\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " ;\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " (idstring) ;\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) ;\n";
                         }
                         else
                         {
@@ -2398,7 +2405,7 @@ ex);
 
                             // 表不存在才创建
                             strCommand +=
-                                "CREATE TABLE if not exists `" + tableInfo.SqlTableName + "` \n" +
+                                $"CREATE TABLE if not exists {db_prefix}`{ tableInfo.SqlTableName }` \n" +
                                 "(" + "\n" +
                                 "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystring的长度由配置文件定
                                 "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
@@ -2407,11 +2414,11 @@ ex);
                                 ")" + " ;\n";
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " ;\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " ;\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " (idstring) ;\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) ;\n";
                         }
                     }
                 }
@@ -2501,23 +2508,23 @@ ex);
             #region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
-                strCommand = "use " + this.m_strSqlDbName + "\n";
+                // strCommand = "use " + this.m_strSqlDbName + "\n";
                 if (StringUtil.IsInList("records", strIndexTypeList) == true)
                 {
                     if (strAction == "create")
                     {
                         strCommand += " CREATE INDEX records_id_index " + "\n"
-                            + " ON records (id) \n";
+                            + $" ON {db_prefix}records (id) \n";
                     }
                     else if (strAction == "rebuild")
                     {
                         strCommand += " ALTER INDEX records_id_index " + "\n"
-                            + " ON records REBUILD \n";
+                            + $" ON {db_prefix}records REBUILD \n";
                     }
                     else if (strAction == "rebuildall")
                     {
                         strCommand += " ALTER INDEX ALL " + "\n"
-                            + " ON records REBUILD \n";
+                            + $" ON {db_prefix}records REBUILD \n";
                     }
                 }
 
@@ -2544,12 +2551,12 @@ ex);
                                 TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                                 strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                    + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " \n";
+                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " \n";
                                 strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                    + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " \n";
+                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " \n";
                                 // 2008/11/20 
                                 strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                    + " ON " + tableInfo.SqlTableName + " (idstring) \n";
+                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) \n";
                             }
                         }
                         else if (strAction == "rebuild")
@@ -2559,11 +2566,11 @@ ex);
                                 TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                                 strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                    + " ON " + tableInfo.SqlTableName + " REBUILD \n";
+                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } REBUILD \n";
                                 strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                    + " ON " + tableInfo.SqlTableName + " REBUILD \n";
+                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } REBUILD \n";
                                 strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                    + " ON " + tableInfo.SqlTableName + " REBUILD \n";
+                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } REBUILD \n";
                             }
                         }
                         else if (strAction == "rebuildall")
@@ -2573,13 +2580,13 @@ ex);
                                 TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                                 strCommand += " ALTER INDEX ALL \n"
-                                    + " ON " + tableInfo.SqlTableName + " REBUILD \n";
+                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } REBUILD \n";
                             }
                         }
                     }
                 }
 
-                strCommand += " use master " + "\n";
+                // strCommand += " use master " + "\n";
             }
             #endregion MS SQL Server
 
@@ -2630,11 +2637,11 @@ ex);
                 // https://stackoverflow.com/questions/28329134/drop-index-query-is-slow
                 string strAlgorithm = "";   // " ALGORITHM=INPLACE ";
 
-                strCommand = "use " + this.m_strSqlDbName + " ;\n";
+                // strCommand = "use " + this.m_strSqlDbName + " ;\n";
                 if (StringUtil.IsInList("records", strIndexTypeList) == true)
                 {
                     strCommand += " CREATE INDEX records_id_index " + "\n"
-    + " ON records (id) " + strAlgorithm + ";\n";
+    + $" ON {db_prefix}records (id) " + strAlgorithm + ";\n";
                 }
 
                 if (StringUtil.IsInList("keys", strIndexTypeList) == true)
@@ -2658,11 +2665,11 @@ ex);
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " " + strAlgorithm + ";\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " " + strAlgorithm + ";\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " " + strAlgorithm + ";\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " " + strAlgorithm + ";\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " (idstring) " + strAlgorithm + ";\n";
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) " + strAlgorithm + ";\n";
                         }
                     }
                 }
@@ -2699,7 +2706,7 @@ ex);
                         for (int i = 0; i < aTableInfo.Count; i++)
                         {
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
-                            string strTableName = (this.m_strSqlDbName + "_" + tableInfo.SqlTableName).ToUpper();
+                            string strTableName = (/*this.m_strSqlDbName + "_"*/db_prefix + tableInfo.SqlTableName).ToUpper();
 
                             //if (string.IsNullOrEmpty(strCommand) == false)
                             //    strCommand += " ; ";
@@ -2747,7 +2754,7 @@ ex);
             #region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
-                strCommand = "use " + this.m_strSqlDbName + "\n";
+                // strCommand = "use " + this.m_strSqlDbName + "\n";
 
                 KeysCfg keysCfg = null;
                 int nRet = this.GetKeysCfg(out keysCfg,
@@ -2769,12 +2776,21 @@ ex);
                         {
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
+                            /*
                             strCommand += " DROP INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
                                 + " ON " + tableInfo.SqlTableName + " \n";
                             strCommand += " DROP INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
                                 + " ON " + tableInfo.SqlTableName + " \n";
                             strCommand += " DROP INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
                                 + " ON " + tableInfo.SqlTableName + " \n";
+                            */
+                            strCommand += $" DROP INDEX { tableInfo.SqlTableName }_keystring_index \n"
+    + $" ON {db_prefix}{ tableInfo.SqlTableName } \n";
+                            strCommand += $" DROP INDEX { tableInfo.SqlTableName }_keystringnum_index \n"
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } \n";
+                            strCommand += $" DROP INDEX { tableInfo.SqlTableName }_idstring_index \n"
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } \n";
+
                         }
                     }
                     else if (strAction == "disable")
@@ -2783,12 +2799,12 @@ ex);
                         {
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
-                            strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " DISABLE \n";
-                            strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + " ON " + tableInfo.SqlTableName + " DISABLE \n";
-                            strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " DISABLE \n";
+                            strCommand += $" ALTER INDEX { tableInfo.SqlTableName }_keystring_index \n"
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } DISABLE \n";
+                            strCommand += $" ALTER INDEX { tableInfo.SqlTableName }_keystringnum_index \n"
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } DISABLE \n";
+                            strCommand += $" ALTER INDEX { tableInfo.SqlTableName }_idstring_index \n"
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } DISABLE \n";
                         }
                     }
                     else if (strAction == "disableall")
@@ -2797,8 +2813,8 @@ ex);
                         {
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
-                            strCommand += " ALTER INDEX ALL \n"
-                                + " ON " + tableInfo.SqlTableName + " DISABLE \n";
+                            strCommand += $" ALTER INDEX ALL \n"
+                                + $" ON {db_prefix}{ tableInfo.SqlTableName } DISABLE \n";
                         }
                     }
                 }
@@ -2841,7 +2857,7 @@ ex);
             #region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
-                strCommand = "use " + this.m_strSqlDbName + " ;\n";
+                // strCommand = "use " + this.m_strSqlDbName + " ;\n";
 
                 KeysCfg keysCfg = null;
                 int nRet = this.GetKeysCfg(out keysCfg,
@@ -2861,12 +2877,12 @@ ex);
                     {
                         TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
-                        strCommand += " DROP INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                            + " ON " + tableInfo.SqlTableName + " ;\n";
-                        strCommand += " DROP INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                            + " ON " + tableInfo.SqlTableName + " ;\n";
-                        strCommand += " DROP INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                            + " ON " + tableInfo.SqlTableName + " ;\n";
+                        strCommand += $" DROP INDEX { tableInfo.SqlTableName }_keystring_index \n"
+                            + $" ON {db_prefix}{ tableInfo.SqlTableName } ;\n";
+                        strCommand += $" DROP INDEX { tableInfo.SqlTableName }_keystringnum_index \n"
+                            + $" ON {db_prefix}{ tableInfo.SqlTableName } ;\n";
+                        strCommand += $" DROP INDEX { tableInfo.SqlTableName }_idstring_index \n"
+                            + $" ON {db_prefix}{ tableInfo.SqlTableName } ;\n";
                     }
                 }
             }
@@ -2894,7 +2910,7 @@ ex);
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = (TableInfo)aTableInfo[i];
-                        string strTableName = (this.m_strSqlDbName + "_" + tableInfo.SqlTableName).ToUpper();
+                        string strTableName = (/*this.m_strSqlDbName + "_"*/db_prefix + tableInfo.SqlTableName).ToUpper();
 
                         //if (string.IsNullOrEmpty(strCommand) == false)
                         //    strCommand += " ; ";
@@ -3401,7 +3417,7 @@ out strError);
         + " DISTINCT "
         + strTop
         + (bOutputKeyID == false ? " id " : " id AS keystring, id, 'recid' AS fromstring ")
-        + " FROM records "
+        + $" FROM {db_prefix}records "
         + strWhere
         + " " + strOrderBy
         + " " + strLimit + "\n";
@@ -3417,7 +3433,7 @@ out strError);
                     strCommand = "SELECT * from ( SELECT "
 + " DISTINCT "
 + (bOutputKeyID == false ? " id " : " id keystring, id, 'recid' fromstring ")
-+ " FROM " + this.m_strSqlDbName + "_records "
++ $" FROM {db_prefix}records "
 + strWhere
 + " " + strOrderBy
 + ") " + strLimit + "\n";
@@ -3425,7 +3441,7 @@ out strError);
                     strCommand = "SELECT "
 + " DISTINCT "
 + (bOutputKeyID == false ? " id " : " id keystring, id, 'recid' fromstring ")
-+ " FROM " + this.m_strSqlDbName + "_records "
++ $" FROM {db_prefix}records "
 + strWhere
 + " " + strOrderBy
 + "\n";
@@ -4649,7 +4665,7 @@ handle.CancelTokenSource.Token).Result;
                         {
                             strOneCommand = "select "
         + strColumns // " id "
-        + "from records where id like '__________' and id not in (" + strOneCommand + ") "
+        + $"from {db_prefix}records where id like '__________' and id not in (" + strOneCommand + ") "
         ;
                         }
 
@@ -5065,12 +5081,12 @@ handle.CancelTokenSource.Token).Result;
                         strOrder = " ORDER BY id ASC ";
                     }
                 }
-                strCommand = "use " + this.m_strSqlDbName + " "
-                    + " SELECT Top 1 id "
-                    + " FROM records "
+                strCommand = /* "use " + this.m_strSqlDbName + " "
+                    +*/ " SELECT Top 1 id "
+                    + $" FROM {db_prefix}records "
                     + strWhere
                     + strOrder;
-                strCommand += " use master " + "\n";
+                // strCommand += " use master " + "\n";
 
 #if OLD_CODE
                 DateTime start_time = DateTime.Now;
@@ -5140,7 +5156,7 @@ handle.CancelTokenSource.Token).Result;
                     }
                 }
                 strCommand = " SELECT id "
-                    + " FROM records "
+                    + $" FROM {db_prefix}records "
                     + strWhere
                     + strOrder
                     + " LIMIT 1";
@@ -5297,7 +5313,7 @@ handle.CancelTokenSource.Token).Result;
                     }
                 }
                 strCommand = "SELECT * FROM (SELECT id "
-                    + " FROM " + this.m_strSqlDbName + "_records "
+                    + $" FROM {db_prefix}records "
                     + strWhere
                     + strOrder
                     + " ) WHERE rownum <= 1";
@@ -5378,7 +5394,7 @@ handle.CancelTokenSource.Token).Result;
                     {
                         if (ex.Number == 942)
                         {
-                            strError = "SQL表 '" + this.m_strSqlDbName + "_records' 不存在";
+                            strError = $"SQL表 '{db_prefix}records' 不存在";
                             return -1;
                         }
                         throw ex;
@@ -6993,14 +7009,14 @@ handle.CancelTokenSource.Token).Result;
                     // size:     是要读取数据的字节数（使用 text 或 image 数据类型时）或字符数（使用 ntext 数据类型时）。如果 size 是 0，则表示读取了 4 KB 字节的数据。
                     // HOLDLOCK: 使文本值一直锁定到事务结束。其他用户可以读取该值，但是不能对其进行修改。
 
-                    string strCommand = "use " + this.m_strSqlDbName + " "
-                       + " READTEXT records." + strDataFieldName
+                    string strCommand = /*"use " + this.m_strSqlDbName + " "
+                       +*/ $" READTEXT {db_prefix}records." + strDataFieldName
                        + " @text_ptr"
                        + " @offset"
                        + " @size"
                        + " HOLDLOCK";
 
-                    strCommand += " use master " + "\n";
+                    // strCommand += " use master " + "\n";
 
                     using (SqlCommand command = new SqlCommand(strCommand,
                         connection.SqlConnection))
@@ -9580,14 +9596,14 @@ handle.CancelTokenSource.Token).Result;
                             if (bObjectFile == false)
                             {
                                 strCommand +=
-            " INSERT INTO records(id, data, range, metadata, dptimestamp) "
+            $" INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp) "
             + " VALUES(@id" + i + ", @data" + i + ", @range" + i + ", @metadata" + i + ", @dptimestamp" + i + ")"
             + "\n";
                             }
                             else
                             {
                                 strCommand +=
-        " INSERT INTO records(id, data, range, metadata, dptimestamp,  filename) "
+        $" INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp,  filename) "
         + " VALUES(@id" + i + ", NULL, @range" + i + ", @metadata" + i + ", @dptimestamp" + i + ", @filename" + i + ")"
         + "\n";
                             }
@@ -9646,7 +9662,7 @@ handle.CancelTokenSource.Token).Result;
 
                             if (bObjectFile == false)
                             {
-                                strCommand += " UPDATE records "
+                                strCommand += $" UPDATE {db_prefix}records "
                                 + " SET dptimestamp=@dptimestamp" + i + ","
                                 + " newdptimestamp=NULL,"
                                 + " data=@data" + i + ", newdata=NULL,"
@@ -9657,7 +9673,7 @@ handle.CancelTokenSource.Token).Result;
                             }
                             else
                             {
-                                strCommand += " UPDATE records "
+                                strCommand += $" UPDATE {db_prefix}records "
                                 + " SET dptimestamp=@dptimestamp" + i + ","
                                 + " newdptimestamp=NULL,"
                                 + " data=NULL, newdata=NULL,"
@@ -9819,7 +9835,7 @@ handle.CancelTokenSource.Token).Result;
                             {
                                 // 创建新行
                                 strCommand +=
-        " INSERT INTO records(id, range, metadata, dptimestamp, filename) "
+        $" INSERT INTO {db_prefix}records(id, range, metadata, dptimestamp, filename) "
         + " VALUES(@id" + i + ", @range" + i + ", @metadata" + i + ", @dptimestamp" + i + ", @filename" + i + ")"
         + " ; ";
 
@@ -9856,7 +9872,7 @@ handle.CancelTokenSource.Token).Result;
                             else
                             {
                                 // 更新已有的行
-                                strCommand += " UPDATE records "
+                                strCommand += $" UPDATE {db_prefix}records "
                                 + " SET dptimestamp=@dptimestamp" + i + ","
                                 + " newdptimestamp=NULL,"
                                 + " range=@range" + i + ","
@@ -10225,7 +10241,7 @@ handle.CancelTokenSource.Token).Result;
                             {
                                 // 创建新行
                                 strCommand +=
-        " INSERT INTO " + this.m_strSqlDbName + "_records (id, range, metadata, dptimestamp, filename) "
+        $" INSERT INTO {db_prefix}records (id, range, metadata, dptimestamp, filename) "
         + " VALUES(:id" + i + ", :range" + i + ", :metadata" + i + ", :dptimestamp" + i + ", :filename" + i + ")"
         + " ";
 
@@ -10262,7 +10278,7 @@ handle.CancelTokenSource.Token).Result;
                             else
                             {
                                 // 更新已有的行
-                                strCommand += " UPDATE " + this.m_strSqlDbName + "_records "
+                                strCommand += $" UPDATE {db_prefix}records "
                                 + " SET dptimestamp=:dptimestamp" + i + ","
                                 + " newdptimestamp=NULL,"
                                 + " range=:range" + i + ","
@@ -10572,12 +10588,14 @@ handle.CancelTokenSource.Token).Result;
                         ", data,"                 // 11
                         + " newdata"            // 12
                         : "")
-                        + " FROM records "
+                        + $" FROM {db_prefix}records "
                         + " WHERE id in (" + strIdString + ")\n";
-
+                    /*
                     strCommand = "use " + this.m_strSqlDbName + " \n"
                         + strSelect
                         + " use master " + "\n";
+                    */
+                    strCommand = strSelect;
                 }
                 else if (connection.IsSqlite())
                 {
@@ -10589,7 +10607,7 @@ handle.CancelTokenSource.Token).Result;
     + " filename,"   // 4
     + " newfilename,"   // 5
     + " id"             // 6
-    + " FROM records "
+    + $" FROM {db_prefix}records "
     + " WHERE id in (" + strIdString + ")\n";
                 }
                 else if (connection.IsMySQL())
@@ -10603,7 +10621,7 @@ handle.CancelTokenSource.Token).Result;
                         + " filename,"   // 4
                         + " newfilename,"   // 5
                         + " id"             // 6
-                        + " FROM `" + this.m_strSqlDbName + "`.records "
+                        + $" FROM {db_prefix}records "
                         + " WHERE id in (" + strIdString + ") \n";
                 }
                 else if (connection.IsOracle())
@@ -10616,7 +10634,7 @@ handle.CancelTokenSource.Token).Result;
     + " filename,"   // 4
     + " newfilename,"   // 5
     + " id"             // 6
-    + " FROM " + this.m_strSqlDbName + "_records "
+    + $" FROM {db_prefix}records "
     + " WHERE id in (" + strIdString + ") \n";
                 }
                 else
@@ -12249,7 +12267,7 @@ handle.CancelTokenSource.Token).Result;
                                 //      -1  出错
                                 //      0   成功
                                 nRet = this.ForceDeleteKeys(connection,
-                                    strID,
+                                    new string[] { strID },
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
@@ -13872,8 +13890,8 @@ handle.CancelTokenSource.Token).Result;
                     // 时间戳和data内容都清除
                 }
 
-                strCommand = "use " + this.m_strSqlDbName + "\n"
-                    + " UPDATE records "
+                strCommand = /*"use " + this.m_strSqlDbName + "\n"
+                    +*/ $" UPDATE {db_prefix}records "
                     + (bReverse == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
                     + strSetNull
                     + " range=@range,"
@@ -13889,8 +13907,8 @@ handle.CancelTokenSource.Token).Result;
 
                 if (connection.SqlServerType == SqlServerType.MsSqlServer)
                 {
-                    strCommand = "use " + this.m_strSqlDbName + "\n"
-                         + " UPDATE records "
+                    strCommand = /*"use " + this.m_strSqlDbName + "\n"
+                         +*/ $" UPDATE {db_prefix}records "
                          + (bFull == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
                          + strSetNull
                          + " range=@range,"
@@ -13898,13 +13916,13 @@ handle.CancelTokenSource.Token).Result;
                          + (bFull == true ? " filename=@filename, newfilename=NULL," : " newfilename=@filename,")
                          + " data=NULL, newdata=NULL "
                          + " WHERE id=@id";
-                    strCommand += " use master " + "\n";
+                    // strCommand += " use master " + "\n";
                 }
                 else if (connection.SqlServerType == SqlServerType.SQLite)
                 {
                     if (bNeedInsertRow == false)
                     {
-                        strCommand = " UPDATE records "
+                        strCommand = $" UPDATE {db_prefix}records "
                              + (bFull == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
                              + strSetNull
                              + " range=@range,"
@@ -13914,7 +13932,7 @@ handle.CancelTokenSource.Token).Result;
                     }
                     else
                     {
-                        strCommand = " INSERT INTO records(id, range, metadata, dptimestamp, newdptimestamp, filename, newfilename) "
+                        strCommand = $" INSERT INTO {db_prefix}records(id, range, metadata, dptimestamp, newdptimestamp, filename, newfilename) "
                             + (bFull == true ? " VALUES(@id, @range, @metadata, @dptimestamp, NULL, @filename, NULL)"
                                              : " VALUES(@id, @range, @metadata, NULL, @dptimestamp, NULL, @filename)");
 
@@ -13944,7 +13962,7 @@ handle.CancelTokenSource.Token).Result;
                 {
                     if (bNeedInsertRow == false)
                     {
-                        strCommand = " UPDATE " + this.m_strSqlDbName + "_records "
+                        strCommand = $" UPDATE {db_prefix}records "
                              + (bFull == true ? " SET dptimestamp=:dptimestamp," : " SET newdptimestamp=:dptimestamp,")
                              + strSetNull
                              + " range=:range,"
@@ -13954,7 +13972,7 @@ handle.CancelTokenSource.Token).Result;
                     }
                     else
                     {
-                        strCommand = " INSERT INTO " + this.m_strSqlDbName + "_records (id, range, metadata, dptimestamp, newdptimestamp, filename, newfilename) "
+                        strCommand = $" INSERT INTO {db_prefix}records (id, range, metadata, dptimestamp, newdptimestamp, filename, newfilename) "
                             + (bFull == true ? " VALUES (:id, :range, :metadata, :dptimestamp, NULL, :filename, NULL)"
                                              : " VALUES (:id, :range, :metadata, NULL, :dptimestamp, NULL, :filename)");
 
@@ -14351,27 +14369,27 @@ handle.CancelTokenSource.Token).Result;
 
                 if (connection.SqlServerType == SqlServerType.MsSqlServer)
                 {
-                    strCommand = "use " + this.m_strSqlDbName + "\n"
-                         + " UPDATE records SET "
+                    strCommand = /*"use " + this.m_strSqlDbName + "\n"
+                         +*/ $" UPDATE {db_prefix}records SET "
                          + " metadata=@metadata "
                          + " WHERE id=@id";
-                    strCommand += " use master " + "\n";
+                    // strCommand += " use master " + "\n";
                 }
                 else if (connection.SqlServerType == SqlServerType.SQLite)
                 {
-                    strCommand = " UPDATE records SET "
+                    strCommand = $" UPDATE {db_prefix}records SET "
                          + " metadata=@metadata "
                          + " WHERE id=@id";
                 }
                 else if (connection.SqlServerType == SqlServerType.MySql)
                 {
-                    strCommand = " UPDATE `" + this.m_strSqlDbName + "`.records SET "
+                    strCommand = $" UPDATE {db_prefix}records SET "
                          + " metadata=@metadata "
                          + " WHERE id=@id";
                 }
                 else if (connection.SqlServerType == SqlServerType.Oracle)
                 {
-                    strCommand = " UPDATE " + this.m_strSqlDbName + "_records SET "
+                    strCommand = $" UPDATE {db_prefix}records SET "
                          + " metadata=:metadata "
                          + " WHERE id=:id";
                 }
@@ -14650,14 +14668,14 @@ handle.CancelTokenSource.Token).Result;
             if (textPtr == null
                 || lStartOfTarget == 0 && lCurrentLength > lTotalLength)
             {
-                string strCommand = "use " + this.m_strSqlDbName + " "
-        + " UPDATE records "
+                string strCommand = /*"use " + this.m_strSqlDbName + " "
+        +*/ $" UPDATE {db_prefix}records "
         + " set " + strImageFieldName + "=0x0 "
         + " where id='" + strID + "'\n"
-        + " SELECT TEXTPTR(" + strImageFieldName + ") from records"
+        + $" SELECT TEXTPTR({ strImageFieldName }) from {db_prefix}records"
         + " where id='" + strID + "'\n";
 
-                strCommand += " use master " + "\n";
+                // strCommand += " use master " + "\n";
 
                 using (SqlCommand command = new SqlCommand(strCommand,
                     connection.SqlConnection))
@@ -14731,8 +14749,8 @@ handle.CancelTokenSource.Token).Result;
                 // 替换现有数据:  指定一个非空 insert_offset 值、非零 delete_length 值和要插入的新数据。
                 // 删除现有数据:  指定一个非空 insert_offset 值、非零 delete_length 值。不指定要插入的新数据。
                 // 插入新数据:    指定 insert_offset 值、为零的 delete_length 值和要插入的新数据。
-                string strCommand = "use " + this.m_strSqlDbName + " "
-                    + " UPDATETEXT records." + strImageFieldName
+                string strCommand = /*"use " + this.m_strSqlDbName + " "
+                    +*/ $" UPDATETEXT {db_prefix}records." + strImageFieldName
                     + " @dest_text_ptr"
                     + " @insert_offset"
                     + " @delete_length"
@@ -14741,7 +14759,7 @@ handle.CancelTokenSource.Token).Result;
 #endif
  + " @inserted_data";   //不能加where语句
 
-                strCommand += " use master " + "\n";
+                // strCommand += " use master " + "\n";
 
                 using (SqlCommand command = new SqlCommand(strCommand,
                     connection.SqlConnection))
@@ -14938,7 +14956,7 @@ handle.CancelTokenSource.Token).Result;
                                 string strIdParamName = "@id" + strIndex;
                                 string strKeynumParamName = "@keynum" + strIndex;
 
-                                strCommand.Append(" DELETE FROM " + strKeysTableName
+                                strCommand.Append($" DELETE FROM {db_prefix}{ strKeysTableName }"
                                     + " WHERE keystring = " + strKeyParamName
                                     + " AND fromstring = " + strFromParamName
                                     + " AND idstring = " + strIdParamName
@@ -14966,9 +14984,13 @@ handle.CancelTokenSource.Token).Result;
 
                                 if (nCount >= nMaxLinesPerExecute)
                                 {
+                                    /*
                                     command.CommandText = "use " + this.m_strSqlDbName + " \n"
                                         + strCommand
                                         + " use master " + "\n";
+                                    */
+                                    command.CommandText = strCommand.ToString();
+
                                     command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
 
                                     command.ExecuteNonQuery();
@@ -15005,7 +15027,7 @@ handle.CancelTokenSource.Token).Result;
                                 string strKeynumParamName = "@keynum" + strIndex;
 
                                 //加keynum
-                                strCommand.Append(" INSERT INTO " + strKeysTableName
+                                strCommand.Append($" INSERT INTO {db_prefix}{ strKeysTableName }"
                                     + " (keystring,fromstring,idstring,keystringnum) "
                                     + " VALUES (" + strKeyParamName + ","
                                     + strFromParamName + ","
@@ -15034,9 +15056,13 @@ handle.CancelTokenSource.Token).Result;
 
                                 if (nCount >= nMaxLinesPerExecute)
                                 {
+                                    /*
                                     command.CommandText = "use " + this.m_strSqlDbName + " \n"
                                         + strCommand
                                         + " use master " + "\n";
+                                    */
+                                    command.CommandText = strCommand.ToString();
+
                                     command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
 
                                     command.ExecuteNonQuery();
@@ -15056,9 +15082,13 @@ handle.CancelTokenSource.Token).Result;
                         // 最后可能剩下的命令
                         if (strCommand.Length > 0)
                         {
+                            /*
                             command.CommandText = "use " + this.m_strSqlDbName + " \n"
                                 + strCommand
                                 + " use master " + "\n";
+                            */
+                            command.CommandText = strCommand.ToString();
+
                             command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
 
                             command.ExecuteNonQuery();
@@ -15277,7 +15307,7 @@ handle.CancelTokenSource.Token).Result;
 
                         string strKeysTableName = oneKey.SqlTableName;
 
-                        lines.Add(" DELETE FROM " + strKeysTableName
+                        lines.Add($" DELETE FROM {db_prefix}{ strKeysTableName }"
         + " WHERE keystring = N'" + MySqlHelper.EscapeString(oneKey.Key)
         + "' AND fromstring = N'" + MySqlHelper.EscapeString(oneKey.FromValue)
         + "' AND idstring = N'" + MySqlHelper.EscapeString(oneKey.RecordID)
@@ -15294,7 +15324,7 @@ handle.CancelTokenSource.Token).Result;
 
                         string strKeysTableName = oneKey.SqlTableName;
 
-                        lines.Add(" INSERT INTO " + strKeysTableName
+                        lines.Add($" INSERT INTO {db_prefix}{ strKeysTableName }"
         + " (keystring,fromstring,idstring,keystringnum) "
         + " VALUES " + new string((char)1, 1) + "(N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
         + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
@@ -15326,12 +15356,16 @@ handle.CancelTokenSource.Token).Result;
                                 || nExecuted >= lines.Count - 1)
                                 )
                             {
+                                /*
                                 command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
                                     + strCommand
 #if !PARAMETERS
  + " ;\n"
 #endif
 ;
+                                */
+                                command.CommandText = strCommand.ToString();
+
                                 try
                                 {
                                     command.ExecuteNonQuery();
@@ -15425,7 +15459,7 @@ handle.CancelTokenSource.Token).Result;
                                 string strIdParamName = ":id" + strIndex;
                                 string strKeynumParamName = ":keynum" + strIndex;
 
-                                strCommand.Append(" DELETE FROM " + this.m_strSqlDbName + "_" + strKeysTableName
+                                strCommand.Append($" DELETE FROM {db_prefix}{strKeysTableName}"
                                     + " WHERE keystring = " + strKeyParamName
                                     + " AND fromstring = " + strFromParamName
                                     + " AND idstring = " + strIdParamName
@@ -15490,7 +15524,7 @@ handle.CancelTokenSource.Token).Result;
                                 string strKeynumParamName = ":keynum" + strIndex;
 
                                 //加keynum
-                                strCommand.Append(" INSERT INTO " + this.m_strSqlDbName + "_" + strKeysTableName
+                                strCommand.Append($" INSERT INTO {db_prefix}{ strKeysTableName }"
                                     + " (keystring,fromstring,idstring,keystringnum) "
                                     + " VALUES(" + strKeyParamName + ","
                                     + strFromParamName + ","
@@ -15628,9 +15662,6 @@ handle.CancelTokenSource.Token).Result;
             if (connection.IsOracle() == false)
             {
                 string strCommand = "";
-                string fenhao = "";
-                if (connection.IsSqlite() || connection.IsMySQL())
-                    fenhao = ";";
                 using (var command = connection.NewCommand(""))
                 {
                     int nCount = 0;
@@ -15666,14 +15697,16 @@ handle.CancelTokenSource.Token).Result;
 
                             if (string.IsNullOrEmpty(strWhere) == false)
                             {
-                                strCommand = " SELECT filename, newfilename, id FROM records WHERE " + strWhere + " \n";
+                                strCommand = $" SELECT filename, newfilename, id FROM {db_prefix}records WHERE { strWhere } \n";
+                                /*
                                 if (connection.IsMsSqlServer())
                                     strCommand = "use " + this.m_strSqlDbName + " \n"
             + strCommand
             + " use master " + "\n";
                                 else if (connection.IsMySQL())
                                     strCommand = "use `" + this.m_strSqlDbName + "` ;\n"
-    + strCommand;
+            + strCommand;
+                                */
 
                                 command.CommandText = strCommand;
 
@@ -15708,7 +15741,7 @@ handle.CancelTokenSource.Token).Result;
                             string strObjectID = strID + "_" + strPureObjectID;
 
                             string strParamIDName = "@id" + Convert.ToString(i);
-                            strCommand += " DELETE FROM records WHERE id = " + strParamIDName + $" {fenhao}\n";
+                            strCommand += $" DELETE FROM {db_prefix}records WHERE id = " + strParamIDName + $" {fenhao}\n";
 
                             var idParam = command.NewParameter(strParamIDName, DbType.String, -1, strObjectID);
                             /* MS SQL Server
@@ -15730,7 +15763,7 @@ handle.CancelTokenSource.Token).Result;
                             string strObjectID = strID + "_" + strPureObjectID;
 
                             string strParamIDName = "@id" + Convert.ToString(i) + nCount;
-                            strCommand += " INSERT INTO records(id) "
+                            strCommand += $" INSERT INTO {db_prefix}records(id) "
                                 + $" VALUES({ strParamIDName}) {fenhao}\n";
                             var idParam = command.NewParameter(strParamIDName, DbType.String, -1, strObjectID);
                             /* MS SQL Server
@@ -15744,6 +15777,7 @@ handle.CancelTokenSource.Token).Result;
 
                     if (string.IsNullOrEmpty(strCommand) == false)
                     {
+                        /*
                         if (connection.IsMsSqlServer())
                             strCommand = "use " + this.m_strSqlDbName + " \n"
                                 + strCommand
@@ -15751,6 +15785,7 @@ handle.CancelTokenSource.Token).Result;
                         else if (connection.IsMySQL())
                             strCommand = "use `" + this.m_strSqlDbName + "` ;\n"
     + strCommand;
+                        */
 
                         command.CommandText = strCommand;
                         command.CommandTimeout = 30 * 60; // 30分钟
@@ -16223,7 +16258,7 @@ handle.CancelTokenSource.Token).Result;
                             idParam.Value = strObjectID;
 
                             // 列出对象文件名
-                            strCommand = " SELECT filename, newfilename FROM " + this.m_strSqlDbName + "_records WHERE id = " + strParamIDName + " \n";
+                            strCommand = $" SELECT filename, newfilename FROM {db_prefix}records WHERE id = { strParamIDName } \n";
                             command.CommandText = strCommand;
 
                             using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
@@ -16243,7 +16278,7 @@ handle.CancelTokenSource.Token).Result;
                                     goto CONTINUE_1;    // 这个id的records行不存在
                             }
 
-                            strCommand = " DELETE FROM " + this.m_strSqlDbName + "_records WHERE id = " + strParamIDName + " \n";
+                            strCommand = $" DELETE FROM {db_prefix}records WHERE id = { strParamIDName } \n";
                             command.CommandText = strCommand;
 
                             try
@@ -16269,7 +16304,7 @@ handle.CancelTokenSource.Token).Result;
                             string strObjectID = strID + "_" + strPureObjectID;
 
                             string strParamIDName = ":id" + Convert.ToString(i) + nCount;
-                            strCommand = " INSERT INTO " + this.m_strSqlDbName + "_records (id) "
+                            strCommand = $" INSERT INTO {db_prefix}records (id) "
                                 + " VALUES (" + strParamIDName + ") \n";
 
                             command.CommandText = strCommand;
@@ -16442,10 +16477,10 @@ handle.CancelTokenSource.Token).Result;
         {
             string strRange = "";
 
-            string strCommand = "use " + this.m_strSqlDbName + " "
-                + "select range from records where id='" + strID + "'";
+            string strCommand = /*"use " + this.m_strSqlDbName + " "
+                +*/ $"select range from {db_prefix}records where id='{ strID }'";
 
-            strCommand += " use master " + "\n";
+            // strCommand += " use master " + "\n";
 
             using (SqlCommand command = new SqlCommand(strCommand,
                 connection))
@@ -17166,19 +17201,19 @@ handle.CancelTokenSource.Token).Result;
                         + " newdptimestamp,"   // 7
                         + " filename,"   // 8
                         + " newfilename"   // 9
-                        + " FROM records "
+                        + $" FROM {db_prefix}records "
                         // + " WHERE id='" + strID + "'\n";
                         + " WHERE id=@id \n";
 
-                    strCommand = "use " + this.m_strSqlDbName + "; \n"
-                        + "SET NOCOUNT OFF\n"
+                    strCommand = /*"use " + this.m_strSqlDbName + "; \n"
+                        +*/ "SET NOCOUNT OFF\n"
                         + strSelect
                         + "if @@ROWCOUNT = 0\n"
                         + "begin\n"
-                        + " INSERT INTO records(id, data, range, metadata, dptimestamp, newdptimestamp) "
+                        + $" INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp, newdptimestamp) "
                         + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp) \n"
                         + " end \n";
-                    strCommand += " use master " + "\n";
+                    // strCommand += " use master " + "\n";
 
                     // MS SQL Server 比较特殊，SQL 命令中用到了参数
                     using (var command = connection.NewCommand(strCommand) as SqlCommand)
@@ -17327,7 +17362,7 @@ handle.CancelTokenSource.Token).Result;
                             + " newdptimestamp,"   // 3 7
                             + " filename,"   // 4 8
                             + " newfilename"   // 5 9
-                            + " FROM records "
+                            + $" FROM {db_prefix}records "
                             + " WHERE id='" + strID + "'\n";    // TODO: 最好改造为 @id
                     else if (connection.IsMySQL())
                     {
@@ -17339,7 +17374,7 @@ handle.CancelTokenSource.Token).Result;
                             + " newdptimestamp,"   // 3 7
                             + " filename,"   // 4 8
                             + " newfilename"   // 5 9
-                            + " FROM `" + this.m_strSqlDbName + "`.records "
+                            + $" FROM {db_prefix}records "
                             + " WHERE id='" + strID + "'\n";    // 最好改造为 @id
                     }
                     else if (connection.IsOracle())
@@ -17352,7 +17387,7 @@ handle.CancelTokenSource.Token).Result;
                             + " newdptimestamp,"   // 3 7
                             + " filename,"   // 4 8
                             + " newfilename"   // 5 9
-                            + " FROM " + this.m_strSqlDbName + "_records "
+                            + $" FROM {db_prefix}records "
                             + " WHERE id='" + strID + "'\n";    // 最好改造为 @id
 
                     }
@@ -17837,13 +17872,13 @@ handle.CancelTokenSource.Token).Result;
                     + " newdptimestamp, "   // 7
                     + " filename, "   // 8
                     + " newfilename "   // 9
-                    + " FROM records "
+                    + $" FROM {db_prefix}records "
                     + " WHERE id='" + strID + "'\n";
 
-                string strCommand = "use " + this.m_strSqlDbName + " \n"
-                    + "SET NOCOUNT OFF\n"
+                string strCommand = /*"use " + this.m_strSqlDbName + " \n"
+                    +*/ "SET NOCOUNT OFF\n"
                     + strSelect;
-                strCommand += " use master " + "\n";
+                // strCommand += " use master " + "\n";
 
                 using (SqlCommand command = new SqlCommand(strCommand,
                     connection.SqlConnection))
@@ -17922,7 +17957,7 @@ handle.CancelTokenSource.Token).Result;
                     + " newdptimestamp, "   // 3 7
                     + " filename, "   // 4 8
                     + " newfilename "   // 5 9
-                    + " FROM records "
+                    + $" FROM {db_prefix}records "
                     + " WHERE id='" + strID + "'\n";
 
                 using (SQLiteCommand command = new SQLiteCommand(strCommand,
@@ -18056,7 +18091,7 @@ handle.CancelTokenSource.Token).Result;
                     + " newdptimestamp, "   // 3 7
                     + " filename, "   // 4 8
                     + " newfilename "   // 5 9
-                    + " FROM " + this.m_strSqlDbName + "_records "
+                    + $" FROM {db_prefix}records "
                     + " WHERE id='" + strID + "'\n";
 
                 using (OracleCommand command = new OracleCommand(strCommand,
@@ -18491,7 +18526,7 @@ handle.CancelTokenSource.Token).Result;
                                 //      -1  出错
                                 //      0   成功
                                 nRet = this.ForceDeleteKeys(connection,
-                                    strRecordID,
+                                    new string[] { strRecordID },
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
@@ -18757,7 +18792,7 @@ handle.CancelTokenSource.Token).Result;
                             //      -1  出错
                             //      0   成功
                             nRet = this.ForceDeleteKeys(connection,
-                                strRecordID,
+                                new string[] { strRecordID },
                                 out strError);
                             if (nRet == -1)
                                 return -1;
@@ -18828,7 +18863,7 @@ handle.CancelTokenSource.Token).Result;
         }
 
         // 构造用于 where idstring in (...) 的 ID 列表字符串
-        static int BuildIdString(List<string> ids,
+        static int BuildIdString(IEnumerable<string> ids,
             out string strResult,
             out string strError)
         {
@@ -18902,7 +18937,7 @@ handle.CancelTokenSource.Token).Result;
         //      >=0 成功，数字表示实际删除的检索点个数
         // 线: 不安全
         public int ForceDeleteKeys(Connection connection,
-            List<string> ids,
+            IEnumerable<string> ids,
             out string strError)
         {
             strError = "";
@@ -18916,6 +18951,7 @@ handle.CancelTokenSource.Token).Result;
             if (nRet == -1)
                 return -1;
 
+            /*
             foreach (string strRecordID in ids)
             {
                 Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteKeys()调用错误，strRecordID参数值不能为null且长度必须等于10位。");
@@ -18925,6 +18961,7 @@ handle.CancelTokenSource.Token).Result;
                     return -1;
                 }
             }
+            */
 
             KeysCfg keysCfg = null;
             nRet = this.GetKeysCfg(out keysCfg,
@@ -18951,6 +18988,47 @@ handle.CancelTokenSource.Token).Result;
 
             int nDeletedCount = 0;
 
+            // 通用
+            if (connection.IsOracle())
+            {
+                // 注: Oracle 不支持多行 SQL 命令一次运行
+                for (int i = 0; i < aTableInfo.Count; i++)
+                {
+                    TableInfo tableInfo = aTableInfo[i];
+
+                    string strCommand = $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
+                        + " WHERE idstring IN (" + strIdString + ")\r\n";
+                    nDeletedCount += connection.Execute(strCommand,
+null,
+null,
+m_nTimeOut);
+                }
+
+                return nDeletedCount;
+            }
+            else
+            {
+                string strCommand = "";
+                for (int i = 0; i < aTableInfo.Count; i++)
+                {
+                    TableInfo tableInfo = aTableInfo[i];
+
+                    strCommand += $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
+                        + $" WHERE idstring IN ({ strIdString }) {fenhao}\r\n";
+                }
+
+                if (string.IsNullOrEmpty(strCommand) == false)
+                {
+                    nDeletedCount = connection.Execute(strCommand,
+null,
+null,
+m_nLongTimeout);
+                }
+
+                return nDeletedCount;
+            }
+
+#if OLD_CODE
             if (container.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -18960,15 +19038,17 @@ handle.CancelTokenSource.Token).Result;
 
                     //strCommand += "DELETE FROM " + tableInfo.SqlTableName
                     //    + " WHERE idstring=@id \r\n";
-                    strCommand += "DELETE FROM " + tableInfo.SqlTableName
+                    strCommand += $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
                         + " WHERE idstring in (" + strIdString + ")\r\n";
                 }
 
                 if (string.IsNullOrEmpty(strCommand) == false)
                 {
+                    /*
                     strCommand = "use " + this.m_strSqlDbName + " \r\n"
                         + strCommand
                         + "use master " + "\r\n";
+                    */
 
                     using (SqlCommand command = new SqlCommand(strCommand,
                         connection.SqlConnection))
@@ -19031,15 +19111,17 @@ handle.CancelTokenSource.Token).Result;
                     strCommand += "DELETE FROM " + tableInfo.SqlTableName
                         + " WHERE idstring=@id ;\r\n";
 #endif
-                    strCommand += "DELETE FROM " + tableInfo.SqlTableName
+                    strCommand += $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
         + " WHERE idstring IN (" + strIdString + ") ;\r\n";
 
                 }
 
                 if (string.IsNullOrEmpty(strCommand) == false)
                 {
+                    /*
                     strCommand = "use `" + this.m_strSqlDbName + "` ;\n"
         + strCommand;
+                    */
 
                     using (MySqlCommand command = new MySqlCommand(strCommand,
                         connection.MySqlConnection))
@@ -19093,8 +19175,11 @@ handle.CancelTokenSource.Token).Result;
             }
 
             return 0;
+#endif
         }
 
+        // 改用集合版本的即可
+#if REMOVED
         // 强制删除记录对应的检索点,检查所有的表
         // parameters:
         //      connection  SqlConnection连接对象
@@ -19111,6 +19196,9 @@ handle.CancelTokenSource.Token).Result;
             strError = "";
             int nRet = 0;
 
+            if (ids.Count == 0)
+                return 0;
+
             // return:
             //      -1  出错
             //      0   正常
@@ -19119,7 +19207,13 @@ handle.CancelTokenSource.Token).Result;
             if (nRet == -1)
                 return -1;
 
-            Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteKeys()调用错误，strRecordID参数值不能为null且长度必须等于10位。");
+            {
+                strError = VerifyID(strRecordID);
+                if (strError != null)
+                    return -1;
+            }
+
+            // Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteKeys()调用错误，strRecordID参数值不能为null且长度必须等于10位。");
 
             KeysCfg keysCfg = null;
             nRet = this.GetKeysCfg(out keysCfg,
@@ -19141,6 +19235,54 @@ handle.CancelTokenSource.Token).Result;
 
             int nDeletedCount = 0;
 
+            // 通用
+            if (connection.IsOracle())
+            {
+                // 注: Oracle 不支持多行 SQL 命令一次运行
+                for (int i = 0; i < aTableInfo.Count; i++)
+                {
+                    TableInfo tableInfo = aTableInfo[i];
+
+                    string strCommand = $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
+                        + " WHERE idstring=@id \r\n";
+
+                    if (connection.IsOracle())
+                        strCommand = strCommand.Replace("@", ":");
+
+                    nDeletedCount += connection.Execute(strCommand,
+new { id = strRecordID },
+null,
+m_nTimeOut);
+                }
+
+                return nDeletedCount;
+            }
+            else
+            {
+                {
+                    string strCommand = "";
+                    for (int i = 0; i < aTableInfo.Count; i++)
+                    {
+                        TableInfo tableInfo = aTableInfo[i];
+
+                        strCommand += $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
+                            + $" WHERE idstring=@id {fenhao}\r\n";
+                    }
+
+                    if (string.IsNullOrEmpty(strCommand) == false)
+                    {
+                        nDeletedCount = connection.Execute(strCommand,
+    new { id = strRecordID },
+    null,
+    m_nLongTimeout);
+                    }
+
+                    return nDeletedCount;
+                }
+
+            }
+
+#if OLDCODE
             if (container.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -19148,15 +19290,17 @@ handle.CancelTokenSource.Token).Result;
                 {
                     TableInfo tableInfo = aTableInfo[i];
 
-                    strCommand += "DELETE FROM " + tableInfo.SqlTableName
+                    strCommand += $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
                         + " WHERE idstring=@id \r\n";
                 }
 
                 if (string.IsNullOrEmpty(strCommand) == false)
                 {
+                    /*
                     strCommand = "use " + this.m_strSqlDbName + " \r\n"
                         + strCommand
                         + "use master " + "\r\n";
+                    */
 
                     using (SqlCommand command = new SqlCommand(strCommand,
                         connection.SqlConnection))
@@ -19206,14 +19350,16 @@ handle.CancelTokenSource.Token).Result;
                 {
                     TableInfo tableInfo = aTableInfo[i];
 
-                    strCommand += "DELETE FROM " + tableInfo.SqlTableName
+                    strCommand += $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
                         + " WHERE idstring=@id ;\r\n";
                 }
 
                 if (string.IsNullOrEmpty(strCommand) == false)
                 {
+                    /*
                     strCommand = "use `" + this.m_strSqlDbName + "` ;\n"
         + strCommand;
+                    */
 
                     using (MySqlCommand command = new MySqlCommand(strCommand,
                         connection.MySqlConnection))
@@ -19258,9 +19404,11 @@ handle.CancelTokenSource.Token).Result;
 
                 return nDeletedCount;
             }
-
             return 0;
+#endif
         }
+
+#endif
 
         // 从库中删除指定的记录或者对象资源
         // parameters:
@@ -19880,6 +20028,23 @@ out strError);
             return nDeletedCount;
         }
 
+        string sysobjects
+        {
+            get
+            {
+                return "dbo.sysobjects";
+            }
+        }
+
+        string fenhao
+        {
+            get
+            {
+                if (this.IsSqlite() || this.IsMySQL())
+                    return ";";
+                return "";
+            }
+        }
         string db_prefix
         {
             get

@@ -238,7 +238,7 @@ namespace dp2KernelApiTester
 
             if (StringUtil.IsInList("create_records", style))
             {
-                var result = CreateRecords(1000);
+                var result = CreateRecords(100);
                 if (result.Value == -1)
                 {
                     DataModel.SetMessage($"CreateRecords() error: {result.ErrorInfo}", "error");

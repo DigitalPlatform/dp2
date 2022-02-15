@@ -67,6 +67,7 @@
       <DependentUpon>SettingDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="TestCase\TestCreateDatabase.cs" />
+    <Compile Include="TestCase\TestRebuildKeys.cs" />
     <Compile Include="TestCase\TestRecord.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
