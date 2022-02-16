@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 //using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
 using MySqlConnector;
+using Npgsql;
 
 namespace DigitalPlatform.rms
 {
@@ -114,6 +115,8 @@ namespace DigitalPlatform.rms
                 this._connection = new MySqlConnection(strConnectionString);
             else if (this.SqlServerType == rms.SqlServerType.Oracle)
                 this._connection = new OracleConnection(strConnectionString);
+            else if (this.SqlServerType == rms.SqlServerType.Pgsql)
+                this._connection = new NpgsqlConnection(strConnectionString);
             else
             {
                 throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
@@ -231,9 +234,7 @@ namespace DigitalPlatform.rms
         /*public*/
         void _open()
         {
-            if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
-                this.SqlConnection.Open();
-            else if (this.SqlServerType == rms.SqlServerType.SQLite)
+            if (this.SqlServerType == rms.SqlServerType.SQLite)
             {
                 if (this._bGlobal == false)
                 {
@@ -275,49 +276,20 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
+#if OLD_CODE
+            else if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
+                this.SqlConnection.Open();
             else if (this.SqlServerType == rms.SqlServerType.MySql)
                 this.MySqlConnection.Open();
             else if (this.SqlServerType == rms.SqlServerType.Oracle)
             {
                 this.OracleConnection.Open();
-
-#if NO
-                int nRedoCount = 0;
-            REDO_OPEN:
-                try
-                {
-                    this.OracleConnection.Open();
-                    if (this.OracleConnection.State != ConnectionState.Open)
-                    {
-                        if (nRedoCount <= 5)
-                        {
-                            nRedoCount++;
-                            goto REDO_OPEN;
-                        }
-                        else
-                        {
-                            Debug.Assert(false, "");
-                        }
-                    }
-
-                }
-                catch (OracleException ex)
-                {
-                    if (ex.Errors.Count > 0 && ex.Errors[0].Number == 12520
-                        && nRedoCount <= 0)
-                    {
-                        nRedoCount++;
-                        this.OracleConnection.Close();
-                        goto REDO_OPEN;
-                    }
-
-                    throw ex;
-                }
-#endif
             }
+#endif
             else
             {
-                throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
+                this._connection.Open();    // 2022/2/16
+                // throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
             }
         }
 
@@ -357,12 +329,7 @@ namespace DigitalPlatform.rms
         {
             try
             {
-                if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
-                {
-                    this.SqlConnection?.Close();
-                    this.SqlConnection?.Dispose();
-                }
-                else if (this.SqlServerType == rms.SqlServerType.SQLite)
+                if (this.SqlServerType == rms.SqlServerType.SQLite)
                 {
                     // 需要加锁
                     // 只有强制关闭，全局的Connection才能真正关闭
@@ -402,6 +369,12 @@ namespace DigitalPlatform.rms
                         this.SQLiteConnection?.Dispose();
                     }
                 }
+#if OLD_CODE
+                else if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
+                {
+                    this.SqlConnection?.Close();
+                    this.SqlConnection?.Dispose();
+                }
                 else if (this.SqlServerType == rms.SqlServerType.MySql)
                 {
                     this.MySqlConnection?.Close();
@@ -409,20 +382,15 @@ namespace DigitalPlatform.rms
                 }
                 else if (this.SqlServerType == rms.SqlServerType.Oracle)
                 {
-                    /*
-                    using (OracleCommand command = new OracleCommand("select count(*) from v$session", this.OracleConnection))
-                    {
-                        object result = command.ExecuteScalar();
-                        Debug.WriteLine("session=" + result.ToString());
-                    }
-                     * */
-
                     this.OracleConnection?.Close();
                     this.OracleConnection?.Dispose();
                 }
+#endif
                 else
                 {
-                    throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
+                    this._connection?.Close();
+                    this._connection?.Dispose();
+                    // throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
                 }
             }
             finally
@@ -531,6 +499,14 @@ namespace DigitalPlatform.rms
             }
         }
 
+        public NpgsqlConnection NpgsqlConnection
+        {
+            get
+            {
+                return (NpgsqlConnection)_connection;
+            }
+        }
+
         public bool IsMsSqlServer()
         {
             return (this.SqlServerType == SqlServerType.MsSqlServer);
@@ -551,6 +527,11 @@ namespace DigitalPlatform.rms
             return (this.SqlServerType == SqlServerType.Oracle);
         }
 
+        public bool IsPgsql()
+        {
+            return (this.SqlServerType == SqlServerType.Pgsql);
+        }
+
         public DbCommand NewCommand(string command)
         {
             if (IsMsSqlServer())
@@ -561,11 +542,13 @@ namespace DigitalPlatform.rms
                 return new MySqlCommand(command, this.MySqlConnection);
             else if (IsOracle())
                 return new OracleCommand(command, this.OracleConnection);
+            else if (IsPgsql())
+                return new NpgsqlCommand(command, this.NpgsqlConnection);
             else
                 throw new Exception($"无法识别的数据库类型 '{this.SqlServerType}'");
         }
 
-        #region 实现 IDbConnection 接口
+#region 实现 IDbConnection 接口
 
         public IDbTransaction BeginTransaction()
         {
@@ -606,7 +589,7 @@ namespace DigitalPlatform.rms
         public ConnectionState State => _connection.State;
 
 
-        #endregion
+#endregion
     }
 
 }

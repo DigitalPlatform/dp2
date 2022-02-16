@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace dp2KernelApiTester
 {
@@ -42,6 +44,24 @@ namespace dp2KernelApiTester
                 var result = DeleteRecords(create_result.CreatedPaths,
                     create_result.AccessPoints,
                     "forcedeleteoldkeys");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var create_result = CreateRecords(1);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = RebuildRecordKeys(create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
+                if (result.Value == -1)
+                    return result;
+
+                result = DeleteRecords(create_result.CreatedPaths,
+    create_result.AccessPoints,
+    "");
                 if (result.Value == -1)
                     return result;
             }
@@ -478,15 +498,109 @@ namespace dp2KernelApiTester
             // 检查检索点是否被成功删除
             foreach (var accesspoint in created_accesspoints)
             {
-                string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                var result = VerifyAccessPoint(
+                    channel,
+                    accesspoint,
+                    "nothit");
+                if (result.Value == -1)
+                    return result;
+            }
 
-                var ret = channel.DoSearch(strQueryXml, "default", out string strError);
+            return new NormalResult();
+        }
+
+
+        public static NormalResult RebuildRecordKeys(IEnumerable<string> paths,
+    IEnumerable<AccessPoint> created_accesspoints,
+    string delete_style)
+        {
+            var channel = DataModel.GetChannel();
+
+            // 刷新前，检查检索点是否存在
+            foreach (var accesspoint in created_accesspoints)
+            {
+                var result = VerifyAccessPoint(
+                    channel,
+                    accesspoint,
+                    "hit");
+                if (result.Value == -1)
+                    return result;
+            }
+
+
+            foreach (var path in paths)
+            {
+                // string path = $"{strDatabaseName}/{i+1}";
+
+                var ret = channel.DoRebuildResKeys(path,
+                    "", // "forcedeleteoldkeys",
+                    out string output_path,
+                    out string strError);
                 if (ret == -1)
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = $"DoSearch() 出错: {strError}"
+                        ErrorInfo = strError
                     };
+
+                DataModel.SetMessage($"刷新记录 {path} 检索点成功");
+            }
+
+            // 检查检索点是否被成功刷新
+            foreach (var accesspoint in created_accesspoints)
+            {
+                var result = VerifyAccessPoint(
+                    channel,
+                    accesspoint,
+                    "hit");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            return new NormalResult();
+        }
+
+        static NormalResult VerifyAccessPoint(
+            RmsChannel channel,
+            AccessPoint accesspoint,
+            string condition)
+        {
+            string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+            var ret = channel.DoSearch(strQueryXml, "default", out string strError);
+            if (ret == -1)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"DoSearch() 出错: {strError}"
+                };
+            if (condition == "hit")
+            {
+                if (ret != 1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
+                    };
+
+                SearchResultLoader loader = new SearchResultLoader(channel,
+    null,
+    "default",
+    "id");
+                loader.ElementType = "Record";
+
+                foreach (Record record in loader)
+                {
+                    if (record.Path != accesspoint.Path)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"应命中记录 {accesspoint.Key}，但命中了记录 {record.Path}",
+                        };
+                }
+            }
+            else if (condition == "nothit")
+            {
                 if (ret != 0)
                     return new NormalResult
                     {
@@ -494,9 +608,16 @@ namespace dp2KernelApiTester
                         ErrorInfo = $"检索 '{accesspoint.Key}' 应当不命中。但命中了 {ret} 条",
                     };
             }
+            else
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"未知的 condition:'{condition}'"
+                };
+            }
 
             return new NormalResult();
         }
-
     }
 }

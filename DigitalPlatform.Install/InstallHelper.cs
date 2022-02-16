@@ -2133,6 +2133,10 @@ MessageBoxDefaultButton.Button1);
                 string value = attr.Value;
                 if (string.IsNullOrEmpty(value))
                     continue;
+
+                // TODO: 只有相同的 SQL 服务器之内的 sql database 才有必要比较
+                // 服务器类型，和 host 一起组成一个字符串，用来表达 SQL 服务器名字
+
                 value = value.ToLower();
                 if (name_table.ContainsKey(value))
                 {

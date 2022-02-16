@@ -55,13 +55,15 @@ namespace DigitalPlatform.rms
             {
                 if (this.SqlServerTypeString == "SQLite")
                     return SqlServerType.SQLite;
-                if (this.SqlServerTypeString == "MS SQL Server")
+                else if (this.SqlServerTypeString == "MS SQL Server")
                     return SqlServerType.MsSqlServer;
-                if (this.SqlServerTypeString == "MySQL Server")
+                else if (this.SqlServerTypeString == "MySQL Server")
                     return SqlServerType.MySql;
-                if (this.SqlServerTypeString == "Oracle")
+                else if (this.SqlServerTypeString == "Oracle")
                     return SqlServerType.Oracle;
-                if (string.Compare(this.SqlServerName, "~sqlite", true) == 0)
+                else if (this.SqlServerTypeString == "PostgreSQL")
+                    return SqlServerType.Pgsql;
+                else if (string.Compare(this.SqlServerName, "~sqlite", true) == 0)
                     return SqlServerType.SQLite;
 
                 return SqlServerType.MsSqlServer;
@@ -325,9 +327,10 @@ namespace DigitalPlatform.rms
                     if (this.SqlServerTypeString != "MS SQL Server"
                         && this.SqlServerTypeString != "MySQL Server"
                         && this.SqlServerTypeString != "Oracle"
-                        && this.SqlServerTypeString != "SQLite")
+                        && this.SqlServerTypeString != "SQLite"
+                        && this.SqlServerTypeString != "PostgreSQL")
                     {
-                        strError = "服务器配置文件不合法，根元素下级的<datasource>元素的'servertype'属性值 '" + this.SqlServerTypeString + "' 不合法。应当为 MS SQL Server/MySQL Server/Oracle SQL Server/SQLite 之一(缺省为 'MS SQL Server')。";
+                        strError = "服务器配置文件不合法，根元素下级的<datasource>元素的'servertype'属性值 '" + this.SqlServerTypeString + "' 不合法。应当为 MS SQL Server/MySQL Server/Oracle SQL Server/PostgreSQL/SQLite 之一(缺省为 'MS SQL Server')。";
                         return -1;
                     }
                 }
@@ -895,7 +898,8 @@ namespace DigitalPlatform.rms
                 {
                     // TODO: 这里要注意是否有SQL数据库名中不允许的字符？
 
-                    if (this.SqlServerType == rms.SqlServerType.Oracle)
+                    if (this.SqlServerType == SqlServerType.Oracle
+                        || this.SqlServerType == SqlServerType.Pgsql)
                     {
                         if (strEnLoginName.Length > 3)
                             strEnLoginName = strEnLoginName.Substring(0, 3);
@@ -908,7 +912,8 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    if (this.SqlServerType == rms.SqlServerType.Oracle)
+                    if (this.SqlServerType == rms.SqlServerType.Oracle
+                        || this.SqlServerType == SqlServerType.Pgsql)
                         strTempSqlDbName = "db_" + strDbID;
                     else
                         strTempSqlDbName = "dprms_" + strDbID + "_db";
@@ -920,7 +925,7 @@ namespace DigitalPlatform.rms
                     strSqlDbName = strTempSqlDbName;
                 else
                 {
-                    if (this.SqlServerType == rms.SqlServerType.Oracle
+                    if ((this.SqlServerType == rms.SqlServerType.Oracle || this.SqlServerType == SqlServerType.Pgsql)
                         && strSqlDbName.Length > 3)
                     {
                         strError = "所指定的 SQL 数据库名 '" + strSqlDbName + "' 不应超过3字符";
@@ -933,7 +938,8 @@ namespace DigitalPlatform.rms
                     // TODO: 最好在这里增加检查SQL Sever中已有数据库名的功能
                     strSqlDbName = this.GetFinalSqlDbName(strSqlDbName);
 
-                    if (this.SqlServerType != rms.SqlServerType.Oracle)
+                    if (this.SqlServerType != rms.SqlServerType.Oracle
+                        && this.SqlServerType != SqlServerType.Pgsql)
                     {
                         // 2007/7/20
                         if (this.InstanceName != "")
@@ -7260,6 +7266,7 @@ dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, Publ
 #if NO
         LocalDB = 5,    // MS SQL Server LocalDB, 2015/5/17
 #endif
+        Pgsql = 6,
     }
 }
 
