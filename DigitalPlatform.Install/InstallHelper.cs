@@ -2067,10 +2067,39 @@ MessageBoxDefaultButton.Button1);
         // 不但记忆字符串，也记忆其从属的实例名
         class InstanceValue
         {
+            // 实例名。从注册表中得知
             public string Instance { get; set; }
+
+            // 实例前缀。从 databases.xml 中 dbs/@instancename 属性得到
             public string Value { get; set; }
+
+            // 获得实例前缀
+            public static string GetInstancePrefix(XmlDocument dom)
+            {
+                XmlAttribute servername = dom.DocumentElement.SelectSingleNode("datasource/@servername") as XmlAttribute;
+                XmlAttribute servertype = dom.DocumentElement.SelectSingleNode("datasource/@servertype") as XmlAttribute;
+                XmlAttribute prefix = dom.DocumentElement.SelectSingleNode("dbs/@instancename") as XmlAttribute;
+
+                return $"{servertype?.Value}|{servername?.Value}|{prefix?.Value}";
+            }
+
+            // 获得 SQL 服务器前缀
+            public static string GetSqlServerPrefix(XmlDocument dom)
+            {
+                XmlAttribute servername = dom.DocumentElement.SelectSingleNode("datasource/@servername") as XmlAttribute;
+                XmlAttribute servertype = dom.DocumentElement.SelectSingleNode("datasource/@servertype") as XmlAttribute;
+
+                return $"{servertype?.Value}|{servername?.Value}";
+            }
         }
 
+        /*
+<root>
+    <version>2.0</version>
+    <datasource userid="postgres" password="HIP8ih0vfHU9me5emzGs3g==" servername="localhost;Database=postgres" servertype="PostgreSQL" />
+    <keysize>255</keysize>
+    <dbs instancename="dp2kernel_pgsql">
+         * */
         // 2017/2/9
         // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
         // return:
@@ -2106,16 +2135,17 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            // 检查 dbs/@instancename
-            string strInstancePrefix = "";
-            XmlAttribute prefix = dom.DocumentElement.SelectSingleNode("dbs/@instancename") as XmlAttribute;
-            if (prefix != null)
-                strInstancePrefix = prefix.Value;
+            // 实例前缀
+            string strInstancePrefix = InstanceValue.GetInstancePrefix(dom);
 
+            // SQL 服务器前缀
+            string strSqlServerPrefix = InstanceValue.GetSqlServerPrefix(dom);
+
+            // 检查实例前缀是否重复。prefix 由 datasource/@servertype + @servername +  dbs/@instancename 构成
             if (prefix_table.ContainsKey(strInstancePrefix))
             {
                 InstanceValue data = (InstanceValue)prefix_table[strInstancePrefix];
-                strError = "实例 '" + strInstanceName + "' (配置文件 " + strFileName + ") 中 dbs 元素 instancename 属性值 '" + strInstancePrefix + "' 和实例 '" + data.Instance + "' 的用法重复了";
+                strError = "实例 '" + strInstanceName + "' (配置文件 " + strFileName + ") 中实例区分前缀 '" + strInstancePrefix + "' 和实例 '" + data.Instance + "' 的用法重复了";
                 return 1;
             }
             else
@@ -2130,9 +2160,11 @@ MessageBoxDefaultButton.Button1);
             XmlNodeList name_nodes = dom.DocumentElement.SelectNodes("dbs/database/property/sqlserverdb/@name");
             foreach (XmlAttribute attr in name_nodes)
             {
-                string value = attr.Value;
-                if (string.IsNullOrEmpty(value))
+                string sqldbname = attr.Value;
+                if (string.IsNullOrEmpty(sqldbname))
                     continue;
+
+                string value = strSqlServerPrefix + "|" + sqldbname;
 
                 // TODO: 只有相同的 SQL 服务器之内的 sql database 才有必要比较
                 // 服务器类型，和 host 一起组成一个字符串，用来表达 SQL 服务器名字

@@ -34,6 +34,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Core;
 using MySqlConnector;
 using Dapper;
+using Npgsql;
 
 namespace DigitalPlatform.rms
 {
@@ -2259,7 +2260,7 @@ ex);
                             "keystring nvarchar2 (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
                             "fromstring nvarchar2 (255) NULL ," + "\n" +
                             "idstring nvarchar2 (255)  NULL ," + "\n" +
-                            "keystringnum NUMBER(19) NULL " + "\n" +
+                            "keystringnum NUMBER(19) NULL " + "\n" +  //
                             ")" + " \n";
                     }
                 }
@@ -2276,6 +2277,8 @@ ex);
                     + $"CREATE TABLE {db_prefix}records " + "\n"
                     + "(" + "\n"
                     + "id varchar (255) NULL UNIQUE," + "\n"
+                    + "data bytea NULL ," + "\n"
+                    + "newdata bytea NULL ," + "\n"
                     + "range varchar (2000) NULL," + "\n"
                     + "dptimestamp varchar (100) NULL ," + "\n"
                     + "newdptimestamp varchar (100) NULL ," + "\n"
@@ -2581,7 +2584,7 @@ ex);
                             "keystring nvarchar2 (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +         //keystring的长度由配置文件定
                             "fromstring nvarchar2 (255) NULL ," + "\n" +
                             "idstring nvarchar2 (255)  NULL ," + "\n" +
-                            "keystringnum NUMBER(19) NULL " + "\n" +
+                            "keystringnum NUMBER(19) NULL " + "\n" +  // 
                             ")" + " ;\n";
 
                         string strTemp = strTableName + "ki";
@@ -2644,9 +2647,9 @@ ex);
 
                         strCommand += " CREATE INDEX " + strTableName + "ki \n"
                             + " ON " + strTableName + " " + KEY_COL_LIST + " ;\n";
-                        strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "ni \n"
+                        strCommand += " CREATE INDEX " + strTableName/*tableInfo.SqlTableName*/ + "ni \n"
                             + " ON " + strTableName + " " + KEYNUM_COL_LIST + " ;\n";
-                        strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "ii \n"
+                        strCommand += " CREATE INDEX " + strTableName/*tableInfo.SqlTableName*/ + "ii \n"
                             + " ON " + strTableName + " (idstring) ;\n";
                     }
                 }
@@ -3416,6 +3419,9 @@ out strError);
                 || searchItem.Match == "")
             {
                 strWhere = " WHERE id LIKE @id and id like " + strPattern + " ";
+                var temp = CreateParameter("@id", DbType.String, searchItem.Word + "%");
+                aSqlParameter.Add(temp);
+#if OLD_CODE
                 if (type == SqlServerType.MsSqlServer)
                 {
                     SqlParameter temp = new SqlParameter("@id", SqlDbType.NVarChar);
@@ -3441,10 +3447,16 @@ out strError);
                     temp.Value = searchItem.Word + "%";
                     aSqlParameter.Add(temp);
                 }
+#endif
             }
             else if (searchItem.Match == "middle")
             {
                 strWhere = " WHERE id LIKE @id and id like " + strPattern + " ";
+
+                var temp = CreateParameter("@id", DbType.String, "%" + searchItem.Word + "%");
+                aSqlParameter.Add(temp);
+
+#if OLD_CODE
                 if (type == SqlServerType.MsSqlServer)
                 {
                     SqlParameter temp = new SqlParameter("@id", SqlDbType.NVarChar);
@@ -3470,11 +3482,16 @@ out strError);
                     temp.Value = "%" + searchItem.Word + "%";
                     aSqlParameter.Add(temp);
                 }
-
+#endif
             }
             else if (searchItem.Match == "right")
             {
                 strWhere = " WHERE id LIKE @id and id like " + strPattern + " ";
+
+                var temp = CreateParameter("@id", DbType.String, "%" + searchItem.Word);
+                aSqlParameter.Add(temp);
+
+#if OLD_CODE
                 if (type == SqlServerType.MsSqlServer)
                 {
                     SqlParameter temp = new SqlParameter("@id", SqlDbType.NVarChar);
@@ -3500,6 +3517,7 @@ out strError);
                     temp.Value = "%" + searchItem.Word;
                     aSqlParameter.Add(temp);
                 }
+#endif
             }
             else if (searchItem.Match == "exact")
             {
@@ -3520,6 +3538,12 @@ out strError);
 
                         strWhere = " WHERE @idMin <=id and id<= @idMax and id like " + strPattern + " ";
 
+                        var temp = CreateParameter("@idMin", DbType.String, strStartID);
+                        aSqlParameter.Add(temp);
+
+                        temp = CreateParameter("@idMax", DbType.String, strEndID);
+                        aSqlParameter.Add(temp);
+#if OLD_CODE
                         if (type == SqlServerType.MsSqlServer)
                         {
                             SqlParameter temp = new SqlParameter("@idMin", SqlDbType.NVarChar);
@@ -3562,6 +3586,7 @@ out strError);
                             temp.Value = strEndID;
                             aSqlParameter.Add(temp);
                         }
+#endif
                     }
                     else
                     {
@@ -3571,7 +3596,13 @@ out strError);
 
                         strRealText = DbPath.GetID10(strRealText);
                         strWhere = " WHERE id " + strOperator + " @id and id like " + strPattern + " ";
+                        if (this.IsOracle())
+                            strWhere = strWhere.Replace("@", ":");
 
+                        var temp = CreateParameter("@id", DbType.String, strRealText);
+                        aSqlParameter.Add(temp);
+
+#if OLD_CODE
                         if (type == SqlServerType.MsSqlServer)
                         {
                             SqlParameter temp = new SqlParameter("@id", SqlDbType.NVarChar);
@@ -3598,13 +3629,20 @@ out strError);
                             temp.Value = strRealText;
                             aSqlParameter.Add(temp);
                         }
+#endif
                     }
                 }
                 else
                 {
                     searchItem.Word = DbPath.GetID10(searchItem.Word);
                     strWhere = " WHERE id " + searchItem.Relation + " @id and id like " + strPattern + " ";
+                    if (this.IsOracle())
+                        strWhere = strWhere.Replace("@", ":");
 
+                    var temp = CreateParameter("@id", DbType.String, searchItem.Word);
+                    aSqlParameter.Add(temp);
+
+#if OLD_CODE
                     if (type == SqlServerType.MsSqlServer)
                     {
                         SqlParameter temp = new SqlParameter("@id", SqlDbType.NVarChar);
@@ -3631,6 +3669,7 @@ out strError);
                         temp.Value = searchItem.Word;
                         aSqlParameter.Add(temp);
                     }
+#endif
                 }
             }
 
@@ -4080,6 +4119,10 @@ handle.CancelTokenSource.Token).Result;
                 string strParameterName = "@key" + i.ToString();
                 text.Append(" keystring = " + strParameterName);
 
+                var temp = CreateParameter(strParameterName, DbType.String, strWord);
+                aSqlParameter.Add(temp);
+
+#if OLD_CODE
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                 {
                     SqlParameter temp = new SqlParameter(strParameterName, SqlDbType.NVarChar);
@@ -4105,6 +4148,7 @@ handle.CancelTokenSource.Token).Result;
                     temp.Value = strWord;
                     aSqlParameter.Add(temp);
                 }
+#endif
 
                 i++;
             }
@@ -4222,6 +4266,10 @@ handle.CancelTokenSource.Token).Result;
                 strKeyCondition = "keystring LIKE "
                     + strParameterName + " ";
 
+                var temp = CreateParameter(strParameterName, DbType.String, strKeyValue + "%");
+                aSqlParameter.Add(temp);
+
+#if OLD_CODE
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                 {
                     SqlParameter temp = new SqlParameter(strParameterName, SqlDbType.NVarChar);
@@ -4247,6 +4295,7 @@ handle.CancelTokenSource.Token).Result;
                     temp.Value = strKeyValue + "%";
                     aSqlParameter.Add(temp);
                 }
+#endif
             }
             else if (searchItem.Match == "middle")
             {
@@ -4260,6 +4309,10 @@ handle.CancelTokenSource.Token).Result;
                 strKeyCondition = "keystring LIKE "
                     + strParameterName + " "; //N'%" + strKeyValue + "'";
 
+                var temp = CreateParameter(strParameterName, DbType.String, "%" + strKeyValue + "%");
+                aSqlParameter.Add(temp);
+
+#if OLD_CODE
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                 {
                     SqlParameter temp = new SqlParameter(strParameterName, SqlDbType.NVarChar);
@@ -4284,6 +4337,7 @@ handle.CancelTokenSource.Token).Result;
                     temp.Value = "%" + strKeyValue + "%";
                     aSqlParameter.Add(temp);
                 }
+#endif
             }
             else if (searchItem.Match == "right")
             {
@@ -4297,6 +4351,10 @@ handle.CancelTokenSource.Token).Result;
                 strKeyCondition = "keystring LIKE "
                     + strParameterName + " "; //N'%" + strKeyValue + "'";
 
+                var temp = CreateParameter(strParameterName, DbType.String, "%" + strKeyValue);
+                aSqlParameter.Add(temp);
+
+#if OLD_CODE
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                 {
                     SqlParameter temp = new SqlParameter(strParameterName, SqlDbType.NVarChar);
@@ -4322,6 +4380,7 @@ handle.CancelTokenSource.Token).Result;
                     temp.Value = "%" + strKeyValue;
                     aSqlParameter.Add(temp);
                 }
+#endif
             }
             else if (searchItem.Match == "exact") //先看match，再看relation,最后看dataType
             {
@@ -4400,6 +4459,12 @@ handle.CancelTokenSource.Token).Result;
                                 + " <=keystring and keystring<= "
                                 + strParameterMaxName + " ";
 
+                            var temp = CreateParameter(strParameterMinName, DbType.String, strStartText);
+                            aSqlParameter.Add(temp);
+
+                            temp = CreateParameter(strParameterMaxName, DbType.String, strEndText);
+                            aSqlParameter.Add(temp);
+#if OLD_CODE
                             if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                             {
                                 SqlParameter temp = new SqlParameter(strParameterMinName, SqlDbType.NVarChar);
@@ -4442,6 +4507,7 @@ handle.CancelTokenSource.Token).Result;
                                 temp.Value = strEndText;
                                 aSqlParameter.Add(temp);
                             }
+#endif
                         }
                         else if (searchItem.DataType == "number")
                         {
@@ -4515,6 +4581,10 @@ handle.CancelTokenSource.Token).Result;
                                 + strOperator
                                 + " " + strParameterName + " ";
 
+                            var temp = CreateParameter(strParameterName, DbType.String, strRealText);
+                            aSqlParameter.Add(temp);
+
+#if OLD_CODE
                             if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                             {
                                 SqlParameter temp = new SqlParameter(strParameterName, SqlDbType.NVarChar);
@@ -4540,6 +4610,7 @@ handle.CancelTokenSource.Token).Result;
                                 temp.Value = strRealText;
                                 aSqlParameter.Add(temp);
                             }
+#endif
                         }
                         else if (searchItem.DataType == "number")
                         {
@@ -4581,6 +4652,11 @@ handle.CancelTokenSource.Token).Result;
                             + searchItem.Relation
                             + " " + strParameterName + " ";
 
+                        // 2022/2/17
+                        var temp = CreateParameter(strParameterName, DbType.String, strKeyValue);
+                        aSqlParameter.Add(temp);
+
+#if OLD_CODE
                         if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                         {
                             SqlParameter temp = new SqlParameter(strParameterName, SqlDbType.NVarChar);
@@ -4606,6 +4682,13 @@ handle.CancelTokenSource.Token).Result;
                             temp.Value = strKeyValue;
                             aSqlParameter.Add(temp);
                         }
+                        else if (this.IsPgsql())
+                        {
+                            NpgsqlParameter temp = new NpgsqlParameter(strParameterName, DbType.String);
+                            temp.Value = strKeyValue;
+                            aSqlParameter.Add(temp);
+                        }
+#endif
                     }
                     else if (searchItem.DataType == "number")
                     {
@@ -4816,9 +4899,9 @@ handle.CancelTokenSource.Token).Result;
                     }
 
                     string strTableName = tableInfo.SqlTableName;
-                    if (this.container.SqlServerType == SqlServerType.Oracle)
+                    if (this.IsOracle() || this.IsPgsql())
                     {
-                        strTableName = this.m_strSqlDbName + "_" + tableInfo.SqlTableName;
+                        strTableName = db_prefix + tableInfo.SqlTableName;
                     }
 
                     string strOneCommand = "";
@@ -9848,6 +9931,304 @@ handle.CancelTokenSource.Token).Result;
             // 是否要直接利用输入的时间戳
             bool bForceTimestamp = StringUtil.IsInList("forcesettimestamp", strStyle);
 
+            // 通用
+            {
+                bool bFastMode = false;
+
+                IDbTransaction trans = null;
+
+                if (bFastMode == false)
+                    trans = connection.BeginTransaction();
+                try
+                {
+                    List<WriteInfo> parts = new List<WriteInfo>();
+                    // int i = 0;
+                    foreach (WriteInfo info in records)
+                    {
+                        if (info.record == null)
+                        {
+                            Debug.Assert(false, "");
+                            strError = "info.record不能为空";
+                            return -1;
+                        }
+
+                        // MS SQL Server
+                        bool bObjectFile = false;
+                        Debug.Assert(info.baContent != null, "");
+                        if (this.m_lObjectStartSize != -1 && info.baContent.Length >= this.m_lObjectStartSize)
+                            bObjectFile = true;
+
+                        string strShortFileName = "";
+                        if (bObjectFile == true)
+                        {
+                            // 将缓冲区内容一次性写入对象文件
+                            nRet = WriteToObjectFile(
+                            info.ID,
+                            info.baContent,
+                            out strShortFileName,
+                            out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            Debug.Assert(string.IsNullOrEmpty(strShortFileName) == false, "");
+                        }
+
+                        // 删除残余的旧有对象文件
+                        if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
+                        {
+                            this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
+                            info.row_info.NewFileName = "";
+                        }
+
+                        // 创建 metadata
+                        string strResultMetadata = "";
+                        // return:
+                        //		-1	出错
+                        //		0	成功
+                        nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
+                            info.record.Metadata,
+                            info.baContent.Length,
+                            "",
+                            out strResultMetadata,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        info.record.Metadata = strResultMetadata;
+
+                        // 创建 timestamp
+                        string strOutputTimestamp = "";
+                        if (bForceTimestamp == true)
+                            strOutputTimestamp = ByteArray.GetHexTimeStampString(info.record.Timestamp);
+                        else
+                            strOutputTimestamp = this.CreateTimestampForDb();
+
+                        info.record.Timestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);
+
+                        string strCommand = "";
+                        object parameters = null;
+                        if (info.row_info == null)
+                        {
+                            // 创建新行
+                            if (bObjectFile == false)
+                            {
+                                Debug.Assert(has_data_fields == true);
+
+                                strCommand =
+            $" INSERT INTO {db_prefix}records(id, data, {range_field_name}, metadata, dptimestamp) "
+            + " VALUES(@id1, @data1, @range1, @metadata1, @dptimestamp1)"
+            + "\n";
+                                parameters = new
+                                {
+                                    id1 = info.ID,
+                                    data1 = (bObjectFile == false) ? info.baContent : null,
+                                    range1 = (bObjectFile == true) ? "#" : "",
+                                    metadata1 = info.record.Metadata,
+                                    dptimestamp1 = strOutputTimestamp,
+                                };
+                            }
+                            else
+                            {
+                                if (has_data_fields)
+                                    strCommand =
+            $" INSERT INTO {db_prefix}records(id, data, {range_field_name}, metadata, dptimestamp,  filename) "
+            + " VALUES(@id1, NULL, @range1, @metadata1, @dptimestamp1, @filename1)"
+            + "\n";
+                                else
+                                    strCommand =
+$" INSERT INTO {db_prefix}records(id, {range_field_name}, metadata, dptimestamp, filename) "
++ " VALUES (@id1, @range1, @metadata1, @dptimestamp1, @filename1)"
++ "\n"; // 注: 没有 data 字段
+
+                                parameters = new
+                                {
+                                    id1 = info.ID,
+                                    // data1 = (bObjectFile == false) ? info.baContent : null,
+                                    range1 = (bObjectFile == true) ? "#" : "",
+                                    metadata1 = info.record.Metadata,
+                                    dptimestamp1 = strOutputTimestamp,
+                                    filename1 = (bObjectFile == true) ? strShortFileName : null,
+                                };
+                            }
+
+                            if (connection.IsOracle())
+                                strCommand = strCommand.Replace("@", ":");
+                            int count = connection.Execute(strCommand,
+parameters,
+trans);
+
+
+
+
+
+                            /*
+                            SQLiteParameter idParam =
+    command.Parameters.Add("@id" + i,
+    DbType.String);
+                            idParam.Value = info.ID;
+
+
+                            SQLiteParameter rangeParam =
+    command.Parameters.Add("@range" + i,
+    DbType.String);
+                            rangeParam.Value = "#";
+
+                            SQLiteParameter metadataParam =
+                            command.Parameters.Add("@metadata" + i,
+                            DbType.String);
+                            metadataParam.Value = info.record.Metadata;
+
+                            SQLiteParameter dptimestampParam =
+                                command.Parameters.Add("@dptimestamp" + i,
+                                DbType.String);
+                            dptimestampParam.Value = strOutputTimestamp;
+
+
+                            SQLiteParameter filenameParam =
+                        command.Parameters.Add("@filename" + i,
+                        DbType.String);
+                            filenameParam.Value = strShortFileName;
+
+
+                            parts.Add(info);
+                            */
+                        }
+                        else
+                        {
+                            string strCurrentRange = "";
+
+                            parameters = null;
+                            // 更新已有的行
+                            if (bObjectFile == false)
+                            {
+                                strCommand = $" UPDATE {db_prefix}records "
+                                + " SET dptimestamp=@dptimestamp1,"
+                                + " newdptimestamp=NULL,"
+                                + " data=@data1, newdata=NULL,"
+                                + $" {range_field_name}=@range1,"
+                                + " filename=NULL, newfilename=NULL,"
+                                + " metadata=@metadata1 "
+                                + " WHERE id=@id1 \n";
+
+                                parameters = new
+                                {
+                                    dptimestamp1 = strOutputTimestamp,
+                                    range1 = (bObjectFile == true) ? "#" + strCurrentRange : strCurrentRange,
+                                    filename1 = (bObjectFile == true) ? strShortFileName : null,
+                                    metadata1 = info.record.Metadata,
+                                    id1 = info.ID,
+                                    // data1 = (bObjectFile == false) ? info.baContent : null,
+                                };
+                            }
+                            else
+                            {
+                                if (has_data_fields)
+                                    strCommand = $" UPDATE {db_prefix}records "
+                                    + " SET dptimestamp=@dptimestamp1,"
+                                    + " newdptimestamp=NULL,"
+                                    + " data=NULL, newdata=NULL,"
+                                    + $" {range_field_name}=@range1,"
+                                    + " filename=@filename1, newfilename=NULL,"
+                                    + " metadata=@metadata1 "
+                                    + " WHERE id=@id1 \n";
+                                else
+                                    strCommand = $" UPDATE {db_prefix}records "
+    + " SET dptimestamp=@dptimestamp1,"
+    + " newdptimestamp=NULL,"
+    + " "
+    + $" {range_field_name}=@range1,"
+    + " filename=@filename1, newfilename=NULL,"
+    + " metadata=@metadata1 "
+    + " WHERE id=@id1 \n";  // 注: 没有 data 和 newdata 字段
+
+                                parameters = new
+                                {
+                                    dptimestamp1 = strOutputTimestamp,
+                                    range1 = (bObjectFile == true) ? "#" + strCurrentRange : strCurrentRange,
+                                    filename1 = (bObjectFile == true) ? strShortFileName : null,
+                                    metadata1 = info.record.Metadata,
+                                    id1 = info.ID,
+                                };
+                            }
+
+                            if (connection.IsOracle())
+                                strCommand = strCommand.Replace("@", ":");
+                            int count = connection.Execute(strCommand,
+parameters,
+trans);
+
+
+
+
+                            /*
+                            string strCurrentRange = "";
+
+                            SQLiteParameter idParam = command.Parameters.Add("@id" + i,
+        DbType.String);
+                            idParam.Value = info.ID;
+
+                            SQLiteParameter dptimestampParam =
+                                command.Parameters.Add("@dptimestamp" + i,
+                                DbType.String);
+                            dptimestampParam.Value = strOutputTimestamp;
+
+                            SQLiteParameter rangeParam =
+                                command.Parameters.Add("@range" + i,
+                                DbType.String);
+                            rangeParam.Value = "#" + strCurrentRange;
+
+
+                            SQLiteParameter metadataParam =
+                            command.Parameters.Add("@metadata" + i,
+                            DbType.String);
+                            metadataParam.Value = info.record.Metadata;
+
+                            SQLiteParameter filenameParam =
+                        command.Parameters.Add("@filename" + i,
+                        DbType.String);
+                            filenameParam.Value = strShortFileName;
+
+
+                            parts.Add(info);
+                            */
+                        }
+
+                        results.Add(info);
+
+                        /*
+                        {
+                            // 提交一次
+                            Debug.Assert(string.IsNullOrEmpty(strCommand) == false, "");
+                            command.CommandText = strCommand;
+
+                            int nCount = command.ExecuteNonQuery();
+                            if (nCount == 0)
+                            {
+                                strError = "创建或更新 records 行失败";
+                                return -1;
+                            }
+                            strCommand = "";
+                            command.Parameters.Clear();
+                            results.AddRange(parts);
+                            parts.Clear();
+                        }
+                        */
+
+                        // i++;
+                    }
+                    if (trans != null)
+                    {
+                        trans.Commit();
+                        trans = null;
+                    }
+                }
+                finally
+                {
+                    if (trans != null)
+                        trans.Rollback();
+                }
+            }
+
+#if OLD_CODE
             #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
@@ -10709,6 +11090,7 @@ handle.CancelTokenSource.Token).Result;
             }
             #endregion // Oracle
 
+#endif
             return 0;
         }
 
@@ -15179,7 +15561,6 @@ handle.CancelTokenSource.Token).Result;
             out string strError)
         {
             strError = "";
-            StringBuilder strCommand = new StringBuilder(4096);
 
             int nCount1 = 0;
             int nCount2 = 0;
@@ -15198,7 +15579,378 @@ handle.CancelTokenSource.Token).Result;
             else if (keysDelete != null && keysDelete.Count > 0)
                 strRecordID = ((KeyItem)keysDelete[0]).RecordID;
 
-#region MS SQL Server
+            // 通用
+#if REMOVED
+            if (false/*connection.IsOracle()*/)
+            {
+                using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
+                {
+                    command.BindByName = true;
+
+                    IDbTransaction trans = null;
+
+                    trans = connection.OracleConnection.BeginTransaction();
+                    try
+                    {
+                        int i = 0;
+                        int nNameIndex = 0;
+                        int nCount = 0; // 累积的尚未发出的命令行数
+
+                        // 把删除提前到增加以前
+                        if (keysDelete != null)
+                        {
+                            // 删除keys
+                            for (i = 0; i < keysDelete.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysDelete[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = ":key" + strIndex;
+                                string strFromParamName = ":from" + strIndex;
+                                string strIdParamName = ":id" + strIndex;
+                                string strKeynumParamName = ":keynum" + strIndex;
+
+                                string strCommand = ($" DELETE FROM {db_prefix}{strKeysTableName}"
+                                    + " WHERE keystring = " + strKeyParamName
+                                    + " AND fromstring = " + strFromParamName
+                                    + " AND idstring = " + strIdParamName
+                                    + " AND keystringnum = " + strKeynumParamName
+                                    + " ");
+
+                                OracleParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    OracleDbType.NVarchar2);
+                                keyParam.Value = oneKey.Key;
+
+                                OracleParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    OracleDbType.NVarchar2);
+                                fromParam.Value = oneKey.FromValue;
+
+                                OracleParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    OracleDbType.NVarchar2);
+                                idParam.Value = oneKey.RecordID;
+
+                                OracleParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    OracleDbType.NVarchar2);
+                                keynumParam.Value = oneKey.Num;
+
+                                command.CommandText = strCommand;
+                                try
+                                {
+                                    int deleted_count = command.ExecuteNonQuery();
+                                    /*
+                                    if (deleted_count > 1)
+                                    {
+                                        strError = $"删除数大于 1, 为 {deleted_count}, command={strCommand.ToString()}";
+                                        return -1;
+                                    }
+                                    */
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "删除检索点出错, 偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                    return -1;
+                                }
+
+                                // 每行都发出命令，不累积参数值
+                                command.Parameters.Clear();
+                                nCount++;
+                            }
+                        }
+
+                        if (keysAdd != null)
+                        {
+                            // nCount = keysAdd.Count;
+
+                            // 增加keys
+                            for (i = 0; i < keysAdd.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysAdd[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = ":key" + strIndex;
+                                string strFromParamName = ":from" + strIndex;
+                                string strIdParamName = ":id" + strIndex;
+                                string strKeynumParamName = ":keynum" + strIndex;
+
+                                //加keynum
+                                string strCommand = ($" INSERT INTO {db_prefix}{ strKeysTableName }"
+                                    + " (keystring,fromstring,idstring,keystringnum) "
+                                    + " VALUES(" + strKeyParamName + ","
+                                    + strFromParamName + ","
+                                    + strIdParamName + ","
+                                    + strKeynumParamName + ")  ");
+
+                                OracleParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    OracleDbType.NVarchar2);
+                                keyParam.Value = oneKey.Key;
+
+                                OracleParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    OracleDbType.NVarchar2);
+                                fromParam.Value = oneKey.FromValue;
+
+                                OracleParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    OracleDbType.NVarchar2);
+                                idParam.Value = oneKey.RecordID;
+
+                                OracleParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    OracleDbType.NVarchar2);
+                                keynumParam.Value = oneKey.Num;
+
+                                command.CommandText = strCommand;
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "创建检索点出错,偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                    return -1;
+                                }
+
+                                // 每行都发出命令，不累积参数值
+                                command.Parameters.Clear();
+
+                                nCount++;
+                            }
+                        }
+                        if (trans != null)
+                        {
+                            trans.Commit();
+                            trans = null;
+                        }
+                    }
+                    finally
+                    {
+                        if (trans != null)
+                            trans.Rollback();
+                    }
+                } // end of using command
+            }
+            else
+#endif
+            {
+                IDbTransaction trans = null;
+
+                if (connection.IsMsSqlServer() == false)
+                    trans = connection.BeginTransaction();
+                try
+                {
+                    int i = 0;
+                    // int nNameIndex = 0;
+                    int nCount = 0; // 累积的尚未发出的命令行数
+
+                    // 把删除提前到增加以前
+                    if (keysDelete != null)
+                    {
+                        // 删除keys
+                        for (i = 0; i < keysDelete.Count; i++)
+                        {
+                            KeyItem oneKey = (KeyItem)keysDelete[i];
+
+                            string strKeysTableName = oneKey.SqlTableName;
+
+                            /*
+                            string strIndex = Convert.ToString(nNameIndex++);
+
+                            string strKeyParamName = ":key" + strIndex;
+                            string strFromParamName = ":from" + strIndex;
+                            string strIdParamName = ":id" + strIndex;
+                            string strKeynumParamName = ":keynum" + strIndex;
+                            */
+                            string strCommand = ($" DELETE FROM {db_prefix}{strKeysTableName}"
+                                + " WHERE keystring = @key1"
+                                + " AND fromstring = @from1"
+                                + " AND idstring = @id1"
+                                + " AND keystringnum = @keynum1"
+                                + " ");
+                            if (connection.IsOracle())
+                                strCommand = strCommand.Replace("@", ":");
+
+                            try
+                            {
+                                connection.Execute(strCommand,
+                                    new
+                                    {
+                                        key1 = oneKey.Key,
+                                        from1 = oneKey.FromValue,
+                                        id1 = oneKey.RecordID,
+                                        keynum1 = Convert.ToInt64(oneKey.Num),
+                                    },
+                                    trans
+                                    );
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "删除检索点出错, 偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                return -1;
+                            }
+
+#if OLD_CODE
+                            OracleParameter keyParam =
+                            command.Parameters.Add(strKeyParamName,
+                                OracleDbType.NVarchar2);
+                            keyParam.Value = oneKey.Key;
+
+                            OracleParameter fromParam =
+                                command.Parameters.Add(strFromParamName,
+                                OracleDbType.NVarchar2);
+                            fromParam.Value = oneKey.FromValue;
+
+                            OracleParameter idParam =
+                                command.Parameters.Add(strIdParamName,
+                                OracleDbType.NVarchar2);
+                            idParam.Value = oneKey.RecordID;
+
+                            OracleParameter keynumParam =
+                                command.Parameters.Add(strKeynumParamName,
+                                OracleDbType.NVarchar2);
+                            keynumParam.Value = oneKey.Num;
+
+                            command.CommandText = strCommand.ToString();
+                            try
+                            {
+                                int deleted_count = command.ExecuteNonQuery();
+                                /*
+                                if (deleted_count > 1)
+                                {
+                                    strError = $"删除数大于 1, 为 {deleted_count}, command={strCommand.ToString()}";
+                                    return -1;
+                                }
+                                */
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "删除检索点出错, 偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                return -1;
+                            }
+                            strCommand.Clear();
+
+                            // 每行都发出命令，不累积参数值
+                            command.Parameters.Clear();
+#endif
+                            nCount++;
+                        }
+                    }
+
+                    if (keysAdd != null)
+                    {
+                        // nCount = keysAdd.Count;
+
+                        // 增加keys
+                        for (i = 0; i < keysAdd.Count; i++)
+                        {
+                            KeyItem oneKey = (KeyItem)keysAdd[i];
+
+                            string strKeysTableName = oneKey.SqlTableName;
+
+                            /*
+                            string strIndex = Convert.ToString(nNameIndex++);
+
+                            string strKeyParamName = ":key" + strIndex;
+                            string strFromParamName = ":from" + strIndex;
+                            string strIdParamName = ":id" + strIndex;
+                            string strKeynumParamName = ":keynum" + strIndex;
+                            */
+
+                            //加keynum
+                            string strCommand = ($" INSERT INTO {db_prefix}{ strKeysTableName }"
+                                + " (keystring,fromstring,idstring,keystringnum) "
+                                + " VALUES(@key1,"
+                                + "@from1,"
+                                + "@id1,"
+                                + "@keynum1)  ");
+                            if (connection.IsOracle())
+                                strCommand = strCommand.Replace("@", ":");
+
+                            try
+                            {
+                                connection.Execute(strCommand.ToString(),
+        new
+        {
+            key1 = oneKey.Key,
+            from1 = oneKey.FromValue,
+            id1 = oneKey.RecordID,
+            keynum1 = Convert.ToInt64(oneKey.Num),
+        },
+        trans
+        );
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "创建检索点出错,偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                return -1;
+                            }
+
+#if OLD_CODE
+                            OracleParameter keyParam =
+                                command.Parameters.Add(strKeyParamName,
+                                OracleDbType.NVarchar2);
+                            keyParam.Value = oneKey.Key;
+
+                            OracleParameter fromParam =
+                                command.Parameters.Add(strFromParamName,
+                                OracleDbType.NVarchar2);
+                            fromParam.Value = oneKey.FromValue;
+
+                            OracleParameter idParam =
+                                command.Parameters.Add(strIdParamName,
+                                OracleDbType.NVarchar2);
+                            idParam.Value = oneKey.RecordID;
+
+                            OracleParameter keynumParam =
+                                command.Parameters.Add(strKeynumParamName,
+                                OracleDbType.NVarchar2);
+                            keynumParam.Value = oneKey.Num;
+
+                            command.CommandText = strCommand.ToString();
+                            try
+                            {
+                                command.ExecuteNonQuery();
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "创建检索点出错,偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                return -1;
+                            }
+                            strCommand.Clear();
+
+                            // 每行都发出命令，不累积参数值
+                            command.Parameters.Clear();
+#endif
+                            nCount++;
+                        }
+                    }
+                    if (trans != null)
+                    {
+                        trans.Commit();
+                        trans = null;
+                    }
+                }
+                finally
+                {
+                    if (trans != null)
+                        trans.Rollback();
+                }
+            }
+
+
+#if OLD_CODE
+
+            #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 using (SqlCommand command = new SqlCommand("",
@@ -15412,9 +16164,9 @@ handle.CancelTokenSource.Token).Result;
 
                 return 0;
             }
-#endregion // MS SQL Server
+            #endregion // MS SQL Server
 
-#region SQLite
+            #region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 using (SQLiteCommand command = new SQLiteCommand("",
@@ -15571,9 +16323,9 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-#endregion // SQLite
+            #endregion // SQLite
 
-#region MySql
+            #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 List<string> lines = new List<string>();
@@ -15702,9 +16454,9 @@ handle.CancelTokenSource.Token).Result;
 
                 return 0;
             }
-#endregion // MySql
+            #endregion // MySql
 
-#region Oracle
+            #region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
@@ -15868,8 +16620,9 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-#endregion // Oracle
+            #endregion // Oracle
 
+#endif
             return 0;
         }
 
@@ -15973,7 +16726,7 @@ handle.CancelTokenSource.Token).Result;
                                 strCommand = strCommand.Replace("@", ":");
 
                             var results = connection.Query(strCommand, new { id = strObjectID });
-                            foreach(var result in results )
+                            foreach (var result in results)
                             {
                                 string filename = result.filename;
                                 string newfilename = result.newfilename;
@@ -16225,7 +16978,7 @@ handle.CancelTokenSource.Token).Result;
 
 #if OLD_CODE
 
-                #region MS SQL Server
+        #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -16353,9 +17106,9 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // enf of using command
             }
-                #endregion // MS SQL Server
+        #endregion // MS SQL Server
 
-                #region SQLite
+        #region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 string strCommand = "";
@@ -16483,9 +17236,9 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-                #endregion // SQLite
+        #endregion // SQLite
 
-                #region MySql
+        #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 string strCommand = "";
@@ -16617,12 +17370,12 @@ handle.CancelTokenSource.Token).Result;
                     }
                 } // end of using command
             }
-                #endregion // MySql
+        #endregion // MySql
 
 #endif
 
 #if REMOVED
-                #region Oracle
+        #region Oracle
             else if (connection.IsOracle())
             {
                 string strCommand = "";
@@ -16790,7 +17543,7 @@ handle.CancelTokenSource.Token).Result;
                 strError = "connection为null";
                 return -1;
             }
-#region MS SQL Server
+            #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 if (connection.SqlConnection == null)
@@ -16805,9 +17558,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-#endregion // MS SQL Server
+            #endregion // MS SQL Server
 
-#region SQLite
+            #region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 if (connection.SQLiteConnection == null)
@@ -16822,9 +17575,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-#endregion // SQLite
+            #endregion // SQLite
 
-#region MySql
+            #region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 if (connection.MySqlConnection == null)
@@ -16839,9 +17592,9 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-#endregion // MySql
+            #endregion // MySql
 
-#region Oracle
+            #region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 if (connection.OracleConnection == null)
@@ -16857,7 +17610,7 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return 0;
             }
-#endregion // Oracle
+            #endregion // Oracle
 
             return 0;
         }
@@ -17745,7 +18498,7 @@ handle.CancelTokenSource.Token).Result;
                 // 其它类型的数据库
                 else
                 {
-                    if (connection.IsSqlite() 
+                    if (connection.IsSqlite()
                         || connection.IsOracle()
                         || connection.IsPgsql())
                         strCommand = " SELECT "
@@ -20660,11 +21413,23 @@ out strError);
         {
             get
             {
-                if (this.IsSqlite() || this.IsMySQL())
+                if (this.IsSqlite() || this.IsMySQL() || this.IsPgsql())
                     return ";";
                 return "";
             }
         }
+
+        bool has_data_fields
+        {
+            get
+            {
+                if (this.IsMsSqlServer() || this.IsPgsql())
+                    return true;
+                return false;
+            }
+        }
+
+
         string db_prefix
         {
             get
@@ -20812,6 +21577,44 @@ out strError);
                             strConnectionString,
                             style);
         }
+
+        DbParameter CreateParameter(string strParameterName,
+            DbType type,
+            object value)
+        {
+            DbParameter parameter = null;
+
+            if (this.IsMsSqlServer())
+            {
+                parameter = new SqlParameter();
+            }
+            else if (this.IsSqlite())
+            {
+                parameter = new SQLiteParameter();
+            }
+            else if (this.IsMySQL())
+            {
+                parameter = new MySqlParameter();
+            }
+            else if (this.IsOracle())
+            {
+                parameter = new OracleParameter();
+                parameter.ParameterName = strParameterName.Replace("@", ":");
+            }
+            else if (this.IsPgsql())
+            {
+                parameter = new NpgsqlParameter();
+            }
+            else
+                throw new ArgumentException($"未知的数据库类型 {this.SqlServerType}");
+
+            if (this.IsOracle() == false)
+                parameter.ParameterName = strParameterName;
+            parameter.DbType = type;
+            parameter.Value = value;
+
+            return parameter;
+        }
     }
 
     public class SQLiteInfo
@@ -20827,3 +21630,9 @@ out strError);
         Global = 0x01,
     }
 }
+
+
+// https://www.npgsql.org/doc/api/Npgsql.Internal.TypeHandlers.ByteaHandler.html
+// https://www.npgsql.org/doc/large-objects
+// https://github.com/npgsql/npgsql/blob/main/test/Npgsql.Tests/LargeObjectTests.cs
+// https://blog.csdn.net/wangkuang5/article/details/51725564

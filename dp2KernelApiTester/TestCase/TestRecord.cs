@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Xml;
 
 namespace dp2KernelApiTester
 {
@@ -20,6 +21,18 @@ namespace dp2KernelApiTester
         {
             {
                 var result = PrepareEnvironment();
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var create_result = BatchCreateRecords(1);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
                 if (result.Value == -1)
                     return result;
             }
@@ -443,6 +456,126 @@ namespace dp2KernelApiTester
                 AccessPoints = created_accesspoints,
             };
         }
+
+        // 成批创建记录
+        public static CreateResult BatchCreateRecords(int count)
+        {
+            var channel = DataModel.GetChannel();
+
+            List<string> created_paths = new List<string>();
+            List<AccessPoint> created_accesspoints = new List<AccessPoint>();
+
+
+            List<RecordBody> inputs = new List<RecordBody>();
+            for (int i = 0; i < count; i++)
+            {
+                string path = $"{strDatabaseName}/?";
+                string current_barcode = (i + 1).ToString().PadLeft(10, '0');
+                string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
+<barcode>{barcode}</barcode>
+<dprms:file id='1' />
+<dprms:file id='2' />
+<dprms:file id='3' />
+<dprms:file id='4' />
+<dprms:file id='5' />
+<dprms:file id='6' />
+<dprms:file id='7' />
+<dprms:file id='8' />
+<dprms:file id='9' />
+<dprms:file id='10' />
+</root>".Replace("{barcode}", current_barcode);
+                // var bytes = Encoding.UTF8.GetBytes(xml);
+
+                inputs.Add(new RecordBody
+                {
+                    Path = path,
+                    Xml = xml,
+                    Timestamp = null,
+                });
+            }
+
+            var ret = channel.DoWriteRecords(null,
+inputs.ToArray(), // strMetadata,
+"",
+out RecordBody[] outputs,
+out string strError);
+            if (ret == -1)
+                return new CreateResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    CreatedPaths = created_paths,
+                    AccessPoints = created_accesspoints,
+                };
+
+            foreach (var output in outputs)
+            {
+                created_paths.Add(output.Path);
+                string output_xml = output.Xml;
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(output_xml);
+                string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                created_accesspoints.Add(new AccessPoint
+                {
+                    Key = barcode,
+                    From = "册条码号",
+                    Path = output.Path,
+                });
+
+                DataModel.SetMessage($"创建记录 {output.Path} 成功");
+
+                // 上载对象
+                for (int j = 0; j < 10; j++)
+                {
+                    byte[] bytes = new byte[4096];
+                    ret = channel.WriteRes($"{output.Path}/object/{j + 1}",
+                        $"0-{bytes.Length - 1}",
+                        bytes.Length,
+                        bytes,
+                        "",
+                        "content,data",
+                        null,
+                        out string output_object_path,
+                        out byte[] output_object_timestamp,
+                        out strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            CreatedPaths = created_paths,
+                            AccessPoints = created_accesspoints,
+                        };
+                }
+            }
+
+            // 检查检索点是否被成功创建
+            foreach (var accesspoint in created_accesspoints)
+            {
+                string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+                ret = channel.DoSearch(strQueryXml, "default", out strError);
+                if (ret == -1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"DoSearch() 出错: {strError}"
+                    };
+                if (ret != 1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
+                    };
+            }
+
+            return new CreateResult
+            {
+                CreatedPaths = created_paths,
+                AccessPoints = created_accesspoints,
+            };
+        }
+
 
         // parameters:
         //      delete_style 如果为 "forcedeleteoldkeys" 表示希望强制删除记录的检索点
