@@ -192,6 +192,10 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
 
+                // 默认 Pgsql 的对象文件起始尺寸
+                if (this.IsPgsql())
+                    this.m_lObjectStartSize = 100 * 1024;
+
                 // <object>节点
                 XmlNode nodeObject = this.PropertyNode.SelectSingleNode("object");
                 if (nodeObject != null)
@@ -226,9 +230,11 @@ namespace DigitalPlatform.rms
                     this.m_lObjectStartSize = lValue;
                 }
 
-                if (this.container.SqlServerType != SqlServerType.MsSqlServer)
+                //  在不是MS SQL Server情况下，所有对象都写入对象文件
+                if (this.IsMsSqlServer() == false
+                    && this.IsPgsql() == false)
                 {
-                    this.m_lObjectStartSize = 0;    // 在不是MS SQL Server情况下，所有对象都写入对象文件
+                    this.m_lObjectStartSize = 0;
                 }
 
                 if (this.m_lObjectStartSize != -1)
@@ -2285,7 +2291,10 @@ ex);
                     + "metadata varchar (2000) NULL ," + "\n"
                     + "filename varchar (255) NULL, \n"
                     + "newfilename varchar (255) NULL\n"
-                    + ") \n";
+                    + ") ;\n";
+                // https://www.cybertec-postgresql.com/en/binary-data-performance-in-postgresql/
+                strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN data SET STORAGE EXTERNAL;";
+                strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN newdata SET STORAGE EXTERNAL;";
 
                 KeysCfg keysCfg = null;
                 int nRet = this.GetKeysCfg(out keysCfg,
@@ -7357,18 +7366,30 @@ handle.CancelTokenSource.Token).Result;
                         goto END1;
                     }
 
-                    // 从 MS SQL Server 的 image 字段提取
-                    if (textPtr == null)
+                    // 从 MS SQL Server/Pgsql 的 image/bytea 字段提取
+                    if (connection.IsMsSqlServer() && textPtr == null)
                     {
-                        strError = "textPtr为null";
+                        strError = "textPtr 不应为 null";
                         return -1;
                     }
 
-                    destBuffer = _readPartImage(connection,
-    strDataFieldName,
-    textPtr,
-    lStart,
-    lOutputLength);
+                    if (connection.IsMsSqlServer())
+                        destBuffer = _readMsSqlPartImage(connection,
+        strDataFieldName,
+        textPtr,
+        lStart,
+        lOutputLength);
+                    else if (connection.IsPgsql())
+                        destBuffer = _readPgsqlPartImage(connection,
+strDataFieldName,
+strID,
+lStart,
+lOutputLength);
+                    else
+                    {
+                        strError = $"无法处理的 SQL 服务器类型 {this.SqlServerType}";
+                        return -1;
+                    }
 
 #if OLD_CODE
                     // READTEXT命令:
@@ -9090,8 +9111,39 @@ handle.CancelTokenSource.Token).Result;
             return lTotalLength;
         }
 
+        // (从 Pgsql 中)读出指定长度的 bytea 二进制内容
+        byte[] _readPgsqlPartImage(Connection connection,
+            string strDataFieldName,
+            string strID,
+            long lStart,
+            long lOutputLength)
+        {
+            string strCommand = $" SELECT {strDataFieldName} FROM {db_prefix}records WHERE id = @id";
+            byte[] destBuffer = new Byte[lOutputLength];
+            using (var dr = connection.ExecuteReader(strCommand,
+                new { id = strID }))
+            {
+                try
+                {
+                    dr.Read();
+                    dr.GetBytes(0,
+                        lStart,
+                        destBuffer,
+                        0,
+                        System.Convert.ToInt32(lOutputLength));
+                }
+                catch (Exception ex)
+                {
+                    string strConnectionName = connection.GetHashCode().ToString();
+                    this.container.KernelApplication.WriteErrorLog("_readPgsqlPartImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                    throw ex;
+                }
+                return destBuffer;
+            }
+        }
+
         // (从 MS SQL Server 中)根据 textPtr 读出指定长度的二进制内容
-        byte[] _readPartImage(Connection connection,
+        byte[] _readMsSqlPartImage(Connection connection,
             string strDataFieldName,
             byte[] textPtr,
             long lStart,
@@ -9155,7 +9207,6 @@ handle.CancelTokenSource.Token).Result;
                 }
                 return destBuffer;
             } // end of using command
-
         }
 
         // 从单页图像描述命令中，获得 MIME 信息
@@ -11334,6 +11385,27 @@ trans);
                     */
                     strCommand = strSelect;
                 }
+                else if (connection.IsPgsql())
+                {
+                    // TODO: 可否限定超过一定尺寸的 data 内容就不要返回? 
+                    strCommand = " SELECT null as data_textptr," // 0
+                        + " length(data) as data_length,"  // 1
+                        + " null as newdata_textptr,"  // 2
+                        + " length(newdata) as newdata_length,"   // 3
+                        + " range,"             // 4
+                        + " dptimestamp,"       // 5
+                        + " metadata, "         // 6
+                        + " newdptimestamp,"    // 7
+                        + " filename,"          // 8
+                        + " newfilename,"        // 9
+                        + " id"                 // 10
+                        + (bGetData == true ?
+                        ", data,"                 // 11
+                        + " newdata"            // 12
+                        : "")
+                        + $" FROM {db_prefix}records "
+                        + " WHERE id in (" + strIdString + ")\n";
+                }
                 else
                 {
                     strCommand = " SELECT "
@@ -11351,8 +11423,6 @@ trans);
                 if (connection.IsOracle())
                     strCommand = strCommand.Replace("@", ":");
 
-                var is_mssql = connection.IsMsSqlServer();
-
                 var results = connection.Query(strCommand);
                 int i = 0;
                 foreach (var result in results)
@@ -11360,7 +11430,7 @@ trans);
                     var row_info = new RecordRowInfo();
                     row_infos.Add(row_info);
 
-                    if (is_mssql)
+                    if (has_data_fields)
                     {
                         row_info.data_textptr = result.data_textptr;
                         row_info.data_length = GetLong(result.data_length);
@@ -11396,20 +11466,6 @@ trans);
                     i++;
                 }
                 return i;
-
-                long GetLong(object value)
-                {
-                    if (value == null)
-                        return 0;
-                    return (long)Convert.ToInt64(value);
-                }
-
-                string GetString(string value)
-                {
-                    if (value == null)
-                        return "";
-                    return value;
-                }
             }
 
 #if OLD_CODE
@@ -13867,7 +13923,7 @@ trans);
 
             if (this.m_lObjectStartSize != -1 && lTotalLength >= this.m_lObjectStartSize
 #if !XML_WRITE_TO_FILE
- && (strID.Length > 10 || connection.SqlServerType != SqlServerType.MsSqlServer)   // 写入对象文件是只针对二进制对象，而不针对普通XML记录
+ && (strID.Length > 10 || has_data_fields == false)   // 写入对象文件是只针对二进制对象，而不针对普通XML记录
 #endif
                 && String.IsNullOrEmpty(strCurrentRange) == false
                 && strCurrentRange[0] == '#')
@@ -13879,7 +13935,7 @@ trans);
             }
             else if (this.m_lObjectStartSize != -1 && lTotalLength >= this.m_lObjectStartSize
 #if !XML_WRITE_TO_FILE
- && (strID.Length > 10 || connection.SqlServerType != SqlServerType.MsSqlServer)
+ && (strID.Length > 10 || has_data_fields == false)
 #endif
  && (string.IsNullOrEmpty(strCurrentRange) == true || strCurrentRange == "!"))
             {
@@ -14104,22 +14160,43 @@ trans);
                     // 应当已经准备好了行
                     Debug.Assert(bNeedInsertRow == false, "");
 
-                    // return:	
-                    //		-1  出错
-                    //		0   成功
-                    nRet = this._writeImage(connection,
-                        ref textptr,
-                        ref lCurrentLength,   // 当前image的长度在不断的变化着
-                        bCanDeleteDuoYu,
-                        strID,
-                        strDataFieldName,   // "newdata",
-                        lStartOfTarget,
-                        baSource,
-                        // streamSource,
-                        nStartOfBuffer,
-                        nNeedReadLength,
-                        lTotalLength,
-                        out strError);
+                    if (connection.IsMsSqlServer())
+                    {
+                        // return:	
+                        //		-1  出错
+                        //		0   成功
+                        nRet = this._writeMsSqlImage(connection,
+                            ref textptr,
+                            ref lCurrentLength,   // 当前image的长度在不断的变化着
+                            bCanDeleteDuoYu,
+                            strID,
+                            strDataFieldName,   // "newdata",
+                            lStartOfTarget,
+                            baSource,
+                            nStartOfBuffer,
+                            nNeedReadLength,
+                            lTotalLength,
+                            out strError);
+                    }
+                    else if (connection.IsPgsql())
+                    {
+                        nRet = this._writePgsqlBytea(connection,
+                            ref lCurrentLength,   // 当前image的长度在不断的变化着
+                            bCanDeleteDuoYu,
+                            strID,
+                            strDataFieldName,   // "newdata",
+                            lStartOfTarget,
+                            baSource,
+                            nStartOfBuffer,
+                            nNeedReadLength,
+                            lTotalLength,
+                            out strError);
+                    }
+                    else
+                    {
+                        strError = $"无法处理 SQL 服务器类型 {this.SqlServerType}";
+                        return -1;
+                    }
                     if (nRet == -1)
                         return -1;
 
@@ -14561,7 +14638,7 @@ trans);
                 if (bFull == true)
                     strSetNull = " newdptimestamp=NULL,";
 
-                if (connection.SqlServerType == SqlServerType.MsSqlServer)
+                if (connection.IsMsSqlServer() || connection.IsPgsql())
                 {
                     strCommand = /*"use " + this.m_strSqlDbName + "\n"
                          +*/ $" UPDATE {db_prefix}records "
@@ -14576,7 +14653,7 @@ trans);
                 }
                 else if (connection.IsSqlite()
                     || connection.IsOracle()
-                    || connection.IsPgsql()
+                    // || connection.IsPgsql()
                     || connection.IsMySQL())
                 {
                     if (bNeedInsertRow == false)
@@ -15030,7 +15107,13 @@ trans);
             string strCommand = "";
 
             {
+                strCommand = $" UPDATE {db_prefix}records SET "
+     + " metadata=@metadata "
+     + " WHERE id=@id";
+                if (connection.IsOracle())
+                    strCommand = strCommand.Replace("@", ":");
 
+#if OLD_CODE
                 if (connection.SqlServerType == SqlServerType.MsSqlServer)
                 {
                     strCommand = /*"use " + this.m_strSqlDbName + "\n"
@@ -15057,6 +15140,7 @@ trans);
                          + " metadata=:metadata "
                          + " WHERE id=:id";
                 }
+#endif
             }
 
             // 通用
@@ -15241,6 +15325,141 @@ trans);
             return 0;
         }
 
+        // (Pgsql)写 bytea 字段的内容
+        // 外面指供一个textprt指针
+        // parameter:
+        //		connection  连接对象
+        //		textPtr     image指针
+        //		nOldLength  原长度
+        //		nDeleteDuoYu    是否删除多余
+        //		strID           记录id
+        //		strImageFieldName   image字段
+        //		nStartOfTarget      目标的起始位置
+        //		sourceBuffer    源大字节数组
+        //		streamSource    源大流
+        //		nStartOfBuffer  源流的起始位置
+        //		nNeedReadLength 需要写的长度
+        //		strError        out参数，返回出错信息
+        // return:	
+        //		-1  出错
+        //		0   成功
+        private int _writePgsqlBytea(Connection connection,
+            ref long lCurrentLength,           // 原来的长度     
+            bool bDeleteDuoYu,
+            string strID,
+            string strImageFieldName,   // "data" "newdata"
+            long lStartOfTarget,       // 目标的起始位置
+            byte[] baSource,
+            int nStartOfSource,     // baSource 缓冲区内开始的实际位置 必须 >=0 
+            int nNeedReadLength,    // baSource 需要读缓冲区的长度可能是-1,表示从源流nSourceStart位置到末尾
+            long lTotalLength,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (baSource == null)
+            {
+                strError = "_writePgsqlBytea() 调用错误，baSource参数不能为null。";
+                return -1;
+            }
+
+            if (connection.IsPgsql() == false)
+            {
+                strError = "SqlServerType '" + connection.SqlServerType.ToString() + "' 的 connection 不能用于调用 _writePgsqlBytea() 函数";
+                return -1;
+            }
+
+            // return:
+            //		-1  出错
+            //		0   成功
+            nRet = ConvertUtil.GetRealLength(nStartOfSource,
+                nNeedReadLength,
+                baSource.Length,
+                -1,
+                out long lOutputLength,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+#if DEBUG
+            // 获得当前 data 字段内容的长度
+            long current_length = GetPgsqlDataLength(connection,
+    strImageFieldName,
+    strID);
+
+            Debug.Assert(current_length == lCurrentLength);
+#endif
+
+            // 检查是否需要补足 byte(0)
+            if (lCurrentLength < lStartOfTarget)
+            {
+                long delta = lStartOfTarget - lCurrentLength;
+                long start = lCurrentLength;
+                while (delta > 0)
+                {
+                    long this_length = delta;
+                    // 本轮填充的长度
+                    if (this_length > 4096)
+                        this_length = 4096;
+
+                    byte[] bytes = new byte[current_length];
+                    string strCommand = $"UPDATE {db_prefix}records set {strImageFieldName} = overlay({strImageFieldName} placing @data from {start + 1}) where id = @id";
+                    connection.Execute(strCommand,
+    new
+    {
+        id = strID,
+        data = bytes,
+    });
+                    delta -= this_length;
+                    start += this_length;
+                }
+
+#if DEBUG
+                current_length = GetPgsqlDataLength(connection,
+strImageFieldName,
+strID);
+                Debug.Assert(current_length == lStartOfTarget);
+#endif
+
+                lCurrentLength = lStartOfTarget;
+            }
+
+            // 上传数据
+            {
+                byte[] target = new byte[nNeedReadLength];
+                Array.Copy(baSource, nStartOfSource, target, 0, target.Length);
+
+                string strCommand = $"UPDATE {db_prefix}records set {strImageFieldName} = overlay({strImageFieldName} placing @data from {lStartOfTarget + 1}) where id = @id";
+                int count = connection.Execute(strCommand,
+    new
+    {
+        id = strID,
+        data = target,
+    });
+                lCurrentLength += target.Length;
+            }
+
+            return 0;
+        }
+
+        // 获得当前 data 字段内容的长度
+        long GetPgsqlDataLength(Connection connection,
+            string strImageFieldName,
+            string strID)
+        {
+            string strCommand = $"select length({strImageFieldName}) as len from {db_prefix}records where id = @id";
+            var results = connection.Query(strCommand, new { id = strID });
+            foreach (var result in results)
+            {
+                return GetLong(result.len);
+            }
+
+            return -1;
+        }
+
+
+
         // (MS SQL Server)写image字段的内容
         // 外面指供一个textprt指针
         // parameter:
@@ -15259,7 +15478,7 @@ trans);
         // return:	
         //		-1  出错
         //		0   成功
-        private int _writeImage(Connection connection,
+        private int _writeMsSqlImage(Connection connection,
             ref byte[] textPtr,
             ref long lCurrentLength,           // 原来的长度     
             bool bDeleteDuoYu,
@@ -18495,6 +18714,186 @@ trans);
 
                     return 0;
                 }
+                else if (connection.IsPgsql())
+                {
+                    string strColumnList = " null as data_textptr," // 0
+                        + " length(data) as data_length,"  // 1
+                        + " null as newdata_textptr,"  // 2
+                        + " length(newdata) as newdata_length,"   // 3
+                        + " range," // 4
+                        + " dptimestamp,"   // 5
+                        + " metadata, "  // 6
+                        + " newdptimestamp,"   // 7
+                        + " filename,"   // 8
+                        + " newfilename";   // 9
+
+                    strCommand = $"INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp, newdptimestamp) "
+                        + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp) \n"
+                        + "ON CONFLICT (id) DO NOTHING RETURNING " + strColumnList;
+
+                    {
+                        if (sourceBuffer == null)
+                            sourceBuffer = new byte[] { 0x0 };
+
+                        row_info = new RecordRowInfo();
+                        row_info.data_textptr = null;
+                        row_info.data_length = sourceBuffer.Length;
+                        row_info.newdata_textptr = null;
+                        row_info.newdata_length = 0;
+                        // row_info.Range = "0-" + Convert.ToString(sourceBuffer.Length - 1);
+                        row_info.Range = "";
+                        row_info.TimestampString = "";    // this.CreateTimestampForDb();
+                        row_info.NewTimestampString = "";
+                        row_info.Metadata = "<file size='0'/>";
+                        row_info.FileName = "";
+                        row_info.NewFileName = "";
+                    }
+
+                    var results = connection.Query(strCommand, new
+                    {
+                        id = strID,
+                        data = sourceBuffer,
+                        range = row_info.Range,
+                        metadata = row_info.Metadata,
+                        dptimestamp = row_info.TimestampString,
+                        newdptimestamp = row_info.NewTimestampString,
+                    });
+
+                    foreach (var result in results)
+                    {
+                        row_info.data_textptr = result.data_textptr;
+                        row_info.data_length = GetLong(result.data_length);
+                        row_info.newdata_textptr = result.newdata_textptr;
+                        row_info.newdata_length = GetLong(result.newdata_length);
+                        row_info.Range = result.range;
+                        row_info.TimestampString = result.dptimestamp;
+                        row_info.Metadata = result.metadata;
+                        row_info.NewTimestampString = result.newdptimestamp;
+                        row_info.FileName = result.filename;
+                        row_info.NewFileName = result.newfilename;
+                        break;
+                    }
+
+#if OLD_CODE
+                    using (var command = connection.NewCommand(strCommand) as SqlCommand)
+                    {
+                        SqlParameter idParam =
+                command.Parameters.Add("@id",
+                SqlDbType.NVarChar);
+                        idParam.Value = strID;
+
+                        SqlParameter dataParam =
+                            command.Parameters.Add("@data",
+                            SqlDbType.Binary,
+                            sourceBuffer.Length);
+                        dataParam.Value = sourceBuffer;
+
+                        SqlParameter rangeParam =
+                            command.Parameters.Add("@range",
+                            SqlDbType.NVarChar);
+                        rangeParam.Value = row_info.Range;
+
+                        SqlParameter metadataParam =
+                            command.Parameters.Add("@metadata",
+                            SqlDbType.NVarChar);
+                        metadataParam.Value = row_info.Metadata;
+
+                        SqlParameter dptimestampParam =
+                            command.Parameters.Add("@dptimestamp",
+                            SqlDbType.NVarChar,
+                            100);
+                        dptimestampParam.Value = row_info.TimestampString;
+
+                        SqlParameter newdptimestampParam =
+                command.Parameters.Add("@newdptimestamp",
+                SqlDbType.NVarChar,
+                100);
+                        newdptimestampParam.Value = row_info.NewTimestampString;
+
+                        try
+                        {
+                            using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.Default))
+                            {
+                                // 1.记录不存在报错
+                                if (dr == null
+                                    || dr.HasRows == false)
+                                {
+                                    //strError = "记录 '" + strID + "' 在库中不存在或者创建失败，有可能是 SQL 库 "+this.m_strSqlDbName+" 空间已满";
+                                    //return -1;
+                                    dr.NextResult();    // 这一句可以触发异常
+
+                                    return 1;   // 已经创建新记录
+                                }
+
+                                dr.Read();
+
+                                row_info = new RecordRowInfo();
+
+                                /*
+                                // 2.textPtr为null报错
+                                if (dr[0] is System.DBNull)
+                                {
+                                    strError = "TextPtr不可能为null";
+                                    return -1;
+                                }
+                                 * */
+
+                                if (dr.IsDBNull(0) == false)
+                                    row_info.data_textptr = (byte[])dr[0];
+
+                                if (dr.IsDBNull(1) == false)
+                                    row_info.data_length = dr.GetInt32(1);
+
+                                if (dr.IsDBNull(2) == false)
+                                    row_info.newdata_textptr = (byte[])dr[2];
+
+                                if (dr.IsDBNull(3) == false)
+                                    row_info.newdata_length = dr.GetInt32(3);
+
+                                if (dr.IsDBNull(4) == false)
+                                    row_info.Range = dr.GetString(4);
+
+                                if (dr.IsDBNull(5) == false)
+                                    row_info.TimestampString = dr.GetString(5);
+
+                                if (dr.IsDBNull(6) == false)
+                                    row_info.Metadata = dr.GetString(6);
+
+                                if (dr.IsDBNull(7) == false)
+                                    row_info.NewTimestampString = dr.GetString(7);
+
+                                if (dr.IsDBNull(8) == false)
+                                    row_info.FileName = dr.GetString(8);
+
+                                if (dr.IsDBNull(9) == false)
+                                    row_info.NewFileName = dr.GetString(9);
+
+                                bool bRet = dr.Read();
+
+                                if (bRet == true)
+                                {
+                                    // 还有一行
+                                    strError = "记录 '" + strID + "' 在 SQL 库" + this.m_strSqlDbName + " 的 records 表中存在多条，这是一种不正常的状态, 请系统管理员利用 SQL 命令删除多余的记录。";
+                                    return -1;
+                                }
+                            }
+                        }
+                        catch (SqlException ex)
+                        {
+                            strError = "插入数据行时出错，记录路径'" + this.GetCaption("zh-CN") + "/" + strID + "，原因：" + ex.Message;
+
+                            // 检查 SQL 错误码
+                            if (ContainsErrorCode(ex, 1105))
+                            {
+                                // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
+                                this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                            }
+                            return -1;
+                        }
+                    } // end of using command
+#endif
+                    return 0;
+                }
                 // 其它类型的数据库
                 else
                 {
@@ -21429,7 +21828,6 @@ out strError);
             }
         }
 
-
         string db_prefix
         {
             get
@@ -21615,6 +22013,21 @@ out strError);
 
             return parameter;
         }
+
+
+        static long GetLong(object value)
+        {
+            if (value == null)
+                return 0;
+            return (long)Convert.ToInt64(value);
+        }
+
+        static string GetString(string value)
+        {
+            if (value == null)
+                return "";
+            return value;
+        }
     }
 
     public class SQLiteInfo
@@ -21636,3 +22049,11 @@ out strError);
 // https://www.npgsql.org/doc/large-objects
 // https://github.com/npgsql/npgsql/blob/main/test/Npgsql.Tests/LargeObjectTests.cs
 // https://blog.csdn.net/wangkuang5/article/details/51725564
+// https://stackoverflow.com/questions/60201258/get-size-for-bytea-column-in-postgresql
+// https://stackoverflow.com/questions/27740179/how-can-i-find-out-that-bytea-column-in-postgresql-contains-any-data
+// https://www.postgresql.org/message-id/00050317284209.00670%40comptechnews
+// https://stackoverflow.com/questions/67116850/on-delete-postgres-trigger-with-fkey
+// https://www.postgresql.org/docs/9.2/lo.html
+// https://dba.stackexchange.com/questions/143150/postgres-selecting-bytea-data-partially-with-offset-and-length
+// https://stackoverflow.com/questions/22863467/how-to-use-overlay-in-different-manner-in-postgresql
+// https://www.cybertec-postgresql.com/en/binary-data-performance-in-postgresql/
