@@ -107,7 +107,8 @@ namespace DigitalPlatform.rms
 #endif
                 if ((style & ConnectionStyle.Global) == ConnectionStyle.Global)
                 {
-                    this._bGlobal = true;
+                    // 2022/2/19 暂时屏蔽全局 Connection 功能
+                    // this._bGlobal = true;
                 }
                 this._connection = new SQLiteConnection(strConnectionString);
             }
@@ -250,6 +251,7 @@ namespace DigitalPlatform.rms
                     if (this._lock == null)
                         _lock = new ReaderWriterLockSlim();
 
+                    // ?? 会多次重复锁定么？如何防止？
                     if (this._lock != null && this._lock.TryEnterWriteLock(this._nLockTimeout) == false)
                         throw new ApplicationException("为Database全局Connection (Open) 加写锁时失败。Timeout=" + this._nLockTimeout.ToString());
 
@@ -409,12 +411,14 @@ namespace DigitalPlatform.rms
                 // 只有强制关闭，全局的Connection才能真正关闭
                 if (this._bGlobal == true)
                 {
+                    /*
                     // 强制提交
                     if (bLock == true)
                     {
                         if (this._lock != null && this._lock.TryEnterWriteLock(this._nLockTimeout) == false)
                             throw new ApplicationException("为Database全局Connection (Commit) 加写锁时失败。Timeout=" + this._nLockTimeout.ToString());
                     }
+                    */
 
                     try
                     {
@@ -437,11 +441,13 @@ namespace DigitalPlatform.rms
                     }
                     finally
                     {
+                        /*
                         if (bLock == true)
                         {
                             if (this._lock != null)
                                 this._lock.ExitWriteLock();
                         }
+                        */
                     }
                     return;
                 }
@@ -548,7 +554,7 @@ namespace DigitalPlatform.rms
                 throw new Exception($"无法识别的数据库类型 '{this.SqlServerType}'");
         }
 
-#region 实现 IDbConnection 接口
+        #region 实现 IDbConnection 接口
 
         public IDbTransaction BeginTransaction()
         {
@@ -562,7 +568,12 @@ namespace DigitalPlatform.rms
 
         public void Close()
         {
-            _connection.Close();
+            if (this._bGlobal == false)
+                _connection.Close();
+            else
+            {
+                // 输出调试信息：全局 Connection 不会关闭
+            }
         }
 
         public void ChangeDatabase(string databaseName)
@@ -589,7 +600,7 @@ namespace DigitalPlatform.rms
         public ConnectionState State => _connection.State;
 
 
-#endregion
+        #endregion
     }
 
 }

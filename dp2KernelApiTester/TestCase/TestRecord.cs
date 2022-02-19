@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
 namespace dp2KernelApiTester
@@ -21,6 +24,30 @@ namespace dp2KernelApiTester
         {
             {
                 var result = PrepareEnvironment();
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var create_result = FragmentCreateRecords(1);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var create_result = QuickCreateRecords(100);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
                 if (result.Value == -1)
                     return result;
             }
@@ -598,7 +625,7 @@ out string strError);
                     return new NormalResult
                     {
                         Value = -1,
-                        ErrorInfo = strError
+                        ErrorInfo = $"DoDeleteRes() error: {strError}"
                     };
 
                 // 检查对象是否被删除
@@ -752,5 +779,445 @@ out string strError);
 
             return new NormalResult();
         }
+
+        // 用 BulkCopy 方式灌入大量记录
+        public static CreateResult QuickCreateRecords(int count)
+        {
+            var channel = DataModel.GetChannel();
+
+            List<string> created_paths = new List<string>();
+            List<AccessPoint> created_accesspoints = new List<AccessPoint>();
+
+            List<string> target_dburls = new List<string>();
+
+            List<RecordBody> inputs = new List<RecordBody>();
+            for (int i = 0; i < count; i++)
+            {
+                string path = $"{strDatabaseName}/?";
+                string strDbUrl = DataModel.dp2kernelServerUrl + "?" + strDatabaseName;
+                // 记载每个数据库的 URL
+                if (target_dburls.IndexOf(strDbUrl) == -1)
+                {
+                    // 每个数据库要进行一次快速模式的准备操作
+                    int nRet = ManageKeysIndex(
+                        channel,
+                        strDbUrl,
+                            "beginfastappend",
+                            "正在对数据库 " + strDbUrl + " 进行快速导入模式的准备工作 ...",
+                            out string error);
+                    if (nRet == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = error
+                        };
+                    target_dburls.Add(strDbUrl);
+                }
+
+                string current_barcode = (i + 1).ToString().PadLeft(10, '0');
+                string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
+<barcode>{barcode}</barcode>
+<dprms:file id='1' />
+<dprms:file id='2' />
+<dprms:file id='3' />
+<dprms:file id='4' />
+<dprms:file id='5' />
+<dprms:file id='6' />
+<dprms:file id='7' />
+<dprms:file id='8' />
+<dprms:file id='9' />
+<dprms:file id='10' />
+</root>".Replace("{barcode}", current_barcode);
+                // var bytes = Encoding.UTF8.GetBytes(xml);
+
+                inputs.Add(new RecordBody
+                {
+                    Path = path,
+                    Xml = xml,
+                    Timestamp = null,
+                });
+            }
+
+            DataModel.SetMessage($"正在一次性创建 {inputs.Count} 条记录");
+
+            var ret = channel.DoWriteRecords(null,
+    inputs.ToArray(), // strMetadata,
+    "fastmode",
+    out RecordBody[] outputs,
+    out string strError);
+            if (ret == -1)
+                return new CreateResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    CreatedPaths = created_paths,
+                    AccessPoints = created_accesspoints,
+                };
+
+            foreach (var output in outputs)
+            {
+                created_paths.Add(output.Path);
+                string output_xml = output.Xml;
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(output_xml);
+                string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                created_accesspoints.Add(new AccessPoint
+                {
+                    Key = barcode,
+                    From = "册条码号",
+                    Path = output.Path,
+                });
+
+                // DataModel.SetMessage($"创建记录 {output.Path} 成功");
+
+                /*
+                // 上载对象
+                for (int j = 0; j < 10; j++)
+                {
+                    byte[] bytes = new byte[4096];
+                    ret = channel.WriteRes($"{output.Path}/object/{j + 1}",
+                        $"0-{bytes.Length - 1}",
+                        bytes.Length,
+                        bytes,
+                        "",
+                        "content,data",
+                        null,
+                        out string output_object_path,
+                        out byte[] output_object_timestamp,
+                        out strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            CreatedPaths = created_paths,
+                            AccessPoints = created_accesspoints,
+                        };
+                }
+            */
+            }
+
+            DataModel.SetMessage($"创建记录 {StringUtil.MakePathList(created_paths)} 成功");
+
+
+            EndFastAppend(channel, target_dburls);
+
+            // 检查检索点是否被成功创建
+            foreach (var accesspoint in created_accesspoints)
+            {
+                string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+                ret = channel.DoSearch(strQueryXml, "default", out strError);
+                if (ret == -1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"DoSearch() 出错: {strError}"
+                    };
+                if (ret != 1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
+                    };
+            }
+
+            return new CreateResult
+            {
+                CreatedPaths = created_paths,
+                AccessPoints = created_accesspoints,
+            };
+        }
+
+        /*
+        static string GetDbUrl(string strLongPath)
+        {
+            ResPath respath = new ResPath(strLongPath);
+            respath.MakeDbName();
+            return respath.FullPath;
+        }
+        */
+
+        static void EndFastAppend(RmsChannel channel,
+        List<string> target_dburls)
+        {
+            int nRet = 0;
+            foreach (string url in target_dburls)
+            {
+                DataModel.SetMessage("正在对数据库 " + url + " 进行快速导入模式的最后收尾工作，请耐心等待 ...");
+                try
+                {
+                    nRet = ManageKeysIndex(
+                        channel,
+                        url,
+                        "start_endfastappend",
+                        "正在对数据库 " + url + " 启动快速导入模式的收尾工作，请耐心等待 ...",
+        out string strQuickModeError);
+                    //if (nRet == -1)
+                    //    MessageBoxShow(strQuickModeError);
+                    if (nRet == -1)
+                        throw new Exception(strQuickModeError);
+                    if (nRet == 1)
+                    {
+                        while (true)
+                        {
+                            //                  detect_endfastappend 探寻任务的状态。返回 0 表示任务尚未结束; 1 表示任务已经结束
+                            nRet = ManageKeysIndex(
+                                channel,
+        url,
+        "detect_endfastappend",
+        "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
+        out strQuickModeError);
+                            if (nRet == -1)
+                                throw new Exception(strQuickModeError);
+                            if (nRet == 1)
+                                break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //LibraryChannelManager.Log?.Debug($"对数据库{url}进行快速导入模式的最后收尾工作阶段出现异常: {ExceptionUtil.GetExceptionText(ex)}\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}");
+                    // throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
+                    throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}。\r\n异常信息{ExceptionUtil.GetExceptionText(ex)}", ex);
+                }
+            }
+        }
+
+        static int ManageKeysIndex(
+            RmsChannel channel,
+        string strDbUrl,
+        string strAction,
+        string strMessage,
+        out string strError)
+        {
+            strError = "";
+
+            Debug.Assert(strDbUrl != null);
+            ResPath respath = new ResPath(strDbUrl);
+
+            TimeSpan old_timeout = channel.Timeout;
+            if (strAction == "endfastappend")
+            {
+                // 收尾阶段可能要耗费很长的时间
+                channel.Timeout = new TimeSpan(3, 0, 0);
+            }
+
+            try
+            {
+                // TODO: 改造为新的查询任务是否完成的用法
+                long lRet = channel.DoRefreshDB(
+                    strAction,
+                    respath.Path,
+                    false,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "管理数据库 '" + respath.Path + "' 时出错: " + strError;
+                    goto ERROR1;
+                }
+
+                // 2019/5/13
+                return (int)lRet;
+            }
+            finally
+            {
+                if (strAction == "endfastappend")
+                {
+                    channel.Timeout = old_timeout;
+                }
+            }
+        ERROR1:
+            return -1;
+        }
+
+        // 用片段方式创建记录
+        public static CreateResult FragmentCreateRecords(int count,
+            int fragment_length = 1)
+        {
+            var channel = DataModel.GetChannel();
+
+            if (fragment_length < 1)
+                throw new ArgumentException("fragment_length 必须大于等于 1");
+
+            List<string> created_paths = new List<string>();
+            List<AccessPoint> created_accesspoints = new List<AccessPoint>();
+
+            for (int i = 0; i < count; i++)
+            {
+                string path = $"{strDatabaseName}/?";
+                string current_barcode = (i + 1).ToString().PadLeft(10, '0');
+                string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
+<barcode>{barcode}</barcode>
+<dprms:file id='1' />
+<dprms:file id='2' />
+<dprms:file id='3' />
+<dprms:file id='4' />
+<dprms:file id='5' />
+<dprms:file id='6' />
+<dprms:file id='7' />
+<dprms:file id='8' />
+<dprms:file id='9' />
+<dprms:file id='10' />
+</root>".Replace("{barcode}", current_barcode);
+
+                {
+                    // 增大记录尺寸
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(xml);
+
+                    StringBuilder text = new StringBuilder();
+                    for (int k = 0; k < 1024; k++)
+                    {
+                        text.Append(k.ToString());
+                    }
+                    DomUtil.SetElementText(dom.DocumentElement, "comment", text.ToString());
+
+                    xml = dom.DocumentElement.OuterXml;
+                }
+
+                byte[] bytes = Encoding.UTF8.GetBytes(xml);
+
+                string current_path = path;
+                byte[] timestamp = null;
+                long start = 0;
+                long end = 0;
+
+                DataModel.SetMessage($"正在用 Fragment 方式创建记录，请耐心等待 ...");
+
+                while (true)
+                {
+                    int chunk_length = fragment_length;
+
+                    end = start + chunk_length - 1;
+
+                    if (end > bytes.Length - 1)
+                        end = chunk_length - 1;
+
+                    Debug.Assert(end >= start);
+
+                    byte[] fragment = new byte[end - start + 1];
+                    Array.Copy(bytes, start, fragment, 0, fragment.Length);
+
+                    var ret = channel.WriteRes(current_path,
+                        $"{start}-{end}",
+                        bytes.Length,
+                        fragment,
+                        "", // strMetadata
+                        "", // strStyle,
+                        timestamp,
+                        out string output_path,
+                        out byte[] output_timestamp,
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            CreatedPaths = created_paths,
+                            AccessPoints = created_accesspoints,
+                        };
+
+                    timestamp = output_timestamp;
+                    current_path = output_path;
+
+                    start += chunk_length;
+                    if (start > bytes.Length - 1)
+                        break;
+                }
+
+                // TODO: 读出记录检查内容是否和发出的一致
+                {
+                    var ret = channel.GetRes(current_path,
+                        out string strResult,
+                        out string _,
+                        out byte[] _,
+                        out string _,
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            CreatedPaths = created_paths,
+                            AccessPoints = created_accesspoints,
+                        };
+
+                    if (xml != strResult)
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"读出记录 {current_path} 内容和创建时的不一致",
+                                CreatedPaths = created_paths,
+                                AccessPoints = created_accesspoints,
+                            };
+                }
+
+                created_paths.Add(current_path);
+                created_accesspoints.Add(new AccessPoint
+                {
+                    Key = current_barcode,
+                    From = "册条码号",
+                    Path = current_path,
+                });
+
+#if NO
+                // 上载对象
+                for (int j = 0; j < 10; j++)
+                {
+                    byte[] bytes = new byte[4096];
+                    ret = channel.WriteRes($"{output_path}/object/{j + 1}",
+                        $"0-{bytes.Length - 1}",
+                        bytes.Length,
+                        bytes,
+                        "",
+                        "content,data",
+                        null,
+                        out string output_object_path,
+                        out byte[] output_object_timestamp,
+                        out strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            CreatedPaths = created_paths,
+                            AccessPoints = created_accesspoints,
+                        };
+                }
+
+#endif
+
+                // 检查检索点是否被成功创建
+                foreach (var accesspoint in created_accesspoints)
+                {
+                    string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+                    var ret = channel.DoSearch(strQueryXml, "default", out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    if (ret != 1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
+                        };
+                }
+
+                DataModel.SetMessage($"Fragment 方式创建记录 {current_path} 成功");
+            }
+
+            return new CreateResult
+            {
+                CreatedPaths = created_paths,
+                AccessPoints = created_accesspoints,
+            };
+        }
+
     }
 }

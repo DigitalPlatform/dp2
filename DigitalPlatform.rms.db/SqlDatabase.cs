@@ -329,7 +329,7 @@ namespace DigitalPlatform.rms
                     if (this.SQLiteInfo != null
                         && this.SQLiteInfo.m_connection != null)
                     {
-                        this.SQLiteInfo.m_connection.Close(false);
+                        this.SQLiteInfo.m_connection.Close(false);  // 强制关闭
                         this.SQLiteInfo.m_connection = null;
                     }
                 }
@@ -347,8 +347,8 @@ namespace DigitalPlatform.rms
         // 异常：可能会抛出异常
         internal override void Commit()
         {
-            try
-            {
+            //try
+            //{
                 // 评估时间
                 DateTime start_time = DateTime.Now;
 
@@ -364,11 +364,16 @@ namespace DigitalPlatform.rms
                 {
                     this.SQLiteInfo.m_connection._nThreshold = 100;
                 }
+                /*
             }
             catch (Exception ex)
             {
                 string strError = ExceptionUtil.GetAutoText(ex);
+
+                // 2022/2/19
+                throw new Exception(strError, ex);
             }
+                */
         }
 
         void CommitInternal(bool bLock = true)
@@ -376,6 +381,12 @@ namespace DigitalPlatform.rms
             if (this.SQLiteInfo == null
                 || this.SQLiteInfo.m_connection == null)
                 return;
+
+            /*
+            // 2022/2/19
+            if (SQLiteInfo.m_connection.State == ConnectionState.Closed)
+                return;
+            */
 
             if (bLock == true)
                 this.m_db_lock.AcquireWriterLock(m_nTimeOut);
@@ -388,7 +399,7 @@ namespace DigitalPlatform.rms
                         if (this.SQLiteInfo != null
                             && this.SQLiteInfo.m_connection != null)
                         {
-                            this.SQLiteInfo.m_connection.Commit(bLock);
+                            this.SQLiteInfo.m_connection.Commit(bLock);    // 2022/2/19 !
 
                             /*
                             this.SQLiteInfo.m_connection.Close(false);
@@ -11846,10 +11857,11 @@ trans);
         {
             strError = "";
 
-            if (this.container.SqlServerType != SqlServerType.MsSqlServer
-                && this.container.SqlServerType != SqlServerType.Oracle
-                && this.container.SqlServerType != SqlServerType.MySql
-                && this.container.SqlServerType != SqlServerType.SQLite)
+            if (this.IsMsSqlServer() == false
+                && this.IsOracle() == false
+                && this.IsMySQL() == false
+                && this.IsSqlite() == false
+                && this.IsPgsql() == false)
             {
                 strError = "BulkCopy() 不支持 " + this.SqlServerType.ToString() + " 类型的数据库";
                 return -1;
@@ -12023,6 +12035,37 @@ trans);
                     }
                     #endregion // SQLite
 
+                    #region Pgsql
+                    if (this.IsPgsql())
+                    {
+                        Stopwatch watch = new Stopwatch();
+                        watch.Start();
+                        foreach (DelayTable table in tables)
+                        {
+                            var bulkCopy = new PgsqlBulkCopy(connection.NpgsqlConnection);
+                            bulkCopy.BatchSize = 5000;  // default is zero , whole in one batch
+                            bulkCopy.BulkCopyTimeout = 20 * 60; // default is 30 seconds
+                            bulkCopy.DestinationTableName = db_prefix + table.TableName;   // this.m_strSqlDbName + ".." + table.TableName;
+                            int nRet = table.OpenForRead(table.FileName, out strError);
+                            if (nRet == -1)
+                                return -1;
+                            table.LockForRead();    // 这里读锁定整个对象。在 Read() 函数那里就不需要锁定了
+                            try
+                            {
+                                bulkCopy.WriteToServer(table);
+                            }
+                            finally
+                            {
+                                table.UnlockForRead();
+                            }
+                            table.Free();
+                            this.container.DelayTables.Remove(table);
+                        }
+                        watch.Stop();
+                        this.container.KernelApplication.WriteErrorLog("Oracle BulkCopy 耗时 " + watch.Elapsed.ToString());
+                    }
+                    #endregion // Pgsql
+
                 }
                 catch (SqlException sqlEx)
                 {
@@ -12031,7 +12074,11 @@ trans);
                 }
                 catch (Exception ex)
                 {
+#if DEBUG
+                    strError = $"4 BulkCopy() 在给'{ this.GetCaption("zh-CN") }'库写入记录时出错,原因:\r\n{ExceptionUtil.GetDebugText(ex)}";
+#else
                     strError = "4 BulkCopy() 在给'" + this.GetCaption("zh-CN") + "'库写入记录时出错,原因:" + ex.Message;
+#endif
                     return -1;
                 }
                 finally
@@ -15382,12 +15429,21 @@ trans);
             if (nRet == -1)
                 return -1;
 
+            // 2022/2/19
+            // TODO: 当 lStartOfTarget 为 0 时，需要截断 bytea 字段中多余的原有内容。
+            // 可以用直接写入的方式实现(也就是说不用 overlay() )
+            // 测试建议: 先写入较大的 bytes[] 的记录内容。然后再写入一个较小 byte[] 的记录，读出检查数据长度是否是正确的长度
+
 #if DEBUG
             // 获得当前 data 字段内容的长度
             long current_length = GetPgsqlDataLength(connection,
     strImageFieldName,
     strID);
-
+            if (current_length != lCurrentLength)
+            {
+                strError = "内部错误: current_length != lCurrentLength";
+                return -1;
+            }
             Debug.Assert(current_length == lCurrentLength);
 #endif
 
@@ -15419,6 +15475,11 @@ trans);
                 current_length = GetPgsqlDataLength(connection,
 strImageFieldName,
 strID);
+                if (current_length != lStartOfTarget)
+                {
+                    strError = "内部错误: current_length != lStartOfTarget";
+                    return -1;
+                }
                 Debug.Assert(current_length == lStartOfTarget);
 #endif
 
@@ -15431,6 +15492,9 @@ strID);
                 Array.Copy(baSource, nStartOfSource, target, 0, target.Length);
 
                 string strCommand = $"UPDATE {db_prefix}records set {strImageFieldName} = overlay({strImageFieldName} placing @data from {lStartOfTarget + 1}) where id = @id";
+                if (lStartOfTarget == 0)
+                    strCommand = $"UPDATE {db_prefix}records set {strImageFieldName} = @data where id = @id";
+
                 int count = connection.Execute(strCommand,
     new
     {
@@ -15439,6 +15503,17 @@ strID);
     });
                 lCurrentLength += target.Length;
             }
+
+#if DEBUG
+            current_length = GetPgsqlDataLength(connection,
+strImageFieldName,
+strID);
+            if (current_length != lStartOfTarget + nNeedReadLength)
+            {
+                strError = "内部错误: current_length != lStartOfTarget + nNeedReadLength";
+                return -1;
+            }
+#endif
 
             return 0;
         }
@@ -15645,7 +15720,6 @@ strID);
                 using (SqlCommand command = new SqlCommand(strCommand,
                     connection.SqlConnection))
                 {
-
                     // 给参数赋值
                     SqlParameter dest_text_ptrParam =
                         command.Parameters.Add("@dest_text_ptr",
@@ -15667,7 +15741,7 @@ strID);
 
                     long insert_offset = lStartOfTarget; // 插入image字段的位置
                     int nReadStartOfBuffer = nStartOfSource;         // 从源缓冲区中的读的起始位置
-                    Byte[] chuckBuffer = null; // 块缓冲区
+                    Byte[] chunkBuffer = null; // 块缓冲区
                     int nCount = 0;             // 影响的记录条数
 
                     dest_text_ptrParam.Value = textPtr;
@@ -15685,7 +15759,7 @@ strID);
                             nContinueLength = chucksize;
 
                         inserted_dataParam.Size = nContinueLength;
-                        chuckBuffer = new byte[nContinueLength];
+                        chunkBuffer = new byte[nContinueLength];
 
                         /*
                         if (baSource != null)
@@ -15694,7 +15768,7 @@ strID);
                             // 拷到源数组的一段到每次用于写的chuckbuffer
                             Array.Copy(baSource,
                                 nReadStartOfBuffer,
-                                chuckBuffer,
+                                chunkBuffer,
                                 0,
                                 nContinueLength);
                         }
@@ -15707,7 +15781,7 @@ strID);
                         }
                          * */
 
-                        if (chuckBuffer.Length <= 0)
+                        if (chunkBuffer.Length <= 0)
                             break;
 
                         insert_offsetParam.Value = insert_offset;
@@ -15739,7 +15813,7 @@ strID);
 
                         // null表示从插入点到末尾的原来的内容全部删除 2013/2/15
                         delete_lengthParam.Value = DBNull.Value;   // lDeleteLength;
-                        inserted_dataParam.Value = chuckBuffer;
+                        inserted_dataParam.Value = chunkBuffer;
 
                         nCount = command.ExecuteNonQuery();
                         if (nCount == 0)
@@ -15750,15 +15824,15 @@ strID);
 
                         // 写入后,当前长度发生的变化
                         // lCurrentLength = lCurrentLength + chuckBuffer.Length - lDeleteLength;
-                        lCurrentLength = insert_offset + chuckBuffer.Length;    // 2012/2/15
+                        lCurrentLength = insert_offset + chunkBuffer.Length;    // 2012/2/15
 
                         // 缓冲区的位置变化
-                        nReadStartOfBuffer += chuckBuffer.Length;
+                        nReadStartOfBuffer += chunkBuffer.Length;
 
                         // 目标的位置变化
-                        insert_offset += chuckBuffer.Length;   //恢复时要恢复到原来的位置
+                        insert_offset += chunkBuffer.Length;   //恢复时要恢复到原来的位置
 
-                        if (chuckBuffer.Length < chucksize)
+                        if (chunkBuffer.Length < chucksize)
                             break;
                     }
                 }
@@ -16169,7 +16243,7 @@ strID);
 
 #if OLD_CODE
 
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 using (SqlCommand command = new SqlCommand("",
@@ -16383,9 +16457,9 @@ strID);
 
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 using (SQLiteCommand command = new SQLiteCommand("",
@@ -16542,9 +16616,9 @@ strID);
                     }
                 } // end of using command
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 List<string> lines = new List<string>();
@@ -16673,9 +16747,9 @@ strID);
 
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
@@ -16839,7 +16913,7 @@ strID);
                     }
                 } // end of using command
             }
-            #endregion // Oracle
+#endregion // Oracle
 
 #endif
             return 0;
@@ -17197,7 +17271,7 @@ strID);
 
 #if OLD_CODE
 
-        #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -17325,9 +17399,9 @@ strID);
                     }
                 } // enf of using command
             }
-        #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-        #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 string strCommand = "";
@@ -17455,9 +17529,9 @@ strID);
                     }
                 } // end of using command
             }
-        #endregion // SQLite
+#endregion // SQLite
 
-        #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 string strCommand = "";
@@ -17589,12 +17663,12 @@ strID);
                     }
                 } // end of using command
             }
-        #endregion // MySql
+#endregion // MySql
 
 #endif
 
 #if REMOVED
-        #region Oracle
+#region Oracle
             else if (connection.IsOracle())
             {
                 string strCommand = "";
@@ -17703,7 +17777,7 @@ strID);
                     }
                 } // end of using command
             }
-        #endregion // Oracle
+#endregion // Oracle
 #endif
 
 
@@ -17762,7 +17836,7 @@ strID);
                 strError = "connection为null";
                 return -1;
             }
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 if (connection.SqlConnection == null)
@@ -17777,9 +17851,9 @@ strID);
                 }
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 if (connection.SQLiteConnection == null)
@@ -17794,9 +17868,9 @@ strID);
                 }
                 return 0;
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 if (connection.MySqlConnection == null)
@@ -17811,9 +17885,9 @@ strID);
                 }
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 if (connection.OracleConnection == null)
@@ -17829,7 +17903,7 @@ strID);
                 }
                 return 0;
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -18729,7 +18803,7 @@ strID);
 
                     strCommand = $"INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp, newdptimestamp) "
                         + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp) \n"
-                        + "ON CONFLICT (id) DO NOTHING RETURNING " + strColumnList;
+                        + "ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id RETURNING " + strColumnList;
 
                     {
                         if (sourceBuffer == null)
@@ -18759,6 +18833,7 @@ strID);
                         newdptimestamp = row_info.NewTimestampString,
                     });
 
+                    // RETURNING  null as data_textptr, length(data) as data_length, null as newdata_textptr, length(newdata) as newdata_length, range, dptimestamp, metadata,  newdptimestamp, filename, newfilename
                     foreach (var result in results)
                     {
                         row_info.data_textptr = result.data_textptr;
@@ -19409,7 +19484,10 @@ strID);
             if (ret == -1)
                 return -1;
             if (ret == 0 || row_infos == null || row_infos.Count == 0)
+            {
+                strError = $"记录 {strID} 不存在";
                 return 0;
+            }
             row_info = row_infos[0];
             return 1;
         }
@@ -22015,14 +22093,14 @@ out strError);
         }
 
 
-        static long GetLong(object value)
+        public static long GetLong(object value)
         {
             if (value == null)
                 return 0;
             return (long)Convert.ToInt64(value);
         }
 
-        static string GetString(string value)
+        public static string GetString(string value)
         {
             if (value == null)
                 return "";
