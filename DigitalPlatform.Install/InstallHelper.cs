@@ -2088,6 +2088,13 @@ MessageBoxDefaultButton.Button1);
             {
                 XmlAttribute servername = dom.DocumentElement.SelectSingleNode("datasource/@servername") as XmlAttribute;
                 XmlAttribute servertype = dom.DocumentElement.SelectSingleNode("datasource/@servertype") as XmlAttribute;
+                XmlAttribute prefix = dom.DocumentElement.SelectSingleNode("dbs/@instancename") as XmlAttribute;
+
+                // PostgreSQL 比较特殊，instancename 表达了数据库名(实际上是一个实例的磁盘空间名称)
+                if (servertype?.Value == "PostgreSQL")
+                    return $"{servertype?.Value}|{servername?.Value}|{prefix?.Value}";
+
+                // TODO: Oracle 多个实例之间如何区分表空间?
 
                 return $"{servertype?.Value}|{servername?.Value}";
             }

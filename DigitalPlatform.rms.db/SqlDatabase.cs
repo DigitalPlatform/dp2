@@ -349,31 +349,31 @@ namespace DigitalPlatform.rms
         {
             //try
             //{
-                // 评估时间
-                DateTime start_time = DateTime.Now;
+            // 评估时间
+            DateTime start_time = DateTime.Now;
 
-                this.CommitInternal();
+            this.CommitInternal();
 
-                TimeSpan delta = DateTime.Now - start_time;
-                int nTicks = (int)(delta.TotalSeconds * 1000);
-                if (this.m_nTimeOut < nTicks * 2)
-                    this.m_nTimeOut = nTicks * 2;
+            TimeSpan delta = DateTime.Now - start_time;
+            int nTicks = (int)(delta.TotalSeconds * 1000);
+            if (this.m_nTimeOut < nTicks * 2)
+                this.m_nTimeOut = nTicks * 2;
 
-                if (nTicks > 5000 && this.SQLiteInfo != null
-                    && this.SQLiteInfo.m_connection != null)
-                {
-                    this.SQLiteInfo.m_connection._nThreshold = 100;
-                }
-                /*
-            }
-            catch (Exception ex)
+            if (nTicks > 5000 && this.SQLiteInfo != null
+                && this.SQLiteInfo.m_connection != null)
             {
-                string strError = ExceptionUtil.GetAutoText(ex);
-
-                // 2022/2/19
-                throw new Exception(strError, ex);
+                this.SQLiteInfo.m_connection._nThreshold = 100;
             }
-                */
+            /*
+        }
+        catch (Exception ex)
+        {
+            string strError = ExceptionUtil.GetAutoText(ex);
+
+            // 2022/2/19
+            throw new Exception(strError, ex);
+        }
+            */
         }
 
         void CommitInternal(bool bLock = true)
@@ -11436,31 +11436,33 @@ trans);
 
                 var results = connection.Query(strCommand);
                 int i = 0;
-                foreach (var result in results)
+                foreach (IDictionary<string, object> rawResult in results)
                 {
+                    var result = rawResult.ToCaseInsensitiveDictionary();
+
                     var row_info = new RecordRowInfo();
                     row_infos.Add(row_info);
 
                     if (has_data_fields)
                     {
-                        row_info.data_textptr = result.data_textptr;
-                        row_info.data_length = GetLong(result.data_length);
-                        row_info.newdata_textptr = result.newdata_textptr;
-                        row_info.newdata_length = GetLong(result.newdata_length);
+                        row_info.data_textptr = result["data_textptr"] as byte[];
+                        row_info.data_length = GetLong(result["data_length"]);
+                        row_info.newdata_textptr = result["newdata_textptr"] as byte[];
+                        row_info.newdata_length = GetLong(result["newdata_length"]);
 
                         if (bGetData)
                         {
-                            row_info.Data = result.data;
-                            row_info.NewData = result.newdata;
+                            row_info.Data = result["data"] as byte[];
+                            row_info.NewData = result["newdata"] as byte[];
                         }
                     }
 
-                    row_info.Range = GetString(result.range);
-                    row_info.TimestampString = result.dptimestamp;
-                    row_info.Metadata = result.metadata;
-                    row_info.NewTimestampString = result.newdptimestamp;
-                    row_info.FileName = result.filename;
-                    row_info.NewFileName = result.newfilename;
+                    row_info.Range = GetString(result["range"]);
+                    row_info.TimestampString = GetString(result["dptimestamp"]);
+                    row_info.Metadata = GetString(result["metadata"]);
+                    row_info.NewTimestampString = GetString(result["newdptimestamp"]);
+                    row_info.FileName = GetString(result["filename"]);
+                    row_info.NewFileName = GetString(result["newfilename"]);
 
                     if (bGetData)
                     {
@@ -15525,6 +15527,7 @@ strID);
         {
             string strCommand = $"select length({strImageFieldName}) as len from {db_prefix}records where id = @id";
             var results = connection.Query(strCommand, new { id = strID });
+            Debug.Assert(connection.IsOracle() == false, "注意此处无法处理大写的 dynamic 属性");
             foreach (var result in results)
             {
                 return GetLong(result.len);
@@ -16243,7 +16246,7 @@ strID);
 
 #if OLD_CODE
 
-#region MS SQL Server
+            #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 using (SqlCommand command = new SqlCommand("",
@@ -16457,9 +16460,9 @@ strID);
 
                 return 0;
             }
-#endregion // MS SQL Server
+            #endregion // MS SQL Server
 
-#region SQLite
+            #region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 using (SQLiteCommand command = new SQLiteCommand("",
@@ -16616,9 +16619,9 @@ strID);
                     }
                 } // end of using command
             }
-#endregion // SQLite
+            #endregion // SQLite
 
-#region MySql
+            #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 List<string> lines = new List<string>();
@@ -16747,9 +16750,9 @@ strID);
 
                 return 0;
             }
-#endregion // MySql
+            #endregion // MySql
 
-#region Oracle
+            #region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
@@ -16913,7 +16916,7 @@ strID);
                     }
                 } // end of using command
             }
-#endregion // Oracle
+            #endregion // Oracle
 
 #endif
             return 0;
@@ -17019,13 +17022,15 @@ strID);
                                 strCommand = strCommand.Replace("@", ":");
 
                             var results = connection.Query(strCommand, new { id = strObjectID });
-                            foreach (var result in results)
+                            foreach (IDictionary<string, object> rawResult in results)
                             {
-                                string filename = result.filename;
-                                string newfilename = result.newfilename;
-                                if (string.IsNullOrEmpty(filename))
+                                var result = rawResult.ToCaseInsensitiveDictionary();
+
+                                string filename = GetString(result["filename"]);
+                                string newfilename = GetString(result["newfilename"]);
+                                if (string.IsNullOrEmpty(filename) == false)
                                     filenames.Add(filename);
-                                if (string.IsNullOrEmpty(newfilename))
+                                if (string.IsNullOrEmpty(newfilename) == false)
                                     filenames.Add(newfilename);
                             }
 
@@ -17038,11 +17043,15 @@ strID);
 
                             try
                             {
-                                var count = connection.Execute(strCommand);
+                                var count = connection.Execute(strCommand, new { id = strObjectID });
                             }
                             catch (Exception ex)
                             {
+#if DEBUG
+                                strError = $"处理记录路径为 '{ this.GetCaption("zh") }/{ strID}' 的子文件时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{ strCommand }";
+#else
                                 strError = "处理记录路径为 '" + this.GetCaption("zh") + "/" + strID + "' 的子文件发生错误:" + ex.Message + ",sql命令:\r\n" + strCommand;
+#endif
                                 return -1;
                             }
                         }
@@ -17073,14 +17082,21 @@ strID);
                                 }
                                 else
                                 {
+#if DEBUG
+                                    strError = $"处理记录路径为 '{ this.GetCaption("zh") }/{ strID}' 的子记录时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{ strCommand }";
+#else
                                     strError = "处理记录路径为 '" + this.GetCaption("zh") + "/" + strID + "' 的子记录时发生错误:" + ex.Message + ", SQL命令:\r\n" + strCommand;
+#endif
                                     return -1;
                                 }
                             }
                             catch (Exception ex)
                             {
-
+#if DEBUG
+                                strError = $"处理记录路径为 '{ this.GetCaption("zh") }/{ strID}' 的子记录时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{ strCommand }";
+#else
                                 strError = "处理记录路径为 '" + this.GetCaption("zh") + "/" + strID + "' 的子记录时发生错误:" + ex.Message + ", SQL命令:\r\n" + strCommand;
+#endif
                                 return -1;
                             }
                         }
@@ -17271,7 +17287,7 @@ strID);
 
 #if OLD_CODE
 
-#region MS SQL Server
+        #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -17399,9 +17415,9 @@ strID);
                     }
                 } // enf of using command
             }
-#endregion // MS SQL Server
+        #endregion // MS SQL Server
 
-#region SQLite
+        #region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 string strCommand = "";
@@ -17529,9 +17545,9 @@ strID);
                     }
                 } // end of using command
             }
-#endregion // SQLite
+        #endregion // SQLite
 
-#region MySql
+        #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 string strCommand = "";
@@ -17663,12 +17679,12 @@ strID);
                     }
                 } // end of using command
             }
-#endregion // MySql
+        #endregion // MySql
 
 #endif
 
 #if REMOVED
-#region Oracle
+        #region Oracle
             else if (connection.IsOracle())
             {
                 string strCommand = "";
@@ -17777,7 +17793,7 @@ strID);
                     }
                 } // end of using command
             }
-#endregion // Oracle
+        #endregion // Oracle
 #endif
 
 
@@ -17836,7 +17852,7 @@ strID);
                 strError = "connection为null";
                 return -1;
             }
-#region MS SQL Server
+            #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 if (connection.SqlConnection == null)
@@ -17851,9 +17867,9 @@ strID);
                 }
                 return 0;
             }
-#endregion // MS SQL Server
+            #endregion // MS SQL Server
 
-#region SQLite
+            #region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 if (connection.SQLiteConnection == null)
@@ -17868,9 +17884,9 @@ strID);
                 }
                 return 0;
             }
-#endregion // SQLite
+            #endregion // SQLite
 
-#region MySql
+            #region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 if (connection.MySqlConnection == null)
@@ -17885,9 +17901,9 @@ strID);
                 }
                 return 0;
             }
-#endregion // MySql
+            #endregion // MySql
 
-#region Oracle
+            #region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 if (connection.OracleConnection == null)
@@ -17903,7 +17919,7 @@ strID);
                 }
                 return 0;
             }
-#endregion // Oracle
+            #endregion // Oracle
 
             return 0;
         }
@@ -18801,6 +18817,9 @@ strID);
                         + " filename,"   // 8
                         + " newfilename";   // 9
 
+                    // https://codegrepr.com/question/how-to-use-returning-with-on-conflict-in-postgresql/#:~:text=If%20the%20other%20transaction%20ends%20normally%20%28implicit%20or,concurrency%20issue%202%20below%2C%20since%20it%E2%80%99s%20not%20visible.%29
+                    // https://stackoverflow.com/questions/35265453/use-insert-on-conflict-do-nothing-returning-failed-rows
+                    // https://www.postgresql.org/message-id/CA%2Bzig0_3KA4HZqYG_Lk%3Dt8uwNLC8wt8eyXpzr6cYs4mEVPwoWg%40mail.gmail.com
                     strCommand = $"INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp, newdptimestamp) "
                         + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp) \n"
                         + "ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id RETURNING " + strColumnList;
@@ -18823,6 +18842,7 @@ strID);
                         row_info.NewFileName = "";
                     }
 
+                    Debug.Assert(connection.IsOracle() == false, "注意此处无法处理大写的 dynamic 属性");
                     var results = connection.Query(strCommand, new
                     {
                         id = strID,
@@ -21282,6 +21302,9 @@ m_nTimeOut);
             if (nRet == -1)
                 return -1;
 
+            // testing
+            // row_info = null;
+
             List<string> filenames = new List<string>();
 
             // 通用
@@ -21965,10 +21988,12 @@ out strError);
                         true,
                         m_nLongTimeout);
 
-                foreach (var result in results)
+                foreach (IDictionary<string, object> rawResult in results)
                 {
-                    string filename = result.filename;
-                    string newfilename = result.newfilename;
+                    var result = rawResult.ToCaseInsensitiveDictionary();
+
+                    string filename = GetString(result["filename"]);
+                    string newfilename = GetString(result["newfilename"]);
                     if (string.IsNullOrEmpty(filename) == false)
                         filenames.Add(filename);
                     if (string.IsNullOrEmpty(newfilename) == false)
@@ -22004,6 +22029,17 @@ out strError);
             int count = 0;
             foreach (var record_id in record_ids)
             {
+                /*
+                {
+                    var results = connection.Query($"SELECT * FROM {db_prefix}records WHERE id = :id", new { id = record_id });
+                    foreach (var result in results)
+                    {
+                        int i = 0;
+                        i++;
+                    }
+                }
+                */
+
                 if (include_subrecord)
                     count += connection.Execute(strCommand,
                         new { id1 = record_id + "_%", id2 = record_id },
@@ -22013,7 +22049,7 @@ out strError);
                     count += connection.Execute(strCommand,
                         new { id = record_id },
                         null,
-                        m_nLongTimeout);
+                        m_nTimeOut);
             }
 
             return count;
@@ -22100,11 +22136,11 @@ out strError);
             return (long)Convert.ToInt64(value);
         }
 
-        public static string GetString(string value)
+        public static string GetString(object value)
         {
             if (value == null)
                 return "";
-            return value;
+            return (string)value;
         }
     }
 
@@ -22135,3 +22171,4 @@ out strError);
 // https://dba.stackexchange.com/questions/143150/postgres-selecting-bytea-data-partially-with-offset-and-length
 // https://stackoverflow.com/questions/22863467/how-to-use-overlay-in-different-manner-in-postgresql
 // https://www.cybertec-postgresql.com/en/binary-data-performance-in-postgresql/
+// http://www.postgis.us/presentations/PGOpen2018_data_loading.pdf

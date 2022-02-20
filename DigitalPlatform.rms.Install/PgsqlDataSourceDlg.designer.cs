@@ -44,6 +44,10 @@ namespace DigitalPlatform.rms
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_loginName = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.textBox_adminDatabaseName = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.checkBox_enableModifyAdminDatabaseName = new System.Windows.Forms.CheckBox();
+            this.button_deleteDatabase = new System.Windows.Forms.Button();
             this.groupBox_login.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -63,7 +67,7 @@ namespace DigitalPlatform.rms
             this.textBox_sqlServerName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_sqlServerName.Location = new System.Drawing.Point(369, 324);
-            this.textBox_sqlServerName.Margin = new System.Windows.Forms.Padding(9, 9, 9, 9);
+            this.textBox_sqlServerName.Margin = new System.Windows.Forms.Padding(9);
             this.textBox_sqlServerName.Name = "textBox_sqlServerName";
             this.textBox_sqlServerName.Size = new System.Drawing.Size(892, 49);
             this.textBox_sqlServerName.TabIndex = 2;
@@ -73,7 +77,7 @@ namespace DigitalPlatform.rms
             // 
             this.button_getSqlServerName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_getSqlServerName.Location = new System.Drawing.Point(657, 402);
-            this.button_getSqlServerName.Margin = new System.Windows.Forms.Padding(9, 9, 9, 9);
+            this.button_getSqlServerName.Margin = new System.Windows.Forms.Padding(9);
             this.button_getSqlServerName.Name = "button_getSqlServerName";
             this.button_getSqlServerName.Size = new System.Drawing.Size(606, 69);
             this.button_getSqlServerName.TabIndex = 3;
@@ -86,8 +90,8 @@ namespace DigitalPlatform.rms
             // 
             this.textBox_instanceName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_instanceName.Location = new System.Drawing.Point(369, 966);
-            this.textBox_instanceName.Margin = new System.Windows.Forms.Padding(9, 9, 9, 9);
+            this.textBox_instanceName.Location = new System.Drawing.Point(380, 943);
+            this.textBox_instanceName.Margin = new System.Windows.Forms.Padding(9);
             this.textBox_instanceName.Name = "textBox_instanceName";
             this.textBox_instanceName.Size = new System.Drawing.Size(481, 49);
             this.textBox_instanceName.TabIndex = 6;
@@ -97,18 +101,18 @@ namespace DigitalPlatform.rms
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(30, 975);
+            this.label4.Location = new System.Drawing.Point(30, 952);
             this.label4.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(267, 36);
+            this.label4.Size = new System.Drawing.Size(231, 36);
             this.label4.TabIndex = 5;
-            this.label4.Text = "内核实例名(&I):";
+            this.label4.Text = "数据库名(&I):";
             // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Location = new System.Drawing.Point(1041, 966);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(9, 9, 9, 9);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(9);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(225, 69);
             this.button_OK.TabIndex = 7;
@@ -121,7 +125,7 @@ namespace DigitalPlatform.rms
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_Cancel.Location = new System.Drawing.Point(1041, 1053);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(9, 9, 9, 9);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(9);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(225, 69);
             this.button_Cancel.TabIndex = 8;
@@ -138,7 +142,7 @@ namespace DigitalPlatform.rms
             this.textBox_message.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_message.ForeColor = System.Drawing.SystemColors.InfoText;
             this.textBox_message.Location = new System.Drawing.Point(30, 30);
-            this.textBox_message.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox_message.Margin = new System.Windows.Forms.Padding(6);
             this.textBox_message.Multiline = true;
             this.textBox_message.Name = "textBox_message";
             this.textBox_message.ReadOnly = true;
@@ -157,9 +161,9 @@ namespace DigitalPlatform.rms
             this.groupBox_login.Controls.Add(this.textBox_loginName);
             this.groupBox_login.Controls.Add(this.label5);
             this.groupBox_login.Location = new System.Drawing.Point(36, 519);
-            this.groupBox_login.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.groupBox_login.Margin = new System.Windows.Forms.Padding(6);
             this.groupBox_login.Name = "groupBox_login";
-            this.groupBox_login.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.groupBox_login.Padding = new System.Windows.Forms.Padding(6);
             this.groupBox_login.Size = new System.Drawing.Size(1233, 387);
             this.groupBox_login.TabIndex = 4;
             this.groupBox_login.TabStop = false;
@@ -169,8 +173,8 @@ namespace DigitalPlatform.rms
             // 
             this.textBox_confirmLoginPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_confirmLoginPassword.Location = new System.Drawing.Point(333, 264);
-            this.textBox_confirmLoginPassword.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox_confirmLoginPassword.Location = new System.Drawing.Point(344, 267);
+            this.textBox_confirmLoginPassword.Margin = new System.Windows.Forms.Padding(6);
             this.textBox_confirmLoginPassword.Name = "textBox_confirmLoginPassword";
             this.textBox_confirmLoginPassword.PasswordChar = '*';
             this.textBox_confirmLoginPassword.Size = new System.Drawing.Size(481, 49);
@@ -191,8 +195,8 @@ namespace DigitalPlatform.rms
             // 
             this.textBox_loginPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_loginPassword.Location = new System.Drawing.Point(333, 189);
-            this.textBox_loginPassword.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox_loginPassword.Location = new System.Drawing.Point(344, 195);
+            this.textBox_loginPassword.Margin = new System.Windows.Forms.Padding(6);
             this.textBox_loginPassword.Name = "textBox_loginPassword";
             this.textBox_loginPassword.PasswordChar = '*';
             this.textBox_loginPassword.Size = new System.Drawing.Size(481, 49);
@@ -213,12 +217,13 @@ namespace DigitalPlatform.rms
             // 
             this.textBox_loginName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_loginName.Location = new System.Drawing.Point(333, 78);
-            this.textBox_loginName.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox_loginName.Location = new System.Drawing.Point(344, 84);
+            this.textBox_loginName.Margin = new System.Windows.Forms.Padding(6);
             this.textBox_loginName.Name = "textBox_loginName";
             this.textBox_loginName.Size = new System.Drawing.Size(481, 49);
             this.textBox_loginName.TabIndex = 1;
             this.textBox_loginName.Text = "dp2kernel";
+            this.textBox_loginName.TextChanged += new System.EventHandler(this.textBox_loginName_TextChanged);
             // 
             // label5
             // 
@@ -231,13 +236,62 @@ namespace DigitalPlatform.rms
             this.label5.TabIndex = 0;
             this.label5.Text = "登录名(&N):";
             // 
-            // PgsqlServerDataSourceDlg
+            // textBox_adminDatabaseName
+            // 
+            this.textBox_adminDatabaseName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_adminDatabaseName.Location = new System.Drawing.Point(380, 1010);
+            this.textBox_adminDatabaseName.Margin = new System.Windows.Forms.Padding(9);
+            this.textBox_adminDatabaseName.Name = "textBox_adminDatabaseName";
+            this.textBox_adminDatabaseName.ReadOnly = true;
+            this.textBox_adminDatabaseName.Size = new System.Drawing.Size(481, 49);
+            this.textBox_adminDatabaseName.TabIndex = 10;
+            // 
+            // label6
+            // 
+            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(30, 1019);
+            this.label6.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(339, 36);
+            this.label6.TabIndex = 9;
+            this.label6.Text = "管理者数据库名(&M):";
+            // 
+            // checkBox_enableModifyAdminDatabaseName
+            // 
+            this.checkBox_enableModifyAdminDatabaseName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkBox_enableModifyAdminDatabaseName.AutoSize = true;
+            this.checkBox_enableModifyAdminDatabaseName.Location = new System.Drawing.Point(380, 1071);
+            this.checkBox_enableModifyAdminDatabaseName.Name = "checkBox_enableModifyAdminDatabaseName";
+            this.checkBox_enableModifyAdminDatabaseName.Size = new System.Drawing.Size(133, 41);
+            this.checkBox_enableModifyAdminDatabaseName.TabIndex = 11;
+            this.checkBox_enableModifyAdminDatabaseName.Text = "修改";
+            this.checkBox_enableModifyAdminDatabaseName.UseVisualStyleBackColor = true;
+            this.checkBox_enableModifyAdminDatabaseName.CheckedChanged += new System.EventHandler(this.checkBox_enableModifyAdminDatabaseName_CheckedChanged);
+            // 
+            // button_deleteDatabase
+            // 
+            this.button_deleteDatabase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_deleteDatabase.Location = new System.Drawing.Point(882, 941);
+            this.button_deleteDatabase.Name = "button_deleteDatabase";
+            this.button_deleteDatabase.Size = new System.Drawing.Size(147, 59);
+            this.button_deleteDatabase.TabIndex = 12;
+            this.button_deleteDatabase.Text = "删除";
+            this.button_deleteDatabase.UseVisualStyleBackColor = true;
+            this.button_deleteDatabase.Click += new System.EventHandler(this.button_deleteDatabase_Click);
+            // 
+            // PgsqlDataSourceDlg
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(18F, 36F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(1296, 1155);
+            this.Controls.Add(this.button_deleteDatabase);
+            this.Controls.Add(this.checkBox_enableModifyAdminDatabaseName);
+            this.Controls.Add(this.textBox_adminDatabaseName);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.groupBox_login);
             this.Controls.Add(this.textBox_message);
             this.Controls.Add(this.button_Cancel);
@@ -248,8 +302,8 @@ namespace DigitalPlatform.rms
             this.Controls.Add(this.textBox_sqlServerName);
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(9, 9, 9, 9);
-            this.Name = "PgsqlServerDataSourceDlg";
+            this.Margin = new System.Windows.Forms.Padding(9);
+            this.Name = "PgsqlDataSourceDlg";
             this.ShowInTaskbar = false;
             this.Text = "PostgreSQL 相关参数设置";
             this.Load += new System.EventHandler(this.DataSourceDlg_Load);
@@ -277,5 +331,9 @@ namespace DigitalPlatform.rms
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBox_loginName;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBox_adminDatabaseName;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.CheckBox checkBox_enableModifyAdminDatabaseName;
+        private System.Windows.Forms.Button button_deleteDatabase;
     }
 }

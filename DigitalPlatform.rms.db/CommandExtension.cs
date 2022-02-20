@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 
 using Oracle.ManagedDataAccess.Client;
@@ -44,5 +46,17 @@ object value = null)
             }
         }
 
+        // https://stackoverflow.com/questions/38005393/how-to-get-dapper-dynamic-as-case-insensitive
+        public static IDictionary<string, T> ToCaseInsensitiveDictionary<T>(this IDictionary<string, T> source)
+        {
+            var target = new Dictionary<string, T>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var entry in source)
+            {
+                target[entry.Key] = entry.Value;
+            }
+
+            return target;
+        }
     }
 }

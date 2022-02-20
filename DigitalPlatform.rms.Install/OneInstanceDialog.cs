@@ -455,7 +455,7 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    datasource_dlg.SqlServerName = "localhost;Database=postgres";
+                    datasource_dlg.SqlServerName = "localhost"; // ;Database=postgres
                     datasource_dlg.InstanceName = "dp2kernel"
                         + (String.IsNullOrEmpty(this.InstanceName) == false ? "_" : "")
                         + this.InstanceName;    // 应当没有空格和特殊字符

@@ -155,12 +155,32 @@ namespace DigitalPlatform.rms
             this.button_OK.Enabled = false;
             try
             {
-                /*
-                MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder();
-                builder.PipeName = "MYSQL";
-                var s = builder.ToString();
-                */
+                // 创建 Pgsql 的数据库。这里数据库实际上是一个实例内的公共空间，不是 MS SQL Server 那种数据库概念
+                nRet = CreateDatabase(
+                    this.SqlServerName,
+                    this.textBox_loginName.Text,
+                    this.textBox_loginPassword.Text,
+                    this.textBox_adminDatabaseName.Text,
+                    this.textBox_instanceName.Text,
+                    out strError);
+                if (nRet == -1)
+                {
+                    DialogResult result = MessageBox.Show(this,
+    "在自动创建数据库的过程中发生错误: \r\n\r\n"
+    + strError
+    + "\r\n\r\n是否依然采用这些参数继续完成安装?",
+    "PgsqlServerDataSourceDlg",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        MessageBox.Show(this, "请修改服务器参数");
+                        return;
+                    }
+                }
 
+                // 检查服务器参数
                 nRet = VerifySqlServer(
                     this.SqlServerName,
                     this.textBox_loginName.Text,
@@ -203,7 +223,132 @@ namespace DigitalPlatform.rms
             this.Close();
         }
 
-        public int VerifySqlServer(
+        public static int DeleteDatabase(
+string strSqlServerName,
+string strSqlUserName,
+string strSqlUserPassword,
+string strAdminDatabase,
+string strDatabaseName,
+out string strError)
+        {
+            strError = "";
+
+            if (strSqlServerName.Contains("="))
+            {
+                strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
+                return -1;
+            }
+            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};Database={strAdminDatabase};"; // Database={strDatabaseName}
+
+            try
+            {
+                using (var connection = new NpgsqlConnection(strConnection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        string strCommand = $"DROP DATABASE \"{strDatabaseName}\"";
+                        using (var command = new NpgsqlCommand(strCommand, connection))
+                        {
+                            var count = command.ExecuteNonQuery();
+                        }
+                    }
+                    catch (PostgresException ex)
+                    {
+                        // https://www.postgresql.org/docs/current/errcodes-appendix.html
+                        // 3D000	invalid_catalog_name
+                        if (ex.SqlState == "3D000")
+                        {
+                            strError = $"数据库 '{strDatabaseName}' 不存在";
+                            return -1;
+                        }
+                        strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                    catch (NpgsqlException sqlEx)
+                    {
+                        strError = $"删除数据库 {strDatabaseName} 出错: { sqlEx.Message }";
+                        int nError = (int)sqlEx.ErrorCode;
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                return -1;
+            }
+            return 0;
+        }
+
+
+        public static int CreateDatabase(
+string strSqlServerName,
+string strSqlUserName,
+string strSqlUserPassword,
+string strAdminDatabase,
+string strDatabaseName,
+out string strError)
+        {
+            strError = "";
+
+            if (strSqlServerName.Contains("="))
+            {
+                strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
+                return -1;
+            }
+            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};Database={strAdminDatabase};"; // Database={strDatabaseName}
+
+            try
+            {
+                using (var connection = new NpgsqlConnection(strConnection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        string strCommand = $"CREATE DATABASE \"{strDatabaseName}\"";
+                        using(var command = new NpgsqlCommand(strCommand, connection))
+                        {
+                            var count = command.ExecuteNonQuery();
+                        }
+                    }
+                    catch(PostgresException ex)
+                    {
+                        // https://www.postgresql.org/docs/current/errcodes-appendix.html
+                        // 42P04	duplicate_database
+                        if (ex.SqlState == "42P04")
+                            return 0;
+                        strError = $"创建数据库 {strDatabaseName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                    catch (NpgsqlException sqlEx)
+                    {
+                        strError = $"创建数据库 {strDatabaseName} 出错: { sqlEx.Message }";
+                        int nError = (int)sqlEx.ErrorCode;
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        // strError = "连接 SQL 数据库出错： " + ex.Message + " 类型:" + ex.GetType().ToString();
+                        strError = $"创建数据库 {strDatabaseName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+            return 0;
+        }
+
+        public static int VerifySqlServer(
 string strSqlServerName,
 string strSqlUserName,
 string strSqlUserPassword,
@@ -212,8 +357,13 @@ out string strError)
         {
             strError = "";
 
+            if (strSqlServerName.Contains("="))
+            {
+                strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
+                return -1;
+            }
             // strSqlServerName 的内容一般为 "localhost;Database=postgres" 形态。等于包含了 database 参数
-            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};"; // Database={strDatabaseName}
+            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};Database={strDatabaseName};"; // Database={strDatabaseName}
 
             try
             {
@@ -309,5 +459,54 @@ out string strError)
 
         }
 
+        private void textBox_loginName_TextChanged(object sender, EventArgs e)
+        {
+            this.textBox_adminDatabaseName.Text = this.textBox_loginName.Text;
+        }
+
+        private void checkBox_enableModifyAdminDatabaseName_CheckedChanged(object sender, EventArgs e)
+        {
+            this.textBox_adminDatabaseName.ReadOnly = !this.checkBox_enableModifyAdminDatabaseName.Checked;
+        }
+
+        private void button_deleteDatabase_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要删除数据库 '{this.InstanceName}'?",
+"PgsqlServerDataSourceDlg",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == System.Windows.Forms.DialogResult.No)
+            {
+                return;
+            }
+
+            this.button_OK.Enabled = false;
+            try
+            {
+                // 删除 Pgsql 的数据库。这里数据库实际上是一个实例内的公共空间，不是 MS SQL Server 那种数据库概念
+                int nRet = DeleteDatabase(
+                    this.SqlServerName,
+                    this.textBox_loginName.Text,
+                    this.textBox_loginPassword.Text,
+                    this.textBox_adminDatabaseName.Text,
+                    this.textBox_instanceName.Text,
+                    out string strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this,
+    $"在删除数据库 '{this.InstanceName}' 的过程中发生错误: \r\n\r\n"
+    + strError);
+                    return;
+                }
+
+                MessageBox.Show(this, $"数据库 '{this.InstanceName}' 删除成功");
+            }
+            finally
+            {
+                this.button_OK.Enabled = true;
+            }
+        }
     }
 }

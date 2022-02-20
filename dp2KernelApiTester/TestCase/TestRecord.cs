@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,11 +34,15 @@ namespace dp2KernelApiTester
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
-                    create_result.AccessPoints,
-                    "");
+                var result = FragmentOverwriteRecords(create_result.CreatedPaths);
                 if (result.Value == -1)
                     return result;
+
+                var result1 = DeleteRecords(create_result.CreatedPaths,
+    null,
+    "");
+                if (result1.Value == -1)
+                    return result1;
             }
 
             {
@@ -655,15 +660,18 @@ out string strError);
                 DataModel.SetMessage($"删除记录 {path} 成功");
             }
 
-            // 检查检索点是否被成功删除
-            foreach (var accesspoint in created_accesspoints)
+            if (created_accesspoints != null)
             {
-                var result = VerifyAccessPoint(
-                    channel,
-                    accesspoint,
-                    "nothit");
-                if (result.Value == -1)
-                    return result;
+                // 检查检索点是否被成功删除
+                foreach (var accesspoint in created_accesspoints)
+                {
+                    var result = VerifyAccessPoint(
+                        channel,
+                        accesspoint,
+                        "nothit");
+                    if (result.Value == -1)
+                        return result;
+                }
             }
 
             return new NormalResult();
@@ -1092,7 +1100,10 @@ out string strError);
                     end = start + chunk_length - 1;
 
                     if (end > bytes.Length - 1)
+                    {
                         end = chunk_length - 1;
+                        chunk_length = (int)(end - start + 1);
+                    }
 
                     Debug.Assert(end >= start);
 
@@ -1144,14 +1155,13 @@ out string strError);
                         };
 
                     if (xml != strResult)
-                        if (ret == -1)
-                            return new CreateResult
-                            {
-                                Value = -1,
-                                ErrorInfo = $"读出记录 {current_path} 内容和创建时的不一致",
-                                CreatedPaths = created_paths,
-                                AccessPoints = created_accesspoints,
-                            };
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"读出记录 {current_path} 内容和创建时的不一致",
+                            CreatedPaths = created_paths,
+                            AccessPoints = created_accesspoints,
+                        };
                 }
 
                 created_paths.Add(current_path);
@@ -1162,32 +1172,92 @@ out string strError);
                     Path = current_path,
                 });
 
-#if NO
                 // 上载对象
-                for (int j = 0; j < 10; j++)
+                for (int j = 0; j < 1; j++)
                 {
-                    byte[] bytes = new byte[4096];
-                    ret = channel.WriteRes($"{output_path}/object/{j + 1}",
-                        $"0-{bytes.Length - 1}",
-                        bytes.Length,
-                        bytes,
-                        "",
-                        "content,data",
-                        null,
-                        out string output_object_path,
-                        out byte[] output_object_timestamp,
-                        out strError);
-                    if (ret == -1)
-                        return new CreateResult
-                        {
-                            Value = -1,
-                            ErrorInfo = strError,
-                            CreatedPaths = created_paths,
-                            AccessPoints = created_accesspoints,
-                        };
+                    int length = 1024 * 1024;
+                    byte[] contents = new byte[length];
+                    for (int k = 0; k < length; k++)
+                    {
+                        contents[k] = (byte)k;
+                    }
+
+                    string object_path = $"{current_path}/object/{j + 1}";
+
+                    int chunk = 10 * 1024;
+                    long start_offs = 0;
+                    byte[] object_timestamp = null;
+                    while (start_offs < length)
+                    {
+                        long end_offs = start_offs + chunk - 1;
+                        if (end_offs >= length)
+                            end_offs = length - 1;
+                        byte[] chunk_contents = new byte[end_offs - start_offs + 1];
+                        Array.Copy(contents, start_offs, chunk_contents, 0, chunk_contents.Length);
+                        var ret = channel.WriteRes(object_path,
+                            $"{start_offs}-{end_offs}",
+                            length,
+                            chunk_contents,
+                            "",
+                            "content,data",
+                            object_timestamp,
+                            out string output_object_path,
+                            out byte[] output_object_timestamp,
+                            out string strError);
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError,
+                                CreatedPaths = created_paths,
+                                AccessPoints = created_accesspoints,
+                            };
+                        object_timestamp = output_object_timestamp;
+
+                        start_offs += chunk_contents.Length;
+                    }
+
+                    // 读出比较
+                    using (var stream = new MemoryStream())
+                    {
+                        var ret = channel.GetRes(object_path,
+                            stream,
+                            null,
+                            "content,data",
+                            null,
+                            out string _,
+                            out byte[] download_timestamp,
+                            out string _,
+                            out string strError);
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError,
+                                CreatedPaths = created_paths,
+                                AccessPoints = created_accesspoints,
+                            };
+                        byte[] download_bytes = new byte[length];
+                        stream.Seek(0, SeekOrigin.Begin);
+                        var read_len = stream.Read(download_bytes, 0, length);
+                        if (read_len != length)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "read file error"
+                            };
+
+                        if (ByteArray.Compare(contents, download_bytes) != 0)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"对象 {object_path} 下载后和原始数据比对发现不一致",
+                                CreatedPaths = created_paths,
+                                AccessPoints = created_accesspoints,
+                            };
+                    }
                 }
 
-#endif
 
                 // 检查检索点是否被成功创建
                 foreach (var accesspoint in created_accesspoints)
@@ -1217,6 +1287,146 @@ out string strError);
                 CreatedPaths = created_paths,
                 AccessPoints = created_accesspoints,
             };
+        }
+
+        // 用 Fragment 方式覆盖已经创建好的记录
+        public static NormalResult FragmentOverwriteRecords(IEnumerable<string> paths,
+    int fragment_length = 1)
+        {
+            var channel = DataModel.GetChannel();
+
+            foreach (var path in paths)
+            {
+                string origin_xml = "";
+                byte[] origin_timestamp = null;
+                // 先获得一次原始记录。然后 Fragment 覆盖，在覆盖完以前，每次中途再获取一次记录，应该是看到原始记录
+                {
+                    var ret = channel.GetRes(path,
+                        out origin_xml,
+                        out string _,
+                        out origin_timestamp,
+                        out string _,
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+                }
+
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(origin_xml);
+                DomUtil.SetElementText(dom.DocumentElement, "changed", "test1234567890");
+
+
+                string new_xml = dom.DocumentElement.OuterXml;
+                byte[] bytes = Encoding.UTF8.GetBytes(new_xml);
+
+                byte[] timestamp = origin_timestamp;
+                long start = 0;
+                long end = 0;
+
+                DataModel.SetMessage($"正在用 Fragment 方式覆盖记录 {path}，请耐心等待 ...");
+
+                while (true)
+                {
+                    int chunk_length = fragment_length;
+
+                    end = start + chunk_length - 1;
+
+                    if (end > bytes.Length - 1)
+                    {
+                        end = chunk_length - 1;
+                        chunk_length = (int)(end - start + 1);
+                    }
+
+                    Debug.Assert(end >= start);
+
+                    byte[] fragment = new byte[end - start + 1];
+                    Array.Copy(bytes, start, fragment, 0, fragment.Length);
+
+                    var ret = channel.WriteRes(path,
+                        $"{start}-{end}",
+                        bytes.Length,
+                        fragment,
+                        "", // strMetadata
+                        "", // strStyle,
+                        timestamp,
+                        out string output_path,
+                        out byte[] output_timestamp,
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+
+                    // 马上读取检验
+                    if (end < bytes.Length - 1)
+                    {
+                        ret = channel.GetRes(path,
+    out string read_xml,
+    out string _,
+    out byte[] read_timestamp,
+    out string _,
+    out strError);
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError,
+                            };
+                        if (read_xml != origin_xml)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"记录 {path} {start}-{end}轮次 读取出来和 origin_xml 不一致"
+                            };
+                        if (ByteArray.Compare(read_timestamp, origin_timestamp) != 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"记录 {path} 的时间戳读取出来和 origin_timestamp 不一致"
+                            };
+
+                    }
+
+                    timestamp = output_timestamp;
+
+                    start += chunk_length;
+                    if (start > bytes.Length - 1)
+                        break;
+
+                }
+
+                // 覆盖成功后，马上读取检验
+                {
+                    var ret = channel.GetRes(path,
+out string read_xml,
+out string _,
+out byte[] read_timestamp,
+out string _,
+out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+                    if (read_xml != new_xml)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"记录 {path} 读取出来和 new_xml 不一致"
+                        };
+                }
+
+                DataModel.SetMessage($"覆盖记录 {path} 成功");
+            }
+
+            return new NormalResult();
         }
 
     }
