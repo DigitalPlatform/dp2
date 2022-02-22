@@ -323,5 +323,39 @@ string style = "")
                 }
             });
         }
+
+        private void MenuItem_test_search_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var result = TestSearch.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        private void MenuItem_test_refreshKeys_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var result = TestRebuildKeys.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
     }
 }

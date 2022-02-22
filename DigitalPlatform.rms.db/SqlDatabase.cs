@@ -20606,8 +20606,18 @@ strID);
                             strRecordID,
                             out strXml,
                             out strError);
-                        if (nRet <= -1)
-                            return nRet;
+
+                        // 2022/2/22
+                        if (nRet == -4 && StringUtil.IsInList("forcedeleteoldkeys", strStyle))
+                        {
+                            // 尽管此时记录不存在，但还需要继续向后处理
+                            // strXml = "<root />";
+                        }
+                        else
+                        {
+                            if (nRet <= -1)
+                                return nRet;
+                        }
 
                         XmlDocument newDom = null;
                         XmlDocument oldDom = null;

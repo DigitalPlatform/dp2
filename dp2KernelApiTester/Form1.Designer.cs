@@ -38,6 +38,8 @@ namespace dp2KernelApiTester
             this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_initializeDatabase = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_records = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_search = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_refreshKeys = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -96,7 +98,7 @@ namespace dp2KernelApiTester
             // MenuItem_settings
             // 
             this.MenuItem_settings.Name = "MenuItem_settings";
-            this.MenuItem_settings.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_settings.Size = new System.Drawing.Size(328, 66);
             this.MenuItem_settings.Text = "设置 ...";
             this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 
@@ -104,7 +106,9 @@ namespace dp2KernelApiTester
             // 
             this.MenuItem_test.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_test_initializeDatabase,
-            this.MenuItem_test_records});
+            this.MenuItem_test_records,
+            this.MenuItem_test_search,
+            this.MenuItem_test_refreshKeys});
             this.MenuItem_test.Name = "MenuItem_test";
             this.MenuItem_test.Size = new System.Drawing.Size(120, 57);
             this.MenuItem_test.Text = "测试";
@@ -112,16 +116,30 @@ namespace dp2KernelApiTester
             // MenuItem_test_initializeDatabase
             // 
             this.MenuItem_test_initializeDatabase.Name = "MenuItem_test_initializeDatabase";
-            this.MenuItem_test_initializeDatabase.Size = new System.Drawing.Size(506, 66);
+            this.MenuItem_test_initializeDatabase.Size = new System.Drawing.Size(538, 66);
             this.MenuItem_test_initializeDatabase.Text = "创建和删除数据库";
             this.MenuItem_test_initializeDatabase.Click += new System.EventHandler(this.MenuItem_test_initializeDatabase_Click);
             // 
             // MenuItem_test_records
             // 
             this.MenuItem_test_records.Name = "MenuItem_test_records";
-            this.MenuItem_test_records.Size = new System.Drawing.Size(506, 66);
+            this.MenuItem_test_records.Size = new System.Drawing.Size(538, 66);
             this.MenuItem_test_records.Text = "记录相关功能";
             this.MenuItem_test_records.Click += new System.EventHandler(this.MenuItem_test_records_Click);
+            // 
+            // MenuItem_test_search
+            // 
+            this.MenuItem_test_search.Name = "MenuItem_test_search";
+            this.MenuItem_test_search.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_search.Text = "检索相关功能";
+            this.MenuItem_test_search.Click += new System.EventHandler(this.MenuItem_test_search_Click);
+            // 
+            // MenuItem_test_refreshKeys
+            // 
+            this.MenuItem_test_refreshKeys.Name = "MenuItem_test_refreshKeys";
+            this.MenuItem_test_refreshKeys.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_refreshKeys.Text = "刷新检索点";
+            this.MenuItem_test_refreshKeys.Click += new System.EventHandler(this.MenuItem_test_refreshKeys_Click);
             // 
             // MainForm
             // 
@@ -156,6 +174,8 @@ namespace dp2KernelApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_initializeDatabase;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_records;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_search;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_refreshKeys;
     }
 }
 

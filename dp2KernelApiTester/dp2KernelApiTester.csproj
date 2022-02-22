@@ -69,6 +69,7 @@
     <Compile Include="TestCase\TestCreateDatabase.cs" />
     <Compile Include="TestCase\TestRebuildKeys.cs" />
     <Compile Include="TestCase\TestRecord.cs" />
+    <Compile Include="TestCase\TestSearch.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
