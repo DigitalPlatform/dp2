@@ -30,6 +30,18 @@ namespace dp2KernelApiTester
             }
 
             {
+                var create_result = CreateRecords(2);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
                 var create_result = FragmentCreateRecords(1);
                 if (create_result.Value == -1)
                     return create_result;
@@ -69,17 +81,7 @@ namespace dp2KernelApiTester
                     return result;
             }
 
-            {
-                var create_result = CreateRecords(1);
-                if (create_result.Value == -1)
-                    return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
-                    create_result.AccessPoints,
-                    "");
-                if (result.Value == -1)
-                    return result;
-            }
 
             {
                 var create_result = CreateRecords(1);
@@ -395,6 +397,7 @@ namespace dp2KernelApiTester
             {
                 string path = $"{strDatabaseName}/?";
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
+
                 string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
 <barcode>{barcode}</barcode>
 <dprms:file id='1' />
