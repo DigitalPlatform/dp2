@@ -1,6 +1,6 @@
-﻿// 册XML记录转换为HTML显示格式
+﻿// 册 XML 记录转换为 HTML 显示格式
 // 编写者：谢涛
-// 最后修改日期: 2020/8/23
+// 最后修改日期: 2022/2/26
 
 // 修改历史：
 // 2010/5/14	将借阅操作者栏的strOperator修改为strBorrowOperator
@@ -13,6 +13,7 @@
 // 2016/9/27    能显示册二维码
 // 2016/11/5    册二维码或者一维码改用 barcode: 协议显示
 // 2020/8/23    增加 uid 字段
+// 2022/2/26    增加 currentLocation 和 shelfNo 字段
 
 using System;
 using System.Xml;
@@ -40,7 +41,7 @@ public class MyConverter : ItemConverter
         }
 
         StringBuilder strResult = new StringBuilder();
-            
+
         strResult.Append("<html>");
 
         strResult.Append("<head>");
@@ -82,6 +83,11 @@ public class MyConverter : ItemConverter
             // 状态
             strResult.Append(GetOneTR(dom.DocumentElement, "state", "状态"));
 
+            // 永久架位
+            strResult.Append(GetOneTR(dom.DocumentElement, "shelfNo", "永久架位"));
+
+            // 当前位置
+            strResult.Append(GetOneTR(dom.DocumentElement, "currentLocation", "当前位置"));
 
             // 册价格
             strResult.Append(GetOneTR(dom.DocumentElement, "price", "册价格"));

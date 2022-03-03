@@ -5455,6 +5455,8 @@ namespace DigitalPlatform.LibraryServer
 
             // 2016/10/26
             account.Binding = node.GetAttribute("binding");
+            // 2022/2/25
+            account.Location = node.GetAttribute("location");
 
             try
             {
@@ -10780,6 +10782,7 @@ out strError);
         //          4) 否则用证条码号进行检索
         //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
         //              还可以为 token: 形态
+        //      strLocation 前端给出的操作者所在的当前位置(馆藏地)，会被用来修改册记录的 currentLocation 元素
         //      nIndex  如果有多个匹配的读者记录，此参数表示要选择其中哪一个。
         //              如果为-1，表示首次调用此函数，还不知如何选择。如此时命中多个，函数会返回>1的值
         //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
@@ -11048,6 +11051,8 @@ out strError);
                 account.Rights = accountref.Rights;
                 // account.LibraryCode = accountref.LibraryCode;
                 account.Access = accountref.Access;
+                // 2022/2/25
+                account.Location = accountref.Location;
             }
 
             // 2021/7/5
@@ -11140,8 +11145,11 @@ out strError);
             account.PatronDom = readerdom;
             account.ReaderDomLastTime = DateTime.Now;
 
+            // 2022/2/25
+            // 参数 strLocation 如果不为空，会覆盖 this.Account.Location
+            if (string.IsNullOrEmpty(strLocation) == false)
+                account.Location = strLocation;
 
-            account.Location = strLocation;
             account.ReaderDomPath = strOutputPath;
             account.ReaderDomTimestamp = timestamp;
 

@@ -520,7 +520,7 @@ namespace DigitalPlatform.LibraryServer
             //      -1  出错
             //      0   没有找到日历
             //      1   找到日历
-            nRet = this.App.GetReaderCalendar(strReaderType,
+            nRet = this.App.GetLibraryCalendar(strReaderType,
                 strLibraryCode,
                 out Calendar calendar,
                 out strError);

@@ -4130,11 +4130,11 @@ root, strLibraryCode);
 
         // 为读者XML添加附加信息
         // parameters:
-        //      strLibraryCode  读者记录所从属的恶读者库的馆代码
+        //      strReaderLibraryCode  读者记录所从属的读者库的馆代码
         public int GetAdvanceReaderXml(
             SessionInfo sessioninfo,
             string strStyle,
-            string strLibraryCode,
+            string strReaderLibraryCode,
             string strReaderXml,
             out string strOutputXml,
             out string strError)
@@ -4174,7 +4174,7 @@ root, strLibraryCode);
             //      reader和book类型都不匹配，算1分
             nRet = this.GetLoanParam(
                 //null,
-                strLibraryCode,
+                strReaderLibraryCode,
                 strReaderType,
                 "",
                 "可借总册数",
@@ -4206,8 +4206,8 @@ root, strLibraryCode);
             //      -1  出错
             //      0   没有找到日历
             //      1   找到日历
-            nRet = this.GetReaderCalendar(strReaderType,
-                strLibraryCode,
+            nRet = this.GetLibraryCalendar(strReaderType,
+                strReaderLibraryCode,
                 out Calendar calendar,
                 out strError);
             if (nRet == -1 || nRet == 0)
@@ -4423,6 +4423,11 @@ root, strLibraryCode);
             {
                 // XmlNode node = overdue_nodes[i];
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
+
+                // TODO: 获得册记录馆代码
+                // 临时代替
+                string strItemLibraryCode = strReaderLibraryCode;
+
                 string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
 
                 if (bFillSummary == true)
@@ -4481,8 +4486,11 @@ root, strLibraryCode);
 
                     long lResultValue = 0;
                     string strPauseCfgString = "";
+                    // parameter:
+                    //      strReaderType 读者类型。可为“海淀分馆/普通读者”这样的形态。注意“海淀分馆”部分表示读者的馆代码
+                    //      strLibraryCode  册所在馆代码
                     nRet = this.ComputePausePeriodValue(strReaderType,
-                        strLibraryCode,
+                        strReaderLibraryCode,
                             lOverduePeriod,
                             out lResultValue,
                         out strPauseCfgString,
@@ -4545,7 +4553,7 @@ root, strLibraryCode);
                 string strPauseMessage = "";
                 nRet = this.HasPauseBorrowing(
                     calendar,
-                    strLibraryCode,
+                    strReaderLibraryCode,
                     readerdom,
                     out strPauseMessage,
                     out strError);
@@ -5950,7 +5958,7 @@ out strError);
             string strXml,
             string level,
             string strResultTypeList,
-            string strLibraryCode,  // calendar/advancexml/html 时需要
+            string strReaderLibraryCode,  // calendar/advancexml/html 时需要
             List<string> recpaths,    // recpaths 时需要
             string strOutputPath,   // recpaths 时需要
             byte[] baTimestamp,    // timestamp 时需要
@@ -6030,8 +6038,8 @@ out strError);
                     //      -1  出错
                     //      0   没有找到日历
                     //      1   找到日历
-                    nRet = this.GetReaderCalendar(strReaderType,
-                        strLibraryCode,
+                    nRet = this.GetLibraryCalendar(strReaderType,
+                        strReaderLibraryCode,
                         out calendar,
                         out strError);
                     if (nRet == -1 || nRet == 0)
@@ -6054,7 +6062,7 @@ out strError);
                     string strResultXml = "";
                     nRet = GetPatronXml(filtered_readerdom.OuterXml, // strXml,
         strResultType,
-        strLibraryCode,
+        strReaderLibraryCode,
         out strResultXml,
         out strError);
                     if (nRet == -1)
@@ -6094,7 +6102,7 @@ out strError);
                 else if (String.Compare(strResultType, "oi", true) == 0)
                 {
                     // oi 第一字符如果是 ! 表示这是出错信息
-                    var oi = GetPatronOI(strLibraryCode);
+                    var oi = GetPatronOI(strReaderLibraryCode);
                     SetResult(results_list, i, oi);
                 }
                 else if (String.Compare(strResultType, "advancexml_borrow_bibliosummary", true) == 0
@@ -6152,7 +6160,7 @@ out strError);
                     nRet = this.GetAdvanceReaderXml(
                         sessioninfo,
                         strResultTypeList,  // strResultType, BUG!!! 2012/4/8
-                        strLibraryCode,
+                        strReaderLibraryCode,
                         filtered_readerdom.OuterXml, // strXml,
                         out strOutputXml,
                         out strError);
@@ -6180,7 +6188,7 @@ out strError);
                         sessioninfo,
                         Path.Combine(this.CfgDir, "readerxml2html.cs"),
                         Path.Combine(this.CfgDir, "readerxml2html.cs.ref"),
-                        strLibraryCode,
+                        strReaderLibraryCode,
                         filtered_readerdom.OuterXml, // strXml,
                         strOutputPath,  // 2009/10/18 
                         operType,   // OperType.None,
@@ -6207,7 +6215,7 @@ out strError);
                         sessioninfo,
                         this.CfgDir + "\\readerxml2text.cs",
                         this.CfgDir + "\\readerxml2text.cs.ref",
-                        strLibraryCode,
+                        strReaderLibraryCode,
                         filtered_readerdom.OuterXml, // strXml,
                         strOutputPath,  // 2009/10/18 
                         OperType.None,

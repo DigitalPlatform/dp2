@@ -249,6 +249,7 @@ namespace DigitalPlatform.LibraryServer
                     userinfo.Access = DomUtil.GetAttr(node, "access");
                     userinfo.Comment = DomUtil.GetAttr(node, "comment");
                     userinfo.Binding = node.GetAttribute("binding");
+                    userinfo.Location = node.GetAttribute("location");
 
                     userList.Add(userinfo);
                 }
@@ -544,6 +545,7 @@ namespace DigitalPlatform.LibraryServer
             DomUtil.SetAttr(nodeAccount, "comment", userinfo.Comment);
 
             DomUtil.SetAttr(nodeAccount, "binding", userinfo.Binding);
+            DomUtil.SetAttr(nodeAccount, "location", userinfo.Location);
         }
 
         XmlDocument PrepareOperlogDom(string strAction,
@@ -1552,6 +1554,7 @@ out strError);
                 DomUtil.SetAttr(nodeAccount, "access", userinfo.Access);
                 DomUtil.SetAttr(nodeAccount, "comment", userinfo.Comment);
                 DomUtil.SetAttr(nodeAccount, "binding", userinfo.Binding);
+                DomUtil.SetAttr(nodeAccount, "location", userinfo.Location);
 
                 bool neverExpire = StringUtil.IsInList("neverexpire", userinfo.Rights);
 
@@ -2001,5 +2004,8 @@ out strError);
 
         [DataMember]
         public string Binding = ""; // 绑定 2016/6/15
+
+        [DataMember]
+        public string Location = "";    // 默认位置 2022/2/21
     }
 }

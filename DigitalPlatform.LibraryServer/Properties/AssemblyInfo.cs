@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.103.*")]
-[assembly: AssemblyFileVersion("3.103.0.0")]
+[assembly: AssemblyVersion("3.105.*")]
+[assembly: AssemblyFileVersion("3.105.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -305,3 +305,7 @@ ItemCanReturn()
 //		3.101 (2022/1/10) dp2library 的 C# 脚本编译改为 Roslyn
 //		3.102 (2022/1/18) RepairBorrowInfo() API 优化改进。返回的出错信息里面增加了 XML 标记
 //		3.103 (2022/1/28) SetBiblioInfo() API action 为 “checkUnique” 时，增加了对 library.xml 中未配置查重空间和发起记录不在查重空间内两种情况进行了报错(以前版本是不报错)
+//		3.104 (2022/2/26) Return() API 会根据一定的规则，还书的同时修改册记录的 currentLocation 元素。
+//						规则是: Return() API strStyle 参数中的 currentLocation:xxx 优先；内务前端登录对话框里面的工作台号次之(也就是说最近一次 Login() API 的 parameters 参数中的 location 子参数)；(进行还书操作的)工作人员账户里面“位置”字段最次。按照这个顺序，非空的值会写入册记录的 currentLocation 元素内容。如果全部都是空，则不写入册记录 currentLocation 元素
+//		3.105 (2022/3/3) Borrow() 和 Return() API 可以处理跨越分馆的借书还书
+//						当 Return() API 根据 strStyle 参数中的 currentLocation:xxx 子参数或者账户当前位置或者 Login() API 的工作台号来自动修改册记录的 currentLocation 字段过程中，遇到检测位置字符串内容格式出错，暂当作警告处理(而不是当作报错处理)

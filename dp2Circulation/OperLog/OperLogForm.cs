@@ -9810,7 +9810,9 @@ MessageBoxDefaultButton.Button1);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            int nRet = RecoverFromOperLogs(dlg.Dates,
+            var dates = dlg.Dates;
+
+            int nRet = RecoverFromOperLogs(dates,
                 dlg.RecPathList,
                 out strError);
             if (nRet == -1)

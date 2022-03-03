@@ -2134,7 +2134,6 @@ namespace DigitalPlatform.LibraryServer
         out string strItemLibraryCode,
         out string strPureLocationName);
 
-
             // 根据状态是否为空, 设置checkbox状态
             if (string.IsNullOrEmpty(strState) == false)
             {
@@ -2359,8 +2358,8 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  出错
                     //      0   没有找到日历
                     //      1   找到日历
-                    nRet = this.GetReaderCalendar(strBorrowerReaderType,
-                        strBorrowerLibraryCode,
+                    nRet = this.GetLibraryCalendar(strBorrowerLibraryCode + "/" + strBorrowerReaderType,
+                        strItemLibraryCode, // strBorrowerLibraryCode,
                         out calendar,
                         out strError);
                     if (nRet == -1 || nRet == 0)

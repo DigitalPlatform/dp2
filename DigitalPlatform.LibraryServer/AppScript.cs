@@ -2578,12 +2578,28 @@ namespace DigitalPlatform.LibraryServer
 || strAction == "transfer"
 || strAction == "move")
             {
-                string strCurrentLocation = DomUtil.GetElementText(itemdom.DocumentElement, "currentLocation");
+                // 验证册记录中的 currentLocation 元素
+                // return:
+                //      -1  调用出错
+                //      0   校验正确
+                //      1   校验发现错误
+                nRet = VerifyCurrentLocation(
+                    this.App,
+                    itemdom,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    errors.Add(strError);
+#if NO
+                string strCurrentLocation = DomUtil.GetElementText(itemdom.DocumentElement,
+                    "currentLocation");
                 if (string.IsNullOrEmpty(strCurrentLocation) == false)
                 {
                     var parts = StringUtil.ParseTwoPart(strCurrentLocation, ":");
                     strCurrentLocation = parts[0];
-                    if (string.IsNullOrEmpty(strCurrentLocation) == false)
+                    if (string.IsNullOrEmpty(strCurrentLocation) == false
+                        && strCurrentLocation.StartsWith("?") == false) // 问号引导的，不检查
                     {
                         // 将馆藏地点字符串分解为 馆代码+地点名 两个部分
                         LibraryApplication.ParseCalendarName(strCurrentLocation,
@@ -2597,12 +2613,14 @@ strLibraryCode1,
 strRoom1);
                             if (item1 == null)
                             {
-                                strError = $"当前位置字段中的馆藏地 '{strCurrentLocation}' 不合法: 馆代码 '{ strLibraryCode1 }' 没有定义馆藏地点 '{ strRoom1 }'(根据 <locationTypes> 定义)";
+                                strError = $"当前位置字段(currentLocation)中的馆藏地 '{strCurrentLocation}' 不合法: 馆代码 '{ strLibraryCode1 }' 没有定义馆藏地点 '{ strRoom1 }'(根据 <locationTypes> 定义)";
                                 errors.Add(strError);
                             }
                         }
                     }
                 }
+
+#endif
             }
 
 
@@ -2610,6 +2628,49 @@ strRoom1);
             {
                 strError = StringUtil.MakePathList(errors, "; ");
                 return 1;
+            }
+
+            return 0;
+        }
+
+        // 验证册记录中的 currentLocation 元素
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public static int VerifyCurrentLocation(
+            LibraryApplication App,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+
+            string strCurrentLocation = DomUtil.GetElementText(itemdom.DocumentElement,
+    "currentLocation");
+            if (string.IsNullOrEmpty(strCurrentLocation) == false)
+            {
+                var parts = StringUtil.ParseTwoPart(strCurrentLocation, ":");
+                strCurrentLocation = parts[0];
+                if (string.IsNullOrEmpty(strCurrentLocation) == false
+                    && strCurrentLocation.StartsWith("?") == false) // 问号引导的，不检查
+                {
+                    // 将馆藏地点字符串分解为 馆代码+地点名 两个部分
+                    LibraryApplication.ParseCalendarName(strCurrentLocation,
+                out string strLibraryCode1,
+                out string strRoom1);
+                    if (App.IsValidLibraryCode(strLibraryCode1) == true)
+                    {
+                        // 只检查当前图书馆的馆藏地。别的图书馆的馆藏地不检查
+                        XmlElement item1 = App.GetLocationItemElement(
+strLibraryCode1,
+strRoom1);
+                        if (item1 == null)
+                        {
+                            strError = $"当前位置字段(currentLocation)中的馆藏地 '{strCurrentLocation}' 不合法: 馆代码 '{ strLibraryCode1 }' 没有定义馆藏地点 '{ strRoom1 }'(根据 <locationTypes> 定义)";
+                            return 1;
+                        }
+                    }
+                }
             }
 
             return 0;

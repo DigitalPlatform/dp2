@@ -489,16 +489,24 @@ namespace dp2Circulation
                     return -1;
                 }
 
-                var nodes = reader_dom.DocumentElement.SelectNodes("borrows/borrow");
-                if (nodes.Count == 0)
-                    return 0;   // 没有必要检查
-
                 string strReaderBarcode = DomUtil.GetElementText(reader_dom.DocumentElement, "barcode");
 
                 string caption = $"{strReaderBarcode}({recpath})";
 
+                // 2022/2/21
+                if (string.IsNullOrEmpty(strReaderBarcode))
+                {
+                    DisplayError($"读者记录 { recpath } 证条码号(barcode 元素)为空，格式不合法。请尽快修正此问题");
+                    DisplayRecord(null, null, $"<pp>{recpath}<pp>");
+                    return -1;
+                    /*
+                    strError = $"读者记录 {caption} 的证条码号为空，没有必要进行检查";
+                    return 0;
+                    */
+                }
+
                 // 条码号查重
-                if (barcode_table != null)
+                if (barcode_table != null && string.IsNullOrEmpty(strReaderBarcode) == false)
                 {
                     int dup_count = 1;
                     if (barcode_table.ContainsKey(strReaderBarcode) == false)
@@ -517,6 +525,10 @@ namespace dp2Circulation
                         DisplayCheckError($"读者证条码号 { strReaderBarcode } 有重复记录 { dup_count }条。({recpath})");
                     }
                 }
+
+                var nodes = reader_dom.DocumentElement.SelectNodes("borrows/borrow");
+                if (nodes.Count == 0)
+                    return 0;   // 没有必要检查
 
                 // string strReaderBarcode = barcodes[i];
                 string strOutputReaderBarcode = "";
@@ -1609,12 +1621,16 @@ false);
 
                                 // string format = "id,cols,format:@coldef:*/barcode|*/borrower";
                                 if (record.Cols == null || record.Cols.Length < 2)
+                                {
+                                    DisplayError($"发现不正常的记录 {record.Path} {(record.Cols != null && record.Cols.Length > 0 ? record.Cols[0] : "record.Cols 为空")}");
                                     return;
+                                }
 
                                 string barcode = record.Cols[0];
                                 string borrower = record.Cols[1];
-                                if (string.IsNullOrEmpty(borrower))
-                                    return; // 跳过不是在借状态的册
+                                if (string.IsNullOrEmpty(borrower)
+                                    && string.IsNullOrEmpty(barcode) == false)
+                                    return; // 跳过不是在借状态的册。但如果册条码号为空则不跳过，还要在后面继续处理
 
                                 string xml = "";
                                 // 册条码号允许为空。这时候要获得 refID 元素
@@ -2334,10 +2350,6 @@ false);
                     return -1;
                 }
 
-                string strReaderBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "borrower");
-                if (string.IsNullOrEmpty(strReaderBarcode))
-                    return 0;   // 没有必要检查
-
                 string strItemBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
                 if (string.IsNullOrEmpty(strItemBarcode))
                 {
@@ -2354,7 +2366,7 @@ false);
                 string caption = $"{strItemBarcode}({recpath})";
 
                 // 条码号查重
-                if (barcode_table != null)
+                if (barcode_table != null && string.IsNullOrEmpty(strItemBarcode) == false)
                 {
                     int dup_count = 1;
                     if (barcode_table.ContainsKey(strItemBarcode) == false)
@@ -2373,6 +2385,10 @@ false);
                         DisplayCheckError($"册条码号 { strItemBarcode } 有重复记录 { dup_count }条。({recpath})");
                     }
                 }
+
+                string strReaderBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "borrower");
+                if (string.IsNullOrEmpty(strReaderBarcode))
+                    return 0;   // 没有必要检查
 
                 string strOutputReaderBarcode = "";
 

@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="BarcodeValidator\TestBarcodeMultiMatch.cs" />
     <Compile Include="Install\TestInstall.cs" />
+    <Compile Include="LoanParam\TestLoanParam.cs" />
     <Compile Include="ResultSet\TestResultSet.cs" />
     <Compile Include="TestAdjustOverflow.cs" />
     <Compile Include="TestAuthorNumber.cs" />

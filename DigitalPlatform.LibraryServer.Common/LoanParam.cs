@@ -9,6 +9,7 @@ using System.Drawing;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
+using System.Text.RegularExpressions;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -444,7 +445,9 @@ namespace DigitalPlatform.LibraryServer
 
         // 获得流通参数
         // parameters:
-        //      strLibraryCode  图书馆代码, 如果为空,表示使用<library>元素以外的片段
+        //      strLibraryCode  (册所在)图书馆代码, 如果为空,表示使用<library>元素以外的片段
+        //      strReaderType   读者类型。可以为 “普通读者”和“海淀分馆/普通读者”这样的形态。后者是对应于跨分馆借阅
+        //                      注: 若为 "xxx/xxx" 形态，并且左侧馆代码和 strLibraryCode 一致，则会被只取出右侧进行匹配处理
         // return:
         //      reader和book类型均匹配 算4分
         //      只有reader类型匹配，算3分
@@ -509,6 +512,16 @@ namespace DigitalPlatform.LibraryServer
             {
                 strError = "图书类型不允许使用 *";
                 return -1;
+            }
+
+            // 2022/3/2
+            // strReaderType 若为 xxx/xxx 形态，并且左侧馆代码部分和 strLibraryCode 相同，则只保留右侧部分
+            if (strReaderType != null && strReaderType.Contains("/"))
+            {
+                var parts = StringUtil.ParseTwoPart(strReaderType, "/");
+                if (parts[0] == strLibraryCode
+                    || (string.IsNullOrEmpty(parts[0]) && string.IsNullOrEmpty(strLibraryCode)))
+                    strReaderType = parts[1];
             }
 
             bool bReaderOnly = false;   // 是否为只和读者类型有关的参数
@@ -578,12 +591,9 @@ namespace DigitalPlatform.LibraryServer
 
                 double nLevel = GetLevel(node);
 
-                string strThisReaderType;
-                string strThisBookType;
-
                 int nRet = GetSurroundType(node,
-                    out strThisReaderType,
-                    out strThisBookType,
+                    out string strOuterReaderType,
+                    out string strOuterBookType,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -597,8 +607,9 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 找到2个外围气氛因素
                     if (
-                        (strThisReaderType == "*" || strReaderType == strThisReaderType)
-                        && (strThisBookType == "*" || strBookType == strThisBookType)
+                        // (strOuterReaderType == "*" || strReaderType == strOuterReaderType)
+                        MatchReaderType(strOuterReaderType, strReaderType)
+                        && (strOuterBookType == "*" || strBookType == strOuterBookType)
                         )
                     {
                         /*
@@ -620,9 +631,9 @@ namespace DigitalPlatform.LibraryServer
                         weightnodes.Add(weightnode);
 
                         // 2008/8/20
-                        if (strThisReaderType == "*")
+                        if (strOuterReaderType == "*")
                             weightnode.Wild++;
-                        if (strThisBookType == "*")
+                        if (strOuterBookType == "*")
                             weightnode.Wild++;
 
 #if DEBUG_LOAN_PARAM
@@ -639,8 +650,9 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 只找到一个外围气氛因素
                     // strThisReaderType和strThisBookType中只有一个是有意义的，那就是非空的那个
-                    if (String.IsNullOrEmpty(strThisReaderType) == false
-                        && (strThisReaderType == "*" || strReaderType == strThisReaderType)
+                    if (String.IsNullOrEmpty(strOuterReaderType) == false
+                        && // (strOuterReaderType == "*" || strReaderType == strOuterReaderType)
+                        MatchReaderType(strOuterReaderType, strReaderType)
                         )
                     {
                         // 只有reader类型匹配，算3分
@@ -653,7 +665,7 @@ namespace DigitalPlatform.LibraryServer
                         weightnodes.Add(weightnode);
 
                         // 2008/8/20
-                        if (strThisReaderType == "*")
+                        if (strOuterReaderType == "*")
                             weightnode.Wild++;
 
 
@@ -662,8 +674,8 @@ namespace DigitalPlatform.LibraryServer
 #endif
                         continue;
                     }
-                    else if (String.IsNullOrEmpty(strThisBookType) == false
-                        && (strThisBookType == "*" || strBookType == strThisBookType)
+                    else if (String.IsNullOrEmpty(strOuterBookType) == false
+                        && (strOuterBookType == "*" || strBookType == strOuterBookType)
                         )
                     {
                         // 只有book类型匹配，算2分
@@ -676,7 +688,7 @@ namespace DigitalPlatform.LibraryServer
                         weightnodes.Add(weightnode);
 
                         // 2008/8/20
-                        if (strThisBookType == "*")
+                        if (strOuterBookType == "*")
                             weightnode.Wild++;
 
 #if DEBUG_LOAN_PARAM
@@ -721,12 +733,48 @@ namespace DigitalPlatform.LibraryServer
             return weightnodes[0].Weight;   // 表示勉强匹配
         }
 
+        // 2022/3/2
+        // parameters:
+        //      pattern 要比较的模式字符串。比如 “海淀分馆/*”或者“*”
+        //      value   要比较的具体读者类型值，比如“普通读者”或者“海淀分馆/普通读者”
+        public static bool MatchReaderType(string pattern, string value)
+        {
+            if (pattern == "*")
+                return true;
+            if (pattern == value)
+                return true;
+            if (pattern.Contains("/") == false && value.Contains("/") == false)
+            {
+                // 都没有斜杠
+                if (Regex.IsMatch(value, WildCardToRegular(pattern)))
+                    return true;
+            }
+            else if (pattern.Contains("/") && value.Contains("/"))
+            {
+                // 都有斜杠
+                var p = StringUtil.ParseTwoPart(pattern, "/");
+                var v = StringUtil.ParseTwoPart(value, "/");
 
+                // 只有斜杠左右侧分别对应匹配符合，才算符合
+                if (
+                    Regex.IsMatch(v[0], WildCardToRegular(p[0]))
+                    && Regex.IsMatch(v[1], WildCardToRegular(p[1]))
+                    )
+                    return true;
+            }
+            return false;
+        }
+
+        // https://stackoverflow.com/questions/30299671/matching-strings-with-wildcard
+        // If you want to implement both "*" and "?"
+        private static String WildCardToRegular(String value)
+        {
+            return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
+        }
 
         static double GetLevel(XmlNode node)
         {
             double nLevel = 0.0;
-
 
             while (node != null
                 && node.ParentNode != node.OwnerDocument)
@@ -800,7 +848,6 @@ namespace DigitalPlatform.LibraryServer
             return 1;   // found one type 
         }
     }
-
 
     // 权值和节点的组合
     public class WeightNode

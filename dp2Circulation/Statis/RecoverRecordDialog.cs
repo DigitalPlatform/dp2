@@ -52,6 +52,15 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
+            if (checkBox_lastFirst.Checked)
+            {
+                // 排序。最新日期在前
+                dates.Sort((a, b) =>
+                {
+                    return string.Compare(a, b) * -1;
+                });
+            }
+
             this.Dates = dates;
 
             this.RecPathList = StringUtil.SplitList(this.textBox_recPathList.Text, "\r\n");

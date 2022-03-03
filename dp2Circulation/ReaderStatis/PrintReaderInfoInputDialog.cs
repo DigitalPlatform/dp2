@@ -18,7 +18,7 @@ namespace dp2Circulation
         /// <summary>
         /// AppInfo 对象
         /// </summary>
-        public ApplicationInfo AppInfo = null;
+        public IApplicationInfo AppInfo = null;
         /// <summary>
         /// 要在 AppInfo 中存取配置事项的 Entry 名称字符串
         /// </summary>

@@ -61,6 +61,8 @@ namespace dp2Circulation
             this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.textBox_binding = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.textBox_location = new System.Windows.Forms.TextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_listAllUsers = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
@@ -180,13 +182,13 @@ namespace dp2Circulation
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_userType, 1, 1);
             this.tableLayoutPanel_userEdit.Controls.Add(this.label3, 0, 3);
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_userRights, 1, 3);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.label4, 0, 8);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_password, 1, 8);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.label4, 0, 9);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_password, 1, 9);
             this.tableLayoutPanel_userEdit.Controls.Add(this.button_editUserRights, 2, 3);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_confirmPassword, 1, 9);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.label5, 0, 9);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.checkBox_changePassword, 0, 7);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.button_resetPassword, 2, 9);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_confirmPassword, 1, 10);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.label5, 0, 10);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.checkBox_changePassword, 0, 8);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.button_resetPassword, 2, 10);
             this.tableLayoutPanel_userEdit.Controls.Add(this.label6, 0, 4);
             this.tableLayoutPanel_userEdit.Controls.Add(this.label7, 0, 5);
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_access, 1, 5);
@@ -195,11 +197,13 @@ namespace dp2Circulation
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_comment, 1, 2);
             this.tableLayoutPanel_userEdit.Controls.Add(this.label9, 0, 6);
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_binding, 1, 6);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.label10, 0, 7);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_location, 1, 7);
             this.tableLayoutPanel_userEdit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_userEdit.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel_userEdit.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_userEdit.Name = "tableLayoutPanel_userEdit";
-            this.tableLayoutPanel_userEdit.RowCount = 11;
+            this.tableLayoutPanel_userEdit.RowCount = 12;
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -207,10 +211,11 @@ namespace dp2Circulation
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel_userEdit.Size = new System.Drawing.Size(829, 269);
             this.tableLayoutPanel_userEdit.TabIndex = 0;
             this.tableLayoutPanel_userEdit.SizeChanged += new System.EventHandler(this.tableLayoutPanel_userEdit_SizeChanged);
@@ -289,7 +294,7 @@ namespace dp2Circulation
             // 
             this.label4.AutoSize = true;
             this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Location = new System.Drawing.Point(4, 300);
+            this.label4.Location = new System.Drawing.Point(4, 340);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(180, 39);
@@ -300,7 +305,7 @@ namespace dp2Circulation
             // textBox_password
             // 
             this.textBox_password.Enabled = false;
-            this.textBox_password.Location = new System.Drawing.Point(192, 304);
+            this.textBox_password.Location = new System.Drawing.Point(192, 344);
             this.textBox_password.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_password.Name = "textBox_password";
             this.textBox_password.PasswordChar = '*';
@@ -325,7 +330,7 @@ namespace dp2Circulation
             // textBox_confirmPassword
             // 
             this.textBox_confirmPassword.Enabled = false;
-            this.textBox_confirmPassword.Location = new System.Drawing.Point(192, 343);
+            this.textBox_confirmPassword.Location = new System.Drawing.Point(192, 383);
             this.textBox_confirmPassword.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_confirmPassword.Name = "textBox_confirmPassword";
             this.textBox_confirmPassword.PasswordChar = '*';
@@ -337,7 +342,7 @@ namespace dp2Circulation
             // 
             this.label5.AutoSize = true;
             this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Location = new System.Drawing.Point(4, 339);
+            this.label5.Location = new System.Drawing.Point(4, 379);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(180, 62);
@@ -348,7 +353,7 @@ namespace dp2Circulation
             // checkBox_changePassword
             // 
             this.checkBox_changePassword.AutoSize = true;
-            this.checkBox_changePassword.Location = new System.Drawing.Point(4, 271);
+            this.checkBox_changePassword.Location = new System.Drawing.Point(4, 311);
             this.checkBox_changePassword.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_changePassword.Name = "checkBox_changePassword";
             this.checkBox_changePassword.Size = new System.Drawing.Size(120, 25);
@@ -361,7 +366,7 @@ namespace dp2Circulation
             // 
             this.button_resetPassword.AutoSize = true;
             this.button_resetPassword.Enabled = false;
-            this.button_resetPassword.Location = new System.Drawing.Point(467, 343);
+            this.button_resetPassword.Location = new System.Drawing.Point(467, 383);
             this.button_resetPassword.Margin = new System.Windows.Forms.Padding(4);
             this.button_resetPassword.Name = "button_resetPassword";
             this.button_resetPassword.Size = new System.Drawing.Size(328, 54);
@@ -471,6 +476,30 @@ namespace dp2Circulation
             this.textBox_binding.Size = new System.Drawing.Size(267, 27);
             this.textBox_binding.TabIndex = 21;
             this.textBox_binding.TextChanged += new System.EventHandler(this.textBox_binding_TextChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label10.Location = new System.Drawing.Point(4, 267);
+            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(180, 40);
+            this.label10.TabIndex = 22;
+            this.label10.Text = "Ä¬ÈÏÎ»ÖÃ(&L):";
+            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // textBox_location
+            // 
+            this.textBox_location.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_location.Font = new System.Drawing.Font("ËÎÌå", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBox_location.Location = new System.Drawing.Point(192, 271);
+            this.textBox_location.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_location.MinimumSize = new System.Drawing.Size(136, 4);
+            this.textBox_location.Name = "textBox_location";
+            this.textBox_location.Size = new System.Drawing.Size(267, 31);
+            this.textBox_location.TabIndex = 23;
+            this.textBox_location.TextChanged += new System.EventHandler(this.textBox_location_TextChanged);
             // 
             // toolStrip1
             // 
@@ -656,5 +685,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_setPivateUserName;
         private System.Windows.Forms.ToolStripButton toolStripButton_clearPrivateUserName;
         private System.Windows.Forms.ToolStripButton toolStripButton_freeAllChannels;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox textBox_location;
     }
 }

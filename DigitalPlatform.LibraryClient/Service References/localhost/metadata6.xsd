@@ -1627,6 +1627,7 @@
       <xs:element minOccurs="0" name="Binding" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Comment" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="LibraryCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Location" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Password" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Rights" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="SetPassword" type="xs:boolean" />

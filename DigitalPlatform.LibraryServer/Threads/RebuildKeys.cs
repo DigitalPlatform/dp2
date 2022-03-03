@@ -7,6 +7,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -558,7 +559,6 @@ out strError);
 
             int nRedoCount = 0;
         REDO_REBUILD:
-            // 获得资源
             // return:
             //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
             //		0	成功
@@ -628,10 +628,97 @@ out strError);
         {
             strError = "";
 
+            /*
+            // 删除所有检索途径检索到的，比 __id 途径检索到的多出来的 ID 对应的记录的检索点
+            int nRet = DeleteOutofRangeKeys(info,
+out strError);
+            if (nRet == -1)
+                return -1;
+            */
+
             return ProcessDatabase(info,
                 beginLoop,
                 processRecord,
                 out strError);
+        }
+
+        // 删除所有检索途径检索到的，比 __id 途径检索到的多出来的 ID 对应的记录的检索点
+        int DeleteOutofRangeKeys(BreakPointInfo info,
+    out string strError)
+        {
+            strError = "";
+
+            this.AppendResultText($"正在检索 {info.DbName} 中残留的记录 ID ...\r\n");
+
+            // TODO: 针对 <全部途径> 检索
+            string query1 = "<target list='"
+    + StringUtil.GetXmlStringSimple(info.DbName)
+    + ":" + "<全部>'><item><word></word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+
+            string query2 = "<target list='"
++ StringUtil.GetXmlStringSimple("__id")
++ ":" + "<全部>'><item><word></word><match>exat</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+
+            string strQueryXml = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+
+            RmsChannel channel = RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            string resultset_name = "_rest";
+            var ret = channel.DoSearch(strQueryXml,
+                resultset_name,
+                out strError);
+            if (ret == -1)
+                return -1;
+
+            if (ret == 0)
+            {
+                this.AppendResultText($"{info.DbName} 没有任何残留的记录 ID\r\n");
+                return 0;
+            }
+
+            this.AppendResultText($"开始清除 {info.DbName} 中残留记录(共 {ret} 条)的检索点...\r\n");
+
+            var loader = new SearchResultLoader(channel,
+                null,
+                resultset_name,
+                "id");
+            loader.ElementType = "Record";
+            foreach (Record record in loader)
+            {
+                string path = record.Path;
+                if (string.IsNullOrEmpty(path))
+                    continue;
+
+                this.AppendResultText($"正在清除残留记录 {path} 的检索点...\r\n");
+
+                int nRedoCount = 0;
+            REDO_REBUILD:
+
+                // return:
+                //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+                //		0	成功
+                ret = channel.DoRebuildResKeys(path,
+                    "forcedeleteoldkeys",
+                    out _,
+                    out strError);
+                if (ret == -1)
+                {
+                    if (nRedoCount < 2)
+                    {
+                        nRedoCount++;
+                        goto REDO_REBUILD;
+                    }
+                    return -1;
+                }
+            }
+
+            this.AppendResultText($"完成清除 {info.DbName} 中残留记录的检索点\r\n");
+            return 0;
         }
 
         #endregion

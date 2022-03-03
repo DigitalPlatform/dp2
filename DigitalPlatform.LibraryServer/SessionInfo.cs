@@ -476,7 +476,7 @@ namespace DigitalPlatform.LibraryServer
 
                     nRet = LibraryServerUtil.MatchUserPassword(
                         account.PasswordType,
-                        strPassword, 
+                        strPassword,
                         account.Password,
                         true, out strError);
                     if (nRet == -1)
@@ -528,7 +528,10 @@ namespace DigitalPlatform.LibraryServer
 
             if (this.Account != null)
             {
-                this.Account.Location = strLocation;
+                // 2022/2/25
+                // 参数 strLocation 如果不为空，会覆盖 this.Account.Location
+                if (string.IsNullOrEmpty(strLocation) == false)
+                    this.Account.Location = strLocation;
 
                 // 2016/6/7 给工作人员账户权限补上 librarian
                 // 2017/1/16 加入 special_usernames 判断

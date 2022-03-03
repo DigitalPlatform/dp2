@@ -234,6 +234,7 @@ password);
             this.checkedComboBox_libraryCode.Enabled = bEnable;
             this.textBox_access.Enabled = bEnable;
             this.textBox_binding.Enabled = bEnable;
+            this.textBox_location.Enabled = bEnable;
             this.textBox_comment.Enabled = bEnable;
             this.listView_users.Enabled = bEnable;
 
@@ -283,6 +284,7 @@ password);
             this.checkedComboBox_libraryCode.Text = "";
             this.textBox_access.Text = "";
             this.textBox_binding.Text = "";
+            this.textBox_location.Text = "";
             this.textBox_comment.Text = "";
         }
 
@@ -532,6 +534,7 @@ password);
             item_info.UserInfo.LibraryCode = this.checkedComboBox_libraryCode.Text; //  this.textBox_libraryCode.Text;
             item_info.UserInfo.Access = this.textBox_access.Text;
             item_info.UserInfo.Binding = this.textBox_binding.Text;
+            item_info.UserInfo.Location = this.textBox_location.Text;
             item_info.UserInfo.Comment = this.textBox_comment.Text;
             item_info.Changed = this.EditChanged;
 
@@ -565,6 +568,7 @@ password);
             this.checkedComboBox_libraryCode.Text = info.LibraryCode;
             this.textBox_access.Text = info.Access;
             this.textBox_binding.Text = info.Binding;
+            this.textBox_location.Text = info.Location;
             this.textBox_comment.Text = info.Comment;
 
             // 故意造成两个密码不一样，防止无意中重设了密码
@@ -596,6 +600,7 @@ password);
             this.checkedComboBox_libraryCode.Text = "";
             this.textBox_access.Text = "";
             this.textBox_binding.Text = "";
+            this.textBox_location.Text = "";
             this.textBox_comment.Text = "";
 
             this.textBox_password.Text = "";
@@ -1172,6 +1177,7 @@ password);
             info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
             info.Access = this.textBox_access.Text;
             info.Binding = this.textBox_binding.Text;
+            info.Location = this.textBox_location.Text;
             info.Comment = this.textBox_comment.Text;
 
             if (this.checkBox_changePassword.Checked == true)
@@ -1235,6 +1241,7 @@ password);
             info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
             info.Access = this.textBox_access.Text;
             info.Binding = this.textBox_binding.Text;
+            info.Location = this.textBox_location.Text;
             info.Comment = this.textBox_comment.Text;
 
             if (this.checkBox_changePassword.Checked == true)
@@ -1346,6 +1353,11 @@ password);
             // TODO: 警告
             Program.MainForm._channelPool.Clear();
             Program.MainForm._channelPoolExt.Clear();
+        }
+
+        private void textBox_location_TextChanged(object sender, EventArgs e)
+        {
+            this.EditChanged = true;
         }
 
 #if NO

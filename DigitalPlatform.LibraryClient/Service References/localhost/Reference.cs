@@ -509,6 +509,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         RefIdDup = 44,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        Canceled = 45,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
@@ -2978,6 +2981,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string LibraryCodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LocationField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string PasswordField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -3050,6 +3056,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.LibraryCodeField, value) != true)) {
                     this.LibraryCodeField = value;
                     this.RaisePropertyChanged("LibraryCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Location {
+            get {
+                return this.LocationField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LocationField, value) != true)) {
+                    this.LocationField = value;
+                    this.RaisePropertyChanged("Location");
                 }
             }
         }

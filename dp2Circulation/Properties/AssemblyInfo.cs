@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.59.*")]
-[assembly: AssemblyFileVersion("3.59.0.0")]
+[assembly: AssemblyVersion("3.60.*")]
+[assembly: AssemblyFileVersion("3.60.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -141,4 +141,5 @@ using System.Runtime.InteropServices;
 // 3.56 2022/1/13
 // 3.57 2022/1/18 检查借阅信息链窗功能重构
 // 3.58 2022/1/25 dp2circulation 中 ApplicationInfo 类更换为 NewApplicationInfo 类
-// 3.29 2022/1/28 在种册窗内进行唯一性检查(997 查重)的时候，如果发现重复记录，如果固定面板区处于隐藏状态，会自动显示出固定面板区
+// 3.59 2022/1/28 在种册窗内进行唯一性检查(997 查重)的时候，如果发现重复记录，如果固定面板区处于隐藏状态，会自动显示出固定面板区
+// 3.60 2022/2/21 检查借阅信息链窗改进了同时检查读者记录证条码为空的记录的功能，和检查册记录中册条码号和参考ID 均为空的功能
