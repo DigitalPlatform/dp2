@@ -40,6 +40,28 @@ namespace dp2Circulation
             return LibraryServerUtil.GetOwnerInstitution(
                 cfg_dom.DocumentElement,
                 strLocation,
+                "entity",
+                out isil,
+                out alternative);
+        }
+
+        public static bool GetOwnerInstitution(
+XmlDocument cfg_dom,
+string libraryCode,
+XmlDocument readerdom,
+out string isil,
+out string alternative)
+        {
+            isil = "";
+            alternative = "";
+
+            if (cfg_dom == null)
+                return false;
+
+            return LibraryServerUtil.GetOwnerInstitution(
+                cfg_dom.DocumentElement,
+                libraryCode,
+                readerdom,
                 out isil,
                 out alternative);
         }

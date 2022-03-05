@@ -7147,12 +7147,31 @@ MessageBoxDefaultButton.Button1);
         // 创建 15693 读者卡
         private void toolStripMenuItem_createRfidCard_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
             string library_code = Program.MainForm.GetReaderDbLibraryCode(Global.GetDbName(this.ReaderEditControl.RecPath));
+            int ret = this.readerEditControl1.GetData(out string xml,
+                out strError);
+            if (ret == -1)
+            {
+                goto ERROR1;
+            }
+            XmlDocument readerdom = new XmlDocument();
+            try
+            {
+                readerdom.LoadXml(xml);
+            }
+            catch (Exception ex)
+            {
+                strError = $"读者 XML 装入 DOM 出现异常: {ex.Message}";
+                goto ERROR1;
+            }
             using (RfidPatronCardDialog dlg = new RfidPatronCardDialog())
             {
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.SetData(this.ReaderEditControl,
                     library_code,
+                    readerdom,
                     out string strWarning);
                 if (string.IsNullOrEmpty(strWarning) == false)
                 {
@@ -7170,6 +7189,9 @@ MessageBoxDefaultButton.Button1);
                 dlg.ShowDialog(this);
                 Program.MainForm.AppInfo.UnlinkFormState(dlg);
             }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void toolStripMenuItem_bindCardNumber_Click(object sender, EventArgs e)

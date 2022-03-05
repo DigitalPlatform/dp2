@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
@@ -34,13 +34,17 @@ namespace dp2Circulation
 
         public void SetData(ReaderEditControl patron,
             string library_code,
+            XmlDocument readerdom,
             out string strWarning)
         {
             strWarning = "";
             try
             {
                 this._barcode = patron.Barcode;
-                this.chipEditor_editing.LogicChipItem = BuildChip(patron, library_code, out strWarning);
+                this.chipEditor_editing.LogicChipItem = BuildChip(patron,
+                    library_code,
+                    readerdom,
+                    out strWarning);
             }
             catch (Exception ex)
             {
@@ -57,6 +61,7 @@ namespace dp2Circulation
         // 根据 BookItem 对象构造一个 LogicChipItem 对象
         public static LogicChipItem BuildChip(ReaderEditControl patron,
             string library_code,
+            XmlDocument readerdom,
             out string strWarning)
         {
             strWarning = "";
@@ -77,7 +82,9 @@ namespace dp2Circulation
             // 定义一系列前缀对应的 ISIL 编码。如果 location 和前缀前方一致比对成功，则得到 ISIL 编码
             var ret = MainForm.GetOwnerInstitution(
                 Program.MainForm.RfidCfgDom,
-                library_code + "/", // 2020/7/17 增加 "/"
+                // library_code + "/", // 2020/7/17 增加 "/"
+                library_code,
+                readerdom,
                 out string isil,
                 out string alternative);
             if (string.IsNullOrEmpty(isil) == false)

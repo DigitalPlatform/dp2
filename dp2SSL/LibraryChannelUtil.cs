@@ -949,7 +949,12 @@ namespace dp2SSL
             if (string.IsNullOrEmpty(oi))
             {
                 string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
-                var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
+                var ret = ShelfData.GetOwnerInstitution(
+                    // libraryCode + "/",
+                    libraryCode,
+                    dom,
+                    out string isil, 
+                    out string alternative);
                 if (ret == true)
                 {
                     if (string.IsNullOrEmpty(isil) == false)
@@ -963,35 +968,6 @@ namespace dp2SSL
             return oi + "." + pii;
         }
 
-
-#if REMOVED
-        // 获得读者的 PII。注意包含了 OI 部分
-        static string GetPatronPii(XmlDocument dom)
-        {
-            string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-            if (string.IsNullOrEmpty(pii))
-            {
-                pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
-                return pii;
-            }
-
-            // 2020/7/17
-            // 加上 OI 部分
-            string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
-            var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
-            if (ret == true)
-            {
-                // 应该是 xxx.xxx 形态
-                if (string.IsNullOrEmpty(isil) == false)
-                    pii = isil + "." + pii;
-                else if (string.IsNullOrEmpty(alternative) == false)
-                    pii = alternative + "." + pii;
-            }
-
-            return pii;
-        }
-
-#endif
 
         // 获得 oi.pii 的 oi 部分
         public static string GetOiPart(string oi_pii, bool return_null)
@@ -1175,34 +1151,6 @@ namespace dp2SSL
                 patron.Xml = get_result.ReaderXml;
                 patron.Timestamp = get_result.Timestamp;
                 patron.LastWriteTime = lastWriteTime;
-
-#if REMOVED
-                // 2020/9/25
-                // 把 PII 规整为包含 OI 的形态
-                if (patron.PII == null
-                    || patron.PII?.IndexOf(".") == -1 || patron.PII.StartsWith("."))
-                {
-                    string pii = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-                    if (string.IsNullOrEmpty(pii))
-                        pii = "@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
-
-                    if (pii.StartsWith("@") == false)
-                    {
-                        string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
-                        var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
-                        if (ret == true)
-                        {
-                            // 应该是 xxx.xxx 形态
-                            if (string.IsNullOrEmpty(isil) == false)
-                                pii = isil + "." + pii;
-                            else if (string.IsNullOrEmpty(alternative) == false)
-                                pii = alternative + "." + pii;
-                        }
-                        WpfClientInfo.WriteInfoLog($"写入本地读者缓存以前，修正 PII '{patron.PII}' 为 '{pii}' (UpdateLocalPatronRecord())");
-                        patron.PII = pii;
-                    }
-                }
-#endif
             }
         }
 

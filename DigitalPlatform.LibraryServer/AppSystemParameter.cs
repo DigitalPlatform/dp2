@@ -371,6 +371,7 @@ namespace DigitalPlatform.LibraryServer
 
                 // 2020/7/17
                 // RFID 相关定义: 获得册记录(或者馆代码)关联的 OI
+                // 注意，不能用于读者记录
                 if (strCategory == "rfid/getOwnerInstitution")
                 {
                     var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
@@ -391,6 +392,7 @@ namespace DigitalPlatform.LibraryServer
                         //      可能会抛出异常 Exception
                         var ret = LibraryServerUtil.GetOwnerInstitution(rfid,
                             strName,
+                            "entity",
                             out string isil,
                             out string alternative);
                         if (ret == false)

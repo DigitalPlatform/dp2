@@ -921,6 +921,39 @@ namespace dp2SSL
 
             return LibraryServerUtil.GetOwnerInstitution(cfg_dom.DocumentElement,
                 strLocation,
+                "entity",
+                out isil,
+                out alternative);
+        }
+
+        // 专用于读者记录
+        public static bool GetOwnerInstitution(
+    string libraryCode,
+    XmlDocument readerdom,
+    out string isil,
+    out string alternative)
+        {
+            isil = "";
+            alternative = "";
+
+        REDO:
+            var cfg_dom = _rfidCfgDom;
+
+            if (cfg_dom == null)
+            {
+                var prepare_result = PrepareConfigDom();
+                if (prepare_result.Value == -1)
+                    throw new Exception(prepare_result.ErrorInfo);
+                goto REDO;
+                // return false;
+            }
+
+            if (cfg_dom.DocumentElement == null)
+                return false;
+
+            return LibraryServerUtil.GetOwnerInstitution(cfg_dom.DocumentElement,
+                libraryCode,
+                readerdom,
                 out isil,
                 out alternative);
         }

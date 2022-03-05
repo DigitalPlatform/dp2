@@ -3310,6 +3310,7 @@ start_time_1,
         public int VerifyPatronOI(
             string strPatronRecPath,
             string strLibraryCode,
+            XmlDocument readerdom,
             string strOwnerInstitution,
             out string strError)
         {
@@ -3342,11 +3343,19 @@ start_time_1,
                 //      false   没有找到
                 // exception:
                 //      可能会抛出异常 Exception
+                /*
                 var ret = LibraryServerUtil.GetOwnerInstitution(
                     rfid,
                     strLibraryCode + "/",
                     out string isil,
                     out string alternative);
+                */
+                var ret = LibraryServerUtil.GetOwnerInstitution(
+    rfid,
+    strLibraryCode,
+    readerdom,
+    out string isil,
+    out string alternative);
                 if (ret == false)
                 {
                     // 2022/2/26
@@ -3375,7 +3384,7 @@ start_time_1,
             }
             catch (Exception ex)
             {
-                strError = $"获取机构代码过程出现异常: {ex.Message}";
+                strError = $"获取读者机构代码过程出现异常: {ex.Message}";
                 return -1;
             }
         }
@@ -3436,6 +3445,7 @@ start_time_1,
                 var ret = LibraryServerUtil.GetOwnerInstitution(
                     rfid,
                     strLocation,
+                    "entity",
                     out string isil,
                     out string alternative);
                 if (ret == false)
@@ -3474,7 +3484,8 @@ start_time_1,
         // 2021/3/4
         // return:
         //      如果返回 null 表示 libraryCode 相关的馆藏地没有在 library.xml 中配置对应的机构代码
-        public string GetPatronOI(string libraryCode)
+        public string GetPatronOI(string libraryCode,
+            XmlDocument readerdom)
         {
             var rfid = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid") as XmlElement;
             if (rfid == null)
@@ -3489,7 +3500,9 @@ start_time_1,
                 //      可能会抛出异常 Exception
                 var ret = LibraryServerUtil.GetOwnerInstitution(
                     rfid,
-                    libraryCode + "/",
+                    // libraryCode + "/",
+                    libraryCode,
+                    readerdom,
                     out string isil,
                     out string alternative);
                 if (ret == false)
@@ -3539,7 +3552,9 @@ start_time_1,
                 //      可能会抛出异常 Exception
                 var ret = LibraryServerUtil.GetOwnerInstitution(
                     rfid,
-                    libraryCode + "/",
+                    // libraryCode + "/",
+                    libraryCode,
+                    patrondom,
                     out string isil,
                     out string alternative);
                 if (ret == false)
@@ -3609,6 +3624,7 @@ start_time_1,
                 var ret = LibraryServerUtil.GetOwnerInstitution(
                     rfid,
                     strLocation,
+                    "entity",
                     out string isil,
                     out string alternative);
                 if (ret == false)
@@ -3671,6 +3687,7 @@ start_time_1,
                 var ret = LibraryServerUtil.GetOwnerInstitution(
                     rfid,
                     strLocation,
+                    "entity",
                     out string isil,
                     out string alternative);
                 if (ret == false)
@@ -3915,10 +3932,22 @@ start_time_1,
                 }
             }
 
+            nRet = LibraryApplication.LoadToDom(strReaderXml,
+        out readerdom,
+        out strError);
+            if (nRet == -1)
+            {
+                // text-level: 内部错误
+                strError = "装载读者记录进入 XML DOM 时发生错误: " + strError;
+                goto ERROR1;
+            }
+
             // 检查机构代码
             // 2021/3/9
             if (strOwnerInstitution != null)
             {
+                Debug.Assert(readerdom != null);
+
                 // return:
                 //      -1  出错
                 //      0   没有通过较验
@@ -3926,6 +3955,7 @@ start_time_1,
                 nRet = VerifyPatronOI(
                     strOutputReaderRecPath,
                     strLibraryCode,
+                    readerdom,
                     strOwnerInstitution,
                     out strError);
                 if (nRet == -1)
@@ -3937,16 +3967,6 @@ start_time_1,
                     result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                     return result;
                 }
-            }
-
-            nRet = LibraryApplication.LoadToDom(strReaderXml,
-                out readerdom,
-                out strError);
-            if (nRet == -1)
-            {
-                // text-level: 内部错误
-                strError = "装载读者记录进入 XML DOM 时发生错误: " + strError;
-                goto ERROR1;
             }
 
             WriteTimeUsed(
@@ -12572,6 +12592,15 @@ out string _);
                     }
                 }
 
+                nRet = LibraryApplication.LoadToDom(strReaderXml,
+                    out XmlDocument readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    goto ERROR1;
+                }
+
                 // 2021/3/3
                 if (strOwnerInstitution != null)
                 {
@@ -12582,6 +12611,7 @@ out string _);
                     nRet = VerifyPatronOI(
                         strOutputReaderRecPath,
                         strLibraryCode,
+                        readerdom,
                         strOwnerInstitution,
                         out strError);
                     if (nRet == -1 || nRet == 0)
@@ -12595,17 +12625,6 @@ out string _);
                         return result;
                     }
                     */
-                }
-
-
-                XmlDocument readerdom = null;
-                nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                    goto ERROR1;
                 }
 
                 // 准备日志DOM
@@ -13216,6 +13235,15 @@ out string _);
                     }
                 }
 
+                nRet = LibraryApplication.LoadToDom(strReaderXml,
+                    out XmlDocument readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    goto ERROR1;
+                }
+
                 // 2021/3/3
                 // 补充判断机构代码
                 if (strOwnerInstitution != null)
@@ -13227,6 +13255,7 @@ out string _);
                     nRet = VerifyPatronOI(
                         strOutputReaderRecPath,
                         strLibraryCode,
+                        readerdom,
                         strOwnerInstitution,
                         out strError);
                     if (nRet == -1)
@@ -13238,16 +13267,6 @@ out string _);
                         result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                         return result;
                     }
-                }
-
-                XmlDocument readerdom = null;
-                nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                    goto ERROR1;
                 }
 
                 // 准备日志DOM

@@ -5672,6 +5672,8 @@ out strError);
             // 2020/7/17
             if (strOwnerInstitution != null)
             {
+                Debug.Assert(readerdom != null);
+
                 // return:
                 //      -1  出错
                 //      0   没有通过较验
@@ -5679,6 +5681,7 @@ out strError);
                 nRet = VerifyPatronOI(
                     strRecPath,
                     strLibraryCode,
+                    readerdom,
                     strOwnerInstitution,
                     out strError);
                 if (nRet == -1)
@@ -6101,8 +6104,9 @@ out strError);
                 }
                 else if (String.Compare(strResultType, "oi", true) == 0)
                 {
+                    Debug.Assert(readerdom != null);
                     // oi 第一字符如果是 ! 表示这是出错信息
-                    var oi = GetPatronOI(strReaderLibraryCode);
+                    var oi = GetPatronOI(strReaderLibraryCode, readerdom);
                     SetResult(results_list, i, oi);
                 }
                 else if (String.Compare(strResultType, "advancexml_borrow_bibliosummary", true) == 0

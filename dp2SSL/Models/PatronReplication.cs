@@ -327,7 +327,12 @@ out string strError);
             if (pii.StartsWith("@") == false)
             {
                 string libraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
-                var ret = ShelfData.GetOwnerInstitution(libraryCode + "/", out string isil, out string alternative);
+                var ret = ShelfData.GetOwnerInstitution(
+                    // libraryCode + "/", 
+                    libraryCode,
+                    dom,
+                    out string isil,
+                    out string alternative);
                 if (ret == true)
                 {
                     // 应该是 xxx.xxx 形态

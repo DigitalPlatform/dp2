@@ -1641,6 +1641,15 @@ namespace dp2Library
                     }
                 }
 
+                nRet = LibraryApplication.LoadToDom(strXml,
+                    out XmlDocument readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    goto ERROR1;
+                }
+
                 // 2021/3/3
                 // 补充判断机构代码
                 if (strOwnerInstitution != null)
@@ -1652,6 +1661,7 @@ namespace dp2Library
                     nRet = app.VerifyPatronOI(
                         strOutputPath,
                         strLibraryCode,
+                        readerdom,
                         strOwnerInstitution,
                         out strError);
                     if (nRet == -1)
@@ -1670,16 +1680,6 @@ namespace dp2Library
                     result.Value = 1;
                     result.ErrorInfo = LibraryApplication.BuildQrCode(strReaderBarcode, app.UID);
                     return result;
-                }
-
-                XmlDocument readerdom = null;
-                nRet = LibraryApplication.LoadToDom(strXml,
-                    out readerdom,
-                    out strError);
-                if (nRet == -1)
-                {
-                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                    goto ERROR1;
                 }
 
                 // 验证读者密码。包括普通密码和临时密码，或者 token

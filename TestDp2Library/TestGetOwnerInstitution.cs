@@ -31,8 +31,10 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "海淀分馆/",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("test", isil);
             Assert.AreEqual("", alternative);
         }
@@ -54,8 +56,10 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "海淀分馆/阅览室",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("test", isil);
             Assert.AreEqual("", alternative);
         }
@@ -76,8 +80,10 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "西城/",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("", isil);
             Assert.AreEqual("xc", alternative);
         }
@@ -99,8 +105,10 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "西城/阅览室",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("", isil);
             Assert.AreEqual("xc", alternative);
         }
@@ -122,8 +130,10 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "阅览室",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("", isil);
             Assert.AreEqual("xc", alternative);
         }
@@ -145,8 +155,10 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "流通书库",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("test", isil);
             Assert.AreEqual("", alternative);
         }
@@ -168,9 +180,10 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "海淀分馆/",
+    "entity",
     out string isil,
     out string alternative);
-            Assert.AreEqual(bRet, false);
+            Assert.AreEqual(false, bRet);
             Assert.AreEqual("", isil);
             Assert.AreEqual("", alternative);
         }
@@ -190,14 +203,16 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "星洲小学/阅览室",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("CN-0000001-XZ", isil);
             Assert.AreEqual("", alternative);
         }
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_1()
+        public void TestMethod_wilcard_GetOwnerInstitution_01()
         {
             string xml =
     @"<rfid>
@@ -212,14 +227,16 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "星洲小学/第一",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("CN-0000001-XZ1", isil);
             Assert.AreEqual("", alternative);
         }
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_2()
+        public void TestMethod_wilcard_GetOwnerInstitution_02()
         {
             string xml =
     @"<rfid>
@@ -234,11 +251,210 @@ namespace TestDp2Library
             bool bRet = LibraryServerUtil.GetOwnerInstitution(
     cfg_dom.DocumentElement,
     "星洲小学/第二分部",
+    "entity",
     out string isil,
     out string alternative);
+            Assert.AreEqual(true, bRet);
             Assert.AreEqual("CN-0000001-XZ2", isil);
             Assert.AreEqual("", alternative);
         }
+
+
+        [TestMethod]
+        public void TestMethod_wilcard_GetOwnerInstitution_11()
+        {
+            string cfg_xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item map='星洲小学/西部*' isil='CN-0000001-XZX' />
+		    <item map='星洲小学/东部*' isil='CN-0000001-XZD' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(cfg_xml);
+
+            string patron_xml =
+    @"<root>
+        <readerType>普通读者</readerType>
+        <department>西部三年级一班</department>
+    </root>";
+            XmlDocument patron_dom = new XmlDocument();
+            patron_dom.LoadXml(patron_xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "星洲小学",
+    patron_dom,
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(true, bRet);
+            Assert.AreEqual("CN-0000001-XZX", isil);
+            Assert.AreEqual("", alternative);
+        }
+
+        [TestMethod]
+        public void TestMethod_wilcard_GetOwnerInstitution_12()
+        {
+            string cfg_xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item map='星洲小学/西部*' isil='CN-0000001-XZX' />
+		    <item map='星洲小学/东部*' isil='CN-0000001-XZD' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(cfg_xml);
+
+            string patron_xml =
+    @"<root>
+        <readerType>普通读者</readerType>
+        <department>东部四年级一班</department>
+    </root>";
+            XmlDocument patron_dom = new XmlDocument();
+            patron_dom.LoadXml(patron_xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "星洲小学",
+    patron_dom,
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(true, bRet);
+            Assert.AreEqual("CN-0000001-XZD", isil);
+            Assert.AreEqual("", alternative);
+        }
+
+        // 两个 department 都没有匹配上
+        [TestMethod]
+        public void TestMethod_wilcard_GetOwnerInstitution_13()
+        {
+            string cfg_xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item map='星洲小学/西部*' isil='CN-0000001-XZX' />
+		    <item map='星洲小学/东部*' isil='CN-0000001-XZD' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(cfg_xml);
+
+            string patron_xml =
+    @"<root>
+        <readerType>普通读者</readerType>
+        <department>五年级一班</department>
+    </root>";
+            XmlDocument patron_dom = new XmlDocument();
+            patron_dom.LoadXml(patron_xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "星洲小学",
+    patron_dom,
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(false, bRet);
+            Assert.AreEqual("", isil);
+            Assert.AreEqual("", alternative);
+        }
+
+        [TestMethod]
+        public void TestMethod_wilcard_GetOwnerInstitution_14()
+        {
+            string cfg_xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item map='星洲小学/西部*' isil='CN-0000001-XZX' />
+		    <item map='星洲小学/readerType:普通*' isil='CN-0000001-XZP' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(cfg_xml);
+
+            string patron_xml =
+    @"<root>
+        <readerType>普通读者</readerType>
+        <department>东部四年级一班</department>
+    </root>";
+            XmlDocument patron_dom = new XmlDocument();
+            patron_dom.LoadXml(patron_xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "星洲小学",
+    patron_dom,
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(true, bRet);
+            Assert.AreEqual("CN-0000001-XZP", isil);
+            Assert.AreEqual("", alternative);
+        }
+
+        // 匹配读者
+        // 用 libraryCode + "/" 匹配上
+        [TestMethod]
+        public void TestMethod_patron_GetOwnerInstitution_01()
+        {
+            string cfg_xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item map='星洲小学/' isil='CN-0000001-XZ' />
+		    <item map='东方小学/' isil='CN-0000001-DF' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(cfg_xml);
+
+            string patron_xml =
+    @"<root>
+        <readerType>普通读者</readerType>
+        <department>四年级一班</department>
+    </root>";
+            XmlDocument patron_dom = new XmlDocument();
+            patron_dom.LoadXml(patron_xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "星洲小学",
+    patron_dom,
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(true, bRet);
+            Assert.AreEqual("CN-0000001-XZ", isil);
+            Assert.AreEqual("", alternative);
+        }
+
+        [TestMethod]
+        public void TestMethod_patron_GetOwnerInstitution_02()
+        {
+            string cfg_xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item type='patron' map='海淀分馆/特殊$' isil='CN-0000001-HDT' /><!-- 此项用末尾的 $ 压制了默认的 * -->
+		    <item type='entity' map='海淀分馆/' isil='CN-0000001-HD' /><!-- 此项排除读者匹配 -->
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(cfg_xml);
+
+            string patron_xml =
+    @"<root>
+        <readerType>普通读者</readerType>
+        <department>特殊四年级一班</department>
+    </root>";
+            XmlDocument patron_dom = new XmlDocument();
+            patron_dom.LoadXml(patron_xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "海淀分馆",
+    patron_dom,
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(false, bRet);
+            Assert.AreEqual("", isil);
+            Assert.AreEqual("", alternative);
+        }
+
 
     }
 }

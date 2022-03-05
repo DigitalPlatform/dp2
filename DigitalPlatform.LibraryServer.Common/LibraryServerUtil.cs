@@ -429,7 +429,7 @@ namespace DigitalPlatform.LibraryServer
                         return 0;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     strError = "内部错误";
                     return -1;
@@ -1326,6 +1326,69 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         }
 #endif
 
+        #region 读者记录 OI
+
+        // 2022/3/5
+        // return:
+        //      true    找到。信息在 isil 和 alternative 参数里面返回
+        //      false   没有找到
+        // exception:
+        //      可能会抛出异常 Exception
+        public static bool GetOwnerInstitution(
+            XmlElement rfid,
+            string libraryCode,
+            XmlDocument readerdom,
+            out string isil,
+            out string alternative)
+        {
+            string[] types = new string[] {
+                "department",
+                "readerType",
+                // "libraryCode",
+            };
+
+            foreach (var type in types)
+            {
+                string location = GetPatronLocation(readerdom,
+                    libraryCode,
+                    type);
+                var ret = GetOwnerInstitution(rfid,
+                    location,
+                    "patron",
+                    out isil,
+                    out alternative);
+                if (ret == true)
+                    return true;
+            }
+            isil = "";
+            alternative = "";
+            return false;
+        }
+
+        // 2022/3/5
+        // 获得读者记录的“位置”
+        public static string GetPatronLocation(XmlDocument readerdom,
+            string libraryCode,
+            string type)
+        {
+            if (libraryCode == null)
+                libraryCode = "";
+
+            if (libraryCode.Contains("/"))
+                throw new ArgumentException($"libraryCode 参数值 '{libraryCode}' 不合法。不应包含斜杠");
+
+            if (type == "libraryCode")
+                return libraryCode + "/";
+            if (type == "readerType")
+                return libraryCode + "/readerType:" + DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
+            if (type == "department")
+                return libraryCode + "/" + DomUtil.GetElementText(readerdom.DocumentElement, "department");
+
+            throw new ArgumentException($"未知的 type 参数值 '{type}'");
+        }
+
+        #endregion
+
         /*
 <rfid>
     <ownerInstitution>
@@ -1339,18 +1402,21 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
  * */
         // parameters:
         //      cfg_dom 根元素是 rfid
-        //      strLocation 纯净的 location 元素内容。
+        //      strLocation 对于册记录，这是纯净的 location 元素内容。
         //                  或者用馆代码，比如 "/" 表示总馆；"海淀分馆/" 表示分馆
+        //                  对于读者记录，这是用读者记录所在馆代码和读者类型、读者单位拼接以后的字符串。两次拼接结果依次尝试，匹配上一次就算匹配命中
+        //      type_list   要匹配的类型。为 entity patron 之一或者组合。如果为 null，表示 "entity,patron"
         //      isil    [out] 返回 ISIL 形态的代码
         //      alternative [out] 返回其他形态的代码
         // return:
         //      true    找到。信息在 isil 和 alternative 参数里面返回
         //      false   没有找到
         // exception:
-        //      可能会抛出异常 Exception
+        //      可能会抛出异常 Exception ArgumentException
         public static bool GetOwnerInstitution(
             XmlElement rfid,
             string strLocation,
+            string type_list,
             out string isil,
             out string alternative)
         {
@@ -1363,6 +1429,12 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             if (strLocation != null
     && strLocation.IndexOfAny(new char[] { '*', '?' }) != -1)
                 throw new ArgumentException($"参数 {nameof(strLocation)} 值({strLocation})中不应包含字符 '*' '?'", nameof(strLocation));
+
+            if (type_list != null && type_list.Contains("item"))
+                throw new ArgumentException($"参数 {nameof(type_list)} 值中不应使用 item。请改用 entity");
+
+            if (type_list == null)
+                type_list = "entity,patron";
 
             // 分析 strLocation 是否属于总馆形态，比如“阅览室”
             // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
@@ -1378,6 +1450,13 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             List<HitItem> results = new List<HitItem>();
             foreach (XmlElement item in items)
             {
+                string type = item.GetAttribute("type");
+                if (string.IsNullOrEmpty(type))
+                    type = "entity,patron";   // 默认 item,patron
+
+                if (StringUtil.IsInList(type_list, type) == false)
+                    continue;
+
                 string map = item.GetAttribute("map");
 
                 if (StringUtil.RegexCompare(GetRegex(map), strLocation))
@@ -1419,8 +1498,16 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         {
             if (pattern == null)
                 pattern = "";
-            if (pattern.Length > 0 && pattern[pattern.Length - 1] != '*')
-                pattern += "*";
+
+            // 末尾的符号 ^ 可以压制默认的 *
+            if (pattern.Length > 0 && pattern[pattern.Length - 1] == '$')
+                pattern = pattern.Substring(0, pattern.Length - 1);
+            else
+            {
+                if (pattern.Length > 0 && pattern[pattern.Length - 1] != '*')
+                    pattern += "*";
+            }
+
             return "^" + Regex.Escape(pattern)
             .Replace(@"\*", ".*")
             .Replace(@"\?", ".")
