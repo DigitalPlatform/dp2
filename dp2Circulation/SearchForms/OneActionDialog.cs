@@ -6,14 +6,15 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 using System.Xml;
+using System.Diagnostics;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.IO;
 using DigitalPlatform;
-using System.Diagnostics;
 using DigitalPlatform.Text;
-using System.IO;
 
 namespace dp2Circulation
 {
@@ -590,6 +591,8 @@ namespace dp2Circulation
                     FillDropDown(combobox);
                 if (StringUtil.IsInList("removable", this._actionCfg.Style) == true)
                     this.comboBox_fieldValue.Items.Add("<删除>");
+                // 2022/3/7
+                this.comboBox_fieldValue.Items.Add("{autopostfix}");
             }
         }
 

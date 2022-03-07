@@ -1332,6 +1332,9 @@ namespace dp2Circulation
             string strOldValue = DomUtil.GetElementText(dom.DocumentElement,
     strElementName);
 
+            // 解析命令
+            strNewValue = ProcessCommand(strOldValue, strNewValue);
+
             if (strOldValue != strNewValue)
             {
                 DomUtil.SetElementText(dom.DocumentElement,
@@ -1341,6 +1344,20 @@ namespace dp2Circulation
 
                 debug.Append("<" + strElementName + "> '" + strOldValue + "' --> '" + strNewValue + "'\r\n");
             }
+        }
+
+        // 2022/3/7
+        // 执行各种 {} 替换命令
+        // {autopostfix}
+        static string ProcessCommand(string old_value,
+            string new_value)
+        {
+            if (new_value != null && new_value.Contains("{autopostfix}"))
+            {
+                return new_value.Replace("{autopostfix}", old_value + "_" + Guid.NewGuid().ToString());
+            }
+
+            return new_value;
         }
 
         internal static void ChangeField(ref XmlDocument dom,
@@ -1760,7 +1777,7 @@ dlg.UiState);
                     }
 
 
-                    // 修改一个订购记录 XmlDocument
+                    // 修改一个册记录 XmlDocument
                     // return:
                     //      -1  出错
                     //      0   没有实质性修改

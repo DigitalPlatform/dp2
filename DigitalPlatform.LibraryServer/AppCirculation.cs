@@ -3876,6 +3876,15 @@ start_time_1,
 
         SKIP0:
 
+            // 可能比 sessioninfo.LibraryCodeList 扩展。因为馆际互借缘故
+            string strExpandCodeList = sessioninfo.LibraryCodeList;
+
+            nRet = GetExpandCodeList(sessioninfo,
+out strExpandCodeList,
+out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
             // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
             // 2008/6/4
             if (bVerifyReaderRecPath == true
@@ -3925,7 +3934,7 @@ start_time_1,
                 // 检查当前操作者是否管辖这个读者库
                 // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                 if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
-        sessioninfo.LibraryCodeList) == false)
+        strExpandCodeList/*sessioninfo.LibraryCodeList*/) == false)
                 {
                     strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
                     goto ERROR1;

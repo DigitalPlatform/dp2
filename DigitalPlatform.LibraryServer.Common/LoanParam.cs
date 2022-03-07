@@ -20,9 +20,9 @@ namespace DigitalPlatform.LibraryServer
     public static class LoanParam
     {
 
-        public static string[] reader_d_paramnames = new string[] { 
+        public static string[] reader_d_paramnames = new string[] {
                     "可借总册数",
-                    "可预约册数", 
+                    "可预约册数",
                     "以停代金因子",
                     "工作日历名",
             };
@@ -833,7 +833,7 @@ namespace DigitalPlatform.LibraryServer
                     && String.IsNullOrEmpty(strBookType) == false)
                     return 2;   // both found
 
-            DOCONTINUE:
+                DOCONTINUE:
                 node = node.ParentNode;
             }
 
@@ -846,6 +846,124 @@ namespace DigitalPlatform.LibraryServer
                 return 0;   // not found
 
             return 1;   // found one type 
+        }
+
+        // 获得读者类型从属的馆代码
+        public static int GetReaderTypeLibraryCode(
+    XmlNode root_param,
+    string strLibraryCode,
+    //string strReaderType,
+    //string strBookType,
+    //string strParamName,
+    out List<string> library_codes,
+    out string strError)
+        {
+            strError = "";
+            library_codes = new List<string>();
+
+            XmlNode root = root_param;
+            string strFilter = "";
+
+            if (string.IsNullOrEmpty(strLibraryCode) == false)
+            {
+                // descendant
+                XmlNode temp = root.SelectSingleNode("descendant-or-self::library[@code='" + strLibraryCode + "']");
+                if (temp == null)
+                {
+                    strError = "<rightsTable> 中没有配置 code 属性为 '" + strLibraryCode + "' 的 <library> 元素";
+                    return -1;
+                }
+                root = temp;
+            }
+            else
+            {
+                // TODO: 如果有一个以上的<library>元素，则需要复制出一个新的DOM，然后把<library>元素全部删除干净
+                strFilter = "[count(ancestor::library) = 0]";
+            }
+
+            // 选出所有同名参数
+            // XmlNodeList nodeParams = root.SelectNodes("descendant::param[@name='" + strParamName + "']" + strFilter);
+            XmlNodeList nodeParams = root.SelectNodes("descendant::param[@name='可借总册数']" + strFilter);
+
+            List<WeightNode> weightnodes = new List<WeightNode>();
+            // 筛选出符合条件的
+
+            // 如果有readertype和booktype都符合的，就优先用(退出循环)，如果没有，则加权后进入一个数组，排序后采用加权值大的。
+            for (int i = 0; i < nodeParams.Count; i++)
+            {
+                XmlNode node = nodeParams[i];
+
+                // double nLevel = GetLevel(node);
+
+                int nRet = GetSurroundType(node,
+                    out string strOuterReaderType,
+                    out string _,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // TODO: 取出读者类型中的馆代码
+                if (strOuterReaderType.Contains("/"))
+                {
+                    var parts = StringUtil.ParseTwoPart(strOuterReaderType, "/");
+                    library_codes.Add(parts[0]);
+                }
+            } // end of for
+
+            // 去重
+            StringUtil.RemoveDup(ref library_codes, false);
+            if (HasWild(library_codes) == false)
+                return 0;
+            // 需要展开 * ?
+            var all_codes = GetAllLibraryCodes();
+            List<string> temp_codes = new List<string>();
+            foreach (var code in library_codes)
+            {
+                temp_codes.AddRange(ExpandCode(code));
+            }
+
+            StringUtil.RemoveDup(ref temp_codes, false);
+            library_codes = temp_codes;
+            return 0;
+
+            bool HasWild(List<string> codes)
+            {
+                foreach(string code in codes)
+                {
+                    if (code.IndexOfAny(new char[] { '*', '?' }) != -1)
+                        return true;
+                }
+
+                return false;
+            }
+
+            List<string> ExpandCode(string code)
+            {
+                if (code.IndexOfAny(new char[] { '*', '?' }) == -1)
+                    return new List<string> { code };
+
+                List<string> results = new List<string>();
+                foreach (var c in all_codes)
+                {
+                    if (MatchReaderType(code, c))
+                        results.Add(c);
+                }
+
+                return results;
+            }
+
+            List<string> GetAllLibraryCodes()
+            {
+                List<string> results = new List<string>();
+                var nodes = root_param.SelectNodes("descendant::library"/*"//library"*/);
+                foreach (XmlElement library in nodes)
+                {
+                    results.Add(library.GetAttribute("code"));
+                }
+
+                StringUtil.RemoveDup(ref results, false);
+                return results;
+            }
         }
     }
 

@@ -51,6 +51,7 @@ namespace DigitalPlatform.LibraryServer.Common
             XmlNodeList nodes = _dom.DocumentElement.SelectNodes("validator");
             if (nodes.Count == 0)
                 return new List<XmlElement>();
+
             foreach (XmlElement validator in nodes)
             {
                 string current = validator.GetAttribute("location");
@@ -72,8 +73,24 @@ namespace DigitalPlatform.LibraryServer.Common
             if (one == pattern)
                 return true;
             string[] list = pattern.Split(new char[] { ',' });
+
+            // 2022/3/7
+            // 看看是否包含否定的事项。否定事项要先执行判断
             foreach (string p in list)
             {
+                if (p.StartsWith("!"))
+                {
+                    string value = p.Substring(1);
+                    if (Regex.IsMatch(one, WildCardToRegular(value)))
+                        return false;
+                }
+            }
+
+            foreach (string p in list)
+            {
+                if (p.StartsWith("!"))
+                    continue;
+
                 if (one == p)
                     return true;
 

@@ -281,5 +281,96 @@ namespace TestDp2Library
             */
         }
 
+        // 测试否定事项
+        [TestMethod]
+        public void Test10()
+        {
+            string xml = @"
+        <collection>
+           <validator location='*,!*/*' >
+               <patron>
+                   <CMIS />
+                   <range value='P000001-P999999' />
+               </patron>
+               <entity>
+                   <range value='0000001-9999999'></range>
+               </entity>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("海淀分馆", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            {
+                var result = validator.Validate("阅览室", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            // 这个应该匹配不上
+            {
+                var result = validator.Validate("海淀分馆/阅览室1", "0000001");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual(null, result.Type);
+            }
+
+            // 这个应该匹配不上
+            {
+                var result = validator.Validate("海淀分馆/阅览室", "0000001");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual(null, result.Type);
+            }
+        }
+
+        // 不使用否定模式，则字符串中间有 / 也会匹配上
+        [TestMethod]
+        public void Test11()
+        {
+            string xml = @"
+        <collection>
+           <validator location='*' >
+               <patron>
+                   <CMIS />
+                   <range value='P000001-P999999' />
+               </patron>
+               <entity>
+                   <range value='0000001-9999999'></range>
+               </entity>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("海淀分馆", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            {
+                var result = validator.Validate("阅览室", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            {
+                var result = validator.Validate("海淀分馆/阅览室1", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            {
+                var result = validator.Validate("海淀分馆/阅览室", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+        }
+
     }
 }

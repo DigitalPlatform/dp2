@@ -5312,6 +5312,9 @@ out strError);
                 //
             }
 
+            // 可能比 sessioninfo.LibraryCodeList 扩展。因为馆际互借缘故
+            string strExpandCodeList = sessioninfo.LibraryCodeList;
+
             // 从证条码号获得
             if (bRecordGetted == false)
             {
@@ -5360,6 +5363,12 @@ out strError);
                     }
                     else
                     {
+                        nRet = GetExpandCodeList(sessioninfo,
+    out strExpandCodeList,
+    out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
                         // 慢速版本。但能获得重复的记录路径
                         // return:
                         //      -1  error
@@ -5371,7 +5380,7 @@ out strError);
                             channel,
                             strBarcode,
                             100,
-                            sessioninfo.LibraryCodeList,
+                            strExpandCodeList,  // sessioninfo.LibraryCodeList,
                             out recpaths,
                             out strXml,
                             // out strOutputPath,
@@ -5581,7 +5590,7 @@ out strError);
                 // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                 if (IsTestReaderBarcode(strBarcode) == false
                     && this.IsCurrentChangeableReaderPath(strOutputPath,
-                    sessioninfo.LibraryCodeList) == false)
+                    strExpandCodeList/*sessioninfo.LibraryCodeList*/) == false)
                 {
                     strError = "读者记录路径 '" + strOutputPath + "' 的读者库不在当前用户管辖范围内";
                     goto ERROR1;
@@ -5935,6 +5944,66 @@ out strError);
             result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
+
+        // 2022/3/7
+        public int GetExpandCodeList(SessionInfo sessioninfo,
+            out string strExpandCodeList,
+            out string strError)
+        {
+            strError = "";
+            strExpandCodeList = sessioninfo.LibraryCodeList;
+
+            int nRet = GetReaderTypeLibraryCode(
+    sessioninfo.LibraryCodeList,
+    out List<string> library_codes,
+    out strError);
+            if (nRet == -1)
+                return -1;
+            List<string> codes = new List<string>();
+            codes.AddRange(StringUtil.SplitList(sessioninfo.LibraryCodeList));
+            codes.AddRange(library_codes);
+            StringUtil.RemoveDupNoSort(ref codes);
+
+            strExpandCodeList = StringUtil.MakePathList(codes);
+            return 0;
+        }
+
+        // 2022/3/7
+        public int GetReaderTypeLibraryCode(
+            string strLibraryCodeList,
+            out List<string> library_codes,
+            out string strError)
+        {
+            library_codes = new List<string>();
+            strError = "";
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable");
+            if (root == null)
+            {
+                strError = "library.xml 配置文件中尚未配置 <rightsTable> 元素";
+                return -1;
+            }
+
+            var list = StringUtil.SplitList(strLibraryCodeList);
+
+            foreach (var code in list)
+            {
+                int nRet = LoanParam.GetReaderTypeLibraryCode(
+                root,
+                code,
+                out List<string> temp,
+                out strError);
+                if (nRet == -1)
+                    return -1;
+                library_codes.AddRange(temp);
+            }
+
+            if (list.Count > 0)
+                StringUtil.RemoveDup(ref library_codes, false);
+
+            return 0;
+        }
+
 
         // 在字符串数组中指定下标位置设置一个元素值
         static void SetResult(List<string> results_list,
