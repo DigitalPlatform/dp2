@@ -9997,9 +9997,9 @@ out string _);
         // 将前端发来的片断XML代码更新到library.xml中
         public int SetLibraryFragmentXml(
             string strRootElementName,
-    string strLibraryCodeList,
-    string strFragment,
-    out string strError)
+            string strLibraryCodeList,
+            string strFragment,
+            out string strError)
         {
             strError = "";
 

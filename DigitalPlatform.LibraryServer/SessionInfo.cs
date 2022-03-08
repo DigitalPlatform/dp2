@@ -192,6 +192,12 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 迫使重新搜集 扩展的(馆际互借范围)馆代码列表
+        public void ClearExpandLibraryCodeList()
+        {
+            _expandLibraryCodeList = null;
+        }
+
         string _expandLibraryCodeList = null;
 
         // 2022/3/6
@@ -1435,6 +1441,17 @@ SetStartEventArgs e);
                 info.CloseSession();
             }
             return nCount;
+        }
+
+        // 刷新所有 SessionInfo 对象的 ExpandLibraryCodeList
+        // 用于 library.xml 中流通借阅权限 XML 代码被改变后
+        public void RefreshExpandLibraryCodeList()
+        {
+            CloseSessionBy((info) =>
+            {
+                info.ClearExpandLibraryCodeList();
+                return false;
+            });
         }
 
         public int CloseSessionByUserID(string strUserID)

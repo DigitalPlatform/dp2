@@ -1246,6 +1246,11 @@ namespace DigitalPlatform.CirculationClient
                 root.AppendChild(readertypes_node);
             foreach (string s in reader_types)
             {
+                // 2022/3/8
+                // 为来客配置的 xxx/xxx 形态的读者类型，要跳过
+                if (s.Contains("/"))
+                    continue;
+
                 XmlNode node = this._dom.CreateElement("item");
                 readertypes_node.AppendChild(node);
                 node.InnerText = s;
@@ -1455,6 +1460,16 @@ namespace DigitalPlatform.CirculationClient
                     {
                         ShowMessageBox("读者类型不能为 *，请重新输入");
                         goto REDO_GET_READERTYPE;
+                    }
+
+                    // 2022/3/8
+                    if (strReaderType.Contains("/") == false)
+                    {
+                        if (strReaderType.IndexOfAny(new char[] { '*', '?' }) != -1)
+                        {
+                            ShowMessageBox("短形态(即不含 / 的)读者类型，不允许包含 * ? 字符，请重新输入");
+                            goto REDO_GET_READERTYPE;
+                        }
                     }
 
                     if (strReaderType == row.ReaderType)

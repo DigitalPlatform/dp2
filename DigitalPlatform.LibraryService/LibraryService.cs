@@ -11309,7 +11309,6 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                         goto ERROR1;
                     }
 
-
                     // 修改 <center> 内的定义
                     // return:
                     //      -1  error
@@ -11493,30 +11492,15 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                     // strValue中是下级片断定义，没有<rightsTable>元素作为根。
                     if (strName == "rightsTable")
                     {
-#if NO
-                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable");   // 0.02前为rightstable
-                        if (root == null)
-                        {
-                            root = app.LibraryCfgDom.CreateElement("rightsTable");
-                            app.LibraryCfgDom.DocumentElement.AppendChild(root);
-                        }
-
-                        try
-                        {
-                            root.InnerXml = strValue;
-                        }
-                        catch (Exception ex)
-                        {
-                            strError = "设置<rightsTable>元素的InnerXml时发生错误: " + ex.Message;
-                            goto ERROR1;
-                        }
-#endif
                         nRet = app.SetRightsTableXml(
     sessioninfo.LibraryCodeList,
     strValue,
     out strError);
                         if (nRet == -1)
                             goto ERROR1;
+
+                        // 2022/3/8
+                        app.SessionTable.RefreshExpandLibraryCodeList();
 
                         app.Changed = true;
                         app.ActivateManagerThread();

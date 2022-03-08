@@ -1955,7 +1955,11 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     if (bReload == true)
+                    {
+                        app.SessionTable.RefreshExpandLibraryCodeList();
+
                         app.WriteErrorLog("LibraryService 结束重新装载 " + this.m_strFileName);
+                    }
                     else
                     {
                         TimeSpan delta = DateTime.Now - start;

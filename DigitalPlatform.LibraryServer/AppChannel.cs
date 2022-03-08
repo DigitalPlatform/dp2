@@ -108,7 +108,6 @@ namespace DigitalPlatform.LibraryServer
                 return nCount;
             }
 
-
             return 0;
         }
     }
