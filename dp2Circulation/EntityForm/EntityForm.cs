@@ -6777,7 +6777,15 @@ out strError);
                 //      -1  error
                 //      0   not found
                 //      1   found
-                nRet = this.entityControl1.DoSearchEntity(this.textBox_itemBarcode.Text);
+                nRet = this.entityControl1.DoSearchEntity(this.textBox_itemBarcode.Text,
+                    out BookItem result_item);
+                if (result_item == null)
+                {
+                    string error = $"无法在列表中定位册条码号为 '{this.textBox_itemBarcode.Text}' 的册记录";
+                    if (DisplayOtherLibraryItem == false)
+                        error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
+                    MessageBox.Show(this, error);
+                }
 
                 // 焦点切换到条码输入域
                 // this.SwitchFocus(ITEM_BARCODE);
@@ -6892,6 +6900,13 @@ out strError);
                     false);
                 if (result_item != null)
                     strItemBarcode = result_item.Barcode;
+                else
+                {
+                    string error = $"无法在列表中定位路径为 {strItemRecPath} 的册记录";
+                    if (DisplayOtherLibraryItem == false)
+                        error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
+                    MessageBox.Show(this, error);
+                }
 
                 if (strItemBarcode != this.textBox_itemBarcode.Text)
                     this.textBox_itemBarcode.Text = strItemBarcode;

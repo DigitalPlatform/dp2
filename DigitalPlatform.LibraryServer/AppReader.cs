@@ -5363,11 +5363,14 @@ out strError);
                     }
                     else
                     {
+                        strExpandCodeList = sessioninfo.ExpandLibraryCodeList;
+                        /*
                         nRet = GetExpandCodeList(sessioninfo,
     out strExpandCodeList,
     out strError);
                         if (nRet == -1)
                             goto ERROR1;
+                        */
 
                         // 慢速版本。但能获得重复的记录路径
                         // return:

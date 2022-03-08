@@ -307,7 +307,7 @@ UiTest3(strBiblioDbName)
             this.Invoke((Action)(() =>
             {
                 int nRet = 0;
-                // 获得书目数据库From信息
+                // 获得各种类型的数据库的检索途径
                 nRet = Program.MainForm.GetDbFromInfos(false);
                 if (nRet == -1)
                     goto END1;

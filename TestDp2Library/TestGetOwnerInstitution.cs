@@ -455,6 +455,71 @@ namespace TestDp2Library
             Assert.AreEqual("", alternative);
         }
 
+        // map 长度较长的 “皇家警察”取胜
+        [TestMethod]
+        public void TestMethod_patron_GetOwnerInstitution_10()
+        {
+            string cfg_xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item type='patron' map='海淀分馆/readerType:本科生' isil='CN-0000001-DZ' />
+		    <item type='patron' map='海淀分馆/皇家警察' isil='CN-0000001-AB' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(cfg_xml);
+
+            string patron_xml =
+    @"<root>
+        <readerType>本科生</readerType>
+        <department>皇家警察</department>
+    </root>";
+            XmlDocument patron_dom = new XmlDocument();
+            patron_dom.LoadXml(patron_xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "海淀分馆",
+    patron_dom,
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(true, bRet);
+            Assert.AreEqual("CN-0000001-AB", isil);
+            Assert.AreEqual("", alternative);
+        }
+
+        // map 长度都是 (5+)4 字符。靠前的 item 元素取胜
+        [TestMethod]
+        public void TestMethod_patron_GetOwnerInstitution_11()
+        {
+            string cfg_xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item type='patron' map='海淀分馆/readerType:本科生呢' isil='CN-0000001-DZ' />
+		    <item type='patron' map='海淀分馆/皇家警察' isil='CN-0000001-AB' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(cfg_xml);
+
+            string patron_xml =
+    @"<root>
+        <readerType>本科生呢</readerType>
+        <department>皇家警察</department>
+    </root>";
+            XmlDocument patron_dom = new XmlDocument();
+            patron_dom.LoadXml(patron_xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "海淀分馆",
+    patron_dom,
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(true, bRet);
+            Assert.AreEqual("CN-0000001-DZ", isil);
+            Assert.AreEqual("", alternative);
+        }
 
     }
 }

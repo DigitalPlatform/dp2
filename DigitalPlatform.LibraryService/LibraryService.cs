@@ -2237,32 +2237,7 @@ namespace dp2Library
                     || strReaderDbNames == "<全部>"
                     || strReaderDbNames.ToLower() == "<all>")
                 {
-#if NO
-                    for (int i = 0; i < app.ReaderDbs.Count; i++)
-                    {
-                        string strDbName = app.ReaderDbs[i].DbName;
-                        if (String.IsNullOrEmpty(strDbName) == true)
-                            continue;
-
-                        if (string.IsNullOrEmpty(sessioninfo.LibraryCode) == false)
-                        {
-                            string strLibraryCode = app.ReaderDbs[i].LibraryCode;
-                            // 匹配图书馆代码
-                            // parameters:
-                            //      strSingle   单个图书馆代码。空的总是不能匹配
-                            //      strList     图书馆代码列表，例如"第一个,第二个"，或者"*"。空表示都匹配
-                            // return:
-                            //      false   没有匹配上
-                            //      true    匹配上
-                            if (LibraryApplication.MatchLibraryCode(strLibraryCode, sessioninfo.LibraryCode) == false)
-                                continue;
-                        }
-
-                        dbnames.Add(strDbName);
-                    }
-#endif
-                    dbnames = app.GetCurrentReaderDbNameList(sessioninfo.LibraryCodeList);
-
+                    dbnames = app.GetCurrentReaderDbNameList(sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/);
                 }
                 else
                 {
@@ -2281,7 +2256,7 @@ namespace dp2Library
                             goto ERROR1;
                         }
 
-                        if (string.IsNullOrEmpty(sessioninfo.LibraryCodeList) == false)
+                        if (string.IsNullOrEmpty(sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
                         {
                             // 匹配图书馆代码
                             // parameters:
@@ -2290,7 +2265,7 @@ namespace dp2Library
                             // return:
                             //      false   没有匹配上
                             //      true    匹配上
-                            if (LibraryApplication.MatchLibraryCode(strLibraryCode, sessioninfo.LibraryCodeList) == false)
+                            if (LibraryApplication.MatchLibraryCode(strLibraryCode, sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
                             {
                                 notmatches.Add(strDbName);
                                 continue;
@@ -2302,13 +2277,12 @@ namespace dp2Library
 
                     if (notmatches.Count > 0)
                     {
-                        strError = "读者库 " + StringUtil.MakePathList(notmatches) + " 因为馆代码限制，不允许当前用户检索";
+                        strError = "读者库 " + StringUtil.MakePathList(notmatches) + " 因为馆代码(及馆际互借权限)限制，不允许当前用户检索";
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
-
                 }
 
                 if (dbnames.Count == 0)
@@ -3235,7 +3209,7 @@ namespace dp2Library
                                         // 检查当前操作者是否管辖这个读者库
                                         // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                                         bChangeable = app.IsCurrentChangeableReaderPath(strDbName + "/?",
-                                sessioninfo.LibraryCodeList);
+                                sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/);
                                     }
                                     table[strDbName] = bChangeable; // 记忆
                                 }
@@ -4127,7 +4101,7 @@ namespace dp2Library
                                     // 检查当前操作者是否管辖这个读者库
                                     // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                                     bChangeable = app.IsCurrentChangeableReaderPath(strDbName + "/?",
-                            sessioninfo.LibraryCodeList);
+                            sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/);
                                 }
                                 table[strDbName] = bChangeable; // 记忆
                             }
@@ -4269,13 +4243,12 @@ namespace dp2Library
                 //      1   成功
                 int nRet = app.ListDbFroms(strDbType,
                     strLang,
-                    sessioninfo.LibraryCodeList,
+                    sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/,
                     out infos,
                     out strError);
 
                 result.Value = nRet;
                 result.ErrorInfo = strError;
-
                 return result;
                 /*
             ERROR1:
@@ -5295,186 +5268,6 @@ namespace dp2Library
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
-
-#if NO
-                List<string> dbnames = new List<string>();
-
-                if (String.IsNullOrEmpty(strItemDbName) == true
-                    || strItemDbName == "<全部>"
-                    || strItemDbName.ToLower() == "<all>")
-                {
-                    for (int i = 0; i < app.ItemDbs.Count; i++)
-                    {
-                        string strDbName = app.ItemDbs[i].DbName;
-                        if (String.IsNullOrEmpty(strDbName) == true)
-                            continue;
-                        dbnames.Add(strDbName);
-                    }
-
-                    if (dbnames.Count == 0)
-                    {
-                        strError = "没有发现任何实体库";
-                        goto ERROR1;
-                    }
-
-                }
-                else if (strItemDbName == "<全部期刊>"
-                    || strItemDbName.ToLower() == "<all series>")
-                {
-                    // 2009/2/2 
-                    for (int i = 0; i < app.ItemDbs.Count; i++)
-                    {
-                        string strCurrentItemDbName = app.ItemDbs[i].DbName;
-                        string strCurrentIssueDbName = app.ItemDbs[i].IssueDbName;
-
-                        if (String.IsNullOrEmpty(strCurrentItemDbName) == true)
-                            continue;
-
-                        if (String.IsNullOrEmpty(strCurrentIssueDbName) == true)
-                            continue;
-
-                        dbnames.Add(strCurrentItemDbName);
-                    }
-
-                    if (dbnames.Count == 0)
-                    {
-                        strError = "没有发现任何期刊实体库";
-                        goto ERROR1;
-                    }
-                }
-                else if (strItemDbName == "<全部图书>"
-                    || strItemDbName.ToLower() == "<all book>")
-                {
-                    // 2009/2/2 
-                    for (int i = 0; i < app.ItemDbs.Count; i++)
-                    {
-                        string strCurrentItemDbName = app.ItemDbs[i].DbName;
-                        string strCurrentIssueDbName = app.ItemDbs[i].IssueDbName;
-
-                        if (String.IsNullOrEmpty(strCurrentItemDbName) == true)
-                            continue;
-
-                        // 大书目库中必须不包含期库，说明才是图书用途
-                        if (String.IsNullOrEmpty(strCurrentIssueDbName) == false)
-                            continue;
-
-                        dbnames.Add(strCurrentItemDbName);
-                    }
-
-                    if (dbnames.Count == 0)
-                    {
-                        strError = "没有发现任何图书实体库";
-                        goto ERROR1;
-                    }
-                }
-                else
-                {
-                    string[] splitted = strItemDbName.Split(new char[] { ',' });
-                    for (int i = 0; i < splitted.Length; i++)
-                    {
-                        string strDbName = splitted[i];
-                        if (String.IsNullOrEmpty(strDbName) == true)
-                            continue;
-
-                        if (app.IsItemDbName(strDbName) == false)
-                        {
-                            strError = "库名 '" + strDbName + "' 不是合法的实体库名";
-                            goto ERROR1;
-                        }
-
-                        dbnames.Add(strDbName);
-                    }
-
-                }
-
-                bool bDesc = StringUtil.IsInList("desc", strSearchStyle);
-
-                // 构造检索式
-                string strQueryXml = "";
-                for (int i = 0; i < dbnames.Count; i++)
-                {
-                    string strDbName = dbnames[i];
-
-                    Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
-
-                    strError = EnsureKdbs(false);
-                    if (strError != null)
-                        goto ERROR1;
-
-                    string strFromStyle = app.kdbs.GetFromStyles(strDbName, strFrom, strLang);
-
-                    string strRelation = "=";
-                    string strDataType = "string";
-
-                    if (strFrom == "__id")
-                    {
-                        // 如果为范围式
-                        if (String.IsNullOrEmpty(strQueryWord) == false // 2013/3/25
-                            && strQueryWord.IndexOfAny(new char[] { '-', '~' }) != -1)
-                        {
-                            strRelation = "range";
-                            strDataType = "number";
-                            // 2012/3/29
-                            strMatchStyle = "exact";
-                        }
-                        else if (String.IsNullOrEmpty(strQueryWord) == false)
-                        {
-                            strDataType = "number";
-                            // 2012/3/29
-                            strMatchStyle = "exact";
-                        }
-                    }
-                    // 2014/8/28
-                    else if (StringUtil.IsInList("_time", strFromStyle) == true)
-                    {
-                        // 如果为范围式
-                        if (strQueryWord.IndexOf("~") != -1)
-                        {
-                            strRelation = "range";
-                            strDataType = "number";
-                        }
-                        else
-                        {
-                            strDataType = "number";
-
-                            // 如果检索词为空，并且匹配方式为前方一致、中间一致、后方一致，那么认为这是意图要命中全部记录
-                            // 注意：如果检索词为空，并且匹配方式为精确一致，则需要认为是获取空值，也就是不存在对应检索点的记录
-                            if (strMatchStyle != "exact" && string.IsNullOrEmpty(strQueryWord) == true)
-                            {
-                                strMatchStyle = "exact";
-                                strRelation = "range";
-                                strQueryWord = "~";
-                            }
-                        }
-
-                        // 最后统一修改为exact。不能在一开始修改，因为strMatchStyle值还有帮助判断的作用
-                        strMatchStyle = "exact";
-                    }
-
-                    // 2007/4/5 改造 加上了 GetXmlStringSimple()
-                    string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 
-                        + "'><item>"
-                        + (bDesc == true ? "<order>DESC</order>" : "")
-                    + "<word>"
-                        + StringUtil.GetXmlStringSimple(strQueryWord)
-                        + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
-
-                    if (i > 0)
-                    {
-                        Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
-                        strQueryXml += "<operator value='OR'/>";
-                    }
-
-                    strQueryXml += strOneDbQuery;
-                }
-
-                if (dbnames.Count > 0)
-                {
-                    strQueryXml = "<group>" + strQueryXml + "</group>";
-                }
-
-#endif
 
                 string strQueryXml = "";
                 // 构造检索实体库的 XML 检索式
@@ -10240,7 +10033,7 @@ Stack:
                 int nRet = app.ManageDatabase(
                     sessioninfo,
                     sessioninfo.Channels,
-                    sessioninfo.LibraryCodeList,
+                    sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/,
                     strAction,
                     strDatabaseName,
                     strDatabaseInfo,

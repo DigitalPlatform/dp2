@@ -1439,6 +1439,7 @@ this.checkBox_patron_disableBioKeyboardSimulation.Checked);
         {
             this.Enabled = false;
 
+            // 获得各种类型的数据库的检索途径
             Program.MainForm.GetDbFromInfos();
 
             MessageBox.Show(this, "OK");

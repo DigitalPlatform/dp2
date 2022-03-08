@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.106.*")]
-[assembly: AssemblyFileVersion("3.106.0.0")]
+[assembly: AssemblyVersion("3.107.*")]
+[assembly: AssemblyFileVersion("3.107.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -310,3 +310,5 @@ ItemCanReturn()
 //		3.105 (2022/3/3) Borrow() 和 Return() API 可以处理跨越分馆的借书还书(还没有测试完成)
 //						当 Return() API 根据 strStyle 参数中的 currentLocation:xxx 子参数或者账户当前位置或者 Login() API 的工作台号来自动修改册记录的 currentLocation 字段过程中，遇到检测位置字符串内容格式出错，暂当作警告处理(而不是当作报错处理)
 //		3.106 (2022/3/5) library.xml 中 rfid 元素采用新的匹配算法(允许读者 XML 记录中的 department 和 readerType 元素参与匹配)
+//		3.107 (2022/3/8) SearchReader() GetReaderInfo() GetSearchResult() GetBrowseRecords() 等 API 均对馆际互借情况下，扩大了 dp2library 账户能查看的读者记录查看范围。
+//						ManageDatabase() API "getinfo" 功能对馆际互借情况情况也扩大了可见的读者库范围

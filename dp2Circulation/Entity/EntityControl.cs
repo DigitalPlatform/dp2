@@ -3084,10 +3084,12 @@ edit.UiState);
         /// 根据册条码号 检索出 书目记录 和全部下属册，装入窗口
         /// </summary>
         /// <param name="strBarcode">册条码号</param>
+        /// <param name="result_item"></param>
         /// <returns>-1: 出错; 0: 没有找到; 1: 成功</returns>
-        public int DoSearchEntity(string strBarcode)
+        public int DoSearchEntity(string strBarcode,
+            out BookItem result_item)
         {
-            BookItem result_item = null;
+            result_item = null;
             return this.DoSearchItem("",
                 strBarcode,
                 out result_item,

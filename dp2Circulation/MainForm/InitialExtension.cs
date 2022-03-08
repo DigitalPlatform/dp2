@@ -2745,7 +2745,7 @@ AppInfo.GetString("config",
                                 MessageBox.Show(this, strError);
                         }
 
-                        // 获得书目数据库From信息
+                        // 获得各种类型的数据库的检索途径
                         nRet = GetDbFromInfos(false);
                         if (nRet == -1)
                             goto END1;
@@ -3306,7 +3306,7 @@ Culture=neutral, PublicKeyToken=null
             return 1;
         }
 
-        // 
+        // 获得各种类型的数据库的检索途径
         // return:
         //      -1  出错，不希望继续以后的操作
         //      0   成功

@@ -192,6 +192,31 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        string _expandLibraryCodeList = null;
+
+        // 2022/3/6
+        // 馆际互借涉及到的馆代码列表。可能比 LibraryCodeList 范围要大
+        public string ExpandLibraryCodeList
+        {
+            get
+            {
+                if (_expandLibraryCodeList == null)
+                {
+                    string strExpandCodeList = this.LibraryCodeList;
+
+                    int nRet = this.App.GetExpandCodeList(this,
+        out strExpandCodeList,
+        out string strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);
+                    _expandLibraryCodeList = strExpandCodeList;
+                    if (_expandLibraryCodeList == null)
+                        _expandLibraryCodeList = "";
+                }
+                return _expandLibraryCodeList;
+            }
+        }
+
         // 是否为全局用户? 所谓全局用户就是管辖所有馆代码的用户
         public bool GlobalUser
         {

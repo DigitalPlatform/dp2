@@ -3877,13 +3877,14 @@ start_time_1,
         SKIP0:
 
             // 可能比 sessioninfo.LibraryCodeList 扩展。因为馆际互借缘故
-            string strExpandCodeList = sessioninfo.LibraryCodeList;
-
+            string strExpandCodeList = sessioninfo.ExpandLibraryCodeList;
+            /*
             nRet = GetExpandCodeList(sessioninfo,
 out strExpandCodeList,
 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
 
             // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
             // 2008/6/4
@@ -5501,8 +5502,8 @@ out strError);
             return 1;
         }
 
-        // 2022/3/2 借书完成后 borrows/borrow 元素有 @libraryCode 属性，专门增加的
         // 从读者信息中，找出该读者在借的来自 strItemLibraryCode 馆册数
+        // 注: 当初借书完成后 borrows/borrow 元素有 @location 属性，可以从里面抽取馆代码
         public static int GetBorrowedCount(XmlDocument readerdom,
             string strItemLibraryCode,
             string strBookType = "*")
@@ -5518,7 +5519,10 @@ out strError);
                         continue;
                 }
 
-                string current_library_code = borrow.GetAttribute("libraryCode");
+                string location = borrow.GetAttribute("location");
+                ParseCalendarName(location,
+out string current_library_code,
+out _);
                 if (current_library_code == strItemLibraryCode
                     || (string.IsNullOrEmpty(current_library_code) && string.IsNullOrEmpty(strItemLibraryCode)))
                     count++;
@@ -18006,7 +18010,7 @@ out string _);
             DomUtil.SetAttr(nodeBorrow, "oi", strItemOI);
 
             // 2022/3/2
-            nodeBorrow.SetAttribute("libraryCode", strItemLibraryCode);
+            // nodeBorrow.SetAttribute("libraryCode", strItemLibraryCode);
 
             // 记载册记录路径
             if (String.IsNullOrEmpty(strItemRecPath) == false)
@@ -18032,6 +18036,7 @@ out string _);
                 DomUtil.SetAttr(nodeBorrow, "biblioRecPath", strBiblioRecPath); // 2015/10/2
             }
 
+            // 馆藏地点。需要的时候里面可以抽取出 libraryCode
             DomUtil.SetAttr(nodeBorrow, "location", strLocation); // 2016/9/5
 
             // 2019/11/3

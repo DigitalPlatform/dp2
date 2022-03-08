@@ -1347,6 +1347,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 // "libraryCode",
             };
 
+            /*
             foreach (var type in types)
             {
                 string location = GetPatronLocation(readerdom,
@@ -1360,6 +1361,24 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 if (ret == true)
                     return true;
             }
+            */
+            List<string> locations = new List<string>();
+            foreach (var type in types)
+            {
+                string location = GetPatronLocation(readerdom,
+                    libraryCode,
+                    type);
+                locations.Add(location);
+            }
+
+            var ret = GetOwnerInstitution(rfid,
+    locations,
+    "patron",
+    out isil,
+    out alternative);
+            if (ret == true)
+                return true;
+
             isil = "";
             alternative = "";
             return false;
@@ -1389,6 +1408,21 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
         #endregion
 
+        // 包装后的版本
+        public static bool GetOwnerInstitution(
+    XmlElement rfid,
+    string strLocation,
+    string type_list,
+    out string isil,
+    out string alternative)
+        {
+            return GetOwnerInstitution(rfid,
+                new string[] { strLocation },
+                type_list,
+                out isil,
+                out alternative);
+        }
+
         /*
 <rfid>
     <ownerInstitution>
@@ -1402,7 +1436,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
  * */
         // parameters:
         //      cfg_dom 根元素是 rfid
-        //      strLocation 对于册记录，这是纯净的 location 元素内容。
+        //      locations   馆藏地点字符串集合。扫描 item 元素是，先匹配完一轮 locations 再到下一个 item 元素
+        //                  对于册记录，这是纯净的 location 元素内容。
         //                  或者用馆代码，比如 "/" 表示总馆；"海淀分馆/" 表示分馆
         //                  对于读者记录，这是用读者记录所在馆代码和读者类型、读者单位拼接以后的字符串。两次拼接结果依次尝试，匹配上一次就算匹配命中
         //      type_list   要匹配的类型。为 entity patron 之一或者组合。如果为 null，表示 "entity,patron"
@@ -1415,7 +1450,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
         //      可能会抛出异常 Exception ArgumentException
         public static bool GetOwnerInstitution(
             XmlElement rfid,
-            string strLocation,
+            // string strLocation,
+            IEnumerable<string> locations_param,
             string type_list,
             out string isil,
             out string alternative)
@@ -1426,24 +1462,39 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             if (rfid == null)
                 return false;
 
-            if (strLocation != null
-    && strLocation.IndexOfAny(new char[] { '*', '?' }) != -1)
-                throw new ArgumentException($"参数 {nameof(strLocation)} 值({strLocation})中不应包含字符 '*' '?'", nameof(strLocation));
-
             if (type_list != null && type_list.Contains("item"))
                 throw new ArgumentException($"参数 {nameof(type_list)} 值中不应使用 item。请改用 entity");
 
             if (type_list == null)
                 type_list = "entity,patron";
 
-            // 分析 strLocation 是否属于总馆形态，比如“阅览室”
-            // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
-            // ‘/’字符可以理解为在馆代码和阅览室名字之间插入的一个必要的符号。这是为了弥补早期做法的兼容性问题
-            dp2StringUtil.ParseCalendarName(strLocation,
-        out string strLibraryCode,
-        out string strRoom);
-            if (string.IsNullOrEmpty(strLibraryCode))
-                strLocation = "/" + strRoom;
+            List<string> locations = new List<string>();
+            if (locations_param != null)
+            {
+                // 检查和预处理参数
+                foreach (var strLocation in locations_param)
+                {
+                    if (strLocation != null
+            && strLocation.IndexOfAny(new char[] { '*', '?' }) != -1)
+                        throw new ArgumentException($"参数 {nameof(strLocation)} 值({strLocation})中不应包含字符 '*' '?'", nameof(strLocation));
+
+                    // 分析 strLocation 是否属于总馆形态，比如“阅览室”
+                    // 如果是总馆形态，则要在前部增加一个 / 字符，以保证可以正确匹配 map 值
+                    // ‘/’字符可以理解为在馆代码和阅览室名字之间插入的一个必要的符号。这是为了弥补早期做法的兼容性问题
+                    dp2StringUtil.ParseCalendarName(strLocation,
+                out string strLibraryCode,
+                out string strRoom);
+                    if (string.IsNullOrEmpty(strLibraryCode))
+                    {
+                        // strLocation = "/" + strRoom;
+                        locations.Add("/" + strRoom);
+                    }
+                    else
+                        locations.Add(strLocation);
+                }
+            }
+
+            int index = 0;
 
             XmlNodeList items = rfid.SelectNodes(
                 "ownerInstitution/item");
@@ -1459,11 +1510,14 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                 string map = item.GetAttribute("map");
 
-                if (StringUtil.RegexCompare(GetRegex(map), strLocation))
-                // if (strLocation.StartsWith(map))
+                foreach (var strLocation in locations)
                 {
-                    HitItem hit = new HitItem { Map = map, Element = item };
-                    results.Add(hit);
+                    if (StringUtil.RegexCompare(GetRegex(map), strLocation))
+                    // if (strLocation.StartsWith(map))
+                    {
+                        HitItem hit = new HitItem { Map = map, Element = item, Index = index++ };
+                        results.Add(hit);
+                    }
                 }
             }
 
@@ -1474,7 +1528,15 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
             // 排序，大在前
             if (results.Count > 0)
-                results.Sort((a, b) => { return b.Map.Length - a.Map.Length; });
+                results.Sort((a, b) =>
+                {
+                    int length1 = GetMapLength(b.Map);
+                    int length2 = GetMapLength(a.Map);
+                    // map 长度相同时，先参与比较的被当作更靠前
+                    if (length1 == length2)
+                        return a.Index - b.Index;
+                    return length1 - length2;
+                });
 
             var element = results[0].Element;
             isil = element.GetAttribute("isil");
@@ -1488,10 +1550,19 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             return true;
         }
 
+        // 忽略掉字符串里面包含的 readerType: 字符串，然后计算长度
+        static int GetMapLength(string map)
+        {
+            if (map == null)
+                return 0;
+            return map.Replace("readerType:", "").Length;
+        }
+
         class HitItem
         {
             public XmlElement Element { get; set; }
             public string Map { get; set; }
+            public int Index { get; set; }  // 原始匹配顺序
         }
 
         static string GetRegex(string pattern)
