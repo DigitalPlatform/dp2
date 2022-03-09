@@ -16,7 +16,7 @@ namespace TestDp2Library
     {
         // 分馆名字部分匹配上了
         [TestMethod]
-        public void TestMethod_GetOwnerInstitution_1()
+        public void TestMethod_GetOwnerInstitution_01()
         {
             string xml =
     @"<rfid>
@@ -41,7 +41,7 @@ namespace TestDp2Library
 
         // 分馆名字部分匹配上了，但是房间名字部分没有匹配上
         [TestMethod]
-        public void TestMethod_GetOwnerInstitution_2()
+        public void TestMethod_GetOwnerInstitution_02()
         {
             string xml =
     @"<rfid>
@@ -65,7 +65,7 @@ namespace TestDp2Library
         }
 
         [TestMethod]
-        public void TestMethod_GetOwnerInstitution_3()
+        public void TestMethod_GetOwnerInstitution_03()
         {
             string xml =
     @"<rfid>
@@ -90,7 +90,7 @@ namespace TestDp2Library
 
         // 分馆名字部分匹配上了
         [TestMethod]
-        public void TestMethod_GetOwnerInstitution_4()
+        public void TestMethod_GetOwnerInstitution_04()
         {
             string xml =
     @"<rfid>
@@ -115,7 +115,7 @@ namespace TestDp2Library
 
         // '/阅览室' 匹配上了
         [TestMethod]
-        public void TestMethod_GetOwnerInstitution_5()
+        public void TestMethod_GetOwnerInstitution_05()
         {
             string xml =
     @"<rfid>
@@ -140,7 +140,7 @@ namespace TestDp2Library
 
         // map '/' 匹配上了；map '/阅览室' 没有匹配上
         [TestMethod]
-        public void TestMethod_GetOwnerInstitution_6()
+        public void TestMethod_GetOwnerInstitution_06()
         {
             string xml =
     @"<rfid>
@@ -165,7 +165,7 @@ namespace TestDp2Library
 
         // 用总馆形态去匹配分馆形态的 location (海淀分馆/)，应不匹配
         [TestMethod]
-        public void TestMethod_GetOwnerInstitution_7()
+        public void TestMethod_GetOwnerInstitution_07()
         {
             string xml =
     @"<rfid>
@@ -189,7 +189,7 @@ namespace TestDp2Library
         }
 
         [TestMethod]
-        public void TestMethod_GetOwnerInstitution_8()
+        public void TestMethod_GetOwnerInstitution_08()
         {
             string xml =
     @"<rfid>
@@ -210,6 +210,55 @@ namespace TestDp2Library
             Assert.AreEqual("CN-0000001-XZ", isil);
             Assert.AreEqual("", alternative);
         }
+
+        // 测试 type 属性为 "" 情况
+        [TestMethod]
+        public void TestMethod_GetOwnerInstitution_09()
+        {
+            string xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item type='' map='海淀分馆/' isil='test' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "海淀分馆/",
+    "entity",
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(false, bRet);
+            Assert.AreEqual("", isil);
+            Assert.AreEqual("", alternative);
+        }
+
+        // 测试 type 属性缺省 情况
+        [TestMethod]
+        public void TestMethod_GetOwnerInstitution_10()
+        {
+            string xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item map='海淀分馆/' isil='test' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(xml);
+
+            bool bRet = LibraryServerUtil.GetOwnerInstitution(
+    cfg_dom.DocumentElement,
+    "海淀分馆/",
+    "entity",
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(true, bRet);
+            Assert.AreEqual("test", isil);
+            Assert.AreEqual("", alternative);
+        }
+
 
         [TestMethod]
         public void TestMethod_wilcard_GetOwnerInstitution_01()

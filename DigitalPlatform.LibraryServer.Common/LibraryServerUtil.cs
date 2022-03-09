@@ -1501,8 +1501,8 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             List<HitItem> results = new List<HitItem>();
             foreach (XmlElement item in items)
             {
-                string type = item.GetAttribute("type");
-                if (string.IsNullOrEmpty(type))
+                string type = item.HasAttribute("type") ? item.GetAttribute("type") : null;
+                if (type == null)
                     type = "entity,patron";   // 默认 item,patron
 
                 if (StringUtil.IsInList(type_list, type) == false)
