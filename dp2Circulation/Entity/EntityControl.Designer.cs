@@ -41,6 +41,7 @@ namespace dp2Circulation
             this.columnHeader_price = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_volume = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_accessNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_shelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_bookType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_registerNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_comment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -56,7 +57,6 @@ namespace dp2Circulation
             this.columnHeader_recpath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_refID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageList_itemType = new System.Windows.Forms.ImageList(this.components);
-            this.columnHeader_shelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // listView
@@ -96,7 +96,8 @@ namespace dp2Circulation
             this.listView.Location = new System.Drawing.Point(0, 0);
             this.listView.Margin = new System.Windows.Forms.Padding(0);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(424, 104);
+            this.listView.ShowItemToolTips = true;
+            this.listView.Size = new System.Drawing.Size(777, 182);
             this.listView.SmallImageList = this.imageList_itemType;
             this.listView.TabIndex = 1;
             this.listView.UseCompatibleStateImageBehavior = false;
@@ -155,6 +156,11 @@ namespace dp2Circulation
             // 
             this.columnHeader_accessNo.Text = "Ë÷È¡ºÅ";
             this.columnHeader_accessNo.Width = 150;
+            // 
+            // columnHeader_shelfNo
+            // 
+            this.columnHeader_shelfNo.Text = "¼ÜºÅ";
+            this.columnHeader_shelfNo.Width = 100;
             // 
             // columnHeader_bookType
             // 
@@ -235,19 +241,14 @@ namespace dp2Circulation
             this.imageList_itemType.Images.SetKeyName(3, "deleted_entity.bmp");
             this.imageList_itemType.Images.SetKeyName(4, "error_entity.bmp");
             // 
-            // columnHeader_shelfNo
-            // 
-            this.columnHeader_shelfNo.Text = "¼ÜºÅ";
-            this.columnHeader_shelfNo.Width = 100;
-            // 
             // EntityControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.listView);
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "EntityControl";
-            this.Size = new System.Drawing.Size(424, 104);
+            this.Size = new System.Drawing.Size(777, 182);
             this.ResumeLayout(false);
 
         }

@@ -3379,6 +3379,18 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 2022/3/10
+            // 判断 rfid/ownerInstitution/@version 属性
+            XmlElement ownerInstitution = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid/ownerInstitution") as XmlElement;
+            if (ownerInstitution != null)
+            {
+                var version = ownerInstitution.GetAttribute("version");
+                if (string.IsNullOrEmpty(version))
+                    version = "0.01";
+                if (StringUtil.CompareVersion(version, "0.02") < 0)
+                    errors.Add($"rfid/ownerInstitution/@version 属性值要求在 0.02 版及以上");
+            }
+
             // 2020/7/1
             if (StringUtil.IsInList("skipVirusCheck", this.Function) == false)
             {

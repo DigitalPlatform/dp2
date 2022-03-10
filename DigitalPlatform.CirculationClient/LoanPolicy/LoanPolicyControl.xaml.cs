@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Windows.Interop;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -499,7 +500,7 @@ namespace DigitalPlatform.CirculationClient
             // 右边的移动
             for (int i = nColIndex + 1; i < _columnLabels.Count + 1; i++)
             {
-                Label current = _columnLabels[i-1];
+                Label current = _columnLabels[i - 1];
                 Grid.SetColumn(current, i);
             }
 
@@ -518,9 +519,9 @@ namespace DigitalPlatform.CirculationClient
             }
             // 还原以前的背景色
             if (_selectedTitle != null)
-                _selectedTitle.Background = new SolidColorBrush(Color.FromArgb(0,255,255,255));
+                _selectedTitle.Background = new SolidColorBrush(Color.FromArgb(0, 255, 255, 255));
 
-            control.Background = new SolidColorBrush(Color.FromArgb(200,255,0,0));    // Colors.Red
+            control.Background = new SolidColorBrush(Color.FromArgb(200, 255, 0, 0));    // Colors.Red
 
 #if NO
             control.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
@@ -572,7 +573,7 @@ namespace DigitalPlatform.CirculationClient
             if (_button_newBookType == null)
             {
                 _button_newBookType = new Button();
-                _button_newBookType.Margin = new Thickness(4,8,4,8);
+                _button_newBookType.Margin = new Thickness(4, 8, 4, 8);
                 _button_newBookType.Padding = new Thickness(4);
                 _button_newBookType.Content = "新增图书类型";
                 _button_newBookType.Click += new RoutedEventHandler(button_newBookType_Click);
@@ -916,14 +917,16 @@ namespace DigitalPlatform.CirculationClient
         //      nColIndex   按内容计算。0 表示第一个内容列，注意，不是读者参数列
         void InsertNewColumn(int nColIndex)
         {
+            string strBookType = "";
         REDO:
-            string strBookType = InputDlg.GetInput(this.Owner != null ? this.Owner : Wpf32Window.GetMainWindow(),
+            strBookType = InputDlg.GetInput(this.Owner != null ? this.Owner : Wpf32Window.GetMainWindow(),
                 "新增图书类型",
                 "图书类型:",
-                "");
+                strBookType);
             if (strBookType == null)
                 return;
 
+            /*
             if (strBookType == "")
             {
                 ShowMessageBox("图书类型不能为空，请重新输入");
@@ -932,6 +935,13 @@ namespace DigitalPlatform.CirculationClient
             if (strBookType == "*")
             {
                 ShowMessageBox("图书类型不能为 *，请重新输入");
+                goto REDO;
+            }
+            */
+            var error = CheckBookType(strBookType);
+            if (error != null)
+            {
+                ShowMessageBox(error);
                 goto REDO;
             }
 
@@ -960,18 +970,74 @@ namespace DigitalPlatform.CirculationClient
             InsertNewColumn(nColIndex);
         }
 
+        // 检查输入的图书类型是否合法
+        string CheckBookType(string strBookType)
+        {
+            if (strBookType == "")
+            {
+                return ("图书类型不能为空，请重新输入");
+            }
+            if (strBookType == "*")
+            {
+                return ("图书类型不能为 *，请重新输入");
+            }
+
+            if (strBookType.IndexOfAny(new char[] { '*', '?', '/' }) != -1)
+            {
+                return ("图书类型，不允许包含 * ? / 字符，请重新输入");
+            }
+
+            return null;
+        }
+
+        // 检查输入的读者类型是否合法
+        string CheckReaderType(string strReaderType)
+        {
+            if (strReaderType == "")
+            {
+                return ("读者类型不能为空，请重新输入");
+            }
+            if (strReaderType == "*")
+            {
+                return ("读者类型不能为 *，请重新输入");
+            }
+
+            // 2022/3/8
+            if (strReaderType.Contains("/") == false)
+            {
+                if (strReaderType.IndexOfAny(new char[] { '*', '?' }) != -1)
+                {
+                    return ("短形态(即不含 / 的)读者类型，不允许包含 * ? 字符，请重新输入");
+                }
+            }
+            else
+            {
+                // 2022/3/10
+                // 检查长形态的左侧不能等于当前馆代码
+                var parts = StringUtil.ParseTwoPart(strReaderType, "/");
+                string left = parts[0];
+                var libraryCode = this._comboBox_libraryCode.Text;
+                if (left == libraryCode)
+                    return $"长形态(即包含 / 的)读者类型，左侧不允许使用当前馆代码 '{libraryCode}'";
+            }
+
+            return null;
+        }
+
         // parameters:
         //      nRowIndex   全部行的坐标
         void InsertNewRow(int nRowIndex)
         {
+            string strReaderType = "";
         REDO:
-            string strReaderType = InputDlg.GetInput(this.Owner != null ? this.Owner : Wpf32Window.GetMainWindow(),
+            strReaderType = InputDlg.GetInput(this.Owner != null ? this.Owner : Wpf32Window.GetMainWindow(),
                 "新增读者类型",
                 "读者类型:",
-                "");
+                strReaderType);
             if (strReaderType == null)
                 return;
 
+            /*
             if (strReaderType == "")
             {
                 ShowMessageBox("读者类型不能为空，请重新输入");
@@ -980,6 +1046,14 @@ namespace DigitalPlatform.CirculationClient
             if (strReaderType == "*")
             {
                 ShowMessageBox("读者类型不能为 *，请重新输入");
+                goto REDO;
+            }
+            */
+
+            var error = CheckReaderType(strReaderType);
+            if (error != null)
+            {
+                ShowMessageBox(error);
                 goto REDO;
             }
 
@@ -1061,7 +1135,7 @@ namespace DigitalPlatform.CirculationClient
             }
 
             size = this._rows.Count + 2;
-            while (this._grid.RowDefinitions.Count < size )
+            while (this._grid.RowDefinitions.Count < size)
             {
                 RowDefinition def = new RowDefinition();
                 //def.Height = new GridLength(100);   // GridLength.Auto;
@@ -1126,35 +1200,35 @@ namespace DigitalPlatform.CirculationClient
                 {
                     string strBookType = this._bookTypes[j];
 
-                        for (int k = 0; k < LoanParam.two_d_paramnames.Length; k++)
-                        {
-                            string strParamName = LoanParam.two_d_paramnames[k];
+                    for (int k = 0; k < LoanParam.two_d_paramnames.Length; k++)
+                    {
+                        string strParamName = LoanParam.two_d_paramnames[k];
 
-                            string strParamValue = "";
-                            MatchResult matchresult;
-                            // return:
-                            //      reader和book类型均匹配 算4分
-                            //      只有reader类型匹配，算3分
-                            //      只有book类型匹配，算2分
-                            //      reader和book类型都不匹配，算1分
-                            int nRet = LoanParam.GetLoanParam(
-                                this._dom.DocumentElement,
-                                strLibraryCode,
-                                row.ReaderType,
-                                strBookType,
-                                strParamName,
-                                out strParamValue,
-                                out matchresult,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
+                        string strParamValue = "";
+                        MatchResult matchresult;
+                        // return:
+                        //      reader和book类型均匹配 算4分
+                        //      只有reader类型匹配，算3分
+                        //      只有book类型匹配，算2分
+                        //      reader和book类型都不匹配，算1分
+                        int nRet = LoanParam.GetLoanParam(
+                            this._dom.DocumentElement,
+                            strLibraryCode,
+                            row.ReaderType,
+                            strBookType,
+                            strParamName,
+                            out strParamValue,
+                            out matchresult,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
 
-                            if (nRet >= 4)
-                                row.Cells[j].SetValue(strParamName, strParamValue);
-                            else
-                                row.Cells[j].SetValue(strParamName, "");
+                        if (nRet >= 4)
+                            row.Cells[j].SetValue(strParamName, strParamValue);
+                        else
+                            row.Cells[j].SetValue(strParamName, "");
 
-                        } // end of for
+                    } // end of for
                 }
 
             }
@@ -1206,14 +1280,14 @@ namespace DigitalPlatform.CirculationClient
                     root.AppendChild(reader);
                 DomUtil.SetAttr(reader, "reader", row.ReaderType);
 
-                    foreach (string strName in LoanParam.reader_d_paramnames)
-                    {
-                        string strValue = row.PatronPolicyCell.GetValue(strName);
-                        XmlNode param = this._dom.CreateElement("param");
-                        reader.AppendChild(param);
-                        DomUtil.SetAttr(param, "name", strName);
-                        DomUtil.SetAttr(param, "value", strValue);
-                    }
+                foreach (string strName in LoanParam.reader_d_paramnames)
+                {
+                    string strValue = row.PatronPolicyCell.GetValue(strName);
+                    XmlNode param = this._dom.CreateElement("param");
+                    reader.AppendChild(param);
+                    DomUtil.SetAttr(param, "name", strName);
+                    DomUtil.SetAttr(param, "value", strValue);
+                }
 
                 for (int j = 0; j < this._bookTypes.Count; j++)
                 {
@@ -1338,7 +1412,7 @@ namespace DigitalPlatform.CirculationClient
                 {
                     e.CanExecute = false;
                     return;
-                } 
+                }
                 e.CanExecute = true;
             }
             else if (strName == "InsertColumn")
@@ -1396,17 +1470,24 @@ namespace DigitalPlatform.CirculationClient
     strBookType);
                 if (strBookType == null)
                     return; // 放弃修改
+                /*
                 if (strBookType == "")
                 {
                     ShowMessageBox("图书类型不能为空，请重新输入");
                     goto REDO_GET_BOOKTYPE;
-                } 
+                }
                 if (strBookType == "*")
                 {
                     ShowMessageBox("图书类型不能为 *，请重新输入");
                     goto REDO_GET_BOOKTYPE;
                 }
-
+                */
+                var error = CheckBookType(strBookType);
+                if (error != null)
+                {
+                    ShowMessageBox(error);
+                    goto REDO_GET_BOOKTYPE;
+                }
 
                 if (strBookType == this._bookTypes[index - 1])
                     return; // 没有修改
@@ -1451,6 +1532,7 @@ namespace DigitalPlatform.CirculationClient
                     if (strReaderType == null)
                         return;
 
+                    /*
                     if (strReaderType == "")
                     {
                         ShowMessageBox("读者类型不能为空，请重新输入");
@@ -1471,6 +1553,13 @@ namespace DigitalPlatform.CirculationClient
                             goto REDO_GET_READERTYPE;
                         }
                     }
+                    */
+                    var error = CheckReaderType(strReaderType);
+                    if (error != null)
+                    {
+                        ShowMessageBox(error);
+                        goto REDO_GET_READERTYPE;
+                    }
 
                     if (strReaderType == row.ReaderType)
                         return; // 没有修改
@@ -1478,7 +1567,7 @@ namespace DigitalPlatform.CirculationClient
                     // 查重
                     foreach (Row current_row in this._rows)
                     {
-                        if (current_row != row 
+                        if (current_row != row
                             && current_row.ReaderType == strReaderType)
                         {
                             ShowMessageBox("读者类型 '" + strReaderType + "' 已经存在，请重新输入");
@@ -1530,7 +1619,7 @@ namespace DigitalPlatform.CirculationClient
                 }
 
                 MessageBoxResult result = MessageBox.Show( // Application.Current.MainWindow,
-                    "确实要删除栏目 '"+this._selectedTitle.Content+"'?",
+                    "确实要删除栏目 '" + this._selectedTitle.Content + "'?",
                     "",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question,
@@ -1574,7 +1663,7 @@ namespace DigitalPlatform.CirculationClient
 
         List<string> _calendarList = new List<string>();
 
-        public List<string> CalendarList 
+        public List<string> CalendarList
         {
             get
             {
@@ -1587,7 +1676,7 @@ namespace DigitalPlatform.CirculationClient
                 // 将全部日历名进行筛选，只给读者参数里面设置分馆的日历
                 List<string> temp = GetCarlendarNamesByLibraryCode(this._strCurrentLibraryCode,
                     value);
-                
+
                 foreach (Row row in this._rows)
                 {
                     row.PatronPolicyCell.CalendarList = temp;

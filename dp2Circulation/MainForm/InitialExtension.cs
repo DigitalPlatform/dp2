@@ -2831,7 +2831,6 @@ AppInfo.GetString("config",
                             MessageBox.Show(this, strError);
                          * */
 
-
                         // 核对本地和服务器时钟
                         // return:
                         //      -1  error
@@ -2840,6 +2839,9 @@ AppInfo.GetString("config",
                         nRet = CheckServerClock(false, out strError);
                         if (nRet != 0)
                             MessageBox.Show(this, strError);
+
+                        // 2022/3/10
+                        ClearValueTableCache();
 
                         _ = Task.Run(() =>
                         {

@@ -1462,6 +1462,18 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             if (rfid == null)
                 return false;
 
+            // 2022/3/10
+            // 判断 rfid/ownerInstitution/@version 属性
+            XmlElement ownerInstitution = rfid.SelectSingleNode("ownerInstitution") as XmlElement;
+            if (ownerInstitution != null)
+            {
+                var version = ownerInstitution.GetAttribute("version");
+                if (string.IsNullOrEmpty(version))
+                    version = "0.01";
+                if (StringUtil.CompareVersion(version, "0.02") < 0)
+                    throw new Exception($"library.xml 中 rfid/ownerInstitution/@version 属性值要求在 0.02 版及以上");
+            }
+
             if (type_list != null && type_list.Contains("item"))
                 throw new ArgumentException($"参数 {nameof(type_list)} 值中不应使用 item。请改用 entity");
 
@@ -1565,6 +1577,24 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             public int Index { get; set; }  // 原始匹配顺序
         }
 
+        // 最新版本，不自动为末尾加星号
+        static string GetRegex(string pattern)
+        {
+            if (pattern == null)
+                pattern = "";
+
+            if (pattern.Contains("$"))
+                throw new ArgumentException($"模式字符串中不允许用字符 $ (但当前是 '{pattern}')");
+
+            return "^" + Regex.Escape(pattern)
+            .Replace(@"\*", ".*")
+            .Replace(@"\?", ".")
+            + "$";
+        }
+
+
+        /*
+        // 默认前方一致的版本
         static string GetRegex(string pattern)
         {
             if (pattern == null)
@@ -1584,6 +1614,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
             .Replace(@"\?", ".")
             + "$";
         }
+        */
 
         static string[] special_usernames = new string[] { "public", "reader", "opac", "图书馆" };
 

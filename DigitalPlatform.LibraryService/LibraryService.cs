@@ -2786,7 +2786,7 @@ namespace dp2Library
                         // 检查当前操作者是否管辖这个读者库
                         // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                         if (app.IsCurrentChangeableReaderPath(strDbName + "/?",
-                sessioninfo.LibraryCodeList) == false)
+                            sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
                         {
                             result.Value = -1;
                             result.ErrorInfo = "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
@@ -2935,7 +2935,7 @@ namespace dp2Library
                     //      0   没有超越要求
                     //      1   超越了要求
                     nRet = app.CheckReaderDbXmlQuery(strQueryXml,
-                        sessioninfo.LibraryCodeList,
+                        sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -3761,7 +3761,7 @@ namespace dp2Library
                         // 检查当前操作者是否管辖这个读者库
                         // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                         if (app.IsCurrentChangeableReaderPath(strDbName + "/?",
-                sessioninfo.LibraryCodeList) == false)
+                            sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
                         {
                             result.Value = -1;
                             result.ErrorInfo = "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
@@ -5778,9 +5778,9 @@ namespace dp2Library
                         //      0   符合要求
                         //      1   不符合要求
                         nRet = app.CheckItemLibraryCode(item_dom,
-                                    sessioninfo.LibraryCodeList,
-                                    out string strLibraryCode,
-                                    out strError);
+                            sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/,
+                            out string strLibraryCode,
+                            out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
@@ -9227,7 +9227,7 @@ namespace dp2Library
             {
                 // 先从 <valueTables> 中找
                 values = app.GetValueTable(
-                    sessioninfo.LibraryCodeList,
+                    sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/,
                     strTableName,
                     strDbName);
 #if NO
@@ -9640,7 +9640,7 @@ namespace dp2Library
 
                 List<CalenderInfo> result_contents = null;
                 int nRet = app.GetCalendar(strAction,
-                    sessioninfo.LibraryCodeList,
+                    sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/,
                     strName,
                     nStart,
                     nCount,
@@ -10033,7 +10033,9 @@ Stack:
                 int nRet = app.ManageDatabase(
                     sessioninfo,
                     sessioninfo.Channels,
-                    sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/,
+                    strAction == "getinfo" ?
+                    sessioninfo.ExpandLibraryCodeList
+                    : sessioninfo.LibraryCodeList,
                     strAction,
                     strDatabaseName,
                     strDatabaseInfo,
