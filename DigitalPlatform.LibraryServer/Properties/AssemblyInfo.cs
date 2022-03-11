@@ -312,4 +312,4 @@ ItemCanReturn()
 //		3.106 (2022/3/5) library.xml 中 rfid 元素采用新的匹配算法(允许读者 XML 记录中的 department 和 readerType 元素参与匹配)
 //		3.107 (2022/3/8) SearchReader() GetReaderInfo() GetSearchResult() GetBrowseRecords() 等 API 均对馆际互借情况下，扩大了 dp2library 账户能查看的读者记录查看范围。
 //						ManageDatabase() API "getinfo" 功能对馆际互借情况情况也扩大了可见的读者库范围
-//		3.108 (2022/3/10) 最新版中 library.xml 文件内 rfid/@map 属性默认精确一致(不像以前默认前方一致)。请注意检查和修改以前的 rfid 配置用法
+//		3.108 (2022/3/12) 最新版中 library.xml 文件内 rfid/@map 属性增加一种默认精确一致(不像以前默认前方一致)的匹配算法，称为 0.02 版算法。以前 0.01 版算法依然支持

@@ -158,4 +158,4 @@ using System.Windows;
 //      1.8.61 (2021/11/30) dp2ssl 会在错误日志中写入本次运行期间的网络流量统计数
 //      1.8.62 (2021/12/2) 同步本地动作到 dp2library 服务器的时候，如果一个 group 的第一个动作的 State == "normalerror" 并且 SyncCount 大于一个阈值，则会延长这种 group 同步的频率，以避免通讯流量耗费过大
 //      1.8.63 (2022/1/20) 自动带起来 RfidCenter 的程序组事项名从“dp2-RFID中心”改为“RFID中心”
-//      1.8.64 (2022/3/11) library.xml 中 rfid/ownerInstitution/@map 采用新算法
+//      1.8.64 (2022/3/12) library.xml 中 rfid/ownerInstitution/@map 增加新算法 0.02 支持
