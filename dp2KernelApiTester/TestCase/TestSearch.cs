@@ -14,7 +14,9 @@ namespace dp2KernelApiTester
     // 测试检索功能
     public static class TestSearch
     {
-        static string strDatabaseName = "__test";
+        static string _strDatabaseName = "__test";
+        static string _strDatabaseName1 = "__test1";
+        static string _strDatabaseName2 = "__test2";
 
         public static NormalResult TestAll(string style = null)
         {
@@ -29,7 +31,11 @@ namespace dp2KernelApiTester
                 if (create_result.Value == -1)
                     return create_result;
 
-                var search_result = TestLogicSearch();
+                var search_result = TestSingleDbLogicSearch();
+                if (search_result.Value == -1)
+                    return search_result;
+
+                search_result = TestMultiDbLogicSearch();
                 if (search_result.Value == -1)
                     return search_result;
 
@@ -50,6 +56,10 @@ namespace dp2KernelApiTester
             return new NormalResult();
         }
 
+        static string[] database_names = new string[] {
+                _strDatabaseName,
+                _strDatabaseName1,
+                _strDatabaseName2 };
 
         public static NormalResult PrepareEnvironment()
         {
@@ -57,16 +67,18 @@ namespace dp2KernelApiTester
 
             var channel = DataModel.GetChannel();
 
-            List<string[]> logicNames = new List<string[]>();
+            foreach (var database_name in database_names)
             {
-                logicNames.Add(new string[]
+                List<string[]> logicNames = new List<string[]>();
                 {
-                    strDatabaseName,
+                    logicNames.Add(new string[]
+                    {
+                    database_name,
                     "zh",
-                });
-            }
+                    });
+                }
 
-            string strKeysDef = @"
+                string strKeysDef = @"
 <root>
   <key>
     <xpath>*/barcode</xpath>
@@ -224,7 +236,7 @@ namespace dp2KernelApiTester
     </stopwordTable>
   </stopword>
 </root>";
-            string strBrowseDef = @"
+                string strBrowseDef = @"
 <root>
   <col title='父记录ID'>
     <xpath>//parent</xpath>
@@ -237,34 +249,34 @@ namespace dp2KernelApiTester
   </col>
 </root>";
 
-            // 试探性删除以前残留的数据库
-            var ret = channel.DoDeleteDB(strDatabaseName, out strError);
-            if (ret == -1 && channel.ErrorCode != DigitalPlatform.rms.Client.ChannelErrorCode.NotFound)
-            {
-                goto ERROR1;
-            }
+                // 试探性删除以前残留的数据库
+                var ret = channel.DoDeleteDB(database_name, out strError);
+                if (ret == -1 && channel.ErrorCode != DigitalPlatform.rms.Client.ChannelErrorCode.NotFound)
+                {
+                    goto ERROR1;
+                }
 
-            ret = channel.DoCreateDB(logicNames,
-                "", // type
-                "", // strSqlDbName,
-                strKeysDef,
-                strBrowseDef,
-                out strError);
-            if (ret == -1)
-            {
-                strError = $"创建数据库时出错: {strError}";
-                goto ERROR1;
-            }
+                ret = channel.DoCreateDB(logicNames,
+                    "", // type
+                    "", // strSqlDbName,
+                    strKeysDef,
+                    strBrowseDef,
+                    out strError);
+                if (ret == -1)
+                {
+                    strError = $"创建数据库时出错: {strError}";
+                    goto ERROR1;
+                }
 
-            ret = channel.DoInitialDB(strDatabaseName, out strError);
-            if (ret == -1)
-            {
-                strError = $"初始化数据库时出错: {strError}";
-                goto ERROR1;
+                ret = channel.DoInitialDB(database_name, out strError);
+                if (ret == -1)
+                {
+                    strError = $"初始化数据库时出错: {strError}";
+                    goto ERROR1;
+                }
             }
 
             DataModel.SetMessage("创建数据库成功", "green");
-
             return new NormalResult();
         ERROR1:
             DataModel.SetMessage($"PrepareEnvironment() error: {strError}", "error");
@@ -281,11 +293,14 @@ namespace dp2KernelApiTester
 
             var channel = DataModel.GetChannel();
 
-            long ret = channel.DoDeleteDB(strDatabaseName, out strError);
-            if (ret == -1)
+            foreach (var database_name in database_names)
             {
-                strError = $"删除数据库时出错: {strError}";
-                goto ERROR1;
+                long ret = channel.DoDeleteDB(database_name, out strError);
+                if (ret == -1)
+                {
+                    strError = $"删除数据库时出错: {strError}";
+                    goto ERROR1;
+                }
             }
 
             DataModel.SetMessage("删除数据库成功", "green");
@@ -305,14 +320,18 @@ namespace dp2KernelApiTester
             var channel = DataModel.GetChannel();
 
             List<string> created_paths = new List<string>();
-            List<AccessPoint> created_accesspoints = new List<AccessPoint>();
+            List<AccessPoint> result_accesspoints = new List<AccessPoint>();
 
-            for (int i = 0; i < count; i++)
+            foreach (var database_name in database_names)
             {
-                string path = $"{strDatabaseName}/?";
-                string current_barcode = (i + 1).ToString().PadLeft(10, '0');
-                string current_location = "海淀分馆/阅览室";
-                string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
+                List<AccessPoint> created_accesspoints = new List<AccessPoint>();
+
+                for (int i = 0; i < count; i++)
+                {
+                    string path = $"{database_name}/?";
+                    string current_barcode = (i + 1).ToString().PadLeft(10, '0');
+                    string current_location = "海淀分馆/阅览室";
+                    string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
 <barcode>{barcode}</barcode>
 <location>{location}</location>
 <dprms:file id='1' />
@@ -326,152 +345,128 @@ namespace dp2KernelApiTester
 <dprms:file id='9' />
 <dprms:file id='10' />
 </root>".Replace("{barcode}", current_barcode).Replace("{location}", current_location);
-                // var bytes = Encoding.UTF8.GetBytes(xml);
+                    // var bytes = Encoding.UTF8.GetBytes(xml);
 
-                var ret = channel.DoSaveTextRes(path,
-                    xml, // strMetadata,
-                    false,
-                    "",
-                    null,
-                    out byte[] output_timestamp,
-                    out string output_path,
-                    out string strError);
-                if (ret == -1)
-                    return new CreateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = strError,
-                        CreatedPaths = created_paths,
-                        AccessPoints = created_accesspoints,
-                    };
-
-                created_paths.Add(output_path);
-
-                // 从 dp2kernel 获得检索点
-                var get_keys = GetKeys(channel,
-    output_path,
-    xml);
-                if (get_keys.Count != 2)
-                    return new CreateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"GetKeys({output_path}) 获得的检索点不是 2 个",
-                    };
-                foreach (var key in get_keys)
-                {
-                    if (key.Path != output_path)
-                        return new CreateResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"key.Path({key.Path}) != output_path({output_path})",
-                        };
-                    created_accesspoints.Add(key);
-
-                    // 检查检索点
-                    if (key.From == "册条码号")
-                    {
-                        if (key.Key != current_barcode)
-                            return new CreateResult
-                            {
-                                Value = -1,
-                                ErrorInfo = $"key.Key({key.Key}) != current_barcode({current_barcode})",
-                            };
-                    }
-
-                    if (key.From == "馆藏地点")
-                    {
-                        if (key.Key != current_location)
-                            return new CreateResult
-                            {
-                                Value = -1,
-                                ErrorInfo = $"key.Key({key.Key}) != current_location({current_location})",
-                            };
-                    }
-
-                    /*
-                    created_accesspoints.Add(new AccessPoint
-                    {
-                        Key = current_barcode,
-                        From = "册条码号",
-                        Path = output_path,
-                    });
-                    */
-                }
-
-#if NO
-                // 上载对象
-                for (int j = 0; j < 10; j++)
-                {
-                    byte[] bytes = new byte[4096];
-                    ret = channel.WriteRes($"{output_path}/object/{j + 1}",
-                        $"0-{bytes.Length - 1}",
-                        bytes.Length,
-                        bytes,
+                    var ret = channel.DoSaveTextRes(path,
+                        xml, // strMetadata,
+                        false,
                         "",
-                        "content,data",
                         null,
-                        out string output_object_path,
-                        out byte[] output_object_timestamp,
-                        out strError);
+                        out byte[] output_timestamp,
+                        out string output_path,
+                        out string strError);
                     if (ret == -1)
                         return new CreateResult
                         {
                             Value = -1,
                             ErrorInfo = strError,
                             CreatedPaths = created_paths,
-                            AccessPoints = created_accesspoints,
+                            AccessPoints = result_accesspoints,
                         };
-                }
 
-#endif
-                var groups = created_accesspoints.AsQueryable().GroupBy(p => new { p.Key, p.From }).ToList();
+                    created_paths.Add(output_path);
 
-                // 检查检索点是否被成功创建
-                foreach (var group in groups)
-                {
-                    var accesspoint = new AccessPoint
-                    {
-                        Key = group.Key.Key,
-                        From = group.Key.From,
-                    };
-                    var c = group.Count();
-                    string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-
-                    ret = channel.DoSearch(strQueryXml, "default", out strError);
-                    if (ret == -1)
+                    // 从 dp2kernel 获得检索点
+                    var get_keys = GetKeys(channel,
+        output_path,
+        xml);
+                    if (get_keys.Count != 2)
                         return new CreateResult
                         {
                             Value = -1,
-                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                            ErrorInfo = $"GetKeys({output_path}) 获得的检索点不是 2 个",
                         };
-                    if (ret != c)
-                        return new CreateResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 {c} 条。但命中了 {ret} 条",
-                        };
-
-                    List<string> path_list = new List<string>();
-                    foreach (var r in group)
+                    foreach (var key in get_keys)
                     {
-                        path_list.Add(r.Path);
+                        if (key.Path != output_path)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"key.Path({key.Path}) != output_path({output_path})",
+                            };
+                        created_accesspoints.Add(key);
+
+                        // 检查检索点
+                        if (key.From == "册条码号")
+                        {
+                            if (key.Key != current_barcode)
+                                return new CreateResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"key.Key({key.Key}) != current_barcode({current_barcode})",
+                                };
+                        }
+
+                        if (key.From == "馆藏地点")
+                        {
+                            if (key.Key != current_location)
+                                return new CreateResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"key.Key({key.Key}) != current_location({current_location})",
+                                };
+                        }
+
+                        /*
+                        created_accesspoints.Add(new AccessPoint
+                        {
+                            Key = current_barcode,
+                            From = "册条码号",
+                            Path = output_path,
+                        });
+                        */
                     }
-                    var verify_result = VerifyHitRecord(channel, "default", path_list);
-                    if (verify_result.Value == -1)
-                        return new CreateResult
+
+                    var groups = created_accesspoints.AsQueryable().GroupBy(p => new { p.Key, p.From }).ToList();
+
+                    // 检查检索点是否被成功创建
+                    foreach (var group in groups)
+                    {
+                        var accesspoint = new AccessPoint
                         {
-                            Value = -1,
-                            ErrorInfo = verify_result.ErrorInfo
+                            Key = group.Key.Key,
+                            From = group.Key.From,
                         };
+                        var c = group.Count();
+                        string strQueryXml = $"<target list='{ database_name}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+                        ret = channel.DoSearch(strQueryXml, "default", out strError);
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"DoSearch() 出错: {strError}"
+                            };
+                        if (ret != c)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 {c} 条。但命中了 {ret} 条",
+                            };
+
+                        List<string> path_list = new List<string>();
+                        foreach (var r in group)
+                        {
+                            path_list.Add(r.Path);
+                        }
+                        var verify_result = VerifyHitRecord(channel, "default", path_list);
+                        if (verify_result.Value == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = verify_result.ErrorInfo
+                            };
+                    }
+
+                    DataModel.SetMessage($"创建记录 {output_path} 成功");
                 }
 
-                DataModel.SetMessage($"创建记录 {output_path} 成功");
+                result_accesspoints.AddRange(created_accesspoints);
             }
-
             return new CreateResult
             {
                 CreatedPaths = created_paths,
-                AccessPoints = created_accesspoints,
+                AccessPoints = result_accesspoints,
             };
         }
 
@@ -575,126 +570,369 @@ namespace dp2KernelApiTester
             public string Path { get; set; }
         }
 
-        public static NormalResult TestLogicSearch()
+        // 针对单一数据库的逻辑检索
+        public static NormalResult TestSingleDbLogicSearch()
         {
             var channel = DataModel.GetChannel();
             string resultset_name = "default";
 
-            // AND
+            foreach (var database_name in database_names)
             {
-                string query1 = $"<target list='{ strDatabaseName}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query2 = $"<target list='{ strDatabaseName}:馆藏地点'><item><word>海淀分馆/阅览室</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query = "<group>" + query1 + "<operator value='AND'/>" + query2 + "</group>";
-                var ret = channel.DoSearch(query, resultset_name, out string strError);
-                if (ret == -1)
-                    return new CreateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"DoSearch() 出错: {strError}"
-                    };
-                var verify_result = VerifyHitRecord(channel,
-        resultset_name,
-        new string[] { strDatabaseName + "/1" });
-                if (verify_result.Value == -1)
-                    return verify_result;
+                // AND
+                {
+                    string query1 = $"<target list='{ database_name}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:馆藏地点'><item><word>海淀分馆/阅览室</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='AND'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] { database_name + "/1" });
+                    if (verify_result.Value == -1)
+                        return verify_result;
 
-                DataModel.SetMessage($"逻辑检索 AND 验证成功");
-            }
+                    DataModel.SetMessage($"逻辑检索 AND 验证成功");
+                }
 
-            // OR
-            {
-                string query1 = $"<target list='{ strDatabaseName}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query2 = $"<target list='{ strDatabaseName}:册条码号'><item><word>0000000002</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query = "<group>" + query1 + "<operator value='OR'/>" + query2 + "</group>";
-                var ret = channel.DoSearch(query, resultset_name, out string strError);
-                if (ret == -1)
-                    return new CreateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"DoSearch() 出错: {strError}"
-                    };
-                var verify_result = VerifyHitRecord(channel,
-        resultset_name,
-        new string[] {
-            strDatabaseName + "/1",
-            strDatabaseName + "/2"
-        });
-                if (verify_result.Value == -1)
-                    return verify_result;
+                // OR
+                {
+                    string query1 = $"<target list='{ database_name}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:册条码号'><item><word>0000000002</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='OR'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            database_name + "/1",
+            database_name + "/2"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
 
-                DataModel.SetMessage($"逻辑检索 OR 验证成功");
-            }
+                    DataModel.SetMessage($"逻辑检索 OR 验证成功");
+                }
 
-            // SUB(1)
-            {
-                string query1 = $"<target list='{ strDatabaseName}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query2 = $"<target list='{ strDatabaseName}:册条码号'><item><word>0000000002</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
-                var ret = channel.DoSearch(query, resultset_name, out string strError);
-                if (ret == -1)
-                    return new CreateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"DoSearch() 出错: {strError}"
-                    };
-                var verify_result = VerifyHitRecord(channel,
-        resultset_name,
-        new string[] {
-            strDatabaseName + "/1"
-        });
-                if (verify_result.Value == -1)
-                    return verify_result;
+                // SUB(1)
+                {
+                    string query1 = $"<target list='{ database_name}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:册条码号'><item><word>0000000002</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            database_name + "/1"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
 
-                DataModel.SetMessage($"逻辑检索 SUB(1) 验证成功");
-            }
+                    DataModel.SetMessage($"逻辑检索 SUB(1) 验证成功");
+                }
 
-            // SUB(2)
-            {
-                string query1 = $"<target list='{ strDatabaseName}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query2 = $"<target list='{ strDatabaseName}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
-                var ret = channel.DoSearch(query, resultset_name, out string strError);
-                if (ret == -1)
-                    return new CreateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"DoSearch() 出错: {strError}"
-                    };
-                var verify_result = VerifyHitRecord(channel,
-        resultset_name,
-        new string[] {
-        });
-                if (verify_result.Value == -1)
-                    return verify_result;
+                // SUB(2)
+                {
+                    string query1 = $"<target list='{ database_name}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
 
-                DataModel.SetMessage($"逻辑检索 SUB(2) 验证成功");
-            }
+                    DataModel.SetMessage($"逻辑检索 SUB(2) 验证成功");
+                }
 
-            // SUB(3)
-            {
-                string query1 = $"<target list='{ strDatabaseName}:馆藏地点'><item><word>海淀分馆/阅览室</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query2 = $"<target list='{ strDatabaseName}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
-                string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
-                var ret = channel.DoSearch(query, resultset_name, out string strError);
-                if (ret == -1)
-                    return new CreateResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"DoSearch() 出错: {strError}"
-                    };
-                var verify_result = VerifyHitRecord(channel,
-        resultset_name,
-        new string[] {
-                        strDatabaseName + "/2"
-        });
-                if (verify_result.Value == -1)
-                    return verify_result;
+                // SUB(3)
+                {
+                    string query1 = $"<target list='{ database_name}:馆藏地点'><item><word>海淀分馆/阅览室</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+                        database_name + "/2"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
 
-                DataModel.SetMessage($"逻辑检索 SUB(2) 验证成功");
+                    DataModel.SetMessage($"逻辑检索 SUB(3) 验证成功");
+                }
             }
 
             return new NormalResult();
         }
+
+        // 针对多个数据库的逻辑检索
+        public static NormalResult TestMultiDbLogicSearch()
+        {
+            var channel = DataModel.GetChannel();
+            string resultset_name = "default";
+
+            var database_name1 = _strDatabaseName1;
+            var database_name2 = _strDatabaseName2;
+
+            {
+                // AND
+                {
+                    string query1 = $"<target list='{ database_name1}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name2}:馆藏地点'><item><word>海淀分馆/阅览室</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='AND'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"多库逻辑检索 AND 验证成功");
+                }
+
+                // OR
+                {
+                    string query1 = $"<target list='{ database_name1}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name2}:册条码号'><item><word>0000000002</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='OR'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            database_name1 + "/1",
+            database_name2 + "/2"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"多库逻辑检索 OR 验证成功");
+                }
+
+                // SUB(1)
+                {
+                    string query1 = $"<target list='{ database_name1}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name2}:册条码号'><item><word>0000000002</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            database_name1 + "/1"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"多库逻辑检索 SUB(1) 验证成功");
+                }
+
+                // SUB(2)
+                {
+                    string query1 = $"<target list='{ database_name1}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name2}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+                            database_name1 + "/1"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"多库逻辑检索 SUB(2) 验证成功");
+                }
+
+                // SUB(3)
+                {
+                    string query1 = $"<target list='{ database_name1}:馆藏地点'><item><word>海淀分馆/阅览室</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name2}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+                        database_name1 + "/1",
+                        database_name1 + "/2",
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"多库逻辑检索 SUB(3) 验证成功");
+                }
+
+                // OR
+                // keycount
+                {
+                    string query1 = $"<target list='{ database_name1}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name2}:册条码号'><item><word>0000000002</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='OR'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query,
+                        resultset_name,
+                        "keycount",
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitKeys(channel,
+            resultset_name,
+            new KeyCount[] {
+                new KeyCount{ Key="0000000001", Count = "1"},
+                new KeyCount{ Key="0000000002", Count = "1"},
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"多库逻辑检索 OR 验证成功");
+                }
+
+
+            }
+
+            return new NormalResult();
+        }
+
+        class KeyCount // : IEquatable<KeyCount>
+        {
+            public string Key { get; set; }
+            public string Count { get; set; }
+            public override string ToString()
+            {
+                return $"{Key}:{Count}";
+            }
+
+            public static string ToString(IEnumerable<KeyCount> items)
+            {
+                StringBuilder text = new StringBuilder();
+                foreach(var item in items)
+                {
+                    if (text.Length > 0)
+                        text.Append(",");
+                    text.Append(item.ToString());
+                }
+
+                return text.ToString();
+            }
+
+            /*
+            public bool Equals(KeyCount other)
+            {
+                return this.Key == other.Key && this.Count == other.Count;
+            }
+            */
+        }
+
+        class KeyCountComparer : IEqualityComparer<KeyCount>
+        {
+            public bool Equals(KeyCount a, KeyCount b)
+            {
+                return a.Key == b.Key && a.Count == b.Count;
+            }
+
+            public int GetHashCode(KeyCount a)
+            {
+                return 0;
+            }
+        }
+
+        // 验证命中记录
+        static NormalResult VerifyHitKeys(RmsChannel channel,
+            string resultset_name,
+            IEnumerable<KeyCount> keys_list)
+        {
+            SearchResultLoader loader = new SearchResultLoader(channel,
+null,
+resultset_name,
+"keycount");
+            loader.ElementType = "Record";
+
+            List<KeyCount> results = new List<KeyCount>();
+            foreach (Record record in loader)
+            {
+                results.Add(new KeyCount
+                {
+                    Key = record.Path,
+                    Count = record.Cols[0]
+                });
+            }
+
+            var intersect_count = results.AsQueryable().Intersect<KeyCount>(keys_list, new KeyCountComparer()).Count();
+            if (intersect_count != results.Count
+                || intersect_count != keys_list.Count())
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"实际命中的集合 '{KeyCount.ToString(results)}' 和期望的集合 '{KeyCount.ToString(keys_list)}' 不吻合"
+                };
+            }
+
+            return new NormalResult();
+        }
+
 
         // 验证命中记录
         static NormalResult VerifyHitRecord(RmsChannel channel,
