@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 // [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyVersion("0.0.17")]
-[assembly: AssemblyFileVersion("0.0.17.0")]
+[assembly: AssemblyVersion("0.0.18")]
+[assembly: AssemblyFileVersion("0.0.18.0")]
 
 // 0.0.1 (2021/4/22) 首个发布版本
 // 0.0.2 (2021/4/22)
@@ -81,3 +81,4 @@ using System.Runtime.InteropServices;
 // 0.0.16 (2021/6/2)    优化盘点时每轮中间的语音提示，增加了“滤除 xxx 项”的提示
 // 0.0.17 (2021/9/23)   BeginInventoryDialog AutoScaleMode 改为 DPI，解决在 1024X768 屏幕上看不到这个对话框的 OK 和 Cancel 按钮的问题
 //                      设置对话框点“确定”按钮时针对条码号校验代码进行了合法性校验。增加了(关于条码号校验的)“样例代码”按钮
+// 0.0.18 (2022/3/11)   library.xml 中 rfid/ownerInstitution/@map 采用新算法

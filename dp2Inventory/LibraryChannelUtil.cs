@@ -1241,6 +1241,7 @@ out string strError);
             public List<SimuTagInfo> TagInfos { get; set; }
         }
 
+#if REMOVED
         // 从 dp2library 服务器检索获得模拟 RFID 图书标签所需的数据
         // parameters:
         //
@@ -1436,6 +1437,6 @@ out string strError);
             }
         }
 
-
+#endif
     }
 }
