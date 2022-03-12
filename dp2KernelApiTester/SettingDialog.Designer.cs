@@ -37,8 +37,8 @@ namespace dp2KernelApiTester
             this.textBox_dp2kernel_userName = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.textBox_dp2kernel_serverUrl = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.comboBox_dp2kernel_serverUrl = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_dp2kernel.SuspendLayout();
             this.SuspendLayout();
@@ -47,11 +47,11 @@ namespace dp2KernelApiTester
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(698, 646);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button_Cancel.Location = new System.Drawing.Point(1042, 842);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(111, 40);
-            this.button_Cancel.TabIndex = 5;
+            this.button_Cancel.Size = new System.Drawing.Size(182, 69);
+            this.button_Cancel.TabIndex = 2;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
@@ -59,11 +59,11 @@ namespace dp2KernelApiTester
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(581, 646);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button_OK.Location = new System.Drawing.Point(851, 842);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(111, 40);
-            this.button_OK.TabIndex = 4;
+            this.button_OK.Size = new System.Drawing.Size(182, 69);
+            this.button_OK.TabIndex = 1;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
@@ -74,25 +74,26 @@ namespace dp2KernelApiTester
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage_dp2kernel);
-            this.tabControl1.Location = new System.Drawing.Point(12, 11);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabControl1.Location = new System.Drawing.Point(20, 19);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(797, 631);
-            this.tabControl1.TabIndex = 3;
+            this.tabControl1.Size = new System.Drawing.Size(1204, 802);
+            this.tabControl1.TabIndex = 0;
             // 
             // tabPage_dp2kernel
             // 
             this.tabPage_dp2kernel.AutoScroll = true;
+            this.tabPage_dp2kernel.Controls.Add(this.comboBox_dp2kernel_serverUrl);
             this.tabPage_dp2kernel.Controls.Add(this.textBox_dp2kernel_password);
             this.tabPage_dp2kernel.Controls.Add(this.textBox_dp2kernel_userName);
             this.tabPage_dp2kernel.Controls.Add(this.label3);
             this.tabPage_dp2kernel.Controls.Add(this.label2);
-            this.tabPage_dp2kernel.Controls.Add(this.textBox_dp2kernel_serverUrl);
             this.tabPage_dp2kernel.Controls.Add(this.label1);
-            this.tabPage_dp2kernel.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_dp2kernel.Location = new System.Drawing.Point(12, 67);
+            this.tabPage_dp2kernel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tabPage_dp2kernel.Name = "tabPage_dp2kernel";
-            this.tabPage_dp2kernel.Size = new System.Drawing.Size(789, 596);
+            this.tabPage_dp2kernel.Size = new System.Drawing.Size(1180, 723);
             this.tabPage_dp2kernel.TabIndex = 1;
             this.tabPage_dp2kernel.Text = "dp2kernel";
             this.tabPage_dp2kernel.UseVisualStyleBackColor = true;
@@ -100,73 +101,74 @@ namespace dp2KernelApiTester
             // textBox_dp2kernel_password
             // 
             this.textBox_dp2kernel_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_dp2kernel_password.Location = new System.Drawing.Point(191, 220);
-            this.textBox_dp2kernel_password.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_dp2kernel_password.Location = new System.Drawing.Point(313, 377);
+            this.textBox_dp2kernel_password.Margin = new System.Windows.Forms.Padding(8, 9, 8, 9);
             this.textBox_dp2kernel_password.Name = "textBox_dp2kernel_password";
             this.textBox_dp2kernel_password.PasswordChar = '*';
-            this.textBox_dp2kernel_password.Size = new System.Drawing.Size(266, 31);
-            this.textBox_dp2kernel_password.TabIndex = 16;
+            this.textBox_dp2kernel_password.Size = new System.Drawing.Size(433, 55);
+            this.textBox_dp2kernel_password.TabIndex = 5;
             // 
             // textBox_dp2kernel_userName
             // 
             this.textBox_dp2kernel_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_dp2kernel_userName.Location = new System.Drawing.Point(191, 172);
-            this.textBox_dp2kernel_userName.Margin = new System.Windows.Forms.Padding(5);
+            this.textBox_dp2kernel_userName.Location = new System.Drawing.Point(313, 295);
+            this.textBox_dp2kernel_userName.Margin = new System.Windows.Forms.Padding(8, 9, 8, 9);
             this.textBox_dp2kernel_userName.Name = "textBox_dp2kernel_userName";
-            this.textBox_dp2kernel_userName.Size = new System.Drawing.Size(266, 31);
-            this.textBox_dp2kernel_userName.TabIndex = 14;
+            this.textBox_dp2kernel_userName.Size = new System.Drawing.Size(433, 55);
+            this.textBox_dp2kernel_userName.TabIndex = 3;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 223);
-            this.label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label3.Location = new System.Drawing.Point(20, 382);
+            this.label3.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(106, 21);
-            this.label3.TabIndex = 15;
+            this.label3.Size = new System.Drawing.Size(174, 46);
+            this.label3.TabIndex = 4;
             this.label3.Text = "密码(&P)：";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 175);
-            this.label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label2.Location = new System.Drawing.Point(20, 300);
+            this.label2.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(127, 21);
-            this.label2.TabIndex = 13;
+            this.label2.Size = new System.Drawing.Size(215, 46);
+            this.label2.TabIndex = 2;
             this.label2.Text = "用户名(&U)：";
-            // 
-            // textBox_dp2kernel_serverUrl
-            // 
-            this.textBox_dp2kernel_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_dp2kernel_serverUrl.Location = new System.Drawing.Point(16, 52);
-            this.textBox_dp2kernel_serverUrl.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_dp2kernel_serverUrl.Name = "textBox_dp2kernel_serverUrl";
-            this.textBox_dp2kernel_serverUrl.Size = new System.Drawing.Size(760, 31);
-            this.textBox_dp2kernel_serverUrl.TabIndex = 11;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 20);
-            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label1.Location = new System.Drawing.Point(18, 34);
+            this.label1.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(238, 21);
-            this.label1.TabIndex = 10;
+            this.label1.Size = new System.Drawing.Size(401, 46);
+            this.label1.TabIndex = 0;
             this.label1.Text = "dp2kernel 服务器 URL:";
+            // 
+            // comboBox_dp2kernel_serverUrl
+            // 
+            this.comboBox_dp2kernel_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_dp2kernel_serverUrl.FormattingEnabled = true;
+            this.comboBox_dp2kernel_serverUrl.Location = new System.Drawing.Point(26, 94);
+            this.comboBox_dp2kernel_serverUrl.Name = "comboBox_dp2kernel_serverUrl";
+            this.comboBox_dp2kernel_serverUrl.Size = new System.Drawing.Size(1126, 54);
+            this.comboBox_dp2kernel_serverUrl.TabIndex = 1;
             // 
             // SettingDialog
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(22F, 46F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(821, 697);
+            this.ClientSize = new System.Drawing.Size(1243, 930);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.tabControl1);
-            this.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.Name = "SettingDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -191,7 +193,7 @@ namespace dp2KernelApiTester
         public System.Windows.Forms.TextBox textBox_dp2kernel_userName;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox_dp2kernel_serverUrl;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox comboBox_dp2kernel_serverUrl;
     }
 }

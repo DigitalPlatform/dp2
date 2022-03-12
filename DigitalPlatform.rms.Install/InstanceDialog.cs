@@ -998,6 +998,11 @@ out strError);
                 }
             }
 
+            if (info.SqlServerName == "PostgreSQL")
+            {
+                // info.DatabaseInstanceName;
+            }
+
             if (info.SqlServerType == "MySQL Server")
             {
                 StringBuilder command = new StringBuilder();

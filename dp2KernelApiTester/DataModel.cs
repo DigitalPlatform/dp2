@@ -58,6 +58,19 @@ namespace dp2KernelApiTester
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
+        public static string [] Urls
+        {
+            get
+            {
+                var list = ClientInfo.Config.Get("dp2kernel", "urls", null);
+                return StringUtil.SplitList(list).ToArray();
+            }
+            set
+            {
+
+                ClientInfo.Config.Set("dp2kernel", "urls", StringUtil.MakePathList(value));
+            }
+        }
 
         public static string dp2kernelServerUrl
         {
