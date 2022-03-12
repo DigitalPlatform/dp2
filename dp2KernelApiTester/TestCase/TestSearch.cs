@@ -9,6 +9,10 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
 
+// TODO: 获取记录 prev next 风格
+// TODO: XML 记录和检索点中包含 0 字符和非法字符
+// TODO: __id 检索返回的结果应该是有序的
+
 namespace dp2KernelApiTester
 {
     // 测试检索功能
@@ -32,6 +36,10 @@ namespace dp2KernelApiTester
                     return create_result;
 
                 var search_result = TestSingleDbLogicSearch();
+                if (search_result.Value == -1)
+                    return search_result;
+
+                search_result = TestSingleDbIdSearch();
                 if (search_result.Value == -1)
                     return search_result;
 
@@ -569,6 +577,151 @@ namespace dp2KernelApiTester
 
             public string Path { get; set; }
         }
+
+        // 针对单一数据库的 __id 检索
+        public static NormalResult TestSingleDbIdSearch()
+        {
+            var channel = DataModel.GetChannel();
+            string resultset_name = "default";
+
+            foreach (var database_name in database_names)
+            {
+                // 非逻辑检索
+                {
+                    string query = $"<target list='{ database_name}:__id'><item><word>1</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] { database_name + "/1" });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"__id 单一检索验证成功");
+                }
+
+                // AND
+                {
+                    string query1 = $"<target list='{ database_name}:__id'><item><word>1</word><match>exact</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:__id'><item><word>1-1000</word><match>exact</match><relation>range</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='AND'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] { database_name + "/1" });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"__id 逻辑检索 AND 验证成功");
+                }
+
+                // OR
+                {
+                    string query1 = $"<target list='{ database_name}:__id'><item><word>1</word><match>exact</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:__id'><item><word>2</word><match>exact</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='OR'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            database_name + "/1",
+            database_name + "/2"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"__id 逻辑检索 OR 验证成功");
+                }
+
+                // SUB(1)
+                {
+                    string query1 = $"<target list='{ database_name}:__id'><item><word>1</word><match>exact</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:__id'><item><word>2</word><match>exact</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            database_name + "/1"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"__id 逻辑检索 SUB(1) 验证成功");
+                }
+
+                // SUB(2)
+                {
+                    string query1 = $"<target list='{ database_name}:__id'><item><word>1</word><match>exact</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:__id'><item><word>1</word><match>exact</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"__id 逻辑检索 SUB(2) 验证成功");
+                }
+
+                // SUB(3)
+                {
+                    string query1 = $"<target list='{ database_name}:__id'><item><word>1-2</word><match>exact</match><relation>range</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query2 = $"<target list='{ database_name}:__id'><item><word>1</word><match>exact</match><relation>=</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    string query = "<group>" + query1 + "<operator value='SUB'/>" + query2 + "</group>";
+                    var ret = channel.DoSearch(query, resultset_name, out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    var verify_result = VerifyHitRecord(channel,
+            resultset_name,
+            new string[] {
+                        database_name + "/2"
+            });
+                    if (verify_result.Value == -1)
+                        return verify_result;
+
+                    DataModel.SetMessage($"__id 逻辑检索 SUB(3) 验证成功");
+                }
+            }
+
+            return new NormalResult();
+        }
+
 
         // 针对单一数据库的逻辑检索
         public static NormalResult TestSingleDbLogicSearch()

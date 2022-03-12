@@ -300,7 +300,8 @@ namespace DigitalPlatform.rms
                                     writer.Write(SqlDatabase.GetLong(value));
                                     break;
                                 case "String":
-                                    writer.Write((string)value);
+                                    string value1 = ProcessString((string)value);
+                                    writer.Write(value1);
                                     break;
                                 case "Byte[]":
                                     writer.Write((byte[])value);
@@ -419,5 +420,17 @@ namespace DigitalPlatform.rms
             }
         }
 
+        static string ProcessString(string value)
+        {
+            try
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(value);
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch (Exception ex)
+            {
+                return "error";
+            }
+        }
     }
 }

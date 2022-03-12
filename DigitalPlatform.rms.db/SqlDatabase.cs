@@ -2607,18 +2607,20 @@ ex);
                             "keystringnum NUMBER(19) NULL " + "\n" +  // 
                             ")" + " ;\n";
 
+                        /*
                         string strTemp = strTableName + "ki";
                         if (strTemp.Length > 30)
                         {
                             strError = "索引名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
                             return -1;
                         }
+                        */
 
-                        strCommand += " CREATE INDEX " + strTableName + "ki \n"
+                        strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ki")} \n"
                             + " ON " + strTableName + " " + KEY_COL_LIST + " ;\n";
-                        strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "ni \n"
+                        strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ni")} \n"
                             + " ON " + strTableName + " " + KEYNUM_COL_LIST + " ;\n";
-                        strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "ii \n"
+                        strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ii")} \n"
                             + " ON " + strTableName + " (idstring) ;\n";
                     }
                 }
@@ -2658,18 +2660,20 @@ ex);
                             "keystringnum bigint NULL " + "\n" +
                             ")" + " ;\n";
 
+                        /*
                         string strTemp = strTableName + "ki";
                         if (strTemp.Length > 30)
                         {
                             strError = "索引名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
                             return -1;
                         }
+                        */
 
-                        strCommand += " CREATE INDEX " + strTableName + "ki \n"
+                        strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ki")} \n"
                             + " ON " + strTableName + " " + KEY_COL_LIST + " ;\n";
-                        strCommand += " CREATE INDEX " + strTableName/*tableInfo.SqlTableName*/ + "ni \n"
+                        strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ni")} \n"
                             + " ON " + strTableName + " " + KEYNUM_COL_LIST + " ;\n";
-                        strCommand += " CREATE INDEX " + strTableName/*tableInfo.SqlTableName*/ + "ii \n"
+                        strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ii")} \n"
                             + " ON " + strTableName + " (idstring) ;\n";
                     }
                 }
@@ -2910,18 +2914,20 @@ ex);
                             //if (string.IsNullOrEmpty(strCommand) == false)
                             //    strCommand += " ; ";
 
+                            /*
                             string strTemp = strTableName + "ki";
                             if (strTemp.Length > 30)
                             {
                                 strError = "索引名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
                                 return -1;
                             }
+                            */
 
-                            strCommand += " CREATE INDEX " + strTableName + "ki \n"
+                            strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ki")} \n"
                                 + " ON " + strTableName + " " + KEY_COL_LIST + " ;\n";
-                            strCommand += " CREATE INDEX " + strTableName + "ni \n"
+                            strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ni")} \n"
                                 + " ON " + strTableName + " " + KEYNUM_COL_LIST + " ;\n";
-                            strCommand += " CREATE INDEX " + strTableName + "ii \n"
+                            strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ii")} \n"
                                 + " ON " + strTableName + " (idstring) ;\n";
                         }
                     }
@@ -2958,18 +2964,20 @@ ex);
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
                             string strTableName = (/*this.m_strSqlDbName + "_"*/db_prefix + tableInfo.SqlTableName).ToUpper();
 
+                            /*
                             string strTemp = strTableName + "ki";
                             if (strTemp.Length > 30)
                             {
                                 strError = "索引名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
                                 return -1;
                             }
+                            */
 
-                            strCommand += " CREATE INDEX " + strTableName + "ki \n"
+                            strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ki")} \n"
                                 + " ON " + strTableName + " " + KEY_COL_LIST + " ;\n";
-                            strCommand += " CREATE INDEX " + strTableName + "ni \n"
+                            strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ni")} \n"
                                 + " ON " + strTableName + " " + KEYNUM_COL_LIST + " ;\n";
-                            strCommand += " CREATE INDEX " + strTableName + "ii \n"
+                            strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ii")} \n"
                                 + " ON " + strTableName + " (idstring) ;\n";
                         }
                     }
@@ -3162,16 +3170,18 @@ ex);
                         //if (string.IsNullOrEmpty(strCommand) == false)
                         //    strCommand += " ; ";
 
+                        /*
                         string strTemp = strTableName + "ki";
                         if (strTemp.Length > 30)
                         {
                             strError = "索引名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
                             return -1;
                         }
+                        */
 
-                        strCommand += " DROP INDEX " + strTableName + "ki ;\n";
-                        strCommand += " DROP INDEX " + strTableName + "ni ;\n";
-                        strCommand += " DROP INDEX " + strTableName + "ii ;\n";
+                        strCommand += $" DROP INDEX {BuildIndexName(strTableName, "ki")} ;\n";
+                        strCommand += $" DROP INDEX {BuildIndexName(strTableName, "ni")} ;\n";
+                        strCommand += $" DROP INDEX {BuildIndexName(strTableName, "ii")} ;\n";
                     }
                 }
             }
@@ -3201,22 +3211,39 @@ ex);
                         TableInfo tableInfo = (TableInfo)aTableInfo[i];
                         string strTableName = (/*this.m_strSqlDbName + "_"*/db_prefix + tableInfo.SqlTableName).ToUpper();
 
+                        /*
                         string strTemp = strTableName + "ki";
                         if (strTemp.Length > 30)
                         {
                             strError = "索引名字 '" + strTemp + "' 的字符数超过 30。请使用更短的 SQL 数据库名。";
                             return -1;
                         }
+                        */
 
-                        strCommand += " DROP INDEX " + strTableName + "ki ;\n";
-                        strCommand += " DROP INDEX " + strTableName + "ni ;\n";
-                        strCommand += " DROP INDEX " + strTableName + "ii ;\n";
+                        strCommand += $" DROP INDEX {BuildIndexName(strTableName, "ki")} ;\n";
+                        strCommand += $" DROP INDEX {BuildIndexName(strTableName, "ni")} ;\n";
+                        strCommand += $" DROP INDEX {BuildIndexName(strTableName, "ii")} ;\n";
                     }
                 }
             }
             #endregion
 
             return 0;
+        }
+
+        // 2022/3/12
+        string BuildIndexName(string strTableName, string strSubName)
+        {
+            // 超长处理
+            if (strTableName.Length + strSubName.Length > 30)
+            {
+                int delta = strTableName.Length + strSubName.Length - 30;
+                if (strTableName.Length <= delta)
+                    throw new ArgumentException($"表名 '{strTableName}' 无法进行缩短调整");
+                return strTableName.Substring(1, strTableName.Length - delta) + strSubName;
+            }
+
+            return strTableName + strSubName;
         }
 
         // 删除数据库
@@ -3419,17 +3446,19 @@ out strError);
             bool bOutputKeyCount = StringUtil.IsInList("keycount", strOutputStyle);
             bool bOutputKeyID = StringUtil.IsInList("keyid", strOutputStyle);
 
-            SqlServerType type = this.container.SqlServerType;
+            // SqlServerType type = this.container.SqlServerType;
 
             string strPattern = "N'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'";
-            if (type == SqlServerType.MsSqlServer)
+            if (IsMsSqlServer())
                 strPattern = "N'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'";
-            else if (type == SqlServerType.SQLite)
+            else if (IsSqlite())
                 strPattern = "'__________'";
-            else if (type == SqlServerType.MySql)
+            else if (IsMySQL())
                 strPattern = "'__________'";
-            else if (type == SqlServerType.Oracle)
+            else if (IsOracle())
                 strPattern = "'__________'";
+            else if (IsPgsql())
+                strPattern = "'__________'";    // TODO: 需要增加集成测试
             else
                 throw new Exception("未知的 SqlServerType");
 
@@ -3616,8 +3645,8 @@ out strError);
 
                         strRealText = DbPath.GetID10(strRealText);
                         strWhere = " WHERE id " + strOperator + " @id and id like " + strPattern + " ";
-                        if (this.IsOracle())
-                            strWhere = strWhere.Replace("@", ":");
+                        //if (this.IsOracle())
+                        //    strWhere = strWhere.Replace("@", ":");
 
                         var temp = CreateParameter("@id", DbType.String, strRealText);
                         aSqlParameter.Add(temp);
@@ -3656,8 +3685,8 @@ out strError);
                 {
                     searchItem.Word = DbPath.GetID10(searchItem.Word);
                     strWhere = " WHERE id " + searchItem.Relation + " @id and id like " + strPattern + " ";
-                    if (this.IsOracle())
-                        strWhere = strWhere.Replace("@", ":");
+                    //if (this.IsOracle())
+                    //    strWhere = strWhere.Replace("@", ":");
 
                     var temp = CreateParameter("@id", DbType.String, searchItem.Word);
                     aSqlParameter.Add(temp);
@@ -3697,14 +3726,16 @@ out strError);
             string strLimit = "";
             if (searchItem.MaxCount != -1)  // 只命中指定的条数
             {
-                if (type == SqlServerType.MsSqlServer)
+                if (IsMsSqlServer())
                     strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
-                else if (type == SqlServerType.SQLite)
+                else if (IsSqlite())
                     strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
-                else if (type == SqlServerType.MySql)
+                else if (IsMySQL())
                     strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
-                else if (type == SqlServerType.Oracle)
+                else if (IsOracle())
                     strLimit = " WHERE rownum <= " + Convert.ToString(searchItem.MaxCount) + " ";
+                else if (IsPgsql())
+                    strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
                 else
                     throw new Exception("未知的 SqlServerType");
             }
@@ -3712,7 +3743,7 @@ out strError);
             string strOrderBy = "";
 
             // Oracle下迫使使用顺序
-            if (type == SqlServerType.Oracle)
+            if (IsOracle() || IsPgsql())
             {
                 if (string.IsNullOrEmpty(searchItem.IdOrder) == true)
                 {
@@ -3731,9 +3762,9 @@ out strError);
             }
 
             string strCommand = "";
-            if (type == SqlServerType.MsSqlServer)
+            if (IsMsSqlServer())
                 strCommand = "use " + this.m_strSqlDbName;
-            else if (type == SqlServerType.MySql)
+            else if (IsMySQL())
                 strCommand = "use `" + this.m_strSqlDbName + "` ;\n";
 
             strCommand += " SELECT "
@@ -3745,12 +3776,16 @@ out strError);
         + " " + strOrderBy
         + " " + strLimit + "\n";
 
-            if (type == SqlServerType.MsSqlServer)
+            if (IsMsSqlServer())
                 strCommand += " use master " + "\n";
 
             // Oracle的语句非常特殊
-            if (type == SqlServerType.Oracle)
+            if (IsOracle())
             {
+                // 2022/3/12
+                if (this.IsOracle())
+                    strWhere = strWhere.Replace("@", ":");
+
                 // TODO 如果没有 order by 子句， rownum还可以简化
                 if (string.IsNullOrEmpty(strLimit) == false)
                     strCommand = "SELECT * from ( SELECT "
@@ -3768,7 +3803,6 @@ out strError);
 + strWhere
 + " " + strOrderBy
 + "\n";
-
             }
 
             int nRet = ExecuteQueryFillResultSet(
@@ -3989,7 +4023,7 @@ handle.CancelTokenSource.Token).Result;
             catch (Exception ex)
             {
                 // 注意这里可能捕获到 AggregationException，所以要用 ExceptionUtil.GetExceptionText() 来输出异常信息
-                strError = "ExecuteQueryFillResultSet() exception: " + ExceptionUtil.GetExceptionText(ex);
+                strError = "ExecuteQueryFillResultSet() exception:\r\n" + ExceptionUtil.GetExceptionText(ex) + "\r\nSQL command: " + strCommand;
                 return -1;
             }
             finally // 连接
@@ -5406,7 +5440,7 @@ handle.CancelTokenSource.Token).Result;
 
             string strCommand = "";
 
-            if (connection.SqlServerType == SqlServerType.MsSqlServer)
+            if (IsMsSqlServer())
             {
                 string strPattern = "N'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'";
 
@@ -5481,7 +5515,7 @@ handle.CancelTokenSource.Token).Result;
 
 #endif
             }
-            else if (connection.SqlServerType == SqlServerType.SQLite)
+            else if (IsSqlite() || IsMySQL() || IsPgsql())
             {
                 string strPattern = "'__________'";
                 string strWhere = "";
@@ -5562,7 +5596,8 @@ handle.CancelTokenSource.Token).Result;
                 } // end of using command
 #endif
             }
-            else if (connection.SqlServerType == SqlServerType.MySql)
+#if REMOVED
+            else if (IsMySQL() || IsPgsql())
             {
                 string strPattern = "'__________'";
 
@@ -5605,7 +5640,7 @@ handle.CancelTokenSource.Token).Result;
                     }
                 }
                 strCommand = " SELECT id "
-                    + " FROM `" + this.m_strSqlDbName + "`.records "
+                    + $" FROM {db_prefix}records "
                     + strWhere
                     + strOrder
                     + " LIMIT 1";
@@ -5637,7 +5672,8 @@ handle.CancelTokenSource.Token).Result;
                 } // end of using command
 #endif
             }
-            else if (connection.SqlServerType == SqlServerType.Oracle)
+#endif
+            else if (IsOracle())
             {
                 string strPattern = "'__________'";
 
@@ -5726,7 +5762,7 @@ handle.CancelTokenSource.Token).Result;
             }
             else
             {
-                strError = "未知的 connection 类型 '" + connection.SqlServerType.ToString() + "'";
+                strError = "未知的数据库类型 '" + this.SqlServerType.ToString() + "'";
                 return -1;
             }
 
@@ -22152,6 +22188,7 @@ out strError);
                 return "";
             return (string)value;
         }
+
     }
 
     public class SQLiteInfo

@@ -2254,7 +2254,7 @@ namespace DigitalPlatform.rms
                         return -1;
 
                     //排序去重
-                    keys.Sort();
+                    //keys.Sort();
                     keys.RemoveDup();
                 }
                 return 0;
@@ -2303,7 +2303,6 @@ namespace DigitalPlatform.rms
             if (nRet == -1)
                 return -1;
 
-
             // 根据新xml创建检索点
             newKeys = new KeyCollection();
 
@@ -2333,7 +2332,7 @@ namespace DigitalPlatform.rms
                         out strError);
                     if (nRet == -1)
                         return -1;
-                    newKeys.Sort();
+                    //newKeys.Sort();
                     newKeys.RemoveDup();
                 }
             }
@@ -2373,7 +2372,7 @@ namespace DigitalPlatform.rms
                         out strError);
                     if (nRet == -1)
                         return -1;
-                    oldKeys.Sort();
+                    //oldKeys.Sort();
                     oldKeys.RemoveDup();
                 }
             }

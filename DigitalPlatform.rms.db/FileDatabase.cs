@@ -2127,7 +2127,7 @@ namespace DigitalPlatform.rms
                             if (nRet == -1)
                                 return -1;
 
-                            oldKeys.Sort();
+                            //oldKeys.Sort();
                             oldKeys.RemoveDup();
 
                             this.DeleteKeys(oldKeys);
