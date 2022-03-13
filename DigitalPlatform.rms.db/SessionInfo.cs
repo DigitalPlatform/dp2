@@ -513,10 +513,23 @@ namespace DigitalPlatform.rms
                 }
 
                 DbPath path = new DbPath(dpRecord.ID);
-                Database db = this.app.Dbs.GetDatabaseSafety(path.Name);
+
+                // 2022/3/12
+                if (this.app == null)
+                {
+                    strError = "API_GetRecords() 中 this.app == null";
+                    return -1;
+                }
+                if (this.app.Dbs == null)
+                {
+                    strError = "API_GetRecords() 中 this.app.Dbs == null";
+                    return -1;
+                }
+
+                Database db = this.app?.Dbs?.GetDatabaseSafety(path.Name);
                 if (db == null)
                 {
-                    strError = "GetDatabaseSafety()从库id '" + path.Name + "' 找数据库对象失败";
+                    strError = "GetDatabaseSafety() 从库id '" + path.Name + "' 找数据库对象失败";
                     return -1;
                 }
 

@@ -54,6 +54,11 @@ namespace dp2KernelApiTester
                     return result;
             }
 
+            {
+                var result = UnicodeSearch();
+                if (result.Value == -1)
+                    return result;
+            }
 
             {
                 var result = Finish();
@@ -320,6 +325,163 @@ namespace dp2KernelApiTester
                 Value = -1,
                 ErrorInfo = strError
             };
+        }
+
+        public static NormalResult UnicodeSearch()
+        {
+            var channel = DataModel.GetChannel();
+
+            {
+                string path = $"{_strDatabaseName}/?";
+                string current_barcode = "0000001";
+                // 김:contributor
+                string current_location = "김";
+                string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
+<barcode>{barcode}</barcode>
+<location>{location}</location>
+<dprms:file id='1' />
+<dprms:file id='2' />
+<dprms:file id='3' />
+<dprms:file id='4' />
+<dprms:file id='5' />
+<dprms:file id='6' />
+<dprms:file id='7' />
+<dprms:file id='8' />
+<dprms:file id='9' />
+<dprms:file id='10' />
+</root>".Replace("{barcode}", current_barcode).Replace("{location}", current_location);
+
+                var ret = channel.DoSaveTextRes(path,
+                    xml, // strMetadata,
+                    false,
+                    "",
+                    null,
+                    out byte[] output_timestamp,
+                    out string output_path,
+                    out string strError);
+                if (ret == -1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                    };
+
+                // 从 dp2kernel 获得检索点
+                var get_keys = GetKeys(channel,
+    output_path,
+    xml);
+                if (get_keys.Count != 2)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"GetKeys({output_path}) 获得的检索点不是 2 个",
+                    };
+
+                List<string> querys = new List<string>();
+
+                foreach (var key in get_keys)
+                {
+                    if (key.Path != output_path)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"key.Path({key.Path}) != output_path({output_path})",
+                        };
+
+                    // 检查检索点
+                    if (key.From == "册条码号")
+                    {
+                        if (key.Key != current_barcode)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"key.Key({key.Key}) != current_barcode({current_barcode})",
+                            };
+                    }
+
+                    if (key.From == "馆藏地点")
+                    {
+                        if (key.Key != current_location)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"key.Key({key.Key}) != current_location({current_location})",
+                            };
+                    }
+
+                    // 检查检索点是否被成功创建
+                    {
+                        var accesspoint = new AccessPoint
+                        {
+                            Key = key.Key,
+                            From = key.From,
+                        };
+                        string strQueryXml = $"<target list='{ _strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                        querys.Add(strQueryXml);
+
+                        ret = channel.DoSearch(strQueryXml, "default", out strError);
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"DoSearch() 出错: {strError}"
+                            };
+                        if (ret != 1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
+                            };
+
+                        List<string> path_list = new List<string>();
+                        {
+                            path_list.Add(output_path);
+                        }
+                        var verify_result = VerifyHitRecord(channel, "default", path_list);
+                        if (verify_result.Value == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = verify_result.ErrorInfo
+                            };
+                    }
+                }
+
+                // 删除记录
+                ret = channel.DoDeleteRes(output_path,
+    output_timestamp,
+    "", // "ignorechecktimestamp",
+    out byte[] output_timestamp2,
+    out strError);
+                if (ret == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"DoDeleteRes() error: {strError}"
+                    };
+
+                // 删除记录后，再检查检索点是否被删除干净了
+                foreach (string strQueryXml in querys)
+                {
+                    ret = channel.DoSearch(strQueryXml, "default", out strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"DoSearch() 出错: {strError}"
+                        };
+                    if (ret != 0)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"检索 '{strQueryXml}' 应当命中 0 条。但命中了 {ret} 条",
+                        };
+                }
+
+                DataModel.SetMessage($"Unicode 检索 {output_path} 成功");
+            }
+
+            return new NormalResult();
         }
 
         // 创建若干条数据库记录
@@ -1020,7 +1182,7 @@ namespace dp2KernelApiTester
             public static string ToString(IEnumerable<KeyCount> items)
             {
                 StringBuilder text = new StringBuilder();
-                foreach(var item in items)
+                foreach (var item in items)
                 {
                     if (text.Length > 0)
                         text.Append(",");
