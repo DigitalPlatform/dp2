@@ -27,6 +27,7 @@ using DigitalPlatform.Xml;
 using static dp2SSL.LibraryChannelUtil;
 using DigitalPlatform.LibraryServer.Common;
 using dp2SSL.OpenAPIs;
+using dp2SSL.Models;
 
 namespace dp2SSL
 {
@@ -872,7 +873,7 @@ TaskScheduler.Default);
                                         oi = (string)oi_table[location];
                                     else
                                     {
-                                        oi = GetInstitution(location);
+                                        oi = EntityReplication.GetInstitution(location);
                                         oi_table[location] = oi;
                                     }
 
@@ -923,24 +924,6 @@ TaskScheduler.Default);
 
                 WpfClientInfo.WriteInfoLog($"结束下载全部册记录到本地缓存");
             }
-        }
-
-        public static string GetInstitution(string location)
-        {
-            string oi = "";
-            {
-                location = StringUtil.GetPureLocation(location);
-                var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
-                if (ret == true)
-                {
-                    if (string.IsNullOrEmpty(isil) == false)
-                        oi = isil;
-                    else if (string.IsNullOrEmpty(alternative) == false)
-                        oi = alternative;
-                }
-            }
-
-            return oi;
         }
 
         // 显示对书柜门的 Inventory 操作，同一时刻只能一个函数进入

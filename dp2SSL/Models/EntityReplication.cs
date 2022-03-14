@@ -253,7 +253,7 @@ namespace dp2SSL.Models
                                         oi = (string)oi_table[location];
                                     else
                                     {
-                                        oi = InventoryData.GetInstitution(location);
+                                        oi = GetInstitution(location);
                                         oi_table[location] = oi;
                                     }
 
@@ -644,7 +644,7 @@ strOldRecord);
 
             string libraryCode = dp2StringUtil.GetLibraryCode(location);
 
-            string oi = InventoryData.GetInstitution(location);
+            string oi = GetInstitution(location);
             if (string.IsNullOrEmpty(oi))
                 return barcode;
             return oi + "." + barcode;
@@ -683,7 +683,7 @@ strOldRecord);
             if (IsManaged(libraryCode, currentLibraryCodeList) == false)
                 return new NormalResult();
 
-            string oi = InventoryData.GetInstitution(location);
+            string oi = GetInstitution(location);
 
             var item = new EntityItem
             {
@@ -749,7 +749,7 @@ strRecPath);
             string location = DomUtil.GetElementText(itemdom.DocumentElement, "location");
 
             location = StringUtil.GetPureLocation(location);
-            string oi = InventoryData.GetInstitution(location);
+            string oi = GetInstitution(location);
 
             var item = new EntityItem
             {
@@ -785,6 +785,25 @@ strRecPath);
             }
 
             return new NormalResult();
+        }
+
+
+        public static string GetInstitution(string location)
+        {
+            string oi = "";
+            {
+                location = StringUtil.GetPureLocation(location);
+                var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
+                if (ret == true)
+                {
+                    if (string.IsNullOrEmpty(isil) == false)
+                        oi = isil;
+                    else if (string.IsNullOrEmpty(alternative) == false)
+                        oi = alternative;
+                }
+            }
+
+            return oi;
         }
 
     }
