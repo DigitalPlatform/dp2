@@ -87,7 +87,8 @@
     <Compile Include="TestDp2Library.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDp2libraryRfid.cs" />
-    <Compile Include="TestGetOwnerInstitution.cs" />
+    <Compile Include="TestGetOwnerInstitution_v01.cs" />
+    <Compile Include="TestGetOwnerInstitution_v02.cs" />
     <Compile Include="TestMergeCurrentLocation.cs" />
     <Compile Include="TestMergePatronXml.cs" />
     <Compile Include="TestMergeRights.cs" />
