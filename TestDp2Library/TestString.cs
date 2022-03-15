@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using DigitalPlatform.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestDp2Library
@@ -100,7 +100,26 @@ namespace TestDp2Library
                 return text;
             return System.Text.RegularExpressions.Regex.Unescape(text.Replace("\\w", " "));
         }
+
+        [TestMethod]
+        public void test_compareVersion_01()
+        {
+            try
+            {
+                int ret = StringUtil.CompareVersion("99", "0.02");
+                Assert.Fail("应该抛出异常才对");
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        [TestMethod]
+        public void test_compareVersion_02()
+        {
+
+            int ret = StringUtil.CompareVersion("99.0", "0.02");
+            Assert.IsTrue(ret > 0);
+        }
     }
-
-
 }

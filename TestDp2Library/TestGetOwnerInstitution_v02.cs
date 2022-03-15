@@ -357,7 +357,7 @@ namespace TestDp2Library
 
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_01()
+        public void TestMethod_wildcard_GetOwnerInstitution_01()
         {
             string xml =
     @"<rfid>
@@ -381,7 +381,7 @@ namespace TestDp2Library
         }
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_02()
+        public void TestMethod_wildcard_GetOwnerInstitution_02()
         {
             string xml =
     @"<rfid>
@@ -406,7 +406,7 @@ namespace TestDp2Library
 
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_11()
+        public void TestMethod_wildcard_GetOwnerInstitution_11()
         {
             string cfg_xml =
     @"<rfid>
@@ -438,7 +438,7 @@ namespace TestDp2Library
         }
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_12()
+        public void TestMethod_wildcard_GetOwnerInstitution_12()
         {
             string cfg_xml =
     @"<rfid>
@@ -471,7 +471,7 @@ namespace TestDp2Library
 
         // 两个 department 都没有匹配上
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_13()
+        public void TestMethod_wildcard_GetOwnerInstitution_13()
         {
             string cfg_xml =
     @"<rfid>
@@ -503,7 +503,7 @@ namespace TestDp2Library
         }
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_14()
+        public void TestMethod_wildcard_GetOwnerInstitution_14()
         {
             string cfg_xml =
     @"<rfid>

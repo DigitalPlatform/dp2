@@ -80,7 +80,7 @@ namespace dp2Inventory
 
         bool _slowMode = false;
 
-        // 开始修改
+        // 开始盘点
         private async void toolStripButton_begin_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -1359,8 +1359,15 @@ out string block_map);
                         }
                         else
                         {
-
-                            SetErrorInfo(item, entity.Error);
+                            string error = entity.Error;
+                            // 2022/3/15
+                            // 判断是否快速模式，getItemXml NotFound。特殊报错
+                            if (iteminfo.UII != null
+                                && IsGetItemXmlNotFound(entity))
+                            {
+                                error += "。为避免缓存信息陈旧问题，建议改用慢速模式重新盘点";
+                            }
+                            SetErrorInfo(item, error);
                             if (NeedRetry(entity.ErrorItems))
                                 error_count++;
                         }
@@ -1414,6 +1421,17 @@ out string block_map);
             {
                 // DataModel.DecApiCount();
             }
+        }
+
+        static bool IsGetItemXmlNotFound(Entity entity)
+        {
+            if (entity.ErrorItems != null && entity.ErrorItems.Count > 0)
+            {
+                if (entity.ErrorItems.AsQueryable().Where(t => t.Type == "getItemXml" && t.Code == "NotFound").Count() > 0)
+                    return true;
+            }
+
+            return false;
         }
 
         // 过滤层架标(按照天线状态)
@@ -1558,6 +1576,9 @@ out string block_map);
                     {
                         result.Value = -1;  // 注意 TaskCompleted 是按照 .Value != -1 来计算的，所以 == 0 要变为 -1 才行
                         info.SetTaskInfo("getItemXml", result);
+
+                        var iteminfo = info.ListViewItem.Tag as ItemInfo;
+                        // iteminfo.UII;
 
                         // 2021/1/19
                         FormClientInfo.Speak($"{entity.PII} 无法获得册信息", false, false);
