@@ -221,7 +221,6 @@ namespace DigitalPlatform.LibraryServer
                     DomUtil.SetAttr(newnode, "name", strDbName);
                     bChanged = true;
                 }
-
             }
 
             if (bChanged == true)
@@ -753,7 +752,6 @@ namespace DigitalPlatform.LibraryServer
 
                 if (node.Name == "virtualDatabase")
                 {
-
                     // 构造虚拟数据库对象
                     VirtualDatabase vdb = new VirtualDatabase();
                     vdb.nodeDatabase = node;
@@ -773,7 +771,6 @@ namespace DigitalPlatform.LibraryServer
 
                 if (node.Name == "database")    // 普通库
                 {
-
                     // 构造普通数据库对象
                     VirtualDatabase vdb = new VirtualDatabase();
                     vdb.nodeDatabase = node;

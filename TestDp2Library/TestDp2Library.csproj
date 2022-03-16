@@ -41,6 +41,9 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -137,11 +140,11 @@
       <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
       <Name>DigitalPlatform</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+    <ProjectReference Include="..\dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
       <Project>{623ea980-be0a-46bb-9e3e-dd8d0fe54f6f}</Project>
       <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>

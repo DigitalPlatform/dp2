@@ -13,16 +13,16 @@ namespace TestDp2Library.LoanParam
     [TestClass]
     public class TestLoanParam
     {
-        // 匹配 libraryCode
+        // 匹配 location
         [TestMethod]
         public void Test_getBorrowCount_01()
         {
             string @xml = @"<root>
 <borrows>
-    <borrow barcode='0000001' type='普通图书' libraryCode='海淀分馆'/>
-    <borrow barcode='0000002' type='普通图书' libraryCode='海淀分馆'/>
-    <borrow barcode='0000003' type='普通图书' libraryCode='西城分馆'/>
-    <borrow barcode='0000004' type='普通图书' libraryCode='西城分馆'/>
+    <borrow barcode='0000001' type='普通图书' location='海淀分馆/阅览室'/>
+    <borrow barcode='0000002' type='普通图书' location='海淀分馆/保存本库'/>
+    <borrow barcode='0000003' type='普通图书' location='西城分馆/阅览室'/>
+    <borrow barcode='0000004' type='普通图书' location='西城分馆/保存本库'/>
 </borrows>
 </root>";
             XmlDocument readerdom = new XmlDocument();
@@ -33,16 +33,16 @@ namespace TestDp2Library.LoanParam
             Assert.AreEqual(2, ret);
         }
 
-        // 匹配不上 libraryCode
+        // 匹配不上 location
         [TestMethod]
         public void Test_getBorrowCount_02()
         {
             string @xml = @"<root>
 <borrows>
-    <borrow barcode='0000001' type='普通图书' libraryCode='海淀分馆'/>
-    <borrow barcode='0000002' type='普通图书' libraryCode='海淀分馆'/>
-    <borrow barcode='0000003' type='普通图书' libraryCode='西城分馆'/>
-    <borrow barcode='0000004' type='普通图书' libraryCode='西城分馆'/>
+    <borrow barcode='0000001' type='普通图书' location='海淀分馆/阅览室'/>
+    <borrow barcode='0000002' type='普通图书' location='海淀分馆/保存本库'/>
+    <borrow barcode='0000003' type='普通图书' location='西城分馆/阅览室'/>
+    <borrow barcode='0000004' type='普通图书' location='西城分馆/保存本库'/>
 </borrows>
 </root>";
             XmlDocument readerdom = new XmlDocument();
@@ -53,16 +53,16 @@ namespace TestDp2Library.LoanParam
             Assert.AreEqual(0, ret);
         }
 
-        // 匹配 libraryCode 和 bookType
+        // 匹配 location 和 bookType
         [TestMethod]
         public void Test_getBorrowCount_10()
         {
             string @xml = @"<root>
 <borrows>
-    <borrow barcode='0000001' type='普通图书' libraryCode='海淀分馆'/>
-    <borrow barcode='0000002' type='普通图书' libraryCode='海淀分馆'/>
-    <borrow barcode='0000003' type='普通图书' libraryCode='西城分馆'/>
-    <borrow barcode='0000004' type='普通图书' libraryCode='西城分馆'/>
+    <borrow barcode='0000001' type='普通图书' location='海淀分馆/阅览室'/>
+    <borrow barcode='0000002' type='普通图书' location='海淀分馆/保存本库'/>
+    <borrow barcode='0000003' type='普通图书' location='西城分馆/阅览室'/>
+    <borrow barcode='0000004' type='普通图书' location='西城分馆/保存本库'/>
 </borrows>
 </root>";
             XmlDocument readerdom = new XmlDocument();
@@ -74,16 +74,16 @@ namespace TestDp2Library.LoanParam
             Assert.AreEqual(2, ret);
         }
 
-        // 匹配不上 libraryCode
+        // 匹配不上 location
         [TestMethod]
         public void Test_getBorrowCount_11()
         {
             string @xml = @"<root>
 <borrows>
-    <borrow barcode='0000001' type='普通图书' libraryCode='海淀分馆'/>
-    <borrow barcode='0000002' type='普通图书' libraryCode='海淀分馆'/>
-    <borrow barcode='0000003' type='普通图书' libraryCode='西城分馆'/>
-    <borrow barcode='0000004' type='普通图书' libraryCode='西城分馆'/>
+    <borrow barcode='0000001' type='普通图书' location='海淀分馆/阅览室'/>
+    <borrow barcode='0000002' type='普通图书' location='海淀分馆/保存本库'/>
+    <borrow barcode='0000003' type='普通图书' location='西城分馆/阅览室'/>
+    <borrow barcode='0000004' type='普通图书' location='西城分馆/保存本库'/>
 </borrows>
 </root>";
             XmlDocument readerdom = new XmlDocument();

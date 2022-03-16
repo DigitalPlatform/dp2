@@ -11918,7 +11918,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
 
             END1:
                 result.Value = nRet;
-                if (WriteOperLog(strCategory,
+                if (WriteSetSystemParameterOperLog(strCategory,
                     strName,
                     strValue,
                     sessioninfo.LibraryCodeList,
@@ -11948,7 +11948,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
         }
 
         // 2020/8/28
-        int WriteOperLog(string strCategory,
+        int WriteSetSystemParameterOperLog(string strCategory,
             string strName,
             string strValue,
             string strLibraryCodeList,
@@ -11969,7 +11969,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
 "name",
 strName);
 
-            DomUtil.SetElementText(domOperLog.DocumentElement,
+            DomUtil.SetElementTextEx(domOperLog.DocumentElement,
 "value",
 strValue);
 
@@ -11991,7 +11991,7 @@ strLibraryCodeList);
                 out strError);
             if (nRet == -1)
             {
-                strError = "GetSystemParameter() API 写入日志时发生错误: " + strError;
+                strError = "SetSystemParameter() API 写入日志时发生错误: " + strError;
                 return -1;
             }
 

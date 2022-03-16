@@ -1172,7 +1172,8 @@ namespace DigitalPlatform.LibraryServer
             // 1.06 (2017/5/16) 对 ManageDatabase() API 也写入日志了
             // 1.07 (2018/3/7) passgate 日志记录中增加了 readerRefID 元素
             // 1.08 (2019/4/25) changeReaderPassword 日志此前版本中少了 readerBarcode 和 newPassword 元素。现在补上
-            DomUtil.SetElementText(dom.DocumentElement, "version", "1.08");
+            // 1.09 (2022/3/16) 此前版本的 setSystemParameter 类型的日志记录中 value 元素内容会把 \t 字符替换为 *，导致 XML 内容或者 C# 脚本出现错误。建议 recover 的时候忽略此前版本的 setSystemParameter 动作
+            DomUtil.SetElementText(dom.DocumentElement, "version", "1.09");
 
             if (start_time != new DateTime(0))
             {

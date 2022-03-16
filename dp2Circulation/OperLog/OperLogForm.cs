@@ -510,6 +510,8 @@ namespace dp2Circulation
                 nRet = GetStatisString(dom, out strHtml, out strError);
             else if (strOperation == "setSystemParameter")
                 nRet = GetSetSystemParameterString(dom, out strHtml, out strError);
+            else if (strOperation == "configChanged")
+                nRet = GetConfigChangedString(dom, out strHtml, out strError);
             else if (strOperation == "adjustOverflow")
                 nRet = GetAdjustOverflowString(dom, out strHtml, out strError);
             else
@@ -2137,6 +2139,52 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             return 0;
         }
 
+        // ConfigChanged
+        int GetConfigChangedString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+            int nRet = 0;
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            string strCategory = DomUtil.GetElementText(dom.DocumentElement, "category");
+            string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
+            string strOldValue = DomUtil.GetElementText(dom.DocumentElement, "oldValue");
+            string strValue = DomUtil.GetElementText(dom.DocumentElement, "value");
+            string strComment = DomUtil.GetElementText(dom.DocumentElement, "comment");
+
+            if (string.IsNullOrEmpty(strOldValue) == false)
+                strOldValue = DomUtil.GetIndentXml(strOldValue);
+
+            if (string.IsNullOrEmpty(strValue) == false)
+                strValue = DomUtil.GetIndentXml(strValue);
+
+            // string strLibraryCodeList = DomUtil.GetElementText(dom.DocumentElement, "libraryCodeList");
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 配置被修改") +
+                BuildHtmlLine("参数目录", strCategory) +
+                BuildHtmlLine("参数名字", strName) +
+                BuildHtmlLine("旧参数值", strOldValue) +    // TODO: 两行最好颜色不一样，便于区别
+                BuildHtmlLine("新参数值", strValue) +
+                BuildHtmlLine("注释", strComment) +
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
+
+            return 0;
+        }
+
+
         // SetSystemParameter
         int GetSetSystemParameterString(XmlDocument dom,
     out string strHtml,
@@ -2405,7 +2453,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
 
             return "<tr>" +
                 "<td class='name'>" + HttpUtility.HtmlEncode(strCaption) + "</td>" +
-                "<td class='content'>" + HttpUtility.HtmlEncode(strValue) + "</td>" +
+                "<td class='content'>" + HttpUtility.HtmlEncode(strValue).Replace("\n", "<br/>").Replace(" ","&nbsp;").Replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") + "</td>" +
                 "</tr>";
         }
 
