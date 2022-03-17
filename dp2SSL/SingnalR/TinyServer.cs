@@ -1409,6 +1409,7 @@ update
             // 重建读者本地缓存
             if (command.StartsWith("rebuild patron cache"))
             {
+                ShelfData.StopDownloadPatron();
                 ShelfData.RedoReplicatePatron();
                 await SendMessageAsync(groupName, $"已启动重建读者本地缓存任务");
                 return;

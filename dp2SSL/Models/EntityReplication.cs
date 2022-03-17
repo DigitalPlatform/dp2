@@ -124,7 +124,8 @@ namespace dp2SSL.Models
                             return new NormalResult
                             {
                                 Value = -1,
-                                ErrorInfo = error
+                                ErrorInfo = error,
+                                ErrorCode = "Canceled"
                             };
                         }
                         // 检索全部读者库记录
@@ -207,7 +208,8 @@ namespace dp2SSL.Models
                                         return new NormalResult
                                         {
                                             Value = -1,
-                                            ErrorInfo = error
+                                            ErrorInfo = error,
+                                            ErrorCode = "Canceled"
                                         };
                                     }
 
@@ -322,7 +324,8 @@ namespace dp2SSL.Models
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = $"DownloadAllEntityRecordAsync() 出现异常：{ex.Message}"
+                    ErrorInfo = $"DownloadAllEntityRecordAsync() 出现异常：{ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
                 };
             }
             finally

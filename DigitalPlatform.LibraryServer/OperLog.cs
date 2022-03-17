@@ -1655,7 +1655,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (StringUtil.IsInList("supervisor", strStyle) == false)
             {
-                // 过滤日志记录中，读者记录的 password 元素
+                // 过滤日志记录中，读者记录或者其它内容的 password 元素
                 RemoveReaderPassword(ref dom);
                 // 2021/9/2 增加
                 strXml = dom.DocumentElement.OuterXml;
@@ -2002,6 +2002,15 @@ out strTargetLibraryCode);
                     XmlElement password = account.SelectSingleNode("password") as XmlElement;
                     if (password != null)
                         password.ParentNode.RemoveChild(password);
+                }
+                return;
+            }
+            if (strOperation == "configChanged")
+            {
+                var nodes = dom.DocumentElement.SelectNodes("rmsserver | mongodb | serverReplication | reportStorage | reportReplication | messageServer");
+                foreach(XmlElement node in nodes)
+                {
+                    node.RemoveAttribute("password");
                 }
                 return;
             }

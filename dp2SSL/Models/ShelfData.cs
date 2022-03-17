@@ -705,6 +705,18 @@ namespace dp2SSL
         // 从 dp2library library.xml 中获取的 RFID 配置信息
         static XmlDocument _rfidCfgDom = null;
 
+        // 2022/3/17
+        // library.xml 中 rfid 元素定义
+        public static string RfidXml
+        {
+            get
+            {
+                if (_rfidCfgDom == null || _rfidCfgDom.DocumentElement == null)
+                    return "";
+                return _rfidCfgDom.DocumentElement.OuterXml;
+            }
+        }
+
         // exception:
         //      可能会抛出异常
         public static NormalResult InitialShelf()
@@ -814,6 +826,12 @@ namespace dp2SSL
                     _rfidCfgDom.LoadXml(result.Xml);
 
                     _libraryName = result.LibraryName;
+
+                    if (result.XmlChanged)
+                    {
+                        // 触发重新全量下载册和读者记录
+                        ShelfData.TriggerDownloadEntitiesAndPatrons();
+                    }
                 }
             }
 
@@ -871,6 +889,20 @@ namespace dp2SSL
             return new NormalResult();
         }
 
+        public static void TriggerDownloadEntitiesAndPatrons()
+        {
+            WpfClientInfo.WriteInfoLog("触发重新全量下载册记录和读者记录");
+            App.CurrentApp.SpeakSequence("重新全量下载册记录和读者记录");
+
+            // 停止可能正在进行的长操作
+            ShelfData.StopDownloadPatron();
+            ShelfData.StopDownloadEntity();
+
+            // 重做
+            ShelfData.RedoReplicatePatron();
+            ShelfData.RestartReplicateEntities();
+        }
+
         public static NormalResult GetRightsTableFromServer()
         {
             // 获得读者借阅权限定义
@@ -909,7 +941,7 @@ namespace dp2SSL
 
             if (cfg_dom == null)
             {
-                var prepare_result = PrepareConfigDom();
+                var prepare_result = EnsureConfigDom();
                 if (prepare_result.Value == -1)
                     throw new Exception(prepare_result.ErrorInfo);
                 goto REDO;
@@ -941,7 +973,7 @@ namespace dp2SSL
 
             if (cfg_dom == null)
             {
-                var prepare_result = PrepareConfigDom();
+                var prepare_result = EnsureConfigDom();
                 if (prepare_result.Value == -1)
                     throw new Exception(prepare_result.ErrorInfo);
                 goto REDO;
@@ -1054,7 +1086,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
 #endif
 
-        static NormalResult PrepareConfigDom()
+        // 确保从 dp2library 获得 library.xml 中的 rfid 元素信息
+        // return:
+        //      result.Value 0 一般返回 1 rfid 元素信息有变化，已经触发了重新下载册记录和读者记录
+        public static NormalResult EnsureConfigDom()
         {
             _rfidCfgDom = new XmlDocument();
 
@@ -1081,6 +1116,14 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 _rfidCfgDom.LoadXml(result.Xml);
 
                 _libraryName = result.LibraryName;
+
+                if (result.XmlChanged)
+                {
+                    // 触发重新全量下载册和读者记录
+                    ShelfData.TriggerDownloadEntitiesAndPatrons();
+
+                    return new NormalResult { Value = 1 };
+                }
 
                 return new NormalResult();
             }

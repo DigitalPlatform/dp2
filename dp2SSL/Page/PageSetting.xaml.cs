@@ -1039,6 +1039,8 @@ string color = "red")
 
         private void redoReplicatePatron_Click(object sender, RoutedEventArgs e)
         {
+            // TODO: 如果开始前，同步正在进行怎么办？
+            ShelfData.StopDownloadPatron();
             ShelfData.RedoReplicatePatron();
             App.ErrorBox("全量同步读者记录", "全量同步读者记录的操作已安排", "green");
         }

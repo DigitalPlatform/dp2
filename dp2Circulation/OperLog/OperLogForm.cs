@@ -2159,6 +2159,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             string strOldValue = DomUtil.GetElementText(dom.DocumentElement, "oldValue");
             string strValue = DomUtil.GetElementText(dom.DocumentElement, "value");
             string strComment = DomUtil.GetElementText(dom.DocumentElement, "comment");
+            string strChangedElements = DomUtil.GetElementText(dom.DocumentElement, "changedElements");
 
             if (string.IsNullOrEmpty(strOldValue) == false)
                 strOldValue = DomUtil.GetIndentXml(strOldValue);
@@ -2173,6 +2174,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 BuildHtmlLine("操作类型", strOperation + " -- 配置被修改") +
                 BuildHtmlLine("参数目录", strCategory) +
                 BuildHtmlLine("参数名字", strName) +
+                BuildHtmlLine("内容有变的元素", strChangedElements) +
                 BuildHtmlLine("旧参数值", strOldValue) +    // TODO: 两行最好颜色不一样，便于区别
                 BuildHtmlLine("新参数值", strValue) +
                 BuildHtmlLine("注释", strComment) +
