@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "MergePinyin": {
-      "commandName": "Project",
-      "commandLineArgs": "..\\pinyin.xml ..\\sjhm.xml ..\\merge.xml"
-    }
-  }
-}
