@@ -1,9 +1,0 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DigitalPlatform.rms.Client.Properties" GeneratedClassName="Settings">
-  <Profiles />
-  <Settings>
-    <Setting Name="DigitalPlatform_rms_Client_rmsService_rmsService" Type="(Web Service URL)" Scope="Application">
-      <Value Profile="(Default)">http://test111/rmsservice/rmsservice.asmx</Value>
-    </Setting>
-  </Settings>
-</SettingsFile>
