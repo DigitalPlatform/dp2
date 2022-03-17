@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<root>
-  <reader type="NET" driverName="RD5100" ip="192.168.31.2" port="9909"/>
-</root>
