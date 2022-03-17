@@ -1,8 +1,0 @@
-﻿<Window x:Class="StackRoomEditor.TestWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="TestWindow" Height="300" Width="300" xmlns:my="clr-namespace:StackRoomEditor">
-    <Grid>
-        <my:PanningControlOld HorizontalAlignment="Stretch" Margin="24,28,0,0" x:Name="panningControl1" VerticalAlignment="Stretch" Width="50" Height="50" />
-    </Grid>
-</Window>
