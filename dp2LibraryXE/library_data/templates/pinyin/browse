@@ -1,8 +1,0 @@
-﻿<root>
-    <col title="汉字">
-        <xpath>/p/@h</xpath>
-    </col>
-    <col title="拼音">
-        <xpath>/p/@p</xpath>
-    </col>
-</root>
