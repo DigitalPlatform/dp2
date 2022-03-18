@@ -42,7 +42,7 @@ namespace dp2SSL
         // 长间隔
         static TimeSpan _replicate_long_period = TimeSpan.FromMinutes(60);
         // 短间隔
-        static TimeSpan _replicate_short_period = TimeSpan.FromMinutes(3); // 10
+        static TimeSpan _replicate_short_period = TimeSpan.FromMinutes(10);
 
 
         // 最近一次零星同步的时间
