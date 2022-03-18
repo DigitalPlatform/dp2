@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="gb2312"?>
-<root>
-    <ref>system.dll</ref>
-    <ref>system.xml.dll</ref>
-    <ref>system.windows.forms.dll</ref>
-    <ref>%bindir%/digitalplatform.script.dll</ref>
-</root>
