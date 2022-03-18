@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<root verify="数字平台">
-  <settings>
-    <key name="图书标签严格要求机构代码" value="true"/>
-    <key name="启用小票打印机即将缺纸警告" value="true"/>
-  </settings>
-</root>
