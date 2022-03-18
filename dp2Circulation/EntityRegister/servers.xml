@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<root>
-  <server name="红泥巴.数字平台中心" type="dp2library" url="http://123.103.13.236/dp2library" userName="public"/>
-  <server name="当前服务器" type="dp2library" url="." userName=".">
-    <database name="中文图书" isTarget="yes" access="" entityAccess="append,overwrite"/>
-    <database name="临时编目库" isTarget="yes" access="append,overwrite" entityAccess="append,overwrite"/>
-  </server>
-  <server name="亚马逊中国" type="amazon" url="webservices.amazon.cn"/>
-</root>
