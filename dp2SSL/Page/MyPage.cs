@@ -54,25 +54,33 @@ namespace dp2SSL
             _adorner = new LayoutAdorner(this);
         }
 
+        int _layerCount = 0;
+
         internal void AddLayer()
         {
             if (_adorner == null || _layer == null)
                 return;
-            try
+            if (_layerCount == 0)
             {
-                _layer.Add(_adorner);
+                try
+                {
+                    _layer.Add(_adorner);
+                }
+                catch (Exception ex)
+                {
+                    WpfClientInfo.WriteErrorLog($"AddLayer() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
             }
-            catch(Exception ex)
-            {
-                WpfClientInfo.WriteErrorLog($"AddLayer() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
-            }
+            _layerCount++;
         }
 
         internal void RemoveLayer()
         {
             if (_adorner == null || _layer == null)
                 return;
-            _layer.Remove(_adorner);
+            _layerCount--;
+            if (_layerCount == 0)
+                _layer.Remove(_adorner);
         }
     }
 }

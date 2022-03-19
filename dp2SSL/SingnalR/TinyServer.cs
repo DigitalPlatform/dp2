@@ -2295,7 +2295,7 @@ text.ToString());
                         App.SetSize(dlg, "full");
                         dlg.TitleText = "写入 RFID 图书标签";
                         dlg.Show();
-                        PageMenu.PageSetting?.AddLayer();
+                        PageMenu.PageSetting?.AddLayer();   /// Closed 事件会 RemoveLayer()
                     }));
                 }
 

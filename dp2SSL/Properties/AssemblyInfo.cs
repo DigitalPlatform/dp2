@@ -51,8 +51,8 @@ using System.Windows;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.64")]    // 1.5.*
-[assembly: AssemblyFileVersion("1.8.64.0")]  // 1.5.0.0
+[assembly: AssemblyVersion("1.8.65")]    // 1.5.*
+[assembly: AssemblyFileVersion("1.8.65.0")]  // 1.5.0.0
 
 // 1.0 2019/2/21 第一个版本
 // 1.1 2019/2/26 可以显示版本号了
@@ -160,3 +160,4 @@ using System.Windows;
 //      1.8.63 (2022/1/20) 自动带起来 RfidCenter 的程序组事项名从“dp2-RFID中心”改为“RFID中心”
 //      1.8.64 (2022/3/12) library.xml 中 rfid/ownerInstitution/@map 增加新算法 0.02 支持
 //      1.8.65 (2022/3/18) dp2ssl 书柜功能，可以自动通过同步 dp2library 操作日志感知到 library.xml 中 rfid (和 rightsTable) 元素的变化。并自动触发一次全量读者和册记录同步下载
+//      1.8.66 (2022/3/19) dp2ssl 中馆员从书柜上架和下架图书的时候，如果选择同时“调拨”，软件会检查馆藏地的修改是否会导致图书所属机构代码发生变化，如果会发生变化，则自动放弃调拨(但上架下架继续执行)，并在操作结束时弹出黄色对话框提示

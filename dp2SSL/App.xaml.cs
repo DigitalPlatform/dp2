@@ -2483,7 +2483,6 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 if (StringUtil.IsInList("button_ok", style))
                     progress.okButton.Content = "确定";
                 progress.Show();
-                // AddLayer();
             }));
 
 
