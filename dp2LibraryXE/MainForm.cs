@@ -5138,7 +5138,6 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             return string.Join("\r\n", results.ToArray());
         }
 
-
         private void MenuItem_configLibraryXmlMq_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5175,6 +5174,8 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
         private void MenuItem_configLibraryXmlMongoDB_Click(object sender, EventArgs e)
         {
             string strError = "";
+
+            // TODO: 检查 mongodb 是否已经安装
 
             string strLibraryXmlFileName = PathUtil.MergePath(this.LibraryDataDir, "library.xml");
             if (File.Exists(strLibraryXmlFileName) == false)

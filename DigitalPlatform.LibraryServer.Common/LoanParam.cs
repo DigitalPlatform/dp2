@@ -6,10 +6,10 @@ using System.Xml;
 using DigitalPlatform.Xml;
 using System.Web;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
-using System.Text.RegularExpressions;
 
 namespace DigitalPlatform.LibraryServer
 {

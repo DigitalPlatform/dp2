@@ -11419,7 +11419,7 @@ message,
         // 调节各个事项之间的并存冲突
         private void checkedComboBox_biblioDbNames_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
-            CheckedComboBox.ProcessItemChecked(e, "<全部>,<all>".ToLower());
+            CheckedComboBox.ProcessItemChecked(e, "<全部>,<all>,<全部书目>,<all biblio>".ToLower());
 #if NO
             ListView list = e.Item.ListView;
 

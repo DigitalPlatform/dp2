@@ -1088,7 +1088,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
         // 确保从 dp2library 获得 library.xml 中的 rfid 元素信息
         // return:
-        //      result.Value 0 一般返回 1 rfid 元素信息有变化，已经触发了重新下载册记录和读者记录
+        //      result.Value 0: 一般返回 1: rfid 元素信息有变化，已经触发了重新下载册记录和读者记录
         public static NormalResult EnsureConfigDom()
         {
             _rfidCfgDom = new XmlDocument();

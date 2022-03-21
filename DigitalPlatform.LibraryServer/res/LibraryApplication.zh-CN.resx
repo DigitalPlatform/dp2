@@ -304,11 +304,11 @@
     <comment>AppCirculation.cs</comment>
   </data>
   <data name="续借失败。读者类型s针对图书类型s的借期参数值s规定，不能续借" xml:space="preserve">
-    <value>续借失败。读者类型 '{0}' 针对图书类型 '{1}' 的 借期 参数值 '{2}' 规定，不能续借。(所定义的一个期限，是指第一次借阅的期限)</value>
+    <value>续借失败。{0} 针对图书类型 '{1}' 的 借期 参数值 '{2}' 规定，不能续借。(所定义的一个期限，是指第一次借阅的期限)</value>
     <comment>AppCirculation.cs</comment>
   </data>
   <data name="续借失败。读者类型s针对图书类型s的借期参数值s规定，只能续借s次" xml:space="preserve">
-    <value>续借失败。读者类型 '{0}' 针对图书类型 '{1}' 的 借期 参数值 '{2}' 规定，只能续借 {3} 次。</value>
+    <value>续借失败。{0} 针对图书类型 '{1}' 的 借期 参数值 '{2}' 规定，只能续借 {3} 次。</value>
     <comment>AppCirculation.cs</comment>
   </data>
   <data name="续借操作被拒绝。不具备renew权限。" xml:space="preserve">

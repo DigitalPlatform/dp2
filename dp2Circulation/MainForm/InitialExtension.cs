@@ -5875,7 +5875,6 @@ out strError);
                 this.ReturnChannel(channel);
             }
         }
-
     }
 
     public delegate void TagChangedEventHandler(object sender,

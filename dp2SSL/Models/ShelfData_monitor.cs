@@ -307,7 +307,7 @@ namespace dp2SSL
                             && _replicateEntityError <= 0)
                             {
                                 List<string> unprocessed = new List<string>();
-                                // TODO: 彻底重做前要清除 unprocessed
+                                // 注: 彻底重做前要清除 unprocessed
                                 string unprocessed_list = WpfClientInfo.Config.Get("entityReplication", "unprocessed", null);
                                 List<string> input_dbnames = null;
                                 if (string.IsNullOrEmpty(unprocessed_list) == false)
@@ -338,7 +338,7 @@ namespace dp2SSL
                                             // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
                                             _replicateEntityError++;
                                             if (_replicateEntityError == 0)
-                                                WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);   // 清空记忆。便于下次从头开始下载
+                                                WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);   // 清空记忆。便于下次从头开始下载 (注:111)
                                             else
                                                 WpfClientInfo.Config.Set("entityReplication", "unprocessed", StringUtil.MakePathList(unprocessed));
 
@@ -408,7 +408,7 @@ TaskScheduler.Default).Unwrap();
 
         public static void RestartReplicateEntities()
         {
-            _replicateEntityError = -1; // -1 表示停止后清空 unprocessed 记忆
+            _replicateEntityError = -1; // -1 效果会是后面 replication 停止后会自动清空 unprocessed 记忆 (见注:111)
             WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", false);
             WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
             App.ReplicateEntities = true;

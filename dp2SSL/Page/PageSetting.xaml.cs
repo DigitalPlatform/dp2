@@ -1371,6 +1371,7 @@ MessageBoxOptions.DefaultDesktopOnly);
         // 重做全量同步册记录和书目摘要
         private void redoReplicateEntity_Click(object sender, RoutedEventArgs e)
         {
+            //
             ShelfData.RestartReplicateEntities();
             App.ErrorBox("全量同步册记录和书目摘要", "全量同步册记录和书目摘要的操作已安排", "green");
         }
