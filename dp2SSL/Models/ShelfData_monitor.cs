@@ -337,10 +337,17 @@ namespace dp2SSL
                                         {
                                             // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
                                             _replicateEntityError++;
-                                            if (_replicateEntityError == 0)
+                                            if (_replicateEntityError == 0
+                                                && token.IsCancellationRequested == false)
+                                            {
                                                 WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);   // 清空记忆。便于下次从头开始下载 (注:111)
+                                                WpfClientInfo.WriteInfoLog("临时中断“下载全部册记录”(计划稍后还将重试从头下载)，清空 'entityReplication' 'unprocessed' 内容");
+                                            }
                                             else
+                                            {
                                                 WpfClientInfo.Config.Set("entityReplication", "unprocessed", StringUtil.MakePathList(unprocessed));
+                                                WpfClientInfo.WriteInfoLog($"永久中断“下载全部册记录”，记忆 'entityReplication' 'unprocessed' 为 '{StringUtil.MakePathList(unprocessed)}'");
+                                            }
 
                                             App.CurrentApp.SpeakSequence($"下载全部册记录到本地缓存出错: {repl_result.ErrorInfo}");
                                         }

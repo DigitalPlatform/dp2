@@ -49,6 +49,7 @@ namespace dp2LibraryApiTester
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.MenuItem_test_loginApi = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -88,6 +89,7 @@ namespace dp2LibraryApiTester
             this.MenuItem_test_searchBiblioSafety,
             this.MenuItem_test_searchItemSafety,
             this.MenuItem_test_setReaderInfoApi,
+            this.MenuItem_test_loginApi,
             this.MenuItem_test_prepareCheckBorrow});
             this.MenuItem_test.Name = "MenuItem_test";
             this.MenuItem_test.Size = new System.Drawing.Size(72, 33);
@@ -218,6 +220,13 @@ namespace dp2LibraryApiTester
             this.webBrowser1.Size = new System.Drawing.Size(800, 366);
             this.webBrowser1.TabIndex = 3;
             // 
+            // MenuItem_test_loginApi
+            // 
+            this.MenuItem_test_loginApi.Name = "MenuItem_test_loginApi";
+            this.MenuItem_test_loginApi.Size = new System.Drawing.Size(385, 40);
+            this.MenuItem_test_loginApi.Text = "测试 Login() API";
+            this.MenuItem_test_loginApi.Click += new System.EventHandler(this.MenuItem_test_loginApi_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
@@ -262,6 +271,7 @@ namespace dp2LibraryApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition3;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition4;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_prepareCheckBorrow_prepare_condition5;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_loginApi;
     }
 }
 

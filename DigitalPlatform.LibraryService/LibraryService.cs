@@ -242,6 +242,8 @@ namespace dp2Library
             try
             {
                 // sessioninfo = new SessionInfo(app, GetClientAddress());
+                // Exception:
+                //      可能会抛出 OutofSessionException 异常
                 this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
     OperationContext.Current.SessionId,
     address_list);
@@ -255,6 +257,13 @@ namespace dp2Library
                 this.WriteDebugInfo("*** 前端 '"
                     + (address == null ? "" : address.ClientIP + "@" + address.Via)
                     + "' 新分配通道的请求被拒绝:" + ex.Message);
+                if (ShouldDumpChannel())
+                {
+                    app.WriteErrorLog("*** 前端 '"
+        + (address == null ? "" : address.ClientIP + "@" + address.Via)
+        + "' 新分配通道的请求被拒绝:" + ex.Message);
+                    DumpChannelInfo();
+                }
                 // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
 
                 // 为了防止攻击，需要立即切断通道。否则 1000 个通道很快会被耗尽
@@ -355,6 +364,8 @@ namespace dp2Library
                     List<RemoteAddress> address_list = GetClientAddress();
                     try
                     {
+                        // Exception:
+                        //      可能会抛出 OutofSessionException 异常
                         this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
                             strSessionID,
                             address_list,
@@ -395,6 +406,13 @@ namespace dp2Library
                             this.WriteDebugInfo("*** 前端 '"
                                 + (address == null ? "" : address.ClientIP + "@" + address.Via)
                                 + "' 新分配通道的请求被拒绝:" + ex.Message);
+                            if (ShouldDumpChannel())
+                            {
+                                app.WriteErrorLog("*** 前端 '"
+        + (address == null ? "" : address.ClientIP + "@" + address.Via)
+        + "' 新分配通道的请求被拒绝:" + ex.Message);
+                                DumpChannelInfo();
+                            }
 
                             result.ErrorCode = ErrorCode.OutofSession;
                             // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
@@ -490,6 +508,46 @@ namespace dp2Library
             }
 
             return result;
+        }
+
+        static DateTime _lastDumpChannel;
+
+        // 是否需要 dump 通道信息？
+        // 避免太频繁地 dump
+        bool ShouldDumpChannel()
+        {
+            if (DateTime.Now - _lastDumpChannel > TimeSpan.FromMinutes(30))
+            {
+                _lastDumpChannel = DateTime.Now;
+                return true;
+            }
+
+            return false;
+        }
+
+        // 向错误日志文件中当前的所有通道信息
+        void DumpChannelInfo()
+        {
+            var ret = app.SessionTable.ListChannels(
+    "*",
+    "*",
+    "", // strStyle,
+    out List<ChannelInfo> infos,
+    out string strError);
+            if (ret == -1)
+            {
+                app.WriteErrorLog($"DumpChannelInfo() error: {strError}");
+                return;
+            }
+            StringBuilder text = new StringBuilder();
+            text.AppendLine($"当前共 {infos.Count} 个通道:");
+            int i = 0;
+            foreach (var info in infos)
+            {
+                text.AppendLine($"{(i + 1)}) ClientIP:{info.ClientIP},\tVia:{info.Via},\tUserName:{info.UserName},\tCallCount:{info.CallCount},\tLibraryCode:{info.LibraryCode},\tlocation={info.Location}");
+                i++;
+            }
+            app.WriteErrorLog(text.ToString());
         }
 
         /*

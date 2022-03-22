@@ -78,10 +78,10 @@ namespace dp2SSL.Models
                     if (first_round)
                     {
                         // 删除 Entities 里面的已有记录
-                        context.Entities.RemoveRange(context.Entities.ToList());
+                        context.Entities.RemoveRange(context.Entities); // .ToList()
                         await context.SaveChangesAsync(token);
                         // 删除 BiblioSummaries 里面的已有记录
-                        context.BiblioSummaries.RemoveRange(context.BiblioSummaries.ToList());
+                        context.BiblioSummaries.RemoveRange(context.BiblioSummaries);   // .ToList()
                         await context.SaveChangesAsync(token);
                     }
                 }
@@ -296,8 +296,10 @@ namespace dp2SSL.Models
                             }
                         }
 
-                        // writeLog?.Invoke($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
-                        writeLog?.Invoke($"实体库 '{dbName}' 下载完成 {succeed_count} 条记录");
+                        if (start > 0)
+                            writeLog?.Invoke($"实体库 '{dbName}' 下载完成 {succeed_count} 条记录(开始偏移为 {start})");
+                        else
+                            writeLog?.Invoke($"实体库 '{dbName}' 下载完成 {succeed_count} 条记录");
 
                         {
                             int index = IndexOf(unprocessed_dbnames, dbName);
@@ -477,7 +479,7 @@ channel.ErrorCode == ErrorCode.RequestTimeOut)
                 else
                     item.PII = oi + "." + barcode;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"SetPII() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -571,7 +573,7 @@ PatronReplication.ProcessInfo info)
                         string uii = GetUii(strRecord);
 
                         WpfClientInfo.WriteInfoLog($"从服务器操作日志中发现 new 册记录的动作。\r\noperTime={operTime},strRecord={strRecord}。\r\n提取 UII='{uii}'\r\n\r\n");
-                        
+
                         if (string.IsNullOrEmpty(uii) == false)
                             await ShelfData.ResyncActionAsync(uii, operTime);
                     }

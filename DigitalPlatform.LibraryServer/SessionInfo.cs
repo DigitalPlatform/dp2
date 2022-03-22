@@ -8,11 +8,11 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Collections;
 using System.Threading;
+using System.Runtime.Serialization;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
-using System.Runtime.Serialization;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1276,6 +1276,8 @@ SetStartEventArgs e);
 
         // parameters:
         //      bAutoCreate 是否自动创建 SessionInfo 对象? true 表示自动创建; false 表示不自动创建(只返回已存在的 SessionInfo 对象)
+        // Exception:
+        //      可能会抛出 OutofSessionException 异常
         public SessionInfo PrepareSession(LibraryApplication app,
             string strSessionID,
             List<RemoteAddress> address_list,
@@ -1895,7 +1897,6 @@ SetStartEventArgs e);
 
                 i++;
             }
-
         }
 
         public class ChannelInfoComparer : IComparer<ChannelInfo>
