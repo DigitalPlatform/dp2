@@ -1539,6 +1539,10 @@ AccountItem item)
             // 最新获取的 XML 相比以前存储的发生了变化
             public bool XmlChanged { get; set; }
 
+            // 2022/3/23
+            // 变化前的 XML
+            public string OldXml { get; set; }
+
             public override string ToString()
             {
                 return $"Xml='{Xml}',LibraryName='{LibraryName}',XmlChanged={XmlChanged}" + base.ToString();
@@ -1636,6 +1640,7 @@ AccountItem item)
                 Xml = new_xml,
                 LibraryName = libraryName,
                 ServerUid = serverUid,
+                OldXml = old_xml,
                 XmlChanged = (old_xml != new_xml),
             };
         }

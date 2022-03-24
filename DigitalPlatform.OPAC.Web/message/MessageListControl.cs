@@ -1014,7 +1014,7 @@ namespace DigitalPlatform.OPAC.Web
 
             if (this.ResultCount != 0)
             {
-                    MessageData[] messages = null;
+                MessageData[] messages = null;
                 LibraryChannel channel = sessioninfo.GetChannel(true);
                 try
                 {

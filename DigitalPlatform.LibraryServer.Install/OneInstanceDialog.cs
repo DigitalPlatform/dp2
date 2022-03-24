@@ -412,48 +412,57 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             if (string.IsNullOrEmpty(this.textBox_bindings.Text) == true)
                 return 0;
-            string[] bindings = this.textBox_bindings.Text.Replace("\r\n", ";").Split(new char[] { ';' });
+            try
+            {
+                string[] bindings = this.textBox_bindings.Text.Replace("\r\n", ";").Split(new char[] { ';' });
 
-            int nTcpCount = 0;
-            int nHttpCount = 0;
-            int nPipeCount = 0;
-            for (int i = 0; i < bindings.Length; i++)
-            {
-                string strOneBinding = bindings[i].Trim();
-                if (String.IsNullOrEmpty(strOneBinding) == true)
-                    continue;
+                int nTcpCount = 0;
+                int nHttpCount = 0;
+                int nPipeCount = 0;
+                for (int i = 0; i < bindings.Length; i++)
+                {
+                    string strOneBinding = bindings[i].Trim();
+                    if (String.IsNullOrEmpty(strOneBinding) == true)
+                        continue;
 
-                Uri one_uri = new Uri(strOneBinding);
-                if (one_uri.Scheme.ToLower() == "net.tcp")
-                {
-                    nTcpCount++;
+                    var scheme = WcfBindingDlg.GetUriScheme(strOneBinding);
+                    if (scheme == "net.tcp")
+                    {
+                        nTcpCount++;
+                    }
+                    else if (scheme == "net.pipe")
+                    {
+                        nPipeCount++;
+                    }
+                    else if (scheme == "http")
+                    {
+                        nHttpCount++;
+                    }
                 }
-                else if (one_uri.Scheme.ToLower() == "net.pipe")
-                {
-                    nPipeCount++;
-                }
-                else if (one_uri.Scheme.ToLower() == "http")
-                {
-                    nHttpCount++;
-                }
-            }
 
-            if (nTcpCount > 1)
-            {
-                strError = "net.tcp 协议绑定数超过一个";
-                return 1;
+                if (nTcpCount > 1)
+                {
+                    strError = "net.tcp 协议绑定数超过一个";
+                    return 1;
+                }
+                if (nPipeCount > 1)
+                {
+                    strError = "net.pipe 协议绑定数超过一个";
+                    return 1;
+                }
+                if (nHttpCount > 1)
+                {
+                    strError = "http 协议绑定数超过一个";
+                    return 1;
+                }
+                return 0;
             }
-            if (nPipeCount > 1)
+            catch(Exception ex)
             {
-                strError = "net.pipe 协议绑定数超过一个";
-                return 1;
+                // 2022/3/24
+                strError = ex.Message;
+                return -1;
             }
-            if (nHttpCount > 1)
-            {
-                strError = "http 协议绑定数超过一个";
-                return 1;
-            }
-            return 0;
         }
 
         // 准备可选的缺省绑定内容

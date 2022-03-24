@@ -829,6 +829,7 @@ namespace dp2SSL
 
                     if (result.XmlChanged)
                     {
+                        WpfClientInfo.WriteInfoLog($"[2] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
                         // 触发重新全量下载册和读者记录
                         ShelfData.TriggerDownloadEntitiesAndPatrons();
                     }
@@ -891,7 +892,7 @@ namespace dp2SSL
 
         public static void TriggerDownloadEntitiesAndPatrons()
         {
-            WpfClientInfo.WriteInfoLog("触发重新全量下载册记录和读者记录");
+            WpfClientInfo.WriteInfoLog("因感知到 library.xml rfid 元素变化，触发重新全量下载册记录和读者记录");
             App.CurrentApp.SpeakSequence("重新全量下载册记录和读者记录");
 
             // 停止可能正在进行的长操作
@@ -1119,6 +1120,7 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
                 if (result.XmlChanged)
                 {
+                    WpfClientInfo.WriteInfoLog($"[3] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
                     // 触发重新全量下载册和读者记录
                     ShelfData.TriggerDownloadEntitiesAndPatrons();
 

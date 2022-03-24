@@ -380,6 +380,7 @@ namespace dp2SSL
 
                     if (result.XmlChanged)
                     {
+                        WpfClientInfo.WriteInfoLog($"[1] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
                         // 触发重新全量下载册和读者记录
                         ShelfData.TriggerDownloadEntitiesAndPatrons();
                     }
