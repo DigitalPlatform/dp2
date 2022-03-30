@@ -104,7 +104,9 @@ namespace DigitalPlatform.LibraryServer
                 "operator",
                 "no",
                 "renewComment",
-                "borrowID"};
+                "borrowID",
+                "reservations", // 2022/3/30 补遗
+        };
 
         // 2020/9/17
         // 检查新记录中是否有超出定义范围的元素
