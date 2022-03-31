@@ -332,7 +332,41 @@ namespace sipApiTester
             {
                 try
                 {
-                    var result = await TestConnect.TestConnectAndLoginConcurrent(300);
+                    var result = await TestConnect.TestConnectAndLoginConcurrent(300, "");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo);
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        private void MenuItem_test_loginConcurrentErrorPassword_Click(object sender, EventArgs e)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var result = await TestConnect.TestConnectAndLoginConcurrent(100, "useErrorPassword");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo);
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        private void MenuItem_test_scStatusConcurrent_Click(object sender, EventArgs e)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var result = await TestConnect.TestScStatusConcurrent(100, "");
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo);
                 }

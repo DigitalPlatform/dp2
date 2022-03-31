@@ -5984,7 +5984,8 @@ out strError);
             if (root == null)
             {
                 strError = "library.xml 配置文件中尚未配置 <rightsTable> 元素";
-                return -1;
+                // return -1;
+                return 0;
             }
 
             var list = StringUtil.SplitList(strLibraryCodeList);
@@ -5998,7 +5999,8 @@ out strError);
                 out strError);
                 if (nRet == -1)
                     return -1;
-                library_codes.AddRange(temp);
+                if (temp.Count > 0)
+                    library_codes.AddRange(temp);
             }
 
             if (list.Count > 0)

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace sipApiTester
 {
@@ -102,7 +103,8 @@ namespace sipApiTester
         }
 
         // Connect 然后 Login。Login 并发完成
-        public static async Task<NormalResult> TestConnectAndLoginConcurrent(int amount)
+        public static async Task<NormalResult> TestConnectAndLoginConcurrent(int amount,
+            string style)
         {
             DataModel.SetMessage("TestConnectAndLogin() 开始");
 
@@ -124,16 +126,21 @@ namespace sipApiTester
                     DataModel.SetMessage($"Connect 出错: {result.ErrorInfo}", "error");
             }
 
+            var use_error_password = StringUtil.IsInList("useErrorPassword", style);
+
             List<Task> tasks = new List<Task>();
             foreach (var channel in channels)
             {
                 var task = Task.Factory.StartNew(async () =>
                 {
+                    string password = DataModel.sipPassword;
+                    if (use_error_password)
+                        password += "1";
                     // return.Value
                     //      -1  出错
                     //      0   登录失败
                     //      1   登录成功
-                    var login_result = await channel.LoginAsync(DataModel.sipUserName, DataModel.sipPassword);
+                    var login_result = await channel.LoginAsync(DataModel.sipUserName, password);
                     if (login_result.Value != 1)
                     {
                         DataModel.SetMessage($"Login 出错: {login_result.ErrorInfo}", "error");
@@ -165,6 +172,89 @@ TaskScheduler.Default).Unwrap();
             }
 
             DataModel.SetMessage("TestConnectAndLogin() 结束");
+            return new NormalResult();
+        }
+
+        // Connect Login 然后 ScStatus。ScStatus 并发完成
+        public static async Task<NormalResult> TestScStatusConcurrent(int amount,
+            string style)
+        {
+            DataModel.SetMessage("TestScStatusConcurrent() 开始");
+
+            if (Int32.TryParse(DataModel.sipServerPort, out int port) == false)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"端口号 '{DataModel.sipServerPort}' 格式错误。应为整数"
+                };
+
+            List<SipChannel> channels = new List<SipChannel>();
+            for (int i = 0; i < amount; i++)
+            {
+                var channel = new SipChannel(Encoding.UTF8);
+                channels.Add(channel);
+
+                var result = await channel.ConnectAsync(DataModel.sipServerAddr, port);
+                if (result.Value == -1)
+                    DataModel.SetMessage($"Connect 出错: {result.ErrorInfo}", "error");
+            }
+
+            var use_error_password = StringUtil.IsInList("useErrorPassword", style);
+
+            foreach(var channel in channels)
+            {
+                string password = DataModel.sipPassword;
+                if (use_error_password)
+                    password += "1";
+
+                // return.Value
+                //      -1  出错
+                //      0   登录失败
+                //      1   登录成功
+                var login_result = await channel.LoginAsync(DataModel.sipUserName, password);
+                if (login_result.Value != 1)
+                {
+                    DataModel.SetMessage($"Login 出错: {login_result.ErrorInfo}", "error");
+                }
+                else
+                    DataModel.SetMessage("Login 成功");
+            }
+
+
+            List<Task> tasks = new List<Task>();
+            foreach (var channel in channels)
+            {
+                var task = Task.Factory.StartNew(async () =>
+                {
+                    // return.Value
+                    //      -1  出错
+                    //      0   登录失败
+                    //      1   登录成功
+                    var scstatus_result = await channel.ScStatusAsync();
+                    if (scstatus_result.Value != 1)
+                    {
+                        DataModel.SetMessage($"ScStatus 出错: {scstatus_result.ErrorInfo}", "error");
+                    }
+                    else
+                        DataModel.SetMessage("ScStatus 成功");
+                },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default).Unwrap();
+                tasks.Add(task);
+            }
+
+            // 等待全部 task 完成
+            await Task.WhenAll(tasks.ToArray());
+
+            DataModel.SetMessage("释放所有通道");
+
+            foreach (var channel in channels)
+            {
+                channel.Close();
+            }
+
+            DataModel.SetMessage("TestScStatusConcurrent() 结束");
             return new NormalResult();
         }
 

@@ -871,7 +871,8 @@ namespace DigitalPlatform.LibraryServer
                 if (temp == null)
                 {
                     strError = "<rightsTable> 中没有配置 code 属性为 '" + strLibraryCode + "' 的 <library> 元素";
-                    return -1;
+                    // return -1;
+                    return 0;
                 }
                 root = temp;
             }

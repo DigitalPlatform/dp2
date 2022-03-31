@@ -214,7 +214,13 @@ namespace DigitalPlatform.LibraryServer
         out strExpandCodeList,
         out string strError);
                     if (nRet == -1)
-                        throw new Exception(strError);
+                    {
+                        // 2022/3/31
+                        // TODO: 可以考虑在馆代码列表中包含一个 ,error 之类的提醒注意
+                        return this.LibraryCodeList;
+                        
+                        // throw new Exception(strError);
+                    }
                     _expandLibraryCodeList = strExpandCodeList;
                     if (_expandLibraryCodeList == null)
                         _expandLibraryCodeList = "";

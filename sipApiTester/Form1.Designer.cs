@@ -35,12 +35,14 @@ namespace sipApiTester
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_settings = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_file_clearHtmlText = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_connect = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_connectAndLogin = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_file_clearHtmlText = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_loginSequence = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_loginConcurrent = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_loginConcurrentErrorPassword = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_scStatusConcurrent = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -96,9 +98,16 @@ namespace sipApiTester
             // MenuItem_settings
             // 
             this.MenuItem_settings.Name = "MenuItem_settings";
-            this.MenuItem_settings.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_settings.Size = new System.Drawing.Size(255, 40);
             this.MenuItem_settings.Text = "设置 ...";
             this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
+            // 
+            // MenuItem_file_clearHtmlText
+            // 
+            this.MenuItem_file_clearHtmlText.Name = "MenuItem_file_clearHtmlText";
+            this.MenuItem_file_clearHtmlText.Size = new System.Drawing.Size(255, 40);
+            this.MenuItem_file_clearHtmlText.Text = "清除面板文字";
+            this.MenuItem_file_clearHtmlText.Click += new System.EventHandler(this.MenuItem_file_clearHtmlText_Click);
             // 
             // MenuItem_test
             // 
@@ -120,17 +129,12 @@ namespace sipApiTester
             // 
             this.MenuItem_test_connectAndLogin.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_test_loginSequence,
-            this.MenuItem_test_loginConcurrent});
+            this.MenuItem_test_loginConcurrent,
+            this.MenuItem_test_loginConcurrentErrorPassword,
+            this.MenuItem_test_scStatusConcurrent});
             this.MenuItem_test_connectAndLogin.Name = "MenuItem_test_connectAndLogin";
             this.MenuItem_test_connectAndLogin.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_connectAndLogin.Text = "连接和登录";
-            // 
-            // MenuItem_file_clearHtmlText
-            // 
-            this.MenuItem_file_clearHtmlText.Name = "MenuItem_file_clearHtmlText";
-            this.MenuItem_file_clearHtmlText.Size = new System.Drawing.Size(315, 40);
-            this.MenuItem_file_clearHtmlText.Text = "清除面板文字";
-            this.MenuItem_file_clearHtmlText.Click += new System.EventHandler(this.MenuItem_file_clearHtmlText_Click);
             // 
             // MenuItem_test_loginSequence
             // 
@@ -145,6 +149,20 @@ namespace sipApiTester
             this.MenuItem_test_loginConcurrent.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_test_loginConcurrent.Text = "并发";
             this.MenuItem_test_loginConcurrent.Click += new System.EventHandler(this.MenuItem_test_loginConcurrent_Click);
+            // 
+            // MenuItem_test_loginConcurrentErrorPassword
+            // 
+            this.MenuItem_test_loginConcurrentErrorPassword.Name = "MenuItem_test_loginConcurrentErrorPassword";
+            this.MenuItem_test_loginConcurrentErrorPassword.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_test_loginConcurrentErrorPassword.Text = "并发+错误的密码";
+            this.MenuItem_test_loginConcurrentErrorPassword.Click += new System.EventHandler(this.MenuItem_test_loginConcurrentErrorPassword_Click);
+            // 
+            // MenuItem_test_scStatusConcurrent
+            // 
+            this.MenuItem_test_scStatusConcurrent.Name = "MenuItem_test_scStatusConcurrent";
+            this.MenuItem_test_scStatusConcurrent.Size = new System.Drawing.Size(315, 40);
+            this.MenuItem_test_scStatusConcurrent.Text = "并发 ScStatus";
+            this.MenuItem_test_scStatusConcurrent.Click += new System.EventHandler(this.MenuItem_test_scStatusConcurrent_Click);
             // 
             // MainForm
             // 
@@ -181,6 +199,8 @@ namespace sipApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_file_clearHtmlText;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_loginSequence;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_loginConcurrent;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_loginConcurrentErrorPassword;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_scStatusConcurrent;
     }
 }
 
