@@ -141,15 +141,17 @@ namespace DigitalPlatform.rms
             {
                 if (this.textBox_loginName.Text == "")
                 {
-                    strError = "尚未指定 dp2Kernel 登录名";
+                    strError = "尚未指定 管理者用户名";
                     goto ERROR1;
                 }
 
+                /*
                 if (this.textBox_loginPassword.Text != this.textBox_confirmLoginPassword.Text)
                 {
                     strError = "dp2Kernel 登录名的密码和确认密码不一致";
                     goto ERROR1;
                 }
+                */
             }
 
             this.button_OK.Enabled = false;

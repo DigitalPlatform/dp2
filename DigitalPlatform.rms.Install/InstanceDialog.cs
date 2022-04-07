@@ -998,9 +998,22 @@ out strError);
                 }
             }
 
-            if (info.SqlServerName == "PostgreSQL")
+            if (info.SqlServerType == "PostgreSQL")
             {
                 // info.DatabaseInstanceName;
+
+                nRet = PgsqlDataSourceDlg.DeleteDatabase(
+info.SqlServerName,
+info.DatabaseLoginName,
+info.DatabaseLoginPassword,
+info.DatabaseLoginName,
+info.DatabaseInstanceName,
+out strError);
+                if (nRet == -1)
+                {
+                    strError = $"删除 Pgsql 实例数据库 '{info.DatabaseInstanceName}' 时出错: {strError}";
+                    return -1;
+                }
             }
 
             if (info.SqlServerType == "MySQL Server")
@@ -1194,6 +1207,11 @@ out strError);
             {
                 strError = "SQLite 暂时不使用本函数";
                 return -1;
+            }
+
+            if (info.SqlServerType == "PostgreSQL")
+            {
+                return 0;
             }
 
             strError = "未知的 SQL 服务器类型 '" + info.SqlServerType + "'";
@@ -2709,13 +2727,13 @@ MessageBoxDefaultButton.Button1);
             else if (this.SqlServerType == "MySQL Server")
                 this.SslMode = "None";  // 兼容以前无 mode 属性时的情况，此情况下等于 SslMode:None
 
-            XmlNode nodeDbs = dom.DocumentElement.SelectSingleNode("dbs");
+            var nodeDbs = dom.DocumentElement.SelectSingleNode("dbs") as XmlElement;
             if (nodeDbs == null)
             {
                 strError = "文件 " + strFilename + " 内容不合法，根下的<dbs>元素不存在。";
                 return -1;
             }
-            this.DatabaseInstanceName = DomUtil.GetAttr(nodeDbs, "instancename");
+            this.DatabaseInstanceName = nodeDbs.GetAttribute("instancename");
             return 1;
         }
 

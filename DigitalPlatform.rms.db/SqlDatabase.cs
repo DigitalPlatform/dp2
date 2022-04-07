@@ -434,7 +434,7 @@ namespace DigitalPlatform.rms
             strConnection = "";
             strError = "";
 
-            XmlNode nodeDataSource = this.container.CfgDom.DocumentElement.SelectSingleNode("datasource");
+            var nodeDataSource = this.container.CfgDom.DocumentElement.SelectSingleNode("datasource") as XmlElement;
             if (nodeDataSource == null)
             {
                 strError = "服务器配置文件不合法，未在根元素下定义<datasource>元素";
@@ -685,13 +685,36 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
                     return -1;
                 }
 
+                /*
+<root>
+  <version>2.0</version>
+  <datasource userid="postgres" password="HIP8ih0vfHU9me5emzGs3g==" servername="localhost" servertype="PostgreSQL" />
+  <keysize>255</keysize>
+  <dbs instancename="dp2kernel_pgsql">
+                * 
+                 * */
+                // 2022/4/7
+                var dbs = this.container.CfgDom.DocumentElement.SelectSingleNode("dbs") as XmlElement;
+                if (nodeDataSource == null)
+                {
+                    strError = "服务器配置文件不合法，未在根元素下定义 dbs 元素";
+                    return -1;
+                }
+
+                var instanceName = dbs.GetAttribute("instancename");
+                if (string.IsNullOrEmpty(instanceName))
+                {
+                    strError = "服务器配置文件不合法，未给根元素下级的 datasource 元素定义 instancename 属性";
+                    return -1;
+                }
+
                 strConnection = "Username=" + strUserID + ";"    //帐户和密码
                             + "Password=" + strPassword + ";"
                             //+ "Integrated Security=SSPI; "      //信任连接
-                            + "Host=" + this.container.SqlServerName + ";";
+                            + "Host=" + this.container.SqlServerName + ";"
+                            + "Database=" + instanceName;
                 return 0;
             }
-
 
             if (String.IsNullOrEmpty(strMode) == true)
             {
@@ -1281,7 +1304,7 @@ ex);
                 if (connection.IsOracle())
                     strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "_%'";
                 else if (connection.IsPgsql())
-                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName.ToUpper() + "_%'";
+                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName + "_%'";
             }
             else if (StringUtil.IsInList("keys", strStyle) == true)
             {
@@ -1289,15 +1312,15 @@ ex);
                 if (connection.IsOracle())
                     strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "_%' AND table_name <> '" + strSqlDbName.ToUpper() + "_RECORDS' ";
                 else if (connection.IsPgsql())
-                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName.ToUpper() + "_%' AND tablename <> '" + strSqlDbName.ToUpper() + "_RECORDS' ";
+                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName + "_%' AND tablename <> '" + strSqlDbName + "_RECORDS' ";
             }
             else if (StringUtil.IsInList("records", strStyle) == true)
             {
                 // 只删除records
                 if (connection.IsOracle())
-                    strCommand = " SELECT table_name FROM user_tables WHERE table_name == '" + strSqlDbName.ToUpper() + "_RECORDS' ";
+                    strCommand = " SELECT table_name FROM user_tables WHERE table_name = '" + strSqlDbName.ToUpper() + "_RECORDS' ";
                 else if (connection.IsPgsql())
-                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename == '" + strSqlDbName.ToUpper() + "_RECORDS' ";
+                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename = '" + strSqlDbName + "_RECORDS' ";
             }
             else
             {
