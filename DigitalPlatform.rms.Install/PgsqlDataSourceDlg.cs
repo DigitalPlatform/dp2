@@ -38,7 +38,7 @@ namespace DigitalPlatform.rms
             {
                 return this.textBox_sqlServerName.Text;
             }
-            set 
+            set
             {
                 this.textBox_sqlServerName.Text = value;
             }
@@ -141,32 +141,46 @@ namespace DigitalPlatform.rms
             {
                 if (this.textBox_loginName.Text == "")
                 {
-                    strError = "尚未指定 管理者用户名";
+                    strError = "尚未指定即将创建的 PostgreSQL 用户名";
                     goto ERROR1;
                 }
 
-                /*
                 if (this.textBox_loginPassword.Text != this.textBox_confirmLoginPassword.Text)
                 {
-                    strError = "dp2Kernel 登录名的密码和确认密码不一致";
+                    strError = "PostgreSQL 用户名的密码和确认密码不一致";
                     goto ERROR1;
                 }
-                */
             }
 
             this.button_OK.Enabled = false;
             try
             {
-                // 创建 Pgsql 的数据库。这里数据库实际上是一个实例内的公共空间，不是 MS SQL Server 那种数据库概念
-                nRet = CreateDatabase(
+
+                nRet = CreateUser(
                     this.SqlServerName,
                     this.textBox_loginName.Text,
                     this.textBox_loginPassword.Text,
-                    this.textBox_adminDatabaseName.Text,
-                    this.textBox_instanceName.Text,
+                    AskAdminUserName,
                     out strError);
                 if (nRet == -1)
                 {
+                    ClearCachedAdminUserName();
+
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+
+                // 创建 Pgsql 的数据库。这里数据库实际上是一个实例内的公共空间，不是 MS SQL Server 那种数据库概念
+                nRet = CreateDatabase(
+                    this.SqlServerName,
+                    this.textBox_instanceName.Text,
+                    this.textBox_loginName.Text,
+                    AskAdminUserName,
+                    out strError);
+                if (nRet == -1)
+                {
+                    ClearCachedAdminUserName();
+
                     DialogResult result = MessageBox.Show(this,
     "在自动创建数据库的过程中发生错误: \r\n\r\n"
     + strError
@@ -225,12 +239,62 @@ namespace DigitalPlatform.rms
             this.Close();
         }
 
+        string adminUserName = "";
+        string adminPassword = "";
+
+        void ClearCachedAdminUserName()
+        {
+            adminUserName = "";
+            adminPassword = "";
+        }
+
+        // 询问超级用户名和密码
+        string AskAdminUserName(out string userName, out string password)
+        {
+            if (string.IsNullOrEmpty(adminUserName))
+            {
+                userName = "";
+                password = "";
+
+                using (LoginDlg dlg = new LoginDlg())
+                {
+                    dlg.Comment = "请提供 PostgreSQL 超级用户名和密码";
+                    dlg.ServerUrl = " ";
+                    dlg.UserName = "postgres";
+                    dlg.Password = "";
+                    dlg.SavePassword = true;
+                    dlg.ShowDialog(this);
+
+                    if (dlg.DialogResult != DialogResult.OK)
+                    {
+                        return "放弃操作";
+                    }
+
+                    userName = dlg.UserName;
+                    password = dlg.Password;
+
+                    if (dlg.SavePassword == true)
+                    {
+                        adminUserName = dlg.UserName;
+                        adminPassword = dlg.Password;
+                    }
+                    else
+                        ClearCachedAdminUserName();
+                }
+            }
+            else
+            {
+                userName = adminUserName;
+                password = adminPassword;
+            }
+
+            return null;
+        }
+
         public static int DeleteDatabase(
 string strSqlServerName,
-string strSqlUserName,
-string strSqlUserPassword,
-string strAdminDatabase,
 string strDatabaseName,
+Delegate_getAdminUserName func_getAdminUserName,
 out string strError)
         {
             strError = "";
@@ -240,7 +304,12 @@ out string strError)
                 strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
                 return -1;
             }
-            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};Database={strAdminDatabase};"; // Database={strDatabaseName}
+
+            strError = func_getAdminUserName(out string strAdminUserName, out string strAdminPassword);
+            if (string.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            string strConnection = $"Host={strSqlServerName};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
 
             try
             {
@@ -289,6 +358,274 @@ out string strError)
         }
 
 
+#if REMOVED
+        public static int DeleteDatabase(
+string strSqlServerName,
+string strSqlUserName,
+string strSqlUserPassword,
+// string strAdminDatabase,
+string strDatabaseName,
+out string strError)
+        {
+            strError = "";
+
+            if (strSqlServerName.Contains("="))
+            {
+                strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
+                return -1;
+            }
+            string strConnection = $"Host={strSqlServerName};Username={strSqlUserName};Password={strSqlUserPassword};"; // Database={strAdminDatabase};
+
+            try
+            {
+                using (var connection = new NpgsqlConnection(strConnection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        string strCommand = $"DROP DATABASE \"{strDatabaseName}\"";
+                        using (var command = new NpgsqlCommand(strCommand, connection))
+                        {
+                            var count = command.ExecuteNonQuery();
+                        }
+                    }
+                    catch (PostgresException ex)
+                    {
+                        // https://www.postgresql.org/docs/current/errcodes-appendix.html
+                        // 3D000	invalid_catalog_name
+                        if (ex.SqlState == "3D000")
+                        {
+                            strError = $"数据库 '{strDatabaseName}' 不存在";
+                            return -1;
+                        }
+                        strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                    catch (NpgsqlException sqlEx)
+                    {
+                        strError = $"删除数据库 {strDatabaseName} 出错: { sqlEx.Message }";
+                        int nError = (int)sqlEx.ErrorCode;
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                return -1;
+            }
+            return 0;
+        }
+
+#endif
+
+        public delegate string Delegate_getAdminUserName(out string userName, out string password);
+
+        // 创建用户
+        public static int CreateUser(
+string strSqlServerName,
+string strSqlUserName,
+string strSqlUserPassword,
+Delegate_getAdminUserName func_getAdminUserName,
+out string strError)
+        {
+            strError = "";
+
+            if (strSqlServerName.Contains("="))
+            {
+                strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
+                return -1;
+            }
+
+            strError = func_getAdminUserName(out string strAdminUserName, out string strAdminPassword);
+            if (string.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            string strConnection = $"Host={strSqlServerName};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
+
+            try
+            {
+                using (var connection = new NpgsqlConnection(strConnection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        string strCommand = $"CREATE USER \"{strSqlUserName}\" PASSWORD '{strSqlUserPassword}'";
+                        using (var command = new NpgsqlCommand(strCommand, connection))
+                        {
+                            var count = command.ExecuteNonQuery();
+                        }
+                    }
+                    catch (PostgresException ex)
+                    {
+                        // https://www.postgresql.org/docs/current/errcodes-appendix.html
+                        // 42710	duplicate_object
+                        if (ex.SqlState == "42710")
+                            return 0;
+                        strError = $"创建用户 {strSqlUserName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                    catch (NpgsqlException sqlEx)
+                    {
+                        strError = $"创建用户 {strSqlUserName} 出错: { sqlEx.Message }";
+                        int nError = (int)sqlEx.ErrorCode;
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"创建用户 {strSqlUserName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+            return 0;
+        }
+
+        // 删除用户
+        public static int DeleteUser(
+string strSqlServerName,
+string strSqlUserName,
+Delegate_getAdminUserName func_getAdminUserName,
+out string strError)
+        {
+            strError = "";
+
+            if (strSqlServerName.Contains("="))
+            {
+                strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
+                return -1;
+            }
+
+            strError = func_getAdminUserName(out string strAdminUserName, out string strAdminPassword);
+            if (string.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            string strConnection = $"Host={strSqlServerName};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
+
+            try
+            {
+                using (var connection = new NpgsqlConnection(strConnection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        string strCommand = $"DROP USER \"{strSqlUserName}\"";
+                        using (var command = new NpgsqlCommand(strCommand, connection))
+                        {
+                            var count = command.ExecuteNonQuery();
+                        }
+                    }
+                    catch (PostgresException ex)
+                    {
+                        // https://www.postgresql.org/docs/current/errcodes-appendix.html
+                        // 42710	undefined_object
+                        if (ex.SqlState == "42704")
+                        {
+                            strError = $"用户 {strSqlUserName} 不存在";
+                            return -1;
+                        }
+                        strError = $"删除用户 {strSqlUserName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                    catch (NpgsqlException sqlEx)
+                    {
+                        strError = $"删除用户 {strSqlUserName} 出错: { sqlEx.Message }";
+                        int nError = (int)sqlEx.ErrorCode;
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"删除用户 {strSqlUserName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+            return 0;
+        }
+
+
+        public static int CreateDatabase(
+string strSqlServerName,
+string strDatabaseName,
+string strOwnerUserName,
+Delegate_getAdminUserName func_getAdminUserName,
+out string strError)
+        {
+            strError = "";
+
+            if (strSqlServerName.Contains("="))
+            {
+                strError = $"strSqlServerName 内容 '{strSqlServerName}' 中不允许包含等号";
+                return -1;
+            }
+
+            strError = func_getAdminUserName(out string strAdminUserName, out string strAdminPassword);
+            if (string.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            string strConnection = $"Host={strSqlServerName};Username={strAdminUserName};Password={strAdminPassword};"; // Database={strAdminDatabase};
+
+            try
+            {
+                using (var connection = new NpgsqlConnection(strConnection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        string strCommand = $"CREATE DATABASE \"{strDatabaseName}\" OWNER '{strOwnerUserName}'";
+                        using (var command = new NpgsqlCommand(strCommand, connection))
+                        {
+                            var count = command.ExecuteNonQuery();
+                        }
+                    }
+                    catch (PostgresException ex)
+                    {
+                        // https://www.postgresql.org/docs/current/errcodes-appendix.html
+                        // 42P04	duplicate_database
+                        if (ex.SqlState == "42P04")
+                            return 0;
+                        strError = $"创建数据库 {strDatabaseName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                    catch (NpgsqlException sqlEx)
+                    {
+                        strError = $"创建数据库 {strDatabaseName} 出错: { sqlEx.Message }";
+                        int nError = (int)sqlEx.ErrorCode;
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        // strError = "连接 SQL 数据库出错： " + ex.Message + " 类型:" + ex.GetType().ToString();
+                        strError = $"创建数据库 {strDatabaseName} 出错: { ex.Message }";
+                        return -1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+            return 0;
+        }
+
+
+#if REMOVED
         public static int CreateDatabase(
 string strSqlServerName,
 string strSqlUserName,
@@ -349,6 +686,7 @@ out string strError)
             }
             return 0;
         }
+#endif
 
         public static int VerifySqlServer(
 string strSqlServerName,
@@ -436,7 +774,7 @@ out string strError)
             // this.button_detect.Enabled = bEnable;
 
             this.button_OK.Enabled = bEnable;
-            this.button_Cancel.Enabled = bEnable;            
+            this.button_Cancel.Enabled = bEnable;
         }
 
         private void DataSourceDlg_Load(object sender, EventArgs e)
@@ -463,7 +801,7 @@ out string strError)
 
         private void textBox_loginName_TextChanged(object sender, EventArgs e)
         {
-            this.textBox_adminDatabaseName.Text = this.textBox_loginName.Text;
+            // this.textBox_adminDatabaseName.Text = this.textBox_loginName.Text;
         }
 
         private void checkBox_enableModifyAdminDatabaseName_CheckedChanged(object sender, EventArgs e)
@@ -490,10 +828,8 @@ MessageBoxDefaultButton.Button2);
                 // 删除 Pgsql 的数据库。这里数据库实际上是一个实例内的公共空间，不是 MS SQL Server 那种数据库概念
                 int nRet = DeleteDatabase(
                     this.SqlServerName,
-                    this.textBox_loginName.Text,
-                    this.textBox_loginPassword.Text,
-                    this.textBox_adminDatabaseName.Text,
                     this.textBox_instanceName.Text,
+                    AskAdminUserName,
                     out string strError);
                 if (nRet == -1)
                 {
@@ -504,6 +840,43 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 MessageBox.Show(this, $"数据库 '{this.InstanceName}' 删除成功");
+            }
+            finally
+            {
+                this.button_OK.Enabled = true;
+            }
+        }
+
+        private void button_deleteLogin_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要删除用户 '{this.KernelLoginName}'?",
+"PgsqlServerDataSourceDlg",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == System.Windows.Forms.DialogResult.No)
+            {
+                return;
+            }
+
+            this.button_OK.Enabled = false;
+            try
+            {
+                int nRet = DeleteUser(
+                    this.SqlServerName,
+                    this.KernelLoginName,
+                    AskAdminUserName,
+                    out string strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this,
+    $"在删除用户 '{this.KernelLoginName}' 的过程中发生错误: \r\n\r\n"
+    + strError);
+                    return;
+                }
+
+                MessageBox.Show(this, $"用户 '{this.KernelLoginName}' 删除成功");
             }
             finally
             {

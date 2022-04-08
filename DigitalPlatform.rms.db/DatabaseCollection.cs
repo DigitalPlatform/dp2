@@ -493,10 +493,14 @@ namespace DigitalPlatform.rms
             // 2012/2/21
             foreach (Database db in this)
             {
+                db.GetDbType();
                 db.Close();
             }
             // 保存内存对象到文件
             this.SaveXmlSafety(true);
+
+            // 2022/4/8
+            Connection.ClearAllPools(this.SqlServerType);
 
             // 2019/5/8
             if (this.DelayTables != null)

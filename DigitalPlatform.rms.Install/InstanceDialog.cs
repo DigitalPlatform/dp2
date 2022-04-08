@@ -177,7 +177,7 @@ MessageBoxDefaultButton.Button2);
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -212,7 +212,7 @@ MessageBoxDefaultButton.Button2);
         // 获得一个目前尚未被使用过的instancename值
         string GetNewInstanceName(int nStart)
         {
-            REDO:
+        REDO:
             string strResult = "instance" + nStart.ToString();
             for (int i = 0; i < this.listView_instance.Items.Count; i++)
             {
@@ -288,7 +288,7 @@ MessageBoxDefaultButton.Button2);
                 this.DebugInfo += "\r\n\r\n";
             this.DebugInfo += new_instance_dlg.DebugInfo;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -472,7 +472,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -917,7 +917,7 @@ out strError);
         //      -1  出错
         //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
         //      1   成功删除
-        public static int DeleteAllSqlDatabase(string strDataDir,
+        public int DeleteAllSqlDatabase(string strDataDir,
             out string strError)
         {
             strError = "";
@@ -1000,18 +1000,25 @@ out strError);
 
             if (info.SqlServerType == "PostgreSQL")
             {
-                // info.DatabaseInstanceName;
-
                 nRet = PgsqlDataSourceDlg.DeleteDatabase(
 info.SqlServerName,
-info.DatabaseLoginName,
-info.DatabaseLoginPassword,
-info.DatabaseLoginName,
 info.DatabaseInstanceName,
+AskAdminUserName,
 out strError);
                 if (nRet == -1)
                 {
                     strError = $"删除 Pgsql 实例数据库 '{info.DatabaseInstanceName}' 时出错: {strError}";
+                    return -1;
+                }
+
+                nRet = PgsqlDataSourceDlg.DeleteUser(
+                    info.SqlServerName,
+                    info.DatabaseLoginName,
+                    AskAdminUserName,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = $"删除 Pgsql 用户 '{info.DatabaseLoginName}' 时出错: {strError}";
                     return -1;
                 }
             }
@@ -1128,6 +1135,58 @@ out strError);
             }
 
             return 1;
+        }
+
+        string adminUserName = "";
+        string adminPassword = "";
+
+        void ClearCachedAdminUserName()
+        {
+            adminUserName = "";
+            adminPassword = "";
+        }
+
+        // 询问超级用户名和密码
+        string AskAdminUserName(out string userName, out string password)
+        {
+            if (string.IsNullOrEmpty(adminUserName))
+            {
+                userName = "";
+                password = "";
+
+                using (LoginDlg dlg = new LoginDlg())
+                {
+                    dlg.Comment = "请提供 PostgreSQL 超级用户名和密码";
+                    dlg.ServerUrl = " ";
+                    dlg.UserName = "postgres";
+                    dlg.Password = "";
+                    dlg.SavePassword = true;
+                    dlg.ShowDialog(this);
+
+                    if (dlg.DialogResult != DialogResult.OK)
+                    {
+                        return "放弃操作";
+                    }
+
+                    userName = dlg.UserName;
+                    password = dlg.Password;
+
+                    if (dlg.SavePassword == true)
+                    {
+                        adminUserName = dlg.UserName;
+                        adminPassword = dlg.Password;
+                    }
+                    else
+                        ClearCachedAdminUserName();
+                }
+            }
+            else
+            {
+                userName = adminUserName;
+                password = adminPassword;
+            }
+
+            return null;
         }
 
 
@@ -1330,7 +1389,7 @@ out strError);
                 this.Enabled = true;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -1342,7 +1401,7 @@ out strError);
             out string strError)
         {
             strError = "";
-            REDO_DELETE_DATADIR:
+        REDO_DELETE_DATADIR:
             try
             {
                 MessageBar bar = new MessageBar();
@@ -2176,7 +2235,7 @@ MessageBoxDefaultButton.Button1);
 
                 if (string.IsNullOrEmpty(strDataDir) == false)
                 {
-                    REDO_DELETE_DATADIR:
+                REDO_DELETE_DATADIR:
                     // 删除数据目录
                     try
                     {

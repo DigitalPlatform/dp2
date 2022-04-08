@@ -459,7 +459,7 @@ namespace DigitalPlatform.rms
                     datasource_dlg.InstanceName = "dp2kernel"
                         + (String.IsNullOrEmpty(this.InstanceName) == false ? "_" : "")
                         + this.InstanceName;    // 应当没有空格和特殊字符
-                    datasource_dlg.KernelLoginName = "postgres";
+                    datasource_dlg.KernelLoginName = datasource_dlg.InstanceName;   // "postgres";
                     datasource_dlg.KernelLoginPassword = "";
                     //datasource_dlg.MySqlSslMode = "";
                 }

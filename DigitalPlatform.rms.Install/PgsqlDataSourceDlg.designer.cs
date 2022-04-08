@@ -48,6 +48,7 @@ namespace DigitalPlatform.rms
             this.label6 = new System.Windows.Forms.Label();
             this.checkBox_enableModifyAdminDatabaseName = new System.Windows.Forms.CheckBox();
             this.button_deleteDatabase = new System.Windows.Forms.Button();
+            this.button_deleteLogin = new System.Windows.Forms.Button();
             this.groupBox_login.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -154,6 +155,7 @@ namespace DigitalPlatform.rms
             // 
             this.groupBox_login.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox_login.Controls.Add(this.button_deleteLogin);
             this.groupBox_login.Controls.Add(this.textBox_confirmLoginPassword);
             this.groupBox_login.Controls.Add(this.label3);
             this.groupBox_login.Controls.Add(this.textBox_loginPassword);
@@ -167,7 +169,7 @@ namespace DigitalPlatform.rms
             this.groupBox_login.Size = new System.Drawing.Size(1280, 357);
             this.groupBox_login.TabIndex = 4;
             this.groupBox_login.TabStop = false;
-            this.groupBox_login.Text = "管理者账户";
+            this.groupBox_login.Text = "创建一个 PostgreSQL 用户";
             // 
             // textBox_confirmLoginPassword
             // 
@@ -179,7 +181,6 @@ namespace DigitalPlatform.rms
             this.textBox_confirmLoginPassword.PasswordChar = '*';
             this.textBox_confirmLoginPassword.Size = new System.Drawing.Size(528, 49);
             this.textBox_confirmLoginPassword.TabIndex = 5;
-            this.textBox_confirmLoginPassword.Visible = false;
             // 
             // label3
             // 
@@ -191,7 +192,6 @@ namespace DigitalPlatform.rms
             this.label3.Size = new System.Drawing.Size(249, 36);
             this.label3.TabIndex = 4;
             this.label3.Text = "再次输入密码:";
-            this.label3.Visible = false;
             // 
             // textBox_loginPassword
             // 
@@ -283,6 +283,17 @@ namespace DigitalPlatform.rms
             this.button_deleteDatabase.UseVisualStyleBackColor = true;
             this.button_deleteDatabase.Click += new System.EventHandler(this.button_deleteDatabase_Click);
             // 
+            // button_deleteLogin
+            // 
+            this.button_deleteLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_deleteLogin.Location = new System.Drawing.Point(893, 81);
+            this.button_deleteLogin.Name = "button_deleteLogin";
+            this.button_deleteLogin.Size = new System.Drawing.Size(147, 59);
+            this.button_deleteLogin.TabIndex = 13;
+            this.button_deleteLogin.Text = "删除";
+            this.button_deleteLogin.UseVisualStyleBackColor = true;
+            this.button_deleteLogin.Click += new System.EventHandler(this.button_deleteLogin_Click);
+            // 
             // PgsqlDataSourceDlg
             // 
             this.AcceptButton = this.button_OK;
@@ -337,5 +348,6 @@ namespace DigitalPlatform.rms
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckBox checkBox_enableModifyAdminDatabaseName;
         private System.Windows.Forms.Button button_deleteDatabase;
+        private System.Windows.Forms.Button button_deleteLogin;
     }
 }

@@ -538,6 +538,24 @@ namespace DigitalPlatform.rms
             return (this.SqlServerType == SqlServerType.Pgsql);
         }
 
+        public static bool ClearAllPools(SqlServerType type)
+        {
+            if (type == SqlServerType.MsSqlServer)
+                SqlConnection.ClearAllPools();
+            else if (type == SqlServerType.SQLite)
+                SQLiteConnection.ClearAllPools();
+            else if (type == SqlServerType.MySql)
+                MySqlConnection.ClearAllPools();
+            else if (type == SqlServerType.Oracle)
+                OracleConnection.ClearAllPools();
+            else if (type == SqlServerType.Pgsql)
+                NpgsqlConnection.ClearAllPools();
+            else
+                return false;
+
+            return true;
+        }
+
         public DbCommand NewCommand(string command)
         {
             if (IsMsSqlServer())
