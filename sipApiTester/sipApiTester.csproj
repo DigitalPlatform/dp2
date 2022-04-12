@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="SipChannel.cs" />
     <Compile Include="TestCase\TestConnect.cs" />
+    <Compile Include="TestCase\TestPipeline.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

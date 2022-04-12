@@ -6893,6 +6893,105 @@ out strError);
             }
         }
 
+        // 改进后版本
+        // 获取资源
+        // parameters:
+        //      strResPath  资源的路径。一般数据库记录为"数据库名/1"形态；而数据库记录所属的对象资源，则为"数据库名/object/0"形态
+        //      nStart  本次要获得的byte开始位置
+        //      nLength 本次要获得的byte个数
+        //      strStyle    风格列表，为逗号分隔的字符串值列表。取值为data/metadata/timestamp/outputpath之一
+        //                  data表示要在baContent参数内返回资源本体内容
+        //                  metadata表示要在strMetadata参数内返回元数据内容
+        //                  timestamp表示要在baOutputTimestam参数内返回资源的时间戳内容
+        //                  outputpath表示要在strOutputResPath参数内返回实际记录路径内容
+        //      baContent   返回的byte数组
+        //      strMetadata 返回的元数据内容
+        //      strOutputResPath    返回的实际记录路径
+        //      baOutputTimestamp   返回的资源时间戳
+        // rights:
+        //      需要 getres 权限
+        // return:
+        //      -1  出错
+        //      >=0   成功(返回值一般表示资源的总尺寸(注意不是这次获取的部分的尺寸))
+        public long GetRes(
+            string strResPath,
+            long lStart,
+            int nLength,
+            string strStyle,
+            out byte[] baContent,
+            out int origin_content_length,
+            out string strMetadata,
+            out string strOutputResPath,
+            out byte[] baOutputTimestamp,
+            out string strError)
+        {
+            strError = "";
+            baContent = null;
+            strMetadata = "";
+            strOutputResPath = "";
+            baOutputTimestamp = null;
+            origin_content_length = 0;
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginGetRes(
+                    strResPath,
+                    lStart,
+                    nLength,
+                    strStyle,
+                    null,
+                    null);
+
+                WaitComplete(soapresult);
+
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                // soapresult.AsyncState;
+                LibraryServerResult result = this.ws.EndGetRes(
+                    out baContent,
+                    out strMetadata,
+                    out strOutputResPath,
+                    out baOutputTimestamp,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+
+                // 解压前的尺寸
+                if (baContent != null)
+                    origin_content_length = baContent.Length;
+
+                // 2017/10/7
+                if (StringUtil.IsInList("gzip", strStyle)
+                    && result.ErrorCode == localhost.ErrorCode.Compressed
+                    && baContent != null && baContent.Length > 0)
+                {
+                    baContent = ByteArray.DecompressGzip(baContent);
+                }
+
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
+
         // 获取资源
         // parameters:
         //      strResPath  资源的路径。一般数据库记录为"数据库名/1"形态；而数据库记录所属的对象资源，则为"数据库名/object/0"形态
@@ -7603,6 +7702,36 @@ out strError);
             }
         }
 
+        // 2022/4/12
+        // 包装后的版本，少了一个参数 out int compressed_content_length
+        public long WriteRes(
+    DigitalPlatform.Stop stop,
+    string strResPath,
+    string strRanges,
+    long lTotalLength,
+    byte[] baContent,
+    string strMetadata,
+    string strStyle,
+    byte[] baInputTimestamp,
+    out string strOutputResPath,
+    out byte[] baOutputTimestamp,
+    out string strError)
+        {
+            return WriteRes(
+            stop,
+            strResPath,
+            strRanges,
+            lTotalLength,
+            baContent,
+            strMetadata,
+            strStyle,
+            baInputTimestamp,
+            out int _,
+            out strOutputResPath,
+            out baOutputTimestamp,
+            out strError);
+        }
+
         // 写入资源
         // parameters:
         //      lTotalLength    对象总尺寸。如果为 -1，表示不上传任何对象内容，而是只修改 metadata 部分
@@ -7615,6 +7744,7 @@ out strError);
             string strMetadata,
             string strStyle,
             byte[] baInputTimestamp,
+            out int compressed_content_length,
             out string strOutputResPath,
             out byte[] baOutputTimestamp,
             out string strError)
@@ -7622,12 +7752,19 @@ out strError);
             strError = "";
             strOutputResPath = "";
             baOutputTimestamp = null;
+            compressed_content_length = 0;
 
             // 2017/10/7
             if (StringUtil.IsInList("gzip", strStyle)
                 && baContent != null && baContent.Length > 0)
             {
                 baContent = ByteArray.CompressGzip(baContent);
+                // 2022/4/12
+                compressed_content_length = baContent.Length;
+            }
+            else
+            {
+                compressed_content_length = baContent.Length;
             }
 
         REDO:
@@ -7833,11 +7970,13 @@ out strError);
             string strRange,
             byte[] timestamp,
             string strStyle,
+            out int compressed_content_length,
             out byte[] output_timestamp,
             out string strError)
         {
             strError = "";
             output_timestamp = null;
+            compressed_content_length = 0;
             long lRet = 0;
 
             if (length == -1 && file != null)
@@ -7856,7 +7995,6 @@ out strError);
                     return -1;
             }
 
-
             // string strMetadata = BuildMetadata(strMime, strLocalPath);
 
             // 写入资源
@@ -7869,6 +8007,7 @@ out strError);
                 strMetadata,
                 strStyle,
                 timestamp,
+                out compressed_content_length,
                 out string strOutputResPath,
                 out output_timestamp,
                 out strError);

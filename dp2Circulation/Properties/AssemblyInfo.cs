@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.62.*")]
-[assembly: AssemblyFileVersion("3.62.0.0")]
+[assembly: AssemblyVersion("3.63.*")]
+[assembly: AssemblyFileVersion("3.63.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -145,3 +145,4 @@ using System.Runtime.InteropServices;
 // 3.60 2022/2/21 检查借阅信息链窗改进了同时检查读者记录证条码为空的记录的功能，和检查册记录中册条码号和参考ID 均为空的功能
 // 3.61 2022/3/5 创建 ISO15693 读者证卡的功能采用了 library.xml 中 rfid 元素的新匹配算法(允许读者 XML 记录中的 department 和 readerType 元素参与匹配)
 // 3.62 2022/3/12 library.xml 中 rfid 元素内机构代码匹配算法新增了 0.02 版，并继续支持 0.01 版
+// 3.63 2022/4/12 上传和下载文件的对话框中增加带宽显示

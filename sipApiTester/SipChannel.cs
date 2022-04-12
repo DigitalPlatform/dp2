@@ -794,6 +794,106 @@ namespace sipApiTester
             };
         }
 
+        #region pipeline
+
+        // 发送消息
+        public async Task<SendAndRecvResult> SendAsync(string requestText)
+        {
+            string error = "";
+            int nRet = 0;
+
+            int redo_count = 0;
+
+            // 校验消息
+            BaseMessage request = null;
+            nRet = SIPUtility.ParseMessage(requestText, out request, out error);
+            if (nRet == -1)
+            {
+                return new SendAndRecvResult
+                {
+                    Value = -1,
+                    ErrorInfo = "校验发送消息异常:" + error
+                };
+            }
+
+        REDO_SEND:
+            // 发送消息
+            var send_result = await SendMessageAsync(requestText);
+            if (send_result.Value == -1)
+            {
+                if (send_result.ErrorCode == "ConnectionAborted"
+                    && String.IsNullOrEmpty(this.SIPServerAddr) == false
+                    && redo_count < 2)
+                {
+                    var connect_result = await ConnectAndLoginAsync(null, -1, null, null);
+                    if (connect_result.Value != -1)
+                    {
+                        redo_count++;
+                        goto REDO_SEND;
+                    }
+                }
+
+                return new SendAndRecvResult(send_result);
+            }
+
+            return new SendAndRecvResult();
+        }
+
+        // 接收消息
+        public async Task<SendAndRecvResult> RecvAsync()
+        {
+            string error = "";
+            int nRet = 0;
+
+            // 接收消息
+            var recv_result = await RecvMessageAsync();
+            if (recv_result.Value == -1)
+            {
+                return new SendAndRecvResult(recv_result);
+            }
+
+            //解析返回的消息
+            nRet = SIPUtility.ParseMessage(recv_result.RecvMsg, out BaseMessage response, out error);
+            if (nRet == -1)
+            {
+                try
+                {
+                    dynamic p = response;
+                    if (string.IsNullOrEmpty(p.AF_ScreenMessage_o) == false)
+                        return new SendAndRecvResult
+                        {
+                            RecvMsg = recv_result.RecvMsg,
+                            Response = response,
+                            Value = -1,
+                            ErrorInfo = p.AF_ScreenMessage_o,
+                            ErrorCode = "sipError",
+                        };
+                }
+                catch
+                {
+
+                }
+
+                return new SendAndRecvResult
+                {
+                    RecvMsg = recv_result.RecvMsg,
+                    Response = response,
+                    Value = -1,
+                    ErrorInfo = "解析返回的消息异常:" + error + "\r\n" + recv_result.RecvMsg,
+                    ErrorCode = "parseError"
+                };
+            }
+
+            return new SendAndRecvResult
+            {
+                Value = 0,
+                RecvMsg = recv_result.RecvMsg,
+                Response = response
+            };
+        }
+
+        #endregion
+
         public static void WriteErrorLog(string text)
         {
             ClientInfo.WriteErrorLog(text);
@@ -883,6 +983,86 @@ namespace sipApiTester
                 Result = response94
             };
         }
+
+        #region pipeline
+
+        public async Task<LoginResult> SendLoginAsync(string username,
+    string password)
+        {
+            if (username != null)
+            {
+                _userName = username;
+                _password = password;
+            }
+
+            Login_93 request = new Login_93()
+            {
+                UIDAlgorithm_1 = "0",
+                PWDAlgorithm_1 = "0",
+                CN_LoginUserId_r = _userName,
+                CO_LoginPassword_r = _password,
+            };
+
+            // 发送消息
+            string requestText = request.ToText();
+
+            var result = await SendAsync(requestText);
+            if (result.Value == -1)
+            {
+                return new LoginResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
+            }
+
+            return new LoginResult();
+        }
+
+        public async Task<LoginResult> RecvLoginAsync()
+        {
+            // 接收消息
+            var result = await RecvAsync();
+            if (result.Value == -1)
+            {
+                return new LoginResult
+                {
+                    Value = -1,
+                    ErrorInfo = result.ErrorInfo,
+                    ErrorCode = result.ErrorCode
+                };
+            }
+
+            var response94 = result.Response as LoginResponse_94;
+            if (response94 == null)
+            {
+                return new LoginResult
+                {
+                    Value = -1,
+                    ErrorInfo = "返回的不是 94 消息"
+                };
+            }
+
+            if (response94.Ok_1 == "0")
+            {
+                return new LoginResult
+                {
+                    Value = 0,
+                    ErrorInfo = response94.AF_ScreenMessage_o == null ? "登录失败" : $"登录失败 {response94.AF_ScreenMessage_o}",
+                    Result = response94
+                };
+            }
+
+            return new LoginResult
+            {
+                Value = 1,
+                ErrorInfo = "登录成功",
+                Result = response94
+            };
+        }
+
+        #endregion
 
         public class ScStatusResult : NormalResult
         {

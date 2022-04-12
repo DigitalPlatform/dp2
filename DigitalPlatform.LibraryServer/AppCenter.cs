@@ -23,7 +23,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
-        /// <summary>
+    /// <summary>
     /// 本部分是和中心服务器相关的代码
     /// </summary>
     public partial class LibraryApplication
@@ -66,10 +66,10 @@ namespace DigitalPlatform.LibraryServer
                         strError = "无法删除，因为请求中没有使用 refid 属性 : " + node.OuterXml;
                         return -1;
                     }
-                    XmlNodeList target_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("center/server[@refid='"+strRefID+"']");
+                    XmlNodeList target_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("center/server[@refid='" + strRefID + "']");
                     if (target_nodes.Count == 0)
                     {
-                        strError = "参考 ID 为 '"+strRefID+"' 的 server 元素在 center 元素下没有找到";
+                        strError = "参考 ID 为 '" + strRefID + "' 的 server 元素在 center 元素下没有找到";
                         return -1;
                     }
 

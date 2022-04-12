@@ -63,6 +63,7 @@ namespace DigitalPlatform
             this._text = strText;
         }
 #endif
+        Bandwidth _bandwidth = new Bandwidth();
 
         // 设置进度条信息
         // parameters:
@@ -72,7 +73,8 @@ namespace DigitalPlatform
         public void SetProgress(
             string strText,
             long bytesReceived,
-            long totalBytesToReceive)
+            long totalBytesToReceive,
+            long transferReceived = 0)
         {
             if (this.IsDisposed)
                 return;
@@ -95,6 +97,17 @@ namespace DigitalPlatform
 
                         // this.label_message.Text = bytesReceived.ToString() + " / " + totalBytesToReceive.ToString() + " " + this.SourceFilePath;
                         this.label_message.Text = GetLengthText(bytesReceived) + " / " + GetLengthText(totalBytesToReceive) + " " + this.SourceFilePath;
+
+                        // 2022/4/11
+                        double band_width = 0;
+                        if (transferReceived != 0)
+                            band_width = _bandwidth.GetWidth(transferReceived);
+                        else
+                            band_width = _bandwidth.GetWidth(bytesReceived);
+                        if (band_width != -1)
+                        {
+                            this.label_bandwidth.Text = GetLengthText((long)band_width) + "bps";
+                        }
                     }
 
                     if (strText != null)
@@ -142,6 +155,50 @@ namespace DigitalPlatform
         public void StopMarquee()
         {
             this.progressBar1.Style = ProgressBarStyle.Continuous;
+        }
+    }
+
+    // 带宽计算
+    public class Bandwidth
+    {
+        public long Width { get; set; }
+
+        DateTime _lastTime = DateTime.MinValue;
+        double _lastWidth = 0;
+        long _lastReceived = 0; // 上次接收到的总数量
+
+        // 平滑间隔
+        TimeSpan _period = TimeSpan.FromSeconds(5);
+
+        // 计算瞬时带宽
+        public double GetWidth(long bytesReceived)
+        {
+            var now = DateTime.Now;
+            if (_lastTime == DateTime.MinValue)
+            {
+                _lastTime = now;
+                _lastReceived = 0;
+                return 0;
+            }
+
+            var delta_length = now - _lastTime;
+
+            if (delta_length < _period)
+            {
+                return -1;  // 表示累积的时间还不够，没有进行计算
+            }
+
+            _lastTime = now;
+
+            long delta_bytes = bytesReceived - _lastReceived;
+            _lastReceived = bytesReceived;
+
+
+            if (delta_length.TotalSeconds == 0)
+                return 0;
+
+            _lastWidth = (double)delta_bytes / delta_length.TotalSeconds;
+            return _lastWidth;
         }
     }
 }

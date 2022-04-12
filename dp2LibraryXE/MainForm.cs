@@ -611,6 +611,19 @@ https://github.com/digitalplatform/dp2"
                 this.AppendString("---\r\n序列号中许可的功能: " + this.Function + "\r\n");
 
         }
+
+        public string LibraryProperties
+        {
+            get
+            {
+                return this.AppInfo.GetString("dp2library", "properties", "");
+            }
+            set
+            {
+                this.AppInfo.SetString("dp2library", "properties", value);
+            }
+        }
+
 #if SN
         int _maxClients = 5;
 #else
@@ -1825,6 +1838,12 @@ https://github.com/digitalplatform/dp2"
                 this.library_host.SetFunction(this.Function);
             }
 
+            // 2022/4/12
+            // 下载带宽
+            var result = OnLibraryProperiesChanged();
+            if (result.Value == -1)
+                return result;
+
             return new NormalResult { ErrorInfo = strError, Value = 1 };
         }
 
@@ -1835,6 +1854,58 @@ https://github.com/digitalplatform/dp2"
                 library_host.Stop();
                 library_host = null;
             }
+        }
+
+        // 2022/4/12
+        // 下载带宽
+        NormalResult OnLibraryProperiesChanged()
+        {
+                var properties = this.LibraryProperties;
+            {
+                var bandwidth_string = StringUtil.GetParameterByPrefix(properties, "downloadBandwidth");
+                long bandwidth = -1;
+                if (string.IsNullOrEmpty(bandwidth_string) == false)
+                {
+                    try
+                    {
+                        bandwidth = LibraryServerUtil.ParseBandwidth(bandwidth_string);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"dp2library 注册表参数 properties 值中 子参数 downloadBandwidth 值 '{bandwidth_string}' 格式不合法: {ex.Message}"
+                        };
+                    }
+                }
+
+                LibraryApplication.DownloadBandwidth = bandwidth;
+            }
+
+            {
+                var bandwidth_string = StringUtil.GetParameterByPrefix(properties, "uploadBandwidth");
+                long bandwidth = -1;
+                if (string.IsNullOrEmpty(bandwidth_string) == false)
+                {
+                    try
+                    {
+                        bandwidth = LibraryServerUtil.ParseBandwidth(bandwidth_string);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"dp2library 注册表参数 properties 值中 子参数 uploadBandwidth 值 '{bandwidth_string}' 格式不合法: {ex.Message}"
+                        };
+                    }
+                }
+
+                LibraryApplication.UploadBandwidth = bandwidth;
+            }
+
+            return new NormalResult();
         }
 
         // 安装 dp2Library 的数据目录
@@ -6096,6 +6167,25 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 2022/4/12
+        private void MenuItem_dp2library_globalSetting_Click(object sender, EventArgs e)
+        {
+            var properties = this.LibraryProperties;
+            var result = InputDlg.GetInput(this,
+                "设置 dp2library 全局参数",
+                "全局参数(格式为 xxx:xxxx,xxx:xxxx)",
+                properties,
+                this.Font);
+            if (result == null)
+                return;
+
+            this.LibraryProperties = result;
+
+            var changed_result = OnLibraryProperiesChanged();
+            if (changed_result.Value == -1)
+                MessageBox.Show(this, changed_result.ErrorInfo);
         }
     }
 

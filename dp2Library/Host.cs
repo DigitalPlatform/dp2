@@ -29,6 +29,7 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.Install;
 
 namespace dp2Library
 {
@@ -394,6 +395,7 @@ EventLogEntryType.Information);
 #endif
 
 #if SN
+
         static string GetMaxClients(string strSerialCode)
         {
             string strExtParams = SerialCodeForm.GetExtParams(strSerialCode);
@@ -498,8 +500,53 @@ EventLogEntryType.Information);
         {
             // CloseHosts();
 
-            string strError = "";
             errors = new List<string>();
+            string strError = "";
+
+            // 2022/4/11
+            var properties = InstallHelper.GetProductString("dp2Library", "properties");
+            {
+                var bandwidth_string = StringUtil.GetParameterByPrefix(properties, "downloadBandwidth");
+                long bandwidth = -1;
+                if (string.IsNullOrEmpty(bandwidth_string) == false)
+                {
+                    try
+                    {
+                        bandwidth = LibraryServerUtil.ParseBandwidth(bandwidth_string);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"dp2library 注册表参数 properties 值中 子参数 downloadBandwidth 值 '{bandwidth_string}' 格式不合法: {ex.Message}";
+                        this.Log.WriteEntry(strError,
+        EventLogEntryType.Error);
+                        errors.Add(strError);
+                    }
+                }
+
+                LibraryApplication.DownloadBandwidth = bandwidth;
+            }
+
+            {
+                var bandwidth_string = StringUtil.GetParameterByPrefix(properties, "uploadBandwidth");
+                long bandwidth = -1;
+                if (string.IsNullOrEmpty(bandwidth_string) == false)
+                {
+                    try
+                    {
+                        bandwidth = LibraryServerUtil.ParseBandwidth(bandwidth_string);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"dp2library 注册表参数 properties 值中 子参数 uploadBandwidth 值 '{bandwidth_string}' 格式不合法: {ex.Message}";
+                        this.Log.WriteEntry(strError,
+        EventLogEntryType.Error);
+                        errors.Add(strError);
+                    }
+                }
+
+                LibraryApplication.UploadBandwidth = bandwidth;
+            }
+
             int nCount = 0;
 
             for (int i = 0; ; i++)
@@ -519,7 +566,6 @@ EventLogEntryType.Information);
                     out string style);
                 if (bRet == false)
                     break;
-
 
                 if (instance_names != null && instance_names.IndexOf(strInstanceName) == -1)
                     continue;
@@ -1229,6 +1275,7 @@ EventLogEntryType.Information);
             return binding;
         }
 
+        /*
         public static string GetProductString(string strProductName,
     string strEntryName)
         {
@@ -1250,6 +1297,7 @@ EventLogEntryType.Information);
                 }
             }
         }
+        */
 
         static X509Certificate2 FindCertificate(
 StoreLocation location, StoreName name,

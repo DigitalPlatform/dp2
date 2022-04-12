@@ -979,7 +979,7 @@ MessageBoxDefaultButton.Button1);
             downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate (object o1, DownloadProgressChangedEventArgs e1)
             {
                 if (dlg.IsDisposed == false)
-                    dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
+                    dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive, e1.TransferReceived);
             });
             // 2017/10/7
             downloader.Prompt += new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
@@ -1199,7 +1199,7 @@ MessageBoxDefaultButton.Button1);
                     downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate (object o1, DownloadProgressChangedEventArgs e1)
                     {
                         if (dlg.IsDisposed == false)
-                            dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
+                            dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive, e1.TransferReceived);
                     });
                     // 2017/10/7
                     downloader.Prompt += new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
@@ -1708,15 +1708,16 @@ MessageBoxDefaultButton.Button1);
             dlg.Font = this.Font;
             dlg.Show(this);
 
-            stop.OnProgressChanged += new ProgressChangedEventHandler(delegate (object o1, ProgressChangedEventArgs e1)
+            stop.OnProgressChanged += (object o1, ProgressChangedEventArgs e1) =>
             {
                 dlg.SetProgress(e1.Message, // StringUtil.GetPercentText(e1.Value - e1.Start, e1.End - e1.Start),
                     e1.Value - e1.Start, 
-                    e1.End - e1.Start);
-            });
+                    e1.End - e1.Start,
+                    e1.Tag == null ? 0 : (long)e1.Tag);
+            };
             stop.BeginLoop();
 
-            Task.Factory.StartNew(() =>
+            _ = Task.Factory.StartNew(() =>
             {
                 string strError = "";
                 foreach (string localfilename in e.SourceFileNames)

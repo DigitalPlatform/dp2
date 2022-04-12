@@ -7132,5 +7132,32 @@ MessageBoxDefaultButton.Button2);
             return 1;
         }
 
+        // dp2library 全局参数
+        private void MenuItem_dp2library_globalSetting_Click(object sender, EventArgs e)
+        {
+            string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
+            if (string.IsNullOrEmpty(strExePath) == true)
+            {
+                string strError = "dp2library 未曾安装过";
+                MessageBox.Show(this, strError);
+                return;
+            }
+
+            // 2022/4/11
+            var properties = InstallHelper.GetProductString("dp2Library", "properties");
+            var result = InputDlg.GetInput(this,
+                "设置 dp2library 全局参数",
+                "全局参数(格式为 xxx:xxxx,xxx:xxxx)",
+                properties,
+                this.Font);
+            if (result == null)
+                return;
+
+            InstallHelper.SetProductString("dp2Library",
+                "properties",
+                result);
+
+            MessageBox.Show(this, "修改后的参数要在 dp2library service 重启之后才能生效");
+        }
     }
 }

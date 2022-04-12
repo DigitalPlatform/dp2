@@ -1136,6 +1136,18 @@ namespace DigitalPlatform.LibraryServer
                             "privilegedIpList",
                             "");
                         this.SessionTable.SpecialIpList = StringUtil.SplitList(strList, ',');
+
+                        /*
+                        // DownloadBandwidth
+                        nRet = DomUtil.GetIntegerParam(node,
+"downloadBandwidth",
+-1,
+out long big_value,
+out strError);
+                        if (nRet == -1)
+                            app.WriteErrorLog(strError);
+                        this.DownloadBandwidth = big_value;
+                        */
                     }
                     else
                     {
@@ -1145,7 +1157,11 @@ namespace DigitalPlatform.LibraryServer
                             this.SessionTable.MaxSessionsLocalHost = 150;
                             this.SessionTable.SpecialIpList = null;
                         }
+
+                        // this.DownloadBandwidth = -1;
                     }
+
+                    // this.InitialRateLimit();
 
                     // <cataloging>
                     node = dom.DocumentElement.SelectSingleNode("cataloging") as XmlElement;
