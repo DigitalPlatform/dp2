@@ -38,6 +38,7 @@ namespace DigitalPlatform.rms
             this.button_Cancel = new System.Windows.Forms.Button();
             this.textBox_message = new System.Windows.Forms.TextBox();
             this.groupBox_login = new System.Windows.Forms.GroupBox();
+            this.button_deleteLogin = new System.Windows.Forms.Button();
             this.textBox_confirmLoginPassword = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBox_loginPassword = new System.Windows.Forms.TextBox();
@@ -48,7 +49,6 @@ namespace DigitalPlatform.rms
             this.label6 = new System.Windows.Forms.Label();
             this.checkBox_enableModifyAdminDatabaseName = new System.Windows.Forms.CheckBox();
             this.button_deleteDatabase = new System.Windows.Forms.Button();
-            this.button_deleteLogin = new System.Windows.Forms.Button();
             this.groupBox_login.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -171,6 +171,17 @@ namespace DigitalPlatform.rms
             this.groupBox_login.TabStop = false;
             this.groupBox_login.Text = "创建一个 PostgreSQL 用户";
             // 
+            // button_deleteLogin
+            // 
+            this.button_deleteLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_deleteLogin.Location = new System.Drawing.Point(893, 81);
+            this.button_deleteLogin.Name = "button_deleteLogin";
+            this.button_deleteLogin.Size = new System.Drawing.Size(147, 59);
+            this.button_deleteLogin.TabIndex = 13;
+            this.button_deleteLogin.Text = "删除";
+            this.button_deleteLogin.UseVisualStyleBackColor = true;
+            this.button_deleteLogin.Click += new System.EventHandler(this.button_deleteLogin_Click);
+            // 
             // textBox_confirmLoginPassword
             // 
             this.textBox_confirmLoginPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -248,6 +259,7 @@ namespace DigitalPlatform.rms
             this.textBox_adminDatabaseName.ReadOnly = true;
             this.textBox_adminDatabaseName.Size = new System.Drawing.Size(528, 49);
             this.textBox_adminDatabaseName.TabIndex = 10;
+            this.textBox_adminDatabaseName.Visible = false;
             // 
             // label6
             // 
@@ -259,6 +271,7 @@ namespace DigitalPlatform.rms
             this.label6.Size = new System.Drawing.Size(339, 36);
             this.label6.TabIndex = 9;
             this.label6.Text = "管理者数据库名(&M):";
+            this.label6.Visible = false;
             // 
             // checkBox_enableModifyAdminDatabaseName
             // 
@@ -270,6 +283,7 @@ namespace DigitalPlatform.rms
             this.checkBox_enableModifyAdminDatabaseName.TabIndex = 11;
             this.checkBox_enableModifyAdminDatabaseName.Text = "修改";
             this.checkBox_enableModifyAdminDatabaseName.UseVisualStyleBackColor = true;
+            this.checkBox_enableModifyAdminDatabaseName.Visible = false;
             this.checkBox_enableModifyAdminDatabaseName.CheckedChanged += new System.EventHandler(this.checkBox_enableModifyAdminDatabaseName_CheckedChanged);
             // 
             // button_deleteDatabase
@@ -282,17 +296,6 @@ namespace DigitalPlatform.rms
             this.button_deleteDatabase.Text = "删除";
             this.button_deleteDatabase.UseVisualStyleBackColor = true;
             this.button_deleteDatabase.Click += new System.EventHandler(this.button_deleteDatabase_Click);
-            // 
-            // button_deleteLogin
-            // 
-            this.button_deleteLogin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_deleteLogin.Location = new System.Drawing.Point(893, 81);
-            this.button_deleteLogin.Name = "button_deleteLogin";
-            this.button_deleteLogin.Size = new System.Drawing.Size(147, 59);
-            this.button_deleteLogin.TabIndex = 13;
-            this.button_deleteLogin.Text = "删除";
-            this.button_deleteLogin.UseVisualStyleBackColor = true;
-            this.button_deleteLogin.Click += new System.EventHandler(this.button_deleteLogin_Click);
             // 
             // PgsqlDataSourceDlg
             // 

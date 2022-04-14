@@ -1302,17 +1302,17 @@ ex);
             {
                 // 删除全部
                 if (connection.IsOracle())
-                    strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "_%'";
+                    strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "\\_%'";
                 else if (connection.IsPgsql())
-                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName + "_%'";
+                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName + "\\_%'";
             }
             else if (StringUtil.IsInList("keys", strStyle) == true)
             {
                 // 只删除keys
                 if (connection.IsOracle())
-                    strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "_%' AND table_name <> '" + strSqlDbName.ToUpper() + "_RECORDS' ";
+                    strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "\\_%' AND table_name <> '" + strSqlDbName.ToUpper() + "_RECORDS' ";
                 else if (connection.IsPgsql())
-                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName + "_%' AND tablename <> '" + strSqlDbName + "_RECORDS' ";
+                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName + "\\_%' AND tablename <> '" + strSqlDbName + "_RECORDS' ";
             }
             else if (StringUtil.IsInList("records", strStyle) == true)
             {
