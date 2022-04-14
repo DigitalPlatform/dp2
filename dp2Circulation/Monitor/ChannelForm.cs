@@ -34,6 +34,7 @@ namespace dp2Circulation
         const int COLUMN_LIBRARYCODE = 6;
         const int COLUMN_LANG = 7;
         const int COLUMN_SESSIONID = 8;
+        const int COLUMN_LASTTIME = 9;
 
         /// <summary>
         /// 构造函数
@@ -170,6 +171,7 @@ namespace dp2Circulation
                         ListViewUtil.ChangeItemText(item, COLUMN_SESSIONID, info.SessionID);
                         ListViewUtil.ChangeItemText(item, COLUMN_LOCATION, info.Location);
                         ListViewUtil.ChangeItemText(item, COLUMN_LANG, info.Lang);
+                        ListViewUtil.ChangeItemText(item, COLUMN_LASTTIME, info.LastTime);
 
                         item.SubItems[0].Font = new Font("Courier New", this.Font.Size);
 

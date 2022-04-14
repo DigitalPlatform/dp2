@@ -2151,11 +2151,14 @@ namespace DigitalPlatform.LibraryServer
                 if (sessioninfo.GlobalUser == false
                     && StringUtil.IsInList(strItemLibraryCode, sessioninfo.LibraryCodeList) == false)
                 {
-                    string strText = "此册因属其他分馆 " + strItemLibraryCode + " 而不能借阅。";
-                    XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
-                        "canBorrow", strText);
-                    DomUtil.SetAttr(node, "canBorrow", "false");
-                    goto SKIP1;
+                    if (AllowCrossBorrow(sessioninfo, strItemLibraryCode) == false)
+                    {
+                        string strText = "此册因属其他分馆 " + strItemLibraryCode + " 而不能借阅。";
+                        XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
+                            "canBorrow", strText);
+                        DomUtil.SetAttr(node, "canBorrow", "false");
+                        goto SKIP1;
+                    }
                 }
             }
 
@@ -2425,6 +2428,55 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        // 2022/4/14
+        // 可能跨越分馆的情况下，检查册(馆代码)是否允许读者外借。是从流通权限定义中检查
+        bool AllowCrossBorrow(SessionInfo sessioninfo,
+            string strItemLibraryCode)
+        {
+            if (sessioninfo.Account != null
+    && sessioninfo.Account.PatronDom != null
+    && sessioninfo.Account.PatronDom.DocumentElement != null)
+            {
+                var readerdom = sessioninfo.Account.PatronDom;
+                var strReaderLibraryCode = sessioninfo.Account.AccountLibraryCode;
+                string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
+                // 获得流通参数
+                // parameters:
+                //      strLibraryCode  图书馆代码, 如果为空,表示使用<library>元素以外的片段
+                //      strReaderType   读者类型。可以为 “普通读者”和“海淀分馆/普通读者”这样的形态。后者是对应于跨分馆借阅
+                // return:
+                //      reader和book类型均匹配 算4分
+                //      只有reader类型匹配，算3分
+                //      只有book类型匹配，算2分
+                //      reader和book类型都不匹配，算1分
+                int nRet = GetLoanParam(
+                    strItemLibraryCode,
+                    strReaderLibraryCode + "/" + strReaderType,
+                    "",
+                    "可借总册数",
+                    out string strParamValue,
+                    out MatchResult matchresult,
+                    out string strError);
+                if (nRet == -1)
+                {
+                    //strError = $"CheckCanBorrow() 中检查跨越分馆权限时出错: {strError}";
+                    //return -1;
+                    return false;
+                }
+
+                if (nRet < 3)
+                {
+                    //strError = "借阅操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不属于读者所在馆代码 '" + strReaderLibraryCode + "' ";
+                    //return 0;
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         // 校验一个册记录

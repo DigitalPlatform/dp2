@@ -51,7 +51,7 @@ namespace dp2Library
             if (this.sessioninfo != null)
             {
                 if (this.RestMode)
-                    this.sessioninfo.Used--;
+                    this.sessioninfo.Used = 0;
             }
 
             if (this.RestMode == false)
@@ -458,6 +458,7 @@ namespace dp2Library
             // 2011/1/27
             if (sessioninfo != null)
             {
+                this.sessioninfo.Touch();
                 this.sessioninfo.CallCount++;
 
 #if NO
@@ -469,7 +470,9 @@ namespace dp2Library
 
                 // 2017/5/7
                 if (this.RestMode)
-                    this.sessioninfo.Used++;
+                {
+                    this.sessioninfo.Used = 1;
+                }
             }
 
             if (bPrepareSessionInfo == false && this.sessioninfo == null)
