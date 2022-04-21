@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define USE_TRANS
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -291,6 +293,7 @@ namespace DigitalPlatform.rms
             return Encoding.UTF8.GetByteCount(text.ToString());
         }
 #endif
+        public delegate void Delegate_writeErrorLog(string text);
 
         // 新版本，针对 Named Pipe 情况测试过
         // 摘要:
@@ -300,7 +303,8 @@ namespace DigitalPlatform.rms
         // 参数:
         //   reader:
         //     一个 System.Data.IDataReader，它的行将被复制到目标表中。
-        public void WriteToServer(IDataReader reader)
+        public void WriteToServer(IDataReader reader,
+            Delegate_writeErrorLog func_writeErrorLog = null)
         {
             int index = 0;
             int nCount = 0;
@@ -312,9 +316,12 @@ namespace DigitalPlatform.rms
                 out strDbName,
                 out strTableName);
 
+#if !USE_TRANS
             using (MySqlCommand command = new MySqlCommand("",
     m_connection))
             {
+#endif
+
 #if NO
                 MySqlTransaction trans = m_connection.BeginTransaction();
                 try
@@ -324,6 +331,8 @@ namespace DigitalPlatform.rms
     " INSERT INTO " + strTableName
     + " (keystring,fromstring,idstring,keystringnum) "
     + " VALUES ";
+
+                List<string> lines = new List<string>();
 
                 StringBuilder strFragment = new StringBuilder();    // 残余的片段
 
@@ -349,10 +358,10 @@ namespace DigitalPlatform.rms
                     {
 #if !PARAMETERS
                         strFragment.Append(
-                            "(N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
-                            + MySqlHelper.EscapeString(strFromString) + "',N'"
-                            + MySqlHelper.EscapeString(strIdString) + "',N'"
-                            + MySqlHelper.EscapeString(strKeyStringNum) + "') "
+                            "(N'" + EscapeString(strKeyString) + "',N'"
+                            + EscapeString(strFromString) + "',N'"
+                            + EscapeString(strIdString) + "',N'"
+                            + EscapeString(strKeyStringNum) + "') "
                             );
 #else
                             strCommand.Append(
@@ -379,17 +388,28 @@ namespace DigitalPlatform.rms
                         && this.BatchSize != 0)
                         || strHead.Length + StringUtil.GetUtf8Bytes(strCommand.ToString()) + StringUtil.GetUtf8Bytes(strFragment.ToString()) + 1 >= 64000)  // 32000 是可以的; 4000 是可以的; 60000 不行
                     {
+                        /*
                         command.CommandText = "use " + strDbName + " ;\n"
                             + strHead + strCommand + " ;\n";
 
                         // 2019/3/6
                         command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
-                        
+
                         // Debug.WriteLine("command length=" + command.CommandText.Length);
                         command.ExecuteNonQuery();
 
                         strCommand.Clear();
                         command.Parameters.Clear();
+                        nCount = 0;
+                        index = 0;
+                        */
+                        ExcuteCommand(
+    strHead,
+    strDbName,
+    lines,
+    func_writeErrorLog);
+                        lines.Clear();
+                        strCommand.Clear();
                         nCount = 0;
                         index = 0;
                     }
@@ -401,12 +421,16 @@ namespace DigitalPlatform.rms
                         strCommand.Append(",");
                     }
                     strCommand.Append(strFragment.ToString());
+
+                    lines.Add(strFragment.ToString());
+
                     strFragment.Clear();
                 }
 
                 // 最后一次
-                if (strCommand.Length > 0)
+                if (lines.Count > 0)
                 {
+                    /*
                     Debug.Assert(strFragment.Length == 0, "");
 
                     command.CommandText = "use " + strDbName + " ;\n"
@@ -420,6 +444,17 @@ namespace DigitalPlatform.rms
 
                     strCommand.Clear();
                     command.Parameters.Clear();
+                    nCount = 0;
+                    index = 0;
+                    */
+
+                    ExcuteCommand(
+strHead,
+strDbName,
+lines,
+func_writeErrorLog);
+                    lines.Clear();
+                    strCommand.Clear();
                     nCount = 0;
                     index = 0;
                 }
@@ -437,7 +472,128 @@ namespace DigitalPlatform.rms
                         trans.Rollback();
                 }
 #endif
+
+#if !USE_TRANS
             } // end of using command
+#endif
+        }
+
+        static string EscapeString(string value)
+        {
+            // MySqlHelper.EscapeString
+            return value.Replace(@"\", @"\\").Replace("'", @"\'");
+        }
+
+        void ExcuteCommand(
+            string strHead,
+            string strDbName,
+            List<string> lines,
+            Delegate_writeErrorLog func_writeErrorLog = null)
+        {
+#if USE_TRANS
+            MySqlTransaction trans = m_connection.BeginTransaction();
+#endif
+            try
+            {
+                using (MySqlCommand command = new MySqlCommand("",
+m_connection))
+                {
+#if USE_TRANS
+                    command.Transaction = trans;
+#endif
+
+                    command.CommandText = "use " + strDbName + " ;\n"
+        + strHead + StringUtil.MakePathList(lines, ",") + " ;\n";
+
+                    // 2019/3/6
+                    command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
+
+                    // Debug.WriteLine("command length=" + command.CommandText.Length);
+                    command.ExecuteNonQuery();
+                    command.Parameters.Clear();
+
+#if USE_TRANS
+                    if (trans != null)
+                    {
+                        trans.Commit();
+                        trans = null;
+                    }
+#endif
+                    return;
+                }
+            }
+            catch (MySqlException ex)
+            {
+                if (ex.ErrorCode != MySqlErrorCode.TruncatedWrongValueForField)
+                    throw ex;
+                func_writeErrorLog?.Invoke($"写入过程发生一次 {ex.GetType().ToString()} 异常。后面将逐行重新写入");
+            }
+            finally
+            {
+#if USE_TRANS
+                if (trans != null)
+                    trans.Rollback();
+#endif
+            }
+
+#if USE_TRANS
+
+            using (MySqlCommand command = new MySqlCommand("",
+m_connection))
+            {
+                // 逐行重做
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    string line = lines[i];
+                    try
+                    {
+                        command.CommandText = "use " + strDbName + " ;\n"
+                + strHead + line + " ;\n";
+
+                        command.CommandTimeout = 1 * 60;
+
+                        command.ExecuteNonQuery();
+                        command.Parameters.Clear();
+                    }
+                    catch (MySqlException ex)
+                    {
+                        if (ex.ErrorCode != MySqlErrorCode.TruncatedWrongValueForField)
+                            throw ex;
+
+                        // 写入错误日志，然后继续
+                        func_writeErrorLog?.Invoke($"逐行重新写入过程中，以下行发生异常(已被跳过): {line}");
+                    }
+                }
+            }
+#else
+
+            // 逐行重做
+            using (MySqlCommand command = new MySqlCommand("",
+m_connection))
+            {
+                for (int i = lines.Count - 1; i >= 0; i--)
+                {
+                    string line = lines[i];
+                    try
+                    {
+                        command.CommandText = "use " + strDbName + " ;\n"
+                + strHead + line + " ;\n";
+
+                        command.CommandTimeout = 1 * 60;
+
+                        command.ExecuteNonQuery();
+                        command.Parameters.Clear();
+                    }
+                    catch (MySqlException ex)
+                    {
+                        if (ex.ErrorCode != MySqlErrorCode.TruncatedWrongValueForField)
+                            throw ex;
+                        else
+                            break;
+                    }
+                }
+            }
+#endif
         }
 
 #if NO

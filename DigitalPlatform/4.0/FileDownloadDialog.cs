@@ -106,7 +106,7 @@ namespace DigitalPlatform
                             band_width = _bandwidth.GetWidth(bytesReceived);
                         if (band_width != -1)
                         {
-                            this.label_bandwidth.Text = GetLengthText((long)band_width) + "bps";
+                            this.label_bandwidth.Text = GetLengthText((long)band_width * 8) + " bit/秒";
                         }
                     }
 

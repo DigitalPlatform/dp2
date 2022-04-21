@@ -68,14 +68,18 @@ namespace dp2Circulation
             }
         }
 
-        Task<NormalResult> BeginCheckMD5(string strServerFilePath,
-            string strLocalFilePath)
+        Task<NormalResult> CheckMD5Async(string strServerFilePath,
+            string strLocalFilePath,
+            CancellationToken token = default)
         {
             return Task.Factory.StartNew<NormalResult>(
-    () =>
-    {
-        return _checkMD5(strServerFilePath, strLocalFilePath);
-    });
+                () =>
+                {
+                    return _checkMD5(strServerFilePath, strLocalFilePath);
+                },
+                token,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
         }
 
         List<string> _task_ids = new List<string>();
@@ -419,20 +423,28 @@ namespace dp2Circulation
             }
         }
 
+        public class AskOverwriteFilesResult : NormalResult
+        {
+            public string OutputFolder { get; set; }
+            public bool Append { get; set; }
+        }
+
         // TODO: 将中途打算删除的文件留到函数返回前一刹那再删除
         // 询问是否覆盖已有的目标下载文件。整体询问
         // return:
         //      -1  出错
         //      0   放弃下载
         //      1   同意启动下载
-        public int AskOverwriteFiles(// List<string> filenames,
+        public async Task<AskOverwriteFilesResult> AskOverwriteFiles(// List<string> filenames,
             List<DownloadFileInfo> fileinfos,
+            string strOutputFolder
+            /*
             ref string strOutputFolder,
             out bool bAppend,
-            out string strError)
+            out string strError*/)
         {
-            strError = "";
-            bAppend = false;
+            string strError = "";
+            bool bAppend = false;
             if (string.IsNullOrEmpty(strOutputFolder))
             {
                 FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
@@ -443,7 +455,11 @@ namespace dp2Circulation
                 dir_dlg.SelectedPath = _usedDownloadFolder;
 
                 if (dir_dlg.ShowDialog() != DialogResult.OK)
-                    return 0;
+                    return new AskOverwriteFilesResult
+                    {
+                        Value = 0,
+                        ErrorInfo = "放弃下载"
+                    };
 
                 _usedDownloadFolder = dir_dlg.SelectedPath;
 
@@ -475,6 +491,8 @@ namespace dp2Circulation
                     //states.Add("temp_exists");
                     //temp_filenames.Add(strTargetPath);
                     continue;   // 一旦一个文件的临时文件存在，那么就不在探索正式文件是否存在、以及它的 MD5 是否匹配
+
+                    // TODO: 要检查这个临时文件是否被正在下载的任务所用
                 }
 
                 // 观察目标文件是否已经存在
@@ -496,17 +514,28 @@ namespace dp2Circulation
                                 new string[] { "是(验证)", "否(不验证)", "取消本次文件下载任务" },
                                 20);
                             if (md5_result == System.Windows.Forms.DialogResult.Cancel)
-                                return 0;
+                                return new AskOverwriteFilesResult
+                                {
+                                    Value = 0,
+                                    OutputFolder = strOutputFolder,
+                                    Append = bAppend,
+                                    ErrorInfo = "放弃下载"
+                                };
                         }
 
                         if (md5_result == System.Windows.Forms.DialogResult.Yes)
                         {
-                            Task<NormalResult> task = BeginCheckMD5(filename, strTargetPath);
+                            /*
+                            Task<NormalResult> task = CheckMD5Async(filename, strTargetPath);
                             GuiWait(task);
                             if (task.Result.Value == -1)
                             {
                                 strError = task.Result.ErrorInfo;
-                                return -1;
+                                return new AskOverwriteFilesResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
                             }
                             if (task.Result.Value == 0)
                             {
@@ -515,32 +544,24 @@ namespace dp2Circulation
                             }
                             else if (task.Result.Value == 1)
                                 info.MD5Matched = "yes";
-#if NO
-                            // 检查 MD5 是否匹配
-                            // return:
-                            //      -1  出错
-                            //      0   不匹配
-                            //      1   匹配
-                            int nRet = CheckMD5(filename,
-                    strTargetPath,
-                    out strError);
-                            if (nRet == -1)
-                                return -1;
-                            if (nRet == 0)
+                            */
+                            var result = await CheckMD5Async(filename, strTargetPath);
+                            if (result.Value == -1)
+                            {
+                                strError = result.ErrorInfo;
+                                return new AskOverwriteFilesResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
+                            }
+                            if (result.Value == 0)
                             {
                                 info.MD5Matched = "no";
-                                //md5_mismatch_filenames.Add(strTargetPath);
-#if NO
-                                // TODO: 最后一刻才删除
-                                File.Delete(strTargetPath); // MD5 不匹配，重新下载
-                                if (File.Exists(strTargetTempPath))
-                                    File.Delete(strTargetTempPath); // 防范性地删除临时文件
-#endif
                                 continue;
                             }
-                            else if (nRet == 1)
+                            else if (result.Value == 1)
                                 info.MD5Matched = "yes";
-#endif
                         }
                     }
 
@@ -568,250 +589,280 @@ namespace dp2Circulation
                 if (local_exists.Count + temp_exists.Count == 0)
                 {
                     bAppend = false;
-                    return 1;
+                    return new AskOverwriteFilesResult
+                    {
+                        Value = 1,
+                        OutputFolder = strOutputFolder,
+                        Append = bAppend
+                    };
                 }
             }
 
-            List<string> delete_filenames = new List<string>();
 
             try
             {
+                List<string> delete_filenames = new List<string>();
 
-                // MD5 不匹配的文件
-                List<string> md5_mismatch_filenames = new List<string>();   // 正式文件存在的，并且 MD5 经过探测发现不匹配的
-                md5_mismatch_filenames = GetFileNames(fileinfos, (info) =>
+                try
                 {
-                    if (info.MD5Matched == "no")
-                        return info.LocalPath;
-                    return null;
-                });
 
-                if (md5_mismatch_filenames.Count > 0)
-                {
-                    DialogResult result = MessageBox.Show(this,
-    "下列文件中 '" + GetFileNameList(md5_mismatch_filenames, "\r\n") + "' 先前曾经被下载过，但 MD5 验证发现和服务器侧文件不一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                    if (result == DialogResult.Cancel)
+                    // MD5 不匹配的文件
+                    List<string> md5_mismatch_filenames = new List<string>();   // 正式文件存在的，并且 MD5 经过探测发现不匹配的
+                    md5_mismatch_filenames = GetFileNames(fileinfos, (info) =>
                     {
-                        delete_filenames.Clear();
-                        return 0;
-                    }
-                    if (result == DialogResult.Yes)
+                        if (info.MD5Matched == "no")
+                            return info.LocalPath;
+                        return null;
+                    });
+
+                    if (md5_mismatch_filenames.Count > 0)
                     {
-                        // 删除本地文件，确保后面会重新下载
-                        ProcessItems(fileinfos, (info) =>
+                        DialogResult result = MessageBox.Show(this,
+        "下列文件中 '" + GetFileNameList(md5_mismatch_filenames, "\r\n") + "' 先前曾经被下载过，但 MD5 验证发现和服务器侧文件不一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                        if (result == DialogResult.Cancel)
                         {
-                            if (info.MD5Matched == "no")
+                            delete_filenames.Clear();
+                            return new AskOverwriteFilesResult
                             {
-                                // File.Delete(info.LocalPath);
-                                delete_filenames.Add(info.LocalPath);
-
-                                info.MD5Matched = "";
-                                info.LocalFileExists = false;
-                                delete_filenames.Add(info.GetTempFileName());
-                                info.TempFileExists = false;
-                            }
-                        });
-                    }
-                    else
-                    {
-                        // 从文件列表中清除，这样就不会下载这些文件了
-                        DeleteItems(fileinfos, (info) =>
+                                Value = 0,
+                                OutputFolder = strOutputFolder,
+                                Append = bAppend,
+                                ErrorInfo = "放弃下载"
+                            };
+                        }
+                        if (result == DialogResult.Yes)
                         {
-                            return info.MD5Matched == "no";
-                        });
+                            // 删除本地文件，确保后面会重新下载
+                            ProcessItems(fileinfos, (info) =>
+                            {
+                                if (info.MD5Matched == "no")
+                                {
+                                    // File.Delete(info.LocalPath);
+                                    delete_filenames.Add(info.LocalPath);
+
+                                    info.MD5Matched = "";
+                                    info.LocalFileExists = false;
+                                    delete_filenames.Add(info.GetTempFileName());
+                                    info.TempFileExists = false;
+                                }
+                            });
+                        }
+                        else
+                        {
+                            // 从文件列表中清除，这样就不会下载这些文件了
+                            DeleteItems(fileinfos, (info) =>
+                            {
+                                return info.MD5Matched == "no";
+                            });
+                        }
+                    }
+
+                    // 观察是否有 .tmp 文件存在
+                    List<string> temp_filenames = GetFileNames(fileinfos, (info) =>
+                    {
+                        if (info.TempFileExists)
+                            return info.LocalPath;
+                        return null;
+                    });
+                    if (temp_filenames.Count > 0)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+        "下列文件 '" + GetFileNameList(temp_filenames, "\r\n") + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃全部下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                        if (result == DialogResult.Cancel)
+                        {
+                            delete_filenames.Clear();
+                            return new AskOverwriteFilesResult
+                            {
+                                Value = 0,
+                                OutputFolder = strOutputFolder,
+                                Append = bAppend,
+                                ErrorInfo = "放弃下载"
+                            };
+                        }
+                        if (result == DialogResult.Yes)
+                        {
+                            bAppend = true;
+                            ProcessItems(fileinfos, (info) =>
+                            {
+                                if (info.TempFileExists)
+                                {
+                                    // 保护性删除正式文件，但留下临时文件
+                                    // info.DeleteLocalFile();
+                                    delete_filenames.Add(info.LocalPath);
+
+                                    info.LocalFileExists = false;
+
+                                    info.OverwriteStyle = "append";
+                                }
+                            });
+                        }
+                        else
+                        {
+                            bAppend = false;
+
+                            // 删除临时文件
+                            ProcessItems(fileinfos, (info) =>
+                            {
+                                if (info.TempFileExists)
+                                {
+                                    info.OverwriteStyle = "overwrite";
+                                    // 删除了临时文件
+                                    // info.DeleteTempFile();
+                                    delete_filenames.Add(info.GetTempFileName());
+                                    info.TempFileExists = false;
+                                }
+                            });
+                        }
+                    }
+
+                    // 询问 MD5 验证过的文件是否重新下载？(建议不必重新下载)
+                    List<string> md5_matched_filenames = GetFileNames(fileinfos, (info) =>
+                    {
+                        if (info.MD5Matched == "yes")
+                            return info.LocalPath;
+                        return null;
+                    });
+                    if (md5_matched_filenames.Count > 0)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+        "下列文件中 '" + GetFileNameList(md5_matched_filenames, "\r\n") + "' 先前曾经被下载过，并且 MD5 验证发现和服务器侧文件完全一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                        if (result == DialogResult.Cancel)
+                        {
+                            delete_filenames.Clear();
+                            return new AskOverwriteFilesResult
+                            {
+                                Value = 0,
+                                OutputFolder = strOutputFolder,
+                                Append = bAppend,
+                                ErrorInfo = "放弃下载"
+                            };
+                        }
+                        if (result == DialogResult.Yes)
+                        {
+                            // 删除本地文件，确保后面会重新下载
+                            ProcessItems(fileinfos, (info) =>
+                            {
+                                if (info.MD5Matched == "yes")
+                                {
+                                    // File.Delete(info.LocalPath);
+                                    delete_filenames.Add(info.LocalPath);
+                                    info.MD5Matched = "";
+                                    info.LocalFileExists = false;
+                                    // info.DeleteTempFile();
+                                    delete_filenames.Add(info.GetTempFileName());
+
+                                    info.TempFileExists = false;
+                                    info.OverwriteStyle = "overwrite";
+                                }
+                            });
+                        }
+                        else
+                        {
+                            // 从文件列表中清除，这样就不会下载这些文件了
+                            DeleteItems(fileinfos, (info) =>
+                            {
+                                return info.MD5Matched == "yes";
+                            });
+                        }
+                    }
+
+                    // 询问其余本地文件存在的，是否重新下载
+                    List<string> filenames = GetFileNames(fileinfos, (info) =>
+                    {
+                        if (info.LocalFileExists)
+                            return info.LocalPath;
+                        return null;
+                    });
+                    if (filenames.Count > 0)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+        "下列文件中 '" + GetFileNameList(filenames, "\r\n") + "' 先前曾经被下载过。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                        if (result == DialogResult.Cancel)
+                        {
+                            delete_filenames.Clear();
+                            return new AskOverwriteFilesResult
+                            {
+                                Value = 0,
+                                OutputFolder = strOutputFolder,
+                                Append = bAppend,
+                                ErrorInfo = "放弃下载"
+                            };
+                        }
+                        if (result == DialogResult.Yes)
+                        {
+                            // 删除本地文件，确保后面会重新下载
+                            ProcessItems(fileinfos, (info) =>
+                            {
+                                if (info.LocalFileExists == true)
+                                {
+                                    // File.Delete(info.LocalPath);
+                                    delete_filenames.Add(info.LocalPath);
+
+                                    info.MD5Matched = "";
+                                    info.LocalFileExists = false;
+                                    // info.DeleteTempFile();
+                                    delete_filenames.Add(info.GetTempFileName());
+
+                                    info.TempFileExists = false;
+                                    info.OverwriteStyle = "overwrite";
+                                }
+                            });
+                        }
+                        else
+                        {
+                            // 从文件列表中清除，这样就不会下载这些文件了
+                            DeleteItems(fileinfos, (info) =>
+                            {
+                                return info.LocalFileExists;
+                            });
+                        }
+                    }
+
+                    return new AskOverwriteFilesResult
+                    {
+                        Value = 1,
+                        OutputFolder = strOutputFolder,
+                        Append = bAppend
+                    };
+                }
+                finally
+                {
+                    StringUtil.RemoveBlank(ref delete_filenames);
+                    foreach (string filename in delete_filenames)
+                    {
+                        if (File.Exists(filename))
+                            File.Delete(filename);
                     }
                 }
 
-                // 观察是否有 .tmp 文件存在
-                List<string> temp_filenames = GetFileNames(fileinfos, (info) =>
-                {
-                    if (info.TempFileExists)
-                        return info.LocalPath;
-                    return null;
-                });
-                if (temp_filenames.Count > 0)
-                {
-                    DialogResult result = MessageBox.Show(this,
-    "下列文件 '" + GetFileNameList(temp_filenames, "\r\n") + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃全部下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                    if (result == DialogResult.Cancel)
-                    {
-                        delete_filenames.Clear();
-                        return 0;
-                    }
-                    if (result == DialogResult.Yes)
-                    {
-                        bAppend = true;
-                        ProcessItems(fileinfos, (info) =>
-                        {
-                            if (info.TempFileExists)
-                            {
-                                // 保护性删除正式文件，但留下临时文件
-                                // info.DeleteLocalFile();
-                                delete_filenames.Add(info.LocalPath);
-
-                                info.LocalFileExists = false;
-
-                                info.OverwriteStyle = "append";
-                            }
-                        });
-                    }
-                    else
-                    {
-                        bAppend = false;
-
-                        // 删除临时文件
-                        ProcessItems(fileinfos, (info) =>
-                        {
-                            if (info.TempFileExists)
-                            {
-                                info.OverwriteStyle = "overwrite";
-                                // 删除了临时文件
-                                // info.DeleteTempFile();
-                                delete_filenames.Add(info.GetTempFileName());
-                                info.TempFileExists = false;
-                            }
-                        });
-                    }
-
-                }
-
-                // 询问 MD5 验证过的文件是否重新下载？(建议不必重新下载)
-                List<string> md5_matched_filenames = GetFileNames(fileinfos, (info) =>
-                {
-                    if (info.MD5Matched == "yes")
-                        return info.LocalPath;
-                    return null;
-                });
-                if (md5_matched_filenames.Count > 0)
-                {
-                    DialogResult result = MessageBox.Show(this,
-    "下列文件中 '" + GetFileNameList(md5_matched_filenames, "\r\n") + "' 先前曾经被下载过，并且 MD5 验证发现和服务器侧文件完全一致。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                    if (result == DialogResult.Cancel)
-                    {
-                        delete_filenames.Clear();
-                        return 0;
-                    }
-                    if (result == DialogResult.Yes)
-                    {
-                        // 删除本地文件，确保后面会重新下载
-                        ProcessItems(fileinfos, (info) =>
-                        {
-                            if (info.MD5Matched == "yes")
-                            {
-                                // File.Delete(info.LocalPath);
-                                delete_filenames.Add(info.LocalPath);
-                                info.MD5Matched = "";
-                                info.LocalFileExists = false;
-                                // info.DeleteTempFile();
-                                delete_filenames.Add(info.GetTempFileName());
-
-                                info.TempFileExists = false;
-                                info.OverwriteStyle = "overwrite";
-                            }
-                        });
-                    }
-                    else
-                    {
-                        // 从文件列表中清除，这样就不会下载这些文件了
-                        DeleteItems(fileinfos, (info) =>
-                        {
-                            return info.MD5Matched == "yes";
-                        });
-                    }
-                }
-
-                // 询问其余本地文件存在的，是否重新下载
-                List<string> filenames = GetFileNames(fileinfos, (info) =>
-                {
-                    if (info.LocalFileExists)
-                        return info.LocalPath;
-                    return null;
-                });
-                if (filenames.Count > 0)
-                {
-                    DialogResult result = MessageBox.Show(this,
-    "下列文件中 '" + GetFileNameList(filenames, "\r\n") + "' 先前曾经被下载过。\r\n\r\n是否删除它们然后重新下载?\r\n[是：重新下载; 否: 不下载这些文件; 取消：放弃全部下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                    if (result == DialogResult.Cancel)
-                    {
-                        delete_filenames.Clear();
-                        return 0;
-                    }
-                    if (result == DialogResult.Yes)
-                    {
-                        // 删除本地文件，确保后面会重新下载
-                        ProcessItems(fileinfos, (info) =>
-                        {
-                            if (info.LocalFileExists == true)
-                            {
-                                // File.Delete(info.LocalPath);
-                                delete_filenames.Add(info.LocalPath);
-
-                                info.MD5Matched = "";
-                                info.LocalFileExists = false;
-                                // info.DeleteTempFile();
-                                delete_filenames.Add(info.GetTempFileName());
-
-                                info.TempFileExists = false;
-                                info.OverwriteStyle = "overwrite";
-                            }
-                        });
-                    }
-                    else
-                    {
-                        // 从文件列表中清除，这样就不会下载这些文件了
-                        DeleteItems(fileinfos, (info) =>
-                        {
-                            return info.LocalFileExists;
-                        });
-                    }
-                }
-
-                return 1;
             }
-            finally
+            catch (Exception ex)
             {
-                StringUtil.RemoveBlank(ref delete_filenames);
-                foreach (string filename in delete_filenames)
+                WriteErrorLog($"AskOverwriteFiles() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                strError = $"AskOverwriteFiles() 出现异常: {ex.Message}";
+                return new AskOverwriteFilesResult
                 {
-                    if (File.Exists(filename))
-                        File.Delete(filename);
-                }
+                    Value = -1,
+                    OutputFolder = strOutputFolder,
+                    Append = bAppend
+                };
             }
-#if NO
-            // 观察目标文件是否全部存在
-            if (IsAllExists(states))
-            {
-                DialogResult result = MessageBox.Show(this,
-all_target_filenames.Count.ToString() + " 个目标文件 '" + GetFileNameList(all_target_filenames, "\r\n") + "' 已经全部存在。\r\n\r\n是否重新下载并覆盖它们?\r\n[是：下载并覆盖; 取消：放弃全部下载]",
-"MainForm",
-MessageBoxButtons.OKCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Cancel)
-                    return 0;
-                bAppend = false;
-                return 1;
-            }
-            // 理论上似乎走不到这里
-            return 1;
-#endif
-
         }
 
         static bool IsAllExists(List<string> states)
@@ -1030,7 +1081,7 @@ MessageBoxDefaultButton.Button1);
             {
                 _ = downloader.StartDownload(bAppend);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"开始下载时出现异常: {ex.Message}";
                 WriteErrorLog($"开始下载时出现异常: {ExceptionUtil.GetDebugText(ex)}");
@@ -1711,7 +1762,7 @@ MessageBoxDefaultButton.Button1);
             stop.OnProgressChanged += (object o1, ProgressChangedEventArgs e1) =>
             {
                 dlg.SetProgress(e1.Message, // StringUtil.GetPercentText(e1.Value - e1.Start, e1.End - e1.Start),
-                    e1.Value - e1.Start, 
+                    e1.Value - e1.Start,
                     e1.End - e1.Start,
                     e1.Tag == null ? 0 : (long)e1.Tag);
             };
@@ -1806,7 +1857,7 @@ MessageBoxDefaultButton.Button1);
                     dlg.Close();
                 }));
                 return;
-                ERROR1:
+            ERROR1:
                 this.Invoke((Action)(() =>
                 {
                     e.FuncEnd?.Invoke(false);

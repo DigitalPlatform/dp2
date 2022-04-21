@@ -13,6 +13,7 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -170,22 +171,19 @@ namespace dp2Circulation
 
         }
 
-        private void button_start_Click(object sender, EventArgs e)
+        private async void button_start_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = StartBatchTask(this.comboBox_taskName.Text,
-                out strError);
-            if (nRet == -1)
+            // string strError = "";
+            var result = await StartBatchTask(this.comboBox_taskName.Text);
+            if (result.Value == -1)
             {
-                this.ShowMessage(strError, "red", true);
-                MessageBox.Show(this, strError);
+                this.ShowMessage(result.ErrorInfo, "red", true);
+                ShowMessageBox(result.ErrorInfo);
             }
             else
             {
-                this.ShowMessage(strError, "green", true);
-                // MessageBox.Show(this,strError);
+                this.ShowMessage(result.ErrorInfo, "green", true);
             }
-
         }
 
         private void button_stop_Click(object sender, EventArgs e)
@@ -242,10 +240,9 @@ namespace dp2Circulation
         // return:
         //      -1  出错
         //      1   成功。strError 里面有提示成功的内容
-        int StartBatchTask(string strTaskName,
-            out string strError)
+        async Task<NormalResult> StartBatchTask(string strTaskName)
         {
-            strError = "";
+            string strError = "";
 
             BatchTaskStartInfo startinfo = new BatchTaskStartInfo();
             if (strTaskName == "日志恢复")
@@ -257,7 +254,11 @@ namespace dp2Circulation
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
             }
             else if (strTaskName == "dp2Library 同步")
@@ -269,7 +270,11 @@ namespace dp2Circulation
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
             }
             else if (strTaskName == "重建检索点")
@@ -281,7 +286,11 @@ namespace dp2Circulation
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
             }
             else if (strTaskName == "预约到书管理")
@@ -293,7 +302,11 @@ namespace dp2Circulation
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
             }
             /*
@@ -368,7 +381,11 @@ namespace dp2Circulation
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
             }
             else if (strTaskName == "服务器同步")
@@ -382,7 +399,11 @@ namespace dp2Circulation
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
             }
             else if (strTaskName == "大备份")
@@ -390,7 +411,11 @@ namespace dp2Circulation
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.117") < 0)
                 {
                     strError = "dp2library 应在 2.117 版以上才能使用“大备份”任务相关的功能";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
 
                 StartBackupDialog dlg = new StartBackupDialog();
@@ -402,14 +427,26 @@ namespace dp2Circulation
                     if (StopBatchTask(strTaskName,
             "abort",
             out strError) == -1)
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     strError = "任务 '" + strTaskName + "' 已被撤销";
-                    return 1;
+                    return new NormalResult
+                    {
+                        Value = 1,
+                        ErrorInfo = strError
+                    };
                 }
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
 
                 // 2017/9/30
@@ -418,7 +455,11 @@ namespace dp2Circulation
                     if (StringUtil.IsInList("download,backup", MainForm._currentUserRights) == false)
                     {
                         strError = "启动“大备份”任务被拒绝。当前用户并不具备 download 或 backup 权限，所以无法在大备份同时下载文件。请先为当前用户添加这个权限，再重新启动大备份任务";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
                 }
             }
@@ -447,10 +488,18 @@ namespace dp2Circulation
                 {
                     if (nRet == 0 && string.IsNullOrEmpty(strError))
                         strError = "用户放弃启动";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
                 strError = "本地任务 '<日志备份> 成功启动'";
-                return 1;
+                return new NormalResult
+                {
+                    Value = 1,
+                    ErrorInfo = strError
+                };
             }
             else if (strTaskName == "报表创建")
             {
@@ -516,13 +565,21 @@ namespace dp2Circulation
                         //      -1  出错
                         //      0   放弃下载
                         //      1   同意启动下载
-                        int nRet = Program.MainForm.AskOverwriteFiles(infos,    // paths,
-            ref strOutputFolder,
+                        var result = await Program.MainForm.AskOverwriteFiles(infos,    // paths,
+                            strOutputFolder
+            /*ref strOutputFolder,
             out bool bAppend,
-            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        if (nRet == 1)
+            out strError*/);
+                        if (result.Value == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
+
+                        strOutputFolder = result.OutputFolder;
+
+                        if (result.Value == 1)
                         {
                             paths = MainForm.GetFileNames(infos, (info) =>
                             {
@@ -540,12 +597,16 @@ namespace dp2Circulation
                                     //      -1  出错
                                     //      0   放弃下载
                                     //      1   成功启动了下载
-                                    nRet = Program.MainForm.BeginDownloadFile(path,
-                                        bAppend ? "append" : "overwrite",
+                                    int nRet = Program.MainForm.BeginDownloadFile(path,
+                                        result.Append ? "append" : "overwrite",
                                         ref strOutputFolder,
                                         out strError);
                                     if (nRet == -1)
-                                        return -1;
+                                        return new NormalResult
+                                        {
+                                            Value = -1,
+                                            ErrorInfo = strError
+                                        };
                                     if (nRet == 0)
                                         break;
                                 }
@@ -563,14 +624,22 @@ namespace dp2Circulation
                 }
 
                 strError = "任务 '" + strTaskName + "' 已成功启动";
-                return 1;
-            ERROR1:
-                return -1;
+                return new NormalResult
+                {
+                    Value = 1,
+                    ErrorInfo = strError
+                };
             }
             finally
             {
                 this.m_lock.ReleaseWriterLock();
             }
+        ERROR1:
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
         }
 
 
