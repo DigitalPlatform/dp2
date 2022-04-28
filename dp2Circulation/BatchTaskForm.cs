@@ -571,11 +571,16 @@ namespace dp2Circulation
             out bool bAppend,
             out strError*/);
                         if (result.Value == -1)
+                        {
+                            /*
                             return new NormalResult
                             {
                                 Value = -1,
                                 ErrorInfo = strError
                             };
+                            */
+                            return result;
+                        }
 
                         strOutputFolder = result.OutputFolder;
 
@@ -597,17 +602,25 @@ namespace dp2Circulation
                                     //      -1  出错
                                     //      0   放弃下载
                                     //      1   成功启动了下载
-                                    int nRet = Program.MainForm.BeginDownloadFile(path,
+                                    var download_result = await Program.MainForm.BeginDownloadFile(path,
                                         result.Append ? "append" : "overwrite",
+                                        strOutputFolder
+                                        /*
                                         ref strOutputFolder,
-                                        out strError);
-                                    if (nRet == -1)
+                                        out strError*/);
+                                    if (download_result.Value == -1)
+                                    {
+                                        /*
                                         return new NormalResult
                                         {
                                             Value = -1,
                                             ErrorInfo = strError
                                         };
-                                    if (nRet == 0)
+                                        */
+                                        return download_result;
+                                    }
+                                    strOutputFolder = download_result.OutputFolder;
+                                    if (download_result.Value == 0)
                                         break;
                                 }
                             }

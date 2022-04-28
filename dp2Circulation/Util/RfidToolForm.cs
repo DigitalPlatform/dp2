@@ -1608,6 +1608,8 @@ this.toolStripButton_autoFixEas.Checked);
 
         async void menu_clearSelectedTagContent_Click(object sender, EventArgs e)
         {
+            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
             DialogResult result = MessageBox.Show(this,
     $"确实要清除选定的 {this.listView_tags.SelectedItems.Count} 个标签的内容?",
     "RfidToolForm",
@@ -1620,13 +1622,22 @@ this.toolStripButton_autoFixEas.Checked);
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
             {
                 // string uid = ListViewUtil.GetItemText(item, COLUMN_UID);
-                await ClearTagContent(item);
+                var clear_result = await ClearTagContentAsync(item, !control);
+                if (clear_result.Value == -1)
+                {
+                    ShowMessageBox("清除标签时出错: " + clear_result.ErrorInfo);
+                    break;
+                }
             }
 
             listView_tags_SelectedIndexChanged(this, new EventArgs());
         }
 
-        async Task ClearTagContent(ListViewItem item)
+        // parameters:
+        //      lock_as_error   == true 如果有锁定块，则不清除，报错返回; == false 有锁定块依然会执行清除
+        async Task<NormalResult> ClearTagContentAsync(
+            ListViewItem item,
+            bool lock_as_error)
         {
 #if OLD_CODE
             RfidChannel channel = GetRfidChannel(
@@ -1644,12 +1655,23 @@ this.toolStripButton_autoFixEas.Checked);
             {
                 ItemInfo item_info = (ItemInfo)item.Tag;
                 var old_tag_info = item_info.OneTag.TagInfo;
+
+                // 检查标签是否有 block 被锁定
+                if (lock_as_error
+                    && old_tag_info.LockStatus != null
+                    && old_tag_info.LockStatus.Contains("l"))
+                {
+                    strError = $"标签 {old_tag_info.UID} 有被锁定的块({old_tag_info.LockStatus})，放弃进行清除";
+                    goto ERROR1;
+                }
+
                 var new_tag_info = old_tag_info.Clone();
                 // 制造一套空内容
                 {
                     new_tag_info.AFI = 0;
                     new_tag_info.DSFID = 0;
                     new_tag_info.EAS = false;
+                    /*
                     List<byte> bytes = new List<byte>();
                     for (int i = 0; i < new_tag_info.BlockSize * new_tag_info.MaxBlockCount; i++)
                     {
@@ -1657,6 +1679,12 @@ this.toolStripButton_autoFixEas.Checked);
                     }
                     new_tag_info.Bytes = bytes.ToArray();
                     new_tag_info.LockStatus = "";
+                    */
+                    // 对 byte[] 内容执行清除。锁定的块不会被清除
+                    new_tag_info.Bytes = LogicChip.ClearBytes(new_tag_info.Bytes,
+                        new_tag_info.BlockSize,
+                        new_tag_info.MaxBlockCount,
+                        new_tag_info.LockStatus);
                 }
 #if OLD_CODE
                 var result = channel.Object.WriteTagInfo(item_info.OneTag.ReaderName,
@@ -1675,7 +1703,7 @@ this.toolStripButton_autoFixEas.Checked);
                 }
 
                 await Task.Run(() => { GetTagInfo(item); });
-                return;
+                return new NormalResult();
             }
             catch (Exception ex)
             {
@@ -1689,12 +1717,19 @@ this.toolStripButton_autoFixEas.Checked);
 #endif
             }
         ERROR1:
+            /*
             this.Invoke((Action)(() =>
             {
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
             }));
+            */
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
         }
 
         async void menu_saveSelectedTagContent_Click(object sender, EventArgs e)

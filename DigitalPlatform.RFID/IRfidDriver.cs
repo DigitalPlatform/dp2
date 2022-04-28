@@ -224,7 +224,7 @@ uint new_password);
 
         public override string ToString()
         {
-            return $"uid={UID},dsfid={Element.GetHexString(DSFID)},afi={Element.GetHexString(AFI)},icref={Element.GetHexString(IcRef)},blkSize={BlockSize},blkNum={MaxBlockCount},lock={LockStatus},AntennaID={AntennaID},Bytes={Element.GetHexString(Bytes)}";
+            return $"UID={UID},DSFID={Element.GetHexString(DSFID)},AFI={Element.GetHexString(AFI)},EAS={EAS},IcRef={Element.GetHexString(IcRef)},BlockSize={BlockSize},MaxBlockCount={MaxBlockCount},LockStatus={LockStatus},AntennaID={AntennaID},Protocol={Protocol},ReaderName={ReaderName},Bytes={Element.GetHexString(Bytes)}";
         }
 
         // 获得锁定状态字符串

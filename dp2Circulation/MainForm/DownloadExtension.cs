@@ -517,9 +517,9 @@ namespace dp2Circulation
                                 return new AskOverwriteFilesResult
                                 {
                                     Value = 0,
+                                    ErrorInfo = "放弃下载",
                                     OutputFolder = strOutputFolder,
                                     Append = bAppend,
-                                    ErrorInfo = "放弃下载"
                                 };
                         }
 
@@ -629,9 +629,9 @@ namespace dp2Circulation
                             return new AskOverwriteFilesResult
                             {
                                 Value = 0,
+                                ErrorInfo = "放弃下载",
                                 OutputFolder = strOutputFolder,
                                 Append = bAppend,
-                                ErrorInfo = "放弃下载"
                             };
                         }
                         if (result == DialogResult.Yes)
@@ -682,9 +682,9 @@ namespace dp2Circulation
                             return new AskOverwriteFilesResult
                             {
                                 Value = 0,
+                                ErrorInfo = "放弃下载",
                                 OutputFolder = strOutputFolder,
                                 Append = bAppend,
-                                ErrorInfo = "放弃下载"
                             };
                         }
                         if (result == DialogResult.Yes)
@@ -744,9 +744,9 @@ namespace dp2Circulation
                             return new AskOverwriteFilesResult
                             {
                                 Value = 0,
+                                ErrorInfo = "放弃下载",
                                 OutputFolder = strOutputFolder,
                                 Append = bAppend,
-                                ErrorInfo = "放弃下载"
                             };
                         }
                         if (result == DialogResult.Yes)
@@ -799,9 +799,9 @@ namespace dp2Circulation
                             return new AskOverwriteFilesResult
                             {
                                 Value = 0,
+                                ErrorInfo = "放弃下载",
                                 OutputFolder = strOutputFolder,
                                 Append = bAppend,
-                                ErrorInfo = "放弃下载"
                             };
                         }
                         if (result == DialogResult.Yes)
@@ -859,6 +859,7 @@ namespace dp2Circulation
                 return new AskOverwriteFilesResult
                 {
                     Value = -1,
+                    ErrorInfo = strError,
                     OutputFolder = strOutputFolder,
                     Append = bAppend
                 };
@@ -878,6 +879,11 @@ namespace dp2Circulation
 
         string _usedDownloadFolder = "";
 
+        public class DownloadFileResult : NormalResult
+        {
+            public string OutputFolder { get; set; }
+        }
+
         // parameters:
         //      strAppendStyle  append/overwrite/ask 之一
         //      strOutputFolder 输出目录。
@@ -887,18 +893,25 @@ namespace dp2Circulation
         //      -1  出错
         //      0   放弃下载
         //      1   成功启动了下载
-        public int BeginDownloadFile(string strPath,
+        public async Task<DownloadFileResult> BeginDownloadFile(string strPath,
             string strAppendStyle,
+            string strOutputFolder
+            /*
             ref string strOutputFolder,
-            out string strError)
+            out string strError*/)
         {
-            strError = "";
+            string strError = "";
 
             string strExt = Path.GetExtension(strPath);
             if (strExt == ".~state")
             {
                 strError = "状态文件是一种临时文件，不支持直接下载";
-                return -1;
+                return new DownloadFileResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    OutputFolder = strOutputFolder
+                };
             }
 
             if (string.IsNullOrEmpty(strOutputFolder))
@@ -911,7 +924,11 @@ namespace dp2Circulation
                 dir_dlg.SelectedPath = _usedDownloadFolder;
 
                 if (dir_dlg.ShowDialog() != DialogResult.OK)
-                    return 0;
+                    return new DownloadFileResult
+                    {
+                        Value = 0,
+                        OutputFolder = strOutputFolder
+                    };
 
                 _usedDownloadFolder = dir_dlg.SelectedPath;
 
@@ -933,7 +950,11 @@ namespace dp2Circulation
                 {
                     if (File.Exists(strTargetTempPath))
                         File.Delete(strTargetTempPath); // 防范性地删除
-                    return 1;
+                    return new DownloadFileResult
+                    {
+                        Value = 1,
+                        OutputFolder = strOutputFolder
+                    };
                 }
             }
             else if (strAppendStyle == "overwrite")
@@ -956,7 +977,11 @@ namespace dp2Circulation
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
                     if (result == DialogResult.Cancel)
-                        return 0;
+                        return new DownloadFileResult
+                        {
+                            Value = 0,
+                            OutputFolder = strOutputFolder
+                        };
                     bAppend = false;
                     File.Delete(strTargetPath);
                     if (File.Exists(strTargetTempPath))
@@ -973,7 +998,11 @@ namespace dp2Circulation
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
                     if (result == DialogResult.Cancel)
-                        return 0;
+                        return new DownloadFileResult
+                        {
+                            Value = 0,
+                            OutputFolder = strOutputFolder
+                        };
                     if (result == DialogResult.Yes)
                         bAppend = true;
                     else
@@ -987,7 +1016,12 @@ namespace dp2Circulation
             else
             {
                 strError = "未知的 strAppendStyle 值 '" + strAppendStyle + "'";
-                return -1;
+                return new DownloadFileResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    OutputFolder = strOutputFolder
+                };
             }
 
             LibraryChannel channel = null;
@@ -1079,15 +1113,24 @@ namespace dp2Circulation
 
             try
             {
-                _ = downloader.StartDownload(bAppend);
+                await downloader.StartDownload(bAppend);
             }
             catch (Exception ex)
             {
                 strError = $"开始下载时出现异常: {ex.Message}";
                 WriteErrorLog($"开始下载时出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                return -1;
+                return new DownloadFileResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    OutputFolder = strOutputFolder
+                };
             }
-            return 1;
+            return new DownloadFileResult
+            {
+                Value = 1,
+                OutputFolder = strOutputFolder
+            };
         }
 
         // return:
@@ -1180,6 +1223,8 @@ namespace dp2Circulation
                                 File.Delete(strTargetTempPath); // 防范性地删除
                             continue;
                         }
+
+                        // TODO: 如何检查 .tmp 文件已经被另一个下载线程占用？
                     }
                     else if (strAppendStyle == "overwrite")
                     {
@@ -1347,6 +1392,7 @@ namespace dp2Circulation
         {
             int i = 0;
             bool bError = false;
+            string strError = "";
             foreach (DynamicDownloader downloader in downloaders)
             {
                 string strNo = "";
@@ -1364,7 +1410,29 @@ namespace dp2Circulation
                 Task task = downloader.StartDownload(bAppend);
                 task.Wait();    // TODO: 这里要允许中断
                 */
-                await downloader.StartDownload(bAppend);    // 2021/12/8 改为 await
+
+                try
+                {
+                    await downloader.StartDownload(bAppend);    // 2021/12/8 改为 await
+                }
+                catch (Exception ex)
+                {
+                    /*
+                    this.Invoke((Action)(() =>
+                    {
+                        string text = $"下载 {downloader.ServerFilePath} 到 {downloader.LocalFilePath} 的过程出错: {ex.Message}";
+                        FileDownloadDialog dlg = downloader.Tag as FileDownloadDialog;
+                        dlg.Text = text;
+                        MessageBox.Show(dlg.ParentForm, text);
+                    }));
+                    */
+                    downloader.State = "error";
+                    downloader.ErrorInfo = ex.Message;
+                    bError = true;
+                    strError = $"下载 {downloader.ServerFilePath} 到 {downloader.LocalFilePath} 的过程出错: {ex.Message}";
+                    break;
+                }
+
                 if (downloader.IsCancellationRequested)
                 {
                     bError = true;
@@ -1379,6 +1447,14 @@ namespace dp2Circulation
             }
 
             func_end(bError);
+
+            if (string.IsNullOrEmpty(strError) == false)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, strError);
+                }));
+            }
         }
 
 #if NO

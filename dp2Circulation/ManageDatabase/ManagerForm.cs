@@ -213,7 +213,8 @@ namespace dp2Circulation
 
             if (e.Action == "getmd5")
             {
-                Task.Run(() =>
+                // TODO: 改为 LongRunning
+                _ = Task.Run(() =>
                 {
                     GetMd5(e,
                         (o1, e1) =>
@@ -274,7 +275,7 @@ namespace dp2Circulation
             if (ask_result.Value == -1
                 || ask_result.Value == 0)
             {
-                e.ErrorInfo = strError;
+                e.ErrorInfo = ask_result.ErrorInfo;
                 return;
             }
 

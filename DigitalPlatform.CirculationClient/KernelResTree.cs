@@ -1014,7 +1014,10 @@ namespace DigitalPlatform.CirculationClient
             e1.FileNames = paths;
             this.DownloadFiles(this, e1);
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+            {
+                strError = e1.ErrorInfo;
                 goto ERROR1;
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
