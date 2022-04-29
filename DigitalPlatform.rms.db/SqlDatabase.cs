@@ -194,7 +194,7 @@ namespace DigitalPlatform.rms
 
                 // 默认 Pgsql 的对象文件起始尺寸
                 if (this.IsPgsql())
-                    this.m_lObjectStartSize = 100 * 1024;
+                    this.m_lObjectStartSize = 100 * 1024;   // 100 * 1024;
 
                 // <object>节点
                 XmlNode nodeObject = this.PropertyNode.SelectSingleNode("object");
@@ -1296,31 +1296,34 @@ ex);
                 return -1;
             }
 
+            string pattern = strSqlDbName + "_%".Replace("_", "\\_");
+            string records_name = strSqlDbName + "_records";
+
             if (string.IsNullOrEmpty(strStyle) == true
                 || (StringUtil.IsInList("keys", strStyle) == true && StringUtil.IsInList("records", strStyle) == true)
                 )
             {
                 // 删除全部
                 if (connection.IsOracle())
-                    strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "\\_%'";
+                    strCommand = $" SELECT table_name FROM user_tables WHERE table_name like '{pattern.ToUpper()}'";
                 else if (connection.IsPgsql())
-                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName + "\\_%'";
+                    strCommand = $" SELECT tablename FROM pg_tables WHERE tablename like '{pattern}'";
             }
             else if (StringUtil.IsInList("keys", strStyle) == true)
             {
                 // 只删除keys
                 if (connection.IsOracle())
-                    strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "\\_%' AND table_name <> '" + strSqlDbName.ToUpper() + "_RECORDS' ";
+                    strCommand = $" SELECT table_name FROM user_tables WHERE table_name like '{pattern.ToUpper()}' AND table_name <> '{records_name.ToUpper()}' ";
                 else if (connection.IsPgsql())
-                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename like '" + strSqlDbName + "\\_%' AND tablename <> '" + strSqlDbName + "_RECORDS' ";
+                    strCommand = $" SELECT tablename FROM pg_tables WHERE tablename like '{pattern}' AND tablename <> '{records_name}' ";
             }
             else if (StringUtil.IsInList("records", strStyle) == true)
             {
                 // 只删除records
                 if (connection.IsOracle())
-                    strCommand = " SELECT table_name FROM user_tables WHERE table_name = '" + strSqlDbName.ToUpper() + "_RECORDS' ";
+                    strCommand = $" SELECT table_name FROM user_tables WHERE table_name = '{records_name.ToUpper()}' ";
                 else if (connection.IsPgsql())
-                    strCommand = " SELECT tablename FROM pg_tables WHERE tablename = '" + strSqlDbName + "_RECORDS' ";
+                    strCommand = $" SELECT tablename FROM pg_tables WHERE tablename = '{records_name}' ";
             }
             else
             {
@@ -2327,8 +2330,9 @@ ex);
                     + "newfilename varchar (255) NULL\n"
                     + ") ;\n";
                 // https://www.cybertec-postgresql.com/en/binary-data-performance-in-postgresql/
-                strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN data SET STORAGE EXTERNAL;";
-                strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN newdata SET STORAGE EXTERNAL;";
+                strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN data SET STORAGE EXTERNAL;\n";
+                strCommand += $"ALTER TABLE {db_prefix}records ALTER COLUMN newdata SET STORAGE EXTERNAL;\n";
+                strCommand += $"ALTER TABLE {db_prefix}records SET (toast.autovacuum_enabled = true);\n";
 
                 KeysCfg keysCfg = null;
                 int nRet = this.GetKeysCfg(out keysCfg,
@@ -14082,6 +14086,15 @@ trans);
                 }
             }
 
+            // 将原本要写入 bytea 的调整为写入对象文件
+            // 注意，bFull == true 时如果原本要写入 bytea 字段，则不做调整
+            if (IsPgsql() && bObjectFile == false)
+            {
+                bObjectFile = true;
+                //lCurrentLength = 0;
+                //strCurrentRange = "";
+            }
+
             // 当strStyle存在 ignorechecktimestamp时，不判断时间戳
             if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
             {
@@ -14163,6 +14176,7 @@ trans);
                 }
                 strCurrentRange = strNewRange;
 
+                string strFileName = "";
                 if (bObjectFile == true)
                 {
                     // 写入对象文件
@@ -14173,7 +14187,6 @@ trans);
                         return -1;
                     }
 
-                    string strFileName = "";
                     if (bFirst == true)
                     {
                         strFileName = BuildObjectFileName(strID, true);
@@ -14319,6 +14332,64 @@ trans);
                         this._streamCache.FileDelete(GetObjectFileName(row_info.NewFileName));
                         row_info.NewFileName = "";
                     }
+                }
+
+                // 2022/4/29
+                // 对于 Pgsql，如果对象文件适合写入 bytea
+                if (connection.IsPgsql()
+                    && bObjectFile == true && bFull == true
+                    && this.m_lObjectStartSize != -1 && lTotalLength < this.m_lObjectStartSize)
+                {
+                    byte[] bytes = null;
+
+                    StreamItem item = _streamCache.GetStream(strFileName,
+                        FileMode.Open,
+                        FileAccess.Read,
+    true   // lStartOfTarget > CACHE_SIZE
+    );
+                    try
+                    {
+                        int length = (int)item.FileStream.Length;
+                        if (length != lTotalLength)
+                        {
+                            strError = $"length({length}) != lTotalLength({lTotalLength})";
+                            return -1;
+                        }
+                        if (length > 100 * 1024)
+                        {
+                            strError = $"拟装入内存的字节数太大 {length}";
+                            return -1;
+                        }
+                        bytes = new byte[length];
+                        item.FileStream.FastSeek(0);
+                        item.FileStream.Read(bytes,
+                            0,
+                            bytes.Length);
+                    }
+                    finally
+                    {
+                        _streamCache.ReturnStream(item);
+                    }
+
+                    lCurrentLength = 0;
+                    nRet = this._writePgsqlBytea(connection,
+    ref lCurrentLength,   // 当前image的长度在不断的变化着
+    bCanDeleteDuoYu,
+    strID,
+    strDataFieldName,   // "newdata",
+    0,  // lStartOfTarget,
+    bytes,
+    0, // nStartOfBuffer,
+    bytes.Length, // nNeedReadLength,
+    bytes.Length,    // lTotalLength,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    // 删除文件
+                    this._streamCache.FileDelete(strFileName);
+                    bObjectFile = false;
+                    row_info.NewFileName = "";
+                    row_info.FileName = "";
                 }
 
                 nStartOfBuffer += nNeedReadLength;
@@ -14700,6 +14771,23 @@ trans);
         }
 
 #endif
+        /*
+         * 1) 没有利用对象文件的情况：
+         *      1.1) 内容完整
+         *          1.1.1) 反转  range(无符号) dptimestamp=@dptimestamp, newdptimestamp=null, newdata=null, range=@range, filename=null, newfilename=null, metadata=@metadata
+         *          1.1.2) 正序  range(!开头)  newdptimestamp=@dptimestamp, dptimestamp=null, data=null, range=@range, filename=null, newfilename=null, metadata=@metadata
+         *      1.2) 内容不完整
+         *          1.2.1) 反转  range(!开头)  dptimestamp=@dptimestamp, range=@range, filename=null, newfilename=null, metadata=@metadata
+         *          1.2.2) 正序  range(无符号) newdptimestamp=@dptimestamp, range=@range, filename=null, newfilename=null, metadata=@metadata
+
+         * 2) 利用对象文件的情况：range 以 # 开头
+         *      2.1) 内容完整(注: 和是否反转无关)
+         *           dptimestamp=@dptimestamp,  newdptimestamp=null,         range=@range,  filename=@filename,     newfilename=null,      metadata=@metadata, data=null, newdata=null
+         *      2.2) 内容不完整
+         *           dptimestamp=(dont change), newdptimestamp=@dptimestamp, range=@range,  filename=(dont change), newfilename=@filename, metadata=@metadata, data=null, newdata=null
+
+         
+         * */
 
         // TODO: metadata 字符数较多，是否可以允许没有必要的时候不写入这个字段内容?
         // parameters:

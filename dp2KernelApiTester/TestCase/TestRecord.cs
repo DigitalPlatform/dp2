@@ -1094,7 +1094,7 @@ out string strError);
                 long start = 0;
                 long end = 0;
 
-                DataModel.SetMessage($"正在用 Fragment 方式创建记录，请耐心等待 ...");
+                DataModel.SetMessage($"正在用 Fragment 方式创建记录 {i}，请耐心等待 ...");
 
                 while (true)
                 {
@@ -1260,7 +1260,6 @@ out string strError);
                             };
                     }
                 }
-
 
                 // 检查检索点是否被成功创建
                 foreach (var accesspoint in created_accesspoints)

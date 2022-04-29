@@ -231,7 +231,7 @@ string style = "")
         {
 
         }
-        
+
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _cancel?.Dispose();
@@ -348,6 +348,27 @@ string style = "")
                 try
                 {
                     var result = TestRebuildKeys.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
+
+        private void MenuItem_fragmentWrite_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var result = TestRecord.PrepareEnvironment();
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+
+                    result = TestRecord.FragmentCreateRecords(1000, 1);
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
                 }
