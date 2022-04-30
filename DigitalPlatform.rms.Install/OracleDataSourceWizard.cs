@@ -270,7 +270,7 @@ namespace DigitalPlatform.rms
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -398,7 +398,7 @@ namespace DigitalPlatform.rms
             dlg.SqlServerName = strSqlServerName;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            REDO_INPUT:
+        REDO_INPUT:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -608,7 +608,9 @@ namespace DigitalPlatform.rms
 
                         string strTableSpaceName = "ts_" + strLoginName;
 
-                        strCommand = "create tablespace " + strTableSpaceName + " datafile '" + strTableSpaceFileName + "' size 100m autoextend on ; "
+                        // https://ittutorial.org/ora-65096-invalid-common-user-or-role-name-oracle-create-user/
+                        strCommand = "alter session set \"_ORACLE_SCRIPT\"=true;"
+                            + "create tablespace " + strTableSpaceName + " datafile '" + strTableSpaceFileName + "' size 100m autoextend on ; "
                             + "create user " + strLoginName + " identified by " + strLoginPassword + " default tablespace " + strTableSpaceName + "; "
                             + "grant dba, connect to " + strLoginName;
                         string[] lines = strCommand.Split(new char[] { ';' });
@@ -630,6 +632,68 @@ namespace DigitalPlatform.rms
                                 strError = "执行命令 " + strLine + " 出错：" + ex.Message + " 类型：" + ex.GetType().ToString();
                                 return -1;
                             }
+                        }
+                    }
+                }
+            }
+            catch (OracleException sqlEx)
+            {
+                strError = "出错：" + sqlEx.Message + "。";
+                int nError = sqlEx.ErrorCode;
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                strError = "出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+
+            return 0;
+        }
+
+        int DropLogin(
+            OracleSqlServerInfo info,
+            string strLoginName,
+            out string strError)
+        {
+            strError = "";
+
+            string strConnection = @"Persist Security Info=False;"
+    + "User ID=" + info.SqlUserName + ";"    //帐户和密码
+    + "Password=" + info.SqlUserPassword + ";"
+    + "Data Source=" + info.ServerName + ";"
+    + "Connect Timeout=30";
+
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(strConnection))
+                {
+                    connection.Open();
+
+
+                    string strTableSpaceName = "ts_" + strLoginName;
+
+                    string strCommand =
+                        "drop user " + strLoginName + "; "
+                        + "drop tablespace " + strTableSpaceName + "; ";
+                    string[] lines = strCommand.Split(new char[] { ';' });
+                    foreach (string line in lines)
+                    {
+                        string strLine = line.Trim();
+                        if (string.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        try
+                        {
+                            using (OracleCommand command = new OracleCommand(strLine, connection))
+                            {
+                                int nRet = command.ExecuteNonQuery();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "执行命令 " + strLine + " 出错：" + ex.Message + " 类型：" + ex.GetType().ToString();
+                            return -1;
                         }
                     }
                 }

@@ -1296,7 +1296,7 @@ ex);
                 return -1;
             }
 
-            string pattern = strSqlDbName + "_%".Replace("_", "\\_");
+            string pattern = (strSqlDbName + "_%").Replace("_", "\\_");
             string records_name = strSqlDbName + "_records";
 
             if (string.IsNullOrEmpty(strStyle) == true
@@ -1305,7 +1305,7 @@ ex);
             {
                 // 删除全部
                 if (connection.IsOracle())
-                    strCommand = $" SELECT table_name FROM user_tables WHERE table_name like '{pattern.ToUpper()}'";
+                    strCommand = $" SELECT table_name FROM user_tables WHERE table_name like '{pattern.ToUpper()}' ESCAPE '\\'";
                 else if (connection.IsPgsql())
                     strCommand = $" SELECT tablename FROM pg_tables WHERE tablename like '{pattern}'";
             }
@@ -1313,7 +1313,7 @@ ex);
             {
                 // 只删除keys
                 if (connection.IsOracle())
-                    strCommand = $" SELECT table_name FROM user_tables WHERE table_name like '{pattern.ToUpper()}' AND table_name <> '{records_name.ToUpper()}' ";
+                    strCommand = $" SELECT table_name FROM user_tables WHERE table_name like '{pattern.ToUpper()}' ESCAPE '\\' AND table_name <> '{records_name.ToUpper()}' ";
                 else if (connection.IsPgsql())
                     strCommand = $" SELECT tablename FROM pg_tables WHERE tablename like '{pattern}' AND tablename <> '{records_name}' ";
             }
@@ -7219,6 +7219,25 @@ handle.CancelTokenSource.Token).Result;
                         strRange = strRange.Substring(1);
 
                         lTotalLength = -1;  // 表示待取得
+
+                        // 2022/4/30
+                        // 混合模式。data 和 newfilename 里面都有数据
+                        if (IsPgsql() && row_info.data_length > 0)
+                        {
+                            bReverse = false;
+                            strDataFieldName = "data";
+                            if (bReverse == false)
+                            {
+                                lTotalLength = row_info.data_length;
+                                textPtr = row_info.data_textptr;
+                            }
+                            else
+                            {
+                                lTotalLength = row_info.newdata_length;
+                                textPtr = row_info.newdata_textptr;
+                            }
+                            bObjectFile = false;
+                        }
                     }
                     else
                     {
@@ -14025,6 +14044,17 @@ trans);
             string strCompleteTimestamp = row_info.TimestampString; // 上次完整写入时的时间戳
             string strCurrentTimestamp = row_info.NewTimestampString; // 本次的时间戳
 
+            // Pgsql 坚持用 data 字段存储 bytea 数据。这样可以把 newfilename 和 newdptimestamp 让出来给对象文件，构成混合模式
+            if (IsPgsql())
+            {
+                bReverse = true;
+                strDataFieldName = "data";
+                textptr = row_info.data_textptr;
+                lCurrentLength = row_info.data_length;
+                strCompleteTimestamp = row_info.NewTimestampString;
+                strCurrentTimestamp = row_info.TimestampString;
+            }
+
             // 已有数据的时间戳
             if (String.IsNullOrEmpty(strCurrentRange) == false
         && strCurrentRange[0] == '!')
@@ -14088,11 +14118,12 @@ trans);
 
             // 将原本要写入 bytea 的调整为写入对象文件
             // 注意，bFull == true 时如果原本要写入 bytea 字段，则不做调整
-            if (IsPgsql() && bObjectFile == false)
+            if (IsPgsql() && bObjectFile == false && bSingleFull == false)
             {
                 bObjectFile = true;
                 //lCurrentLength = 0;
                 //strCurrentRange = "";
+                strCurrentTimestamp = row_info.NewTimestampString;
             }
 
             // 当strStyle存在 ignorechecktimestamp时，不判断时间戳
@@ -14372,6 +14403,7 @@ trans);
                     }
 
                     lCurrentLength = 0;
+                    strDataFieldName = "data";
                     nRet = this._writePgsqlBytea(connection,
     ref lCurrentLength,   // 当前image的长度在不断的变化着
     bCanDeleteDuoYu,
@@ -14390,6 +14422,7 @@ trans);
                     bObjectFile = false;
                     row_info.NewFileName = "";
                     row_info.FileName = "";
+                    bReverse = true;
                 }
 
                 nStartOfBuffer += nNeedReadLength;
@@ -14809,6 +14842,14 @@ trans);
         {
             strError = "";
 
+            // 是否为混合模式。混合模式就是完整的 newdata 和局部的 filename 同时存在
+            bool bMixMode = false;
+            if (
+                (row_info.newdata_length > 0 || row_info.data_length > 0)
+                && (string.IsNullOrEmpty(row_info.FileName) == false || string.IsNullOrEmpty(row_info.NewFileName) == false)
+                )
+                bMixMode = true;
+
             string strCommand = "";
             if (bObjectFile == false)
             {
@@ -14841,9 +14882,9 @@ trans);
                          + (bFull == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
                          + strSetNull
                          + " range=@range,"
-                         + " metadata=@metadata,"
-                         + (bFull == true ? " filename=@filename, newfilename=NULL," : " newfilename=@filename,")
-                         + " data=NULL, newdata=NULL "
+                         + " metadata=@metadata"
+                         + (bFull == true ? ", filename=@filename, newfilename=NULL" : ", newfilename=@filename")
+                         + (bMixMode == false ? ", data=NULL, newdata=NULL " : "")
                          + " WHERE id=@id";
                     // strCommand += " use master " + "\n";
                 }
@@ -15588,12 +15629,15 @@ trans);
             long current_length = GetPgsqlDataLength(connection,
     strImageFieldName,
     strID);
-            if (current_length != lCurrentLength)
+            if (lStartOfTarget > 0)
             {
-                strError = "内部错误: current_length != lCurrentLength";
-                return -1;
+                if (current_length != lCurrentLength)
+                {
+                    strError = "内部错误: current_length != lCurrentLength";
+                    return -1;
+                }
+                Debug.Assert(current_length == lCurrentLength);
             }
-            Debug.Assert(current_length == lCurrentLength);
 #endif
 
             // 检查是否需要补足 byte(0)

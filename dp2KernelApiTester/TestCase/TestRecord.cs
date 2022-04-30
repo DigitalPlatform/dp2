@@ -21,6 +21,44 @@ namespace dp2KernelApiTester
     {
         static string strDatabaseName = "__test";
 
+        public static NormalResult SpecialTest()
+        {
+            {
+                var result = PrepareEnvironment();
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var create_result = CreateRecords(1000, false, false);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    var result = FragmentOverwriteRecords(create_result.CreatedPaths, -1);
+                    if (result.Value == -1)
+                        return result;
+                }
+
+                var result1 = DeleteRecords(create_result.CreatedPaths,
+    null,
+    "");
+                if (result1.Value == -1)
+                    return result1;
+            }
+
+            /*
+            {
+                var result = Finish();
+                if (result.Value == -1)
+                    return result;
+            }
+            */
+
+            return new NormalResult();
+        }
+
         public static NormalResult TestAll(string style = null)
         {
             {
@@ -30,7 +68,7 @@ namespace dp2KernelApiTester
             }
 
             {
-                var create_result = CreateRecords(2);
+                var create_result = CreateRecords(2, true);
                 if (create_result.Value == -1)
                     return create_result;
 
@@ -84,7 +122,7 @@ namespace dp2KernelApiTester
 
 
             {
-                var create_result = CreateRecords(1);
+                var create_result = CreateRecords(1, true);
                 if (create_result.Value == -1)
                     return create_result;
 
@@ -96,7 +134,7 @@ namespace dp2KernelApiTester
             }
 
             {
-                var create_result = CreateRecords(1);
+                var create_result = CreateRecords(1, true);
                 if (create_result.Value == -1)
                     return create_result;
 
@@ -386,7 +424,9 @@ namespace dp2KernelApiTester
         }
 
         // 创建若干条数据库记录
-        public static CreateResult CreateRecords(int count)
+        public static CreateResult CreateRecords(int count,
+            bool upload_object = false,
+            bool verify_accesspoint = true)
         {
             var channel = DataModel.GetChannel();
 
@@ -438,48 +478,54 @@ namespace dp2KernelApiTester
                     Path = output_path,
                 });
 
-                // 上载对象
-                for (int j = 0; j < 10; j++)
+                if (upload_object)
                 {
-                    byte[] bytes = new byte[4096];
-                    ret = channel.WriteRes($"{output_path}/object/{j + 1}",
-                        $"0-{bytes.Length - 1}",
-                        bytes.Length,
-                        bytes,
-                        "",
-                        "content,data",
-                        null,
-                        out string output_object_path,
-                        out byte[] output_object_timestamp,
-                        out strError);
-                    if (ret == -1)
-                        return new CreateResult
-                        {
-                            Value = -1,
-                            ErrorInfo = strError,
-                            CreatedPaths = created_paths,
-                            AccessPoints = created_accesspoints,
-                        };
+                    // 上载对象
+                    for (int j = 0; j < 10; j++)
+                    {
+                        byte[] bytes = new byte[4096];
+                        ret = channel.WriteRes($"{output_path}/object/{j + 1}",
+                            $"0-{bytes.Length - 1}",
+                            bytes.Length,
+                            bytes,
+                            "",
+                            "content,data",
+                            null,
+                            out string output_object_path,
+                            out byte[] output_object_timestamp,
+                            out strError);
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError,
+                                CreatedPaths = created_paths,
+                                AccessPoints = created_accesspoints,
+                            };
+                    }
                 }
 
-                // 检查检索点是否被成功创建
-                foreach (var accesspoint in created_accesspoints)
+                if (verify_accesspoint)
                 {
-                    string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+                    // 检查检索点是否被成功创建
+                    foreach (var accesspoint in created_accesspoints)
+                    {
+                        string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
-                    ret = channel.DoSearch(strQueryXml, "default", out strError);
-                    if (ret == -1)
-                        return new CreateResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"DoSearch() 出错: {strError}"
-                        };
-                    if (ret != 1)
-                        return new CreateResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
-                        };
+                        ret = channel.DoSearch(strQueryXml, "default", out strError);
+                        if (ret == -1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"DoSearch() 出错: {strError}"
+                            };
+                        if (ret != 1)
+                            return new CreateResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
+                            };
+                    }
                 }
 
                 DataModel.SetMessage($"创建记录 {output_path} 成功");
@@ -1297,6 +1343,7 @@ out string strError);
         {
             var channel = DataModel.GetChannel();
 
+            int i = 1;
             foreach (var path in paths)
             {
                 string origin_xml = "";
@@ -1319,8 +1366,13 @@ out string strError);
 
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml(origin_xml);
-                DomUtil.SetElementText(dom.DocumentElement, "changed", "test1234567890");
+                var old_text = DomUtil.GetElementText(dom.DocumentElement, "changed");
+                if (old_text == null)
+                    old_text = "";
+                DomUtil.SetElementText(dom.DocumentElement, "changed", old_text + CreateString(i++));
 
+                if (i > 2000)
+                    i = 0;
 
                 string new_xml = dom.DocumentElement.OuterXml;
                 byte[] bytes = Encoding.UTF8.GetBytes(new_xml);
@@ -1335,11 +1387,14 @@ out string strError);
                 {
                     int chunk_length = fragment_length;
 
+                    if (chunk_length == -1)
+                        chunk_length = bytes.Length;
+
                     end = start + chunk_length - 1;
 
                     if (end > bytes.Length - 1)
                     {
-                        end = chunk_length - 1;
+                        end = bytes.Length - 1;
                         chunk_length = (int)(end - start + 1);
                     }
 
@@ -1390,9 +1445,8 @@ out string strError);
                             return new NormalResult
                             {
                                 Value = -1,
-                                ErrorInfo = $"记录 {path} 的时间戳读取出来和 origin_timestamp 不一致"
+                                ErrorInfo = $"记录 {path} 的时间戳({ByteArray.GetHexTimeStampString(read_timestamp)})读取出来和 origin_timestamp({ByteArray.GetHexTimeStampString(origin_timestamp)}) 不一致"
                             };
-
                     }
 
                     timestamp = output_timestamp;
@@ -1431,5 +1485,16 @@ out string strError);
             return new NormalResult();
         }
 
+        static string CreateString(int length)
+        {
+            StringBuilder text = new StringBuilder();
+            for (int i = 0; i < length; i++)
+            {
+                char ch = (char)((int)'0' + (i % 10));
+                text.Append(ch);
+            }
+
+            return text.ToString();
+        }
     }
 }

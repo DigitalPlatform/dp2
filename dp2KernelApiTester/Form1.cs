@@ -253,7 +253,6 @@ string style = "")
                     FormProperty.SetProperty(state, this, ClientInfo.IsMinimizeMode());
                 }
             }
-
         }
 
         void SaveSettings()
@@ -294,6 +293,7 @@ string style = "")
         {
             Task.Run(() =>
             {
+                EnableControls(false);
                 try
                 {
                     var result = TestCreateDatabase.TestAll("refresh_database,create_records,buildkeys");
@@ -304,6 +304,10 @@ string style = "")
                 {
                     AppendString($"exception: {ex.Message}");
                 }
+                finally
+                {
+                    EnableControls(true);
+                }
             });
         }
 
@@ -311,6 +315,7 @@ string style = "")
         {
             Task.Run(() =>
             {
+                EnableControls(false);
                 try
                 {
                     var result = TestRecord.TestAll("");
@@ -321,6 +326,10 @@ string style = "")
                 {
                     AppendString($"exception: {ex.Message}");
                 }
+                finally
+                {
+                    EnableControls(true);
+                }
             });
         }
 
@@ -328,6 +337,7 @@ string style = "")
         {
             Task.Run(() =>
             {
+                EnableControls(false);
                 try
                 {
                     var result = TestSearch.TestAll("");
@@ -338,6 +348,10 @@ string style = "")
                 {
                     AppendString($"exception: {ex.Message}");
                 }
+                finally
+                {
+                    EnableControls(true);
+                }
             });
         }
 
@@ -345,6 +359,7 @@ string style = "")
         {
             Task.Run(() =>
             {
+                EnableControls(false);
                 try
                 {
                     var result = TestRebuildKeys.TestAll("");
@@ -355,6 +370,10 @@ string style = "")
                 {
                     AppendString($"exception: {ex.Message}");
                 }
+                finally
+                {
+                    EnableControls(true);
+                }
             });
         }
 
@@ -362,21 +381,41 @@ string style = "")
         {
             Task.Run(() =>
             {
+                EnableControls(false);
                 try
                 {
                     var result = TestRecord.PrepareEnvironment();
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
 
-                    result = TestRecord.FragmentCreateRecords(1000, 1);
+                    result = TestRecord.SpecialTest();
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
+
+                    /*
+                    result = TestRecord.FragmentCreateRecords(1000, 1); // 1000
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                    */
+
+                    DataModel.SetMessage("碎片式写入完成", "green");
                 }
                 catch (Exception ex)
                 {
                     AppendString($"exception: {ex.Message}");
                 }
+                finally
+                {
+                    EnableControls(true);
+                }
             });
+        }
+
+        void EnableControls(bool enable)
+        {
+            this.Invoke(new Action(() => {
+                this.menuStrip1.Enabled = enable;
+            }));
         }
     }
 }

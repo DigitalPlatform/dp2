@@ -1077,9 +1077,10 @@ out strError);
                 int i = 0;
                 foreach (string strSqlDbName in sql_dbnames)
                 {
+                    string pattern = (strSqlDbName + "_%").Replace("_", "\\_");
                     if (i > 0)
                         strCommand += " or ";
-                    strCommand += " table_name like '" + strSqlDbName.ToUpper() + "_%' ";
+                    strCommand += " table_name like '" + pattern.ToUpper() + "_%' ESCAPE '\\'";
                     i++;
                 }
 
