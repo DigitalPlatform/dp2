@@ -7187,8 +7187,15 @@ handle.CancelTokenSource.Token).Result;
                     // 需要即时获得行信息
                     strID = DbPath.GetID10(strID);
 
+                    var get_data = false;
+                    // 2022/5/1
+                    // Pgsql 优化
+                    // 小规模 bytea 可以直接获取
+                    if (IsPgsql() && m_lObjectStartSize > 0 && m_lObjectStartSize <= 100 * 1024)
+                        get_data = StringUtil.IsInList("data", strStyle);
+
                     nRet = _getRowInfos(connection,
-    false,
+    get_data,
     new List<string> { strID },
     out List<RecordRowInfo> row_infos,
     out strError);
@@ -7401,7 +7408,6 @@ handle.CancelTokenSource.Token).Result;
                                 out strError);
                             if (nRet == -1)
                                 return -1;
-
                         }
                         finally
                         {
@@ -7473,11 +7479,23 @@ handle.CancelTokenSource.Token).Result;
         lStart,
         lOutputLength);
                     else if (connection.IsPgsql())
-                        destBuffer = _readPgsqlPartImage(connection,
-strDataFieldName,
-strID,
-lStart,
-lOutputLength);
+                    {
+                        // 2022/5/1
+                        // Pgsql 优化
+                        if (IsPgsql() && row_info.Data != null)
+                        {
+                            if (strDataFieldName == "data")
+                                destBuffer = row_info.Data;
+                            else
+                                destBuffer = row_info.NewData;
+                        }
+                        else
+                            destBuffer = _readPgsqlPartImage(connection,
+    strDataFieldName,
+    strID,
+    lStart,
+    lOutputLength);
+                    }
                     else
                     {
                         strError = $"无法处理的 SQL 服务器类型 {this.SqlServerType}";
@@ -11420,7 +11438,7 @@ trans);
 
         // 获得 records表中 多个已存在的行信息
         // parameters:
-        //      bGetData    是否需要获得记录体?
+        //      bGetData    是否需要从 SQL 行中获得记录体? (注：不从对象文件)
         private int _getRowInfos(Connection connection,
             bool bGetData,
             IEnumerable<string> ids,
@@ -11546,6 +11564,8 @@ trans);
                     row_info.FileName = GetString(result["filename"]);
                     row_info.NewFileName = GetString(result["newfilename"]);
 
+                    // 注: 本函数并不从对象文件中获得内容。因为对象文件尺寸可能很大，内存会不够
+                    /*
                     if (bGetData)
                     {
                         // 对象文件
@@ -11557,6 +11577,7 @@ trans);
                                 return -1;  // TODO: 是否尽量多读入数据，最后统一警告或者报错?
                         }
                     }
+                    */
 
                     i++;
                 }
@@ -13438,6 +13459,7 @@ trans);
                         }
                          * */
                         RecordRowInfo row_info = null;
+                        // 不获得 data 或者 newdata
                         // return:
                         //      -1  出错
                         //      0   记录不存在
@@ -14152,6 +14174,9 @@ trans);
                 }
             }
 
+            // 是否最后 WriteLine() 一次性写入 SQL row。false 表示不等到最后 WriteLine() 就提前写入
+            byte [] direct_write_data = null;
+
             bool bDeleted = false;
 
             // 根据range写数据
@@ -14332,17 +14357,31 @@ trans);
                     }
                     else if (connection.IsPgsql())
                     {
-                        nRet = this._writePgsqlBytea(connection,
-                            ref lCurrentLength,   // 当前image的长度在不断的变化着
-                            bCanDeleteDuoYu,
-                            strID,
-                            strDataFieldName,   // "newdata",
-                            lStartOfTarget,
-                            baSource,
-                            nStartOfBuffer,
-                            nNeedReadLength,
-                            lTotalLength,
-                            out strError);
+                        // Pgsql 优化
+                        if (lStartOfTarget == 0
+                            && nStartOfBuffer == 0
+                            && nNeedReadLength == lTotalLength
+                            && bFull == true
+                            && baSource.Length == lTotalLength)
+                        {
+                            direct_write_data = baSource;
+                            lCurrentLength = baSource.Length;
+                            nRet = 0;
+                        }
+                        else
+                        {
+                            nRet = this._writePgsqlBytea(connection,
+                                ref lCurrentLength,   // 当前image的长度在不断的变化着
+                                bCanDeleteDuoYu,
+                                strID,
+                                strDataFieldName,   // "newdata",
+                                lStartOfTarget,
+                                baSource,
+                                nStartOfBuffer,
+                                nNeedReadLength,
+                                lTotalLength,
+                                out strError);
+                        }
                     }
                     else
                     {
@@ -14402,21 +14441,31 @@ trans);
                         _streamCache.ReturnStream(item);
                     }
 
-                    lCurrentLength = 0;
-                    strDataFieldName = "data";
-                    nRet = this._writePgsqlBytea(connection,
-    ref lCurrentLength,   // 当前image的长度在不断的变化着
-    bCanDeleteDuoYu,
-    strID,
-    strDataFieldName,   // "newdata",
-    0,  // lStartOfTarget,
-    bytes,
-    0, // nStartOfBuffer,
-    bytes.Length, // nNeedReadLength,
-    bytes.Length,    // lTotalLength,
-    out strError);
-                    if (nRet == -1)
-                        return -1;
+                    // 2022/5/1
+                    // 优化 Pgsql
+                    {
+                        direct_write_data = bytes;
+                    }
+
+                    if (false)
+                    {
+                        lCurrentLength = 0;
+                        strDataFieldName = "data";
+                        nRet = this._writePgsqlBytea(connection,
+        ref lCurrentLength,   // 当前image的长度在不断的变化着
+        bCanDeleteDuoYu,
+        strID,
+        strDataFieldName,   // "newdata",
+        0,  // lStartOfTarget,
+        bytes,
+        0, // nStartOfBuffer,
+        bytes.Length, // nNeedReadLength,
+        bytes.Length,    // lTotalLength,
+        out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+
                     // 删除文件
                     this._streamCache.FileDelete(strFileName);
                     bObjectFile = false;
@@ -14621,6 +14670,7 @@ trans);
                 bReverse,
                 bNeedInsertRow,
                 "", // strPartList,
+                direct_write_data,
                 out strError);
                 if (nRet == -1)
                     return -1;
@@ -14838,6 +14888,7 @@ trans);
             bool bReverse,
             bool bNeedInsertRow,
             string strPartList,
+            byte [] data,    // 是否顺便将 data 写入 SQL 行
             out string strError)
         {
             strError = "";
@@ -14856,14 +14907,19 @@ trans);
                 string strSetNull = ""; // 设置即将删除的 timestamp 字段内容为空的语句
                 if (bFull == true)
                 {
-                    strSetNull = (bReverse == true ? " newdptimestamp=NULL, newdata=NULL," : " dptimestamp=NULL, data=NULL,");
                     // 时间戳和data内容都清除
+                    strSetNull = (bReverse == true ? " newdptimestamp=NULL, newdata=NULL," : " dptimestamp=NULL, data=NULL,");
                 }
+
+                string strSetData = "";
+                if (data != null)
+                    strSetData = (bReverse == true ? " data=@data," : " newdata=@data,");
 
                 strCommand = /*"use " + this.m_strSqlDbName + "\n"
                     +*/ $" UPDATE {db_prefix}records "
                     + (bReverse == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
                     + strSetNull
+                    + strSetData
                     + " range=@range,"
                     + " filename=NULL, newfilename=NULL,"
                     + " metadata=@metadata "
@@ -15027,6 +15083,12 @@ trans);
                             filenameParam.Value = row_info.FileName;
                         else
                             filenameParam.Value = row_info.NewFileName;
+                    }
+
+                    if (data != null)
+                    {
+                        var dataParam = command.NewParameter("@data", DbType.Binary);
+                        dataParam.Value = data;
                     }
 
                     try
@@ -19677,7 +19739,7 @@ strID);
         }
 
         //
-        // 新版本。调用 _getRowInfos()
+        // 新版本。调用 _getRowInfos()。不获得 data 或者 newdata
         // return:
         //      -1  出错
         //      0   记录不存在
@@ -20459,6 +20521,7 @@ strID);
                         connection._nOpenCount += 10;
 
                         RecordRowInfo row_info = null;
+                        // 不获得 data 或者 newdata
                         // return:
                         //      -1  出错
                         //      0   记录不存在
@@ -20496,7 +20559,6 @@ strID);
                         // 处理检索点
                         if (bObject == false)
                         {
-
                             KeyCollection newKeys = null;
                             KeyCollection oldKeys = null;
 
