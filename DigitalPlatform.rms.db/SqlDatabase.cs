@@ -7187,16 +7187,51 @@ handle.CancelTokenSource.Token).Result;
                     // 需要即时获得行信息
                     strID = DbPath.GetID10(strID);
 
-                    var get_data = false;
+                    Delegate_willGetBytes get_data = null;
+
                     // 2022/5/1
                     // Pgsql 优化
                     // 小规模 bytea 可以直接获取
-                    if (IsPgsql() && m_lObjectStartSize > 0 && m_lObjectStartSize <= 100 * 1024)
-                        get_data = StringUtil.IsInList("data", strStyle);
+                    if (IsPgsql()
+                        && StringUtil.IsInList("data", strStyle)
+                        && m_lObjectStartSize > 0 && m_lObjectStartSize <= 100 * 1024)
+                        get_data = (dr, current_row_info, data_col_index, newdata_col_index) =>
+                        {
+                            if (nReadLength == 0)
+                                return;
+
+                            long current_length = nReadLength;
+                            if (current_row_info.data_length > 0)
+                            {
+                                if (lStart >= current_row_info.data_length)
+                                    throw new Exception($"lStart 越过对象尺寸 data_length({current_row_info.data_length})");
+                                if (current_length == -1)
+                                    current_length = (int)(current_row_info.data_length - lStart);
+                                else
+                                    current_length = Math.Min(nReadLength, current_row_info.data_length - lStart);
+                                if (current_length > 0)
+                                    current_row_info.Data = GetData(dr, data_col_index, lStart, current_length);
+                            }
+
+                            if (current_row_info.newdata_length > 0)
+                            {
+                                if (lStart >= current_row_info.newdata_length)
+                                    throw new Exception($"lStart 越过对象尺寸 newdata_length({current_row_info.newdata_length})");
+
+                                if (current_length == -1)
+                                    current_length = (int)(current_row_info.newdata_length - lStart);
+                                else
+                                    current_length = Math.Min(nReadLength, current_row_info.newdata_length - lStart);
+                                if (current_length > 0)
+                                    current_row_info.NewData = GetData(dr, newdata_col_index, lStart, current_length);
+                            }
+
+                            // 不从对象文件读
+                        };
 
                     nRet = _getRowInfos(connection,
-    get_data,
     new List<string> { strID },
+    get_data,
     out List<RecordRowInfo> row_infos,
     out strError);
                     if (nRet == -1)
@@ -11397,8 +11432,9 @@ trans);
 
         // 这一层主要是把较大的数组分片进行调用
         private int GetRowInfos(Connection connection,
-        bool bGetData,
+        // bool bGetData,
         List<string> ids,
+        Delegate_willGetBytes proc_willGetBytes,
         out List<RecordRowInfo> row_infos,
         out string strError)
         {
@@ -11415,8 +11451,9 @@ trans);
                 while (count < ids.Count)
                 {
                     nRet = _getRowInfos(connection,
-                    bGetData,
+                    // bGetData,
                     ids.GetRange(start, length),
+                    proc_willGetBytes,
                     out results,
                     out strError);
                     if (nRet == -1)
@@ -11430,18 +11467,33 @@ trans);
             }
             else
                 return _getRowInfos(connection,
-                    bGetData,
+                    // bGetData,
                     ids,
+                    proc_willGetBytes,
                     out row_infos,
                     out strError);
         }
+
+        class Fragment
+        {
+            public bool Output { get; set; }
+            public long Start { get; set; }
+            public long Length { get; set; }
+        }
+
+        delegate void Delegate_willGetBytes(
+            IDataReader dr,
+            RecordRowInfo row_info,
+            int data_col_index,
+            int newdata_row_index);
 
         // 获得 records表中 多个已存在的行信息
         // parameters:
         //      bGetData    是否需要从 SQL 行中获得记录体? (注：不从对象文件)
         private int _getRowInfos(Connection connection,
-            bool bGetData,
+            // bool bGetData,
             IEnumerable<string> ids,
+            Delegate_willGetBytes proc_willGetBytes,
             out List<RecordRowInfo> row_infos,
             out string strError)
         {
@@ -11463,6 +11515,8 @@ trans);
 
             if (string.IsNullOrEmpty(strIdString))
                 return 0;
+
+            bool bGetData = proc_willGetBytes != null;
 
             // 通用
             {
@@ -11534,6 +11588,115 @@ trans);
                 if (connection.IsOracle())
                     strCommand = strCommand.Replace("@", ":");
 
+                int i = 0;
+                using (var result = connection.ExecuteReader(strCommand))
+                {
+                    //try
+                    //{
+                    while (result.Read())
+                    {
+                        var row_info = new RecordRowInfo();
+                        row_infos.Add(row_info);
+
+                        row_info.ID = GetString(result, "id");
+                        if (has_data_fields)
+                        {
+                            row_info.data_textptr = GetBytes(result, "data_textptr");
+                            row_info.data_length = GetLong(result, "data_length");
+                            row_info.newdata_textptr = GetBytes(result, "newdata_textptr");
+                            row_info.newdata_length = GetLong(result, "newdata_length");
+
+                            /*
+                            if (bGetData)
+                            {
+                                {
+                                    var fragment = proc_willGetBytes(id, "data", row_info.data_length);
+                                    if (fragment != null && fragment.Output && fragment.Length > 0)
+                                    {
+                                        // TODO: 检查 fragment.Length 的值是否过大，导致 Out of memory
+                                        var index = result.GetOrdinal("data");
+                                        byte[] buffer = new byte[fragment.Length];
+                                        result.GetBytes(index,
+                                            fragment.Start,
+                                            buffer,
+                                            0,
+                                            (int)fragment.Length);
+                                        row_info.Data = buffer;
+                                    }
+                                }
+
+                                {
+                                    var fragment = proc_willGetBytes(id, "newdata", row_info.newdata_length);
+                                    // TODO: 检查 fragment.Length 是否超过 row_info.newdata_length
+                                    if (fragment != null && fragment.Output && fragment.Length > 0)
+                                    {
+                                        var index = result.GetOrdinal("newdata");
+                                        byte[] buffer = new byte[fragment.Length];
+                                        result.GetBytes(index,
+                                            fragment.Start,
+                                            buffer,
+                                            0,
+                                            (int)fragment.Length);
+                                        row_info.NewData = buffer;
+                                    }
+                                }
+                            }
+                            */
+                        }
+
+                        row_info.Range = GetString(result, "range");
+                        row_info.TimestampString = GetString(result, "dptimestamp");
+                        row_info.Metadata = GetString(result, "metadata");
+                        row_info.NewTimestampString = GetString(result, "newdptimestamp");
+                        row_info.FileName = GetString(result, "filename");
+                        row_info.NewFileName = GetString(result, "newfilename");
+
+                        /*
+                    if (bGetData)
+                    {
+                        var fragment = proc_willGetBytes(id, "file", -1);
+
+                        // 对象文件
+                        if (fragment != null
+                            && fragment.Output
+                            && String.IsNullOrEmpty(row_info.Range) == false
+                            && row_info.Range[0] == '#')
+                        {
+                            nRet = ReadObjectFileContent(row_info, out strError);
+                            if (nRet == -1)
+                                return -1;  // TODO: 是否尽量多读入数据，最后统一警告或者报错?
+                        }
+                    }
+                        */
+
+                        if (bGetData)
+                        {
+                            int data_col_index = -1;
+                            int newdata_col_index = -1;
+                            if (IsPgsql() || IsMsSqlServer())
+                            {
+                                data_col_index = result.GetOrdinal("data");
+                                Debug.Assert(data_col_index != -1);
+                                newdata_col_index = result.GetOrdinal("newdata");
+                                Debug.Assert(newdata_col_index != -1);
+                            }
+                            proc_willGetBytes?.Invoke(result, row_info, data_col_index, newdata_col_index);
+                        }
+
+                        i++;
+                    }
+                    /*
+                }
+                catch (Exception ex)
+                {
+                    string strConnectionName = connection.GetHashCode().ToString();
+                    this.container.KernelApplication.WriteErrorLog("_getRowInfos() exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                    throw new Exception(ex.Message, ex);
+                }
+                    */
+                }
+
+#if OLD
                 var results = connection.Query(strCommand);
                 int i = 0;
                 foreach (IDictionary<string, object> rawResult in results)
@@ -11552,6 +11715,7 @@ trans);
 
                         if (bGetData)
                         {
+
                             row_info.Data = result["data"] as byte[];
                             row_info.NewData = result["newdata"] as byte[];
                         }
@@ -11581,6 +11745,8 @@ trans);
 
                     i++;
                 }
+#endif
+
                 return i;
             }
 
@@ -11906,13 +12072,50 @@ trans);
 #endif
         }
 
+        static byte[] GetData(IDataReader dr,
+            int index,
+            long start,
+            long length)
+        {
+            if (length == -1)
+                length = (int)dr.GetBytes(index, 0, null, 0, 1);
+            if (length >= 1024 * 1024)
+                throw new Exception($"对象尺寸太大({length})，不适合直接读入内存");
+            byte[] buffer = new byte[length];
+            dr.GetBytes(index,
+                start,
+                buffer,
+                0,
+                (int)length);
+            return buffer;
+        }
+
+        static int GetColumnIndex(IDataReader reader, string column_name)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i) == column_name)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        // 将对象文件内所有内容读入 row_info 的 Data 或者 NewData 中
+        // return:
+        //      -1  出错
+        //      0   没有读入
+        //      1   成功读入
         public int ReadObjectFileContent(RecordRowInfo row_info,
             out string strError)
         {
             strError = "";
 
             if (string.IsNullOrEmpty(row_info.FileName) == true)
+            {
                 row_info.Data = new byte[0];
+                return 1;
+            }
             else
             {
                 string strObjectFilename = GetObjectFileName(row_info.FileName);
@@ -11935,6 +12138,8 @@ trans);
                             0,
                             (int)s.Length);
                     }
+
+                    return 1;
                 }
                 catch (FileNotFoundException /* ex */)
                 {
@@ -11948,7 +12153,6 @@ trans);
                     return -1;
                 }
             }
-            return 0;
         }
 
         // 将 Session 中和本数据库有关的缓冲数据成批写入 SQL Server
@@ -12394,11 +12598,36 @@ trans);
                     connection.TryOpen();
                     try
                     {
+                        bool output = bRebuildKeys ? true : !bFastMode;
+                        Delegate_willGetBytes func = null;
+                        if (output)
+                            func = (dr, row_info, data_col_index, newdata_col_index) =>
+                            {
+                                if (output)
+                                {
+                                    if (row_info.data_length > 0 && data_col_index != -1)
+                                        row_info.Data = GetData(dr, data_col_index, 0, row_info.data_length);
+
+                                    if (row_info.newdata_length > 0 && newdata_col_index != -1)
+                                        row_info.NewData = GetData(dr, newdata_col_index, 0, row_info.newdata_length);
+
+                                    // 对象文件
+                                    if (String.IsNullOrEmpty(row_info.Range) == false
+                                        && row_info.Range[0] == '#')
+                                    {
+                                        var ret = ReadObjectFileContent(row_info, out string error);
+                                        if (ret == -1)
+                                            throw new Exception(error);
+                                    }
+                                }
+                            };
+
                         // select 已经存在的行信息
                         // 获得多个已存在的行信息
                         int nRet = GetRowInfos(connection,
-                            bRebuildKeys ? true : !bFastMode,
+                            // bRebuildKeys ? true : !bFastMode,
                             WriteInfo.get_ids(records),    // 采用 get_existing_ids 纯追加 40 万条书目数据才加快速度1分钟而已
+                            func,
                             out List<RecordRowInfo> row_infos,
                             out strError);
                         if (nRet == -1)
@@ -13473,6 +13702,11 @@ trans);
                         if (nRet == 0)  // 2013/11/21
                             return -4;
 
+                        if (nRet == 1)
+                        {
+                            Debug.Assert(string.IsNullOrEmpty(row_info.ID) == false);
+                        }
+
                         // 3.把数据写到range指定的范围
                         bool bFull = false; // 是否为最后完成的一次写入操作
                         bool bSingleFull = false;
@@ -14058,6 +14292,11 @@ trans);
             bool bObjectFile = false;
 
             string strCurrentRange = row_info.Range;
+
+            // 2022/5/2
+            if (strCurrentRange == null)
+                strCurrentRange = "";
+
             bool bReverse = false;  // 方向标志。如果为false，表示 data 为正式内容，newdata为暂时内容
 
             string strDataFieldName = "newdata";    // 临时存储字段名
@@ -14175,7 +14414,7 @@ trans);
             }
 
             // 是否最后 WriteLine() 一次性写入 SQL row。false 表示不等到最后 WriteLine() 就提前写入
-            byte [] direct_write_data = null;
+            byte[] direct_write_data = null;
 
             bool bDeleted = false;
 
@@ -14888,7 +15127,7 @@ trans);
             bool bReverse,
             bool bNeedInsertRow,
             string strPartList,
-            byte [] data,    // 是否顺便将 data 写入 SQL 行
+            byte[] data,    // 是否顺便将 data 写入 SQL 行
             out string strError)
         {
             strError = "";
@@ -14920,9 +15159,9 @@ trans);
                     + (bReverse == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
                     + strSetNull
                     + strSetData
-                    + " range=@range,"
-                    + " filename=NULL, newfilename=NULL,"
-                    + " metadata=@metadata "
+                    + " range=@range"
+                    + ", filename=NULL, newfilename=NULL"
+                    + (bFull ? ", metadata=@metadata " : "")
                     + " WHERE id=@id";
             }
             else
@@ -14937,8 +15176,8 @@ trans);
                          +*/ $" UPDATE {db_prefix}records "
                          + (bFull == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
                          + strSetNull
-                         + " range=@range,"
-                         + " metadata=@metadata"
+                         + " range=@range"
+                         + (bFull ? ", metadata=@metadata" : "")
                          + (bFull == true ? ", filename=@filename, newfilename=NULL" : ", newfilename=@filename")
                          + (bMixMode == false ? ", data=NULL, newdata=NULL " : "")
                          + " WHERE id=@id";
@@ -14946,7 +15185,6 @@ trans);
                 }
                 else if (connection.IsSqlite()
                     || connection.IsOracle()
-                    // || connection.IsPgsql()
                     || connection.IsMySQL())
                 {
                     if (bNeedInsertRow == false)
@@ -14954,16 +15192,16 @@ trans);
                         strCommand = $" UPDATE {db_prefix}records "
                              + (bFull == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
                              + strSetNull
-                             + $" {range_field_name}=@range,"
-                             + " metadata=@metadata,"
-                             + (bFull == true ? " filename=@filename, newfilename=NULL " : " newfilename=@filename ")
+                             + $" {range_field_name}=@range"
+                             + (bFull ? ", metadata=@metadata" : "")
+                             + (bFull == true ? ", filename=@filename, newfilename=NULL " : ", newfilename=@filename ")
                              + " WHERE id=@id";
                     }
                     else
                     {
-                        strCommand = $" INSERT INTO {db_prefix}records(id, {range_field_name}, metadata, dptimestamp, newdptimestamp, filename, newfilename) "
+                        strCommand = $" INSERT INTO {db_prefix}records(id, {range_field_name}, {(bFull ? "metadata," : "")} dptimestamp, newdptimestamp, filename, newfilename) "
                             + (bFull == true ? " VALUES(@id, @range, @metadata, @dptimestamp, NULL, @filename, NULL)"
-                                             : " VALUES(@id, @range, @metadata, NULL, @dptimestamp, NULL, @filename)");
+                                             : " VALUES(@id, @range, NULL, @dptimestamp, NULL, @filename)");
 
                     }
 
@@ -15058,17 +15296,23 @@ trans);
 
                     row_info.Range = (string)rangeParam.Value;  // 将反转情况及时兑现
 
-                    var metadataParam = command.NewParameter("@metadata", DbType.String, 4000, null);
-                    /* MS SQL Server
-                    SqlParameter metadataParam =
-                        command.Parameters.Add("@metadata",
-                        SqlDbType.NVarChar,
-                        4000);
-                    */
                     if (bFull == true)
+                    {
+                        var metadataParam = command.NewParameter("@metadata", DbType.String, 4000, null);
+                        /* MS SQL Server
+                        SqlParameter metadataParam =
+                            command.Parameters.Add("@metadata",
+                            SqlDbType.NVarChar,
+                            4000);
+                        */
                         metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
-                    else
-                        metadataParam.Value = row_info.Metadata;
+                        /*
+                        else
+                        {
+                            Debug.Assert(row_info.Metadata != null);
+                            metadataParam.Value = row_info.Metadata == null ? "" : row_info.Metadata;
+                        }*/
+                    }
 
                     if (bObjectFile == true)
                     {
@@ -15102,7 +15346,7 @@ trans);
                     }
                     catch (Exception ex)
                     {
-                        strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
+                        strError = "WriteLine() 执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
                         return -1;
                     }
                 } // end of using command
@@ -19751,7 +19995,9 @@ strID);
         {
             row_info = null;
 
-            var ret = _getRowInfos(connection, false, new string[] { strID },
+            var ret = _getRowInfos(connection,
+                new string[] { strID },
+                null,
                 out List<RecordRowInfo> row_infos,
                 out strError);
             if (ret == -1)
@@ -19762,6 +20008,7 @@ strID);
                 return 0;
             }
             row_info = row_infos[0];
+            Debug.Assert(ret == 1);
             return 1;
         }
 
@@ -22406,6 +22653,36 @@ out strError);
             return (string)value;
         }
 
+        public static long GetLong(IDataReader dr, string name)
+        {
+            var index = dr.GetOrdinal(name);
+            if (dr.IsDBNull(index))
+                return 0;
+            var type_name = dr.GetDataTypeName(index);
+            if (type_name == "int" || type_name == "integer")
+                return dr.GetInt32(index);
+            else
+                return dr.GetInt64(index);
+        }
+
+        public static string GetString(IDataReader dr, string name)
+        {
+            var index = dr.GetOrdinal(name);
+            if (dr.IsDBNull(index))
+                return null;
+            return dr.GetString(index);
+        }
+
+        public static byte[] GetBytes(IDataReader dr, string name)
+        {
+            var index = dr.GetOrdinal(name);
+            if (dr.IsDBNull(index))
+                return null;
+            var length = dr.GetBytes(index, 0, null, 0, 1);
+            byte[] buffer = new byte[length];
+            dr.GetBytes(index, 0, buffer, 0, (int)length);
+            return buffer;
+        }
     }
 
     public class SQLiteInfo

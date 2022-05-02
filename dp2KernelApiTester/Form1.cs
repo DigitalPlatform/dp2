@@ -388,7 +388,7 @@ string style = "")
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
 
-                    result = TestRecord.SpecialTest();
+                    result = TestRecord.SpecialTest(1000); // 1000
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
 

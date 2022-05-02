@@ -21,7 +21,7 @@ namespace dp2KernelApiTester
     {
         static string strDatabaseName = "__test";
 
-        public static NormalResult SpecialTest()
+        public static NormalResult SpecialTest(int count)
         {
             {
                 var result = PrepareEnvironment();
@@ -30,9 +30,35 @@ namespace dp2KernelApiTester
             }
 
             {
-                var create_result = CreateRecords(1000, false, false);
+                var create_result = QuickCreateRecords(100);
                 if (create_result.Value == -1)
                     return create_result;
+
+                var result = BatchRefreshRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints);
+                if (result.Value == -1)
+                    return result;
+
+                result = DeleteRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            return new NormalResult();
+
+            {
+                var create_result = CreateRecords(count, false, false);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                for (int i = 1; i < 10; i++)
+                {
+                    var result = FragmentReadRecords(create_result.CreatedPaths, i);
+                    if (result.Value == -1)
+                        return result;
+                }
 
                 for (int i = 0; i < 10; i++)
                 {
@@ -96,11 +122,35 @@ namespace dp2KernelApiTester
             }
 
             {
+                var create_result = FragmentCreateRecords(1);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                for (int i = 1; i < 10; i++)
+                {
+                    var result = FragmentReadRecords(create_result.CreatedPaths, i);
+                    if (result.Value == -1)
+                        return result;
+                }
+
+                var result1 = DeleteRecords(create_result.CreatedPaths,
+    null,
+    "");
+                if (result1.Value == -1)
+                    return result1;
+            }
+
+            {
                 var create_result = QuickCreateRecords(100);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
+                var result = BatchRefreshRecords(create_result.CreatedPaths,
+                    create_result.AccessPoints);
+                if (result.Value == -1)
+                    return result;
+
+                result = DeleteRecords(create_result.CreatedPaths,
                     create_result.AccessPoints,
                     "");
                 if (result.Value == -1)
@@ -546,7 +596,6 @@ namespace dp2KernelApiTester
             List<string> created_paths = new List<string>();
             List<AccessPoint> created_accesspoints = new List<AccessPoint>();
 
-
             List<RecordBody> inputs = new List<RecordBody>();
             for (int i = 0; i < count; i++)
             {
@@ -657,6 +706,65 @@ out string strError);
             };
         }
 
+        // 用 CreateRecords() 刷新检索点
+        public static NormalResult BatchRefreshRecords(IEnumerable<string> paths,
+            IEnumerable<AccessPoint> created_accesspoints)
+        {
+            var channel = DataModel.GetChannel();
+
+            List<RecordBody> inputs = new List<RecordBody>();
+
+            foreach (var path in paths)
+            {
+                inputs.Add(new RecordBody
+                {
+                    Path = path,
+                    // Xml = xml,
+                    Timestamp = null,
+                });
+            }
+
+            var ret = channel.DoWriteRecords(null,
+inputs.ToArray(),
+"rebuildkeys,deletekeys",
+out RecordBody[] outputs,
+out string strError);
+            if (ret == -1)
+                return new CreateResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                };
+
+            // 检查检索点是否被成功创建
+            foreach (var accesspoint in created_accesspoints)
+            {
+                string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+                ret = channel.DoSearch(strQueryXml, "default", out strError);
+                if (ret == -1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"DoSearch() 出错: {strError}"
+                    };
+                if (ret != 1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"检索 '{accesspoint.Key}' 应当命中 1 条。但命中了 {ret} 条",
+                    };
+            }
+
+            List<string> refresh_paths = new List<string>();
+            foreach (var output in outputs)
+            {
+                refresh_paths.Add(output.Path);
+            }
+            DataModel.SetMessage($"刷新(删除后重建)记录检索点 {StringUtil.MakePathList(refresh_paths, ", ")} 成功");
+
+            return new NormalResult();
+        }
 
         // parameters:
         //      delete_style 如果为 "forcedeleteoldkeys" 表示希望强制删除记录的检索点
@@ -743,7 +851,6 @@ out string strError);
                 if (result.Value == -1)
                     return result;
             }
-
 
             foreach (var path in paths)
             {
@@ -954,7 +1061,7 @@ out string strError);
             */
             }
 
-            DataModel.SetMessage($"创建记录 {StringUtil.MakePathList(created_paths)} 成功");
+            DataModel.SetMessage($"创建记录 {StringUtil.MakePathList(created_paths, ", ")} 成功");
 
 
             EndFastAppend(channel, target_dburls);
@@ -1496,5 +1603,119 @@ out string strError);
 
             return text.ToString();
         }
+
+        // 用 Fragment 方式读已经创建好的记录
+        public static NormalResult FragmentReadRecords(IEnumerable<string> paths,
+    int fragment_length = 1)
+        {
+            var channel = DataModel.GetChannel();
+
+            int i = 1;
+            foreach (var path in paths)
+            {
+                byte[] origin_bytes = null;
+                byte[] origin_timestamp = null;
+                string origin_metadata = "";
+                // 先获得一次原始记录。然后 Fragment 读
+                {
+                    var ret = channel.GetRes(path,
+                        0,
+                        -1,
+                        "content,data,metadata,timestamp,outputpath", // strStyle,
+                        out origin_bytes,
+                        out origin_metadata,
+                        out string origin_path,
+                        out origin_timestamp,
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+                }
+
+                long start = 0;
+                long end = 0;
+
+                DataModel.SetMessage($"正在用 Fragment 方式读记录 {path}，请耐心等待 ...");
+
+                while (true)
+                {
+                    int chunk_length = fragment_length;
+
+                    if (chunk_length == -1)
+                        chunk_length = origin_bytes.Length;
+
+                    end = start + chunk_length - 1;
+
+                    if (end > origin_bytes.Length - 1)
+                    {
+                        end = origin_bytes.Length - 1;
+                        chunk_length = (int)(end - start + 1);
+                    }
+
+                    Debug.Assert(end >= start);
+
+                    byte[] fragment = new byte[end - start + 1];
+                    Array.Copy(origin_bytes, start, fragment, 0, fragment.Length);
+
+                    var ret = channel.GetRes(path,
+                        start,
+                        fragment.Length,
+                        "content,data,metadata,timestamp,outputpath", // strStyle,
+                        out byte[] content,
+                        out string output_metadata,
+                        out string output_path,
+                        out byte[] read_timestamp,
+                        out string strError);
+                    if (ret == -1)
+                        return new CreateResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+
+                    if (ByteArray.Compare(content, fragment) != 0)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"记录 {path} {start}-{end}轮次 读取出来和 origin_xml 不一致"
+                        };
+
+                    if (origin_metadata != output_metadata)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"记录 {path} {start}-{end}轮次 读取出来的 metadata 和 origin_metadata 不一致"
+                        };
+
+                    if (path != output_path)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"记录 {path} {start}-{end}轮次 读取出来的 output_path 和 origin_path 不一致"
+                        };
+
+                    if (ByteArray.Compare(read_timestamp, origin_timestamp) != 0)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"记录 {path} 的时间戳({ByteArray.GetHexTimeStampString(read_timestamp)})读取出来和 origin_timestamp({ByteArray.GetHexTimeStampString(origin_timestamp)}) 不一致"
+                        };
+
+                    start += chunk_length;
+                    if (start > origin_bytes.Length - 1)
+                        break;
+
+                    // TODO: Fragment 读下级对象记录
+                }
+
+                DataModel.SetMessage($"Fragment 读取记录 {path} 成功");
+            }
+
+            return new NormalResult();
+        }
+
     }
 }
