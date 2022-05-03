@@ -884,16 +884,19 @@ namespace dp2Circulation
             public string OutputFolder { get; set; }
         }
 
+        // 开始下载，但不等待下载结束就返回
         // parameters:
         //      strAppendStyle  append/overwrite/ask 之一
         //      strOutputFolder 输出目录。
         //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
-        //                      [out] 实际使用的目录
-        // return:
+        // result.Value:
         //      -1  出错
         //      0   放弃下载
         //      1   成功启动了下载
-        public async Task<DownloadFileResult> BeginDownloadFile(string strPath,
+        // result.OutputFoleder
+        //      [out] 实际使用的目录
+        public DownloadFileResult StartDownloadFile(
+            string strPath,
             string strAppendStyle,
             string strOutputFolder
             /*
@@ -1113,7 +1116,8 @@ namespace dp2Circulation
 
             try
             {
-                await downloader.StartDownload(bAppend);
+                // 启动下载任务，但不等待结束 .
+                _ = downloader.StartDownload(bAppend);
             }
             catch (Exception ex)
             {
@@ -1413,6 +1417,7 @@ namespace dp2Circulation
 
                 try
                 {
+                    // 启动下载，并等待下载结束
                     await downloader.StartDownload(bAppend);    // 2021/12/8 改为 await
                 }
                 catch (Exception ex)

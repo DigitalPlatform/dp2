@@ -594,15 +594,18 @@ namespace dp2Circulation
                             {
                                 if (string.IsNullOrEmpty(path) == false)
                                 {
+                                    // 开始下载，但不等待下载结束就返回
                                     // parameters:
+                                    //      strAppendStyle  append/overwrite/ask 之一
                                     //      strOutputFolder 输出目录。
                                     //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
-                                    //                      [out] 实际使用的目录
-                                    // return:
+                                    // result.Value:
                                     //      -1  出错
                                     //      0   放弃下载
                                     //      1   成功启动了下载
-                                    var download_result = await Program.MainForm.BeginDownloadFile(path,
+                                    // result.OutputFoleder
+                                    //      [out] 实际使用的目录
+                                    var download_result = Program.MainForm.StartDownloadFile(path,
                                         result.Append ? "append" : "overwrite",
                                         strOutputFolder
                                         /*

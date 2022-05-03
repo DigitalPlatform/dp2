@@ -19,6 +19,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
+using System.Threading;
 
 namespace dp2Circulation
 {
@@ -213,8 +214,7 @@ namespace dp2Circulation
 
             if (e.Action == "getmd5")
             {
-                // TODO: 改为 LongRunning
-                _ = Task.Run(() =>
+                _ = Task.Factory.StartNew(() =>
                 {
                     GetMd5(e,
                         (o1, e1) =>
@@ -256,7 +256,10 @@ namespace dp2Circulation
 
                             }));
                         });
-                });
+                },
+    CancellationToken.None,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
                 return;
             }
 
