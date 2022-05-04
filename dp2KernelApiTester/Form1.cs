@@ -392,11 +392,9 @@ string style = "")
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
 
-                    /*
                     result = TestRecord.FragmentCreateRecords(1000, 1); // 1000
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
-                    */
 
                     DataModel.SetMessage("碎片式写入完成", "green");
                 }

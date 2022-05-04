@@ -1280,7 +1280,7 @@ out string strError);
                         return new CreateResult
                         {
                             Value = -1,
-                            ErrorInfo = strError,
+                            ErrorInfo = $"写入 {current_path} {start}-{end} 时出错: {strError}",
                             CreatedPaths = created_paths,
                             AccessPoints = created_accesspoints,
                         };

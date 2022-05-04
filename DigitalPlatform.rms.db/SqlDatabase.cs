@@ -7192,7 +7192,7 @@ handle.CancelTokenSource.Token).Result;
                     // 需要即时获得行信息
                     strID = DbPath.GetID10(strID);
 
-                    Delegate_willGetBytes get_data = null;
+                    Delegate_readBytes get_data = null;
 
                     // 2022/5/1
                     // Pgsql 优化
@@ -11439,7 +11439,7 @@ trans);
         private int GetRowInfos(Connection connection,
         // bool bGetData,
         List<string> ids,
-        Delegate_willGetBytes proc_willGetBytes,
+        Delegate_readBytes proc_willGetBytes,
         out List<RecordRowInfo> row_infos,
         out string strError)
         {
@@ -11486,7 +11486,8 @@ trans);
             public long Length { get; set; }
         }
 
-        delegate void Delegate_willGetBytes(
+        // 从 SQL 行中读取对象 bytes
+        delegate void Delegate_readBytes(
             IDataReader dr,
             RecordRowInfo row_info,
             int data_col_index,
@@ -11498,7 +11499,7 @@ trans);
         private int _getRowInfos(Connection connection,
             // bool bGetData,
             IEnumerable<string> ids,
-            Delegate_willGetBytes proc_willGetBytes,
+            Delegate_readBytes proc_willGetBytes,
             out List<RecordRowInfo> row_infos,
             out string strError)
         {
@@ -12302,7 +12303,8 @@ trans);
                             table.LockForRead();    // 这里读锁定整个对象。在 Read() 函数那里就不需要锁定了
                             try
                             {
-                                bulkCopy.WriteToServer(table, (text)=> {
+                                bulkCopy.WriteToServer(table, (text) =>
+                                {
                                     this.container.KernelApplication.WriteErrorLog(text);
                                 });
                             }
@@ -12606,7 +12608,7 @@ trans);
                     try
                     {
                         bool output = bRebuildKeys ? true : !bFastMode;
-                        Delegate_willGetBytes func = null;
+                        Delegate_readBytes func = null;
                         if (output)
                             func = (dr, row_info, data_col_index, newdata_col_index) =>
                             {
@@ -12618,13 +12620,23 @@ trans);
                                     if (row_info.newdata_length > 0 && newdata_col_index != -1)
                                         row_info.NewData = GetData(dr, newdata_col_index, 0, row_info.newdata_length);
 
-                                    // 对象文件
-                                    if (String.IsNullOrEmpty(row_info.Range) == false
-                                        && row_info.Range[0] == '#')
+                                    // 注: 混合模式下不读取对象文件。(对象文件中存储的是尚未完全上传完成的对象内容)
+                                    if ((row_info.data_length > 0 || row_info.newdata_length > 0)
+                                        && (string.IsNullOrEmpty(row_info.FileName) == false || string.IsNullOrEmpty(row_info.NewFileName) == false))
                                     {
-                                        var ret = ReadObjectFileContent(row_info, out string error);
-                                        if (ret == -1)
-                                            throw new Exception(error);
+                                        if (row_info.Range == null || row_info.Range.StartsWith("#") == false)
+                                            throw new ArgumentException($"混合模式时 Range 第一字符应为 '#'。id='{row_info.ID}', range='{row_info.Range}', data_length={row_info.data_length}, newdata_length={row_info.newdata_length}, FileName='{row_info.FileName}', NewFileName='{row_info.NewFileName}'");
+                                    }
+                                    else
+                                    {
+                                        // 对象文件
+                                        if (String.IsNullOrEmpty(row_info.Range) == false
+                                            && row_info.Range[0] == '#')
+                                        {
+                                            var ret = ReadObjectFileContent(row_info, out string error);
+                                            if (ret == -1)
+                                                throw new Exception(error);
+                                        }
                                     }
                                 }
                             };
@@ -13100,6 +13112,36 @@ trans);
         start_time_open,
         "Open Connection 耗时 ");
 
+                        Delegate_readBytes func = null;
+                        if (IsPgsql() /*|| IsMsSqlServer()*/)
+                            func = (dr, current_row_info, data_col_index, newdata_col_index) =>
+                            {
+                                if (current_row_info.data_length > 0 && data_col_index != -1)
+                                    current_row_info.Data = GetData(dr, data_col_index, 0, current_row_info.data_length);
+
+                                if (current_row_info.newdata_length > 0 && newdata_col_index != -1)
+                                    current_row_info.NewData = GetData(dr, newdata_col_index, 0, current_row_info.newdata_length);
+
+                                // 注: 混合模式下不读取对象文件。(对象文件中存储的是尚未完全上传完成的对象内容)
+                                if ((current_row_info.data_length > 0 || current_row_info.newdata_length > 0)
+                                    && (string.IsNullOrEmpty(current_row_info.FileName) == false || string.IsNullOrEmpty(current_row_info.NewFileName) == false))
+                                {
+                                    if (current_row_info.Range == null || current_row_info.Range.StartsWith("#") == false)
+                                        throw new ArgumentException($"混合模式时 Range 第一字符应为 '#'。id='{current_row_info.ID}', range='{current_row_info.Range}', data_length={current_row_info.data_length}, newdata_length={current_row_info.newdata_length}, FileName='{current_row_info.FileName}', NewFileName='{current_row_info.NewFileName}'");
+                                }
+                                else
+                                {
+                                    // 对象文件
+                                    if (String.IsNullOrEmpty(current_row_info.Range) == false
+                                        && current_row_info.Range[0] == '#')
+                                    {
+                                        var ret = ReadObjectFileContent(current_row_info, out string error);
+                                        if (ret == -1)
+                                            throw new Exception(error);
+                                    }
+                                }
+                            };
+
                         // 视情况创建新记录，返回行信息
                         // return:
                         //		-1  出错
@@ -13109,6 +13151,7 @@ trans);
                         nRet = this.CreateNewRecordIfNeed(connection,
                             strID,
                             null,
+                            func,
                             out RecordRowInfo row_info,
                             out strError);
                         if (nRet == -1)
@@ -13426,7 +13469,11 @@ trans);
                     }
                     catch (SqlException sqlEx)
                     {
+#if DEBUG
+                        strError = $"3 WriteXml() 在给'{ this.GetCaption("zh-CN")}'库写入记录'{ strID}'时出错,原因\r\n{ExceptionUtil.GetDebugText(sqlEx)}";
+#else
                         strError = "3 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时出错,原因:" + GetSqlErrors(sqlEx);
+#endif
                         // return -1;
                         goto ERROR2;
                     }
@@ -13995,6 +14042,7 @@ trans);
         // 如果本次temp区写入完成，则清除old区
         // parameters:
         //		connection	    连接对象	不能为null
+        //      row_info        调用后 row_info.Data 可能会发生变化
         //		strID	        记录ID	不能为null或空字符串
         //		strRanges	    目标范围，多个范围用逗号分隔
         //		nTotalLength	记录内容总长度
@@ -14420,7 +14468,7 @@ trans);
                 }
             }
 
-            // 是否最后 WriteLine() 一次性写入 SQL row。false 表示不等到最后 WriteLine() 就提前写入
+            // 对象 bytes 是否最后 WriteLine() 一次性写入 SQL row。null 表示不等到最后 WriteLine() 就提前写入
             byte[] direct_write_data = null;
 
             bool bDeleted = false;
@@ -14600,6 +14648,14 @@ trans);
                             nNeedReadLength,
                             lTotalLength,
                             out strError);
+                        if (nRet == 0)
+                        {
+                            // 2022/5/4
+                            if (strDataFieldName == "data")
+                                row_info.Data = null;
+                            else
+                                row_info.NewData = null;
+                        }
                     }
                     else if (connection.IsPgsql())
                     {
@@ -14627,6 +14683,14 @@ trans);
                                 nNeedReadLength,
                                 lTotalLength,
                                 out strError);
+                            if (nRet == 0)
+                            {
+                                // 2022/5/4
+                                if (strDataFieldName == "data")
+                                    row_info.Data = null;
+                                else
+                                    row_info.NewData = null;
+                            }
                         }
                     }
                     else
@@ -14710,6 +14774,12 @@ trans);
         out strError);
                         if (nRet == -1)
                             return -1;
+
+                        // 2022/5/4
+                        if (strDataFieldName == "data")
+                            row_info.Data = null;
+                        else
+                            row_info.NewData = null;
                     }
 
                     // 删除文件
@@ -15120,6 +15190,7 @@ trans);
 
         // TODO: metadata 字符数较多，是否可以允许没有必要的时候不写入这个字段内容?
         // parameters:
+        //      row_info    调用后 row_info.Range 可能会被改变
         //      strPartList 要写入哪些部分？ full 表示全部。range filename newfilename metadata timestamp
         //      bFull   是否为最后一次充满的写入。因为 metadata 字段是临时和正式共用的，所以在充满的这一次才修改写入
         int WriteLine(
@@ -15145,7 +15216,9 @@ trans);
                 (row_info.newdata_length > 0 || row_info.data_length > 0)
                 && (string.IsNullOrEmpty(row_info.FileName) == false || string.IsNullOrEmpty(row_info.NewFileName) == false)
                 )
+            {
                 bMixMode = true;
+            }
 
             string strCommand = "";
             if (bObjectFile == false)
@@ -15303,6 +15376,13 @@ trans);
 
                     row_info.Range = (string)rangeParam.Value;  // 将反转情况及时兑现
 
+                    // 注: 混合模式时 Range 第一字符应为 '#'
+                    if (bMixMode)
+                    {
+                        if (row_info.Range == null || row_info.Range.StartsWith("#") == false)
+                            throw new ArgumentException($"混合模式时 Range 第一字符应为 '#'。id='{row_info.ID}', range='{row_info.Range}', data_length={row_info.data_length}, newdata_length={row_info.newdata_length}, FileName='{row_info.FileName}', NewFileName='{row_info.NewFileName}'");
+                    }
+
                     if (bFull == true)
                     {
                         var metadataParam = command.NewParameter("@metadata", DbType.String, 4000, null);
@@ -15349,6 +15429,15 @@ trans);
                         {
                             strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
                             return -1;
+                        }
+
+                        // 2022/5/4
+                        if (data != null)
+                        {
+                            if (bReverse == true)
+                                row_info.Data = data;
+                            else
+                                row_info.NewData = data;
                         }
                     }
                     catch (Exception ex)
@@ -16322,11 +16411,18 @@ strID);
                         delete_lengthParam.Value = DBNull.Value;   // lDeleteLength;
                         inserted_dataParam.Value = chunkBuffer;
 
-                        nCount = command.ExecuteNonQuery();
-                        if (nCount == 0)
+                        try
                         {
-                            strError = "没有更新到记录块";
-                            return -1;
+                            nCount = command.ExecuteNonQuery();
+                            if (nCount == 0)
+                            {
+                                strError = "没有更新到记录块";
+                                return -1;
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            throw ex;
                         }
 
                         // 写入后,当前长度发生的变化
@@ -16750,7 +16846,7 @@ strID);
 
 #if OLD_CODE
 
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 using (SqlCommand command = new SqlCommand("",
@@ -16964,9 +17060,9 @@ strID);
 
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 using (SQLiteCommand command = new SQLiteCommand("",
@@ -17123,9 +17219,9 @@ strID);
                     }
                 } // end of using command
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 List<string> lines = new List<string>();
@@ -17254,9 +17350,9 @@ strID);
 
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
@@ -17420,7 +17516,7 @@ strID);
                     }
                 } // end of using command
             }
-            #endregion // Oracle
+#endregion // Oracle
 
 #endif
             return 0;
@@ -17791,7 +17887,7 @@ strID);
 
 #if OLD_CODE
 
-        #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -17919,9 +18015,9 @@ strID);
                     }
                 } // enf of using command
             }
-        #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-        #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 string strCommand = "";
@@ -18049,9 +18145,9 @@ strID);
                     }
                 } // end of using command
             }
-        #endregion // SQLite
+#endregion // SQLite
 
-        #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 string strCommand = "";
@@ -18183,12 +18279,12 @@ strID);
                     }
                 } // end of using command
             }
-        #endregion // MySql
+#endregion // MySql
 
 #endif
 
 #if REMOVED
-        #region Oracle
+#region Oracle
             else if (connection.IsOracle())
             {
                 string strCommand = "";
@@ -18297,7 +18393,7 @@ strID);
                     }
                 } // end of using command
             }
-        #endregion // Oracle
+#endregion // Oracle
 #endif
 
 
@@ -18356,7 +18452,7 @@ strID);
                 strError = "connection为null";
                 return -1;
             }
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 if (connection.SqlConnection == null)
@@ -18371,9 +18467,9 @@ strID);
                 }
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 if (connection.SQLiteConnection == null)
@@ -18388,9 +18484,9 @@ strID);
                 }
                 return 0;
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 if (connection.MySqlConnection == null)
@@ -18405,9 +18501,9 @@ strID);
                 }
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 if (connection.OracleConnection == null)
@@ -18423,7 +18519,7 @@ strID);
                 }
                 return 0;
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -19121,6 +19217,7 @@ strID);
         private int CreateNewRecordIfNeed(Connection connection,
             string strID,
             byte[] sourceBuffer,
+            Delegate_readBytes proc_readBytes,
             out RecordRowInfo row_info,
             out string strError)
         {
@@ -19148,7 +19245,8 @@ strID);
                 string strCommand = "";
                 if (connection.IsMsSqlServer())
                 {
-                    string strSelect = " SELECT TEXTPTR(data)," // 0
+                    string strSelect =
+                        " SELECT TEXTPTR(data)," // 0
                         + " DataLength(data),"  // 1
                         + " TEXTPTR(newdata),"  // 2
                         + " DataLength(newdata),"   // 3
@@ -19243,15 +19341,6 @@ strID);
 
                                 row_info = new RecordRowInfo();
 
-                                /*
-                                // 2.textPtr为null报错
-                                if (dr[0] is System.DBNull)
-                                {
-                                    strError = "TextPtr不可能为null";
-                                    return -1;
-                                }
-                                 * */
-
                                 if (dr.IsDBNull(0) == false)
                                     row_info.data_textptr = (byte[])dr[0];
 
@@ -19308,25 +19397,59 @@ strID);
 
                     return 0;
                 }
-                else if (connection.IsPgsql())
+                else if (connection.IsPgsql() || connection.IsMsSqlServer())
                 {
-                    string strColumnList = " null as data_textptr," // 0
-                        + " length(data) as data_length,"  // 1
-                        + " null as newdata_textptr,"  // 2
-                        + " length(newdata) as newdata_length,"   // 3
-                        + " range," // 4
-                        + " dptimestamp,"   // 5
-                        + " metadata, "  // 6
-                        + " newdptimestamp,"   // 7
-                        + " filename,"   // 8
-                        + " newfilename";   // 9
+                    if (IsPgsql())
+                    {
+                        string strColumnList =
+                            (proc_readBytes == null ? "" : " data,")
+                            + " null as data_textptr,"// 0
+                            + " length(data) as data_length,"  // 1
+                            + (proc_readBytes == null ? "" : " newdata,")
+                            + " null as newdata_textptr," // 2
+                            + " length(newdata) as newdata_length,"   // 3
+                            + " range," // 4
+                            + " dptimestamp,"   // 5
+                            + " metadata, "  // 6
+                            + " newdptimestamp,"   // 7
+                            + " filename,"   // 8
+                            + " newfilename";   // 9
 
-                    // https://codegrepr.com/question/how-to-use-returning-with-on-conflict-in-postgresql/#:~:text=If%20the%20other%20transaction%20ends%20normally%20%28implicit%20or,concurrency%20issue%202%20below%2C%20since%20it%E2%80%99s%20not%20visible.%29
-                    // https://stackoverflow.com/questions/35265453/use-insert-on-conflict-do-nothing-returning-failed-rows
-                    // https://www.postgresql.org/message-id/CA%2Bzig0_3KA4HZqYG_Lk%3Dt8uwNLC8wt8eyXpzr6cYs4mEVPwoWg%40mail.gmail.com
-                    strCommand = $"INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp, newdptimestamp) "
-                        + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp) \n"
-                        + "ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id RETURNING " + strColumnList;
+                        // https://codegrepr.com/question/how-to-use-returning-with-on-conflict-in-postgresql/#:~:text=If%20the%20other%20transaction%20ends%20normally%20%28implicit%20or,concurrency%20issue%202%20below%2C%20since%20it%E2%80%99s%20not%20visible.%29
+                        // https://stackoverflow.com/questions/35265453/use-insert-on-conflict-do-nothing-returning-failed-rows
+                        // https://www.postgresql.org/message-id/CA%2Bzig0_3KA4HZqYG_Lk%3Dt8uwNLC8wt8eyXpzr6cYs4mEVPwoWg%40mail.gmail.com
+                        strCommand = $"INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp, newdptimestamp) "
+                            + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp) \n"
+                            + "ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id RETURNING " + strColumnList;
+                    }
+                    else
+                    {
+                        string strSelect = "SELECT "
+                            + (proc_readBytes == null ? "" : " data,")
+                            + " TEXTPTR(data) as data_textptr," // 0
+                            + " DataLength(data) as data_length,"  // 1
+                            + (proc_readBytes == null ? "" : " newdata,")
+                            + " TEXTPTR(newdata) as newdata_textptr,"  // 2
+                            + " DataLength(newdata) as newdata_length,"   // 3
+    + " range," // 4
+    + " dptimestamp,"   // 5
+    + " metadata, "  // 6
+    + " newdptimestamp,"   // 7
+    + " filename,"   // 8
+    + " newfilename"   // 9
+    + $" FROM {db_prefix}records "
+    // + " WHERE id='" + strID + "'\n";
+    + " WHERE id=@id \n";
+
+                        strCommand = "SET NOCOUNT OFF\n"
+                            + strSelect
+                            + "if @@ROWCOUNT = 0\n"
+                            + "begin\n"
+                            + $" INSERT INTO {db_prefix}records(id, data, range, metadata, dptimestamp, newdptimestamp) "
+                            + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp) \n"
+                            + strSelect
+                            + " end \n";
+                    }
 
                     {
                         if (sourceBuffer == null)
@@ -19346,6 +19469,55 @@ strID);
                         row_info.NewFileName = "";
                     }
 
+                    using (var result = connection.ExecuteReader(strCommand,
+                        new
+                        {
+                            id = strID,
+                            data = sourceBuffer,
+                            range = row_info.Range,
+                            metadata = row_info.Metadata,
+                            dptimestamp = row_info.TimestampString,
+                            newdptimestamp = row_info.NewTimestampString,
+                        }))
+                    {
+                        //while (IsPgsql() || result.NextResult())
+                        //{
+                            while (result.Read())
+                            {
+                                // row_info.ID = GetString(result, "id");
+                                row_info.data_textptr = GetBytes(result, "data_textptr");
+                                row_info.data_length = GetLong(result, "data_length");
+                                row_info.newdata_textptr = GetBytes(result, "newdata_textptr");
+                                row_info.newdata_length = GetLong(result, "newdata_length");
+
+                                row_info.Range = GetString(result, "range");
+                                row_info.TimestampString = GetString(result, "dptimestamp");
+                                row_info.Metadata = GetString(result, "metadata");
+                                row_info.NewTimestampString = GetString(result, "newdptimestamp");
+                                row_info.FileName = GetString(result, "filename");
+                                row_info.NewFileName = GetString(result, "newfilename");
+
+                                // 2022/5/4
+                                if (proc_readBytes != null)
+                                {
+                                    int data_col_index = -1;
+                                    int newdata_col_index = -1;
+                                    if (IsPgsql() || IsMsSqlServer())
+                                    {
+                                        data_col_index = result.GetOrdinal("data");
+                                        Debug.Assert(data_col_index != -1);
+                                        newdata_col_index = result.GetOrdinal("newdata");
+                                        Debug.Assert(newdata_col_index != -1);
+                                    }
+                                    proc_readBytes?.Invoke(result, row_info, data_col_index, newdata_col_index);
+                                }
+
+                                return 0;
+                            }
+                        //}
+                    }
+
+                    /*
                     Debug.Assert(connection.IsOracle() == false, "注意此处无法处理大写的 dynamic 属性");
                     var results = connection.Query(strCommand, new
                     {
@@ -19372,6 +19544,7 @@ strID);
                         row_info.NewFileName = result.newfilename;
                         break;
                     }
+                    */
 
 #if OLD_CODE
                     using (var command = connection.NewCommand(strCommand) as SqlCommand)
