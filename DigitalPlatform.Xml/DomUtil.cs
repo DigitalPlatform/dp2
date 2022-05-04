@@ -1947,6 +1947,39 @@ namespace DigitalPlatform.Xml
             return nodeFound;
         }
 
+        // 2022/3/16
+        // 对 strText 不替换里面的控制字符
+        public static XmlElement SetElementTextEx(XmlElement nodeRoot,
+    string strXpath,
+    string strText)
+        {
+            if (nodeRoot == null)
+            {
+                throw (new ArgumentException("nodeRoot参数不能为null"));
+            }
+
+            XmlElement nodeFound = nodeRoot.SelectSingleNode(strXpath) as XmlElement;
+
+            if (nodeFound == null)
+            {
+                string[] aNodeName = strXpath.Split(new Char[] { '/' });
+                nodeFound = CreateNode(nodeRoot, aNodeName) as XmlElement;
+            }
+
+            if (nodeFound == null)
+            {
+                throw (new Exception("SetElementText() CreateNode error"));
+            }
+
+            if (String.IsNullOrEmpty(strText) == true)
+                nodeFound.InnerText = strText;
+            else
+                nodeFound.InnerText = strText;  // 不替换
+
+            return nodeFound;
+        }
+
+
         // 2019/8/4 返回类型从 XmlNode 修改为 XmlElement
         // 写入一个元素文本
         // 文本内容中可以包含回车换行符号，但其他控制字符在写入的时候会被过滤为星号

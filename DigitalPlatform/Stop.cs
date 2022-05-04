@@ -71,6 +71,9 @@ namespace DigitalPlatform
         public long Start { get; set; }
         public long End { get; set; }
         public long Value { get; set; }
+        // 2022/4/12
+        // 扩展的参数
+        public object Tag { get; set; }
     }
 
     // 定义一个Delegate_doStop()
@@ -334,7 +337,7 @@ namespace DigitalPlatform
             }
         }
 
-        public void SetProgressValue(long lValue)
+        public void SetProgressValue(long lValue, object tag = null)
         {
             this.ProgressValue = lValue;
 
@@ -345,7 +348,8 @@ namespace DigitalPlatform
                 {
                     Start = this.ProgressMin,
                     End = this.ProgressMax,
-                    Value = lValue
+                    Value = lValue,
+                    Tag = tag,
                 }
                 );
 

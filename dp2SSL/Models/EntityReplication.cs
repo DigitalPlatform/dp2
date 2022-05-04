@@ -74,17 +74,16 @@ namespace dp2SSL.Models
                 using (BiblioCacheContext context = new BiblioCacheContext())
                 {
                     context.Database.EnsureCreated();
-                    /*
+
                     if (first_round)
                     {
                         // 删除 Entities 里面的已有记录
-                        context.Entities.RemoveRange(context.Entities.ToList());
+                        context.Entities.RemoveRange(context.Entities); // .ToList()
                         await context.SaveChangesAsync(token);
                         // 删除 BiblioSummaries 里面的已有记录
-                        context.BiblioSummaries.RemoveRange(context.BiblioSummaries.ToList());
+                        context.BiblioSummaries.RemoveRange(context.BiblioSummaries);   // .ToList()
                         await context.SaveChangesAsync(token);
                     }
-                    */
                 }
 
                 using (BiblioCacheContext context = new BiblioCacheContext())
@@ -124,7 +123,8 @@ namespace dp2SSL.Models
                             return new NormalResult
                             {
                                 Value = -1,
-                                ErrorInfo = error
+                                ErrorInfo = error,
+                                ErrorCode = "Canceled"
                             };
                         }
                         // 检索全部读者库记录
@@ -207,7 +207,8 @@ namespace dp2SSL.Models
                                         return new NormalResult
                                         {
                                             Value = -1,
-                                            ErrorInfo = error
+                                            ErrorInfo = error,
+                                            ErrorCode = "Canceled"
                                         };
                                     }
 
@@ -253,7 +254,7 @@ namespace dp2SSL.Models
                                         oi = (string)oi_table[location];
                                     else
                                     {
-                                        oi = InventoryData.GetInstitution(location);
+                                        oi = GetInstitution(location);
                                         oi_table[location] = oi;
                                     }
 
@@ -295,8 +296,10 @@ namespace dp2SSL.Models
                             }
                         }
 
-                        // writeLog?.Invoke($"dbName='{dbName}'。skip_count={skip_count}, error_count={error_count}");
-                        writeLog?.Invoke($"实体库 '{dbName}' 下载完成 {succeed_count} 条记录");
+                        if (start > 0)
+                            writeLog?.Invoke($"实体库 '{dbName}' 下载完成 {succeed_count} 条记录(开始偏移为 {start})");
+                        else
+                            writeLog?.Invoke($"实体库 '{dbName}' 下载完成 {succeed_count} 条记录");
 
                         {
                             int index = IndexOf(unprocessed_dbnames, dbName);
@@ -322,7 +325,8 @@ namespace dp2SSL.Models
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = $"DownloadAllEntityRecordAsync() 出现异常：{ex.Message}"
+                    ErrorInfo = $"DownloadAllEntityRecordAsync() 出现异常：{ex.Message}",
+                    ErrorCode = ex.GetType().ToString()
                 };
             }
             finally
@@ -475,7 +479,7 @@ channel.ErrorCode == ErrorCode.RequestTimeOut)
                 else
                     item.PII = oi + "." + barcode;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WpfClientInfo.WriteErrorLog($"SetPII() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -569,7 +573,7 @@ PatronReplication.ProcessInfo info)
                         string uii = GetUii(strRecord);
 
                         WpfClientInfo.WriteInfoLog($"从服务器操作日志中发现 new 册记录的动作。\r\noperTime={operTime},strRecord={strRecord}。\r\n提取 UII='{uii}'\r\n\r\n");
-                        
+
                         if (string.IsNullOrEmpty(uii) == false)
                             await ShelfData.ResyncActionAsync(uii, operTime);
                     }
@@ -644,7 +648,7 @@ strOldRecord);
 
             string libraryCode = dp2StringUtil.GetLibraryCode(location);
 
-            string oi = InventoryData.GetInstitution(location);
+            string oi = GetInstitution(location);
             if (string.IsNullOrEmpty(oi))
                 return barcode;
             return oi + "." + barcode;
@@ -683,7 +687,7 @@ strOldRecord);
             if (IsManaged(libraryCode, currentLibraryCodeList) == false)
                 return new NormalResult();
 
-            string oi = InventoryData.GetInstitution(location);
+            string oi = GetInstitution(location);
 
             var item = new EntityItem
             {
@@ -749,7 +753,7 @@ strRecPath);
             string location = DomUtil.GetElementText(itemdom.DocumentElement, "location");
 
             location = StringUtil.GetPureLocation(location);
-            string oi = InventoryData.GetInstitution(location);
+            string oi = GetInstitution(location);
 
             var item = new EntityItem
             {
@@ -785,6 +789,25 @@ strRecPath);
             }
 
             return new NormalResult();
+        }
+
+
+        public static string GetInstitution(string location)
+        {
+            string oi = "";
+            {
+                location = StringUtil.GetPureLocation(location);
+                var ret = ShelfData.GetOwnerInstitution(location, out string isil, out string alternative);
+                if (ret == true)
+                {
+                    if (string.IsNullOrEmpty(isil) == false)
+                        oi = isil;
+                    else if (string.IsNullOrEmpty(alternative) == false)
+                        oi = alternative;
+                }
+            }
+
+            return oi;
         }
 
     }

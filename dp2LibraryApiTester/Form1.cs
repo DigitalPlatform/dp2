@@ -497,6 +497,21 @@ string style = "")
             });
         }
 
-
+        private void MenuItem_test_loginApi_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var result = TestLoginApi.TestAll(_cancel.Token);
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo);
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+            });
+        }
     }
 }

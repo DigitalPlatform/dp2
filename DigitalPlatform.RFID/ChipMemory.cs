@@ -1111,6 +1111,50 @@ start);
             return map[index];
         }
 
+        // 2022/4/22
+        // 对 byte[] 内容执行清除。锁定的块不会被清除
+        public static byte[] ClearBytes(byte[] bytes,
+            uint block_size,
+            uint max_block_count,
+            string block_map)
+        {
+            List<byte> results = new List<byte>();
+            for (int i = 0; i < max_block_count; i++)
+            {
+                var lock_char = GetBlockStatus(block_map, i);
+                if (lock_char == 'l')
+                    results.AddRange(GetRange(bytes, (uint)i * block_size, block_size));
+                else
+                {
+                    for (int j = 0; j < block_size; j++)
+                    {
+                        results.Add(0);
+                    }
+                }
+            }
+
+            return results.ToArray();
+        }
+
+        static List<byte> GetRange(byte[] bytes,
+            uint start,
+            uint length,
+            byte default_value = 0)
+        {
+            List<byte> results = new List<byte>();
+            for (uint i = start; i < start + length; i++)
+            {
+                byte v;
+                if (i < bytes.Length)
+                    v = bytes[i];
+                else
+                    v = default_value;
+                results.Add(v);
+            }
+
+            return results;
+        }
+
         // 根据 XML 数据构造
         public static LogicChip FromXml(string xml)
         {

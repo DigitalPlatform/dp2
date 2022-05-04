@@ -118,7 +118,7 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
-                string strLibraryCode = "";
+                string strPatronLibraryCode = "";
                 // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
                 // 2012/9/8
                 if (String.IsNullOrEmpty(strOutputReaderRecPath) == false)
@@ -127,7 +127,7 @@ namespace DigitalPlatform.LibraryServer
                     bool bReaderDbInCirculation = true;
                     if (this.IsReaderDbName(strReaderDbName,
                         out bReaderDbInCirculation,
-                        out strLibraryCode) == false)
+                        out strPatronLibraryCode) == false)
                     {
                         // text-level: 内部错误
                         strError = "读者记录路径 '" + strOutputReaderRecPath + "' 中的数据库名 '" + strReaderDbName + "' 居然不在定义的读者库之列。";
@@ -223,7 +223,7 @@ namespace DigitalPlatform.LibraryServer
                 domOperLog.LoadXml("<root />");
                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "libraryCode",
-    strLibraryCode);    // 读者所在的馆代码
+    strPatronLibraryCode);    // 读者所在的馆代码
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operation", "reservation");
 
                 if (String.Compare(strFunction, "new", true) == 0)
@@ -236,7 +236,7 @@ namespace DigitalPlatform.LibraryServer
                     //      1   有重 提示信息在strError中
                     nRet = this.ReservationCheckDup(
                         strItemBarcodeList,
-                        strLibraryCode,
+                        strPatronLibraryCode,
                         ref readerdom,
                         out strError);
                     if (nRet == -1)
@@ -288,7 +288,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         int nRedoCount = 0;
 
-                        REDO_LOAD:
+                    REDO_LOAD:
                         byte[] item_timestamp = null;
 
                         // 获得册记录
@@ -344,6 +344,8 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                         }
 
+                        string strItemLibraryCode = GetItemLibraryCode(itemdom);
+
                         records.Add(strOutputItemRecPath, itemdom, item_timestamp);
 
                         // TODO: 若册属于个人藏书，则不仅要求预约者是同一分馆的读者，另外还要求预约者是主人的好友。即，主人的读者记录中 firends 列表中有预约者
@@ -357,14 +359,17 @@ namespace DigitalPlatform.LibraryServer
                             //      0   符合要求
                             //      1   不符合要求
                             nRet = CheckItemLibraryCode(itemdom,
-                                strLibraryCode,
+                                strPatronLibraryCode,
                                 out strError);
                             if (nRet == -1)
                                 goto ERROR1;
                             if (nRet == 1)
                             {
-                                strError = "册记录 '" + strItemBarcode + "' 因馆藏地而不能进行预约: " + strError;
-                                goto ERROR1;
+                                if (AllowCrossBorrow(sessioninfo, strItemLibraryCode) == false)
+                                {
+                                    strError = "册记录 '" + strItemBarcode + "' 因馆藏地而不能进行预约: " + strError;
+                                    goto ERROR1;
+                                }
                             }
                         }
 
@@ -392,7 +397,7 @@ namespace DigitalPlatform.LibraryServer
                             //      0   借阅操作应该被拒绝
                             //      1   借阅操作应该被允许
                             nRet = CheckCanBorrow(
-                                strLibraryCode,
+                                strPatronLibraryCode,
                                 false,
                                 sessioninfo.Account,
                                 strOutputReaderRecPath,
@@ -432,7 +437,7 @@ namespace DigitalPlatform.LibraryServer
     strItemBarcode,
     "", // strRefID 暂时不使用此参数
     itemdom,
-    strLibraryCode,
+    strPatronLibraryCode,
     strReaderBarcode,
     strReaderXml,
     out strError);
@@ -543,7 +548,7 @@ namespace DigitalPlatform.LibraryServer
                     // 写入统计指标
                     if (this.Statis != null)
                         this.Statis.IncreaseEntryValue(
-                        strLibraryCode,
+                        strPatronLibraryCode,
                         "出纳",
                         "预约次",
                         1);
@@ -636,7 +641,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -1313,7 +1318,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 return 0;   // not found request
-                FOUND:
+            FOUND:
                 Debug.Assert(readerRequestNode != null, "");
 
                 // 将相关册中的<request>元素清除
@@ -2045,7 +2050,7 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-            REDODELETE:
+        REDODELETE:
             // 如果队列中已经存在同册条码号的记录, 要先删除
             string strNotifyXml = "";
             // 获得预约到书队列记录
@@ -2072,8 +2077,8 @@ namespace DigitalPlatform.LibraryServer
             if (nRet >= 1)
             {
                 int nRedoDeleteCount = 0;
-                // TODO: 这一段删除代码可以专门编制在一个函数中，不必这么费力循环。可以优化处理
-                REDO_DELETE:
+            // TODO: 这一段删除代码可以专门编制在一个函数中，不必这么费力循环。可以优化处理
+            REDO_DELETE:
                 lRet = channel.DoDeleteRes(strOutputPath,
                     timestamp,
                     out output_timestamp,
@@ -2870,5 +2875,18 @@ namespace DigitalPlatform.LibraryServer
                 return strBarcode;
             return "@refID:" + strRefID;
         }
+
+        /*
+        // 获得册记录的馆代码。根据 location 元素内容
+        public static string GetItemLibraryCode(XmlDocument itemdom)
+        {
+            string location = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+            location = StringUtil.GetPureLocation(location);
+            ParseCalendarName(location,
+out string strItemLibraryCode,
+out string strRoom);
+            return strItemLibraryCode;
+        }
+        */
     }
 }

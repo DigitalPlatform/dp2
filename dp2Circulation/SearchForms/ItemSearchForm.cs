@@ -14068,7 +14068,7 @@ out strError);
 
         private void comboBox_entityDbName_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
-            CheckedComboBox.ProcessItemChecked(e, "<全部>,<all>".ToLower());
+            CheckedComboBox.ProcessItemChecked(e, "<全部>,<all>,<全部图书>,<all books>,<全部期刊>,<all series>".ToLower());
 
 #if NO
             ListView list = e.Item.ListView;

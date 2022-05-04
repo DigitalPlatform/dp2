@@ -193,37 +193,55 @@ namespace dp2SSL
                             string startDate = LoadStartDate();
                             if (/*download_complete == false || */
                             string.IsNullOrEmpty(startDate)
-                            && _replicatePatronError == 0)
+                            && _replicatePatronError <= 0)
                             {
                                 // 如果 Config 中没有记载断点位置，说明以前从来没有首次同步过。需要进行一次首次同步
                                 if (string.IsNullOrEmpty(startDate))
                                 {
                                     // SaveStartDate("");
 
-                                    App.CurrentApp.SpeakSequence("开始下载全部读者记录到本地缓存");
-                                    var repl_result = await PatronReplication.DownloadAllPatronRecordAsync(
-                                        (text) =>
+                                    // 专用 token source
+                                    using (var download_source = CancellationTokenSource.CreateLinkedTokenSource(token))
+                                    {
+                                        lock (_syncRoot_cancel)
                                         {
-                                            WpfClientInfo.WriteInfoLog(text);
-                                            PageShelf.TrySetMessage(null, text);
-                                        },
-                                        token);
-                                    if (repl_result.Value == -1)
-                                    {
-                                        // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
-                                        _replicatePatronError++;
+                                            _cancelDownloadPatron = download_source;
+                                        }
+                                        try
+                                        {
+                                            App.CurrentApp.SpeakSequence("开始下载全部读者记录到本地缓存");
+                                            var repl_result = await PatronReplication.DownloadAllPatronRecordAsync(
+                                                (text) =>
+                                                {
+                                                    WpfClientInfo.WriteInfoLog(text);
+                                                    PageShelf.TrySetMessage(null, text);
+                                                },
+                                                download_source.Token);
+                                            if (repl_result.Value == -1)
+                                            {
+                                                // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
+                                                _replicatePatronError++;
 
-                                        App.CurrentApp.SpeakSequence($"下载全部读者记录到本地缓存出错: {repl_result.ErrorInfo}");
+                                                App.CurrentApp.SpeakSequence($"下载全部读者记录到本地缓存出错: {repl_result.ErrorInfo}");
+                                            }
+                                            else
+                                            {
+                                                SaveStartDate(repl_result.StartDate);
+
+                                                App.CurrentApp.SpeakSequence("下载全部读者记录到本地缓存完成");
+                                            }
+
+                                            // 立刻允许接着做一次零星同步
+                                            ActivateMonitor();
+                                        }
+                                        finally
+                                        {
+                                            lock (_syncRoot_cancel)
+                                            {
+                                                _cancelDownloadPatron = null;
+                                            }
+                                        }
                                     }
-                                    else
-                                    {
-                                        SaveStartDate(repl_result.StartDate);
-
-                                        App.CurrentApp.SpeakSequence("下载全部读者记录到本地缓存完成");
-                                    }
-
-                                    // 立刻允许接着做一次零星同步
-                                    ActivateMonitor();
                                 }
                                 // download_complete = true;
                             }
@@ -259,7 +277,7 @@ namespace dp2SSL
                                         //      -1  出错
                                         //      0   中断
                                         //      1   完成
-                                        ReplicationResult repl_result = await PatronReplication.DoReplication(
+                                        ReplicationResult repl_result = await PatronReplication.DoReplicationAsync(
                                             startDate,
                                             endDate,
                                             LogType.OperLog,
@@ -286,39 +304,68 @@ namespace dp2SSL
 
                             if (App.ReplicateEntities == true
                             && downloaded == false
-                            && _replicateEntityError == 0)
+                            && _replicateEntityError <= 0)
                             {
                                 List<string> unprocessed = new List<string>();
+                                // 注: 彻底重做前要清除 unprocessed
                                 string unprocessed_list = WpfClientInfo.Config.Get("entityReplication", "unprocessed", null);
                                 List<string> input_dbnames = null;
                                 if (string.IsNullOrEmpty(unprocessed_list) == false)
                                     input_dbnames = StringUtil.SplitList(unprocessed_list);
 
-                                App.CurrentApp.SpeakSequence("开始下载全部册记录到本地缓存");
-                                var repl_result = await EntityReplication.DownloadAllEntityRecordAsync(
-                                    input_dbnames,
-                                    unprocessed,
-                                    (text) =>
+                                // 专用 token source
+                                using (var download_source = CancellationTokenSource.CreateLinkedTokenSource(token))
+                                {
+                                    lock (_syncRoot_cancel)
                                     {
-                                        WpfClientInfo.WriteInfoLog(text);
-                                        PageShelf.TrySetMessage(null, text);
-                                        App.CurrentApp.SpeakSequence(text);
-                                    },
-                                    token);
-                                if (repl_result.Value == -1)
-                                {
-                                    // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
-                                    _replicateEntityError++;
-                                    WpfClientInfo.Config.Set("entityReplication", "unprocessed", StringUtil.MakePathList(unprocessed));
+                                        _cancelDownloadEntity = download_source;
+                                    }
+                                    try
+                                    {
+                                        App.CurrentApp.SpeakSequence("开始下载全部册记录到本地缓存");
+                                        var repl_result = await EntityReplication.DownloadAllEntityRecordAsync(
+                                            input_dbnames,
+                                            unprocessed,
+                                            (text) =>
+                                            {
+                                                WpfClientInfo.WriteInfoLog(text);
+                                                PageShelf.TrySetMessage(null, text);
+                                                App.CurrentApp.SpeakSequence(text);
+                                            },
+                                            download_source.Token);
+                                        if (repl_result.Value == -1)
+                                        {
+                                            // TODO: 判断通讯出错的错误码。如果是通讯出错，则稍后需要重试下载
+                                            _replicateEntityError++;
+                                            if (_replicateEntityError == 0
+                                                && token.IsCancellationRequested == false)
+                                            {
+                                                WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);   // 清空记忆。便于下次从头开始下载 (注:111)
+                                                WpfClientInfo.WriteInfoLog("临时中断“下载全部册记录”(计划稍后还将重试从头下载)，清空 'entityReplication' 'unprocessed' 内容");
+                                            }
+                                            else
+                                            {
+                                                WpfClientInfo.Config.Set("entityReplication", "unprocessed", StringUtil.MakePathList(unprocessed));
+                                                WpfClientInfo.WriteInfoLog($"永久中断“下载全部册记录”，记忆 'entityReplication' 'unprocessed' 为 '{StringUtil.MakePathList(unprocessed)}'");
+                                            }
 
-                                    App.CurrentApp.SpeakSequence($"下载全部册记录到本地缓存出错: {repl_result.ErrorInfo}");
-                                }
-                                else
-                                {
-                                    WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", true);
-                                    WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
+                                            App.CurrentApp.SpeakSequence($"下载全部册记录到本地缓存出错: {repl_result.ErrorInfo}");
+                                        }
+                                        else
+                                        {
+                                            WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", true);
+                                            WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
 
-                                    App.CurrentApp.SpeakSequence("下载全部册记录到本地缓存完成");
+                                            App.CurrentApp.SpeakSequence("下载全部册记录到本地缓存完成");
+                                        }
+                                    }
+                                    finally
+                                    {
+                                        lock (_syncRoot_cancel)
+                                        {
+                                            _cancelDownloadEntity = null;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -345,8 +392,30 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default).Unwrap();
         }
 
+        static object _syncRoot_cancel = new object();
+
+        static CancellationTokenSource _cancelDownloadPatron = null;
+        static CancellationTokenSource _cancelDownloadEntity = null;
+
+        public static void StopDownloadPatron()
+        {
+            lock (_syncRoot_cancel)
+            {
+                _cancelDownloadPatron?.Cancel();
+            }
+        }
+
+        public static void StopDownloadEntity()
+        {
+            lock (_syncRoot_cancel)
+            {
+                _cancelDownloadEntity?.Cancel();
+            }
+        }
+
         public static void RestartReplicateEntities()
         {
+            _replicateEntityError = -1; // -1 效果会是后面 replication 停止后会自动清空 unprocessed 记忆 (见注:111)
             WpfClientInfo.Config.SetBoolean("entityReplication", "downloaded", false);
             WpfClientInfo.Config.Set("entityReplication", "unprocessed", null);
             App.ReplicateEntities = true;
@@ -363,6 +432,7 @@ TaskScheduler.Default).Unwrap();
         // 开始重做全量同步读者信息
         public static void RedoReplicatePatron()
         {
+            _replicatePatronError = -1;
             SaveStartDate(null);
             ActivateMonitor();
         }
@@ -477,6 +547,6 @@ TaskScheduler.Default).Unwrap();
             return StringUtil.MakePathList(names, ", ");
         }
 
-#endregion
+        #endregion
     }
 }

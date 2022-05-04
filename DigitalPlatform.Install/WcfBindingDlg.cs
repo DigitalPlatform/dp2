@@ -20,51 +20,84 @@ namespace DigitalPlatform.Install
 
         private void WcfBindingDlg_Load(object sender, EventArgs e)
         {
-            // 填充 checked == false 位置的 textbox 缺省值
-            for (int i = 0; i < this.DefaultUrls.Length; i++)
+            try
             {
-                string strUrl = this.DefaultUrls[i].Trim();
-                if (String.IsNullOrEmpty(strUrl) == true)
-                    continue;
+                // 填充 checked == false 位置的 textbox 缺省值
+                for (int i = 0; i < this.DefaultUrls.Length; i++)
+                {
+                    string strUrl = this.DefaultUrls[i].Trim();
+                    if (String.IsNullOrEmpty(strUrl) == true)
+                        continue;
 
-                Uri uri = new Uri(strUrl);
-                if (uri.Scheme.ToLower() == "net.tcp")
-                {
-                    if (this.checkBox_nettcp.Checked == false
-                        && String.IsNullOrEmpty(this.textBox_nettcpUrl.Text) == true)
-                        this.textBox_nettcpUrl.Text = strUrl;
+                    var scheme = GetUriScheme(strUrl);
+                    if (scheme == "net.tcp")
+                    {
+                        if (this.checkBox_nettcp.Checked == false
+                            && String.IsNullOrEmpty(this.textBox_nettcpUrl.Text) == true)
+                            this.textBox_nettcpUrl.Text = strUrl;
+                    }
+                    if (scheme == "net.pipe")
+                    {
+                        if (this.checkBox_netpipe.Checked == false
+                            && String.IsNullOrEmpty(this.textBox_netpipeUrl.Text) == true)
+                            this.textBox_netpipeUrl.Text = strUrl;
+                    }
+                    if (scheme == "http")
+                    {
+                        if (this.checkBox_http.Checked == false
+                            && String.IsNullOrEmpty(this.textBox_httpUrl.Text) == true)
+                            this.textBox_httpUrl.Text = strUrl;
+                    }
+                    // 2021/6/18
+                    if (scheme == "https")
+                    {
+                        if (this.checkBox_https.Checked == false
+                            && String.IsNullOrEmpty(this.textBox_httpsUrl.Text) == true)
+                            this.textBox_httpsUrl.Text = strUrl;
+                    }
+                    if (scheme == "rest.http")
+                    {
+                        if (this.checkBox_rest.Checked == false
+                            && String.IsNullOrEmpty(this.textBox_restUrl.Text) == true)
+                            this.textBox_restUrl.Text = strUrl;
+                    }
+                    if (scheme == "basic.http")
+                    {
+                        if (this.checkBox_basic.Checked == false
+                            && String.IsNullOrEmpty(this.textBox_basicUrl.Text) == true)
+                            this.textBox_basicUrl.Text = strUrl;
+                    }
                 }
-                if (uri.Scheme.ToLower() == "net.pipe")
-                {
-                    if (this.checkBox_netpipe.Checked == false
-                        && String.IsNullOrEmpty(this.textBox_netpipeUrl.Text) == true)
-                        this.textBox_netpipeUrl.Text = strUrl;
-                }
-                if (uri.Scheme.ToLower() == "http")
-                {
-                    if (this.checkBox_http.Checked == false
-                        && String.IsNullOrEmpty(this.textBox_httpUrl.Text) == true)
-                        this.textBox_httpUrl.Text = strUrl;
-                }
-                // 2021/6/18
-                if (uri.Scheme.ToLower() == "https")
-                {
-                    if (this.checkBox_https.Checked == false
-                        && String.IsNullOrEmpty(this.textBox_httpsUrl.Text) == true)
-                        this.textBox_httpsUrl.Text = strUrl;
-                }
-                if (uri.Scheme.ToLower() == "rest.http")
-                {
-                    if (this.checkBox_rest.Checked == false
-                        && String.IsNullOrEmpty(this.textBox_restUrl.Text) == true)
-                        this.textBox_restUrl.Text = strUrl;
-                }
-                if (uri.Scheme.ToLower() == "basic.http")
-                {
-                    if (this.checkBox_basic.Checked == false
-                        && String.IsNullOrEmpty(this.textBox_basicUrl.Text) == true)
-                        this.textBox_basicUrl.Text = strUrl;
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message);
+            }
+        }
+
+        public static string TryGetUriScheme(string url)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+                return uri.Scheme.ToLower();
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public static string GetUriScheme(string url)
+        {
+            try
+            {
+                Uri uri = new Uri(url);
+                return uri.Scheme.ToLower();
+            }
+            catch(UriFormatException)
+            {
+                throw new ArgumentException($"URL '{url}' 格式不合法");
             }
         }
 
@@ -72,97 +105,105 @@ namespace DigitalPlatform.Install
         {
             string strError = "";
 
-            if (this.checkBox_nettcp.Checked == true)
+            try
             {
-                if (String.IsNullOrEmpty(this.textBox_nettcpUrl.Text) == true)
+                if (this.checkBox_nettcp.Checked == true)
                 {
-                    strError = "尚未指定 NET.TCP 协议的 URL 地址";
-                    goto ERROR1;
+                    if (String.IsNullOrEmpty(this.textBox_nettcpUrl.Text) == true)
+                    {
+                        strError = "尚未指定 NET.TCP 协议的 URL 地址";
+                        goto ERROR1;
+                    }
+                    var scheme = GetUriScheme(this.textBox_nettcpUrl.Text);
+                    if (scheme != "net.tcp")
+                    {
+                        strError = "NET.TCP 协议 URL '" + this.textBox_nettcpUrl.Text + "' 格式错误: 协议名部分不正确";
+                        goto ERROR1;
+                    }
                 }
-                Uri uri = new Uri(this.textBox_nettcpUrl.Text);
-                if (uri.Scheme.ToLower() != "net.tcp")
+
+                if (this.checkBox_netpipe.Checked == true)
                 {
-                    strError = "NET.TCP 协议 URL '"+this.textBox_nettcpUrl.Text+"' 格式错误: 协议名部分不正确";
-                    goto ERROR1;
+                    if (String.IsNullOrEmpty(this.textBox_netpipeUrl.Text) == true)
+                    {
+                        strError = "尚未指定 NET.PIPE 协议的 URL 地址";
+                        goto ERROR1;
+                    }
+                    var scheme = GetUriScheme(this.textBox_netpipeUrl.Text);
+                    if (scheme != "net.pipe")
+                    {
+                        strError = "NET.PIPE 协议 URL '" + this.textBox_netpipeUrl.Text + "' 格式错误: 协议名部分不正确";
+                        goto ERROR1;
+                    }
+
+                    // TODO: 检查端口号
+                }
+
+                if (this.checkBox_http.Checked == true)
+                {
+                    if (String.IsNullOrEmpty(this.textBox_httpUrl.Text) == true)
+                    {
+                        strError = "尚未指定 HTTP 协议的 URL 地址";
+                        goto ERROR1;
+                    }
+                    var scheme = GetUriScheme(this.textBox_httpUrl.Text);
+                    if (scheme != "http")
+                    {
+                        strError = "HTTP 协议 URL '" + this.textBox_httpUrl.Text + "' 格式错误: 协议名部分不正确";
+                        goto ERROR1;
+                    }
+                }
+
+                // 2021/6/18
+                if (this.checkBox_https.Checked == true)
+                {
+                    if (String.IsNullOrEmpty(this.textBox_httpsUrl.Text) == true)
+                    {
+                        strError = "尚未指定 HTTPS 协议的 URL 地址";
+                        goto ERROR1;
+                    }
+                    var scheme = GetUriScheme(this.textBox_httpsUrl.Text);
+                    if (scheme != "https")
+                    {
+                        strError = "HTTPS 协议 URL '" + this.textBox_httpsUrl.Text + "' 格式错误: 协议名部分不正确";
+                        goto ERROR1;
+                    }
+                }
+
+                if (this.checkBox_rest.Checked == true)
+                {
+                    if (String.IsNullOrEmpty(this.textBox_restUrl.Text) == true)
+                    {
+                        strError = "尚未指定 REST.HTTP 协议的 URL 地址";
+                        goto ERROR1;
+                    }
+                    var scheme = GetUriScheme(this.textBox_restUrl.Text);
+                    if (scheme != "rest.http")
+                    {
+                        strError = "REST.BASIC 协议 URL '" + this.textBox_restUrl.Text + "' 格式错误: 协议名部分不正确";
+                        goto ERROR1;
+                    }
+                }
+
+                if (this.checkBox_basic.Checked == true)
+                {
+                    if (String.IsNullOrEmpty(this.textBox_basicUrl.Text) == true)
+                    {
+                        strError = "尚未指定 BASIC.HTTP 协议的 URL 地址";
+                        goto ERROR1;
+                    }
+                    var scheme = GetUriScheme(this.textBox_basicUrl.Text);
+                    if (scheme != "basic.http")
+                    {
+                        strError = "BASIC.HTTP 协议 URL '" + this.textBox_basicUrl.Text + "' 格式错误: 协议名部分不正确";
+                        goto ERROR1;
+                    }
                 }
             }
-
-            if (this.checkBox_netpipe.Checked == true)
+            catch(Exception ex)
             {
-                if (String.IsNullOrEmpty(this.textBox_netpipeUrl.Text) == true)
-                {
-                    strError = "尚未指定 NET.PIPE 协议的 URL 地址";
-                    goto ERROR1;
-                }
-                Uri uri = new Uri(this.textBox_netpipeUrl.Text);
-                if (uri.Scheme.ToLower() != "net.pipe")
-                {
-                    strError = "NET.PIPE 协议 URL '" + this.textBox_netpipeUrl.Text + "' 格式错误: 协议名部分不正确";
-                    goto ERROR1;
-                }
-
-                // TODO: 检查端口号
-            }
-
-            if (this.checkBox_http.Checked == true)
-            {
-                if (String.IsNullOrEmpty(this.textBox_httpUrl.Text) == true)
-                {
-                    strError = "尚未指定 HTTP 协议的 URL 地址";
-                    goto ERROR1;
-                }
-                Uri uri = new Uri(this.textBox_httpUrl.Text);
-                if (uri.Scheme.ToLower() != "http")
-                {
-                    strError = "HTTP 协议 URL '" + this.textBox_httpUrl.Text + "' 格式错误: 协议名部分不正确";
-                    goto ERROR1;
-                }
-            }
-
-            // 2021/6/18
-            if (this.checkBox_https.Checked == true)
-            {
-                if (String.IsNullOrEmpty(this.textBox_httpsUrl.Text) == true)
-                {
-                    strError = "尚未指定 HTTPS 协议的 URL 地址";
-                    goto ERROR1;
-                }
-                Uri uri = new Uri(this.textBox_httpsUrl.Text);
-                if (uri.Scheme.ToLower() != "https")
-                {
-                    strError = "HTTPS 协议 URL '" + this.textBox_httpsUrl.Text + "' 格式错误: 协议名部分不正确";
-                    goto ERROR1;
-                }
-            }
-
-            if (this.checkBox_rest.Checked == true)
-            {
-                if (String.IsNullOrEmpty(this.textBox_restUrl.Text) == true)
-                {
-                    strError = "尚未指定 REST.HTTP 协议的 URL 地址";
-                    goto ERROR1;
-                }
-                Uri uri = new Uri(this.textBox_restUrl.Text);
-                if (uri.Scheme.ToLower() != "rest.http")
-                {
-                    strError = "REST.BASIC 协议 URL '" + this.textBox_restUrl.Text + "' 格式错误: 协议名部分不正确";
-                    goto ERROR1;
-                }
-            }
-
-            if (this.checkBox_basic.Checked == true)
-            {
-                if (String.IsNullOrEmpty(this.textBox_basicUrl.Text) == true)
-                {
-                    strError = "尚未指定 BASIC.HTTP 协议的 URL 地址";
-                    goto ERROR1;
-                }
-                Uri uri = new Uri(this.textBox_basicUrl.Text);
-                if (uri.Scheme.ToLower() != "basic.http")
-                {
-                    strError = "BASIC.HTTP 协议 URL '" + this.textBox_basicUrl.Text + "' 格式错误: 协议名部分不正确";
-                    goto ERROR1;
-                }
+                strError = ex.Message;
+                goto ERROR1;
             }
 
             if (this.checkBox_nettcp.Checked == false
@@ -559,7 +600,7 @@ namespace DigitalPlatform.Install
                     {
                         this.textBox_netpipeUrl.Text = strUrl;
                         this.checkBox_netpipe.Checked = true;
-                    } 
+                    }
                     if (uri.Scheme.ToLower() == "http")
                     {
                         this.textBox_httpUrl.Text = strUrl;

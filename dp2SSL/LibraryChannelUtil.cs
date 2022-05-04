@@ -1535,18 +1535,30 @@ AccountItem item)
             // 2021/11/22
             public string ServerUid { get; set; }
 
+            // 2022/3/17
+            // 最新获取的 XML 相比以前存储的发生了变化
+            public bool XmlChanged { get; set; }
+
+            // 2022/3/23
+            // 变化前的 XML
+            public string OldXml { get; set; }
+
             public override string ToString()
             {
-                return $"Xml='{Xml}',LibraryName='{LibraryName}'," + base.ToString();
+                return $"Xml='{Xml}',LibraryName='{LibraryName}',XmlChanged={XmlChanged}" + base.ToString();
             }
         }
 
         // 获得 RFID 配置信息
         public static GetRfidCfgResult GetRfidCfg()
         {
-            string strOutputInfo = "";
+            string new_xml = "";
             string libraryName = "";
             string serverUid = "";
+
+            var old_xml = WpfClientInfo.Config.Get("cache",
+    "rfidCfg",
+    null);
 
             LibraryChannel channel = App.CurrentApp.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
@@ -1558,7 +1570,7 @@ AccountItem item)
                     null,
                     "system",
                     "rfid",
-                    out strOutputInfo,
+                    out new_xml,
                     out string strError);
                 if (lRet == -1)
                     return new GetRfidCfgResult
@@ -1612,7 +1624,7 @@ AccountItem item)
             // 顺便保存到本地
             WpfClientInfo.Config.Set("cache",
                 "rfidCfg",
-                strOutputInfo);
+                new_xml);
 
             WpfClientInfo.Config.Set("cache",
                 "libraryName",
@@ -1625,9 +1637,11 @@ AccountItem item)
             return new GetRfidCfgResult
             {
                 Value = 1,
-                Xml = strOutputInfo,
+                Xml = new_xml,
                 LibraryName = libraryName,
                 ServerUid = serverUid,
+                OldXml = old_xml,
+                XmlChanged = (old_xml != new_xml),
             };
         }
 

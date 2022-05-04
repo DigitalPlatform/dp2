@@ -1,4 +1,18 @@
 ﻿
+Login() API 的 strParameters 参数里面可以包含 clientip 子参数
+
+但因为在 ChannelPool 使用方式下，寻找空闲通道是按照 userName 来匹配的。
+可能得到一根 userName 匹配，但用过的 clientIP 和当前 clientIP 并不相同。
+这时候如果再分配一根新通道，比较浪费。最好是复用这根通道。
+那么就需要有一个 API 可以动态设置通道的 clientIP。dp2library 响应这个
+“修改 clientIP”的请求时，要像第一次创建通道时一样，检查这个 clientIP 所对应
+的总通道数是否超过了配额，如果超过了则出错返回；如果没有超过则成功返回(返回前要增量所请求的 clientIP 的配额，减量一次被改掉的原 clientIP 的配额)。
+
+有时候也可以考虑为 Login() API 的 clientip 子参数使用一个虚拟的 IP 地址字符串，例如
+#opac，表示这些全都都是 dp2OPAC 发起的请求，算作同一个 IP 地址。
+
+还有一个办法就是前端，使用 LibraryChannel 的时候，前端自己约束自己，保证所用
+的通道数不超过一个配额。
 
 order权限
 囊括了

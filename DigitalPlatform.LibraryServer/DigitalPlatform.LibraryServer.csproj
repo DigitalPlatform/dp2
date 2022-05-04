@@ -73,6 +73,9 @@
     <Reference Include="DnsClient, Version=1.2.0.0, Culture=neutral, PublicKeyToken=4574bb5573c51424, processorArchitecture=MSIL">
       <HintPath>..\packages\DnsClient.1.2.0\lib\net471\DnsClient.dll</HintPath>
     </Reference>
+    <Reference Include="Esendex.TokenBucket, Version=1.0.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Esendex.TokenBucket.1.0.7\lib\net40\Esendex.TokenBucket.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Protobuf, Version=3.15.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.15.0\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
@@ -243,6 +246,7 @@
     <Compile Include="AppDatabaseVerify.cs" />
     <Compile Include="AppFileSystem.cs" />
     <Compile Include="AppLoginCache.cs" />
+    <Compile Include="AppRateLimit.cs" />
     <Compile Include="AppReportBuilder.cs" />
     <Compile Include="AppRights.cs" />
     <Compile Include="AppScriptFilter.cs" />

@@ -3170,6 +3170,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string LangField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LastTimeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string LibraryCodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -3242,6 +3245,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.LangField, value) != true)) {
                     this.LangField = value;
                     this.RaisePropertyChanged("Lang");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string LastTime {
+            get {
+                return this.LastTimeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LastTimeField, value) != true)) {
+                    this.LastTimeField = value;
+                    this.RaisePropertyChanged("LastTime");
                 }
             }
         }

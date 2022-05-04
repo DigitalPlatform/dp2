@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.108.*")]
-[assembly: AssemblyFileVersion("3.108.0.0")]
+[assembly: AssemblyVersion("3.114.*")]
+[assembly: AssemblyFileVersion("3.114.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -313,3 +313,10 @@ ItemCanReturn()
 //		3.107 (2022/3/8) SearchReader() GetReaderInfo() GetSearchResult() GetBrowseRecords() 等 API 均对馆际互借情况下，扩大了 dp2library 账户能查看的读者记录查看范围。
 //						ManageDatabase() API "getinfo" 功能对馆际互借情况情况也扩大了可见的读者库范围
 //		3.108 (2022/3/12) 最新版中 library.xml 文件内 rfid/@map 属性增加一种默认精确一致(不像以前默认前方一致)的匹配算法，称为 0.02 版算法。以前 0.01 版算法依然支持
+//		3.109 (2022/3/18) 当 library.xml 被修改的时候(例如被 Windows 记事本直接修改)，会自动产生一个 configChanged 操作日志动作。dp2library 启动的时候也会产生一个 configChanged 动作
+//						原有 setSystemParameter 动作改掉了一个会把日志记录中某些 \t 字符替换为 * 的 bug
+//		3.110 (2022/3/30) SetEntities() API 当册记录有 reservations 元素时保存会报错说“超过定义范围”，此 bug 已经修正
+//		3.111 (2022/3/31) 修正 SessionInfo::ExpandLibraryCodeList 中的一处 bug。当 library.xml 中 rightsTable 内没有找到指定的 code 属性值的 library 元素时，不会抛出异常，而是返回 SessionInfo::LibraryCodeList
+//		3.112 (2022/3/12) WriteRes() 和 GetRes() API 增加了带宽限制的功能。由全局参数 downloadBandwidth 和 uploadBandwidth 定义，缺省为 -1 表示不限制
+//		3.113 (2022/4/14) GetChannelInfo() API 返回的行信息中增加了 LastTime 列。改进了 rest.http Session 的激活(Touch)和休眠释放代码
+//		3.114 (2022/4/18) MySqlBulkCopy 做了改进，当出现非法 UTF-8 内容的时候，会自动跳过有问题的行继续向后处理

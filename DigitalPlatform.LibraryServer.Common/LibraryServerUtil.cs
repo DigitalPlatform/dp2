@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Collections.Generic;
+using System.Text;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
@@ -16,6 +17,54 @@ namespace DigitalPlatform.LibraryServer
 
         // 本地文件目录的虚拟前缀字符串
         public static string LOCAL_PREFIX = "!";
+
+        // 将 1M 或 2.5G 这样的字符串解析为 long 字节数
+        public static long ParseBandwidth(string text)
+        {
+            StringBuilder number = new StringBuilder();
+            StringBuilder postfix = new StringBuilder();
+            foreach (char ch in text)
+            {
+                if (char.IsLetter(ch))
+                {
+                    if (number.Length == 0)
+                        throw new ArgumentException($"'{text}' 格式不合法");
+                    postfix.Append(ch);
+                }
+                else
+                {
+                    if (postfix.Length > 0)
+                        break;
+                    number.Append(ch);
+                }
+            }
+
+            if (double.TryParse(number.ToString(), out double result) == false)
+                throw new ArgumentException($"'{text}' 中数字部分 '{number}' 不合法");
+
+            var tail = postfix.ToString().ToLower();
+
+            if (string.IsNullOrEmpty(tail))
+                return (long)result;
+
+            int pow;
+
+            if (tail == "byte" || tail == "b")
+                pow = 0;
+            else if (tail == "kb" || tail == "k")
+                pow = 1;
+            else if (tail == "mb" || tail == "m")
+                pow = 2;
+            else if (tail == "gb" || tail == "g")
+                pow = 3;
+            else if (tail == "tb" || tail == "t")
+                pow = 4;
+            else
+                throw new ArgumentException($"无法识别的后缀 '{tail}'");
+
+            return System.Convert.ToInt64((result * Math.Pow(1024, pow)));
+        }
+
 
         // parameters:
         //      strStyle    skip_check_overdue 跳过检查超期

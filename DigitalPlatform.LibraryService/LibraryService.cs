@@ -51,7 +51,7 @@ namespace dp2Library
             if (this.sessioninfo != null)
             {
                 if (this.RestMode)
-                    this.sessioninfo.Used--;
+                    this.sessioninfo.Used = 0;
             }
 
             if (this.RestMode == false)
@@ -242,6 +242,8 @@ namespace dp2Library
             try
             {
                 // sessioninfo = new SessionInfo(app, GetClientAddress());
+                // Exception:
+                //      可能会抛出 OutofSessionException 异常
                 this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
     OperationContext.Current.SessionId,
     address_list);
@@ -255,6 +257,13 @@ namespace dp2Library
                 this.WriteDebugInfo("*** 前端 '"
                     + (address == null ? "" : address.ClientIP + "@" + address.Via)
                     + "' 新分配通道的请求被拒绝:" + ex.Message);
+                if (ShouldDumpChannel())
+                {
+                    app.WriteErrorLog("*** 前端 '"
+        + (address == null ? "" : address.ClientIP + "@" + address.Via)
+        + "' 新分配通道的请求被拒绝:" + ex.Message);
+                    DumpChannelInfo();
+                }
                 // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
 
                 // 为了防止攻击，需要立即切断通道。否则 1000 个通道很快会被耗尽
@@ -355,6 +364,8 @@ namespace dp2Library
                     List<RemoteAddress> address_list = GetClientAddress();
                     try
                     {
+                        // Exception:
+                        //      可能会抛出 OutofSessionException 异常
                         this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
                             strSessionID,
                             address_list,
@@ -395,6 +406,13 @@ namespace dp2Library
                             this.WriteDebugInfo("*** 前端 '"
                                 + (address == null ? "" : address.ClientIP + "@" + address.Via)
                                 + "' 新分配通道的请求被拒绝:" + ex.Message);
+                            if (ShouldDumpChannel())
+                            {
+                                app.WriteErrorLog("*** 前端 '"
+        + (address == null ? "" : address.ClientIP + "@" + address.Via)
+        + "' 新分配通道的请求被拒绝:" + ex.Message);
+                                DumpChannelInfo();
+                            }
 
                             result.ErrorCode = ErrorCode.OutofSession;
                             // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
@@ -440,6 +458,7 @@ namespace dp2Library
             // 2011/1/27
             if (sessioninfo != null)
             {
+                this.sessioninfo.Touch();
                 this.sessioninfo.CallCount++;
 
 #if NO
@@ -451,7 +470,9 @@ namespace dp2Library
 
                 // 2017/5/7
                 if (this.RestMode)
-                    this.sessioninfo.Used++;
+                {
+                    this.sessioninfo.Used = 1;
+                }
             }
 
             if (bPrepareSessionInfo == false && this.sessioninfo == null)
@@ -490,6 +511,46 @@ namespace dp2Library
             }
 
             return result;
+        }
+
+        static DateTime _lastDumpChannel;
+
+        // 是否需要 dump 通道信息？
+        // 避免太频繁地 dump
+        bool ShouldDumpChannel()
+        {
+            if (DateTime.Now - _lastDumpChannel > TimeSpan.FromMinutes(30))
+            {
+                _lastDumpChannel = DateTime.Now;
+                return true;
+            }
+
+            return false;
+        }
+
+        // 向错误日志文件中当前的所有通道信息
+        void DumpChannelInfo()
+        {
+            var ret = app.SessionTable.ListChannels(
+    "*",
+    "*",
+    "", // strStyle,
+    out List<ChannelInfo> infos,
+    out string strError);
+            if (ret == -1)
+            {
+                app.WriteErrorLog($"DumpChannelInfo() error: {strError}");
+                return;
+            }
+            StringBuilder text = new StringBuilder();
+            text.AppendLine($"当前共 {infos.Count} 个通道:");
+            int i = 0;
+            foreach (var info in infos)
+            {
+                text.AppendLine($"{(i + 1)}) ClientIP:{info.ClientIP},\tVia:{info.Via},\tUserName:{info.UserName},\tCallCount:{info.CallCount},\tLibraryCode:{info.LibraryCode},\tlocation={info.Location}");
+                i++;
+            }
+            app.WriteErrorLog(text.ToString());
         }
 
         /*
@@ -669,6 +730,10 @@ namespace dp2Library
                 // gettoken 的参数值是有效期 day / month / year
                 string strGetToken = (string)parameters["gettoken"];
 
+                // 2022/4/2
+                // 需要需要模糊报错信息(中的用户名和密码错误)
+                bool public_error = parameters.ContainsKey("publicError");
+
                 // TODO: 图书馆代码列表需要和当前 sessioninfo 的馆代码列表交叉，排除可能多余的部分
 
                 bool bReader = false;
@@ -746,7 +811,7 @@ namespace dp2Library
                             nRet = sessioninfo.Login(info.ManagerUserName,
                                  info.ManagerPassword,
                                  "#simulate",
-                                 false,
+                                 public_error,
                                  null,
                                  "*",
                                  null,
@@ -805,7 +870,7 @@ namespace dp2Library
                     nRet = sessioninfo.Login(strUserName,
                          strPassword,
                          strLocation,
-                         StringUtil.HasHead(strLocation, "#opac") == true || strLocation == "@web" ? true : false,  // todo: 判断 #opac 或者 #opac_xxxx
+                         public_error || StringUtil.HasHead(strLocation, "#opac") == true || strLocation == "@web" ? true : false,  // todo: 判断 #opac 或者 #opac_xxxx
                          sessioninfo.ClientIP,
                          sessioninfo.RouterClientIP,
                          strGetToken,
@@ -891,7 +956,7 @@ namespace dp2Library
                             nRet = sessioninfo.Login(info.ManagerUserName,
                                  info.ManagerPassword,
                                  "#simulate",
-                                 false,
+                                 public_error,
                                  null,
                                  "*",
                                  null,
@@ -11918,7 +11983,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
 
             END1:
                 result.Value = nRet;
-                if (WriteOperLog(strCategory,
+                if (WriteSetSystemParameterOperLog(strCategory,
                     strName,
                     strValue,
                     sessioninfo.LibraryCodeList,
@@ -11948,7 +12013,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
         }
 
         // 2020/8/28
-        int WriteOperLog(string strCategory,
+        int WriteSetSystemParameterOperLog(string strCategory,
             string strName,
             string strValue,
             string strLibraryCodeList,
@@ -11969,7 +12034,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
 "name",
 strName);
 
-            DomUtil.SetElementText(domOperLog.DocumentElement,
+            DomUtil.SetElementTextEx(domOperLog.DocumentElement,
 "value",
 strValue);
 
@@ -11991,7 +12056,7 @@ strLibraryCodeList);
                 out strError);
             if (nRet == -1)
             {
-                strError = "GetSystemParameter() API 写入日志时发生错误: " + strError;
+                strError = "SetSystemParameter() API 写入日志时发生错误: " + strError;
                 return -1;
             }
 
@@ -13257,6 +13322,15 @@ Stack:
                         return result;
                     }
 #endif
+                    bool need_compress = StringUtil.IsInList("gzip", strStyle);
+                    int nMaxLength = 100 * 1024;
+                    if (LibraryApplication.DownloadBandwidth > 0)
+                    {
+                        if (need_compress == false)
+                            nMaxLength = Math.Min((int)LibraryApplication.DownloadBandwidth * 2, 100 * 1024);
+                        else
+                            nMaxLength = 100 * 1024;
+                    }
 
                     // 下载本地文件
                     // TODO: 限制 nMaxLength 最大值
@@ -13270,7 +13344,7 @@ Stack:
                         strFilePath,
                         nStart,
                         nLength,
-                        100 * 1024,
+                        nMaxLength,
                         strStyle,
                         out baContent,
                         out baOutputTimestamp,
@@ -13288,13 +13362,44 @@ Stack:
                     else
                         result.Value = lRet;
 
+                    var baUncompressContent = baContent;
                     // 压缩内容
                     // 2017/10/6
-                    if (StringUtil.IsInList("gzip", strStyle)
+                    if (need_compress
                         && baContent != null && baContent.Length > 0)
                     {
                         baContent = ByteArray.CompressGzip(baContent);
                         result.ErrorCode = ErrorCode.Compressed;
+                    }
+
+                    // 2022/4/10
+                    // 下载限速
+                    if (baContent != null)
+                    {
+                        var timeout = TimeSpan.FromSeconds(60);
+                        var content_length = baContent.Length;
+                        var consume_result = app.ComsumeDownload(baContent.Length,
+                            timeout,
+                            app.AppDownToken);
+                        if (consume_result.Value == -1
+                            && consume_result.ErrorCode == "overflow")
+                        {
+                            if (consume_result.Tokens == 0)
+                            {
+                                baContent = null;
+                                result.ErrorCode = ErrorCode.ServerTimeout;
+                                result.ErrorInfo = $"访问过于频繁导致带宽超出限额。请稍后重试请求";
+                                strOutputResPath = strResPath;
+                                return result;
+                            }
+
+                            // 减少响应内容
+                            baContent = LibraryApplication.GetRange(baUncompressContent, (int)consume_result.Tokens);
+
+                            // 若先前是压缩返回情形，则改为不压缩
+                            if (need_compress)
+                                result.ErrorCode = ErrorCode.NoError;
+                        }
                     }
 
                     result.ErrorInfo = strError;
@@ -13953,6 +14058,26 @@ Stack:
                         if (attachment != null)
                             attachment.Close();
                     }
+                }
+
+                // 2022/4/12
+                // 上载限速
+                if (baContent != null && baContent.Length > 0)
+                {
+                    var timeout = TimeSpan.FromSeconds(60);
+                    var content_length = baContent.Length;
+                    var consume_result = app.ComsumeUpload(baContent.Length,
+                        timeout,
+                        app.AppDownToken);
+                    /*
+                    if (consume_result.Value == -1
+                        && consume_result.ErrorCode == "overflow")
+                    {
+                        result.ErrorCode = ErrorCode.ServerTimeout;
+                        result.ErrorInfo = $"访问过于频繁导致带宽超出限额。请稍后重试请求";
+                        return result;
+                    }
+                    */
                 }
 
                 return result;

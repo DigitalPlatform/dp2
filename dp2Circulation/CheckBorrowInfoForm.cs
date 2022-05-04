@@ -21,6 +21,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -77,6 +78,8 @@ namespace dp2Circulation
                 "check_borrowinfo_form",
                 "display_record",
                 true);
+
+            FillLibraryCodeList();
 
             {
                 this.tabControl_main.TabPages.Remove(this.tabPage_batchAddItemPrice);
@@ -313,17 +316,23 @@ namespace dp2Circulation
 
                 string resultset_name = "#checkborrow_" + Guid.NewGuid().ToString();
 
+                var library_codes = this.SelectedLibraryCodes;
+
+                if (string.IsNullOrEmpty(library_codes)
+                    || library_codes == "<全部>")
+                    library_codes = "<all>";
+
                 // 检索全部读者库记录
                 long lRet = channel.SearchReader(null,  // stop,
-                    "<all>",
-                    "",
-                    -1,
-                    "__id",
-                    "left",
-                    "zh",
-                    resultset_name,
-                    "", // strOutputStyle
-                    out string strError);
+                library_codes,  // "<all>",
+                "",
+                -1,
+                "__id",
+                "left",
+                "zh",
+                resultset_name,
+                "", // strOutputStyle
+                out string strError);
                 if (lRet == -1)
                 {
                     writeLog?.Invoke($"SearchReader() 出错, strError={strError}, channel.ErrorCode={channel.ErrorCode}");
@@ -1813,6 +1822,7 @@ false);
                     }
                     string resultset_name = "#download_" + Guid.NewGuid().ToString();
                     // 检索一个实体库的全部记录
+                    /*
                     long lRet = channel.SearchItem(null,
     dbName, // "<all>",
     "",
@@ -1824,6 +1834,41 @@ false);
     "", // strSearchStyle
     "", // strOutputStyle
     out string strError);
+                    */
+                    long lRet = 0;
+                    string strError = "";
+
+                    var library_codes = this.SelectedLibraryCodes;
+
+                    if (string.IsNullOrEmpty(library_codes)
+                        || library_codes == "<全部>")
+                    {
+                        lRet = channel.SearchItem(null,
+    dbName, // "<all>",
+    "",
+    -1,
+    "__id",
+    "left",
+    "zh",
+    resultset_name,   // strResultSetName
+    "", // strSearchStyle
+    "", // strOutputStyle
+    out strError);
+                    }
+                    else
+                    {
+                        lRet = channel.SearchItem(null,
+    dbName, // "<all>",
+    library_codes,
+    -1,
+    "馆藏地点",
+    "left",
+    "zh",
+    resultset_name,
+    "", // strSearchStyle
+    "", // strOutputStyle
+    out strError);
+                    }
                     if (lRet == -1)
                     {
                         strError = $"检索实体库 {dbName} 时出错: {strError}";
@@ -4213,5 +4258,37 @@ out strError);
         {
             BeginCheckFromItem(true);
         }
+
+        void FillLibraryCodeList()
+        {
+            var list = Program.MainForm.GetAllLibraryCode();
+            this.checkedComboBox_libraryCode.Items.Clear();
+            this.checkedComboBox_libraryCode.Items.Add("<全部>");
+            this.checkedComboBox_libraryCode.Items.AddRange(list.ToArray());
+        }
+
+        private void checkedComboBox_libraryCode_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            CheckedComboBox.ProcessItemChecked(e, "<全部>");
+        }
+
+        public string SelectedLibraryCodes
+        {
+            get
+            {
+                return (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.checkedComboBox_libraryCode.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.checkedComboBox_libraryCode.Text = value;
+                }));
+            }
+        }
+
     }
 }

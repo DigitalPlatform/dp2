@@ -181,6 +181,7 @@ namespace DigitalPlatform.LibraryClient
                 byte[] baContent = null;
 
                 long lStart = _stream.Length;
+                long lTransferStart = lStart;
                 int nPerLength = -1;
 
                 // byte[] old_timestamp = null;
@@ -233,12 +234,13 @@ namespace DigitalPlatform.LibraryClient
                 REDO:
                     string strMetadata = "";
                     long lRet = this.Channel.GetRes(
-                        this.Stop,
+                        // this.Stop,
                         this.ServerFilePath,
                         lStart,
                         nPerLength,
                         strStyle,
                         out baContent,
+                        out int origin_content_length,
                         out strMetadata,
                         out string strOutputPath,
                         out timestamp,
@@ -339,13 +341,14 @@ namespace DigitalPlatform.LibraryClient
                             _stream.Write(baContent, 0, baContent.Length);
                             _stream.Flush(); // 2013/5/17
                             lStart += baContent.Length;
+                            lTransferStart += origin_content_length;
 
                             var func = this.ProgressChanged;
                             if (func != null)
                             {
                                 try
                                 {
-                                    DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(lStart, lTotalLength);
+                                    DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(lStart, lTotalLength, lTransferStart);
                                     func(this, e);
                                 }
                                 catch (ObjectDisposedException)
@@ -1253,10 +1256,19 @@ out strError);
             this.Text = strText;
         }
 
-        public DownloadProgressChangedEventArgs(long recieved, long total)
+        public DownloadProgressChangedEventArgs(long received, long total)
+        {
+            this.BytesReceived = received;
+            this.TotalBytesToReceive = total;
+        }
+
+        public DownloadProgressChangedEventArgs(long recieved, 
+            long total,
+            long transfer_received)
         {
             this.BytesReceived = recieved;
             this.TotalBytesToReceive = total;
+            this.TransferReceived = transfer_received;
         }
 
         // 摘要: 
@@ -1272,5 +1284,9 @@ out strError);
         // 返回结果: 
         //     一个指示将要接收的字节数的 System.Int64 值。
         public long TotalBytesToReceive { get; set; }
+
+        // 2022/4/12
+        // 累积收到的传输中未压缩的尺寸
+        public long TransferReceived { get; set; }
     }
 }

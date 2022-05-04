@@ -2021,9 +2021,14 @@ ex);
             }
             else if (server_type == SqlServerType.MySql)
             {
+                /*
                 string strCommand =
                     " DROP DATABASE IF EXISTS `" + this.m_strSqlDbName + "`; \n"
                     + " CREATE DATABASE IF NOT EXISTS `" + this.m_strSqlDbName + "`;\n";
+                */
+                string strCommand =
+                    " DROP DATABASE IF EXISTS `" + this.m_strSqlDbName + "`; \n"
+                    + " CREATE DATABASE `" + this.m_strSqlDbName + "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n";
                 return strCommand;
             }
             else if (server_type == SqlServerType.Oracle)
@@ -2185,7 +2190,7 @@ ex);
             #region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
-                string strCharset = " CHARACTER SET utf8 "; // COLLATE utf8_bin ";
+                string strCharset = ""; // " CHARACTER SET utf8mb4 "; // COLLATE utf8_bin ";
 
                 // 创建records表
                 strCommand = // "use `" + this.m_strSqlDbName + "` ;\n" +
@@ -12297,7 +12302,9 @@ trans);
                             table.LockForRead();    // 这里读锁定整个对象。在 Read() 函数那里就不需要锁定了
                             try
                             {
-                                bulkCopy.WriteToServer(table);
+                                bulkCopy.WriteToServer(table, (text)=> {
+                                    this.container.KernelApplication.WriteErrorLog(text);
+                                });
                             }
                             finally
                             {

@@ -12,7 +12,7 @@ using DigitalPlatform.LibraryServer;
 namespace TestDp2Library
 {
     [TestClass]
-    public class TestGetOwnerInstitution
+    public class TestGetOwnerInstitution_v02
     {
         // 分馆名字这部分匹配上了
         [TestMethod]
@@ -20,7 +20,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='海淀分馆/' isil='test' />
             <item map='西城/' alternative='xc' />
         </ownerInstitution>
@@ -45,7 +45,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='海淀分馆/' isil='test' />
             <item map='西城/' alternative='xc' />
         </ownerInstitution>
@@ -70,7 +70,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='海淀分馆/*' isil='test' />
             <item map='西城/' alternative='xc' />
         </ownerInstitution>
@@ -94,7 +94,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='海淀分馆/' isil='test' />
             <item map='西城/' alternative='xc' />
         </ownerInstitution>
@@ -119,7 +119,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='海淀分馆/' isil='test' />
             <item map='西城/' alternative='xc' />
         </ownerInstitution>
@@ -143,7 +143,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='海淀分馆/' isil='test' />
             <item map='西城/*' alternative='xc' />
         </ownerInstitution>
@@ -168,7 +168,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='/' isil='test' />
             <item map='/阅览室' alternative='xc' />
         </ownerInstitution>
@@ -193,7 +193,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='/' isil='test' />
             <item map='/阅览室' alternative='xc' />
         </ownerInstitution>
@@ -217,7 +217,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='/*' isil='test' />
             <item map='/阅览室' alternative='xc' />
         </ownerInstitution>
@@ -242,7 +242,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='/' isil='test' />
             <item map='/阅览室' alternative='xc' />
         </ownerInstitution>
@@ -266,7 +266,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='星洲小学/' isil='CN-0000001-XZ' />
         </ownerInstitution>
     </rfid>";
@@ -289,7 +289,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='星洲小学/???' isil='CN-0000001-XZ' />
         </ownerInstitution>
     </rfid>";
@@ -313,7 +313,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item type='' map='海淀分馆/' isil='test' />
         </ownerInstitution>
     </rfid>";
@@ -337,7 +337,7 @@ namespace TestDp2Library
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='海淀分馆/' isil='test' />
         </ownerInstitution>
     </rfid>";
@@ -357,11 +357,11 @@ namespace TestDp2Library
 
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_01()
+        public void TestMethod_wildcard_GetOwnerInstitution_01()
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='星洲小学/第一*' isil='CN-0000001-XZ1' />
 		    <item map='星洲小学/第二*' isil='CN-0000001-XZ2' />
         </ownerInstitution>
@@ -381,11 +381,11 @@ namespace TestDp2Library
         }
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_02()
+        public void TestMethod_wildcard_GetOwnerInstitution_02()
         {
             string xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='星洲小学/第一*' isil='CN-0000001-XZ1' />
 		    <item map='星洲小学/第二*' isil='CN-0000001-XZ2' />
         </ownerInstitution>
@@ -406,11 +406,11 @@ namespace TestDp2Library
 
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_11()
+        public void TestMethod_wildcard_GetOwnerInstitution_11()
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='星洲小学/西部*' isil='CN-0000001-XZX' />
 		    <item map='星洲小学/东部*' isil='CN-0000001-XZD' />
         </ownerInstitution>
@@ -438,11 +438,11 @@ namespace TestDp2Library
         }
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_12()
+        public void TestMethod_wildcard_GetOwnerInstitution_12()
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='星洲小学/西部*' isil='CN-0000001-XZX' />
 		    <item map='星洲小学/东部*' isil='CN-0000001-XZD' />
         </ownerInstitution>
@@ -471,11 +471,11 @@ namespace TestDp2Library
 
         // 两个 department 都没有匹配上
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_13()
+        public void TestMethod_wildcard_GetOwnerInstitution_13()
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='星洲小学/西部*' isil='CN-0000001-XZX' />
 		    <item map='星洲小学/东部*' isil='CN-0000001-XZD' />
         </ownerInstitution>
@@ -503,11 +503,11 @@ namespace TestDp2Library
         }
 
         [TestMethod]
-        public void TestMethod_wilcard_GetOwnerInstitution_14()
+        public void TestMethod_wildcard_GetOwnerInstitution_14()
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item map='星洲小学/西部*' isil='CN-0000001-XZX' />
 		    <item map='星洲小学/readerType:普通*' isil='CN-0000001-XZP' />
         </ownerInstitution>
@@ -542,7 +542,7 @@ namespace TestDp2Library
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.01'>
 		    <item map='星洲小学/' isil='CN-0000001-XZ' />
 		    <item map='东方小学/' isil='CN-0000001-DF' />
         </ownerInstitution>
@@ -575,7 +575,7 @@ namespace TestDp2Library
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item type='patron' map='海淀分馆/特殊' isil='CN-0000001-HDT' /><!-- 此项用末尾没有 * -->
 		    <item type='entity' map='海淀分馆/' isil='CN-0000001-HD' /><!-- 此项排除读者匹配 -->
         </ownerInstitution>
@@ -608,7 +608,7 @@ namespace TestDp2Library
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item type='patron' map='海淀分馆/readerType:本科生' isil='CN-0000001-DZ' />
 		    <item type='patron' map='海淀分馆/皇家警察' isil='CN-0000001-AB' />
         </ownerInstitution>
@@ -642,7 +642,7 @@ namespace TestDp2Library
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item type='patron' map='海淀分馆/readerType:本科生呢' isil='CN-0000001-DZ' />
 		    <item type='patron' map='海淀分馆/皇家警察' isil='CN-0000001-AB' />
         </ownerInstitution>
@@ -676,7 +676,7 @@ namespace TestDp2Library
         {
             string cfg_xml =
     @"<rfid>
-	    <ownerInstitution>
+	    <ownerInstitution version='0.02'>
 		    <item type='patron' map='海淀分馆/皇家警察' isil='CN-0000001-AB' />
 		    <item type='patron' map='海淀分馆/readerType:本科生呢' isil='CN-0000001-DZ' />
         </ownerInstitution>

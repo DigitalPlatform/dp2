@@ -34,6 +34,8 @@
             this.button_beginCheckFromItem = new System.Windows.Forms.Button();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_batchCheck = new System.Windows.Forms.TabPage();
+            this.checkedComboBox_libraryCode = new DigitalPlatform.CommonControl.CheckedComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.button_beginRepairFromItem = new System.Windows.Forms.Button();
             this.button_beginRepairFromReader = new System.Windows.Forms.Button();
@@ -84,7 +86,7 @@
             this.webBrowser_resultInfo.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser_resultInfo.MinimumSize = new System.Drawing.Size(28, 28);
             this.webBrowser_resultInfo.Name = "webBrowser_resultInfo";
-            this.webBrowser_resultInfo.Size = new System.Drawing.Size(785, 300);
+            this.webBrowser_resultInfo.Size = new System.Drawing.Size(785, 257);
             this.webBrowser_resultInfo.TabIndex = 0;
             // 
             // button_beginCheckFromItem
@@ -108,11 +110,13 @@
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(785, 136);
+            this.tabControl_main.Size = new System.Drawing.Size(785, 179);
             this.tabControl_main.TabIndex = 0;
             // 
             // tabPage_batchCheck
             // 
+            this.tabPage_batchCheck.Controls.Add(this.checkedComboBox_libraryCode);
+            this.tabPage_batchCheck.Controls.Add(this.label1);
             this.tabPage_batchCheck.Controls.Add(this.groupBox1);
             this.tabPage_batchCheck.Controls.Add(this.button_beginRepairFromItem);
             this.tabPage_batchCheck.Controls.Add(this.button_beginRepairFromReader);
@@ -124,10 +128,33 @@
             this.tabPage_batchCheck.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_batchCheck.Name = "tabPage_batchCheck";
             this.tabPage_batchCheck.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_batchCheck.Size = new System.Drawing.Size(777, 101);
+            this.tabPage_batchCheck.Size = new System.Drawing.Size(777, 144);
             this.tabPage_batchCheck.TabIndex = 0;
             this.tabPage_batchCheck.Text = "批检查借阅信息链";
             this.tabPage_batchCheck.UseVisualStyleBackColor = true;
+            // 
+            // checkedComboBox_libraryCode
+            // 
+            this.checkedComboBox_libraryCode.BackColor = System.Drawing.SystemColors.Window;
+            this.checkedComboBox_libraryCode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.checkedComboBox_libraryCode.Location = new System.Drawing.Point(90, 109);
+            this.checkedComboBox_libraryCode.Margin = new System.Windows.Forms.Padding(0);
+            this.checkedComboBox_libraryCode.Name = "checkedComboBox_libraryCode";
+            this.checkedComboBox_libraryCode.ReadOnly = false;
+            this.checkedComboBox_libraryCode.Size = new System.Drawing.Size(680, 26);
+            this.checkedComboBox_libraryCode.TabIndex = 7;
+            this.checkedComboBox_libraryCode.Visible = false;
+            this.checkedComboBox_libraryCode.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_libraryCode_ItemChecked);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 109);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(84, 21);
+            this.label1.TabIndex = 6;
+            this.label1.Text = "馆代码:";
+            this.label1.Visible = false;
             // 
             // groupBox1
             // 
@@ -194,7 +221,7 @@
             this.tabPage_batchAddItemPrice.Location = new System.Drawing.Point(4, 31);
             this.tabPage_batchAddItemPrice.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_batchAddItemPrice.Name = "tabPage_batchAddItemPrice";
-            this.tabPage_batchAddItemPrice.Size = new System.Drawing.Size(777, 101);
+            this.tabPage_batchAddItemPrice.Size = new System.Drawing.Size(777, 144);
             this.tabPage_batchAddItemPrice.TabIndex = 2;
             this.tabPage_batchAddItemPrice.Text = "批增加册价格";
             this.tabPage_batchAddItemPrice.UseVisualStyleBackColor = true;
@@ -258,7 +285,7 @@
             this.tabPage_singleCheck.Location = new System.Drawing.Point(4, 31);
             this.tabPage_singleCheck.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_singleCheck.Name = "tabPage_singleCheck";
-            this.tabPage_singleCheck.Size = new System.Drawing.Size(777, 101);
+            this.tabPage_singleCheck.Size = new System.Drawing.Size(777, 144);
             this.tabPage_singleCheck.TabIndex = 3;
             this.tabPage_singleCheck.Text = "零星检查";
             this.tabPage_singleCheck.UseVisualStyleBackColor = true;
@@ -383,7 +410,7 @@
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.webBrowser_resultInfo);
             this.splitContainer_main.Size = new System.Drawing.Size(785, 450);
-            this.splitContainer_main.SplitterDistance = 136;
+            this.splitContainer_main.SplitterDistance = 179;
             this.splitContainer_main.SplitterWidth = 14;
             this.splitContainer_main.TabIndex = 11;
             // 
@@ -460,5 +487,7 @@
         private System.Windows.Forms.Button button_beginRepairFromReader;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox checkBox_displayRecords;
+        private System.Windows.Forms.Label label1;
+        private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_libraryCode;
     }
 }

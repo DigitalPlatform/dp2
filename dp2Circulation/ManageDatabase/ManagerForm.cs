@@ -19,6 +19,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
+using System.Threading;
 
 namespace dp2Circulation
 {
@@ -205,7 +206,7 @@ namespace dp2Circulation
             ShowMessageBox(strError);
         }
 
-        void kernelResTree1_DownloadFiles(object sender,
+        async void kernelResTree1_DownloadFiles(object sender,
             DownloadFilesEventArgs e)
         {
             string strError = "";
@@ -213,7 +214,7 @@ namespace dp2Circulation
 
             if (e.Action == "getmd5")
             {
-                Task.Run(() =>
+                _ = Task.Factory.StartNew(() =>
                 {
                     GetMd5(e,
                         (o1, e1) =>
@@ -255,7 +256,10 @@ namespace dp2Circulation
 
                             }));
                         });
-                });
+                },
+    CancellationToken.None,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
                 return;
             }
 
@@ -266,25 +270,29 @@ namespace dp2Circulation
             //      -1  出错
             //      0   放弃下载
             //      1   同意启动下载
-            int nRet = Program.MainForm.AskOverwriteFiles(infos,    // e.FileNames,
-    ref strOutputFolder,
+            var ask_result = await Program.MainForm.AskOverwriteFiles(infos,
+                strOutputFolder // e.FileNames,
+    /*ref strOutputFolder,
     out bool bAppend,
-    out strError);
-            if (nRet == -1)
+    out strError*/);
+            if (ask_result.Value == -1
+                || ask_result.Value == 0)
             {
-                e.ErrorInfo = strError;
+                e.ErrorInfo = ask_result.ErrorInfo;
                 return;
             }
+
+            strOutputFolder = ask_result.OutputFolder;
 
             // return:
             //      -1  出错
             //      0   放弃下载
             //      1   成功启动了下载
-            nRet = Program.MainForm.BeginDownloadFiles(infos,   // e.FileNames,
-                bAppend ? "append" : "overwrite",
-                        null,
-                        ref strOutputFolder,
-                        out strError);
+            int nRet = Program.MainForm.BeginDownloadFiles(infos,   // e.FileNames,
+                ask_result.Append ? "append" : "overwrite",
+                null,
+                ref strOutputFolder,
+                out strError);
             if (nRet == -1)
                 e.ErrorInfo = strError;
         }

@@ -8,11 +8,11 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Collections;
 using System.Threading;
+using System.Runtime.Serialization;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
-using System.Runtime.Serialization;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -214,7 +214,13 @@ namespace DigitalPlatform.LibraryServer
         out strExpandCodeList,
         out string strError);
                     if (nRet == -1)
-                        throw new Exception(strError);
+                    {
+                        // 2022/3/31
+                        // TODO: 可以考虑在馆代码列表中包含一个 ,error 之类的提醒注意
+                        return this.LibraryCodeList;
+
+                        // throw new Exception(strError);
+                    }
                     _expandLibraryCodeList = strExpandCodeList;
                     if (_expandLibraryCodeList == null)
                         _expandLibraryCodeList = "";
@@ -230,6 +236,13 @@ namespace DigitalPlatform.LibraryServer
             {
                 return IsGlobalUser(this.LibraryCodeList);
             }
+        }
+
+        public void Touch()
+        {
+            if (this.SessionTime == null)
+                this.SessionTime = new SessionTime();
+            this.SessionTime.LastUsedTime = DateTime.Now;
         }
 
         public static bool IsGlobalUser(string strLibraryCodeList)
@@ -1276,6 +1289,8 @@ SetStartEventArgs e);
 
         // parameters:
         //      bAutoCreate 是否自动创建 SessionInfo 对象? true 表示自动创建; false 表示不自动创建(只返回已存在的 SessionInfo 对象)
+        // Exception:
+        //      可能会抛出 OutofSessionException 异常
         public SessionInfo PrepareSession(LibraryApplication app,
             string strSessionID,
             List<RemoteAddress> address_list,
@@ -1298,8 +1313,11 @@ SetStartEventArgs e);
 
             if (sessioninfo != null)
             {
+                /*
                 Debug.Assert(sessioninfo.SessionTime != null, "");
                 sessioninfo.SessionTime.LastUsedTime = DateTime.Now;
+                */
+                sessioninfo.Touch();
 #if NO
                 if (sessioninfo.SessionTime.SessionID != strSessionID)
                 {
@@ -1715,6 +1733,7 @@ SetStartEventArgs e);
                     if (info.SessionTime == null)
                     {
                         Debug.Assert(false, "");
+                        info.Touch();   // 补救一下
                         continue;
                     }
 
@@ -1895,7 +1914,6 @@ SetStartEventArgs e);
 
                 i++;
             }
-
         }
 
         public class ChannelInfoComparer : IComparer<ChannelInfo>
@@ -1937,6 +1955,8 @@ SetStartEventArgs e);
                 info.Count = 1;
                 info.CallCount = session.CallCount;
                 info.Lang = session.Lang;
+                if (session.SessionTime != null)
+                    info.LastTime = session.SessionTime.LastUsedTime.ToString("u");
                 if (session.Account != null)
                     info.Location = session.Account.Location;
 
@@ -1958,6 +1978,7 @@ SetStartEventArgs e);
             List<string> librarycodes = new List<string>();
             List<string> vias = new List<string>();
             List<string> langs = new List<string>();
+            List<string> times = new List<string>();
             ChannelInfo current = null;
             foreach (ChannelInfo info in infos)
             {
@@ -1982,6 +2003,9 @@ SetStartEventArgs e);
                     StringUtil.RemoveDupNoSort(ref langs);
                     result.Lang = StringUtil.MakePathList(langs);
 
+                    StringUtil.RemoveDupNoSort(ref times);
+                    result.LastTime = StringUtil.MakePathList(times);
+
                     results.Add(result);
 
                     current = info;
@@ -1991,6 +2015,7 @@ SetStartEventArgs e);
                     librarycodes.Clear();
                     vias.Clear();
                     langs.Clear();
+                    times.Clear();
                 }
 
                 usernames.Add(info.UserName);
@@ -1998,6 +2023,7 @@ SetStartEventArgs e);
                 librarycodes.Add(info.LibraryCode);
                 vias.Add(info.Via);
                 langs.Add(info.Lang);
+                times.Add(info.LastTime);
 
                 if (current == null)
                     current = info;
@@ -2023,6 +2049,9 @@ SetStartEventArgs e);
 
                 StringUtil.RemoveDupNoSort(ref langs);
                 result.Lang = StringUtil.MakePathList(langs);
+
+                StringUtil.RemoveDupNoSort(ref times);
+                result.LastTime = StringUtil.MakePathList(times);
 
                 results.Add(result);
             }
@@ -2138,6 +2167,8 @@ SetStartEventArgs e);
                         info.Count = 1;
                         info.CallCount = session.CallCount;
                         info.Lang = session.Lang;
+                        if (session.SessionTime != null)
+                            info.LastTime = session.SessionTime.LastUsedTime.ToString("u");
                         if (session.Account != null)
                             info.Location = session.Account.Location;
 
@@ -2210,5 +2241,9 @@ SetStartEventArgs e);
 
         [DataMember]
         public string Lang = "";  // 语言代码
+
+        // 2022/4/14
+        [DataMember]
+        public string LastTime = "";  // 最后一次使用通道的时间
     }
 }

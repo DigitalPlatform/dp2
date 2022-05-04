@@ -109,7 +109,8 @@ namespace dp2SSL.Models
                     return new ReplicationPlan
                     {
                         Value = -1,
-                        ErrorInfo = "用户中断"
+                        ErrorInfo = "用户中断",
+                        ErrorCode = "Canceled"
                     };
                 // 检索全部读者库记录
                 long lRet = channel.SearchReader(null,  // stop,
@@ -183,7 +184,8 @@ out string strError);
                                     return new ReplicationPlan
                                     {
                                         Value = -1,
-                                        ErrorInfo = "用户中断"
+                                        ErrorInfo = "用户中断",
+                                        ErrorCode = "Canceled"
                                     };
 
                                 PatronItem item = new PatronItem();
@@ -241,6 +243,15 @@ out string strError);
                 {
                     Value = (int)hitcount,
                     StartDate = plan.StartDate
+                };
+            }
+            catch (TaskCanceledException)
+            {
+                return new ReplicationPlan
+                {
+                    Value = -1,
+                    ErrorInfo = "用户中断",
+                    ErrorCode = "Canceled"
                 };
             }
             catch (Exception ex)
@@ -392,7 +403,7 @@ out string strError);
         //      -1  出错
         //      0   中断
         //      1   完成
-        public static async Task<ReplicationResult> DoReplication(
+        public static async Task<ReplicationResult> DoReplicationAsync(
             string strStartDate,
             string strEndDate,
             LogType logType,
@@ -420,6 +431,8 @@ out string strError);
                     ErrorInfo = "DoReplication() 出错: strStartDate 参数值不应为空"
                 };
             }
+
+            bool download_triggered = false;
 
             LibraryChannel channel = App.CurrentApp.GetChannel();
             var old_timeout = channel.Timeout;
@@ -464,7 +477,7 @@ out string strError);
                         AutoCache = false,
                         CacheDir = "",
                         LogType = logType,
-                        Filter = "setReaderInfo,borrow,return,setSystemParameter,writeRes,setEntity", // 借书还书时候都会修改读者记录
+                        Filter = "setReaderInfo,borrow,return,setSystemParameter,writeRes,setEntity,configChanged", // 借书还书时候都会修改读者记录
                         // ServerVersion = serverVersion
                     };
 
@@ -549,6 +562,18 @@ out string strError);
                                 if (trace_result.Value == -1)
                                     WpfClientInfo.WriteErrorLog("同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + trace_result.ErrorInfo);
                             }
+                            else if (strOperation == "configChanged")
+                            {
+                                // return:
+                                //      result.Value 0 一般返回 1 rfid 元素信息有变化，已经触发了重新下载册记录和读者记录
+                                var trace_result = TraceConfigChanged(
+                                    dom,
+                                    info);
+                                if (trace_result.Value == -1)
+                                    WpfClientInfo.WriteErrorLog("同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + trace_result.ErrorInfo);
+                                else if (trace_result.Value == 1)   // 以“中断”状态返回，从而避免调主修改 startDate。这样才能让下一轮开始全量重新下载读者记录
+                                    download_triggered = true;
+                            }
                             else if (strOperation == "writeRes")
                             {
                                 var trace_result = TraceWriteRes(
@@ -622,7 +647,7 @@ out string strError);
 
                 return new ReplicationResult
                 {
-                    Value = last_index == -1 ? 0 : 1,
+                    Value = last_index == -1 || download_triggered ? 0 : 1,
                     LastDate = strLastDate,
                     LastIndex = last_index,
                     ProcessInfo = info
@@ -966,6 +991,92 @@ out string strError);
             }
         }
 
+        /*
+<root>
+<operation>configChanged</operation>
+<category></category>
+<name></name>
+<oldValue>...</oldValue>
+<value>...</value>
+<comment>...</comment>
+<operTime>Fri, 28 Aug 2020 12:02:28 +0800</operTime>
+<clientAddress>localhost</clientAddress>
+<version>1.09</version>
+</root>
+ * */
+        // return:
+        //      result.Value 0 一般返回 1 rfid 元素信息有变化，已经触发了重新下载册记录和读者记录
+        static NormalResult TraceConfigChanged(
+XmlDocument domLog,
+ProcessInfo info)
+        {
+            try
+            {
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement, "action");
+                string strCategory = DomUtil.GetElementText(domLog.DocumentElement, "category");
+                string strName = DomUtil.GetElementText(domLog.DocumentElement, "name");
+                string strChangedElements = DomUtil.GetElementText(domLog.DocumentElement, "changedElements");
+
+                if (string.IsNullOrEmpty(strCategory)
+                    && string.IsNullOrEmpty(strName)
+                    && StringUtil.IsInList("rfid", strChangedElements))
+                {
+                    WpfClientInfo.WriteInfoLog("根据 dp2library 操作日志感知到 library.xml 中 rfid 元素内容发生变化");
+
+                    string old_xml = ShelfData.RfidXml;
+
+                    // 重新获得 library.xml rfid 定义
+                    // return:
+                    //      result.Value 0 一般返回 1 rfid 元素信息有变化，已经触发了重新下载册记录和读者记录
+                    var result = ShelfData.EnsureConfigDom();
+                    if (result.Value == -1)
+                    {
+                        WpfClientInfo.WriteErrorLog($"尝试同步获取 library.xml rfid 元素定义时出错: {result.ErrorInfo}");
+                    }
+
+                    string new_xml = ShelfData.RfidXml;
+                    if (old_xml != new_xml)
+                        WpfClientInfo.WriteInfoLog($"old_xml='{old_xml}'\r\nnew_xml='{new_xml}'");
+
+                    if (result.Value == 1)
+                        return new NormalResult { Value = 1 };
+                }
+
+                if (string.IsNullOrEmpty(strCategory)
+                    && string.IsNullOrEmpty(strName)
+                    && StringUtil.IsInList("rightsTable", strChangedElements))
+                {
+                    WpfClientInfo.WriteInfoLog("根据 dp2library 操作日志感知到 library.xml 中 rightsTable 元素内容发生变化");
+
+                    // 获得读者借阅权限定义
+                    var result = ShelfData.GetRightsTableFromServer();
+                    if (result.Value == -1)
+                    {
+                        WpfClientInfo.WriteErrorLog($"同步获取读者借阅权限定义时出错: {result.ErrorInfo}");
+                        // TODO: 延时后尝试重新获取?
+                    }
+                    else
+                    {
+                        string strOperTime = DomUtil.GetElementText(domLog.DocumentElement, "operTime");
+                        // DateTime operTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime);
+
+                        WpfClientInfo.WriteInfoLog($"更新读者权限定义。操作日志创建时间 {strOperTime}");
+                    }
+                }
+
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                WpfClientInfo.WriteErrorLog($"TraceConfigChanged() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"TraceConfigChanged() 出现异常: {ex.Message}"
+                };
+            }
+        }
 
         /*
 <root>

@@ -14,6 +14,7 @@ using System.Messaging;
 using System.Security.Principal;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 using MongoDB.Driver;
 using MongoDB.Bson;
@@ -1135,6 +1136,18 @@ namespace DigitalPlatform.LibraryServer
                             "privilegedIpList",
                             "");
                         this.SessionTable.SpecialIpList = StringUtil.SplitList(strList, ',');
+
+                        /*
+                        // DownloadBandwidth
+                        nRet = DomUtil.GetIntegerParam(node,
+"downloadBandwidth",
+-1,
+out long big_value,
+out strError);
+                        if (nRet == -1)
+                            app.WriteErrorLog(strError);
+                        this.DownloadBandwidth = big_value;
+                        */
                     }
                     else
                     {
@@ -1144,7 +1157,11 @@ namespace DigitalPlatform.LibraryServer
                             this.SessionTable.MaxSessionsLocalHost = 150;
                             this.SessionTable.SpecialIpList = null;
                         }
+
+                        // this.DownloadBandwidth = -1;
                     }
+
+                    // this.InitialRateLimit();
 
                     // <cataloging>
                     node = dom.DocumentElement.SelectSingleNode("cataloging") as XmlElement;
@@ -1338,7 +1355,7 @@ namespace DigitalPlatform.LibraryServer
                     node = dom.DocumentElement.SelectSingleNode("messageServer") as XmlElement;
                     if (node != null)
                     {
-                        app._mserverUrl = node.GetAttribute( "url");
+                        app._mserverUrl = node.GetAttribute("url");
                         app._mserverUserName = node.GetAttribute("userName");
                         app._mserverPassword = DecryptPassword(node.GetAttribute("password"));
                     }
@@ -2016,6 +2033,11 @@ namespace DigitalPlatform.LibraryServer
                     strError = "LoadCfg() 抛出异常: " + ExceptionUtil.GetDebugText(ex);
                     goto ERROR1;
                 }
+
+                // 2022/3/16
+                OnLibraryXmlChanged(
+                    bReload ? "change" : "memory", // 分别表示确认修改，和快照记忆。所以快照记忆就是 dp2library 首次启动时候记忆一次，但并不太明确是否比上次 down 之前发生过修改
+                    bReload ? "library.xml 被重新装载" : "dp2library 启动时记载");
 
                 // 增量完整装载次数
                 if (bReload == false)
@@ -3050,6 +3072,281 @@ namespace DigitalPlatform.LibraryServer
                 this.Filters.ClearFilter(e.FullPath);
             }
         }
+
+        #region library.xml 变化感知
+
+        // 改变前的 library.xml 内容
+        string _oldLibraryXmlString = null;
+
+        // 2022/3/16
+        // 处理 library.xml 变化后的事宜
+        void OnLibraryXmlChanged(string strAction, string strComment)
+        {
+            string strError = "";
+
+            string new_xml = "";
+            if (this._libraryCfgDom != null && this._libraryCfgDom.DocumentElement != null)
+                new_xml = this._libraryCfgDom.DocumentElement.OuterXml;
+
+            // 如果发生了实质性变化，写入操作日志
+            if (_oldLibraryXmlString != new_xml)
+            {
+                var changed_elements = DiffTwoXml(_oldLibraryXmlString, new_xml);
+
+                string old_temp = _oldLibraryXmlString;
+                if (FilterLibraryXml(ref old_temp, out strError) == -1)
+                    this.WriteErrorLog($"过滤 old_xml 时出错: {strError}");
+                string new_temp = new_xml;
+                if (FilterLibraryXml(ref new_temp, out strError) == -1)
+                    this.WriteErrorLog($"过滤 old_xml 时出错: {strError}");
+                if (WriteConfigChangedOperLog(
+                    strAction,
+                    null,
+                    null,
+                    old_temp,
+                    new_temp,
+                    strComment,
+                    changed_elements,
+                    out strError) == -1)
+                {
+                    this.WriteErrorLog(strError);
+                    return;
+                }
+            }
+
+            // 记忆下来，供以后比较
+            _oldLibraryXmlString = new_xml;
+        }
+
+        // 比较两个 XML 字符串，到底是根元素下的哪些一级元素发生了变化。
+        List<string> DiffTwoXml(string old_xml, string new_xml)
+        {
+            List<string> results = new List<string>();
+
+            try
+            {
+                XmlDocument old_dom = new XmlDocument();
+                if (string.IsNullOrEmpty(old_xml))
+                    old_dom.LoadXml("<root />");
+                else
+                    old_dom.LoadXml(old_xml);
+
+                XmlDocument new_dom = new XmlDocument();
+                if (string.IsNullOrEmpty(new_xml))
+                    new_dom.LoadXml("<root />");
+                else
+                    new_dom.LoadXml(new_xml);
+
+                var old_elements = GetElements(old_dom);
+                StringUtil.RemoveDupNoSort(ref old_elements);
+                var new_elements = GetElements(new_dom);
+                StringUtil.RemoveDupNoSort(ref new_elements);
+
+                // 两个空集合
+                if (old_elements.Count == 0 && new_elements.Count == 0)
+                    return results;
+
+                if (old_elements.Count == 0 || new_elements.Count == 0)
+                    results.Add("[all]");   // 表示全部一级元素都发生了变化
+
+                var union_elements = old_elements.AsQueryable().Union(new_elements).Distinct().ToList();
+
+                foreach (var name in union_elements)
+                {
+                    XmlElement old_node = old_dom.DocumentElement.SelectSingleNode(name) as XmlElement;
+                    XmlElement new_node = new_dom.DocumentElement.SelectSingleNode(name) as XmlElement;
+                    if (CompareOuterXml(old_node, new_node) != 0)
+                        results.Add(name);
+                }
+
+                return results;
+            }
+            catch (Exception ex)
+            {
+                this.WriteErrorLog($"DiffTwoXml() 出现异常: {ExceptionUtil.GetDebugText(ex)}\r\nold_xml='{old_xml}\r\nnew_xml='{new_xml}''");
+                return results;
+            }
+        }
+
+        // 获得根元素下第一级元素的元素名集合
+        static List<string> GetElements(XmlDocument dom)
+        {
+            List<string> results = new List<string>();
+
+            var nodes = dom.DocumentElement.SelectNodes("*");
+            foreach (XmlElement node in nodes)
+            {
+                results.Add(node.Name);
+            }
+
+            return results;
+        }
+
+        static int CompareOuterXml(XmlElement element1, XmlElement element2)
+        {
+            string xml1 = "";
+            if (element1 != null)
+                xml1 = element1.OuterXml;
+            string xml2 = "";
+            if (element2 != null)
+                xml2 = element2.OuterXml;
+            return string.CompareOrdinal(xml1, xml2);
+        }
+
+        int WriteConfigChangedOperLog(
+            string strAction,
+            string strCategory,
+    string strName,
+    string strOldValue,
+    string strValue,
+    string strComment,
+    List<string> changed_elements,
+    // string strLibraryCodeList,
+    out string strError)
+        {
+            try
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "configChanged");
+
+                if (string.IsNullOrEmpty(strAction) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "action",
+        strAction);
+
+                if (string.IsNullOrEmpty(strCategory) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "category",
+        strCategory);
+
+                if (string.IsNullOrEmpty(strName) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "name",
+        strName);
+
+                if (changed_elements != null && changed_elements.Count > 0)
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "changedElements", StringUtil.MakePathList(changed_elements, ","));
+
+                if (string.IsNullOrEmpty(strOldValue) == false)
+                    DomUtil.SetElementTextEx(domOperLog.DocumentElement,
+        "oldValue",
+        strOldValue);
+
+                if (string.IsNullOrEmpty(strValue) == false)
+                    DomUtil.SetElementTextEx(domOperLog.DocumentElement,
+        "value",
+        strValue);
+
+                if (string.IsNullOrEmpty(strComment) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "comment",
+        strComment);
+
+                /*
+                // 请求者所管辖的分馆代码列表
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "libraryCodeList",
+    strLibraryCodeList);
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+        sessioninfo.UserID);
+                */
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                int nRet = this.OperLog.WriteOperLog(domOperLog,
+                    "localhost",
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "library.xml 修改后自动写入日志时发生错误: " + strError;
+                    return -1;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = $"library.xml 修改后自动写入日志时发生异常: {ExceptionUtil.GetDebugText(ex)}";
+                return -1;
+            }
+        }
+
+        // 过滤掉 library.xml 内容中的一些不必要的元素
+        int FilterLibraryXml(ref string xml,
+            out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(xml))
+                return 0;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(xml);
+            }
+            catch (Exception ex)
+            {
+                strError = $"XML 装入 DOM 出现异常: {ex.Message}";
+                return -1;
+            }
+
+            if (dom.DocumentElement == null)
+                return 0;
+
+            int changed_count = 0;
+            if (CutElement(dom, "accounts"))
+                changed_count++;
+
+            if (ClipVirtualDatabases(dom))
+                changed_count++;
+
+            if (changed_count > 0)
+                xml = dom.DocumentElement.OuterXml;
+
+            return changed_count;
+        }
+
+        // 剪切掉 virtualDatabases/database 元素的 InnerXml
+        static bool ClipVirtualDatabases(XmlDocument dom)
+        {
+            if (dom == null || dom.DocumentElement == null)
+                return false;
+            bool changed = false;
+            var databases = dom.DocumentElement.SelectNodes("virtualDatabases/database");
+            foreach (XmlElement database in databases)
+            {
+                database.InnerXml = "";
+                changed = true;
+            }
+            return changed;
+        }
+
+        static bool CutElement(XmlDocument dom,
+            string element_name)
+        {
+            bool changed = false;
+            var nodes = dom.DocumentElement.SelectNodes(element_name);
+            foreach (XmlElement node in nodes)
+            {
+                node.InnerXml = "";
+                node.SetAttribute("_removed", "");
+                changed = true;
+            }
+
+            return changed;
+        }
+
+        #endregion
 
         // 读入<readerdbgroup>相关配置
         // return:

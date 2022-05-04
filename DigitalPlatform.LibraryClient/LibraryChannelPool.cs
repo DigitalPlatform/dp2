@@ -38,7 +38,7 @@ namespace DigitalPlatform.LibraryClient
         /// <summary>
         /// 最多通道数
         /// </summary>
-        public int MaxCount = 50;
+        public int MaxCount = 50;   // 50
 
         internal ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         internal static int m_nLockTimeout = 5000;	// 5000=5秒

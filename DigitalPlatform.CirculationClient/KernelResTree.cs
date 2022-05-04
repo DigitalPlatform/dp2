@@ -942,96 +942,10 @@ namespace DigitalPlatform.CirculationClient
             e1.FileNames = paths;
             this.DownloadFiles(this, e1);
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+            {
+                strError = e1.ErrorInfo;
                 goto ERROR1;
-#if NO
-            FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
-
-            dir_dlg.Description = "请指定下载目标文件夹";
-            dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
-            dir_dlg.ShowNewFolderButton = true;
-            dir_dlg.SelectedPath = _usedDownloadFolder;
-
-            if (dir_dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            _usedDownloadFolder = dir_dlg.SelectedPath;
-
-            string strTargetPath = Path.Combine(dir_dlg.SelectedPath, Path.GetFileName(strPath));
-
-            bool bAppend = false;   // 是否继续下载?
-            // 观察目标文件是否已经存在
-            if (File.Exists(strTargetPath))
-            {
-                DialogResult result = MessageBox.Show(this,
-    "目标文件 '" + strTargetPath + "' 已经存在。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃下载]",
-    "KernelResTree",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Cancel)
-                    return;
-                if (result == DialogResult.Yes)
-                    bAppend = true;
             }
-
-            LibraryChannel channel = null;
-            TimeSpan old_timeout = new TimeSpan(0);
-
-            channel = this.CallGetChannel(true);
-
-            old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 5, 0);
-
-            FileDownloadDialog dlg = new FileDownloadDialog();
-            dlg.Font = this.Font;
-            dlg.SourceFilePath = strPath;
-            dlg.TargetFilePath = strTargetPath;
-            // dlg.TopMost = true;
-            dlg.Show(this);
-
-            DynamicDownloader downloader = new DynamicDownloader(channel,
-                strPath,
-                strTargetPath);
-            downloader.Tag = dlg;
-
-            _downloaders.Add(downloader);
-
-            downloader.Closed += new EventHandler(delegate(object o1, EventArgs e1)
-                {
-                    if (channel != null)
-                    {
-                        channel.Timeout = old_timeout;
-                        this.CallReturnChannel(channel, true);
-                        channel = null;
-                    }
-                    DisplayDownloaderErrorInfo(downloader);
-                    RemoveDownloader(downloader);
-                    this.Invoke((Action)(() =>
-                    {
-                        dlg.Close();
-                    }));
-                });
-            downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate(object o1, DownloadProgressChangedEventArgs e1)
-            {
-                if (dlg.IsDisposed == false)
-                    dlg.SetProgress(e1.BytesReceived, e1.TotalBytesToReceive);
-            });
-            dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
-                {
-                    downloader.Cancel();
-
-                    if (channel != null)
-                    {
-                        channel.Timeout = old_timeout;
-                        this.CallReturnChannel(channel, true);
-                        channel = null;
-                    }
-                    DisplayDownloaderErrorInfo(downloader);
-                    RemoveDownloader(downloader);
-                });
-
-            downloader.StartDownload(bAppend);
-#endif
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1100,7 +1014,10 @@ namespace DigitalPlatform.CirculationClient
             e1.FileNames = paths;
             this.DownloadFiles(this, e1);
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+            {
+                strError = e1.ErrorInfo;
                 goto ERROR1;
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);

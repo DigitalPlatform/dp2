@@ -896,20 +896,25 @@ namespace dp2SSL
                     App.SetSize(bookInfoWindow, "wide");
                     //bookInfoWindow.Width = Math.Min(1000, this.ActualWidth);
                     //bookInfoWindow.Height = Math.Min(700, this.ActualHeight);
-                    bookInfoWindow.Closed += BookInfoWindow_Closed;
+                    bookInfoWindow.Closed += (s1, e1) => {
+                        _bookInfoWindows.Remove(sender as BookInfoWindow);
+                        RemoveLayer();
+                    }; // BookInfoWindow_Closed;
                     bookInfoWindow.SetBooks(collection);
                     bookInfoWindow.Show();
-                    AddLayer();
+                    AddLayer(); // Closed 事件会 RemoveLayer()
                     _bookInfoWindows.Add(bookInfoWindow);
                 }));
             }
         }
 
+        /*
         private void BookInfoWindow_Closed(object sender, EventArgs e)
         {
             _bookInfoWindows.Remove(sender as BookInfoWindow);
             RemoveLayer();
         }
+        */
 
         // 当前读者卡状态是否 OK?
         static bool IsPatronOK(Patron patron, string action, out string message)
@@ -1029,11 +1034,11 @@ namespace dp2SSL
                 progress.MessageText = start_message;
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                progress.Closed += Progress_Closed;
+                progress.Closed += (s, e) => { RemoveLayer(); };// Progress_Closed;
                 //if (StringUtil.IsInList("button_ok", style))
                 //    progress.okButton.Content = "确定";
                 progress.Show();
-                AddLayer();
+                AddLayer(); // Closed 事件会 RemoveLayer()
             }));
 
             string result_message = func?.Invoke(progress);
@@ -1067,11 +1072,11 @@ namespace dp2SSL
                 App.SetSize(progress, "tall");
                 //progress.Width = Math.Min(700, this.ActualWidth);
                 //progress.Height = Math.Min(900, this.ActualHeight);
-                progress.Closed += Progress_Closed;
+                progress.Closed += (s, e) => { RemoveLayer(); };// Progress_Closed;
                 if (StringUtil.IsInList("button_ok", style))
                     progress.okButton.Content = "确定";
                 progress.Show();
-                AddLayer();
+                AddLayer(); // Closed 事件会 RemoveLayer()
             }));
 
 
@@ -2220,6 +2225,7 @@ namespace dp2SSL
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += (s, e) =>
                 {
+                    RemoveLayer();  // 2022/3/19
                     errors.Add("初始化被取消");
                     _initialCancelled = true;
                     eventCancel.Set();
@@ -2295,7 +2301,7 @@ namespace dp2SSL
                 progress.EnableRetryOpenButtons(false);
                 // progress.okButton.Content = "取消";
                 progress.Show();
-                AddLayer();
+                AddLayer(); // Closed 事件会 RemoveLayer()
             }));
 
             try
@@ -2853,10 +2859,12 @@ namespace dp2SSL
             finally
             {
                 // _firstInitial = true;   // 第一次初始化已经完成
+                /*
                 App.Invoke(new Action(() =>
                 {
                     RemoveLayer();
                 }));
+                */
 
                 if (_initialCancelled == false)
                 {
@@ -3115,7 +3123,7 @@ namespace dp2SSL
                             };
                             bookInfoWindow.SetBooks(collection);
                             bookInfoWindow.Show();
-                            AddLayer();
+                            AddLayer(); // Closed 事件会 RemoveLayer()
 
                             _bookInfoWindows.Add(bookInfoWindow);
                         }));
@@ -3211,7 +3219,7 @@ namespace dp2SSL
                                         };
                                         bookInfoWindow.SetBooks(collection);
                                         bookInfoWindow.Show();
-                                        AddLayer();
+                                        AddLayer(); // Closed 事件会 RemoveLayer()
 
                                         _bookInfoWindows.Add(bookInfoWindow);
                                     }));
@@ -3779,7 +3787,7 @@ namespace dp2SSL
                     }
                 };
                 _passwordDialog.Show();
-                AddLayer();
+                AddLayer(); // Closed 事件会 RemoveLayer
             }));
 
             // 等待对话框关闭
@@ -4019,10 +4027,12 @@ namespace dp2SSL
         }
         */
 
+        /*
         private void Progress_Closed(object sender, EventArgs e)
         {
             RemoveLayer();
         }
+        */
 
         /*
         void AddLayer()

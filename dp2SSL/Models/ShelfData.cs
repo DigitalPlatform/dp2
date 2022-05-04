@@ -705,6 +705,18 @@ namespace dp2SSL
         // 从 dp2library library.xml 中获取的 RFID 配置信息
         static XmlDocument _rfidCfgDom = null;
 
+        // 2022/3/17
+        // library.xml 中 rfid 元素定义
+        public static string RfidXml
+        {
+            get
+            {
+                if (_rfidCfgDom == null || _rfidCfgDom.DocumentElement == null)
+                    return "";
+                return _rfidCfgDom.DocumentElement.OuterXml;
+            }
+        }
+
         // exception:
         //      可能会抛出异常
         public static NormalResult InitialShelf()
@@ -814,6 +826,13 @@ namespace dp2SSL
                     _rfidCfgDom.LoadXml(result.Xml);
 
                     _libraryName = result.LibraryName;
+
+                    if (result.XmlChanged)
+                    {
+                        WpfClientInfo.WriteInfoLog($"[2] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
+                        // 触发重新全量下载册和读者记录
+                        ShelfData.TriggerDownloadEntitiesAndPatrons();
+                    }
                 }
             }
 
@@ -871,6 +890,20 @@ namespace dp2SSL
             return new NormalResult();
         }
 
+        public static void TriggerDownloadEntitiesAndPatrons()
+        {
+            WpfClientInfo.WriteInfoLog("因感知到 library.xml rfid 元素变化，触发重新全量下载册记录和读者记录");
+            App.CurrentApp.SpeakSequence("重新全量下载册记录和读者记录");
+
+            // 停止可能正在进行的长操作
+            ShelfData.StopDownloadPatron();
+            ShelfData.StopDownloadEntity();
+
+            // 重做
+            ShelfData.RedoReplicatePatron();
+            ShelfData.RestartReplicateEntities();
+        }
+
         public static NormalResult GetRightsTableFromServer()
         {
             // 获得读者借阅权限定义
@@ -909,7 +942,7 @@ namespace dp2SSL
 
             if (cfg_dom == null)
             {
-                var prepare_result = PrepareConfigDom();
+                var prepare_result = EnsureConfigDom();
                 if (prepare_result.Value == -1)
                     throw new Exception(prepare_result.ErrorInfo);
                 goto REDO;
@@ -941,7 +974,7 @@ namespace dp2SSL
 
             if (cfg_dom == null)
             {
-                var prepare_result = PrepareConfigDom();
+                var prepare_result = EnsureConfigDom();
                 if (prepare_result.Value == -1)
                     throw new Exception(prepare_result.ErrorInfo);
                 goto REDO;
@@ -1054,7 +1087,10 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
 
 #endif
 
-        static NormalResult PrepareConfigDom()
+        // 确保从 dp2library 获得 library.xml 中的 rfid 元素信息
+        // return:
+        //      result.Value 0: 一般返回 1: rfid 元素信息有变化，已经触发了重新下载册记录和读者记录
+        public static NormalResult EnsureConfigDom()
         {
             _rfidCfgDom = new XmlDocument();
 
@@ -1081,6 +1117,15 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                 _rfidCfgDom.LoadXml(result.Xml);
 
                 _libraryName = result.LibraryName;
+
+                if (result.XmlChanged)
+                {
+                    WpfClientInfo.WriteInfoLog($"[3] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
+                    // 触发重新全量下载册和读者记录
+                    ShelfData.TriggerDownloadEntitiesAndPatrons();
+
+                    return new NormalResult { Value = 1 };
+                }
 
                 return new NormalResult();
             }
@@ -3105,6 +3150,44 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                         }
                         else
                         {
+                            // 2022/3/18
+                            // 检查 transfer 动作里的 Location 成员，如果跨越机构代码，则改为普通上架
+                            await CheckOiChangingAsync(transferins, "in");
+#if REMOVED
+                            List<string> errors = new List<string>();
+                            foreach (var action in transferins)
+                            {
+                                string old_location = action.Entity.Location;
+
+                                // 获取册记录馆藏地
+                                if (old_location == null)
+                                {
+                                    var get_result = await GetEntityDataAsync(action.Entity.GetOiPii(),
+    ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
+                                    if (get_result.Value == -1 || get_result.Value == 0)
+                                    {
+
+                                    }
+                                    else
+                                        old_location = GetLocation(get_result.ItemXml);
+                                }
+
+                                string new_location = action.Location;
+
+                                var error = IsOiChanging(old_location, new_location);
+                                if (error != null)
+                                {
+                                    action.Location = "";   // 不改变
+                                    errors.Add(action.Entity.GetOiPii() + ":" + error);
+                                }
+                            }
+                            if (errors.Count > 0)
+                                App.ErrorBox("调入",
+                                    $"下列 {errors.Count} 册因机构代码可能发生变化，而从调拨改为普通上架: \r\n{StringUtil.MakePathList(errors, "\r\n")}",
+                                    "green");
+#endif
+
+
                             foreach (var action in transferins)
                             {
                                 action.BatchNo = batchNo;
@@ -3220,12 +3303,82 @@ map 为 "海淀分馆/" 可以匹配 "海淀分馆/" "海淀分馆/阅览室" �
                                 action.Location = target;
                                 action.BatchNo = batchNo;
                             }
+
+                            // 2022/3/18
+                            // 检查 transfer 动作里的 Location 成员，如果跨越机构代码，则改为普通下架
+                            await CheckOiChangingAsync(transferouts, "out");
                         }
                     }
                 }
             }
 
             return bAsked;
+        }
+
+        async static Task CheckOiChangingAsync(List<ActionInfo> actions,
+            string direction)
+        {
+            // 检查 transfer 动作里的 Location 成员，如果跨越机构代码，则拒绝移交
+            List<string> errors = new List<string>();
+            foreach (var action in actions)
+            {
+                string new_location = action.Location;
+                if (string.IsNullOrEmpty(new_location))
+                    continue;
+
+                string old_location = action.Entity.Location;
+
+                // 获取册记录馆藏地
+                if (old_location == null)
+                {
+                    var get_result = await GetEntityDataAsync(action.Entity.GetOiPii(),
+ShelfData.LibraryNetworkCondition == "OK" ? "" : "offline");
+                    if (get_result.Value == -1 || get_result.Value == 0)
+                    {
+
+                    }
+                    else
+                        old_location = GetLocation(get_result.ItemXml);
+                }
+
+                var error = IsOiChanging(old_location, new_location);
+                if (error != null)
+                {
+                    action.Location = "";   // 不改变
+                    errors.Add(action.Entity.GetOiPii() + ":" + error);
+                }
+            }
+
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach(string error in errors)
+            {
+                text.AppendLine($"{(i+1)}) {error}");
+                i++;
+            }
+
+            if (errors.Count > 0)
+                App.ErrorBox(direction == "in" ? "调入" : "调出",
+                    $"下列 {errors.Count} 册因机构代码可能发生变化，而从调拨改为普通{(direction == "in" ? "上架" : "下架")}: \r\n{text.ToString()}",
+                    "yellow");
+        }
+
+        // 从册记录中获得馆藏地
+        static string GetLocation(string item_xml)
+        {
+            if (string.IsNullOrEmpty(item_xml))
+                return null;
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(item_xml);
+            }
+            catch
+            {
+                return null;
+            }
+            var location = DomUtil.GetElementText(dom.DocumentElement, "location");
+            return StringUtil.GetPureLocation(location);
         }
 
         // 概括门名字
@@ -7102,6 +7255,36 @@ out string block_map);
         public static TimeSpan ForceWriteLength = TimeSpan.FromDays(30);
 
         #endregion
+
+
+        public static string IsOiChanging(string old_location, string new_location)
+        {
+            string old_oi = "";
+            {
+                ShelfData.GetOwnerInstitution(old_location, out string isil, out string alternative);
+                if (string.IsNullOrEmpty(isil) == false)
+                    old_oi = isil;
+                else if (string.IsNullOrEmpty(alternative) == false)
+                    old_oi = alternative;
+            }
+
+            string new_oi = "";
+            {
+                ShelfData.GetOwnerInstitution(new_location, out string isil, out string alternative);
+                if (string.IsNullOrEmpty(isil) == false)
+                    new_oi = isil;
+                else if (string.IsNullOrEmpty(alternative) == false)
+                    new_oi = alternative;
+            }
+
+            if (string.IsNullOrEmpty(old_oi) && string.IsNullOrEmpty(new_oi))
+                return null;
+
+            if (old_oi == new_oi)
+                return null;
+
+            return $"馆藏地从 '{old_location}' 变为 '{new_location}' 将导致机构代码从 '{old_oi}' 变为 '{new_oi}'";
+        }
 
         /*
         static Operator OperatorFromRequest(RequestItem request)

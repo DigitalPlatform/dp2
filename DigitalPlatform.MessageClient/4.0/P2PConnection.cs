@@ -422,6 +422,14 @@ current_request);
 
         public async Task<SetMessageResult> TrySetMessageAsync(SetMessageRequest request)
         {
+            // 2022/3/31
+            if (HubProxy == null)
+                return new SetMessageResult
+                {
+                    Value = -1,
+                    ErrorInfo = "HubProxy == null"
+                };
+
             int max = 5;
             for (int i = 0; ; i++)
             {

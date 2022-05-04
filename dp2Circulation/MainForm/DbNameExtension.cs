@@ -258,13 +258,15 @@ namespace dp2Circulation
                     results.Add(prop.LibraryCode);
                 }
 
+                /*
                 results.Sort();
                 StringUtil.RemoveDup(ref results, true);
+                */
+                StringUtil.RemoveDupNoSort(ref results);
             }
 
             return results;
         }
-
 
 #if NO
         // 

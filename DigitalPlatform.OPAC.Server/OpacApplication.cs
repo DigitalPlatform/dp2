@@ -521,11 +521,12 @@ namespace DigitalPlatform.OPAC.Server
                     this.ChannelPool.Close();
                     this.ChannelPool.BeforeLogin -= new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
                     this.ChannelPool = null;
-
-                    this.ChannelPool = new LibraryChannelPool();
-                    this.ChannelPool.BeforeLogin -= new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
-                    this.ChannelPool.BeforeLogin += new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
                 }
+
+                this.ChannelPool = new LibraryChannelPool();
+                this.ChannelPool.MaxCount = 50;
+                this.ChannelPool.BeforeLogin -= new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
+                this.ChannelPool.BeforeLogin += new BeforeLoginEventHandle(ChannelPool_BeforeLogin);
 
                 // OPAC服务器
                 // 元素<opacServer>
@@ -775,6 +776,7 @@ namespace DigitalPlatform.OPAC.Server
             return -1;
         }
 
+        // TODO: Login 的 parameters 中增加 clientip=
         public void ChannelPool_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
             if (e.FirstTry == false)
@@ -3691,7 +3693,7 @@ System.Text.Encoding.UTF8))
                 }
                 return 1;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"验证上载文件格式时出错: {ex.Message}";
                 return -1;

@@ -304,11 +304,11 @@
     <comment>AppCirculation.cs</comment>
   </data>
   <data name="续借失败。读者类型s针对图书类型s的借期参数值s规定，不能续借" xml:space="preserve">
-    <value>Renewal request failed. Patron type '{0}' has not been authorized to renew the materials classified as type '{1}'. The setting of the parameter values '{2}' assigned the renewal period (the initial load is assigned by the first parameter).</value>
+    <value>Renewal request failed. {0} has not been authorized to renew the materials classified as type '{1}'. The setting of the parameter values '{2}' assigned the renewal period (the initial load is assigned by the first parameter).</value>
     <comment>AppCirculation.cs</comment>
   </data>
   <data name="续借失败。读者类型s针对图书类型s的借期参数值s规定，只能续借s次" xml:space="preserve">
-    <value>Renew failed. Patron type '{0}' has assigned in parameter values '{2}' that the overall loan period to the materials classified as type '{1}' limited to {3} renewals.</value>
+    <value>Renew failed. {0} has assigned in parameter values '{2}' that the overall loan period to the materials classified as type '{1}' limited to {3} renewals.</value>
     <comment>AppCirculation.cs</comment>
   </data>
   <data name="续借操作被拒绝。不具备renew权限。" xml:space="preserve">

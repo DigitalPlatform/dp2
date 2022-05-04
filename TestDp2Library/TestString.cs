@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using DigitalPlatform.LibraryServer;
+using DigitalPlatform.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestDp2Library
@@ -100,7 +101,81 @@ namespace TestDp2Library
                 return text;
             return System.Text.RegularExpressions.Regex.Unescape(text.Replace("\\w", " "));
         }
+
+        [TestMethod]
+        public void test_compareVersion_01()
+        {
+            try
+            {
+                int ret = StringUtil.CompareVersion("99", "0.02");
+                Assert.Fail("应该抛出异常才对");
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        [TestMethod]
+        public void test_compareVersion_02()
+        {
+
+            int ret = StringUtil.CompareVersion("99.0", "0.02");
+            Assert.IsTrue(ret > 0);
+        }
+
+        [TestMethod]
+        public void test_ParseBandwidth_01()
+        {
+            var source = "1024";
+            long correct = 1024;
+
+            var result = LibraryServerUtil.ParseBandwidth(source);
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_ParseBandwidth_02()
+        {
+            var source = "5K";
+            long correct = 5*1024;
+
+            var result = LibraryServerUtil.ParseBandwidth(source);
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_ParseBandwidth_03()
+        {
+            var source = "12M";
+            long correct = 12 * 1024 * 1024;
+
+            var result = LibraryServerUtil.ParseBandwidth(source);
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_ParseBandwidth_04()
+        {
+            var source = "100G";
+            long correct = (long)100 * 1024 * 1024 * 1024;
+
+            var result = LibraryServerUtil.ParseBandwidth(source);
+            Assert.AreEqual(correct, result);
+        }
+
+        [TestMethod]
+        public void test_ParseBandwidth_05()
+        {
+            var source = "100G1";
+
+            try
+            {
+                var result = LibraryServerUtil.ParseBandwidth(source);
+                Assert.Fail("不应该走到这里");
+            }
+            catch
+            {
+            }
+        }
     }
-
-
 }

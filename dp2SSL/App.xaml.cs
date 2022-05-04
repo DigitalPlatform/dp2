@@ -377,6 +377,13 @@ namespace dp2SSL
                     // WpfClientInfo.WriteInfoLog($"GetRfidCfg() return {result.ToString()}");
                     LibraryName = result.LibraryName;
                     ServerUid = result.ServerUid;
+
+                    if (result.XmlChanged)
+                    {
+                        WpfClientInfo.WriteInfoLog($"[1] 探测到 library.xml 中 rfid 发生变化。\r\n变化前的: {result.OldXml}\r\n变化后的: {result.Xml}");
+                        // 触发重新全量下载册和读者记录
+                        ShelfData.TriggerDownloadEntitiesAndPatrons();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -538,8 +545,7 @@ namespace dp2SSL
                 //
                 await StartMessageSendingAsync("我这台智能书柜启动了！");
 
-                if (App.Function == "智能书柜")
-                    ShelfData.StartMonitorTask();
+                // 原来 StartMonitorTask 在这里
 
                 SelectMode();
 
@@ -560,6 +566,9 @@ namespace dp2SSL
                         WpfClientInfo.WriteErrorLog($"LedDisplay() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 }
+
+                if (App.Function == "智能书柜")
+                    ShelfData.StartMonitorTask();
 
                 _shelfPrepared = true;
                 return new NormalResult();
@@ -2475,7 +2484,6 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 if (StringUtil.IsInList("button_ok", style))
                     progress.okButton.Content = "确定";
                 progress.Show();
-                // AddLayer();
             }));
 
 

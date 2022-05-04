@@ -5404,7 +5404,7 @@ out strError);
                 if (nRet == -1 || nRet < 4)
                 {
                     // text-level: 用户提示
-                    strError = "册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderType + "' 图书类型 '" + strBookType + "' 尚未定义 可借册数 参数, 因此拒绝" + strOperName + "操作";
+                    strError = GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 图书类型 '" + strBookType + "' 尚未定义 可借册数 参数, 因此拒绝" + strOperName + "操作";
                     return -1;
                 }
 
@@ -5416,13 +5416,13 @@ out strError);
                 }
                 catch
                 {
-                    strError = "册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderType + "' 图书类型 '" + strBookType + "' 的 可借册数 参数值 '" + strParamValue + "' 格式有问题, 因此拒绝" + strOperName + "操作";
+                    strError = GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 图书类型 '" + strBookType + "' 的 可借册数 参数值 '" + strParamValue + "' 格式有问题, 因此拒绝" + strOperName + "操作";
                     return -1;
                 }
 
                 if (nThisTypeCount + 1 > nThisTypeMax)
                 {
-                    strError = "读者 '" + strReaderBarcode + "' 所借 '" + strBookType + "' 类图书数量将超过 册所在馆代码 '" + strItemLibraryCode + "' 中 该读者类型 '" + strReaderType + "' 对该图书类型 '" + strBookType + "' 的最多 可借册数 值 '" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
+                    strError = "读者 '" + strReaderBarcode + "' 所借 '" + strBookType + "' 类图书数量将超过 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 对该图书类型 '" + strBookType + "' 的最多 可借册数 值 '" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
                     return 0;
                 }
 
@@ -5444,13 +5444,13 @@ out strError);
                 if (nRet == -1)
                 {
                     // text-level: 用户提示
-                    strError = "在获取册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 可借总册数 参数过程中出错: " + strError + "。因此拒绝" + strOperName + "操作";
+                    strError = "在获取" + GetReaderTypeCaption(strItemLibraryCode,strReaderLibraryCode, strReaderType) + " 的 可借总册数 参数过程中出错: " + strError + "。因此拒绝" + strOperName + "操作";
                     return -1;
                 }
                 if (nRet < 3)
                 {
                     // text-level: 用户提示
-                    strError = "册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderType + "' 尚未定义 可借总册数 参数, 因此拒绝" + strOperName + "操作";
+                    strError = GetReaderTypeCaption( strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 尚未定义 可借总册数 参数, 因此拒绝" + strOperName + "操作";
                     return -1;
                 }
 
@@ -5463,7 +5463,7 @@ out strError);
                 catch
                 {
                     // text-level: 用户提示
-                    strError = "册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 可借总册数 参数值 '" + strParamValue + "' 格式有问题, 因此拒绝" + strOperName + "操作";
+                    strError = GetReaderTypeCaption( strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 的 可借总册数 参数值 '" + strParamValue + "' 格式有问题, 因此拒绝" + strOperName + "操作";
                     return -1;
                 }
 
@@ -5477,7 +5477,7 @@ out strError);
                 if (nCount + 1 > nMax)
                 {
                     // text-level: 用户提示
-                    strError = "读者 '" + strReaderBarcode + "' 所借册数将超过 册所在馆代码 '" + strItemLibraryCode + "' 中 类型 '" + strReaderType + "' 可借总册数 值'" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
+                    strError = "读者 '" + strReaderBarcode + "' 所借册数将超过 " + GetReaderTypeCaption( strItemLibraryCode,strReaderLibraryCode, strReaderType) + " 可借总册数 值'" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
                     return 0;
                 }
             }
@@ -16248,7 +16248,7 @@ out string _);
                         bComputePrice = false;  // goto CONTINUE_OVERDUESTRING;
                     else
                     {
-                        strError = "还书失败。获得 册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 超期违约金因子 参数时发生错误: " + strError;
+                        strError = "还书失败。获得 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 超期违约金因子 参数时发生错误: " + strError;
                         return -1;
                     }
                 }
@@ -16258,7 +16258,7 @@ out string _);
                         bComputePrice = false;  // goto CONTINUE_OVERDUESTRING;
                     else
                     {
-                        strError = "还书失败。册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 超期违约金因子 参数无法获得: " + strError;
+                        strError = "还书失败。" + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 超期违约金因子 参数无法获得: " + strError;
                         return -1;
                     }
                 }
@@ -16431,7 +16431,7 @@ out string _);
                     {
                         if (bForce == true)
                             goto CONTINUE_LOSTING;
-                        strError = "丢失处理失败。获得 册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 丢失违约金因子 参数时发生错误: " + strError;
+                        strError = "丢失处理失败。获得 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 丢失违约金因子 参数时发生错误: " + strError;
                         return -1;
                     }
                     if (nRet < 4)  // nRet == 0
@@ -16439,7 +16439,7 @@ out string _);
                         if (bForce == true)
                             goto CONTINUE_LOSTING;
 
-                        strError = "还书失败。册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 丢失违约金因子 参数无法获得: " + strError;
+                        strError = "还书失败。" + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 丢失违约金因子 参数无法获得: " + strError;
                         return -1;
                     }
 
@@ -16805,6 +16805,38 @@ out string _);
                 return 1;
             }
             return 0;
+        }
+
+        // 获得适合于显示的读者类型字符串
+        static string GetReaderTypeCaption(
+            string strItemLibraryCode,
+            string strReaderLibraryCode,
+            string strReaderType)
+        {
+            // CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentUICulture.Name);
+            var cn = Thread.CurrentThread.CurrentUICulture.Name;
+
+            if (cn.StartsWith("zh"))
+            {
+                if (strItemLibraryCode == strReaderLibraryCode)
+                    return $"册从属馆代码 '{strItemLibraryCode}' 借阅参数中 读者类型 '{strReaderType}'";
+                else
+                    return $"册从属馆代码 '{strItemLibraryCode}' 借阅参数中 读者类型 '{strReaderLibraryCode}/{strReaderType}'";
+            }
+            else
+            {
+                if (strItemLibraryCode == strReaderLibraryCode)
+                    return $"in book library code '{strItemLibraryCode}' patron type '{strReaderType}'";
+                else
+                    return $"in book library code '{strItemLibraryCode}' patron type '{strReaderLibraryCode}/{strReaderType}'";
+            }
+        }
+
+        // 获得适合于显示的读者类型字符串
+        static string GetReaderTypeCaption(string strReaderLibraryCode,
+            string strReaderType)
+        {
+            return $"{strReaderType}(馆代码 '{strReaderLibraryCode}')";
         }
 
         bool EnsureDeleteElement(ref XmlDocument itemdom, string strXPath)
@@ -18082,7 +18114,7 @@ out string _);
                     if (bForce == true)
                         goto DOCHANGE;
                     // text-level: 内部错误
-                    strError = "借阅失败。获得 册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数时发生错误: " + strError;
+                    strError = "借阅失败。获得 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 借期 参数时发生错误: " + strError;
                     return -1;
                 }
                 if (nRet < 4)  // nRet == 0
@@ -18091,7 +18123,7 @@ out string _);
                         goto DOCHANGE;
 
                     // text-level: 内部错误
-                    strError = "借阅失败。册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数无法获得: " + strError;
+                    strError = "借阅失败。" + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 借期 参数无法获得: " + strError;
                     return -1;
                 }
             }
@@ -18105,7 +18137,7 @@ out string _);
                     goto DOCHANGE;
 
                 // text-level: 内部错误
-                strError = "借阅失败。册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "'格式错误";
+                strError = "借阅失败。" + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "'格式错误";
                 return -1;
             }
 
@@ -18119,10 +18151,11 @@ out string _);
                         // text-level: 用户提示
                         strError = string.Format(this.GetString("续借失败。读者类型s针对图书类型s的借期参数值s规定，不能续借"),
                             // "续借失败。读者类型 '{0}' 针对图书类型 '{1}' 的 借期 参数值 '{2}' 规定，不能续借。(所定义的一个期限，是指第一次借阅的期限)"
-                            strReaderLibraryCode + "/" + strReaderType,
+                            GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType),
                             strBookType,
                             strBorrowPeriodList);
 
+                        // Renewal request failed. {0} has not been authorized to renew the materials classified as type '{1}'. The setting of the parameter values '{2}' assigned the renewal period (the initial load is assigned by the first parameter).
                         // "续借失败。读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数值 '" + strBorrowPeriodList + "' 规定，不能续借。(所定义的一个期限，是指第一次借阅的期限)";
                     }
                     else
@@ -18130,10 +18163,11 @@ out string _);
                         // text-level: 用户提示
                         strError = string.Format(this.GetString("续借失败。读者类型s针对图书类型s的借期参数值s规定，只能续借s次"),
                             // "续借失败。读者类型 '{0}' 针对图书类型 '{1}' 的 借期 参数值 '{2}' 规定，只能续借 {3} 次。"
-                            strReaderLibraryCode + "/" + strReaderType,
+                            GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType),
                             strBookType,
                             strBorrowPeriodList,
                             Convert.ToString(aPeriod.Length - 1));
+                        // Renew failed. {0} has assigned in parameter values '{2}' that the overall loan period to the materials classified as type '{1}' limited to {3} renewals.
                         // "续借失败。读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数值 '" + strBorrowPeriodList + "' 规定，只能续借 " + Convert.ToString(aPeriod.Length - 1) + " 次。";
                     }
                     return -1;
@@ -18147,7 +18181,7 @@ out string _);
                         goto DOCHANGE;
 
                     // text-level: 内部错误
-                    strError = "借阅失败。册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "' 格式错误：第 " + Convert.ToString(nNo) + "个部分为空。";
+                    strError = "借阅失败。" + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "' 格式错误：第 " + Convert.ToString(nNo) + "个部分为空。";
                     return -1;
                 }
             }
@@ -18161,7 +18195,7 @@ out string _);
                         goto DOCHANGE;
 
                     // text-level: 内部错误
-                    strError = "借阅失败。册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "' 格式错误：第一部分为空。";
+                    strError = "借阅失败。" + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "' 格式错误：第一部分为空。";
                     return -1;
                 }
             }
@@ -18192,7 +18226,7 @@ out string _);
                         goto DOCHANGE;
 
                     // text-level: 内部错误
-                    strError = "借阅失败。册所在馆代码 '" + strItemLibraryCode + "' 中 读者类型 '" + strReaderLibraryCode + "/" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "' 格式错误：'" +
+                    strError = "借阅失败。" + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 针对图书类型 '" + strBookType + "' 的 借期 参数 '" + strBorrowPeriodList + "' 格式错误：'" +
                          strThisBorrowPeriod + "' 格式错误: " + strError;
                     return -1;
                 }

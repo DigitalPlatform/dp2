@@ -1006,7 +1006,7 @@ namespace dp2Inventory
                 AO_InstitutionId_r = oi,
                 AB_ItemIdentifier_r = itemBarcode,
             };
-            request.SetDefaulValue();//设置其它默认值
+            request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();
@@ -1061,7 +1061,7 @@ namespace dp2Inventory
                 CH_ItemProperties_r = ""
 
             };
-            request.SetDefaulValue();
+            request.SetDefaultValue();
             request.AB_ItemIdentifier_r = itemBarcode;
 
             if (Location != null)
@@ -1119,7 +1119,7 @@ namespace dp2Inventory
                 AO_InstitutionId_r = filter_oi,
                 AA_PatronIdentifier_r = patronBarcode,
             };
-            request.SetDefaulValue();//设置其它默认值
+            request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();
@@ -1173,7 +1173,7 @@ namespace dp2Inventory
                 AB_ItemIdentifier_r = itemBarcode,
                 AO_InstitutionId_r = filter_oi,
             };
-            request.SetDefaulValue();//设置其它默认值
+            request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();
@@ -1228,7 +1228,7 @@ namespace dp2Inventory
                 AB_ItemIdentifier_r = itemBarcode,
                 AO_InstitutionId_r = filter_oi,
             };
-            request.SetDefaulValue();//设置其它默认值
+            request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();
@@ -1283,7 +1283,7 @@ namespace dp2Inventory
                 AA_PatronIdentifier_r = patronBarcode,
                 AB_ItemIdentifier_o = itemBarcode,
             };
-            request.SetDefaulValue();//设置其它默认值
+            request.SetDefaultValue();//设置其它默认值
 
             // 发送和接收消息
             string requestText = request.ToText();

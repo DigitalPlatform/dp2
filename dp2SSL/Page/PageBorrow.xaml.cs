@@ -98,7 +98,11 @@ namespace dp2SSL
                     Owner = Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
-                videoRecognition.Closed += VideoRecognition_Closed;
+                videoRecognition.Closed += (s1, e1) => {
+                    FaceManager.CancelRecognitionFace();
+                    _stopVideo = true;
+                    RemoveLayer();
+                };  // VideoRecognition_Closed;
                 videoRecognition.Show();
             }));
             _stopVideo = false;
@@ -200,12 +204,14 @@ namespace dp2SSL
             }
         }
 
+        /*
         private void VideoRecognition_Closed(object sender, EventArgs e)
         {
             FaceManager.CancelRecognitionFace();
             _stopVideo = true;
             RemoveLayer();
         }
+        */
 
         void EnableControls(bool enable)
         {
@@ -1917,9 +1923,9 @@ out string strError);
                 progress.MessageText = "正在处理，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                progress.Closed += Progress_Closed;
+                progress.Closed += (s, e) => { RemoveLayer(); };   // Progress_Closed;
                 progress.Show();
-                AddLayer();
+                AddLayer(); // Closed 事件会 RemoveLayer()
             }));
 
             // 检查读者卡状态是否 OK
@@ -2445,10 +2451,12 @@ out string strError);
                 DateTime.Now);
         }
 
+        /*
         private void Progress_Closed(object sender, EventArgs e)
         {
             RemoveLayer();
         }
+        */
 
         NormalResult SetEAS(string uid, string antenna, bool enable)
         {
@@ -3077,9 +3085,13 @@ out string strError);
                     Owner = Application.Current.MainWindow,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner
                 };
-                videoRegister.Closed += VideoRegister_Closed;
+                videoRegister.Closed += (s, e)=> {
+                    FaceManager.CancelGetFeatureString();
+                    _stopVideo = true;
+                    RemoveLayer();
+                }; // VideoRegister_Closed;
                 videoRegister.Show();
-                AddLayer();
+                AddLayer(); // Closed 事件会 RemoveLayer()
             }));
             try
             {
@@ -3707,12 +3719,14 @@ string usage)
 
 #endif
 
+        /*
         private void VideoRegister_Closed(object sender, EventArgs e)
         {
             FaceManager.CancelGetFeatureString();
             _stopVideo = true;
             RemoveLayer();
         }
+        */
 
 #if OLDVERSION
         async Task<GetFeatureStringResult> GetFeatureStringAsync(string style)
@@ -4333,7 +4347,7 @@ string usage)
                         _commands.Clear();
                 };
                 progress.Show();
-                AddLayer();
+                AddLayer(); // Closed 事件会 RemoveLayer()
             }));
 
             // 如果正在倒计时

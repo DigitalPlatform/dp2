@@ -55,6 +55,7 @@
             this.tabPage_channel = new System.Windows.Forms.TabPage();
             this.label_channel_message = new System.Windows.Forms.Label();
             this.tabPage_blackList = new System.Windows.Forms.TabPage();
+            this.columnHeader_lastTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip_channel.SuspendLayout();
             this.tabControl_main.SuspendLayout();
             this.tabPage_channel.SuspendLayout();
@@ -62,6 +63,7 @@
             // 
             // toolStrip_channel
             // 
+            this.toolStrip_channel.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip_channel.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this.toolStripTextBox_IP,
@@ -74,38 +76,41 @@
             this.toolStripButton_refresh,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_channel.Location = new System.Drawing.Point(3, 3);
+            this.toolStrip_channel.Location = new System.Drawing.Point(6, 5);
             this.toolStrip_channel.Name = "toolStrip_channel";
-            this.toolStrip_channel.Size = new System.Drawing.Size(472, 25);
+            this.toolStrip_channel.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
+            this.toolStrip_channel.Size = new System.Drawing.Size(871, 38);
             this.toolStrip_channel.TabIndex = 0;
             this.toolStrip_channel.Text = "toolStrip1";
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(22, 22);
+            this.toolStripLabel1.Size = new System.Drawing.Size(36, 32);
             this.toolStripLabel1.Text = "IP:";
             // 
             // toolStripTextBox_IP
             // 
+            this.toolStripTextBox_IP.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBox_IP.Name = "toolStripTextBox_IP";
-            this.toolStripTextBox_IP.Size = new System.Drawing.Size(100, 25);
+            this.toolStripTextBox_IP.Size = new System.Drawing.Size(180, 38);
             // 
             // toolStripLabel2
             // 
             this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(47, 22);
+            this.toolStripLabel2.Size = new System.Drawing.Size(80, 32);
             this.toolStripLabel2.Text = "用户名:";
             // 
             // toolStripTextBox_UserName
             // 
+            this.toolStripTextBox_UserName.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.toolStripTextBox_UserName.Name = "toolStripTextBox_UserName";
-            this.toolStripTextBox_UserName.Size = new System.Drawing.Size(100, 25);
+            this.toolStripTextBox_UserName.Size = new System.Drawing.Size(180, 38);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_count
             // 
@@ -113,7 +118,7 @@
             this.toolStripButton_count.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_count.Image")));
             this.toolStripButton_count.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_count.Name = "toolStripButton_count";
-            this.toolStripButton_count.Size = new System.Drawing.Size(36, 22);
+            this.toolStripButton_count.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_count.Text = "概览";
             this.toolStripButton_count.Click += new System.EventHandler(this.toolStripButton_channel_count_Click);
             // 
@@ -123,14 +128,14 @@
             this.toolStripButton_detail.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_detail.Image")));
             this.toolStripButton_detail.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_detail.Name = "toolStripButton_detail";
-            this.toolStripButton_detail.Size = new System.Drawing.Size(36, 22);
+            this.toolStripButton_detail.Size = new System.Drawing.Size(58, 32);
             this.toolStripButton_detail.Text = "详情";
             this.toolStripButton_detail.Click += new System.EventHandler(this.toolStripButton_channel_detail_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 38);
             // 
             // toolStripButton_refresh
             // 
@@ -138,7 +143,7 @@
             this.toolStripButton_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_refresh.Image")));
             this.toolStripButton_refresh.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_refresh.Name = "toolStripButton_refresh";
-            this.toolStripButton_refresh.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_refresh.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_refresh.Text = "刷新";
             this.toolStripButton_refresh.Click += new System.EventHandler(this.toolStripButton_channel_refresh_Click);
             // 
@@ -149,7 +154,7 @@
             this.toolStripButton_prevQuery.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prevQuery.Image")));
             this.toolStripButton_prevQuery.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_prevQuery.Name = "toolStripButton_prevQuery";
-            this.toolStripButton_prevQuery.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_prevQuery.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_prevQuery.Text = "后退";
             this.toolStripButton_prevQuery.Click += new System.EventHandler(this.toolStripButton_channel_prevQuery_Click);
             // 
@@ -160,7 +165,7 @@
             this.toolStripButton_nextQuery.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_nextQuery.Image")));
             this.toolStripButton_nextQuery.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_nextQuery.Name = "toolStripButton_nextQuery";
-            this.toolStripButton_nextQuery.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_nextQuery.Size = new System.Drawing.Size(40, 32);
             this.toolStripButton_nextQuery.Text = "前进";
             this.toolStripButton_nextQuery.Click += new System.EventHandler(this.toolStripButton_channel_nextQuery_Click);
             // 
@@ -178,12 +183,14 @@
             this.columnHeader_callCount,
             this.columnHeader_libraryCode,
             this.columnHeader_lang,
-            this.columnHeader_sessionID});
+            this.columnHeader_sessionID,
+            this.columnHeader_lastTime});
             this.listView_channel.FullRowSelect = true;
             this.listView_channel.HideSelection = false;
-            this.listView_channel.Location = new System.Drawing.Point(3, 31);
+            this.listView_channel.Location = new System.Drawing.Point(6, 54);
+            this.listView_channel.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.listView_channel.Name = "listView_channel";
-            this.listView_channel.Size = new System.Drawing.Size(472, 189);
+            this.listView_channel.Size = new System.Drawing.Size(862, 328);
             this.listView_channel.TabIndex = 1;
             this.listView_channel.UseCompatibleStateImageBehavior = false;
             this.listView_channel.View = System.Windows.Forms.View.Details;
@@ -243,9 +250,10 @@
             this.tabControl_main.Controls.Add(this.tabPage_blackList);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(486, 264);
+            this.tabControl_main.Size = new System.Drawing.Size(891, 462);
             this.tabControl_main.TabIndex = 2;
             // 
             // tabPage_channel
@@ -253,10 +261,11 @@
             this.tabPage_channel.Controls.Add(this.label_channel_message);
             this.tabPage_channel.Controls.Add(this.listView_channel);
             this.tabPage_channel.Controls.Add(this.toolStrip_channel);
-            this.tabPage_channel.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_channel.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_channel.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabPage_channel.Name = "tabPage_channel";
-            this.tabPage_channel.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_channel.Size = new System.Drawing.Size(478, 238);
+            this.tabPage_channel.Padding = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.tabPage_channel.Size = new System.Drawing.Size(883, 427);
             this.tabPage_channel.TabIndex = 0;
             this.tabPage_channel.Text = "通道";
             this.tabPage_channel.UseVisualStyleBackColor = true;
@@ -265,27 +274,35 @@
             // 
             this.label_channel_message.AutoSize = true;
             this.label_channel_message.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label_channel_message.Location = new System.Drawing.Point(3, 223);
+            this.label_channel_message.Location = new System.Drawing.Point(6, 401);
+            this.label_channel_message.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_channel_message.Name = "label_channel_message";
-            this.label_channel_message.Size = new System.Drawing.Size(0, 12);
+            this.label_channel_message.Size = new System.Drawing.Size(0, 21);
             this.label_channel_message.TabIndex = 2;
             // 
             // tabPage_blackList
             // 
-            this.tabPage_blackList.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_blackList.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_blackList.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabPage_blackList.Name = "tabPage_blackList";
-            this.tabPage_blackList.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_blackList.Size = new System.Drawing.Size(478, 238);
+            this.tabPage_blackList.Padding = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.tabPage_blackList.Size = new System.Drawing.Size(883, 427);
             this.tabPage_blackList.TabIndex = 1;
             this.tabPage_blackList.Text = "黑名单";
             this.tabPage_blackList.UseVisualStyleBackColor = true;
             // 
+            // columnHeader_lastTime
+            // 
+            this.columnHeader_lastTime.Text = "最后使用时间";
+            this.columnHeader_lastTime.Width = 200;
+            // 
             // ChannelForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(486, 264);
+            this.ClientSize = new System.Drawing.Size(891, 462);
             this.Controls.Add(this.tabControl_main);
+            this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.Name = "ChannelForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -330,5 +347,6 @@
         private System.Windows.Forms.Label label_channel_message;
         private System.Windows.Forms.TabPage tabPage_blackList;
         private System.Windows.Forms.ColumnHeader columnHeader_lang;
+        private System.Windows.Forms.ColumnHeader columnHeader_lastTime;
     }
 }

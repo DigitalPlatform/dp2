@@ -183,6 +183,7 @@ strMetadata,
 "",
 timestamp,
 strStyle,
+out int _,
 out output_timestamp,
 out strError);
                 timestamp = output_timestamp;
@@ -306,6 +307,8 @@ out strError);
 
             // byte[] output_timestamp = null;
 
+            long compressed_start = 0;
+
             string strWarning = "";
 
             TimeSpan old_timeout = channel.Timeout;
@@ -350,7 +353,7 @@ out strError);
                                 + StringUtil.GetLengthText(fi.Length)
                                 + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
                             if (bProgressChange && rl.Count > 0)
-                                stop.SetProgressValue(rl[0].lStart);
+                                stop.SetProgressValue(rl[0].lStart, compressed_start);
                         }
 
                         // 2019/6/23
@@ -374,6 +377,7 @@ out strError);
         // j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
         timestamp,
         strStyle,
+        out int compressed_content_length,
         out output_timestamp,
         out strError);
                         if (channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch)
@@ -382,6 +386,8 @@ out strError);
                         // Debug.WriteLine($"parsed:{ParseTimestamp(timestamp)};{ParseTimestamp(output_timestamp)}");
 
                         timestamp = output_timestamp;
+
+                        compressed_start += compressed_content_length;
 
                         strWarning = "";
 

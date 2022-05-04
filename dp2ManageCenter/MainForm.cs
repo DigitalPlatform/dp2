@@ -2685,7 +2685,7 @@ string strHtml)
                     }
                 }));
             });
-            // 注：启动下载但并不等待
+            // 注：启动下载并等待结束
             await downloader.StartDownload(bAppend, true);
             return new BeginDownloadResult { Value = 1 };
         }
