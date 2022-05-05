@@ -2816,7 +2816,7 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        this.container.KernelApplication.WriteErrorLog("发现除了'" + this.GetCaption("zh-CN") + "'库使用'" + strCfgsDir + "'目录外，还有其它库的使用这个目录，所以不能在删除库时删除目录");
+                        this.WriteErrorLog("发现除了'" + this.GetCaption("zh-CN") + "'库使用'" + strCfgsDir + "'目录外，还有其它库的使用这个目录，所以不能在删除库时删除目录");
                     }
                 }
 

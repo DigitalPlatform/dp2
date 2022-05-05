@@ -211,7 +211,7 @@ namespace DigitalPlatform.rms
                         {
                             strError = "对象目录定义 '" + this.m_strObjectDir + "' 不合法。对象目录不能是根目录";
                             // 给错误日志写一条信息
-                            this.container.KernelApplication.WriteErrorLog(strError);
+                            this.WriteErrorLog(strError);
                             return -1;
                         }
                     }
@@ -230,7 +230,7 @@ namespace DigitalPlatform.rms
                     this.m_lObjectStartSize = lValue;
                 }
 
-                //  在不是MS SQL Server情况下，所有对象都写入对象文件
+                //  在不是 MS SQL Server、Pgsql 情况下，所有对象都写入对象文件
                 if (this.IsMsSqlServer() == false
                     && this.IsPgsql() == false)
                 {
@@ -3396,7 +3396,7 @@ out strError);
                     if (this.container.IsExistCfgsDir(strCfgsDir, this) == true)
                     {
                         // 给错误日志写一条信息
-                        this.container.KernelApplication.WriteErrorLog("发现除了 '" + this.GetCaption("zh-CN") + "' 库使用 '" + strCfgsDir + "' 目录外，还有其它库的使用这个目录，所以不能在删除库时删除目录");
+                        this.WriteErrorLog("发现除了 '" + this.GetCaption("zh-CN") + "' 库使用 '" + strCfgsDir + "' 目录外，还有其它库的使用这个目录，所以不能在删除库时删除目录");
                     }
                     else
                     {
@@ -6096,7 +6096,7 @@ handle.CancelTokenSource.Token).Result;
                     /*
                     // 调试用
                     string strConnectionName = connection.GetHashCode().ToString();
-                    this.container.WriteErrorLog("getimage use connection '"+strConnectionName+"'");
+                    this.WriteErrorLog("getimage use connection '"+strConnectionName+"'");
                      * */
 
                     try  //连接
@@ -7154,7 +7154,7 @@ handle.CancelTokenSource.Token).Result;
             // string strImageFieldName,
             bool bTempField,    // 是否需要从临时 data 字段中提取数据?
             long lStart,
-            int nReadLength,
+            int nReadLength,    // TODO: 如果 nReadLength 太大怎么办? 会引起服务器内存不足么?
             int nMaxLength,
             string strStyle,
             out byte[] destBuffer,
@@ -7199,14 +7199,21 @@ handle.CancelTokenSource.Token).Result;
                     // 小规模 bytea 可以直接获取
                     if (IsPgsql()
                         && StringUtil.IsInList("data", strStyle)
-                        && m_lObjectStartSize > 0 && m_lObjectStartSize <= 100 * 1024)
+                        // && m_lObjectStartSize > 0 && m_lObjectStartSize <= 100 * 1024
+                        && nReadLength <= 100 * 1024)
                         get_data = (dr, current_row_info, data_col_index, newdata_col_index) =>
                         {
                             if (nReadLength == 0)
                                 return;
 
+                            if (string.IsNullOrEmpty(strPartCmd) == false)
+                                return;
+
+                            string data_field_name = RecordRowInfo.GetDataFieldName(current_row_info.Range, out bool mix_mode);
+
                             long current_length = nReadLength;
-                            if (current_row_info.data_length > 0)
+                            if ((data_field_name == "data" || mix_mode == true)
+                                && current_row_info.data_length > 0)
                             {
                                 if (lStart >= current_row_info.data_length)
                                     throw new Exception($"lStart 越过对象尺寸 data_length({current_row_info.data_length})");
@@ -7214,11 +7221,12 @@ handle.CancelTokenSource.Token).Result;
                                     current_length = (int)(current_row_info.data_length - lStart);
                                 else
                                     current_length = Math.Min(nReadLength, current_row_info.data_length - lStart);
-                                if (current_length > 0)
+                                if (current_length > 0 && current_length <= 100 * 1024)
                                     current_row_info.Data = GetData(dr, data_col_index, lStart, current_length);
                             }
 
-                            if (current_row_info.newdata_length > 0)
+                            if ((data_field_name == "newdata" || mix_mode == true)
+                                && current_row_info.newdata_length > 0)
                             {
                                 if (lStart >= current_row_info.newdata_length)
                                     throw new Exception($"lStart 越过对象尺寸 newdata_length({current_row_info.newdata_length})");
@@ -7227,7 +7235,7 @@ handle.CancelTokenSource.Token).Result;
                                     current_length = (int)(current_row_info.newdata_length - lStart);
                                 else
                                     current_length = Math.Min(nReadLength, current_row_info.newdata_length - lStart);
-                                if (current_length > 0)
+                                if (current_length > 0 && current_length <= 100 * 1024)
                                     current_row_info.NewData = GetData(dr, newdata_col_index, lStart, current_length);
                             }
 
@@ -7596,7 +7604,7 @@ handle.CancelTokenSource.Token).Result;
                             catch (Exception ex)
                             {
                                 string strConnectionName = command.Connection.GetHashCode().ToString();
-                                this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                                this.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                                 throw ex;
                             }
                         }
@@ -7847,7 +7855,7 @@ handle.CancelTokenSource.Token).Result;
                         catch (Exception ex)
                         {
                             string strConnectionName = command.Connection.GetHashCode().ToString();
-                            this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                            this.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                             throw ex;
                         }
 
@@ -8236,7 +8244,7 @@ handle.CancelTokenSource.Token).Result;
                             catch (Exception ex)
                             {
                                 string strConnectionName = command.Connection.GetHashCode().ToString();
-                                this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                                this.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                                 throw ex;
                             }
                         }
@@ -8432,7 +8440,7 @@ handle.CancelTokenSource.Token).Result;
                         catch (Exception ex)
                         {
                             string strConnectionName = command.Connection.GetHashCode().ToString();
-                            this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                            this.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                             throw ex;
                         }
                     } // end of using command
@@ -8763,7 +8771,7 @@ handle.CancelTokenSource.Token).Result;
                         catch (Exception ex)
                         {
                             string strConnectionName = command.Connection.GetHashCode().ToString();
-                            this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                            this.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                             throw ex;
                         }
                     } // end of using command
@@ -9078,7 +9086,7 @@ handle.CancelTokenSource.Token).Result;
                         catch (Exception ex)
                         {
                             string strConnectionName = command.Connection.GetHashCode().ToString();
-                            this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                            this.WriteErrorLog("GetImage() ExecuteNonQuery exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                             throw ex;
                         }
 
@@ -9286,7 +9294,7 @@ handle.CancelTokenSource.Token).Result;
                 catch (Exception ex)
                 {
                     string strConnectionName = connection.GetHashCode().ToString();
-                    this.container.KernelApplication.WriteErrorLog("_readPgsqlPartImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                    this.WriteErrorLog("_readPgsqlPartImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                     throw ex;
                 }
                 return destBuffer;
@@ -9352,7 +9360,7 @@ handle.CancelTokenSource.Token).Result;
                     catch (Exception ex)
                     {
                         string strConnectionName = command.Connection.GetHashCode().ToString();
-                        this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                        this.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                         throw ex;
                     }
                 }
@@ -9491,7 +9499,7 @@ handle.CancelTokenSource.Token).Result;
             catch (Exception ex)
             {
                 string strConnectionName = command.Connection.GetHashCode().ToString();
-                this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                this.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                 throw ex;
             }
 
@@ -11696,7 +11704,7 @@ trans);
                 catch (Exception ex)
                 {
                     string strConnectionName = connection.GetHashCode().ToString();
-                    this.container.KernelApplication.WriteErrorLog("_getRowInfos() exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                    this.WriteErrorLog("_getRowInfos() exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
                     throw new Exception(ex.Message, ex);
                 }
                     */
@@ -12244,7 +12252,7 @@ trans);
                             this.container.DelayTables.Remove(table);
                         }
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("MS SQL Server BulkCopy 耗时 " + watch.Elapsed.ToString());
+                        this.WriteErrorLog("MS SQL Server BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
                     #endregion // MS SQL Server
 
@@ -12279,7 +12287,7 @@ trans);
                             this.container.DelayTables.Remove(table);
                         }
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("Oracle BulkCopy 耗时 " + watch.Elapsed.ToString());
+                        this.WriteErrorLog("Oracle BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
                     #endregion // Oracle
 
@@ -12305,7 +12313,7 @@ trans);
                             {
                                 bulkCopy.WriteToServer(table, (text) =>
                                 {
-                                    this.container.KernelApplication.WriteErrorLog(text);
+                                    this.WriteErrorLog(text);
                                 });
                             }
                             finally
@@ -12316,7 +12324,7 @@ trans);
                             this.container.DelayTables.Remove(table);
                         }
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("MySql BulkCopy 耗时 " + watch.Elapsed.ToString());
+                        this.WriteErrorLog("MySql BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
                     #endregion // MySql
 
@@ -12349,7 +12357,7 @@ trans);
                         // this.CommitInternal(false);
                         // connection.Commit(false);
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("SQLite BulkCopy 耗时 " + watch.Elapsed.ToString());
+                        this.WriteErrorLog("SQLite BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
                     #endregion // SQLite
 
@@ -12380,7 +12388,7 @@ trans);
                             this.container.DelayTables.Remove(table);
                         }
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("Oracle BulkCopy 耗时 " + watch.Elapsed.ToString());
+                        this.WriteErrorLog("Oracle BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
                     #endregion // Pgsql
 
@@ -12610,30 +12618,36 @@ trans);
                         bool output = bRebuildKeys ? true : !bFastMode;
                         Delegate_readBytes func = null;
                         if (output)
-                            func = (dr, row_info, data_col_index, newdata_col_index) =>
+                            func = (dr, current_row_info, data_col_index, newdata_col_index) =>
                             {
                                 if (output)
                                 {
-                                    if (row_info.data_length > 0 && data_col_index != -1)
-                                        row_info.Data = GetData(dr, data_col_index, 0, row_info.data_length);
+                                    string data_field_name = RecordRowInfo.GetDataFieldName(current_row_info.Range, out bool mix_mode);
 
-                                    if (row_info.newdata_length > 0 && newdata_col_index != -1)
-                                        row_info.NewData = GetData(dr, newdata_col_index, 0, row_info.newdata_length);
+                                    if ((data_field_name == "data" || mix_mode == true)
+                                        && current_row_info.data_length > 0 && data_col_index != -1
+                                        && current_row_info.data_length <= 100 * 1024)
+                                        current_row_info.Data = GetData(dr, data_col_index, 0, current_row_info.data_length);
+
+                                    if ((data_field_name == "newdata" || mix_mode == true)
+                                        && current_row_info.newdata_length > 0 && newdata_col_index != -1
+                                        && current_row_info.newdata_length <= 100 * 1024)
+                                        current_row_info.NewData = GetData(dr, newdata_col_index, 0, current_row_info.newdata_length);
 
                                     // 注: 混合模式下不读取对象文件。(对象文件中存储的是尚未完全上传完成的对象内容)
-                                    if ((row_info.data_length > 0 || row_info.newdata_length > 0)
-                                        && (string.IsNullOrEmpty(row_info.FileName) == false || string.IsNullOrEmpty(row_info.NewFileName) == false))
+                                    if ((current_row_info.data_length > 0 || current_row_info.newdata_length > 0)
+                                        && (string.IsNullOrEmpty(current_row_info.FileName) == false || string.IsNullOrEmpty(current_row_info.NewFileName) == false))
                                     {
-                                        if (row_info.Range == null || row_info.Range.StartsWith("#") == false)
-                                            throw new ArgumentException($"混合模式时 Range 第一字符应为 '#'。id='{row_info.ID}', range='{row_info.Range}', data_length={row_info.data_length}, newdata_length={row_info.newdata_length}, FileName='{row_info.FileName}', NewFileName='{row_info.NewFileName}'");
+                                        if (current_row_info.Range == null || current_row_info.Range.StartsWith("#") == false)
+                                            throw new ArgumentException($"混合模式时 Range 第一字符应为 '#'。id='{current_row_info.ID}', range='{current_row_info.Range}', data_length={current_row_info.data_length}, newdata_length={current_row_info.newdata_length}, FileName='{current_row_info.FileName}', NewFileName='{current_row_info.NewFileName}'");
                                     }
                                     else
                                     {
                                         // 对象文件
-                                        if (String.IsNullOrEmpty(row_info.Range) == false
-                                            && row_info.Range[0] == '#')
+                                        if (String.IsNullOrEmpty(current_row_info.Range) == false
+                                            && current_row_info.Range[0] == '#')
                                         {
-                                            var ret = ReadObjectFileContent(row_info, out string error);
+                                            var ret = ReadObjectFileContent(current_row_info, out string error);
                                             if (ret == -1)
                                                 throw new Exception(error);
                                         }
@@ -13548,7 +13562,7 @@ trans);
         time_lines,
         start_time,
         "WriteXml 总耗时 ");
-                this.container.KernelApplication.WriteErrorLog(
+                this.WriteErrorLog(
                     "--- 写入 XML 记录的时间超过 1 秒。详情: \r\n"
                     + "记录路径: " + this.GetCaption("zh-CN") + "/" + strID + "\r\n"
                     + StringUtil.MakePathList(time_lines, ";\r\n")
@@ -13575,7 +13589,7 @@ trans);
                 if (nRet == -1 || nRet == -4)
                 {
                     strError += "; 在删除刚创建的记录 '" + strID + "' 时又遇到出错: " + strError1;
-                    this.container.KernelApplication.WriteErrorLog("*** Undo 创建记录过程中出错(此数据库检索点需要重建): " + strError);
+                    this.WriteErrorLog("*** Undo 创建记录过程中出错(此数据库检索点需要重建): " + strError);
                 }
 
                 // 尝试把 id 回收，下次重复使用就好了
@@ -14633,10 +14647,24 @@ trans);
 
                     if (connection.IsMsSqlServer())
                     {
-                        // return:	
-                        //		-1  出错
-                        //		0   成功
-                        nRet = this._writeMsSqlImage(connection,
+                        // 2022/5/5
+                        // MsSqlServer 优化
+                        if (lStartOfTarget == 0
+    && nStartOfBuffer == 0
+    && nNeedReadLength == lTotalLength
+    && bFull == true
+    && baSource.Length == lTotalLength)
+                        {
+                            direct_write_data = baSource;
+                            lCurrentLength = baSource.Length;
+                            nRet = 0;
+                        }
+                        else
+                        {
+                            // return:	
+                            //		-1  出错
+                            //		0   成功
+                            nRet = this._writeMsSqlImage(connection,
                             ref textptr,
                             ref lCurrentLength,   // 当前image的长度在不断的变化着
                             bCanDeleteDuoYu,
@@ -14648,13 +14676,18 @@ trans);
                             nNeedReadLength,
                             lTotalLength,
                             out strError);
-                        if (nRet == 0)
-                        {
-                            // 2022/5/4
-                            if (strDataFieldName == "data")
-                                row_info.Data = null;
-                            else
-                                row_info.NewData = null;
+                            if (nRet == 0)
+                            {
+                                // 2022/5/4
+                                if (strDataFieldName == "data")
+                                {
+                                    row_info.Data = null;
+                                }
+                                else
+                                {
+                                    row_info.NewData = null;
+                                }
+                            }
                         }
                     }
                     else if (connection.IsPgsql())
@@ -16270,7 +16303,7 @@ strID);
                         if (ContainsErrorCode(ex, 1105))
                         {
                             // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
-                            this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                            this.WriteErrorLog("*** 数据库空间不足错误: " + strError);
                         }
                         return -1;
                     }
@@ -16420,7 +16453,7 @@ strID);
                                 return -1;
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             throw ex;
                         }
@@ -16846,7 +16879,7 @@ strID);
 
 #if OLD_CODE
 
-#region MS SQL Server
+            #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 using (SqlCommand command = new SqlCommand("",
@@ -17039,7 +17072,7 @@ strID);
                         if (ContainsErrorCode(ex, 1105))
                         {
                             // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
-                            this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                            this.WriteErrorLog("*** 数据库空间不足错误: " + strError);
                         }
 
                         return -1;
@@ -17060,9 +17093,9 @@ strID);
 
                 return 0;
             }
-#endregion // MS SQL Server
+            #endregion // MS SQL Server
 
-#region SQLite
+            #region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 using (SQLiteCommand command = new SQLiteCommand("",
@@ -17219,9 +17252,9 @@ strID);
                     }
                 } // end of using command
             }
-#endregion // SQLite
+            #endregion // SQLite
 
-#region MySql
+            #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 List<string> lines = new List<string>();
@@ -17300,7 +17333,7 @@ strID);
                                 catch (Exception ex)
                                 {
                                     strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
-                                    this.container.KernelApplication.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
+                                    this.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
                                     return -1;
                                 }
 
@@ -17350,9 +17383,9 @@ strID);
 
                 return 0;
             }
-#endregion // MySql
+            #endregion // MySql
 
-#region Oracle
+            #region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
@@ -17516,7 +17549,7 @@ strID);
                     }
                 } // end of using command
             }
-#endregion // Oracle
+            #endregion // Oracle
 
 #endif
             return 0;
@@ -17877,7 +17910,7 @@ strID);
 
                         if (nResultCount != targetRight.Count + targetLeft.Count)
                         {
-                            this.container.KernelApplication.WriteErrorLog("希望处理的文件数'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'个，实际删除的文件数'" + Convert.ToString(nResultCount) + "'个");
+                            this.WriteErrorLog("希望处理的文件数'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'个，实际删除的文件数'" + Convert.ToString(nResultCount) + "'个");
                         }
                     }
                 } // enf of using command
@@ -17887,7 +17920,7 @@ strID);
 
 #if OLD_CODE
 
-#region MS SQL Server
+        #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -18010,14 +18043,14 @@ strID);
 
                         if (nResultCount != targetRight.Count + targetLeft.Count)
                         {
-                            this.container.KernelApplication.WriteErrorLog("希望处理的文件数'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'个，实际删除的文件数'" + Convert.ToString(nResultCount) + "'个");
+                            this.WriteErrorLog("希望处理的文件数'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'个，实际删除的文件数'" + Convert.ToString(nResultCount) + "'个");
                         }
                     }
                 } // enf of using command
             }
-#endregion // MS SQL Server
+        #endregion // MS SQL Server
 
-#region SQLite
+        #region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 string strCommand = "";
@@ -18140,14 +18173,14 @@ strID);
 
                         if (nResultCount != targetRight.Count + targetLeft.Count)
                         {
-                            this.container.KernelApplication.WriteErrorLog("希望处理的文件数'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'个，实际删除的文件数'" + Convert.ToString(nResultCount) + "'个");
+                            this.WriteErrorLog("希望处理的文件数'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'个，实际删除的文件数'" + Convert.ToString(nResultCount) + "'个");
                         }
                     }
                 } // end of using command
             }
-#endregion // SQLite
+        #endregion // SQLite
 
-#region MySql
+        #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 string strCommand = "";
@@ -18274,17 +18307,17 @@ strID);
 
                         if (nResultCount != targetRight.Count + targetLeft.Count)
                         {
-                            this.container.KernelApplication.WriteErrorLog("希望处理的文件数'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'个，实际删除的文件数'" + Convert.ToString(nResultCount) + "'个");
+                            this.WriteErrorLog("希望处理的文件数'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'个，实际删除的文件数'" + Convert.ToString(nResultCount) + "'个");
                         }
                     }
                 } // end of using command
             }
-#endregion // MySql
+        #endregion // MySql
 
 #endif
 
 #if REMOVED
-#region Oracle
+        #region Oracle
             else if (connection.IsOracle())
             {
                 string strCommand = "";
@@ -18393,7 +18426,7 @@ strID);
                     }
                 } // end of using command
             }
-#endregion // Oracle
+        #endregion // Oracle
 #endif
 
 
@@ -18415,7 +18448,7 @@ strID);
                 catch (Exception ex)
                 {
                     strError = "删除数据库 '" + this.GetCaption("zh-CN") + "' 中 ID为 '" + strID + "' 的对象文件时发生错误: " + ex.Message;
-                    this.container.KernelApplication.WriteErrorLog(strError);
+                    this.WriteErrorLog(strError);
                     return -1;
                 }
             }
@@ -18452,7 +18485,7 @@ strID);
                 strError = "connection为null";
                 return -1;
             }
-#region MS SQL Server
+            #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 if (connection.SqlConnection == null)
@@ -18467,9 +18500,9 @@ strID);
                 }
                 return 0;
             }
-#endregion // MS SQL Server
+            #endregion // MS SQL Server
 
-#region SQLite
+            #region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 if (connection.SQLiteConnection == null)
@@ -18484,9 +18517,9 @@ strID);
                 }
                 return 0;
             }
-#endregion // SQLite
+            #endregion // SQLite
 
-#region MySql
+            #region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 if (connection.MySqlConnection == null)
@@ -18501,9 +18534,9 @@ strID);
                 }
                 return 0;
             }
-#endregion // MySql
+            #endregion // MySql
 
-#region Oracle
+            #region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 if (connection.OracleConnection == null)
@@ -18519,7 +18552,7 @@ strID);
                 }
                 return 0;
             }
-#endregion // Oracle
+            #endregion // Oracle
 
             return 0;
         }
@@ -19206,6 +19239,20 @@ strID);
                 return GetCompleteTimestamp();
             }
 
+            public static string GetDataFieldName(string range, out bool mix_mode)
+            {
+                mix_mode = range != null && range.StartsWith("#");
+                string data_field_name = "";
+                if (mix_mode == false)
+                {
+                    if (range != null && range.StartsWith("!"))
+                        data_field_name = "newdata";
+                    else
+                        data_field_name = "data";
+                }
+
+                return data_field_name;
+            }
         }
 
         // 检查记录在库中是否存在，如果存在在则返回一些字段内容，如果不存在则插入一条新记录
@@ -19243,7 +19290,7 @@ strID);
             // 通用
             {
                 string strCommand = "";
-                if (connection.IsMsSqlServer())
+                if (false/*connection.IsMsSqlServer()*/)
                 {
                     string strSelect =
                         " SELECT TEXTPTR(data)," // 0
@@ -19389,7 +19436,7 @@ strID);
                             if (ContainsErrorCode(ex, 1105))
                             {
                                 // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
-                                this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                                this.WriteErrorLog("*** 数据库空间不足错误: " + strError);
                             }
                             return -1;
                         }
@@ -19424,6 +19471,7 @@ strID);
                     }
                     else
                     {
+                        // proc_readBytes = null;
                         string strSelect = "SELECT "
                             + (proc_readBytes == null ? "" : " data,")
                             + " TEXTPTR(data) as data_textptr," // 0
@@ -19469,52 +19517,75 @@ strID);
                         row_info.NewFileName = "";
                     }
 
-                    using (var result = connection.ExecuteReader(strCommand,
-                        new
-                        {
-                            id = strID,
-                            data = sourceBuffer,
-                            range = row_info.Range,
-                            metadata = row_info.Metadata,
-                            dptimestamp = row_info.TimestampString,
-                            newdptimestamp = row_info.NewTimestampString,
-                        }))
+                    try
                     {
-                        //while (IsPgsql() || result.NextResult())
-                        //{
-                            while (result.Read())
+                        using (var result = connection.ExecuteReader(strCommand,
+                            new
                             {
-                                // row_info.ID = GetString(result, "id");
-                                row_info.data_textptr = GetBytes(result, "data_textptr");
-                                row_info.data_length = GetLong(result, "data_length");
-                                row_info.newdata_textptr = GetBytes(result, "newdata_textptr");
-                                row_info.newdata_length = GetLong(result, "newdata_length");
-
-                                row_info.Range = GetString(result, "range");
-                                row_info.TimestampString = GetString(result, "dptimestamp");
-                                row_info.Metadata = GetString(result, "metadata");
-                                row_info.NewTimestampString = GetString(result, "newdptimestamp");
-                                row_info.FileName = GetString(result, "filename");
-                                row_info.NewFileName = GetString(result, "newfilename");
-
-                                // 2022/5/4
-                                if (proc_readBytes != null)
+                                id = strID,
+                                data = sourceBuffer,
+                                range = row_info.Range,
+                                metadata = row_info.Metadata,
+                                dptimestamp = row_info.TimestampString,
+                                newdptimestamp = row_info.NewTimestampString,
+                            }))
+                        {
+                            while (true)
+                            {
+                                while (result.Read())
                                 {
-                                    int data_col_index = -1;
-                                    int newdata_col_index = -1;
-                                    if (IsPgsql() || IsMsSqlServer())
+                                    // row_info.ID = GetString(result, "id");
+                                    row_info.data_textptr = GetBytes(result, "data_textptr");
+                                    row_info.data_length = GetLong(result, "data_length");
+                                    row_info.newdata_textptr = GetBytes(result, "newdata_textptr");
+                                    row_info.newdata_length = GetLong(result, "newdata_length");
+
+                                    row_info.Range = GetString(result, "range");
+                                    row_info.TimestampString = GetString(result, "dptimestamp");
+                                    row_info.Metadata = GetString(result, "metadata");
+                                    row_info.NewTimestampString = GetString(result, "newdptimestamp");
+                                    row_info.FileName = GetString(result, "filename");
+                                    row_info.NewFileName = GetString(result, "newfilename");
+
+                                    // 2022/5/4
+                                    if (proc_readBytes != null)
                                     {
-                                        data_col_index = result.GetOrdinal("data");
-                                        Debug.Assert(data_col_index != -1);
-                                        newdata_col_index = result.GetOrdinal("newdata");
-                                        Debug.Assert(newdata_col_index != -1);
+                                        int data_col_index = -1;
+                                        int newdata_col_index = -1;
+                                        if (IsPgsql() || IsMsSqlServer())
+                                        {
+                                            data_col_index = result.GetOrdinal("data");
+                                            Debug.Assert(data_col_index != -1);
+                                            newdata_col_index = result.GetOrdinal("newdata");
+                                            Debug.Assert(newdata_col_index != -1);
+                                        }
+                                        proc_readBytes?.Invoke(result, row_info, data_col_index, newdata_col_index);
                                     }
-                                    proc_readBytes?.Invoke(result, row_info, data_col_index, newdata_col_index);
+
+                                    return 0;
                                 }
 
-                                return 0;
+                                if (IsMsSqlServer())
+                                {
+                                    if (result.NextResult() == false)
+                                        break;
+                                }
+                                else
+                                    break;
                             }
-                        //}
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        strError = "插入数据行时出错，记录路径'" + this.GetCaption("zh-CN") + "/" + strID + "，原因：" + ex.Message;
+
+                        // 检查 SQL 错误码
+                        if (ContainsErrorCode(ex, 1105))
+                        {
+                            // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
+                            this.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                        }
+                        return -1;
                     }
 
                     /*
@@ -19658,7 +19729,7 @@ strID);
                             if (ContainsErrorCode(ex, 1105))
                             {
                                 // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
-                                this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                                this.WriteErrorLog("*** 数据库空间不足错误: " + strError);
                             }
                             return -1;
                         }
@@ -19928,7 +19999,7 @@ strID);
                         if (ContainsErrorCode(ex, 1105))
                         {
                             // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
-                            this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                            this.WriteErrorLog("*** 数据库空间不足错误: " + strError);
                         }
                         return -1;
                     }
@@ -22166,7 +22237,7 @@ out strError);
                         nDeletedCount = command.ExecuteNonQuery();
                         if (nDeletedCount != 1)
                         {
-                            this.container.KernelApplication.WriteErrorLog("希望删除" + strID + " '1'条，实际删除'" + Convert.ToString(nDeletedCount) + "'个");
+                            this.WriteErrorLog("希望删除" + strID + " '1'条，实际删除'" + Convert.ToString(nDeletedCount) + "'个");
                         }
                     } // end of using command
                 }
@@ -22279,7 +22350,7 @@ out strError);
                     nDeletedCount = command.ExecuteNonQuery();
                     if (nDeletedCount != 1)
                     {
-                        this.container.KernelApplication.WriteErrorLog("希望删除" + strID + " '1'条，实际删除'" + Convert.ToString(nDeletedCount) + "'个");
+                        this.WriteErrorLog("希望删除" + strID + " '1'条，实际删除'" + Convert.ToString(nDeletedCount) + "'个");
                     }
                 } // end of using command
             }
@@ -22386,7 +22457,7 @@ out strError);
                     nDeletedCount = command.ExecuteNonQuery();
                     if (nDeletedCount != 1)
                     {
-                        this.container.KernelApplication.WriteErrorLog("希望删除" + strID + " '1'条，实际删除'" + Convert.ToString(nDeletedCount) + "'个");
+                        this.WriteErrorLog("希望删除" + strID + " '1'条，实际删除'" + Convert.ToString(nDeletedCount) + "'个");
                     }
                 } // end of using command
             }
@@ -22500,7 +22571,7 @@ out strError);
                     nDeletedCount = command.ExecuteNonQuery();
                     if (nDeletedCount != 1)
                     {
-                        this.container.KernelApplication.WriteErrorLog("希望删除" + strID + " '1'条，实际删除'" + Convert.ToString(nDeletedCount) + "'个");
+                        this.WriteErrorLog("希望删除" + strID + " '1'条，实际删除'" + Convert.ToString(nDeletedCount) + "'个");
                     }
                     command.Parameters.Clear();
                 } // end of using command
@@ -22537,7 +22608,7 @@ out strError);
                     catch (Exception ex)
                     {
                         strError = "删除数据库 '" + this.GetCaption("zh-CN") + "' 中 ID为 '" + strID + "' 的对象文件时发生错误: " + ex.Message;
-                        this.container.KernelApplication.WriteErrorLog(strError);
+                        this.WriteErrorLog(strError);
                         return -1;
                     }
                 }
@@ -22559,7 +22630,7 @@ out strError);
                         catch (Exception ex)
                         {
                             strError = "删除数据库 '" + this.GetCaption("zh-CN") + "' 中 ID为 '" + strID + "' 的对象文件时发生错误: " + ex.Message;
-                            this.container.KernelApplication.WriteErrorLog(strError);
+                            this.WriteErrorLog(strError);
                             return -1;
                         }
                     }

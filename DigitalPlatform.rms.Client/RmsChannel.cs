@@ -5522,7 +5522,6 @@ ref strNewStyle);	// 不要数据体和metadata
             REDO:
                 try
                 {
-
                     string strMessage = "";
 
                     string strPercent = "";

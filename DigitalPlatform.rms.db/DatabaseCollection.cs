@@ -258,7 +258,7 @@ namespace DigitalPlatform.rms
             }
 
             if (PathUtil.TryClearDir(strTempDir) == false)
-                this.KernelApplication.WriteErrorLog("清除临时文件目录 " + strTempDir + " 时出错");
+                this.WriteErrorLog("清除临时文件目录 " + strTempDir + " 时出错");
 
             this.TempDir = strTempDir;
 
@@ -360,7 +360,7 @@ namespace DigitalPlatform.rms
                         return -1;
                 }
 
-                this.KernelApplication.WriteErrorLog("初始化数据库内存对象完毕。");
+                this.WriteErrorLog("初始化数据库内存对象完毕。");
 
                 /*
                 // 检验各个数据库记录尾号
@@ -481,12 +481,12 @@ namespace DigitalPlatform.rms
                         out string strError);
                     if (nRet == -1)
                     {
-                        this.KernelApplication.WriteErrorLog("DatabaseCollection.Close() flushkeys 出错：" + strError);
+                        this.WriteErrorLog("DatabaseCollection.Close() flushkeys 出错：" + strError);
                     }
                 }
                 catch (Exception ex)
                 {
-                    this.KernelApplication.WriteErrorLog("DatabaseCollection.Close() flushkeys 抛出异常：" + ex.Message);
+                    this.WriteErrorLog("DatabaseCollection.Close() flushkeys 抛出异常：" + ex.Message);
                 }
             }
 
@@ -576,7 +576,7 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    this.KernelApplication.WriteErrorLog("删除 streamCache 文件 " + filename + " 出现异常: " + ExceptionUtil.GetAutoText(ex));
+                                    this.WriteErrorLog("删除 streamCache 文件 " + filename + " 出现异常: " + ExceptionUtil.GetAutoText(ex));
                                 }
                             },
                             token);
@@ -614,7 +614,7 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
-                // this.KernelApplication.WriteErrorLog("开始校验数据库尾号。");
+                // this.WriteErrorLog("开始校验数据库尾号。");
 
                 int nRet = 0;
                 try
@@ -684,7 +684,7 @@ namespace DigitalPlatform.rms
 
                 if (FileUtil.IsFileExsitAndNotNull(this.m_strDbsCfgFilePath) == true)
                 {
-                    this.KernelApplication.WriteErrorLog("备份 " + this.m_strDbsCfgFilePath + " 到 " + strBackupFilename);
+                    this.WriteErrorLog("备份 " + this.m_strDbsCfgFilePath + " 到 " + strBackupFilename);
                     File.Copy(this.m_strDbsCfgFilePath, strBackupFilename, true);
                 }
 
@@ -697,7 +697,7 @@ namespace DigitalPlatform.rms
                 }
 
                 this.Changed = false;
-                this.KernelApplication.WriteErrorLog("完成保存内存 DOM 到 '" + this.m_strDbsCfgFilePath + "' 文件。");
+                this.WriteErrorLog("完成保存内存 DOM 到 '" + this.m_strDbsCfgFilePath + "' 文件。");
             }
             finally
             {
@@ -2367,7 +2367,7 @@ namespace DigitalPlatform.rms
                 if (length >= slow_length)
                 {
                     long count = resultSet == null ? 0 : resultSet.Count;
-                    KernelApplication.WriteErrorLog(string.Format("检索式 '{0}' 耗时 {1} (检索是否成功 {2} 命中条数 {3})，超过慢速阈值 {4}",
+                    WriteErrorLog(string.Format("检索式 '{0}' 耗时 {1} (检索是否成功 {2} 命中条数 {3})，超过慢速阈值 {4}",
                         strQuery,
                         length.ToString(),
                         nRet,
@@ -6847,6 +6847,11 @@ namespace DigitalPlatform.rms
                     return -1;
             }
             return 0;
+        }
+
+        public void WriteErrorLog(string text)
+        {
+            this.KernelApplication.WriteErrorLog(text);
         }
 
     } // end of class DatabaseCollection

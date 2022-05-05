@@ -204,6 +204,32 @@ string style = "")
             this.webBrowser1.ScrollToEnd();
         }
 
+        // 线程安全
+        public void ShowProgressMessage(string strID,
+            string strText)
+        {
+            if (this.webBrowser1 == null || this.webBrowser1.IsDisposed == true)
+                return;
+
+            if (this.webBrowser1.InvokeRequired)
+            {
+                this.webBrowser1.Invoke(new Action<string, string>(ShowProgressMessage), strID, strText);
+                return;
+            }
+
+            if (webBrowser1.Document == null)
+                return;
+
+            HtmlElement obj = this.webBrowser1.Document.GetElementById(strID);
+            if (obj != null)
+            {
+                obj.InnerText = strText;
+                return;
+            }
+
+            AppendHtml("<div id='" + strID + "'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+        }
+
 
         #endregion
 

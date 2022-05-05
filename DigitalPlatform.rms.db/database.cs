@@ -3180,5 +3180,10 @@ namespace DigitalPlatform.rms
             strOutputRecordID = DbPath.GetID10(strInputRecordID);
             return 0;
         }
+
+        public void WriteErrorLog(string text)
+        {
+            this.container?.KernelApplication?.WriteErrorLog(text);
+        }
     }
 }
