@@ -41,6 +41,7 @@ namespace dp2KernelApiTester
             this.MenuItem_test_search = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_refreshKeys = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_fragmentWrite = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_largeObject = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -110,6 +111,7 @@ namespace dp2KernelApiTester
             this.MenuItem_test_records,
             this.MenuItem_test_search,
             this.MenuItem_test_refreshKeys,
+            this.MenuItem_test_largeObject,
             this.MenuItem_fragmentWrite});
             this.MenuItem_test.Name = "MenuItem_test";
             this.MenuItem_test.Size = new System.Drawing.Size(120, 57);
@@ -150,6 +152,13 @@ namespace dp2KernelApiTester
             this.MenuItem_fragmentWrite.Text = "碎片式写入";
             this.MenuItem_fragmentWrite.Click += new System.EventHandler(this.MenuItem_fragmentWrite_Click);
             // 
+            // MenuItem_test_largeObject
+            // 
+            this.MenuItem_test_largeObject.Name = "MenuItem_test_largeObject";
+            this.MenuItem_test_largeObject.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_largeObject.Text = "大对象功能";
+            this.MenuItem_test_largeObject.Click += new System.EventHandler(this.MenuItem_test_largeObject_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(18F, 36F);
@@ -186,6 +195,7 @@ namespace dp2KernelApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_search;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_refreshKeys;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_fragmentWrite;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_largeObject;
     }
 }
 

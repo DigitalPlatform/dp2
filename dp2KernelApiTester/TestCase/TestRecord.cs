@@ -29,6 +29,7 @@ namespace dp2KernelApiTester
                     return result;
             }
 
+            /*
             {
                 var create_result = UploadLargObject(1);
                 if (create_result.Value == -1)
@@ -40,6 +41,7 @@ namespace dp2KernelApiTester
                 if (result.Value == -1)
                     return result;
             }
+            */
 
             {
                 var create_result = QuickCreateRecords(100);
@@ -57,8 +59,6 @@ namespace dp2KernelApiTester
                 if (result.Value == -1)
                     return result;
             }
-
-            return new NormalResult();
 
             {
                 var create_result = CreateRecords(count, false, false);
@@ -93,6 +93,35 @@ namespace dp2KernelApiTester
                     return result;
             }
             */
+
+            return new NormalResult();
+        }
+
+        public static NormalResult LargeObjectTest(int count)
+        {
+            {
+                var result = PrepareEnvironment();
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var create_result = UploadLargObject(count);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(create_result.CreatedPaths,
+    create_result.AccessPoints,
+    "");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var result = Finish();
+                if (result.Value == -1)
+                    return result;
+            }
 
             return new NormalResult();
         }
@@ -1271,7 +1300,8 @@ out string strError);
                 long start = 0;
                 long end = 0;
 
-                DataModel.SetMessage($"正在用 Fragment 方式创建记录 {i}，请耐心等待 ...");
+                string progress_id = DataModel.NewProgressID();
+                DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式创建记录 {i}，请耐心等待 ...");
 
                 while (true)
                 {
@@ -1289,6 +1319,8 @@ out string strError);
 
                     byte[] fragment = new byte[end - start + 1];
                     Array.Copy(bytes, start, fragment, 0, fragment.Length);
+
+                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式覆盖记录 {current_path} {start}-{end} {StringUtil.GetPercentText(start, bytes.Length)}...");
 
                     var ret = channel.WriteRes(current_path,
                         $"{start}-{end}",
@@ -1316,6 +1348,8 @@ out string strError);
                     if (start > bytes.Length - 1)
                         break;
                 }
+
+                DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式创建记录 {current_path} 完成");
 
                 // TODO: 读出记录检查内容是否和发出的一致
                 {
@@ -1512,7 +1546,8 @@ out string strError);
                 long start = 0;
                 long end = 0;
 
-                DataModel.SetMessage($"正在用 Fragment 方式覆盖记录 {path}，请耐心等待 ...");
+                string progress_id = DataModel.NewProgressID();
+                DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式覆盖记录 {path}，请耐心等待 ...");
 
                 while (true)
                 {
@@ -1533,6 +1568,8 @@ out string strError);
 
                     byte[] fragment = new byte[end - start + 1];
                     Array.Copy(bytes, start, fragment, 0, fragment.Length);
+
+                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式覆盖记录 {path} {start}-{end} {StringUtil.GetPercentText(start, bytes.Length)}...");
 
                     var ret = channel.WriteRes(path,
                         $"{start}-{end}",
@@ -1585,8 +1622,9 @@ out string strError);
                     start += chunk_length;
                     if (start > bytes.Length - 1)
                         break;
-
                 }
+
+                DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式覆盖记录 {path} 完成");
 
                 // 覆盖成功后，马上读取检验
                 {
@@ -1748,7 +1786,9 @@ out string strError);
             List<string> created_paths = new List<string>();
             List<AccessPoint> created_accesspoints = new List<AccessPoint>();
 
-            for (int i = 0; i < count; i++)
+            long object_size_unit = 512 * 1024 * 1024; // 512M
+
+            for (int i = 0; i < 1; i++)
             {
                 string path = $"{strDatabaseName}/?";
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
@@ -1794,48 +1834,99 @@ out string strError);
                 });
 
                 List<string> filenames = new List<string>();
+
+                try
                 {
-                    // 上载对象
-                    for (int j = 0; j < 1; j++)
                     {
-                        long object_size = 200 * 1024 * 1024; // 1G
-                        string fileName = Path.Combine(Environment.CurrentDirectory, $"temp_object_{j}");
-                        File.Delete(fileName);
-                        DataModel.SetMessage($"正在创建大文件 size={object_size} ...");
-                        CreateObjectFile(fileName, object_size);
-
-                        filenames.Add(fileName);
-
-                        string object_path = $"{output_path}/object/{j + 1}";
-
-                        string progress_id = Guid.NewGuid().ToString();
-                        DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} ...");
-
-                        long start = 0;
-                        using (var file = File.OpenRead(fileName))
+                        // 上载对象
+                        for (int j = 0; j < Math.Min(10, count); j++)
                         {
-                            byte[] timestamp = null;
-                            while (true)
+                            long object_size = object_size_unit * (j + 1);
+                            string fileName = Path.Combine(Environment.CurrentDirectory, $"temp_object_{j+1}");
+                            File.Delete(fileName);
+                            DataModel.SetMessage($"正在创建大文件 {fileName} size={object_size} ...");
+                            CreateObjectFile(fileName, object_size);
+
+                            filenames.Add(fileName);
+
+                            string object_path = $"{output_path}/object/{j + 1}";
+
+                            string progress_id = DataModel.NewProgressID();
+                            DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} ...");
+
+                            long start = 0;
+                            using (var file = File.OpenRead(fileName))
                             {
-                                long rest_length = file.Length - start;
-                                byte[] bytes = new byte[Math.Min((long)(300 * 1024), rest_length)];
-                                int read_length = file.Read(bytes, 0, bytes.Length);
-                                if (read_length == 0)
-                                    break;
+                                byte[] timestamp = null;
+                                while (true)
+                                {
+                                    long rest_length = file.Length - start;
+                                    byte[] bytes = new byte[Math.Min((long)(300 * 1024), rest_length)];
+                                    int read_length = file.Read(bytes, 0, bytes.Length);
+                                    if (read_length == 0)
+                                        break;
 
-                                DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} {start}-{start + read_length - 1} {StringUtil.GetPercentText(start, file.Length)}...");
+                                    DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} {start}-{start + read_length - 1} {StringUtil.GetPercentText(start, file.Length)}...");
 
-                                ret = channel.WriteRes(object_path,
-                                    $"{start}-{start + read_length - 1}",
-                                    file.Length,
-                                    bytes,
-                                    "",
-                                    "content,data",
-                                    timestamp,
-                                    out string output_object_path,
-                                    out byte[] output_object_timestamp,
-                                    out strError);
-                                if (ret == -1)
+                                    ret = channel.WriteRes(object_path,
+                                        $"{start}-{start + read_length - 1}",
+                                        file.Length,
+                                        bytes,
+                                        "",
+                                        "content,data",
+                                        timestamp,
+                                        out string output_object_path,
+                                        out byte[] output_object_timestamp,
+                                        out strError);
+                                    if (ret == -1)
+                                        return new CreateResult
+                                        {
+                                            Value = -1,
+                                            ErrorInfo = strError,
+                                            CreatedPaths = created_paths,
+                                            AccessPoints = created_accesspoints,
+                                        };
+                                    start += read_length;
+                                    if (read_length < bytes.Length
+                                        || start >= file.Length)
+                                        break;
+
+                                    timestamp = output_object_timestamp;
+                                }
+                            }
+
+                            DataModel.ShowProgressMessage(progress_id, $"文件 {object_path} 上传完成");
+                        }
+                    }
+
+                    // 下载，比较
+                    for (int j = 0; j < filenames.Count; j++)
+                    {
+                        string object_path = $"{output_path}/object/{j + 1}";
+                        string fileName = filenames[j];
+                        string output_fileName = Path.Combine(Environment.CurrentDirectory, $"output_{j+1}");
+                        File.Delete(output_fileName);
+                        try
+                        {
+                            string progress_id = DataModel.NewProgressID();
+                            DataModel.ShowProgressMessage(progress_id, $"正在下载大文件 {object_path} ...");
+
+                            var stop = new Stop();
+                            stop.OnProgressChanged += (o, e) =>
+                            {
+                                DataModel.ShowProgressMessage(progress_id, e.Message);
+                            };
+                            stop.BeginLoop();
+                            try
+                            {
+                                var lRet = channel.GetRes(object_path,
+                output_fileName,
+                stop,
+                out string strMetaData,
+                out byte[] baOutputTimeStamp,
+                out string strOutputPath,
+                out strError);
+                                if (lRet == -1)
                                     return new CreateResult
                                     {
                                         Value = -1,
@@ -1843,78 +1934,52 @@ out string strError);
                                         CreatedPaths = created_paths,
                                         AccessPoints = created_accesspoints,
                                     };
-                                start += read_length;
-                                if (read_length < bytes.Length
-                                    || start >= file.Length)
-                                    break;
-
-                                timestamp = output_object_timestamp;
                             }
+                            finally
+                            {
+                                stop.EndLoop();
+                            }
+                            DataModel.ShowProgressMessage(progress_id, $"文件 {object_path} 下载完成");
+
+                            // compare
+                            progress_id = DataModel.NewProgressID();
+                            string compare_error = CompareFiles(fileName,
+                                output_fileName,
+                                (offset, total_length) =>
+                                {
+                                    DataModel.ShowProgressMessage(progress_id, $"正在比较文件 {fileName} {output_fileName} {StringUtil.GetPercentText(offset, total_length)}...");
+                                });
+                            if (compare_error != null)
+                                return new CreateResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"原始文件和下载文件比较发现不同: {compare_error}",
+                                    CreatedPaths = created_paths,
+                                    AccessPoints = created_accesspoints,
+                                };
+
+                            DataModel.ShowProgressMessage(progress_id, $"文件 {fileName} {output_fileName} 比较完成");
+
+                            //File.Delete(fileName);
+                            //File.Delete(output_fileName);
+                        }
+                        finally
+                        {
+                            if (File.Exists(output_fileName))
+                                File.Delete(output_fileName);
                         }
                     }
+
+                    DataModel.SetMessage($"上传大对象 {output_path} 成功");
                 }
-
-
-
-                // 下载，比较
-                for (int j = 0; j < 1; j++)
+                finally
                 {
-                    string object_path = $"{output_path}/object/{j + 1}";
-                    string fileName = filenames[j];
-                    string output_fileName = Path.Combine(Environment.CurrentDirectory, $"output_{j}");
-                    File.Delete(output_fileName);
-
-                    string progress_id = Guid.NewGuid().ToString();
-                    DataModel.ShowProgressMessage(progress_id, $"正在下载大文件 {object_path} ...");
-
-                    var stop = new Stop();
-                    stop.OnProgressChanged += (o, e) => {
-                        DataModel.ShowProgressMessage(progress_id, e.Message);
-                    };
-                    stop.BeginLoop();
-                    try
+                    foreach (var fileName in filenames)
                     {
-                        var lRet = channel.GetRes(object_path,
-        output_fileName,
-        stop,
-        out string strMetaData,
-        out byte[] baOutputTimeStamp,
-        out string strOutputPath,
-        out strError);
-                        if (lRet == -1)
-                            return new CreateResult
-                            {
-                                Value = -1,
-                                ErrorInfo = strError,
-                                CreatedPaths = created_paths,
-                                AccessPoints = created_accesspoints,
-                            };
+                        if (File.Exists(fileName))
+                            File.Delete(fileName);
                     }
-                    finally
-                    {
-                        stop.EndLoop();
-                    }
-
-                    // compare
-                    progress_id = Guid.NewGuid().ToString();
-                    string compare_error = CompareFiles(fileName, 
-                        output_fileName,
-                        (offset, total_length) => {
-                            DataModel.ShowProgressMessage(progress_id, $"正在比较文件 {fileName} {output_fileName} {StringUtil.GetPercentText(offset, total_length)}...");
-                        });
-                    if (compare_error != null)
-                        return new CreateResult
-                        {
-                            Value = -1,
-                            ErrorInfo = $"原始文件和下载文件比较发现不同: {compare_error}",
-                            CreatedPaths = created_paths,
-                            AccessPoints = created_accesspoints,
-                        };
-                    File.Delete(fileName);
-                    File.Delete(output_fileName);
                 }
-
-                DataModel.SetMessage($"上传大对象 {output_path} 成功");
             }
 
             return new CreateResult
@@ -1926,7 +1991,7 @@ out string strError);
 
         delegate void Delegate_showProgress(long current, long total_length);
 
-        static string CompareFiles(string file1, 
+        static string CompareFiles(string file1,
             string file2,
             Delegate_showProgress proc_showProgress)
         {

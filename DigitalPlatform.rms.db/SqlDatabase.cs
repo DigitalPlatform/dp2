@@ -7192,7 +7192,7 @@ handle.CancelTokenSource.Token).Result;
                     // 需要即时获得行信息
                     strID = DbPath.GetID10(strID);
 
-                    Delegate_readBytes get_data = null;
+                    Delegate_readBytes proc_readBytes = null;
 
                     // 2022/5/1
                     // Pgsql 优化
@@ -7201,7 +7201,7 @@ handle.CancelTokenSource.Token).Result;
                         && StringUtil.IsInList("data", strStyle)
                         // && m_lObjectStartSize > 0 && m_lObjectStartSize <= 100 * 1024
                         && nReadLength <= 100 * 1024)
-                        get_data = (dr, current_row_info, data_col_index, newdata_col_index) =>
+                        proc_readBytes = (dr, current_row_info, data_col_index, newdata_col_index) =>
                         {
                             if (nReadLength == 0)
                                 return;
@@ -7244,7 +7244,7 @@ handle.CancelTokenSource.Token).Result;
 
                     nRet = _getRowInfos(connection,
     new List<string> { strID },
-    get_data,
+    proc_readBytes,
     out List<RecordRowInfo> row_infos,
     out strError);
                     if (nRet == -1)
@@ -11447,7 +11447,7 @@ trans);
         private int GetRowInfos(Connection connection,
         // bool bGetData,
         List<string> ids,
-        Delegate_readBytes proc_willGetBytes,
+        Delegate_readBytes proc_readBytes,
         out List<RecordRowInfo> row_infos,
         out string strError)
         {
@@ -11466,7 +11466,7 @@ trans);
                     nRet = _getRowInfos(connection,
                     // bGetData,
                     ids.GetRange(start, length),
-                    proc_willGetBytes,
+                    proc_readBytes,
                     out results,
                     out strError);
                     if (nRet == -1)
@@ -11482,7 +11482,7 @@ trans);
                 return _getRowInfos(connection,
                     // bGetData,
                     ids,
-                    proc_willGetBytes,
+                    proc_readBytes,
                     out row_infos,
                     out strError);
         }
@@ -11507,7 +11507,7 @@ trans);
         private int _getRowInfos(Connection connection,
             // bool bGetData,
             IEnumerable<string> ids,
-            Delegate_readBytes proc_willGetBytes,
+            Delegate_readBytes proc_readBytes,
             out List<RecordRowInfo> row_infos,
             out string strError)
         {
@@ -11530,7 +11530,7 @@ trans);
             if (string.IsNullOrEmpty(strIdString))
                 return 0;
 
-            bool bGetData = proc_willGetBytes != null;
+            bool bGetData = proc_readBytes != null;
 
             // 通用
             {
@@ -11694,7 +11694,7 @@ trans);
                                 newdata_col_index = result.GetOrdinal("newdata");
                                 Debug.Assert(newdata_col_index != -1);
                             }
-                            proc_willGetBytes?.Invoke(result, row_info, data_col_index, newdata_col_index);
+                            proc_readBytes?.Invoke(result, row_info, data_col_index, newdata_col_index);
                         }
 
                         i++;
@@ -12616,9 +12616,9 @@ trans);
                     try
                     {
                         bool output = bRebuildKeys ? true : !bFastMode;
-                        Delegate_readBytes func = null;
+                        Delegate_readBytes proc_readBytes = null;
                         if (output)
-                            func = (dr, current_row_info, data_col_index, newdata_col_index) =>
+                            proc_readBytes = (dr, current_row_info, data_col_index, newdata_col_index) =>
                             {
                                 if (output)
                                 {
@@ -12660,7 +12660,7 @@ trans);
                         int nRet = GetRowInfos(connection,
                             // bRebuildKeys ? true : !bFastMode,
                             WriteInfo.get_ids(records),    // 采用 get_existing_ids 纯追加 40 万条书目数据才加快速度1分钟而已
-                            func,
+                            proc_readBytes,
                             out List<RecordRowInfo> row_infos,
                             out strError);
                         if (nRet == -1)
@@ -13126,9 +13126,9 @@ trans);
         start_time_open,
         "Open Connection 耗时 ");
 
-                        Delegate_readBytes func = null;
+                        Delegate_readBytes proc_readBytes = null;
                         if (IsPgsql() /*|| IsMsSqlServer()*/)
-                            func = (dr, current_row_info, data_col_index, newdata_col_index) =>
+                            proc_readBytes = (dr, current_row_info, data_col_index, newdata_col_index) =>
                             {
                                 if (current_row_info.data_length > 0 && data_col_index != -1)
                                     current_row_info.Data = GetData(dr, data_col_index, 0, current_row_info.data_length);
@@ -13165,7 +13165,7 @@ trans);
                         nRet = this.CreateNewRecordIfNeed(connection,
                             strID,
                             null,
-                            func,
+                            proc_readBytes,
                             out RecordRowInfo row_info,
                             out strError);
                         if (nRet == -1)

@@ -227,7 +227,8 @@ string style = "")
                 return;
             }
 
-            AppendHtml("<div id='" + strID + "'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+            // <div class='debug {style}'>
+            AppendHtml("<div id='" + strID + "' class='debug'>" + HttpUtility.HtmlEncode(strText) + "</div>");
         }
 
 
@@ -440,6 +441,34 @@ string style = "")
             this.Invoke(new Action(() => {
                 this.menuStrip1.Enabled = enable;
             }));
+        }
+
+        private void MenuItem_test_largeObject_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                EnableControls(false);
+                try
+                {
+                    var result = TestRecord.PrepareEnvironment();
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+
+                    result = TestRecord.LargeObjectTest(5);
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+
+                    DataModel.SetMessage("大对象写入完成", "green");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            });
         }
     }
 }

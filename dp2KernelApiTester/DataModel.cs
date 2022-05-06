@@ -36,6 +36,13 @@ namespace dp2KernelApiTester
             MainForm.ShowProgressMessage(id, text);
         }
 
+        static int _progressIdSeed = 0;
+
+        public static string NewProgressID()
+        {
+            return _progressIdSeed++.ToString();
+        }
+
         static string EncryptKey = "dp2kernelapitester_key";
 
         internal static string DecryptPasssword(string strEncryptedText)
