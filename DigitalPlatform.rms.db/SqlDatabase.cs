@@ -6828,6 +6828,7 @@ handle.CancelTokenSource.Token).Result;
             string strRecPath,
             string strDataFieldName,
             byte[] textPtr,
+            string id,
             long lTotalLength,
             out bool bFreely,
             out string strObjectFileName,
@@ -6843,12 +6844,21 @@ handle.CancelTokenSource.Token).Result;
                     () =>
                     {
                         string strTempFileName = this.container.GetTempFileName("obj");
+                        SqlImageStream source = null;
+                        /*
+                        if (connection.IsMsSqlServer())
+                            source = new SqlImageStream(connection,
+                            this.m_strSqlDbName,
+                            strDataFieldName,
+                            textPtr,
+                            lTotalLength);
+                        else */ if (connection.IsPgsql() || connection.IsMsSqlServer())
+                            source = new SqlImageStream(connection,
+                            db_prefix,
+                            strDataFieldName,
+                            id);
                         // 先把整个对象文件写入一个对象文件
-                        using (SqlImageStream source = new SqlImageStream(connection,
-                        this.m_strSqlDbName,
-                        strDataFieldName,
-                        textPtr,
-                        lTotalLength))
+                        using (source)
                         {
                             using (FileStream output = File.Create(strTempFileName))
                             {
@@ -7436,6 +7446,7 @@ handle.CancelTokenSource.Token).Result;
         this.GetCacheRecPath(strID),    // this.m_strSqlDbName + "/" + strID,
         strDataFieldName,
         textPtr,
+        strID,
         lTotalLength,
         out bFreely,
         out strObjectFilePath,
@@ -22907,6 +22918,20 @@ out strError);
         public static long GetLong(IDataReader dr, string name)
         {
             var index = dr.GetOrdinal(name);
+            /*
+            if (dr.IsDBNull(index))
+                return 0;
+            var type_name = dr.GetDataTypeName(index);
+            if (type_name == "int" || type_name == "integer")
+                return dr.GetInt32(index);
+            else
+                return dr.GetInt64(index);
+            */
+            return GetLong(dr, index);
+        }
+
+        public static long GetLong(IDataReader dr, int index)
+        {
             if (dr.IsDBNull(index))
                 return 0;
             var type_name = dr.GetDataTypeName(index);

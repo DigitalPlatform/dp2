@@ -40,8 +40,9 @@ namespace dp2KernelApiTester
             this.MenuItem_test_records = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_search = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_refreshKeys = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_fragmentWrite = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_largeObject = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_fragmentWrite = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_test_pdf = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -112,7 +113,8 @@ namespace dp2KernelApiTester
             this.MenuItem_test_search,
             this.MenuItem_test_refreshKeys,
             this.MenuItem_test_largeObject,
-            this.MenuItem_fragmentWrite});
+            this.MenuItem_fragmentWrite,
+            this.MenuItem_test_pdf});
             this.MenuItem_test.Name = "MenuItem_test";
             this.MenuItem_test.Size = new System.Drawing.Size(120, 57);
             this.MenuItem_test.Text = "测试";
@@ -128,14 +130,14 @@ namespace dp2KernelApiTester
             // 
             this.MenuItem_test_records.Name = "MenuItem_test_records";
             this.MenuItem_test_records.Size = new System.Drawing.Size(538, 66);
-            this.MenuItem_test_records.Text = "记录相关功能";
+            this.MenuItem_test_records.Text = "记录相关";
             this.MenuItem_test_records.Click += new System.EventHandler(this.MenuItem_test_records_Click);
             // 
             // MenuItem_test_search
             // 
             this.MenuItem_test_search.Name = "MenuItem_test_search";
             this.MenuItem_test_search.Size = new System.Drawing.Size(538, 66);
-            this.MenuItem_test_search.Text = "检索相关功能";
+            this.MenuItem_test_search.Text = "检索相关";
             this.MenuItem_test_search.Click += new System.EventHandler(this.MenuItem_test_search_Click);
             // 
             // MenuItem_test_refreshKeys
@@ -145,6 +147,13 @@ namespace dp2KernelApiTester
             this.MenuItem_test_refreshKeys.Text = "刷新检索点";
             this.MenuItem_test_refreshKeys.Click += new System.EventHandler(this.MenuItem_test_refreshKeys_Click);
             // 
+            // MenuItem_test_largeObject
+            // 
+            this.MenuItem_test_largeObject.Name = "MenuItem_test_largeObject";
+            this.MenuItem_test_largeObject.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_largeObject.Text = "大对象";
+            this.MenuItem_test_largeObject.Click += new System.EventHandler(this.MenuItem_test_largeObject_Click);
+            // 
             // MenuItem_fragmentWrite
             // 
             this.MenuItem_fragmentWrite.Name = "MenuItem_fragmentWrite";
@@ -152,12 +161,12 @@ namespace dp2KernelApiTester
             this.MenuItem_fragmentWrite.Text = "碎片式写入";
             this.MenuItem_fragmentWrite.Click += new System.EventHandler(this.MenuItem_fragmentWrite_Click);
             // 
-            // MenuItem_test_largeObject
+            // MenuItem_test_pdf
             // 
-            this.MenuItem_test_largeObject.Name = "MenuItem_test_largeObject";
-            this.MenuItem_test_largeObject.Size = new System.Drawing.Size(538, 66);
-            this.MenuItem_test_largeObject.Text = "大对象功能";
-            this.MenuItem_test_largeObject.Click += new System.EventHandler(this.MenuItem_test_largeObject_Click);
+            this.MenuItem_test_pdf.Name = "MenuItem_test_pdf";
+            this.MenuItem_test_pdf.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_pdf.Text = "PDF 相关";
+            this.MenuItem_test_pdf.Click += new System.EventHandler(this.MenuItem_test_pdf_Click);
             // 
             // MainForm
             // 
@@ -196,6 +205,7 @@ namespace dp2KernelApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_refreshKeys;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_fragmentWrite;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_largeObject;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_test_pdf;
     }
 }
 

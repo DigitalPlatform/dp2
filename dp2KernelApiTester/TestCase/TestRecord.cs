@@ -146,12 +146,30 @@ namespace dp2KernelApiTester
                     return result;
             }
 
+            // 碎片方式创建记录
             {
                 var create_result = FragmentCreateRecords(1);
                 if (create_result.Value == -1)
                     return create_result;
 
                 var result = FragmentOverwriteRecords(create_result.CreatedPaths);
+                if (result.Value == -1)
+                    return result;
+
+                var result1 = DeleteRecords(create_result.CreatedPaths,
+    null,
+    "");
+                if (result1.Value == -1)
+                    return result1;
+            }
+
+            // 碎片方式创建记录，overlap 风格
+            {
+                var create_result = FragmentCreateRecords(1,1,"overlap");
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = FragmentOverwriteRecords(create_result.CreatedPaths, 1, "overlap");
                 if (result.Value == -1)
                     return result;
 
@@ -1250,12 +1268,15 @@ out string strError);
 
         // 用片段方式创建记录
         public static CreateResult FragmentCreateRecords(int count,
-            int fragment_length = 1)
+            int fragment_length = 1,
+            string style = "")
         {
             var channel = DataModel.GetChannel();
 
             if (fragment_length < 1)
                 throw new ArgumentException("fragment_length 必须大于等于 1");
+
+            var overlap = StringUtil.IsInList("overlap", style);
 
             List<string> created_paths = new List<string>();
             List<AccessPoint> created_accesspoints = new List<AccessPoint>();
@@ -1301,7 +1322,7 @@ out string strError);
                 long end = 0;
 
                 string progress_id = DataModel.NewProgressID();
-                DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式创建记录 {i}，请耐心等待 ...");
+                DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}创建记录 {i}，请耐心等待 ...");
 
                 while (true)
                 {
@@ -1317,13 +1338,21 @@ out string strError);
 
                     Debug.Assert(end >= start);
 
-                    byte[] fragment = new byte[end - start + 1];
-                    Array.Copy(bytes, start, fragment, 0, fragment.Length);
+                    long delta = 0;  // 调整长度
+                    if (overlap)
+                    {
+                        delta = -10;
+                        if (start + delta < 0)
+                            delta = -1*start;
+                    }
 
-                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式覆盖记录 {current_path} {start}-{end} {StringUtil.GetPercentText(start, bytes.Length)}...");
+                    byte[] fragment = new byte[end - (start + delta) + 1];
+                    Array.Copy(bytes, (start + delta), fragment, 0, fragment.Length);
+
+                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}创建记录 {current_path} {start+delta}-{end} {StringUtil.GetPercentText(end+1, bytes.Length)}...");
 
                     var ret = channel.WriteRes(current_path,
-                        $"{start}-{end}",
+                        $"{start+delta}-{end}",
                         bytes.Length,
                         fragment,
                         "", // strMetadata
@@ -1349,7 +1378,7 @@ out string strError);
                         break;
                 }
 
-                DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式创建记录 {current_path} 完成");
+                DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式{style}创建记录 {current_path} 完成");
 
                 // TODO: 读出记录检查内容是否和发出的一致
                 {
@@ -1406,10 +1435,19 @@ out string strError);
                         long end_offs = start_offs + chunk - 1;
                         if (end_offs >= length)
                             end_offs = length - 1;
-                        byte[] chunk_contents = new byte[end_offs - start_offs + 1];
-                        Array.Copy(contents, start_offs, chunk_contents, 0, chunk_contents.Length);
+
+                        long delta = 0;  // 调整长度
+                        if (overlap)
+                        {
+                            delta = -10;
+                            if (start_offs + delta < 0)
+                                delta = -1 * start_offs;
+                        }
+
+                        byte[] chunk_contents = new byte[end_offs - (start_offs + delta)+ 1];
+                        Array.Copy(contents, (start_offs + delta), chunk_contents, 0, chunk_contents.Length);
                         var ret = channel.WriteRes(object_path,
-                            $"{start_offs}-{end_offs}",
+                            $"{start_offs+delta}-{end_offs}",
                             length,
                             chunk_contents,
                             "",
@@ -1504,7 +1542,8 @@ out string strError);
 
         // 用 Fragment 方式覆盖已经创建好的记录
         public static NormalResult FragmentOverwriteRecords(IEnumerable<string> paths,
-    int fragment_length = 1)
+    int fragment_length = 1,
+    string style = "")
         {
             var channel = DataModel.GetChannel();
 
@@ -1546,8 +1585,10 @@ out string strError);
                 long start = 0;
                 long end = 0;
 
+                var overlap = StringUtil.IsInList("overlap", style);
+
                 string progress_id = DataModel.NewProgressID();
-                DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式覆盖记录 {path}，请耐心等待 ...");
+                DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}覆盖记录 {path}，请耐心等待 ...");
 
                 while (true)
                 {
@@ -1566,13 +1607,21 @@ out string strError);
 
                     Debug.Assert(end >= start);
 
-                    byte[] fragment = new byte[end - start + 1];
-                    Array.Copy(bytes, start, fragment, 0, fragment.Length);
+                    long delta = 0;  // 调整长度
+                    if (overlap)
+                    {
+                        delta = -10;
+                        if (start + delta < 0)
+                            delta = -1 * start;
+                    }
 
-                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式覆盖记录 {path} {start}-{end} {StringUtil.GetPercentText(start, bytes.Length)}...");
+                    byte[] fragment = new byte[end - (start + delta) + 1];
+                    Array.Copy(bytes, start+delta, fragment, 0, fragment.Length);
+
+                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}覆盖记录 {path} {start+delta}-{end} {StringUtil.GetPercentText(end+1, bytes.Length)}...");
 
                     var ret = channel.WriteRes(path,
-                        $"{start}-{end}",
+                        $"{start+delta}-{end}",
                         bytes.Length,
                         fragment,
                         "", // strMetadata
@@ -1624,7 +1673,7 @@ out string strError);
                         break;
                 }
 
-                DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式覆盖记录 {path} 完成");
+                DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式{style}覆盖记录 {path} 完成");
 
                 // 覆盖成功后，马上读取检验
                 {
@@ -1866,7 +1915,7 @@ out string strError);
                                     if (read_length == 0)
                                         break;
 
-                                    DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} {start}-{start + read_length - 1} {StringUtil.GetPercentText(start, file.Length)}...");
+                                    DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} {start}-{start + read_length - 1} {StringUtil.GetPercentText(start+read_length, file.Length)}...");
 
                                     ret = channel.WriteRes(object_path,
                                         $"{start}-{start + read_length - 1}",

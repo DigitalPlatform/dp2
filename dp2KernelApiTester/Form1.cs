@@ -415,11 +415,13 @@ string style = "")
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
 
+                    /*
                     result = TestRecord.SpecialTest(1000); // 1000
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
+                    */
 
-                    result = TestRecord.FragmentCreateRecords(1000, 1); // 1000
+                    result = TestRecord.FragmentCreateRecords(1000, 1, "overlap"); // 1000
                     if (result.Value == -1)
                         DataModel.SetMessage(result.ErrorInfo, "error");
 
@@ -459,6 +461,28 @@ string style = "")
                         DataModel.SetMessage(result.ErrorInfo, "error");
 
                     DataModel.SetMessage("大对象写入完成", "green");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            });
+        }
+
+        private void MenuItem_test_pdf_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                EnableControls(false);
+                try
+                {
+                    var result = TestPdfPage.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
                 }
                 catch (Exception ex)
                 {
