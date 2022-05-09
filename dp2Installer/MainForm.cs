@@ -2310,8 +2310,6 @@ MessageBoxDefaultButton.Button1);
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
             stop.HideProgress();
-
-
         }
 
         internal void DoStop(object sender, StopEventArgs e)

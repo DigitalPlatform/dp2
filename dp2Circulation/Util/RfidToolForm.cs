@@ -1826,7 +1826,7 @@ this.toolStripButton_autoFixEas.Checked);
             int count = 0;
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
             {
-                if (await SaveErrorTagContent(item) == true)
+                if (await SaveErrorTagContent1(item) == true)
                     count++;
             }
 
@@ -1838,6 +1838,59 @@ this.toolStripButton_autoFixEas.Checked);
                 this.ShowMessage($"保存成功({count})", "green", true);
             else
                 this.ShowMessage("没有需要保存的事项", "yellow", true);
+        }
+
+        // 故意写入可导致解析错误的标签内容(fudan 空白标签)
+        async Task<bool> SaveErrorTagContent1(ListViewItem item)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info.LogicChipItem == null)
+                return false;
+            //if (item_info.LogicChipItem.Changed == false)
+            //    return false;
+
+
+            string strError = "";
+
+            try
+            {
+                var old_tag_info = item_info.OneTag.TagInfo;
+                var new_tag_info = BuildNewTagInfo(
+    old_tag_info,
+    item_info.LogicChipItem);
+                {
+                    var bytes = ByteArray.GetTimeStampByteArray("E14018000300FE30303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030");
+                    new_tag_info.Bytes = bytes;
+                }
+
+                TagList.ClearTagTable(item_info.OneTag.UID);
+                var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
+                    old_tag_info,
+                    new_tag_info);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                await Task.Run(() => { GetTagInfo(item); });
+
+                UpdateChanged(item_info.LogicChipItem);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                strError = "SaveErrorTagContent() 出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+        ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
+                // 把 item 修改为红色背景，表示出错的状态
+                SetItemColor(item, "error");
+            }));
+            return false;
         }
 
         // 故意写入可导致解析错误的标签内容

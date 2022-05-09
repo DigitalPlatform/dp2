@@ -339,7 +339,7 @@ namespace dp2Circulation
 #endif
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
+            channel.Timeout = TimeSpan.FromSeconds(30);
             try
             {
                 List<string> lines = new List<string>();
@@ -4355,7 +4355,7 @@ FileShare.ReadWrite))
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
+            channel.Timeout = TimeSpan.FromSeconds(30);
 
             try
             {
@@ -4743,7 +4743,7 @@ FileShare.ReadWrite))
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
+            channel.Timeout = TimeSpan.FromSeconds(30);
 
             try
             {

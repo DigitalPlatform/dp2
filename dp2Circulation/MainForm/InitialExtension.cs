@@ -3012,7 +3012,7 @@ Culture=neutral, PublicKeyToken=null
 
                 // 若第一次复制绿色版本失败，则需要再进行一次
                 if (_copyGreenError == true)
-                    Task.Factory.StartNew(() => CopyGreen());
+                    _ = Task.Factory.StartNew(() => CopyGreen());
 
                 BeginUpdateClickOnceApplication();    // 自动探测更新 dp2circulation
 
