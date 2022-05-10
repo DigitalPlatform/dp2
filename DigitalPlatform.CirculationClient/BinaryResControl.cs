@@ -711,10 +711,6 @@ bool bChanged)
                 item.Tag = info;
             }
 
-#if NO
-            if (strInitialUsage != null)
-                info.InitialUsage = strInitialUsage;
-#endif
             info.LineState = state;
         }
 
@@ -2017,7 +2013,7 @@ bool bChanged)
                 return 0;
 
             int count = 0;
-            foreach(ListViewItem item in this.ListView.Items)
+            foreach (ListViewItem item in this.ListView.Items)
             {
                 LineState state = GetLineState(item);
 
@@ -2037,6 +2033,7 @@ bool bChanged)
         }
 
         // 保存资源到服务器
+        // 线程安全
         // return:
         //		-1	error
         //		>=0 实际上载的资源对象数
@@ -2047,7 +2044,12 @@ bool bChanged)
         {
             strError = "";
 
-            if (this.ListView.Items.Count == 0)
+            var item_count = (int)this.Invoke((Func<int>)(() =>
+            {
+                return this.ListView.Items.Count;
+            }));
+
+            if (item_count == 0)
                 return 0;
 
             if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
@@ -2062,26 +2064,12 @@ bool bChanged)
                 return -1;
             }
 
-#if NO
-            if (this.Channel == null)
-            {
-                strError = "BinaryResControl尚未指定Channel";
-                return -1;
-            }
-#endif
-
             StopStyle old_stop_style = StopStyle.None;
 
             if (Stop != null)
             {
                 old_stop_style = Stop.Style;
                 Stop.Style = StopStyle.EnableHalfStop;
-
-#if NO
-                Stop.OnStop += new StopEventHandler(this.DoStop);
-                Stop.Initial("正在上载资源 ...");
-                Stop.BeginLoop();
-#endif
                 Stop.Initial("正在上载资源 ...");
             }
 
@@ -2091,9 +2079,13 @@ bool bChanged)
             {
                 // bNotAskTimestampMismatchWhenOverwrite = false;
 
-                for (int i = 0; i < this.ListView.Items.Count; i++)
+                for (int i = 0; i < /*this.ListView.Items.Count*/item_count; i++)
                 {
-                    ListViewItem item = this.ListView.Items[i];
+                    var item = (ListViewItem)this.Invoke((Func<ListViewItem>)(() =>
+                    {
+                        return this.ListView.Items[i];
+                    }));
+
                     LineInfo info = (LineInfo)item.Tag;
                     // string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
 
@@ -2114,14 +2106,6 @@ bool bChanged)
                                 }
                                 // 这种情况应该是 metadata 修改过
                                 bOnlyChangeMetadata = true;
-#if NO
-                                SetLineInfo(item,
-                                    // strUsage, 
-                                    LineState.Normal);
-                                SetXmlChanged(item, false);
-                                SetResChanged(item, false);
-                                continue;   // 资源没有修改的，则跳过上载
-#endif
                             }
                         }
                     }
@@ -2132,20 +2116,24 @@ bool bChanged)
                         // 所以本函数只是简单Remove这样的listview事项即可
                         if (state == LineState.Deleted)
                         {
-                            this.ListView.Items.Remove(item);
+                            this.BeginInvoke((Action)(() =>
+                            {
+                                this.ListView.Items.Remove(item);
+                            }));
                             i--;
+                            item_count--;
                         }
 
                         continue;
                     }
 
-                    string strState = ListViewUtil.GetItemText(item, COLUMN_STATE);
+                    string strState = ListViewUtil.InvokeGetItemText(item, COLUMN_STATE);
 
-                    string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
+                    string strID = ListViewUtil.InvokeGetItemText(item, COLUMN_ID);
                     string strResPath = this.BiblioRecPath + "/object/" + ListViewUtil.GetItemText(item, COLUMN_ID);
-                    string strLocalFilename = ListViewUtil.GetItemText(item, COLUMN_LOCALPATH);
-                    string strMime = ListViewUtil.GetItemText(item, COLUMN_MIME);
-                    string strTimestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
+                    string strLocalFilename = ListViewUtil.InvokeGetItemText(item, COLUMN_LOCALPATH);
+                    string strMime = ListViewUtil.InvokeGetItemText(item, COLUMN_MIME);
+                    string strTimestamp = ListViewUtil.InvokeGetItemText(item, COLUMN_TIMESTAMP);
 
                     byte[] timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
                     byte[] output_timestamp = null;
@@ -2159,20 +2147,6 @@ bool bChanged)
 
                     if (bOnlyChangeMetadata)
                     {
-#if NO
-                        long lRet = channel.SaveResObject(
-    Stop,
-    strResPath,
-    "",
-    strLocalFilename,
-    strMime,
-    "", // range
-    true,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
-    timestamp,
-    out output_timestamp,
-    out strError);
-#endif
-
                         long lRet = channel.UploadFile(
 Stop,
 "", // strLocalFilename,
@@ -2236,153 +2210,19 @@ out strError);
 
                         if (lRet == -1)
                             goto ERROR1;
-
-#if NO
-                        string[] ranges = null;
-
-                        if (fi.Length == 0)
-                        {
-                            // 空文件
-                            ranges = new string[1];
-                            ranges[0] = "";
-                        }
-                        else
-                        {
-                            string strRange = "";
-                            strRange = "0-" + Convert.ToString(fi.Length - 1);
-
-                            // 按照100K作为一个chunk
-                            // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
-                            ranges = RangeList.ChunkRange(strRange,
-                                channel.UploadResChunkSize // 500 * 1024
-                                );
-                        }
-
-                        // REDOWHOLESAVE:
-                        string strWarning = "";
-
-                        for (int j = 0; j < ranges.Length; j++)
-                        {
-                            // REDOSINGLESAVE:
-
-                            Application.DoEvents();	// 出让界面控制权
-
-                            if (Stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                goto ERROR1;
-                            }
-
-                            string strWaiting = "";
-                            if (j == ranges.Length - 1)
-                                strWaiting = " 请耐心等待...";
-
-                            string strPercent = "";
-                            RangeList rl = new RangeList(ranges[j]);
-                            if (rl.Count >= 1)
-                            {
-                                double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
-                                strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
-                            }
-
-                            if (Stop != null)
-                                Stop.SetMessage("正在上载 " + ranges[j] + "/"
-                                    + Convert.ToString(fi.Length)
-                                    + " " + strPercent + " " + strLocalFilename + strWarning + strWaiting);
-
-                            long lRet = 0;
-                            TimeSpan old_timeout = channel.Timeout;
-                            channel.Timeout = new TimeSpan(0, 5, 0);
-                            try
-                            {
-                                lRet = channel.SaveResObject(
-                                    Stop,
-                                    strResPath,
-                                    strLocalFilename,
-                                    strLocalFilename,
-                                    strMime,
-                                    ranges[j],
-                                    j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
-                                    timestamp,
-                                    out output_timestamp,
-                                    out strError);
-
-                            }
-                            finally
-                            {
-                                channel.Timeout = old_timeout;
-                            }
-                            timestamp = output_timestamp;
-
-                            if (timestamp != null)
-                                ListViewUtil.ChangeItemText(item,
-                                COLUMN_TIMESTAMP,
-                                ByteArray.GetHexTimeStampString(timestamp));
-
-                            strWarning = "";
-
-                            if (lRet == -1)
-                            {
-                                /*
-                                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
-                                {
-
-                                    if (this.bNotAskTimestampMismatchWhenOverwrite == true)
-                                    {
-                                        timestamp = new byte[output_timestamp.Length];
-                                        Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                        strWarning = " (时间戳不匹配, 自动重试)";
-                                        if (ranges.Length == 1 || j == 0)
-                                            goto REDOSINGLESAVE;
-                                        goto REDOWHOLESAVE;
-                                    }
-
-
-                                    DialogResult result = MessageDlg.Show(this,
-                                        "上载 '" + strLocalFilename + "' (片断:" + ranges[j] + "/总尺寸:" + Convert.ToString(fi.Length)
-                                        + ") 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
-                                        + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
-                                        "dp2batch",
-                                        MessageBoxButtons.YesNoCancel,
-                                        MessageBoxDefaultButton.Button1,
-                                        ref this.bNotAskTimestampMismatchWhenOverwrite);
-                                    if (result == DialogResult.Yes)
-                                    {
-                                        timestamp = new byte[output_timestamp.Length];
-                                        Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                        strWarning = " (时间戳不匹配, 应用户要求重试)";
-                                        if (ranges.Length == 1 || j == 0)
-                                            goto REDOSINGLESAVE;
-                                        goto REDOWHOLESAVE;
-                                    }
-
-                                    if (result == DialogResult.No)
-                                    {
-                                        goto END1;	// 继续作后面的资源
-                                    }
-
-                                    if (result == DialogResult.Cancel)
-                                    {
-                                        strError = "用户中断";
-                                        goto ERROR1;	// 中断整个处理
-                                    }
-                                }
-                                 * */
-                                goto ERROR1;
-                            }
-                        }
-#endif
                     }
 
-                    SetLineInfo(item,
-                        // strUsage, 
-                        LineState.Normal);
-                    SetXmlChanged(item, false);
-                    SetResChanged(item, false);
+                    this.BeginInvoke((Action)(() =>
+                    {
+                        SetLineInfo(item,
+                            // strUsage, 
+                            LineState.Normal);
+                        SetXmlChanged(item, false);
+                        SetResChanged(item, false);
+                    }));
                 }
 
                 this.DeleteTempFiles();
-
                 this.Changed = false;
                 return nUploadCount;
             ERROR1:
@@ -2392,15 +2232,6 @@ out strError);
             {
                 if (Stop != null)
                 {
-#if NO
-                    Stop.EndLoop();
-                    Stop.OnStop -= new StopEventHandler(this.DoStop);
-                    if (nUploadCount > 0)
-                        Stop.Initial("上载资源完成");
-                    else
-                        Stop.Initial("");
-                    Stop.Style = old_stop_style;
-#endif
                     if (nUploadCount > 0)
                         Stop.Initial("上载资源完成");
                     else

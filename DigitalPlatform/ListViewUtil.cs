@@ -721,6 +721,16 @@ namespace DigitalPlatform.GUI
             }
         }
 
+        // 2022/5/10
+        public static string InvokeGetItemText(ListViewItem item,
+            int col)
+        {
+            return (string)item.ListView.Invoke((Func<string>)(() =>
+            {
+                return GetItemText(item, col);
+            }));
+        }
+
         // 获得一个单元的值
         public static string GetItemText(ListViewItem item,
             int col)

@@ -896,12 +896,16 @@ this.toolStripButton_autoFixEas.Checked);
 
         void UpdateChanged(LogicChipItem chip)
         {
+            // 2022/5/10
+            if (chip == null)
+                return;
             this.Invoke((Action)(() =>
             {
                 foreach (ListViewItem item in this.listView_tags.Items)
                 {
                     ItemInfo tag_info = (ItemInfo)item.Tag;
-                    if (tag_info.LogicChipItem == chip)
+                    if (tag_info.LogicChipItem == chip
+                        && tag_info.LogicChipItem != null)
                     {
 #if NO
                         // 更新 column 0
@@ -1561,7 +1565,7 @@ this.toolStripButton_autoFixEas.Checked);
 
                 // item_info.LogicChipItem = new LogicChipItem();
                 SetContent(item_info.LogicChipItem);
-                item_info.LogicChipItem.SetChanged(true);
+                item_info.LogicChipItem?.SetChanged(true);
             }
         }
 
@@ -1773,11 +1777,14 @@ this.toolStripButton_autoFixEas.Checked);
         // 故意写入 PII 为空的标签内容
         async Task<bool> SaveBlankPiiTagContent(ListViewItem item)
         {
+            string strError = "";
             ItemInfo item_info = (ItemInfo)item.Tag;
             if (item_info.LogicChipItem == null)
-                return false;
-
-            string strError = "";
+            {
+                // return false;
+                strError = "item_info.LogicChipItem == null";
+                goto ERROR1;
+            }
 
             try
             {
@@ -1844,22 +1851,45 @@ this.toolStripButton_autoFixEas.Checked);
         async Task<bool> SaveErrorTagContent1(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
+            /*
             if (item_info.LogicChipItem == null)
                 return false;
-            //if (item_info.LogicChipItem.Changed == false)
-            //    return false;
-
+            */
 
             string strError = "";
 
             try
             {
                 var old_tag_info = item_info.OneTag.TagInfo;
+                var new_tag_info = old_tag_info.Clone();
+                /*
                 var new_tag_info = BuildNewTagInfo(
     old_tag_info,
     item_info.LogicChipItem);
+                */
                 {
                     var bytes = ByteArray.GetTimeStampByteArray("E14018000300FE30303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030");
+
+                    var count = old_tag_info.BlockSize * old_tag_info.MaxBlockCount;
+                    // 修正
+                    if (bytes.Length < count)
+                    {
+                        var temp = new List<byte>(bytes);
+                        while (temp.Count < count)
+                        {
+                            temp.Add(temp[temp.Count - 1]);
+                        }
+                        bytes = temp.ToArray();
+                        Debug.Assert(bytes.Length == count);
+                    }
+                    else if (bytes.Length > count)
+                    {
+                        var temp = new List<byte>(bytes);
+                        temp.RemoveRange((int)count, temp.Count - (int)count);
+                        bytes = temp.ToArray();
+                        Debug.Assert(bytes.Length == count);
+                    }
+
                     new_tag_info.Bytes = bytes;
                 }
 
@@ -1897,20 +1927,21 @@ this.toolStripButton_autoFixEas.Checked);
         async Task<bool> SaveErrorTagContent(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
+            /*
             if (item_info.LogicChipItem == null)
                 return false;
-            //if (item_info.LogicChipItem.Changed == false)
-            //    return false;
-
-
+            */
             string strError = "";
 
             try
             {
                 var old_tag_info = item_info.OneTag.TagInfo;
+                var new_tag_info = old_tag_info.Clone();
+                /*
                 var new_tag_info = BuildNewTagInfo(
     old_tag_info,
     item_info.LogicChipItem);
+                */
                 {
                     List<byte> temp = new List<byte>();
                     for (int i = 0; i < 50; i++)

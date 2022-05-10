@@ -2030,7 +2030,7 @@ strNewDefault);
             }
         }
 
-        // 为了兼容以前脚本里面的调用
+        // 为了兼容以前脚本里面的调用。但注意发现这个函数容易引起死锁！
         public int SaveRecord(string strStyle = "displaysuccess,verifybarcode")
         {
             return SaveRecordAsync(strStyle).Result;
@@ -4692,7 +4692,7 @@ MessageBoxDefaultButton.Button2);
 
         // 
         /// <summary>
-        /// 设置当前记录的证件照片对象
+        /// 设置当前记录的证件或人脸识别用照片对象
         /// </summary>
         /// <param name="image">腿片对象</param>
         /// <param name="object_type">对象的类型，cardphoto/face 之一</param>
@@ -6965,6 +6965,88 @@ MessageBoxDefaultButton.Button1);
             _importantFields.Clear();
         }
 
+        // 根据文件登记人脸(用于人脸识别)
+        // 可用于 C# 脚本调用
+        public async Task<NormalResult> RegisterFaceAsync(string strFaceFileName)
+        {
+            string strError = "";
+            this.ShowMessage("等待登记人脸 ...");
+            this.EnableControls(false);
+            try
+            {
+                // 检查 FaceCenter 所连的 dp2library 服务器是否和 dp2circulation 所连的一致
+                NormalResult getstate_result = await FaceGetStateAsync("getLibraryServerUID");
+                if (getstate_result.Value == -1)
+                {
+                    // strError = getstate_result.ErrorInfo;
+                    return getstate_result;
+                }
+                else if (getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                {
+                    strError = $"人脸中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行人脸登记";
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                }
+
+                byte[] bytes = null;
+                using (Stream stream = File.OpenRead(strFaceFileName))
+                {
+                    bytes = new byte[stream.Length];
+                    await stream.ReadAsync(bytes, 0, bytes.Length);
+                }
+
+                GetFeatureStringResult feature_result = await ReadFeatureString(bytes, "", "");
+                if (feature_result.Value == -1)
+                {
+                    /*
+                    if (feature_result.ErrorCode == "getFeatureFail")
+                    {
+                        // 无法提取特征的情况，输出报错信息到操作历史，然后继续循环
+                        // Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"无法提取人脸特征 {feature_result.ErrorInfo}") + "</div>");
+                        return feature_result;
+                    }
+                    */
+                    return feature_result;
+                }
+
+                this.readerEditControl1.FaceFeature = feature_result.FeatureString;
+                this.readerEditControl1.FaceFeatureVersion = feature_result.Version;
+                this.readerEditControl1.Changed = true;
+                AddImportantField("face");
+
+                AddImportantField("face");
+
+                // TODO: 如果尺寸符合要求，则直接用返回的 jpeg 上载
+                // 设置人脸照片对象
+                using (Image image = FromBytes(/*feature_result.ImageData*/bytes))
+                using (Image image1 = new Bitmap(image))
+                {
+                    // 自动缩小图像
+                    int nRet = SetCardPhoto(image1,
+                        "face",
+                        out string strShrinkComment,
+                        out strError);
+                    if (nRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                            ErrorCode = "setCardPhotoError"
+                        };
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+                this.ClearMessage();
+            }
+
+            return new NormalResult();
+        }
+
         // 登记人脸。用于人脸识别
         private async void toolStripSplitButton_registerFace_ButtonClick(object sender, EventArgs e)
         {
@@ -9073,5 +9155,21 @@ MessageBoxDefaultButton.Button1);
 
 
         #endregion
+
+        private async void toolStripMenuItem_registerFaceByFile_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Title = "请指定人脸图像文件名";
+            // dlg.FileName = this.textBox_filename.Text;
+
+            dlg.Filter = "图像文件 (*.bmp;*.jpg;*.gif;*.png)|*.bmp;*.jpg;*.gif;*.png|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+            var result = await RegisterFaceAsync(dlg.FileName);
+            if (result.Value == -1)
+                ShowMessageBox(result.ErrorInfo);
+        }
     }
 }

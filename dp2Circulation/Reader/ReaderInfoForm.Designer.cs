@@ -85,6 +85,7 @@
             this.toolStripButton_clearOutofReservationCount = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton_otherFunc = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_saveTemplate = new System.Windows.Forms.ToolStripButton();
+            this.toolStripMenuItem_loadBlankRecord = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_createRfidCard = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_bindCardNumber = new System.Windows.Forms.ToolStripMenuItem();
@@ -105,7 +106,7 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.toolStripMenuItem_loadBlankRecord = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_registerFaceByFile = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -444,6 +445,7 @@
             // 
             this.toolStripSplitButton_registerFace.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.toolStripSplitButton_registerFace.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem_registerFaceByFile,
             this.ToolStripMenuItem_pasteCardPhoto});
             this.toolStripSplitButton_registerFace.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_registerFace.Image")));
             this.toolStripSplitButton_registerFace.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -707,6 +709,13 @@
             this.toolStripButton_saveTemplate.Text = "保存读者记录到模板";
             this.toolStripButton_saveTemplate.Click += new System.EventHandler(this.toolStripButton_saveTemplate_Click);
             // 
+            // toolStripMenuItem_loadBlankRecord
+            // 
+            this.toolStripMenuItem_loadBlankRecord.Name = "toolStripMenuItem_loadBlankRecord";
+            this.toolStripMenuItem_loadBlankRecord.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_loadBlankRecord.Text = "装载空白记录";
+            this.toolStripMenuItem_loadBlankRecord.Visible = false;
+            // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
@@ -799,7 +808,7 @@
             this.toolStripButton_option.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_option.Image")));
             this.toolStripButton_option.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_option.Name = "toolStripButton_option";
-            this.toolStripButton_option.Size = new System.Drawing.Size(82, 32);
+            this.toolStripButton_option.Size = new System.Drawing.Size(86, 32);
             this.toolStripButton_option.Text = "选项";
             this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
             // 
@@ -867,12 +876,12 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1118, 500);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
-            // toolStripMenuItem_loadBlankRecord
+            // toolStripMenuItem_registerFaceByFile
             // 
-            this.toolStripMenuItem_loadBlankRecord.Name = "toolStripMenuItem_loadBlankRecord";
-            this.toolStripMenuItem_loadBlankRecord.Size = new System.Drawing.Size(443, 40);
-            this.toolStripMenuItem_loadBlankRecord.Text = "装载空白记录";
-            this.toolStripMenuItem_loadBlankRecord.Visible = false;
+            this.toolStripMenuItem_registerFaceByFile.Name = "toolStripMenuItem_registerFaceByFile";
+            this.toolStripMenuItem_registerFaceByFile.Size = new System.Drawing.Size(535, 40);
+            this.toolStripMenuItem_registerFaceByFile.Text = "用图像文件注册人脸(&R) ...";
+            this.toolStripMenuItem_registerFaceByFile.Click += new System.EventHandler(this.toolStripMenuItem_registerFaceByFile_Click);
             // 
             // ReaderInfoForm
             // 
@@ -990,5 +999,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearPalmprint;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearPalmprint1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_loadBlankRecord;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_registerFaceByFile;
     }
 }
