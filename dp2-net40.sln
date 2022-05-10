@@ -208,8 +208,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMarcEditor", "TestMarcE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.MarcQuery", "dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj", "{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.KernelClient", "DigitalPlatform.KernelClient\DigitalPlatform.KernelClient.csproj", "{58E33A45-D8AC-451F-971D-E1F5216198A2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.ArcSoft", "FaceDrivers.ArcSoft\FaceDrivers.ArcSoft.csproj", "{5ADA90F1-11A0-4BFF-A1EA-5FCE066D3051}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.EyeCool", "FaceDrivers.EyeCool\FaceDrivers.EyeCool.csproj", "{EEDDD036-EB38-4BE8-A302-A4A3F206FE5D}"
@@ -1755,24 +1753,6 @@ Global
 		{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}.Test|x86.ActiveCfg = Debug|Any CPU
 		{623EA980-BE0A-46BB-9E3E-DD8D0FE54F6F}.Test|x86.Build.0 = Debug|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Debug|x86.Build.0 = Debug|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Release|x86.ActiveCfg = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Release|x86.Build.0 = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Test|Any CPU.ActiveCfg = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Test|Any CPU.Build.0 = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Test|Mixed Platforms.Build.0 = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Test|x86.ActiveCfg = Release|Any CPU
-		{58E33A45-D8AC-451F-971D-E1F5216198A2}.Test|x86.Build.0 = Release|Any CPU
 		{5ADA90F1-11A0-4BFF-A1EA-5FCE066D3051}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5ADA90F1-11A0-4BFF-A1EA-5FCE066D3051}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5ADA90F1-11A0-4BFF-A1EA-5FCE066D3051}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
