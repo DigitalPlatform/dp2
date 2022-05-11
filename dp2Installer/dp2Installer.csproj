@@ -36,7 +36,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>276</ApplicationRevision>
+    <ApplicationRevision>277</ApplicationRevision>
     <ApplicationVersion>3.2.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -70,7 +70,7 @@
     <ManifestKeyFile>数字平台（北京）软件有限责任公司.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>false</GenerateManifests>
+    <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
@@ -427,14 +427,25 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>echo 准备安装包 .zip 文件 ...
+    <PreBuildEvent>echo "准备安装包 .zip 文件 ..."
 CD /D $(ProjectDir)
 CALL copykernel.bat
 CALL copylibrary.bat
 CALL copyopac.bat
 CALL copyzserver.bat
+
+if exist "..\palmcenter\program.cs" (
 CALL copypalm.bat
-CALL copygate.bat</PreBuildEvent>
+) else (
+echo "palmcenter not found"
+)
+
+if exist "..\dp2gate\program.cs" (
+CALL copygate.bat
+) else (
+echo "dp2gate not found"
+)
+</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

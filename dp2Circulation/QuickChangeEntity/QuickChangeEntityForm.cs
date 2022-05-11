@@ -580,7 +580,16 @@ false);
                     "adjust_right,saving,auto_close_dialog",
                     out strError);
                 if (nRet == -1)
-                    goto ERROR1;
+                {
+                    DialogResult result = MessageBox.Show(this,
+$"装载标签原有内容发生错误: {strError}。\r\n\r\n是否继续保存新内容到此标签?",
+"QuickChangeEntityForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                        goto ERROR1;
+                }
                 if (nRet == 0)
                 {
                     strError = "已放弃写入 RFID 标签内容";
@@ -716,6 +725,7 @@ false);
             }
             catch (Exception ex)
             {
+                _left = null;
                 strError = "出现异常: " + ex.Message;
                 return -1;
             }

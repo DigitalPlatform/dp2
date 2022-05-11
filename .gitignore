@@ -238,8 +238,11 @@ ModelManifest.xml
 
 !dp2Circulation/Microsoft.mshtml.dll
 
-dp2Circulation/x86/SQLite.Interop.dll
-dp2Circulation/x64/SQLite.Interop.dll
+!dp2Circulation/x86/SQLite.Interop.dll
+!dp2Circulation/x64/SQLite.Interop.dll
+
+!dp2Inventory/x86/SQLite.Interop.dll
+!dp2Inventory/x64/SQLite.Interop.dll
 
 FaceCenter/
 

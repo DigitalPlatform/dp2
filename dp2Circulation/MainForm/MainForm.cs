@@ -1887,7 +1887,6 @@ false);
             form.Show();
 #endif
             OpenWindow<QuickChangeEntityForm>();
-
         }
 
         // 批修改书目

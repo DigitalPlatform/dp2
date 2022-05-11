@@ -686,15 +686,18 @@ this.toolStripButton_autoFixEas.Checked);
             return null;
         }
 
-        void FillTagInfo(ListViewItem item)
+        // return:
+        //      null    没有错误
+        //      其他      错误信息
+        string FillTagInfo(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             OneTag tag = item_info.OneTag;
             if (tag.Protocol == InventoryInfo.ISO14443A)
-                return; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
+                return null; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
 
             if (tag.TagInfo == null)
-                return;
+                return null;
 
             string strError = "";
             try
@@ -709,6 +712,8 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 catch (Exception ex)
                 {
+                    if (item_info != null)
+                        item_info.LogicChipItem = null;
                     chip_parse_error = ex.Message;
                 }
 
@@ -742,7 +747,7 @@ this.toolStripButton_autoFixEas.Checked);
                     strError = chip_parse_error;
                     goto ERROR1;
                 }
-                return;
+                return null;
             }
             catch (Exception ex)
             {
@@ -757,6 +762,7 @@ this.toolStripButton_autoFixEas.Checked);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
             }));
+            return strError;
         }
 
         // TagInfo 是否已经填充过了？ 
@@ -770,12 +776,15 @@ this.toolStripButton_autoFixEas.Checked);
             return item_info.LogicChipItem != null;
         }
 
-        void GetTagInfo(ListViewItem item)
+        // return:
+        //      null    正常
+        //      其他      报错信息
+        string GetTagInfo(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             OneTag tag = item_info.OneTag;
             if (tag.Protocol == InventoryInfo.ISO14443A)
-                return; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
+                return null; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
 
 #if OLD_CODE
             RfidChannel channel = GetRfidChannel(
@@ -813,6 +822,8 @@ this.toolStripButton_autoFixEas.Checked);
                 }
                 catch (Exception ex)
                 {
+                    if (item_info != null)
+                        item_info.LogicChipItem = null;
                     chip_parse_error = ex.Message;
                 }
 
@@ -846,7 +857,7 @@ this.toolStripButton_autoFixEas.Checked);
                     strError = chip_parse_error;
                     goto ERROR1;
                 }
-                return;
+                return null;
             }
             catch (Exception ex)
             {
@@ -866,6 +877,7 @@ this.toolStripButton_autoFixEas.Checked);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
             }));
+            return strError;
         }
 
         private void LogicChipItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1706,7 +1718,9 @@ this.toolStripButton_autoFixEas.Checked);
                     goto ERROR1;
                 }
 
-                await Task.Run(() => { GetTagInfo(item); });
+                strError = await Task.Run(() => { return GetTagInfo(item); });
+                if (strError != null)
+                    goto ERROR1;
                 return new NormalResult();
             }
             catch (Exception ex)
@@ -1739,9 +1753,13 @@ this.toolStripButton_autoFixEas.Checked);
         async void menu_saveSelectedTagContent_Click(object sender, EventArgs e)
         {
             int count = 0;
+            List<string> errors = new List<string>();
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
             {
-                if (await SaveTagContent(item) == true)
+                var error = await SaveTagContent(item);
+                if (error != null)
+                    errors.Add(error);
+                else
                     count++;
             }
 
@@ -1750,17 +1768,25 @@ this.toolStripButton_autoFixEas.Checked);
             UpdateSaveButton();
 
             if (count > 0)
-                this.ShowMessage($"保存成功({count})", "green", true);
-            else
-                this.ShowMessage("没有需要保存的事项", "yellow", true);
+                this.ShowMessage($"保存成功({count}) 错误({errors.Count})", errors.Count == 0 ? "green" : "yellow", true);
+            //else
+            //    this.ShowMessage("没有需要保存的事项", "yellow", true);
+
+            if (errors.Count > 0)
+                MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
         }
 
         async void menu_saveSelectedErrorTagContent_1_Click(object sender, EventArgs e)
         {
             int count = 0;
+            List<string> errors = new List<string>();
+
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
             {
-                if (await SaveBlankPiiTagContent(item) == true)
+                var error = await SaveBlankPiiTagContent(item);
+                if (error != null)
+                    errors.Add(error);
+                else
                     count++;
             }
 
@@ -1768,34 +1794,48 @@ this.toolStripButton_autoFixEas.Checked);
 
             UpdateSaveButton();
 
-            if (count > 0)
-                this.ShowMessage($"保存成功({count})", "green", true);
-            else
-                this.ShowMessage("没有需要保存的事项", "yellow", true);
+            this.ShowMessage($"保存成功({count}) 错误({errors.Count})", errors.Count == 0 ? "green" : "yellow", true);
+            if (errors.Count > 0)
+                MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
         }
 
         // 故意写入 PII 为空的标签内容
-        async Task<bool> SaveBlankPiiTagContent(ListViewItem item)
+        async Task<string> SaveBlankPiiTagContent(ListViewItem item)
         {
             string strError = "";
             ItemInfo item_info = (ItemInfo)item.Tag;
+            /*
             if (item_info.LogicChipItem == null)
             {
                 // return false;
                 strError = "item_info.LogicChipItem == null";
                 goto ERROR1;
             }
+            */
 
             try
             {
                 var old_tag_info = item_info.OneTag.TagInfo;
 
-                // 删除 PII
-                item_info.LogicChipItem.RemoveElement(ElementOID.PII);
+                TagInfo new_tag_info = null;
+                if (item_info.LogicChipItem != null)
+                {
+                    // 删除 PII
+                    item_info.LogicChipItem.RemoveElement(ElementOID.PII);
 
-                var new_tag_info = BuildNewTagInfo(
-    old_tag_info,
-    item_info.LogicChipItem);
+                    new_tag_info = BuildNewTagInfo(
+        old_tag_info,
+        item_info.LogicChipItem);
+                }
+                else
+                {
+                    new_tag_info = old_tag_info.Clone();
+                    // 对 byte[] 内容执行清除。锁定的块不会被清除
+                    new_tag_info.Bytes = LogicChip.ClearBytes(new_tag_info.Bytes,
+                        new_tag_info.BlockSize,
+                        new_tag_info.MaxBlockCount,
+                        new_tag_info.LockStatus);
+                }
 
                 TagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
@@ -1807,10 +1847,15 @@ this.toolStripButton_autoFixEas.Checked);
                     goto ERROR1;
                 }
 
-                await Task.Run(() => { GetTagInfo(item); });
-
-                UpdateChanged(item_info.LogicChipItem);
-                return true;
+                strError = await Task.Run(() => { return GetTagInfo(item); });
+                if (strError == null)
+                {
+                    UpdateChanged(item_info.LogicChipItem);
+                    return null;
+                }
+                else
+                    strError = $"保存成功。重新读入时出错: {strError}";
+                return strError;
             }
             catch (Exception ex)
             {
@@ -1824,16 +1869,20 @@ this.toolStripButton_autoFixEas.Checked);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
             }));
-            return false;
+            return strError;
         }
 
 
         async void menu_saveSelectedErrorTagContent_Click(object sender, EventArgs e)
         {
             int count = 0;
+            List<string> errors = new List<string>();
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
             {
-                if (await SaveErrorTagContent1(item) == true)
+                var error = await SaveErrorTagContent1(item);
+                if (error != null)
+                    errors.Add(error);
+                else
                     count++;
             }
 
@@ -1841,14 +1890,16 @@ this.toolStripButton_autoFixEas.Checked);
 
             UpdateSaveButton();
 
-            if (count > 0)
-                this.ShowMessage($"保存成功({count})", "green", true);
-            else
-                this.ShowMessage("没有需要保存的事项", "yellow", true);
+            this.ShowMessage($"保存成功({count}) 错误({errors.Count})", errors.Count == 0 ? "green" : "yellow", true);
+            if (errors.Count > 0)
+                MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
         }
 
         // 故意写入可导致解析错误的标签内容(fudan 空白标签)
-        async Task<bool> SaveErrorTagContent1(ListViewItem item)
+        // return:
+        //      null    没有出错
+        //      其他      出错信息
+        async Task<string> SaveErrorTagContent1(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             /*
@@ -1903,10 +1954,15 @@ this.toolStripButton_autoFixEas.Checked);
                     goto ERROR1;
                 }
 
-                await Task.Run(() => { GetTagInfo(item); });
-
-                UpdateChanged(item_info.LogicChipItem);
-                return true;
+                strError = await Task.Run(() => { return GetTagInfo(item); });
+                if (strError == null)
+                {
+                    UpdateChanged(item_info.LogicChipItem);
+                    return null;
+                }
+                else
+                    strError = $"保存成功。重新读入时出错: {strError}";
+                return strError;
             }
             catch (Exception ex)
             {
@@ -1920,11 +1976,14 @@ this.toolStripButton_autoFixEas.Checked);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
             }));
-            return false;
+            return strError;
         }
 
         // 故意写入可导致解析错误的标签内容
-        async Task<bool> SaveErrorTagContent(ListViewItem item)
+        // return:
+        //      null    没有出错
+        //      其他      出错信息
+        async Task<string> SaveErrorTagContent(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             /*
@@ -1961,10 +2020,15 @@ this.toolStripButton_autoFixEas.Checked);
                     goto ERROR1;
                 }
 
-                await Task.Run(() => { GetTagInfo(item); });
-
-                UpdateChanged(item_info.LogicChipItem);
-                return true;
+                strError = await Task.Run(() => { return GetTagInfo(item); });
+                if (strError == null)
+                {
+                    UpdateChanged(item_info.LogicChipItem);
+                    return null;
+                }
+                else
+                    strError = $"保存成功。重新读入时出错: {strError}";
+                return strError;
             }
             catch (Exception ex)
             {
@@ -1978,16 +2042,19 @@ this.toolStripButton_autoFixEas.Checked);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
             }));
-            return false;
+            return strError;
         }
 
-        async Task<bool> SaveTagContent(ListViewItem item)
+        // return:
+        //      null    没有出错
+        //      其他      出错信息
+        async Task<string> SaveTagContent(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             if (item_info.LogicChipItem == null)
-                return false;
+                return null;
             if (item_info.LogicChipItem.Changed == false)
-                return false;
+                return null;
 
 #if OLD_CODE
             RfidChannel channel = GetRfidChannel(
@@ -2023,10 +2090,15 @@ this.toolStripButton_autoFixEas.Checked);
                     goto ERROR1;
                 }
 
-                await Task.Run(() => { GetTagInfo(item); });
-
-                UpdateChanged(item_info.LogicChipItem);
-                return true;
+                strError = await Task.Run(() => { return GetTagInfo(item); });
+                if (strError == null)
+                {
+                    UpdateChanged(item_info.LogicChipItem);
+                    return null;
+                }
+                else
+                    strError = $"保存成功。重新读入时出错: {strError}";
+                return strError;
             }
             catch (Exception ex)
             {
@@ -2046,7 +2118,7 @@ this.toolStripButton_autoFixEas.Checked);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
             }));
-            return false;
+            return strError;
         }
 
         static TagInfo BuildNewTagInfo(TagInfo old_tag_info,
@@ -2069,9 +2141,13 @@ this.toolStripButton_autoFixEas.Checked);
         private async void toolStripButton_saveRfid_Click(object sender, EventArgs e)
         {
             int count = 0;
+            List<string> errors = new List<string>();
             foreach (ListViewItem item in this.listView_tags.Items)
             {
-                if (await SaveTagContent(item) == true)
+                var error = await SaveTagContent(item);
+                if (error != null)
+                    errors.Add(error);
+                else
                     count++;
             }
 
@@ -2079,10 +2155,9 @@ this.toolStripButton_autoFixEas.Checked);
 
             UpdateSaveButton();
 
-            if (count > 0)
-                this.ShowMessage($"保存成功({count})", "green", true);
-            else
-                this.ShowMessage("没有需要保存的事项", "yellow", true);
+            this.ShowMessage($"保存成功({count}) 错误({errors.Count})", errors.Count == 0 ? "green" : "yellow", true);
+            if (errors.Count > 0)
+                MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
         }
 
         private void toolStripButton_autoFixEas_CheckedChanged(object sender, EventArgs e)

@@ -130,7 +130,16 @@ namespace dp2Circulation
                     "adjust_right,saving",
                     out strError);
                 if (nRet == -1)
-                    goto ERROR1;
+                {
+                    DialogResult result = MessageBox.Show(this,
+$"装载标签原有内容发生错误: {strError}。\r\n\r\n是否继续保存新内容到此标签?",
+"RfidPatronCardDialog",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                        goto ERROR1;
+                }
                 if (nRet == 0)
                 {
                     strError = "已放弃保存 RFID 读者卡内容";
@@ -238,7 +247,10 @@ namespace dp2Circulation
                         return 0;
                     }
 
+                    _tagExisting = dialog.SelectedTag;
+
                     {
+                        // 可能会抛出异常
                         var old_chip = LogicChipItem.FromTagInfo(dialog.SelectedTag.TagInfo);
 
                         // 首先检查 typeOfUsage 是否为 8X
@@ -319,6 +331,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
+                this.chipEditor_existing.LogicChipItem = null;
                 strError = "出现异常: " + ex.Message;
                 return -1;
             }
@@ -403,9 +416,13 @@ out strError);
 #endif
             try
             {
-                TagInfo new_tag_info = LogicChipItem.ToTagInfo(
-                    _tagExisting.TagInfo,
-                    this.chipEditor_editing.LogicChipItem);
+                TagInfo new_tag_info = null;
+                if (this.chipEditor_editing.LogicChipItem != null)
+                    new_tag_info = LogicChipItem.ToTagInfo(
+                        _tagExisting.TagInfo,
+                        this.chipEditor_editing.LogicChipItem);
+                else
+                    new_tag_info = _tagExisting.TagInfo.Clone();
 #if OLD_CODE
                 NormalResult result = channel.Object.WriteTagInfo(
                     _tagExisting.ReaderName,
