@@ -1752,6 +1752,8 @@ this.toolStripButton_autoFixEas.Checked);
 
         async void menu_saveSelectedTagContent_Click(object sender, EventArgs e)
         {
+            await SaveItemChangeAsync(async (item) => await SaveTagContentAsync(item));
+#if OLD
             int count = 0;
             List<string> errors = new List<string>();
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
@@ -1774,10 +1776,43 @@ this.toolStripButton_autoFixEas.Checked);
 
             if (errors.Count > 0)
                 MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
+#endif
+        }
+
+        delegate Task<string> Delegate_save(ListViewItem item);
+
+        async Task SaveItemChangeAsync(Delegate_save proc)
+        {
+            int count = 0;
+            List<string> errors = new List<string>();
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                var error = await proc(item);
+                if (error != null)
+                    errors.Add(error);
+                else
+                    count++;
+            }
+
+            listView_tags_SelectedIndexChanged(this, new EventArgs());
+
+            UpdateSaveButton();
+
+            // if (count > 0)
+                this.ShowMessage($"保存完全成功:{count} {(errors.Count > 0 ? ("警告或错误:"+errors.Count) : "")}", 
+                    errors.Count == 0 ? "green" : "yellow", true);
+            //else
+            //    this.ShowMessage("没有需要保存的事项", "yellow", true);
+
+            if (errors.Count > 0)
+                MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "警告或错误");
         }
 
         async void menu_saveSelectedErrorTagContent_1_Click(object sender, EventArgs e)
         {
+            await SaveItemChangeAsync (async (item) => await SaveBlankPiiTagContentAsync(item));
+
+#if OLD
             int count = 0;
             List<string> errors = new List<string>();
 
@@ -1797,10 +1832,11 @@ this.toolStripButton_autoFixEas.Checked);
             this.ShowMessage($"保存成功({count}) 错误({errors.Count})", errors.Count == 0 ? "green" : "yellow", true);
             if (errors.Count > 0)
                 MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
+#endif
         }
 
         // 故意写入 PII 为空的标签内容
-        async Task<string> SaveBlankPiiTagContent(ListViewItem item)
+        async Task<string> SaveBlankPiiTagContentAsync(ListViewItem item)
         {
             string strError = "";
             ItemInfo item_info = (ItemInfo)item.Tag;
@@ -1875,6 +1911,8 @@ this.toolStripButton_autoFixEas.Checked);
 
         async void menu_saveSelectedErrorTagContent_Click(object sender, EventArgs e)
         {
+            await SaveItemChangeAsync(async (item) => await SaveErrorTagContent1Async(item));
+#if OLD
             int count = 0;
             List<string> errors = new List<string>();
             foreach (ListViewItem item in this.listView_tags.SelectedItems)
@@ -1893,13 +1931,14 @@ this.toolStripButton_autoFixEas.Checked);
             this.ShowMessage($"保存成功({count}) 错误({errors.Count})", errors.Count == 0 ? "green" : "yellow", true);
             if (errors.Count > 0)
                 MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
+#endif
         }
 
         // 故意写入可导致解析错误的标签内容(fudan 空白标签)
         // return:
         //      null    没有出错
         //      其他      出错信息
-        async Task<string> SaveErrorTagContent1(ListViewItem item)
+        async Task<string> SaveErrorTagContent1Async(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             /*
@@ -1983,7 +2022,7 @@ this.toolStripButton_autoFixEas.Checked);
         // return:
         //      null    没有出错
         //      其他      出错信息
-        async Task<string> SaveErrorTagContent(ListViewItem item)
+        async Task<string> SaveErrorTagContentAsync(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             /*
@@ -2048,13 +2087,13 @@ this.toolStripButton_autoFixEas.Checked);
         // return:
         //      null    没有出错
         //      其他      出错信息
-        async Task<string> SaveTagContent(ListViewItem item)
+        async Task<string> SaveTagContentAsync(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             if (item_info.LogicChipItem == null)
-                return null;
+                return "item_info.LogicChipItem == null";
             if (item_info.LogicChipItem.Changed == false)
-                return null;
+                return "没有发生修改";
 
 #if OLD_CODE
             RfidChannel channel = GetRfidChannel(
@@ -2140,6 +2179,9 @@ this.toolStripButton_autoFixEas.Checked);
 
         private async void toolStripButton_saveRfid_Click(object sender, EventArgs e)
         {
+            await SaveItemChangeAsync(async (item) => await SaveTagContentAsync(item));
+
+#if OLD
             int count = 0;
             List<string> errors = new List<string>();
             foreach (ListViewItem item in this.listView_tags.Items)
@@ -2158,6 +2200,7 @@ this.toolStripButton_autoFixEas.Checked);
             this.ShowMessage($"保存成功({count}) 错误({errors.Count})", errors.Count == 0 ? "green" : "yellow", true);
             if (errors.Count > 0)
                 MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "保存出错");
+#endif
         }
 
         private void toolStripButton_autoFixEas_CheckedChanged(object sender, EventArgs e)
