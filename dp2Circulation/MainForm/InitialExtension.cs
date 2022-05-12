@@ -2659,8 +2659,12 @@ MessageBoxDefaultButton.Button1);
 #if SN
                     {
                         _verified = false;
+                        // return:
+                        //      -1  出错
+                        //      0   放弃
+                        //      1   成功
                         nRet = this.VerifySerialCode("", false, out strError);
-                        if (nRet == 0)
+                        if (nRet == 1)
                             _verified = true;
 
                     }

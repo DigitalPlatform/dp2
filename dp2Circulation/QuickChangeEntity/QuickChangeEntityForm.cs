@@ -503,8 +503,12 @@ false);
             if (exceed == true)
             {
                 // 序列号中要求包含 function=rfid 参数
+                // return:
+                //      -1  出错
+                //      0   放弃
+                //      1   成功
                 int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == 0)
                 {
                     strError = "写入 RFID 标签功能尚未被许可('rfid')";
                     goto ERROR1;

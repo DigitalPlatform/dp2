@@ -3044,8 +3044,12 @@ false);
                 && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
             {
                 string strError = "";
+                // return:
+                //      -1  出错
+                //      0   放弃
+                //      1   成功
                 int nRet = this.VerifySerialCode("", true, out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == 0)
                 {
                     channel.Close();
                     Program.PromptAndExit(this, "dp2Circulation 专业版需要先设置序列号才能使用。\r\n\r\n注：可以切换为社区版，不需要设置序列号即可使用。方法是：在设置序列号对话框中，按左下角的“切换为社区版”按钮。");
@@ -8190,7 +8194,8 @@ Keys keyData)
         //      bReinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
         // return:
         //      -1  出错
-        //      0   正确
+        //      0   放弃
+        //      1   成功
         internal int VerifySerialCode(string strRequireFuncList,
             bool bReinput,
             out string strError)
@@ -8204,7 +8209,8 @@ Keys keyData)
             //                  skipVerify  不验证序列号合法性，只关注 function list 是否符合要求
             // return:
             //      -1  出错
-            //      0   正确
+            //      0   放弃
+            //      1   成功
             return FormClientInfo.VerifySerialCode(
             $"验证序列号 {strRequireFuncList}",
             strRequireFuncList,
@@ -8551,7 +8557,8 @@ Keys keyData)
 #if SN
             // return:
             //      -1  出错
-            //      0   正确
+            //      0   放弃
+            //      1   成功
             int nRet = FormClientInfo.VerifySerialCode(
                 "设置序列号", // strTitle,
                 "", // strRequireFuncList,

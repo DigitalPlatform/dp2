@@ -112,10 +112,14 @@ namespace dp2Circulation
         {
             string strError = "";
 #if SN
+            // return:
+            //      -1  出错
+            //      0   放弃
+            //      1   成功
             int nRet = Program.MainForm.VerifySerialCode("relationdialog",
                 false,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == 0)
             {
                 MessageBox.Show(this, "RelationDialog 需要先设置序列号才能使用");
                 API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);

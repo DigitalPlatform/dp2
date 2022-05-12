@@ -2225,7 +2225,8 @@ token);
         {
             // return:
             //      -1  出错
-            //      0   正确
+            //      0   放弃
+            //      1   成功
             int nRet = FormClientInfo.VerifySerialCode(
                 "", // strTitle,
                 "", // strRequireFuncList,

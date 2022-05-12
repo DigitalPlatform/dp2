@@ -56,16 +56,24 @@ namespace dp2Library
 
             if (this.RestMode == false)
             {
-                if (this.sessioninfo != null)
+                try
                 {
-                    this.app.SessionTable.DeleteSession(sessioninfo);
-                    this.sessioninfo = null;
+                    if (this.sessioninfo != null)
+                    {
+                        this.app.SessionTable.DeleteSession(sessioninfo);
+                        this.sessioninfo = null;
+                    }
+                    else if (string.IsNullOrEmpty(this._ip) == false)
+                    {
+                        // 减量，以便管理配额
+                        this.app.SessionTable.IncNullIpCount(this._ip, -1);
+                        this._ip = null;
+                    }
                 }
-                else if (string.IsNullOrEmpty(this._ip) == false)
+                catch(Exception ex)
                 {
-                    // 减量，以便管理配额
-                    this.app.SessionTable.IncNullIpCount(this._ip, -1);
-                    this._ip = null;
+                    // 2022/5/12
+                    app.WriteErrorLog($"Dispose() LibraryService 出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
             }
         }

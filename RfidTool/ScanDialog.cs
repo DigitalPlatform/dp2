@@ -1392,12 +1392,16 @@ MessageBoxDefaultButton.Button2);
             string style = reinput ? "reinput" : "";
             if (StringUtil.IsDevelopMode())
                 style += ",skipVerify";
+            // return:
+            //      -1  出错
+            //      0   放弃
+            //      1   成功
             int nRet = FormClientInfo.VerifySerialCode(
     $"设置序列号({function_type})",
     function_type,
     style,
     out string strError);
-            if (nRet == 0)
+            if (nRet == 1)
                 return true;
             return false;
         }

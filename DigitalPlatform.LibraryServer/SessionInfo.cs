@@ -1683,7 +1683,6 @@ SetStartEventArgs e);
             }
             try
             {
-                // this.Remove(sessioninfo.SessionTime.SessionID);
                 this.Remove(sessioninfo.SessionID);
                 if (string.IsNullOrEmpty(sessioninfo.ClientIP) == false)
                 {
@@ -1828,64 +1827,65 @@ SetStartEventArgs e);
         long _incIpCount(string strIP, int nDelta)
         {
             // this.MaxClients = 0;    // test
-
-            long v = 0;
-            if (this._ipTable.ContainsKey(strIP) == true)
-                v = (long)this._ipTable[strIP];
-            else
+            lock (this._ipTable.SyncRoot)   // 2022/5/12
             {
-                if (this.Count > _nMaxCount
-                    && v + nDelta != 0)
-                    throw new OutofSessionException("IP 条目数量超过 " + _nMaxCount.ToString());
-
-                // 判断前端机器台数是否超过限制数额 2014/8/23
-                if (this.MaxClients != -1
-                    && IsLocalhost(strIP) == false
-                    && this.GetClientIpAmount() >= this.MaxClients
-                    && v + nDelta != 0)
-                    throw new OutofClientsException("前端机器数量已经达到 " + this.GetClientIpAmount().ToString() + " 个 ( 现有IP: " + StringUtil.MakePathList(GetIpList(), ", ") + " 试图申请的IP: " + strIP + ")。请先释放出通道然后重新访问");
-
-            }
-
-            if (v + nDelta == 0)
-                this._ipTable.Remove(strIP); // 及时移走计数器为 0 的条目，避免 hashtable 尺寸太大
-            else
-                this._ipTable[strIP] = v + nDelta;
-
-            return v;   // 返回增量前的数字
-        }
-
-        // 获得当前除了 localhost 以外的 IP 总数
-        int GetClientIpAmount()
-        {
-            if (this._ipTable.Count == 0)
-                return 0;
-
-            // 排除 localhost
-            int nDelta = 0;
-            if (this._ipTable.ContainsKey("::1") == true)
-                nDelta -= 1;
-            if (this._ipTable.ContainsKey("127.0.0.1") == true)
-                nDelta -= 1;
-            if (this._ipTable.ContainsKey("localhost") == true)
-                nDelta -= 1;
-
-            return this._ipTable.Count + nDelta;
-        }
-
-        // 获得当前正在使用的 IP 列表，为报错显示用途。其中 localhost 会标出 (未计入)
-        List<string> GetIpList()
-        {
-            List<string> results = new List<string>();
-            foreach (string ip in this._ipTable.Keys)
-            {
-                if (IsLocalhost(ip) == true)
-                    results.Add("localhost(未计入)");
+                long v = 0;
+                if (this._ipTable.ContainsKey(strIP) == true)
+                    v = (long)this._ipTable[strIP];
                 else
-                    results.Add(ip);
+                {
+                    if (this.Count > _nMaxCount
+                        && v + nDelta != 0)
+                        throw new OutofSessionException("IP 条目数量超过 " + _nMaxCount.ToString());
+
+                    // 判断前端机器台数是否超过限制数额 2014/8/23
+                    if (this.MaxClients != -1
+                        && IsLocalhost(strIP) == false
+                        && GetClientIpAmount() >= this.MaxClients
+                        && v + nDelta != 0)
+                        throw new OutofClientsException("前端机器数量已经达到 " + GetClientIpAmount().ToString() + " 个 ( 现有IP: " + StringUtil.MakePathList(GetIpList(), ", ") + " 试图申请的IP: " + strIP + ")。请先释放出通道然后重新访问");
+                }
+
+                if (v + nDelta == 0)
+                    this._ipTable.Remove(strIP); // 及时移走计数器为 0 的条目，避免 hashtable 尺寸太大
+                else
+                    this._ipTable[strIP] = v + nDelta;
+
+                return v;   // 返回增量前的数字
             }
 
-            return results;
+            // 获得当前除了 localhost 以外的 IP 总数
+            int GetClientIpAmount()
+            {
+                if (this._ipTable.Count == 0)
+                    return 0;
+
+                // 排除 localhost
+                int delta = 0;
+                if (this._ipTable.ContainsKey("::1") == true)
+                    delta -= 1;
+                if (this._ipTable.ContainsKey("127.0.0.1") == true)
+                    delta -= 1;
+                if (this._ipTable.ContainsKey("localhost") == true)
+                    delta -= 1;
+
+                return this._ipTable.Count + delta;
+            }
+
+            // 获得当前正在使用的 IP 列表，为报错显示用途。其中 localhost 会标出 (未计入)
+            List<string> GetIpList()
+            {
+                List<string> results = new List<string>();
+                foreach (string ip in this._ipTable.Keys)
+                {
+                    if (IsLocalhost(ip) == true)
+                        results.Add("localhost(未计入)");
+                    else
+                        results.Add(ip);
+                }
+
+                return results;
+            }
         }
 
         // 根据 ip 地址聚集其它字段信息
@@ -2078,22 +2078,24 @@ SetStartEventArgs e);
                 // strClientIP 参数可用于筛选
                 if (strStyle == "ip-count")
                 {
-
-                    foreach (string ip in this._ipTable.Keys)
+                    lock (this._ipTable.SyncRoot)   // 2022/5/12
                     {
-                        if (string.IsNullOrEmpty(strClientIP) == true
-                            || strClientIP == "*")
+                        foreach (string ip in this._ipTable.Keys)
                         {
+                            if (string.IsNullOrEmpty(strClientIP) == true
+                                || strClientIP == "*")
+                            {
+                            }
+                            else if (ip != strClientIP)
+                                continue;
+
+                            ChannelInfo info = new ChannelInfo();
+                            info.ClientIP = ip;
+                            // TODO: UserName 可以累积所有用过的
+                            info.Count = (long)this._ipTable[ip];
+
+                            infos.Add(info);
                         }
-                        else if (ip != strClientIP)
-                            continue;
-
-                        ChannelInfo info = new ChannelInfo();
-                        info.ClientIP = ip;
-                        // TODO: UserName 可以累积所有用过的
-                        info.Count = (long)this._ipTable[ip];
-
-                        infos.Add(info);
                     }
 
                     // 根据 ip 地址聚集其它字段信息

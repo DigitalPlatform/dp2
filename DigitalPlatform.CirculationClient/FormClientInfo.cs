@@ -51,11 +51,15 @@ namespace DigitalPlatform.CirculationClient
 
                     ClientInfo.WriteInfoLog($"尝试打开序列号对话框");
 
+                    // return:
+                    //      -1  出错
+                    //      0   放弃
+                    //      1   成功
                     int nRet = VerifySerialCode($"{product_name}需要先设置序列号才能使用",
                         "",
                         "reinput",
                         out string strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == 0)
                     {
                         ClientInfo.WriteErrorLog($"序列号不正确，{product_name} 退出");
                         MessageBox.Show(MainForm, $"{product_name}需要先设置序列号才能使用");
@@ -80,7 +84,8 @@ namespace DigitalPlatform.CirculationClient
         //                  skipVerify  不验证序列号合法性，只关注 function list 是否符合要求
         // return:
         //      -1  出错
-        //      0   正确
+        //      0   放弃
+        //      1   成功
         public static int VerifySerialCode(
         string strTitle,
         string strRequireFuncList,
@@ -165,13 +170,13 @@ namespace DigitalPlatform.CirculationClient
                 if (nRet == 0)
                 {
                     strError = "放弃";
-                    return -1;
+                    return 0;
                 }
                 strSerialCode = ClientInfo.Config.Get("sn", "sn", "");
                 bReset = false;
                 goto REDO_VERIFY;
             }
-            return 0;
+            return 1;
         }
 
         static bool _communityMode = false;
