@@ -36,7 +36,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>277</ApplicationRevision>
+    <ApplicationRevision>278</ApplicationRevision>
     <ApplicationVersion>3.2.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -70,7 +70,7 @@
     <ManifestKeyFile>数字平台（北京）软件有限责任公司.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
@@ -164,9 +164,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="palm_app.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="setup-v.ico" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -392,15 +389,6 @@
       <TargetPath>
       </TargetPath>
       <PublishState>DataFile</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="palm_app.zip">
-      <Visible>False</Visible>
-      <Group>palmcenter</Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>

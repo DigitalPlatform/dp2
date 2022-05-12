@@ -19,4 +19,6 @@ cd ..
 
 ..\ziputil palm_app palm_app.zip -t
 
+xcopy palm_app.zip .\bin\debug /Y
+
 xcopy palm_app.zip c:\publish\dp2installer\v3 /Y
