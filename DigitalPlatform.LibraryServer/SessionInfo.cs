@@ -238,6 +238,11 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        public override string ToString()
+        {
+            return $"UserID={UserID},SessionID={SessionID},ClientIP={ClientIP},LibraryCodeList={LibraryCodeList},Via={Via},CallCount={CallCount},Lang={Lang},SessionTime=({SessionTime?.ToString()}),Closed={Closed},RouterClientIP={RouterClientIP},NeedAutoClien={NeedAutoClean},Used={Used},TempDir={TempDir}";  // ,Rights=({Rights})
+        }
+
         public void Touch()
         {
             if (this.SessionTime == null)
@@ -1163,6 +1168,11 @@ SetStartEventArgs e);
         public DateTime LastUsedTime = DateTime.Now;
         // public string SessionID = "";
         // TODO: 是否登录过，也决定了通道的空闲生存时间
+
+        public override string ToString()
+        {
+            return $"CreateTime={CreateTime.ToString()},LastUsedTime={LastUsedTime.ToString()}";
+        }
     }
 
     /// <summary>

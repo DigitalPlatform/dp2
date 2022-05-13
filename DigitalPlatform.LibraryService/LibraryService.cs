@@ -56,10 +56,16 @@ namespace dp2Library
 
             if (this.RestMode == false)
             {
+                string session_dumptext = "(null)";
                 try
                 {
                     if (this.sessioninfo != null)
                     {
+                        session_dumptext = this.sessioninfo.ToString();
+
+                        // testing 
+                        // throw new Exception("test");
+
                         this.app.SessionTable.DeleteSession(sessioninfo);
                         this.sessioninfo = null;
                     }
@@ -70,10 +76,10 @@ namespace dp2Library
                         this._ip = null;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // 2022/5/12
-                    app.WriteErrorLog($"Dispose() LibraryService 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    app.WriteErrorLog($"Dispose() LibraryService 出现异常: {ExceptionUtil.GetDebugText(ex)}\r\nsession_dumptext: {session_dumptext}");
                 }
             }
         }
@@ -1444,14 +1450,16 @@ namespace dp2Library
             if (result.Value == -1)
                 return result;
 
+            string session_dumptext = "(null)";
             try
             {
                 sessioninfo.Account = null;
 
                 if (OperationContext.Current.SessionId == null)
                 {
+                    session_dumptext = this.sessioninfo.ToString();
+
                     // REST 情形下
-                    // Session.Abandon(); 
                     this.app.SessionTable.DeleteSession(sessioninfo);
                 }
                 else
@@ -1463,7 +1471,7 @@ namespace dp2Library
             }
             catch (Exception ex)
             {
-                string strErrorText = "dp2Library Logout() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = $"dp2Library Logout() API出现异常: { ExceptionUtil.GetDebugText(ex)}\r\nsession_dumptext: {session_dumptext}";
                 app.WriteErrorLog(strErrorText);
 
                 result.Value = -1;
