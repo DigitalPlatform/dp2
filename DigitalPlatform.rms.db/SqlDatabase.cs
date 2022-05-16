@@ -194,10 +194,10 @@ namespace DigitalPlatform.rms
 
                 // 默认 Pgsql 的对象文件起始尺寸
                 if (this.IsPgsql())
-                    this.m_lObjectStartSize = 100 * 1024;   // 100 * 1024;
+                    this.m_lObjectStartSize = PGSQL_OBJECTSTART_SIZE;   // 100 * 1024;
 
-                // <object>节点
-                XmlNode nodeObject = this.PropertyNode.SelectSingleNode("object");
+                // <object>元素
+                var nodeObject = this.PropertyNode.SelectSingleNode("object") as XmlElement;
                 if (nodeObject != null)
                 {
                     this.m_strObjectDir = DomUtil.GetAttr(nodeObject, "dir").Trim();
@@ -224,6 +224,12 @@ namespace DigitalPlatform.rms
                         out strError) == -1)
                     {
                         strError = "读取数据库的 startSize 参数时发生错误：" + strError;
+                        return -1;
+                    }
+
+                    if (IsPgsql() && lValue != PGSQL_OBJECTSTART_SIZE)
+                    {
+                        strError = "Pgsql 类型的 object/@startSize 属性值只允许定义为 102400";
                         return -1;
                     }
 
@@ -309,6 +315,7 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        public const int PGSQL_OBJECTSTART_SIZE = 100 * 1024;
         internal override void Close()
         {
             this.CloseInternal();
@@ -7210,7 +7217,7 @@ handle.CancelTokenSource.Token).Result;
                     if (IsPgsql()
                         && StringUtil.IsInList("data", strStyle)
                         // && m_lObjectStartSize > 0 && m_lObjectStartSize <= 100 * 1024
-                        && nReadLength <= 100 * 1024)
+                        && nReadLength <= PGSQL_OBJECTSTART_SIZE)
                         proc_readBytes = (dr, current_row_info, data_col_index, newdata_col_index) =>
                         {
                             if (nReadLength == 0)
@@ -7231,7 +7238,7 @@ handle.CancelTokenSource.Token).Result;
                                     current_length = (int)(current_row_info.data_length - lStart);
                                 else
                                     current_length = Math.Min(nReadLength, current_row_info.data_length - lStart);
-                                if (current_length > 0 && current_length <= 100 * 1024)
+                                if (current_length > 0 && current_length <= PGSQL_OBJECTSTART_SIZE)
                                     current_row_info.Data = GetData(dr, data_col_index, lStart, current_length);
                             }
 
@@ -7245,7 +7252,7 @@ handle.CancelTokenSource.Token).Result;
                                     current_length = (int)(current_row_info.newdata_length - lStart);
                                 else
                                     current_length = Math.Min(nReadLength, current_row_info.newdata_length - lStart);
-                                if (current_length > 0 && current_length <= 100 * 1024)
+                                if (current_length > 0 && current_length <= PGSQL_OBJECTSTART_SIZE)
                                     current_row_info.NewData = GetData(dr, newdata_col_index, lStart, current_length);
                             }
 
@@ -12637,12 +12644,12 @@ trans);
 
                                     if ((data_field_name == "data" || mix_mode == true)
                                         && current_row_info.data_length > 0 && data_col_index != -1
-                                        && current_row_info.data_length <= 100 * 1024)
+                                        && current_row_info.data_length <= PGSQL_OBJECTSTART_SIZE)
                                         current_row_info.Data = GetData(dr, data_col_index, 0, current_row_info.data_length);
 
                                     if ((data_field_name == "newdata" || mix_mode == true)
                                         && current_row_info.newdata_length > 0 && newdata_col_index != -1
-                                        && current_row_info.newdata_length <= 100 * 1024)
+                                        && current_row_info.newdata_length <= PGSQL_OBJECTSTART_SIZE)
                                         current_row_info.NewData = GetData(dr, newdata_col_index, 0, current_row_info.newdata_length);
 
                                     // 注: 混合模式下不读取对象文件。(对象文件中存储的是尚未完全上传完成的对象内容)
@@ -14779,7 +14786,7 @@ trans);
                             strError = $"length({length}) != lTotalLength({lTotalLength})";
                             return -1;
                         }
-                        if (length > 100 * 1024)
+                        if (length > PGSQL_OBJECTSTART_SIZE)
                         {
                             strError = $"拟装入内存的字节数太大 {length}";
                             return -1;
