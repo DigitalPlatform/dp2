@@ -274,6 +274,8 @@ namespace dp2LibraryConsole
                     return false;
                 }
 
+                // Console.Write("\b");    // 2022/5/20
+
                 string strDisplayDirectory = "";
 
                 int file_count = 0;
@@ -373,7 +375,14 @@ namespace dp2LibraryConsole
                 // 用 "/" rdir， strResultDirectory 为 "upload/"
 
                 // this._currentDir = strResultDirectory;
-                this._currentDir = strResultDirectory.Substring("upload".Length);   // 2017/3/20
+
+                if (strResultDirectory.StartsWith("upload"))
+                    this._currentDir = strResultDirectory.Substring("upload".Length);   // 2017/3/20
+                else
+                {
+                    strError = $"rcd 失败: dp2library 返回的 '{strResultDirectory}' 没有以 'upload' 开头";
+                    goto ERROR1;
+                }
 
                 Debug.Assert(string.IsNullOrEmpty(this._currentDir) == true || this._currentDir.IndexOf("\\") == -1,
                     "this._currentDir 中不允许使用字符 '\\'");
@@ -943,7 +952,7 @@ value);
             else
             {
                 _index = -1;
-                Console.Write("\b ");
+                Console.Write("\b \b");
             }
         }
 
@@ -1580,7 +1589,7 @@ value);
                     nRet = DownloadFile(
             null,
             this.Channel,
-                        // "!upload" + info.Name.Replace("\\", "/"),
+            // "!upload" + info.Name.Replace("\\", "/"),
             "!" + info.Name.Replace("\\", "/"), // 2017/4/8
             strLocalPath,
             out strError);

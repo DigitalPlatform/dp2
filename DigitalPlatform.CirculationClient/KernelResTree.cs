@@ -265,6 +265,7 @@ namespace DigitalPlatform.CirculationClient
                         items.Add(item);
                     }
 
+                    // TODO: 可否把 ! 排在 < 后面
                     items.Sort((a, b) =>
                     {
                         int nRet = a.Type - b.Type;
@@ -298,6 +299,7 @@ namespace DigitalPlatform.CirculationClient
                     }
                 }
 
+                /*
                 // 在根级追加 '!' 下的 dp2library 本地文件或目录
                 if (string.IsNullOrEmpty(start_path))
                 {
@@ -323,7 +325,7 @@ namespace DigitalPlatform.CirculationClient
                     else
                         children.Add(nodeNew);
                 }
-
+                */
                 restoreLoading = false;  // 防止 finally 复原
                 return 0;
             }
@@ -1233,15 +1235,19 @@ MessageBoxDefaultButton.Button2);
                 KernelCfgFileDialog dlg = new KernelCfgFileDialog();
                 dlg.Text = "编辑 " + strPath;
                 dlg.Font = GuiUtil.GetDefaultFont();
-                dlg.ActivePage = "content";
-                dlg.Content = info.Content;
-                dlg.MIME = info.MIME;
                 dlg.ServerUrl = channel.Url;
                 dlg.Path = strPath;
+                dlg.Content = info.Content;
+                dlg.MIME = info.MIME;
                 if (this.AppInfo != null)
                     this.AppInfo.LinkFormState(dlg, "CfgFileEditDlg_state");
                 else
                     dlg.StartPosition = FormStartPosition.CenterScreen;
+
+                if (KernelCfgFileDialog.IsMarkDownPath(strPath))
+                    dlg.ActivePage = "preview";
+                else
+                    dlg.ActivePage = "content";
 
                 dlg.ShowDialog(this);
 

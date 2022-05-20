@@ -98,6 +98,7 @@ namespace DigitalPlatform.CirculationClient
             bool bReinput = StringUtil.IsInList("reinput", strStyle);
             bool bReset = StringUtil.IsInList("reset", strStyle);
             bool bSkipVerify = StringUtil.IsInList("skipVerify", strStyle);
+            bool bLoose = StringUtil.IsInList("loose", strStyle);
 
             string strFirstMac = "";
             List<string> macs = SerialCodeForm.GetMacAddress();
@@ -107,6 +108,9 @@ namespace DigitalPlatform.CirculationClient
             }
 
             string strSerialCode = ClientInfo.Config.Get("sn", "sn", "");
+            if (string.IsNullOrEmpty(strSerialCode) == true
+                && bLoose)
+                return 1;
 
             // 首次运行
             if (string.IsNullOrEmpty(strSerialCode) == true)
@@ -123,7 +127,7 @@ namespace DigitalPlatform.CirculationClient
                     {
                         CommunityMode = true;
                         ClientInfo.Config.Set("main_form", "last_mode", "community");
-                        return 0;
+                        return 1;
                     }
                 }
 

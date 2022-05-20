@@ -1323,18 +1323,8 @@ SetStartEventArgs e);
 
             if (sessioninfo != null)
             {
-                /*
-                Debug.Assert(sessioninfo.SessionTime != null, "");
-                sessioninfo.SessionTime.LastUsedTime = DateTime.Now;
-                */
                 sessioninfo.Touch();
-#if NO
-                if (sessioninfo.SessionTime.SessionID != strSessionID)
-                {
-                    Debug.Assert(false, "");
-                    sessioninfo.SessionTime.SessionID = strSessionID;
-                }
-#endif
+
                 if (sessioninfo.SessionID != strSessionID)
                 {
                     Debug.Assert(false, "");
@@ -1350,7 +1340,7 @@ SetStartEventArgs e);
             }
 
             if (this.Count > _nMaxCount)
-                throw new ApplicationException("Session 数量超过 " + _nMaxCount.ToString());
+                throw new OutofSessionException("Session 数量超过 " + _nMaxCount.ToString());
 
             sessioninfo = new SessionInfo(app, strSessionID, address_list);
             sessioninfo.SessionTime = new SessionTime();
@@ -1385,7 +1375,6 @@ SetStartEventArgs e);
 
                 // 没有超过配额的才加入
                 this[strSessionID] = sessioninfo;
-
                 return sessioninfo;
             }
             finally

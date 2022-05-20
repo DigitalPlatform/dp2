@@ -39,8 +39,11 @@ namespace dp2Library
 
         string _ip = "";    // 没有 sessioninfo 的通道，记载 ip，便于最后释放计数
 
+        bool _disposed = false;
         public void Dispose()
         {
+            if (_disposed == true)
+                return;
 #if NO
             if (this.RestMode == false && this.sessioninfo != null)
             {
@@ -81,6 +84,20 @@ namespace dp2Library
                     // 2022/5/12
                     app.WriteErrorLog($"Dispose() LibraryService 出现异常: {ExceptionUtil.GetDebugText(ex)}\r\nsession_dumptext: {session_dumptext}");
                 }
+            }
+
+            _disposed = true;
+        }
+
+        public LibraryService()
+        {
+            if (OperationContext.Current != null && OperationContext.Current.Channel != null)
+            {
+                OperationContext.Current.Channel.Closing -= Channel_Closing;
+                OperationContext.Current.Channel.Closed -= Channel_Closed;
+
+                OperationContext.Current.Channel.Closing += Channel_Closing;
+                OperationContext.Current.Channel.Closed += Channel_Closed;
             }
         }
 
@@ -297,7 +314,6 @@ namespace dp2Library
                 strError = ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
-
             return 0;
         }
 
@@ -311,12 +327,15 @@ namespace dp2Library
             bool bCheckLogin = false,
             bool bCheckHangup = false)
         {
-#if DEBUG
-            if (bPrepareSessionInfo == false)
+            if (bPrepareSessionInfo == false && bCheckLogin == true)
             {
+                /*
+#if DEBUG
                 Debug.Assert(bCheckLogin == false, "bPrepareSessionInfo为false时， bCheckLogin必须为false");
-            }
 #endif
+                */
+                throw new ArgumentException($"{nameof(bPrepareSessionInfo)}为 false 时, {nameof(bCheckLogin)}必须为 false(然而现在为 true)");
+            }
             LibraryServerResult result = new LibraryServerResult();
 
             string strError = "";
@@ -567,21 +586,31 @@ namespace dp2Library
             app.WriteErrorLog(text.ToString());
         }
 
-        /*
         private void Channel_Closed(object sender, EventArgs e)
         {
-            this.app.SessionTable.DeleteSession(sessioninfo);
+            if (this.app != null
+                && this.sessioninfo != null
+                && this._disposed == false)
+            {
+                Dispose();
+            }
 
-            OperationContext.Current.Channel.Closed -= Channel_Closed;
+            if (OperationContext.Current != null && OperationContext.Current.Channel != null)
+                OperationContext.Current.Channel.Closed -= Channel_Closed;
         }
 
         private void Channel_Closing(object sender, EventArgs e)
         {
-            this.app.SessionTable.DeleteSession(sessioninfo);
+            if (this.app != null
+                && this.sessioninfo != null
+                && this._disposed == false)
+            {
+                Dispose();
+            }
 
-            OperationContext.Current.Channel.Closing -= Channel_Closing;
+            if (OperationContext.Current != null && OperationContext.Current.Channel != null)
+                OperationContext.Current.Channel.Closing -= Channel_Closing;
         }
-        */
 
         #endregion
 
@@ -10838,6 +10867,11 @@ true);
                     }
                     else
                     {
+                        // return:
+                        //      -1  error
+                        //      0   不具备权限
+                        //      1   具备权限
+                        //      2   具备部分权限(2022/5/20)
                         nRet = app.CheckGetResRights(
                             sessioninfo,
                             sessioninfo.LibraryCodeList,
@@ -10864,19 +10898,44 @@ true);
                     }
                 }
 
-                if (string.IsNullOrEmpty(strCategory) == false
-                    && strCategory[0] == '!')
-                {
-                    // TODO: 根据不同的权限限定不同的 root 起点
-                    string strRoot = Path.Combine(app.DataDir, "upload");
-                    if (StringUtil.IsInList("managedatabase,backup", sessioninfo.RightsOrigin) == true)
-                    {
-                        strRoot = app.DataDir.Replace("/", "\\");  // 权力很大，能看到数据目录下的全部文件和目录了
-                        if (strRoot.EndsWith("\\") == false)
-                            strRoot += "\\";
-                    }
+                string temp = strCategory;
+                // parameters:
+                //      strPath [in]逻辑路径
+                //              [out]吃掉第一部分后余下的逻辑路径
+                //      strStartDir 起点物理路径。也就是被吃掉的第一部分对应的物理路径
+                nRet = app.GetStartDir(ref temp,
+                    sessioninfo,
+                    strAction,
+                    out string strStartDir,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-                    string strCurrentDirectory = Path.Combine(app.DataDir, strCategory.Substring(1));
+                //if (string.IsNullOrEmpty(strCategory) == false
+                //    && strCategory[0] == '!')
+                if (nRet == 1)
+                {
+                    /*
+                    string strRoot = strStartDir;
+                    // 根据不同的权限限定不同的 root 起点
+                    if (strCategory.StartsWith("!"))
+                    {
+                        strRoot = Path.Combine(app.DataDir, "upload");
+                        if (StringUtil.IsInList("managedatabase,backup", sessioninfo.RightsOrigin) == true)
+                        {
+                            strRoot = app.DataDir.Replace("/", "\\");  // 权力很大，能看到数据目录下的全部文件和目录了
+                            if (strRoot.EndsWith("\\") == false)
+                                strRoot += "\\";
+                        }
+                    }
+                    else
+                    */
+
+                    string strCurrentDirectory = Path.Combine(strStartDir, temp);
+                    strCurrentDirectory = LibraryApplication.CanonicalizeDir(strCurrentDirectory);
+                    // strRoot = LibraryApplication.CanonicalizeDir(strCurrentDirectory);
+
+                    // string strCurrentDirectory = Path.Combine(app.DataDir, strCategory.Substring(1));
 
                     if (strAction == "delete")
                     {
@@ -10918,7 +10977,7 @@ true);
                     if (strAction == "cd")
                     {
                         nRet = LibraryApplication.ChangeDirectory(
-                            strRoot,
+                            strStartDir,    // strRoot,
                             strCurrentDirectory,
                             strFileName,
                             out string strResult,  // 注意返回的是物理路径
@@ -10935,7 +10994,8 @@ true);
                         infos = new List<FileItemInfo>();
                         FileItemInfo info = new FileItemInfo();
                         infos.Add(info);
-                        info.Name = strResult.Substring(strRoot.Length).Replace("\\", "/");    // 这里需要逻辑路径
+                        // info.Name = strResult.Substring(strRoot.Length).Replace("\\", "/");    // 这里需要逻辑路径
+                        info.Name = strResult.Substring(strStartDir.Length).Replace("\\", "/");    // 这里需要逻辑路径
                         result.Value = 1;
                         return result;
 #if NO
@@ -10973,17 +11033,35 @@ true);
 
                     if (strAction == "list")
                     {
+                        string strRoot = null;  // 不限定
+                        // 根据不同的权限限定不同的 root 起点
+                        if (strCategory.StartsWith("!"))
+                        {
+                            strRoot = Path.Combine(app.DataDir, "upload");
+                            if (StringUtil.IsInList("managedatabase,backup", sessioninfo.RightsOrigin) == true)
+                            {
+                                strRoot = null;
+                                // 权力很大，能看到数据目录下的全部文件和目录了
+                            }
+                        }
+
                         // parameters:
                         //      strCurrentDirectory 当前路径。物理路径
                         // return:
                         //      -1  出错
                         //      其他  列出的事项总数。注意，不是 lLength 所指出的本次返回数
                         nRet = app.ListFile(
-                            strRoot,
+                            strCurrentDirectory,    // strRoot,
                             strCurrentDirectory,
                             strFileName,
                             lStart,
                             lLength,
+                            (fullName) =>
+                            {
+                                if (strRoot != null && PathUtil.IsChildOrEqual(fullName, strRoot) == false)
+                                    return false;
+                                return true;
+                            },
                             out infos,
                             out strError);
                         if (nRet == -1)
@@ -11001,10 +11079,12 @@ true);
                     strError = "未知的 strAction '" + strAction + "'";
                     goto ERROR1;
                 }
-                else if (string.IsNullOrEmpty(strCategory) == false
-                    && strCategory.StartsWith(KernelServerUtil.LOCAL_PREFIX))
+                else /*if (string.IsNullOrEmpty(strCategory) == false
+                    && strCategory.StartsWith(KernelServerUtil.LOCAL_PREFIX))*/
                 {
-                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                    if (string.IsNullOrEmpty(strCategory) == false
+                        && strCategory.StartsWith(KernelServerUtil.LOCAL_PREFIX)
+                        && StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "不具备 managedatabase 权限，无法列出内核数据目录和文件";
@@ -11030,9 +11110,25 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
     (int)lStart,
     (int)lLength,
     "zh",
-    "", // strStyle,
+    "", // strStyle,    TODO: 给 ListFile() API 增加 style 参数
     out ResInfoItem[] results,
     out strError);
+                    if (string.IsNullOrEmpty(strCategory) == true
+    && lRet != -1)
+                    {
+                        /*
+                        List<ResInfoItem> t = results != null ? new List<ResInfoItem>(results) : new List<ResInfoItem>();
+                        var names = app.GetFileShareNames(sessioninfo);
+                        names.Add("!");
+                        foreach (var name in names)
+                        {
+                            t.Add(new ResInfoItem { Name = name, Type = 4, HasChildren = true });
+                        }
+                        results = t.ToArray();
+                        */
+                        results = AppendResInfoItemList(results);
+                    }
+
                     if (results != null)
                     {
                         foreach (var item in results)
@@ -11044,6 +11140,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                                 if (Int64.TryParse(size_string, out size) == false)
                                     size = -1;
                             }
+                            // TODO: 根据 type 判断如果是 from 节点，则 haschildren 设置为 false
                             infos.Add(new FileItemInfo
                             {
                                 Name = item.Name,
@@ -11056,6 +11153,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                     result.Value = lRet;
                     return result;
                 }
+                /*
                 else
                 {
                     result.ErrorCode = ErrorCode.SystemError;
@@ -11064,6 +11162,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
 
                     return result;
                 }
+                */
             }
             catch (Exception ex)
             {
@@ -11080,6 +11179,34 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 在 ResInfoItem 数组末尾添加共享文件夹相关元素
+        ResInfoItem[] AppendResInfoItemList(ResInfoItem[] results)
+        {
+            // 准备查重
+            Hashtable table = new Hashtable();
+            foreach (var item in results)
+            {
+                if (item.Name != null)
+                    table[item.Name.ToLower()] = 1;
+            }
+
+            List<ResInfoItem> t = results != null ? new List<ResInfoItem>(results) : new List<ResInfoItem>();
+            var names = app.GetFileShareNames(sessioninfo);
+            names.Add("!");
+            foreach (var name in names)
+            {
+                if (table.ContainsKey(name.ToLower()))
+                    t.Add(new ResInfoItem { Name = $"error:共享文件夹名 '{name}' 和其它事项名称发生了冲突", Type = 4, HasChildren = false });
+                else
+                {
+                    t.Add(new ResInfoItem { Name = name, Type = 4, HasChildren = true });
+                    if (name != null)
+                        table[name.ToLower()] = 1;
+                }
+            }
+            return t.ToArray();
         }
 
         static string EnsureRootPath(string strTemp)
@@ -11259,7 +11386,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
             if (isPublic)
             {
                 result = this.PrepareEnvironment("GetSystemParameter", false);  // 不准备 sessioninfo
-                sessioninfo = null;
+                // sessioninfo = null;
             }
             else
                 result = this.PrepareEnvironment("GetSystemParameter", true, true, true);
@@ -13158,8 +13285,9 @@ strLibraryCodeList);
 
                 string strError = "";
 
-                if (string.IsNullOrEmpty(strResPath) == false
-                    && strResPath.StartsWith("!"))
+                if (string.IsNullOrEmpty(strResPath) == false/*
+                    && strResPath.StartsWith("!")*/
+                    && app.IsFileDir(strResPath, sessioninfo) == true)
                 {
                     // 2016/11/6
                     // 列出本地文件目录
@@ -13178,11 +13306,16 @@ strLibraryCodeList);
                     foreach (FileItemInfo info in infos)
                     {
                         ResInfoItem item = new ResInfoItem();
+
+                        /*
                         string name = info.Name.Substring(strResPath.Length - 1);
                         // 去掉第一个字符的 \ 或者 /
                         if (string.IsNullOrEmpty(name) == false
                             && (name[0] == '\\' || name[0] == '/'))
                             name = name.Substring(1);
+                        */
+
+                        string name = info.Name;
 
                         item.Name = name;
                         /*
@@ -13225,6 +13358,22 @@ strLibraryCodeList);
                         strStyle,
                         out items,
                         out strError);
+                    if (string.IsNullOrEmpty(strResPath) == true
+                        && lRet != -1)
+                    {
+                        /*
+                        List<ResInfoItem> results = items != null ? new List<ResInfoItem>(items) : new List<ResInfoItem>();
+                        var names = app.GetFileShareNames(sessioninfo);
+                        names.Add("!");
+                        foreach (var name in names)
+                        {
+                            results.Add(new ResInfoItem { Name = name, Type = 4, HasChildren = true });
+                        }
+                        items = results.ToArray();
+                        */
+                        items = AppendResInfoItemList(items);
+                    }
+
                     kernel_errorcode = channel.OriginErrorCode;
                     result.ErrorInfo = strError;
                     result.Value = lRet;
@@ -13304,7 +13453,7 @@ Stack:
 
                 // '!' 前缀表示获取 dp2library 管辖的本地文件。
                 if (string.IsNullOrEmpty(strResPath) == false
-    && strResPath[0] == '!')
+    && /*strResPath[0] == '!'*/app.IsFileDir(strResPath, sessioninfo))
                 {
 
                     // 检查用户使用 GetRes API 的权限
@@ -13312,6 +13461,7 @@ Stack:
                     //      -1  error
                     //      0   不具备权限
                     //      1   具备权限
+                    //      2   具备部分权限(2022/5/20)
                     int nRet = app.CheckGetResRights(
                         sessioninfo,
                         sessioninfo.LibraryCodeList,
@@ -13320,7 +13470,7 @@ Stack:
                         out string strLibraryCode,
                         out string strFilePath,
                         out strError);
-                    if (nRet == 0)
+                    if (nRet == 0 || nRet == 2)
                     {
                         result.Value = -1;
                         result.ErrorInfo = strError;
@@ -13444,6 +13594,7 @@ Stack:
                     //      -1  error
                     //      0   不具备权限
                     //      1   具备权限
+                    //      2   具备部分权限(2022/5/20)
                     int nRet = app.CheckGetResRights(
                         sessioninfo,
                         sessioninfo.LibraryCodeList,
@@ -13452,7 +13603,7 @@ Stack:
                         out strLibraryCode,
                         out strFilePath,
                         out strError);
-                    if (nRet == 0)
+                    if (nRet == 0 || nRet == 2)
                     {
                         result.Value = -1;
                         result.ErrorInfo = strError;

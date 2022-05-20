@@ -4136,6 +4136,7 @@ out strError);
                             "reportReplication",    // 2021/9/20
                             "messageServer", // 2021/10/21
                             "commands", // 2021/12/23
+                            "fileShare",    // 2022/5/19
                         };
 
                             RestoreElements(cfg_dom, writer, elements);
@@ -15896,6 +15897,125 @@ strLibraryCode);    // 读者所在的馆代码
             return 0;
         }
 
+        public bool IsFileDir(string strPath,
+            SessionInfo sessioninfo)
+        {
+            // 根据逻辑名称找到对应的起始物理目录
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = GetStartDir(ref strPath,
+                sessioninfo,
+                "read",
+                out string _,
+                out string _);
+            if (nRet == 1)
+                return true;
+            return false;
+        }
+
+        /*
+	<fileShare>
+		<directory name="data" path="c:\backup">
+	</fileShare>
+        * */
+        // 根据逻辑名称找到对应的起始物理目录
+        // parameters:
+        //      strPath [in]逻辑路径
+        //              [out]吃掉第一部分后余下的逻辑路径
+        //      strStartDir 起点物理路径。也就是被吃掉的第一部分对应的物理路径
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetStartDir(ref string strPath,
+            SessionInfo sessioninfo,
+            string strAction,   // cd/list/read/write/delete
+            out string strStartDir,
+            out string strError)
+        {
+            strStartDir = "";
+            strError = "";
+
+            if (string.IsNullOrEmpty(strPath))
+            {
+                strError = $"逻辑路径不应为空";
+                return -1;
+            }
+
+            // 读取 dp2library 本地文件
+            if (strPath.StartsWith("!"))
+            {
+                strPath = strPath.Substring(1);
+                strStartDir = LibraryApplication.CanonicalizeDir(this.DataDir);
+                return 1;
+            }
+
+            bool is_read = (strAction == "cd" || strAction == "read" || strAction == "list");
+            bool is_write = (strAction == "write" || strAction == "delete");
+
+            if (is_read == false && is_write == false)
+                throw new ArgumentException($"未知的 strAction '{strAction}'");
+
+            string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
+
+            var nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("fileShare/directory");
+            foreach (XmlElement directory in nodes)
+            {
+                string name = directory.GetAttribute("name");
+                string path = directory.GetAttribute("path");
+
+                if (strFirstLevel.ToLower() == name.ToLower())
+                {
+                    // 检查权限
+                    string userName = sessioninfo.UserID;
+
+                    if (is_read)
+                    {
+                        string read = directory.GetAttribute("read");
+                        if (read == "*" || StringUtil.IsInList(userName, read))
+                        {
+                            strStartDir = LibraryApplication.CanonicalizeDir(path);
+                            return 1;
+                        }
+                    }
+
+                    if (is_write)
+                    {
+                        string write = directory.GetAttribute("write");
+                        if (write == "*" || StringUtil.IsInList(userName, write))
+                        {
+                            strStartDir = LibraryApplication.CanonicalizeDir(path);
+                            return 1;
+                        }
+                    }
+
+                    return 0;
+                }
+            }
+
+            return 0;
+        }
+
+        public List<string> GetFileShareNames(SessionInfo sessioninfo)
+        {
+            List<string> results = new List<string>();
+            var nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("fileShare/directory");
+            foreach (XmlElement directory in nodes)
+            {
+                string name = directory.GetAttribute("name");
+                // string path = directory.GetAttribute("path");
+
+                // 检查权限
+                string userName = sessioninfo.UserID;
+                string read = directory.GetAttribute("read");
+                if (read == "*" || StringUtil.IsInList(userName, read))
+                    results.Add(name);
+            }
+            return results;
+        }
+
         // 检查用户使用 GetRes API 的权限
         // parameters:
         //      strLibraryCodeList  当前用户所管辖的馆代码列表
@@ -15906,6 +16026,7 @@ strLibraryCode);    // 读者所在的馆代码
         //      -1  error
         //      0   不具备权限
         //      1   具备权限
+        //      2   具备部分权限(2022/5/20)
         public int CheckGetResRights(
             SessionInfo sessioninfo,
             string strLibraryCodeList,
@@ -15921,39 +16042,64 @@ strLibraryCode);    // 读者所在的馆代码
 
             string strPath = strResPath;
 
-            // 读取 dp2library 本地文件
-            if (string.IsNullOrEmpty(strPath) == false
-                && strPath[0] == '!')
+            // 根据逻辑名称找到对应的起始物理目录
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = GetStartDir(ref strPath,
+                sessioninfo,
+                "list",
+                out string strTargetDir,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (nRet == 1)
             {
-                strPath = strPath.Substring(1);
-
-                string strTargetDir = this.DataDir;
-                strFilePath = Path.Combine(strTargetDir, strPath);
-
-                // 注意： strPath 中的斜杠应该是 '/'
-                string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
-                if (StringUtil.IsInList("managedatabase,backup", strRights) == false)
+                // 读取 dp2library 本地文件
+                //if (string.IsNullOrEmpty(strPath) == false
+                //    && strPath[0] == '!')
                 {
-                    if (string.Compare(strFirstLevel, "upload", true) != 0)
+                    // strPath = strPath.Substring(1);
+
+                    // string strTargetDir = this.DataDir;
+                    strFilePath = Path.Combine(strTargetDir, strPath);
+
+                    // 注意： strPath 中的斜杠应该是 '/'
+                    string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
+                    if (StringUtil.IsInList("managedatabase,backup", strRights) == false)
                     {
-                        strError = "因当前用户不具备权限 managedatabase，能列出的第一级目录名被限定为 'upload'";
-                        return -1;
-                    }
-                }
+                        // 2022/5/20
+                        if (string.Compare(strFirstLevel, "upload", true) != 0
+                            && string.IsNullOrEmpty(strFirstLevel)
+                            && string.IsNullOrEmpty(strPath))
+                        {
+                            strError = "因当前用户不具备权限 managedatabase 或 backup，能列出的第一级目录名被限定为 'upload'";
+                            return 2;
+                        }
 
-                if (StringUtil.IsInList("download,backup", strRights) == false)
-                {
-                    strError = "读取文件 " + strResPath + " 被拒绝。不具备 download 或 backup 权限";
-                    return 0;
+                        if (string.Compare(strFirstLevel, "upload", true) != 0)
+                        {
+                            strError = "因当前用户不具备权限 managedatabase 或 backup，能列出的第一级目录名被限定为 'upload'";
+                            return -1;
+                        }
+                    }
+
+                    if (StringUtil.IsInList("download,backup", strRights) == false)
+                    {
+                        strError = "读取文件 " + strResPath + " 被拒绝。不具备 download 或 backup 权限";
+                        return 0;
+                    }
+                    // 用于限定的根目录
+                    string strLimitDir = Path.Combine(strTargetDir, strFirstLevel);
+                    if (PathUtil.IsChildOrEqual(strFilePath, strLimitDir) == false)
+                    {
+                        strError = "路径 '" + strResPath + "' 越过了限定的范围，无法访问";
+                        return 0;
+                    }
+                    return 1;
                 }
-                // 用于限定的根目录
-                string strLimitDir = Path.Combine(strTargetDir, strFirstLevel);
-                if (PathUtil.IsChildOrEqual(strFilePath, strLimitDir) == false)
-                {
-                    strError = "路径 '" + strResPath + "' 越过了限定的范围，无法访问";
-                    return 0;
-                }
-                return 1;
             }
 
             // 如果具备 writeobject 权限，则具备所有对象的读取权限了
@@ -16004,7 +16150,7 @@ strLibraryCode);    // 读者所在的馆代码
                         //      -1  出错
                         //      0   没有找到 object id 相关的信息
                         //      1   找到
-                        int nRet = GetObjectRights(
+                        nRet = GetObjectRights(
             sessioninfo,
             strXmlRecordPath,
             strObjectID,

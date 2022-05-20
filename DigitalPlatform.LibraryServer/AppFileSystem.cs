@@ -918,6 +918,19 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
+        public static string CanonicalizeDir(string strRoot)
+        {
+            if (string.IsNullOrEmpty(strRoot))
+                return strRoot;
+
+            strRoot = strRoot.Replace("/", "\\");  // 权力很大，能看到数据目录下的全部文件和目录了
+            if (strRoot.EndsWith("\\") == false)
+                strRoot += "\\";
+            return strRoot;
+        }
+
+        public delegate bool Delegate_filter(string fullname);
+
         // 返回的 FileItemInfo.Name 中是逻辑全路径
         // parameters:
         //      strCurrentDirectory 当前路径。物理路径
@@ -930,6 +943,7 @@ namespace DigitalPlatform.LibraryServer
             string strPattern,
             long lStart,
             long lLength,
+            Delegate_filter proc_filter,
             out List<FileItemInfo> infos,
             out string strError)
         {
@@ -952,6 +966,11 @@ namespace DigitalPlatform.LibraryServer
                     // 检查文件或目录必须在根以下。防止漏洞
                     if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
                         continue;
+                    if (proc_filter != null)
+                    {
+                        if (proc_filter(si.FullName) == false)
+                            continue;
+                    }
 
                     if (i < lStart)
                         goto CONTINUE;

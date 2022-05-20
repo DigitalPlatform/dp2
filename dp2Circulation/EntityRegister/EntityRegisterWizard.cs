@@ -835,7 +835,7 @@ MessageBoxDefaultButton.Button1);
                             nHitCount += nRet;
                     }
                     else if (account.ServerType == "amazon"
-                        && this.checkBox_settings_searchAmazon.Checked)
+                        && false/*this.checkBox_settings_searchAmazon.Checked*/)
                     {
                         nRet = SearchLineAmazon(
                             strQueryWord,

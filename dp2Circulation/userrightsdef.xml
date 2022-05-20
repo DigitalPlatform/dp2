@@ -337,6 +337,10 @@
     <comment lang='zh'>管理数据库</comment>
     <comment lang='en'>manage database</comment>
   </property>
+  <property name='backup'>
+    <comment lang='zh'>备份</comment>
+    <comment lang='en'>Backup</comment>
+  </property>
   <property name='restore'>
     <comment lang='zh'>完整还原数据记录</comment>
     <comment lang='en'>restore data record</comment>

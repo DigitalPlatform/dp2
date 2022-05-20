@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Xml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +6,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
+
+using DigitalPlatform.Xml;
+using Markdig;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -36,9 +39,26 @@ namespace DigitalPlatform.CirculationClient
             InitializeComponent();
         }
 
+        List<Control> _freeControls = new List<Control>();
+
+        void DisposeFreeControls()
+        {
+            ControlExtention.DisposeFreeControls(_freeControls);
+        }
+
         private void KernelCfgFileDialog_Load(object sender, EventArgs e)
         {
             this.Changed = false;
+
+            if (IsMarkDownPath(this.Path) == false)
+            {
+                this.tabControl_main.TabPages.Remove(this.tabPage_preview);
+                ControlExtention.AddFreeControl(_freeControls, this.tabPage_preview);
+            }
+
+            // 2022/5/20
+            tabControl_main_SelectedIndexChanged(sender, e);
+
             this.BeginInvoke(new Action(FocusEdit));
         }
 
@@ -101,6 +121,8 @@ namespace DigitalPlatform.CirculationClient
                     return "content";
                 if (this.tabControl_main.SelectedTab == this.tabPage_property)
                     return "property";
+                if (this.tabControl_main.SelectedTab == this.tabPage_preview)
+                    return "preview";
                 return "";
             }
             set
@@ -109,6 +131,8 @@ namespace DigitalPlatform.CirculationClient
                     this.tabControl_main.SelectedTab = this.tabPage_content;
                 else if (value == "property")
                     this.tabControl_main.SelectedTab = this.tabPage_property;
+                else if (value == "preview")
+                    this.tabControl_main.SelectedTab = this.tabPage_preview;
                 else
                     throw new Exception("Invalid page name '" + value + "'");
             }
@@ -150,9 +174,47 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        long _textVersion = 0;
+        long _previewVersion = 0;
+
         private void textBox_content_TextChanged(object sender, EventArgs e)
         {
             this.Changed = true;
+
+            _textVersion++;
+        }
+
+        static string GetExtension(string path)
+        {
+            if (path == null)
+                return "";
+            int ret = path.LastIndexOf(".");
+            if (ret != -1)
+                return path.Substring(ret);
+            return "";
+        }
+
+        public static bool IsMarkDownPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return false;
+            var ext = GetExtension(path);
+            if (string.IsNullOrEmpty(ext))
+                return false;
+            if (ext.ToLower() == ".md")
+                return true;
+            return false;
+        }
+
+        void RefreshMarkDownPreview()
+        {
+            string text = this.textBox_content.Text;
+            // Configure the pipeline with all advanced extensions active
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            var html = Markdown.ToHtml(text, pipeline);
+            this.webBrowser1.DocumentText = $"<html><head></head><body>{html}</body></html>";
+
+            _previewVersion = _textVersion;
         }
 
         private void toolStripButton_formatXml_Click(object sender, EventArgs e)
@@ -170,6 +232,18 @@ namespace DigitalPlatform.CirculationClient
         {
             this.textBox_content.Select(0, 0);
             this.textBox_content.Focus();
+        }
+
+        private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.tabControl_main.SelectedTab == this.tabPage_preview)
+            {
+                if (_previewVersion != _textVersion)
+                {
+                    if (IsMarkDownPath(this.Path))
+                        RefreshMarkDownPreview();
+                }
+            }
         }
     }
 }
