@@ -243,9 +243,7 @@ namespace DigitalPlatform.CommonControl
                             this.CancelButton = this.button_3;
                     }
                 }
-
             }
-
 
             if (button_texts != null)
             {

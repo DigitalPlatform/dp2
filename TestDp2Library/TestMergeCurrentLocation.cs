@@ -32,7 +32,8 @@ namespace TestDp2Library
 <currentLocation>阅览室:0202</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(0, nRet);   // 没有实质性修改
@@ -54,7 +55,8 @@ namespace TestDp2Library
 <currentLocation>*:0202</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -76,7 +78,8 @@ namespace TestDp2Library
 <currentLocation>阅览室:*</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -98,7 +101,8 @@ namespace TestDp2Library
 <currentLocation>*:*</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -121,7 +125,8 @@ namespace TestDp2Library
 <currentLocation>*:0101</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -144,7 +149,8 @@ namespace TestDp2Library
 <currentLocation>阅览室:*</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -167,7 +173,8 @@ namespace TestDp2Library
 <currentLocation>*:*</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -190,7 +197,8 @@ namespace TestDp2Library
 <currentLocation>*:0202</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -213,7 +221,8 @@ namespace TestDp2Library
 <currentLocation>阅览室:*</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -236,7 +245,8 @@ namespace TestDp2Library
 <currentLocation>*:*</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(1, nRet);   // 有实质性修改
@@ -258,7 +268,8 @@ namespace TestDp2Library
 <currentLocation>保存本库</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(0, nRet);   // 没有实质性修改
@@ -280,7 +291,8 @@ namespace TestDp2Library
 <currentLocation>:0202</currentLocation>
 </root>");
 
-            int nRet = LibraryApplication.MergeCurrentLocation(domExist,
+            int nRet = LibraryApplication.MergeCurrentLocation(
+                domExist,
     domNew,
     out string strError);
             Assert.AreEqual(0, nRet);   // 没有实质性修改

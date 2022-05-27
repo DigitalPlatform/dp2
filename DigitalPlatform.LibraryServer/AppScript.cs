@@ -1192,6 +1192,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 执行脚本函数 NotifyReader
         // parameters:
+        //      strStyle    如果包含 instantly，表示立即发出通知
         // return:
         //      -2  not found script
         //      -1  出错
@@ -1205,6 +1206,7 @@ namespace DigitalPlatform.LibraryServer
             Calendar calendar,
             // List<string> notifiedBarcodes,
             string strBodyType,
+            string strStyle,
             StringBuilder debugInfo,
             out int nResultValue,
             out string strBody,
@@ -1274,11 +1276,14 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 // 早绑定
+                // parameters:
+                //      strStyle    如果包含 instantly，表示立即发出通知
                 nResultValue = host.NotifyReader(
                     readerdom,
                     calendar,
                     // notifiedBarcodes,
                     strBodyType,
+                    strStyle,
                     debugInfo,
                     out strBody,
                     out strMime,
@@ -2586,6 +2591,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = VerifyCurrentLocation(
                     this.App,
                     itemdom,
+                    "asterisk", // 跳过检查 currentLocation 中的星号
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -2634,6 +2640,8 @@ strRoom1);
         }
 
         // 验证册记录中的 currentLocation 元素
+        // parameters:
+        //      style   风格。如果包含 asterisk，表示忽略检查星号部分(例如 *:0102 中的星号部分)
         // return:
         //      -1  调用出错
         //      0   校验正确
@@ -2641,9 +2649,13 @@ strRoom1);
         public static int VerifyCurrentLocation(
             LibraryApplication App,
             XmlDocument itemdom,
+            string style,
             out string strError)
         {
             strError = "";
+
+            // == true 表示不检查星号情形
+            var asterisk = StringUtil.IsInList("asterisk", style);
 
             string strCurrentLocation = DomUtil.GetElementText(itemdom.DocumentElement,
     "currentLocation");
@@ -2651,7 +2663,12 @@ strRoom1);
             {
                 var parts = StringUtil.ParseTwoPart(strCurrentLocation, ":");
                 strCurrentLocation = parts[0];
-                if (string.IsNullOrEmpty(strCurrentLocation) == false
+
+                if (asterisk == true && strCurrentLocation == "*")
+                {
+                    // 星号代表依照以前的内容，跳过检查 (2022/5/23)
+                }
+                else if (string.IsNullOrEmpty(strCurrentLocation) == false
                     && strCurrentLocation.StartsWith("?") == false) // 问号引导的，不检查
                 {
                     // 将馆藏地点字符串分解为 馆代码+地点名 两个部分
@@ -3156,6 +3173,8 @@ strRoom1);
 #endif
         // 超期提醒
         // 新版本，可以处理超期前提醒
+        // parameters:
+        //      strStyle    如果包含 instantly，表示立即发出通知
         // retun:
         //      -1  出错
         //      0   没有必要发送
@@ -3165,6 +3184,7 @@ strRoom1);
             Calendar calendar,
             // List<string> notifiedBarcodes,
             string strBodyType,
+            string strStyle,    // 2022/5/27
             StringBuilder debugInfo,
             out string strBody,
             out string strMime,
@@ -3178,6 +3198,7 @@ strRoom1);
                     calendar,
                     //notifiedBarcodes,
                     strBodyType,
+                    strStyle,
                     debugInfo,
                     out strBody,
                     out strMime,
@@ -3191,6 +3212,7 @@ strRoom1);
                     readerdom,
                     calendar,
                     strBodyType,
+                    strStyle,
                     debugInfo,
                     out strBody,
                     out strMime,
@@ -3213,6 +3235,8 @@ strRoom1);
             if (nodes.Count == 0)
                 return 0;
 
+            var instantly = StringUtil.IsInList("instantly", strStyle);
+
             string strLink = "<LINK href='" + App.OpacServerUrl + "/readerhtml.css' type='text/css' rel='stylesheet'>";
             strResult = "<html><head>" + strLink + "</head><body>";
 
@@ -3233,9 +3257,10 @@ strRoom1);
                 + "<td nowrap>超期情况</td>"
                 //+ "<td nowrap>备注</td>"
                 + "</tr>";
-            for (int i = 0; i < nodes.Count; i++)
+            // for (int i = 0; i < nodes.Count; i++)
+            foreach(XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
+                // XmlNode node = nodes[i];
 
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
                 string strNo = DomUtil.GetAttr(node, "no");
@@ -3290,12 +3315,17 @@ strRoom1);
                     strBodyType,
                     strHistory);
 
+                if (instantly)
+                    strChars = new string('n', strChars.Length);
+
                 if (bOverdue == true)
                 {
                     strColor = "bgcolor=#ff9999";	// 超期
 
                     // 看看是不是已经通知过
-                    if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
+                    if (string.IsNullOrEmpty(strChars) == false
+                        && GetChar(strChars, 0) == 'y' //strChars[0] == 'y'
+                        )
                         continue;
 
                     // 合并设置一种 body type 的全部通知字符
@@ -3316,7 +3346,8 @@ strRoom1);
                     // nNotifyCount++;
                     nOverdueCount++;
                 }
-                else if (string.IsNullOrEmpty(App.NotifyDef) == false)
+                else if (string.IsNullOrEmpty(App.NotifyDef) == false
+                    && instantly == false)
                 {
                     // 检查超期前的通知点
 
@@ -3476,10 +3507,13 @@ strRoom1);
 <root/>
          * */
         // MQ 通知读者超期的版本。供 NotifyReader() 的重载版本必要时引用
+        // parameters:
+        //      strStyle    如果包含 instantly，表示立即发出通知
         public int NotifyReaderMQ(
             XmlDocument readerdom,
             Calendar calendar,
             string strBodyType,
+            string strStyle,
             StringBuilder debugInfo,
             out string strBody,
             out string strMime,
@@ -3503,6 +3537,8 @@ strRoom1);
                 return 0;
             }
 
+            var instantly = StringUtil.IsInList("instantly", strStyle);
+
             // 表达通知信息的 XML 记录
             XmlDocument output_dom = new XmlDocument();
             output_dom.LoadXml("<root />");
@@ -3520,9 +3556,10 @@ strRoom1);
             strResult += "您借阅的下列书刊：\n";
 
             // 借阅的册
-            for (int i = 0; i < nodes.Count; i++)
+            // for (int i = 0; i < nodes.Count; i++)
+            foreach(XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
+                // XmlNode node = nodes[i];
 
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
                 string strLocation = StringUtil.GetPureLocation(DomUtil.GetAttr(node, "location"));
@@ -3581,7 +3618,7 @@ strRoom1);
                     if (nRet == -1)
                     {
                         strOverDue = strError;
-                        debugInfo?.AppendLine($"nRet == -1 strOverDue={strOverDue}, bOverdur={bOverdue}");
+                        debugInfo?.AppendLine($"nRet == -1 strOverDue={strOverDue}, bOverdue={bOverdue}");
                     }
                     else
                     {
@@ -3590,7 +3627,7 @@ strRoom1);
                             bOverdue = true;
                             strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
                                                 this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit));
-                            debugInfo?.AppendLine($"nRet == 1 strOverDue={strOverDue}, bOverdur={bOverdue}");
+                            debugInfo?.AppendLine($"nRet == 1 strOverDue={strOverDue}, bOverdue={bOverdue}");
                         }
                     }
                 }
@@ -3600,13 +3637,21 @@ strRoom1);
                 strChars = ReadersMonitor.GetNotifiedChars(App,
                     strBodyType,
                     strHistory);
-                debugInfo?.AppendLine($"GetNotifiedChars() strBodyType='{strBodyType}', strHistory='{strHistory}', return strChars='{strChars}'");
+
+                if (instantly)
+                {
+                    strChars = new string('n', strChars.Length);
+                    debugInfo?.AppendLine($"(instantly) GetNotifiedChars() strBodyType='{strBodyType}', strHistory='{strHistory}', return strChars='{strChars}'");
+                }
+                else
+                    debugInfo?.AppendLine($"GetNotifiedChars() strBodyType='{strBodyType}', strHistory='{strHistory}', return strChars='{strChars}'");
 
                 debugInfo?.AppendLine($"bOverdue={bOverdue}");
                 if (bOverdue == true)
                 {
                     // 看看是不是已经通知过
-                    if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y'
+                    if (string.IsNullOrEmpty(strChars) == false
+                        && GetChar(strChars, 0) == 'y' // strChars[0] == 'y'
                         && bTestNotify == false)
                     {
                         debugInfo?.AppendLine($"因为 strChars[0] == 'y'，跳过本次通知");
@@ -3634,7 +3679,8 @@ strRoom1);
 
                     nOverdueCount++;
                 }
-                else if (string.IsNullOrEmpty(App.NotifyDef) == false)
+                else if (string.IsNullOrEmpty(App.NotifyDef) == false
+                    && instantly == false)
                 {
                     // 检查超期前的通知点
                     debugInfo?.AppendLine($"检查“即将超期”情况。App.NotifyDef='{App.NotifyDef}'");
@@ -3799,6 +3845,16 @@ if (nNormalCount > 0)
             }
         }
 
+        // 2022/5/27
+        public static char GetChar(string strChars, int index)
+        {
+            if (strChars == null)
+                return 'n';
+            if (strChars.Length < index + 1)
+                return 'n';
+            return strChars[index];
+        }
+
         static string ToString(List<int> indices)
         {
             StringBuilder text = new StringBuilder();
@@ -3813,11 +3869,14 @@ if (nNormalCount > 0)
         }
 
         // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用
+        // parameters:
+        //      strStyle    如果包含 instantly，表示立即发出通知
         public int NotifyReaderSMS(
             XmlDocument readerdom,
             Calendar calendar,
             // List<string> notifiedBarcodes,
             string strBodyType,
+            string strStyle,
             StringBuilder debugInfo,
             out string strBody,
             out string strMime,
@@ -3839,14 +3898,17 @@ if (nNormalCount > 0)
             if (nodes.Count == 0)
                 return 0;
 
+            var instantly = StringUtil.IsInList("instantly", strStyle);
+
             string strName = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
             strResult += "您借阅的下列书刊：\n";
 
             // 借阅的册
-            for (int i = 0; i < nodes.Count; i++)
+            // for (int i = 0; i < nodes.Count; i++)
+            foreach(XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
+                // XmlNode node = nodes[i];
 
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
                 string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
@@ -3899,10 +3961,15 @@ if (nNormalCount > 0)
                     strBodyType,
                     strHistory);
 
+                if (instantly)
+                    strChars = new string('n', strChars.Length);
+
                 if (bOverdue == true)
                 {
                     // 看看是不是已经通知过
-                    if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
+                    if (string.IsNullOrEmpty(strChars) == false
+                        && GetChar(strChars, 0) == 'y' //strChars[0] == 'y'
+                        )
                         continue;
 
                     // 合并设置一种 body type 的全部通知字符
@@ -3922,7 +3989,8 @@ if (nNormalCount > 0)
 
                     nOverdueCount++;
                 }
-                else if (string.IsNullOrEmpty(App.NotifyDef) == false)
+                else if (string.IsNullOrEmpty(App.NotifyDef) == false
+                    && instantly == false)
                 {
                     // 检查超期前的通知点
 

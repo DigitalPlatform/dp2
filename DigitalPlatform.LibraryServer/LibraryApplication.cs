@@ -15628,7 +15628,7 @@ strLibraryCode);    // 读者所在的馆代码
                 }
                 else
                 {
-                    strError = "第一级目录名必须为 'upload' 或者 'backup'";
+                    strError = "第一级目录名必须为 'upload' 'backup' 或 'cfgs'";
                     return -1;
                 }
 
@@ -15854,7 +15854,6 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
-
                 }
 
                 // 记录ID

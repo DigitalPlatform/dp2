@@ -11126,7 +11126,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                         }
                         results = t.ToArray();
                         */
-                        results = AppendResInfoItemList(results);
+                        results = AppendFileShareItem(results);
                     }
 
                     if (results != null)
@@ -11182,7 +11182,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
         }
 
         // 在 ResInfoItem 数组末尾添加共享文件夹相关元素
-        ResInfoItem[] AppendResInfoItemList(ResInfoItem[] results)
+        ResInfoItem[] AppendFileShareItem(ResInfoItem[] results)
         {
             // 准备查重
             Hashtable table = new Hashtable();
@@ -13371,7 +13371,7 @@ strLibraryCodeList);
                         }
                         items = results.ToArray();
                         */
-                        items = AppendResInfoItemList(items);
+                        items = AppendFileShareItem(items);
                     }
 
                     kernel_errorcode = channel.OriginErrorCode;

@@ -58,6 +58,7 @@
             this.ToolStripMenuItem_loadBlankFromServer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_webCamera = new System.Windows.Forms.ToolStripButton();
             this.toolStripSplitButton_registerFace = new System.Windows.Forms.ToolStripSplitButton();
+            this.toolStripMenuItem_registerFaceByFile = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_pasteCardPhoto = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_pasteCardPhoto = new System.Windows.Forms.ToolStripButton();
             this.toolStripSplitButton_registerFingerprint = new System.Windows.Forms.ToolStripSplitButton();
@@ -106,7 +107,7 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.toolStripMenuItem_registerFaceByFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_notifyOverdue = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -454,6 +455,13 @@
             this.toolStripSplitButton_registerFace.Text = "登记人脸(用于人脸识别)";
             this.toolStripSplitButton_registerFace.ButtonClick += new System.EventHandler(this.toolStripSplitButton_registerFace_ButtonClick);
             // 
+            // toolStripMenuItem_registerFaceByFile
+            // 
+            this.toolStripMenuItem_registerFaceByFile.Name = "toolStripMenuItem_registerFaceByFile";
+            this.toolStripMenuItem_registerFaceByFile.Size = new System.Drawing.Size(535, 40);
+            this.toolStripMenuItem_registerFaceByFile.Text = "用图像文件注册人脸(&R) ...";
+            this.toolStripMenuItem_registerFaceByFile.Click += new System.EventHandler(this.toolStripMenuItem_registerFaceByFile_Click);
+            // 
             // ToolStripMenuItem_pasteCardPhoto
             // 
             this.ToolStripMenuItem_pasteCardPhoto.Name = "ToolStripMenuItem_pasteCardPhoto";
@@ -678,6 +686,7 @@
             this.toolStripDropDownButton_otherFunc.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_saveTemplate,
             this.toolStripMenuItem_loadBlankRecord,
+            this.toolStripMenuItem_notifyOverdue,
             this.toolStripSeparator8,
             this.toolStripMenuItem_createRfidCard,
             this.toolStripMenuItem_bindCardNumber,
@@ -808,7 +817,7 @@
             this.toolStripButton_option.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_option.Image")));
             this.toolStripButton_option.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_option.Name = "toolStripButton_option";
-            this.toolStripButton_option.Size = new System.Drawing.Size(86, 32);
+            this.toolStripButton_option.Size = new System.Drawing.Size(82, 32);
             this.toolStripButton_option.Text = "选项";
             this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
             // 
@@ -876,12 +885,12 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1118, 500);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
-            // toolStripMenuItem_registerFaceByFile
+            // toolStripMenuItem_notifyOverdue
             // 
-            this.toolStripMenuItem_registerFaceByFile.Name = "toolStripMenuItem_registerFaceByFile";
-            this.toolStripMenuItem_registerFaceByFile.Size = new System.Drawing.Size(535, 40);
-            this.toolStripMenuItem_registerFaceByFile.Text = "用图像文件注册人脸(&R) ...";
-            this.toolStripMenuItem_registerFaceByFile.Click += new System.EventHandler(this.toolStripMenuItem_registerFaceByFile_Click);
+            this.toolStripMenuItem_notifyOverdue.Name = "toolStripMenuItem_notifyOverdue";
+            this.toolStripMenuItem_notifyOverdue.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_notifyOverdue.Text = "立即发出超期通知";
+            this.toolStripMenuItem_notifyOverdue.Click += new System.EventHandler(this.toolStripMenuItem_notifyOverdue_Click);
             // 
             // ReaderInfoForm
             // 
@@ -1000,5 +1009,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearPalmprint1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_loadBlankRecord;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_registerFaceByFile;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_notifyOverdue;
     }
 }

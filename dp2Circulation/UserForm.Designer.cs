@@ -126,6 +126,7 @@ namespace dp2Circulation
             this.listView_users.View = System.Windows.Forms.View.Details;
             this.listView_users.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_users_ColumnClick);
             this.listView_users.SelectedIndexChanged += new System.EventHandler(this.listView_users_SelectedIndexChanged);
+            this.listView_users.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_users_MouseUp);
             // 
             // columnHeader_libraryCode
             // 

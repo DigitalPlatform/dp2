@@ -10,6 +10,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using System.Text;
 
 namespace dp2Circulation
 {
@@ -1358,6 +1359,117 @@ password);
         private void textBox_location_TextChanged(object sender, EventArgs e)
         {
             this.EditChanged = true;
+        }
+
+        string[] _append_types = new string[] {
+        "SIP",
+        };
+
+        private void listView_users_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            menuItem = new MenuItem("增补权限");
+            if (this.listView_users.SelectedItems.Count != 1)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            foreach (var name in _append_types)
+            {
+                MenuItem subMenuItem = new MenuItem(name);
+                subMenuItem.Click += new System.EventHandler(this.menu_appendRights);
+                menuItem.MenuItems.Add(subMenuItem);
+                subMenuItem.Tag = name;
+            }
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            /*
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            menuItem = new MenuItem("装入下一批记录(&N)");
+            menuItem.Click += new System.EventHandler(this.menu_nextBatch_Click);
+            if (_search == null || _search.HasNextBatch() == false)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+            */
+
+            contextMenu.Show(this.listView_users, new Point(e.X, e.Y));
+        }
+
+        static string[] _types = new string[] {
+        "sip:borrow,return,renew,amerce,setiteminfo,getsystemparameter,getiteminfo,getbiblioinfo,getreaderinfo,getbibliosummary",
+        "cataloging:xxx",
+        "ordering:xxx",
+        "checking:xxx", // 流通，借还图书
+        "supervisor:xxx",    // 超级用户
+        };
+
+        static string GetTypeRights(string type)
+        {
+            foreach (string s in _types)
+            {
+                if (s.StartsWith(type.ToLower() + ":"))
+                    return s.Substring(type.Length + 1);
+            }
+
+            return null;
+        }
+
+        static List<string> AppendRights(string origin, string append_list)
+        {
+            List<string> rights = null;
+            if (string.IsNullOrEmpty(origin) == false)
+                rights = new List<string>(origin?.Split(new char[] { ',' }));
+            else 
+                rights = new List<string>();
+
+            if (string.IsNullOrEmpty(append_list) == false)
+            {
+                string[] new_rights = append_list.Split(new char[] { ',' });
+                foreach(var new_right in new_rights)
+                {
+                    if (rights.IndexOf(new_right) == -1)
+                        rights.Add(new_right);
+                }
+            }
+
+            return rights;
+        }
+
+        void menu_appendRights(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            MenuItem menu = (MenuItem)sender;
+            var type = menu.Tag as string;
+            var rights = GetTypeRights(type);
+            if (rights == null)
+            {
+                strError = $"类型 '{type}' 没有找到定义";
+                goto ERROR1;
+            }
+            string old_string = this.textBox_userRights.Text;
+            var changed_rights = AppendRights(old_string, rights);
+            string new_string = StringUtil.MakePathList(changed_rights, ",");
+            if (old_string == new_string)
+            {
+                strError = "权限字符串没有发生变化";
+                goto ERROR1;
+            }
+            this.textBox_userRights.Text = new_string;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
 #if NO

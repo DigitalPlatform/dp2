@@ -9171,5 +9171,57 @@ MessageBoxDefaultButton.Button1);
             if (result.Value == -1)
                 ShowMessageBox(result.ErrorInfo);
         }
+
+        // 立刻发出超期通知
+        private void toolStripMenuItem_notifyOverdue_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.120") < 0)
+            {
+                strError = $"触发超期通知功能必须和 dp2library 3.120 或以上版本配套使用";
+                goto ERROR1;
+            }
+
+            string strRecPath = this.readerEditControl1.RecPath;
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial($"正在针对读者记录 {strRecPath} 触发超期通知 ...");
+            stop.BeginLoop();
+
+            EnableControls(false);
+
+            try
+            {
+                long lRet = Channel.SetReaderInfo(
+    stop,
+    "instantlyCheckOverdue",
+    strRecPath,
+    "bodytypes:mq", // strNewXml,
+    "",
+    null,
+    out string strExistingXml,
+    out string strSavedXml,
+    out string strSavedPath,
+    out byte [] baNewTimestamp,
+    out ErrorCodeValue kernel_errorcode,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                EnableControls(true);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+            }
+            MessageBox.Show(this, $"触发成功。{strError}");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return;
+        }
     }
 }

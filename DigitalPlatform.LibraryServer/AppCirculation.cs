@@ -13021,6 +13021,7 @@ out string _);
                     AmerceItem item = amerce_items[i];
 
                     // NewPrice域中有值
+                    // TODO: 这里可以改进一下，如果 NewPrice 和原有金额没有变化，则不要求 amercemodifyprice 权限。或者滞后到 ModifyPrice() 函数内判断权限
                     if (String.IsNullOrEmpty(item.NewPrice) == false)
                     {
                         bHasNewPrice = true;
@@ -16602,6 +16603,7 @@ out string _);
                 nRet = LibraryHost.VerifyCurrentLocation(
                     this,
                     itemdom,
+                    "",
                     out strError);
                 if (nRet == -1)
                 {

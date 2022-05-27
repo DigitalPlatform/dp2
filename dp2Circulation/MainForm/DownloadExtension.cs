@@ -1889,9 +1889,12 @@ namespace dp2Circulation
                     {
                         this.Invoke((Action)(() =>
                         {
+                            MessageBoxButtons v = MessageBoxButtons.YesNoCancel;
+                            if (buttons.Length == 2)
+                                v = MessageBoxButtons.YesNo;
                             result = MessageDialog.Show(this,
                         m,
-                        MessageBoxButtons.YesNoCancel,
+                        v,
                         MessageBoxDefaultButton.Button1,
                         "此后不再出现本对话框",
                         ref _hide_dialog,

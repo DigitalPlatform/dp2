@@ -26,6 +26,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
+using System.Messaging;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1113,6 +1114,21 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
             }
+            else if (strAction == "instantlyCheckOverdue")
+            {
+                /*
+                if (String.IsNullOrEmpty(strNewXml) == false)
+                {
+                    strError = "strAction 值为 instantlyCheckOverdue 时, strNewXml 参数必须为空";
+                    goto ERROR1;
+                }
+                */
+                if (String.IsNullOrEmpty(strOldXml) == false)
+                {
+                    strError = "strAction 值为 instantlyCheckOverdue 时, strOldXml 参数必须为空";
+                    goto ERROR1;
+                }
+            }
             else
             {
                 // 非 delete 情况 strNewXml 则必须不为空
@@ -1154,6 +1170,106 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
                 }
+            }
+
+            if (strAction == "instantlyCheckOverdue")
+            {
+                RmsChannel channel0 = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel0 == null)
+                {
+                    strError = "get channel error";
+                    goto ERROR1;
+                }
+
+                lRet = channel0.GetRes(strRecPath,
+    "data,content,timestamp,outputpath",    // strStyle,
+    out string xml,
+    out string _,
+    out byte[] _,
+    out string strOutputPath,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                XmlDocument readerdom = null;
+                nRet = LibraryApplication.LoadToDom(xml,
+                    out readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    goto ERROR1;
+                }
+
+                // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                if (app.IsCurrentChangeableReaderPath(strRecPath,
+                    sessioninfo.ExpandLibraryCodeList,
+                    out string strLibraryCode) == false)
+                {
+                    strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
+                    goto ERROR1;
+                }
+
+                var bodytypes = StringUtil.GetParameterByPrefix(strNewXml, "bodytypes");
+                if (bodytypes == null)
+                    bodytypes = "mq";
+                List<string> types = StringUtil.SplitList(bodytypes);
+
+                MessageQueue queue = null;
+                if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
+                {
+                    try
+                    {
+                        queue = new MessageQueue(this.OutgoingQueue);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "创建路径为 '" + this.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ex.Message;
+                        goto ERROR1;
+                    }
+                }
+
+                if (queue == null 
+                    && types.IndexOf("mq") == -1
+                    && types.Count == 1)
+                {
+                    strError = "dp2library 当前没有配置 MQ，无法触发 mq 类型的通知";
+                    goto ERROR1;
+                }
+
+                /*
+                string style = StringUtil.GetParameterByPrefix(strNewXml, "style");
+                if (style != null)
+                    style = style.Replace("|", ",");
+                */
+
+                bool changed = false;
+                List<string> errors = new List<string>();
+                // parameters:
+                //      strStyle    如果包含 instantly，表示立即发出通知
+                var send_types = ReadersMonitor.NotifyOverdue(
+this,
+queue,
+sessioninfo.Channels,
+strLibraryCode,
+readerdom,
+types,
+0,
+"instantly",
+(t, e) => { if (e == "error") errors.Add(t); },
+null,
+ref changed);
+                if (errors.Count > 0)
+                {
+                    strError = $"{StringUtil.MakePathList(errors, "; ")}";
+                    goto ERROR1;
+                }
+
+                return new LibraryServerResult
+                {
+                    Value = send_types.Count,
+                    ErrorInfo = (send_types.Count == 0 ? "未发出任何通知消息" : $"已发出 {StringUtil.MakePathList(send_types)}")
+                };
             }
 
             // 2017/3/2

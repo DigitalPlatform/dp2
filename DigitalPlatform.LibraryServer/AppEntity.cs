@@ -155,7 +155,8 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   domNew 内容没有发生实质性修改
         //      1   domNew 内容发生了修改
-        public static int MergeCurrentLocation(XmlDocument domExist,
+        public static int MergeCurrentLocation(
+            XmlDocument domExist,
             XmlDocument domNew,
             out string strError)
         {
@@ -183,11 +184,23 @@ namespace DigitalPlatform.LibraryServer
             bool changed = false;
             if (new_left == "*")
             {
+                // 2022/5/23
+                if (string.IsNullOrEmpty(old_left))
+                {
+                    strError = $"无法创建 currentLocation 元素。因 '{newValue}' 中左侧星号部分缺失原有内容";
+                    return -1;
+                }
                 new_left = old_left;
                 changed = true;
             }
             if (new_right == "*")
             {
+                // 2022/5/23
+                if (string.IsNullOrEmpty(old_right))
+                {
+                    strError = $"无法创建 currentLocation 元素。因 '{newValue}' 中右侧星号部分缺失原有内容";
+                    return -1;
+                }
                 new_right = old_right;
                 changed = true;
             }
@@ -201,9 +214,11 @@ namespace DigitalPlatform.LibraryServer
                 newValue = new_left;
             else
                 newValue = new_left + ":" + new_right;
+
             DomUtil.SetElementText(domNew.DocumentElement,
                 "currentLocation",
                 newValue);
+
             return 1;
         }
 
@@ -2005,7 +2020,7 @@ namespace DigitalPlatform.LibraryServer
                             //      0   符合要求
                             //      1   不符合要求
                             nRet = CheckItemLibraryCode(itemdom,
-                                        sessioninfo.LibraryCodeList,
+                                        sessioninfo.ExpandLibraryCodeList,  // sessioninfo.LibraryCodeList,
                                         out string strLibraryCode,
                                         out strError);
                             if (nRet == -1)
@@ -3280,7 +3295,7 @@ out strError);
                             &&*/ (info.Action == "new"
                                 || info.Action == "change"
                                 || info.Action == "move")       // delete操作不查重
-                            // && String.IsNullOrEmpty(strNewBarcode) == false
+                                                                // && String.IsNullOrEmpty(strNewBarcode) == false
                             && bNoCheckDup == false    // 2008/10/6 
                                                        // && bSimulate == false    // 要想跳过查重，可以使用 nocheckdup
                             )
@@ -3670,6 +3685,22 @@ out strError);
                             if (CheckParent(new_xml_dom, strBiblioRecId, out strError) != 1)
                             {
                                 goto ERROR1;
+                            }
+
+                            // 2022/5/23
+                            // 补一次检查 currentLocation 元素
+                            if (bForce == false)
+                            {
+                                // return:
+                                //      -1  调用出错
+                                //      0   校验正确
+                                //      1   校验发现错误
+                                nRet = LibraryHost.VerifyCurrentLocation(this,
+                                    new_xml_dom,
+                                    "",
+                                    out strError);
+                                if (nRet != 0)
+                                    goto ERROR1;
                             }
 
                             lRet = channel.DoSaveTextRes(info.NewRecPath,
@@ -5349,11 +5380,32 @@ out strError);
 
             // 2020/12/11
             // 检查 currentLocation 元素内容是否为 *:xxx 或者 xxx:* 形态
-            nRet = MergeCurrentLocation(domExist,
-    domNew,
-    out strError);
+            nRet = MergeCurrentLocation(
+                domExist,
+                domNew,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
+
+            // 2022/5/23
+            if (nRet == 1)
+            {
+                // 重新检查 currentLocation 元素是否合法
+                // 验证册记录中的 currentLocation 元素
+                // return:
+                //      -1  调用出错
+                //      0   校验正确
+                //      1   校验发现错误
+                nRet = LibraryHost.VerifyCurrentLocation(
+                    this,
+                    domNew,
+                    "",
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    return -1;
+            }
 
             // 合并新旧记录
             // string strNewXml = "";
