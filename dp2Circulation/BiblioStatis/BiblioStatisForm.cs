@@ -1531,9 +1531,9 @@ Stack:
 
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var prop in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     this.comboBox_inputBiblioDbName.Items.Add(prop.DbName);
                 }

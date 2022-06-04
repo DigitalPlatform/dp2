@@ -475,7 +475,7 @@ namespace dp2Circulation
                                     Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
-                Environment.CurrentDirectory + "\\dp2circulation.exe",
+                                    Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
 
 

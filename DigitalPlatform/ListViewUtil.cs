@@ -951,6 +951,8 @@ namespace DigitalPlatform.GUI
             styles.Add(ColumnSortStyle.LongRecPath);  // 记录路径。例如“中文图书/1 @本地服务器”
             // 2021/10/9
             styles.Add(ColumnSortStyle.RFC1123);  // RFC1123 时间字符串
+            styles.Add(ColumnSortStyle.IpAddress);
+            styles.Add(ColumnSortStyle.Width);
 
             // 寻找标题 .Tag 中的定义
             if (nColumn < list.Columns.Count)
@@ -969,7 +971,6 @@ namespace DigitalPlatform.GUI
             }
             return styles;
         }
-
 
         public ColumnSortStyle GetSortStyle(ListView list, int nColumn)
         {

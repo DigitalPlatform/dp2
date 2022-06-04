@@ -4016,9 +4016,9 @@ Culture=neutral, PublicKeyToken=null
                 // 创建NormalDbProperties数组
                 if (this.BiblioDbProperties != null)
                 {
-                    for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                    foreach (var biblio in this.BiblioDbProperties)
                     {
-                        BiblioDbProperty biblio = this.BiblioDbProperties[i];
+                        // BiblioDbProperty biblio = this.BiblioDbProperties[i];
 
                         // NormalDbProperty normal = null;
 

@@ -182,9 +182,9 @@ namespace dp2Circulation
             if (Program.MainForm.BiblioDbProperties == null)
                 return;
 
-            for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+            foreach (var property in Program.MainForm.BiblioDbProperties)
             {
-                BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
+                // BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
                 // 只允许特定的 MARC 格式
                 if (string.IsNullOrEmpty(this.MarcSyntax) == false
                     && property.Syntax != this.MarcSyntax)

@@ -171,7 +171,7 @@ namespace dp2Circulation
         /// <param name="strText">要输出的文本字符串</param>
         public void WriteTextToConsole(string strText)
         {
-            Global.WriteHtml(this.Console, HttpUtility.HtmlEncode(strText));
+            Global.WriteHtml(this.Console, HttpUtility.HtmlEncode(strText) + "<br/>");
         }
 
         internal virtual string GetOutputFileNamePrefix()

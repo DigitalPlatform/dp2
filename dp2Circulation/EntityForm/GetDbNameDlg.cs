@@ -57,9 +57,9 @@ namespace dp2Circulation
                 if (Program.MainForm != null
                     && Program.MainForm.BiblioDbProperties != null)
                 {
-                    for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                    foreach (var property in Program.MainForm.BiblioDbProperties)
                     {
-                        this.listBox_biblioDbNames.Items.Add(Program.MainForm.BiblioDbProperties[i].DbName);
+                        this.listBox_biblioDbNames.Items.Add(property.DbName);
                     }
                 }
             }

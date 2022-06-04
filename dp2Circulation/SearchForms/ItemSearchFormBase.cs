@@ -403,72 +403,80 @@ namespace dp2Circulation
                     }
                 }
 
-                for (; ; )
+                this._listviewRecords.BeginUpdate();
+                try
                 {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null && stop.State != 0)
+                    int i = 0;
+                    for (; ; )
                     {
-                        MessageBox.Show(this, "用户中断");
-                        return 0;
-                    }
+                        bool display = (i % 1000) == 0;
 
-                    string strRecPath = sr.ReadLine();
+                        if (display)
+                            Application.DoEvents(); // 出让界面控制权
 
-                    stop.SetProgressValue(sr.BaseStream.Position);
-
-                    if (strRecPath == null)
-                        break;
-
-                    // 检查路径的正确性，检查数据库是否为实体库之一
-                    string strDbName = Global.GetDbName(strRecPath);
-                    if (string.IsNullOrEmpty(strDbName) == true)
-                    {
-                        strError = "'" + strRecPath + "' 不是合法的记录路径";
-                        goto ERROR1;
-                    }
-
-                    if (this.DbType == "item")
-                    {
-                        if (Program.MainForm.IsItemDbName(strDbName) == false)
+                        if (stop != null && stop.State != 0)
                         {
-                            strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的实体库名。很可能所指定的文件不是实体库的记录路径文件";
+                            MessageBox.Show(this, "用户中断");
+                            return 0;
+                        }
+
+                        string strRecPath = sr.ReadLine();
+
+                        if (display)
+                            stop.SetProgressValue(sr.BaseStream.Position);
+
+                        if (strRecPath == null)
+                            break;
+
+                        // 检查路径的正确性，检查数据库是否为实体库之一
+                        string strDbName = Global.GetDbName(strRecPath);
+                        if (string.IsNullOrEmpty(strDbName) == true)
+                        {
+                            strError = "'" + strRecPath + "' 不是合法的记录路径";
                             goto ERROR1;
                         }
-                    }
-                    else if (this.DbType == "comment")
-                    {
-                        if (Program.MainForm.IsCommentDbName(strDbName) == false)
-                        {
-                            strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的评注库名。很可能所指定的文件不是评注库的记录路径文件";
-                            goto ERROR1;
-                        }
-                    }
-                    else if (this.DbType == "order")
-                    {
-                        if (Program.MainForm.IsOrderDbName(strDbName) == false)
-                        {
-                            strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的订购库名。很可能所指定的文件不是订购库的记录路径文件";
-                            goto ERROR1;
-                        }
-                    }
-                    else if (this.DbType == "issue")
-                    {
-                        if (Program.MainForm.IsIssueDbName(strDbName) == false)
-                        {
-                            strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的期库名。很可能所指定的文件不是期库的记录路径文件";
-                            goto ERROR1;
-                        }
-                    }
-                    else
-                        throw new Exception("未知的DbType '" + this.DbType + "'");
 
-                    ListViewItem item = new ListViewItem();
-                    item.Text = strRecPath;
+                        if (this.DbType == "item")
+                        {
+                            if (Program.MainForm.IsItemDbName(strDbName) == false)
+                            {
+                                strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的实体库名。很可能所指定的文件不是实体库的记录路径文件";
+                                goto ERROR1;
+                            }
+                        }
+                        else if (this.DbType == "comment")
+                        {
+                            if (Program.MainForm.IsCommentDbName(strDbName) == false)
+                            {
+                                strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的评注库名。很可能所指定的文件不是评注库的记录路径文件";
+                                goto ERROR1;
+                            }
+                        }
+                        else if (this.DbType == "order")
+                        {
+                            if (Program.MainForm.IsOrderDbName(strDbName) == false)
+                            {
+                                strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的订购库名。很可能所指定的文件不是订购库的记录路径文件";
+                                goto ERROR1;
+                            }
+                        }
+                        else if (this.DbType == "issue")
+                        {
+                            if (Program.MainForm.IsIssueDbName(strDbName) == false)
+                            {
+                                strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的期库名。很可能所指定的文件不是期库的记录路径文件";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                            throw new Exception("未知的DbType '" + this.DbType + "'");
 
-                    this._listviewRecords.Items.Add(item);
+                        ListViewItem item = new ListViewItem();
+                        item.Text = strRecPath;
 
-                    items.Add(item);
+                        this._listviewRecords.Items.Add(item);
+
+                        items.Add(item);
 
 #if NO
                     if (bSkipBrowse == false
@@ -495,6 +503,12 @@ namespace dp2Circulation
                     }
 #endif
 
+                        i++;
+                    }
+                }
+                finally
+                {
+                    this._listviewRecords.EndUpdate();
                 }
 
                 // 刷新浏览行

@@ -14267,9 +14267,9 @@ out strError);
 
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var property in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
                     this.checkedComboBox_biblioDbNames.Items.Add(property.DbName);
                 }
             }

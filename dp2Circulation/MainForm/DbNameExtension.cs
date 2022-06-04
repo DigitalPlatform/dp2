@@ -90,9 +90,9 @@ namespace dp2Circulation
             bool bFound = false;
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var prop in this.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = this.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = this.BiblioDbProperties[i];
 
                     if (prop.DbName == strTargetDbName)
                     {
@@ -193,10 +193,10 @@ namespace dp2Circulation
         {
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].DbName == strBiblioDbName)
-                        return this.BiblioDbProperties[i].Syntax;
+                    if (property.DbName == strBiblioDbName)
+                        return property.Syntax;
                 }
             }
 
@@ -304,9 +304,9 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].DbName == strDbName)
+                    if (property.DbName == strDbName)
                         return true;
                 }
             }
@@ -328,18 +328,18 @@ namespace dp2Circulation
         {
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].DbName == strBiblioDbName)
+                    if (property.DbName == strBiblioDbName)
                     {
                         if (strDbType == "item")
-                            return this.BiblioDbProperties[i].ItemDbName;
+                            return property.ItemDbName;
                         else if (strDbType == "order")
-                            return this.BiblioDbProperties[i].OrderDbName;
+                            return property.OrderDbName;
                         else if (strDbType == "issue")
-                            return this.BiblioDbProperties[i].IssueDbName;
+                            return property.IssueDbName;
                         else if (strDbType == "comment")
-                            return this.BiblioDbProperties[i].CommentDbName;
+                            return property.CommentDbName;
                         else
                             return "";
                     }
@@ -360,10 +360,10 @@ namespace dp2Circulation
         {
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].DbName == strBiblioDbName)
-                        return this.BiblioDbProperties[i].ItemDbName;
+                    if (property.DbName == strBiblioDbName)
+                        return property.ItemDbName;
                 }
             }
 
@@ -381,10 +381,10 @@ namespace dp2Circulation
         {
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].DbName == strBiblioDbName)
-                        return this.BiblioDbProperties[i].IssueDbName;
+                    if (property.DbName == strBiblioDbName)
+                        return property.IssueDbName;
                 }
             }
 
@@ -402,10 +402,10 @@ namespace dp2Circulation
         {
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].DbName == strBiblioDbName)
-                        return this.BiblioDbProperties[i].OrderDbName;
+                    if (property.DbName == strBiblioDbName)
+                        return property.OrderDbName;
                 }
             }
 
@@ -423,10 +423,10 @@ namespace dp2Circulation
         {
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].DbName == strBiblioDbName)
-                        return this.BiblioDbProperties[i].CommentDbName;
+                    if (property.DbName == strBiblioDbName)
+                        return property.CommentDbName;
                 }
             }
 
@@ -485,10 +485,10 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].ItemDbName == strItemDbName)
-                        return this.BiblioDbProperties[i].DbName;
+                    if (property.ItemDbName == strItemDbName)
+                        return property.DbName;
                 }
             }
 
@@ -619,10 +619,10 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].IssueDbName == strIssueDbName)
-                        return this.BiblioDbProperties[i].DbName;
+                    if (property.IssueDbName == strIssueDbName)
+                        return property.DbName;
                 }
             }
 
@@ -669,10 +669,10 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].OrderDbName == strOrderDbName)
-                        return this.BiblioDbProperties[i].DbName;
+                    if (property.OrderDbName == strOrderDbName)
+                        return property.DbName;
                 }
             }
 
@@ -692,10 +692,10 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].CommentDbName == strCommentDbName)
-                        return this.BiblioDbProperties[i].DbName;
+                    if (property.CommentDbName == strCommentDbName)
+                        return property.DbName;
                 }
             }
 
@@ -714,9 +714,9 @@ namespace dp2Circulation
         {
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var prop in this.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = this.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = this.BiblioDbProperties[i];
 
                     if (prop.DbName == strBiblioDbName)
                     {
@@ -740,9 +740,9 @@ namespace dp2Circulation
         {
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var prop in this.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = this.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = this.BiblioDbProperties[i];
 
                     if (prop.DbName == strBiblioDbName)
                     {
@@ -793,9 +793,9 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach(var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].ItemDbName == strDbName)
+                    if (property.ItemDbName == strDbName)
                         return true;
                 }
             }
@@ -840,9 +840,9 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].OrderDbName == strDbName)
+                    if (property.OrderDbName == strDbName)
                         return true;
                 }
             }
@@ -863,9 +863,9 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach(var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].IssueDbName == strDbName)
+                    if (property.IssueDbName == strDbName)
                         return true;
                 }
             }
@@ -886,9 +886,9 @@ namespace dp2Circulation
 
             if (this.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.BiblioDbProperties.Count; i++)
+                foreach (var property in this.BiblioDbProperties)
                 {
-                    if (this.BiblioDbProperties[i].CommentDbName == strDbName)
+                    if (property.CommentDbName == strDbName)
                         return true;
                 }
             }

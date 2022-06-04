@@ -6326,6 +6326,7 @@ Program.MainForm.DefaultFont);
 
             this.EnableControls(false);
             this.listView_records.Enabled = false;
+            this.listView_records.BeginUpdate();
             try
             {
                 stop.SetProgressRange(0, items.Count);
@@ -6342,7 +6343,10 @@ Program.MainForm.DefaultFont);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    bool display = (i % 100) == 0;
+
+                    if (display)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -6350,7 +6354,8 @@ Program.MainForm.DefaultFont);
                         goto ERROR1;
                     }
 
-                    stop.SetProgressValue(i);
+                    if (display)
+                        stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -6472,11 +6477,20 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                     stop.SetProgressValue(i);
 
                     this.listView_records.Items.Remove(item.ListViewItem);
+                    
+                    if (display)
+                    {
+                        this.listView_records.EndUpdate();
+                        Application.DoEvents();	// 出让界面控制权
+                        this.listView_records.BeginUpdate();
+                    }
+
                     i++;
                 }
             }
             finally
             {
+                this.listView_records.EndUpdate();
                 this.EnableControls(true);
                 this.listView_records.Enabled = true;
 
@@ -12344,9 +12358,9 @@ out strError);
 
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var property in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
 
                     if (this.DbType == "item")
                     {
@@ -13676,9 +13690,9 @@ Keys keyData)
             {
                 if (Program.MainForm.BiblioDbProperties != null)
                 {
-                    for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                    foreach (var property in Program.MainForm.BiblioDbProperties)
                     {
-                        BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
+                        // BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
 
                         if (this.DbType == "item")
                         {

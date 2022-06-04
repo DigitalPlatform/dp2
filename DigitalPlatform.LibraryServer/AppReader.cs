@@ -1255,7 +1255,7 @@ strLibraryCode,
 readerdom,
 types,
 0,
-"instantly",
+"instantly," + strNewXml,
 (t, e) => { if (e == "error") errors.Add(t); },
 null,
 ref changed);

@@ -6086,9 +6086,9 @@ MessageBoxDefaultButton.Button2);
                     List<string> item_dbnames = new List<string>();
                     if (Program.MainForm.BiblioDbProperties != null)
                     {
-                        for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                        foreach (var property in Program.MainForm.BiblioDbProperties)
                         {
-                            BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
+                            // BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
 
                             if (String.IsNullOrEmpty(property.ItemDbName) == false)
                                 item_dbnames.Add(property.ItemDbName);

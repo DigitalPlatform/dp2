@@ -3258,7 +3258,7 @@ strRoom1);
                 //+ "<td nowrap>备注</td>"
                 + "</tr>";
             // for (int i = 0; i < nodes.Count; i++)
-            foreach(XmlElement node in nodes)
+            foreach (XmlElement node in nodes)
             {
                 // XmlNode node = nodes[i];
 
@@ -3537,6 +3537,16 @@ strRoom1);
                 return 0;
             }
 
+            var recall_reason = StringUtil.GetParameterByPrefix(strStyle, "recall");
+            // 是否为“召回”通知类型。false 表示为“超期通知”
+            bool recall = recall_reason != null;
+            if (recall && string.IsNullOrEmpty(recall_reason))
+                recall_reason = "业务需要";
+
+            if (string.IsNullOrEmpty(recall_reason) == false)
+                recall_reason = StringUtil.UnescapeString(recall_reason);
+            
+            // 是否立即进行超期通知或召回？
             var instantly = StringUtil.IsInList("instantly", strStyle);
 
             // 表达通知信息的 XML 记录
@@ -3546,18 +3556,21 @@ strRoom1);
             string strName = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
 
-            DomUtil.SetElementText(output_dom.DocumentElement, "type", "超期通知");
+            DomUtil.SetElementText(output_dom.DocumentElement, "type", recall ? "召回" : "超期通知");
             XmlElement items = output_dom.CreateElement("items");
             output_dom.DocumentElement.AppendChild(items);
 
             string strRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
             bool bTestNotify = (StringUtil.IsInList("_testoverduenotify", strRights) == true);
 
-            strResult += "您借阅的下列书刊：\n";
+            if (recall)
+                strResult += $"因 {recall_reason}，图书馆提醒您尽快归还下列书刊：\n";
+            else
+                strResult += "您借阅的下列书刊：\n";
 
             // 借阅的册
             // for (int i = 0; i < nodes.Count; i++)
-            foreach(XmlElement node in nodes)
+            foreach (XmlElement node in nodes)
             {
                 // XmlNode node = nodes[i];
 
@@ -3647,7 +3660,11 @@ strRoom1);
                     debugInfo?.AppendLine($"GetNotifiedChars() strBodyType='{strBodyType}', strHistory='{strHistory}', return strChars='{strChars}'");
 
                 debugInfo?.AppendLine($"bOverdue={bOverdue}");
-                if (bOverdue == true)
+                if (recall)
+                {
+                    nNormalCount++;
+                }
+                else if (bOverdue == true)
                 {
                     // 看看是不是已经通知过
                     if (string.IsNullOrEmpty(strChars) == false
@@ -3780,9 +3797,16 @@ strRoom1);
 
                 // strResult += (i + 1).ToString() + ") " 
                 strResult += strSummary + " ";
-                // strResult += "借阅日期: " + DateTimeUtil.LocalDate(strBorrowDate) + " ";
-                strResult += "应还日期: " + timeReturning.ToString("d") + " ";
-                strResult += strOverDue + "\n";
+
+                if (recall)
+                {
+                    strResult += "\n";
+                }
+                else
+                {
+                    strResult += "应还日期: " + timeReturning.ToString("d") + " ";
+                    strResult += strOverDue + "\n";
+                }
 
                 debugInfo?.AppendLine($"strResult='{strResult}'");
 
@@ -3831,7 +3855,6 @@ if (nNormalCount > 0)
                     DomUtil.DeleteElement(record, "face");
                     // TODO: 是否包含 libraryCode 元素?
                 }
-
 
                 strBody = output_dom.DocumentElement.OuterXml;
                 debugInfo?.AppendLine($"退出 NotifyReaderMQ() 函数, 返回 1");
@@ -3906,7 +3929,7 @@ if (nNormalCount > 0)
 
             // 借阅的册
             // for (int i = 0; i < nodes.Count; i++)
-            foreach(XmlElement node in nodes)
+            foreach (XmlElement node in nodes)
             {
                 // XmlNode node = nodes[i];
 

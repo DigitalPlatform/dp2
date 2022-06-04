@@ -93,9 +93,9 @@ namespace dp2Circulation
 
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var prop in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.ItemDbName) == true)
                         continue;

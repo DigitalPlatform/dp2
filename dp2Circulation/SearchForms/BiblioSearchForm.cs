@@ -3055,9 +3055,9 @@ Keys keyData)
 
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var property in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
 
                     strText += "<p>书目库名: " + property.DbName + "; 语法: " + property.Syntax + "</p>";
                 }
@@ -11699,9 +11699,9 @@ message,
             {
                 if (Program.MainForm.BiblioDbProperties != null)
                 {
-                    for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                    foreach (var property in Program.MainForm.BiblioDbProperties)
                     {
-                        BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
+                        // BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
                         e.Values.Add(property.DbName);
                     }
                 }

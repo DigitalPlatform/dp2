@@ -4855,9 +4855,9 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var prop in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (this.comboBox_prepare_type.Text == "图书")
                     {
@@ -5179,9 +5179,9 @@ Keys keyData)
             this.Clear();
             if (mainform.BiblioDbProperties != null)
             {
-                for (int i = 0; i < mainform.BiblioDbProperties.Count; i++)
+                foreach (var property in mainform.BiblioDbProperties)
                 {
-                    BiblioDbProperty property = mainform.BiblioDbProperties[i];
+                    // BiblioDbProperty property = mainform.BiblioDbProperties[i];
 
                     OrderDbInfo info = new OrderDbInfo();
                     info.BiblioDbName = property.DbName;

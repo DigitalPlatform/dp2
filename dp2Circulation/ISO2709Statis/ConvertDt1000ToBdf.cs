@@ -25,6 +25,14 @@ namespace dp2Circulation.ISO2709Statis
     {
         XmlTextWriter _writer = null;
 
+        public XmlTextWriter Writer
+        {
+            get
+            {
+                return _writer;
+            }
+        }
+
         // 来源。库名(可能包括 IP 地址部分)，用于定位 dt1000 MARC 中 -01 字段
         string _source = null;
 
@@ -50,6 +58,62 @@ namespace dp2Circulation.ISO2709Statis
         {
             if (_writer != null)
                 _writer.Close();
+        }
+
+        public int PrepareSource(
+            MarcRecord record,
+            out string path,
+            out string timestamp,
+            out string strError)
+        {
+            strError = "";
+            path = "";
+            timestamp = "";
+
+            /*
+var g01 = record.select("field[@name='-01']").FirstContent;
+var parts = StringUtil.ParseTwoPart(g01, "|");
+string path = ToDp2Path(parts[0]);
+string timestamp = parts[1];
+*/
+            /*
+            ReaderInfoForm.ParseDt1000G01(record,
+out string path,
+out string timestamp);
+            */
+            if (_source == null)
+            {
+                // 从 dt1000 MARC 记录中的若干 -01 字段中选择一个来源数据库
+                // /132.147.160.100/图书总库/ctlno/0000001
+                int ret = ReaderInfoForm.SelectDt1000G01Source(
+                    this.MainForm,
+                    record,
+                    out string source,
+                    out string _);
+                if (ret == -1)
+                {
+                    strError = "第一条 MARC 记录中缺乏 -01 字段，无法获得来源";
+                    return -1;
+                }
+                if (ret == 0)
+                {
+                    strError = "用户放弃";
+                    return -1;
+                }
+                _source = source;
+            }
+
+            if (ReaderInfoForm.GetDt1000G01Path(
+                record,
+                _source,
+                out path,
+                out timestamp) != 1)
+            {
+                strError = $"MARC 记录中没有找到匹配 '{_source}' 的 -01 字段";
+                return -1;
+            }
+
+            return 0;
         }
 
         public override void OnBegin(object sender, StatisEventArgs e)
@@ -117,51 +181,16 @@ namespace dp2Circulation.ISO2709Statis
 
             MarcRecord record = new MarcRecord(this.MARC);
 
-            /*
-            var g01 = record.select("field[@name='-01']").FirstContent;
-            var parts = StringUtil.ParseTwoPart(g01, "|");
-            string path = ToDp2Path(parts[0]);
-            string timestamp = parts[1];
-            */
-            /*
-            ReaderInfoForm.ParseDt1000G01(record,
-out string path,
-out string timestamp);
-            */
-            if (_source == null)
-            {
-                // 从 dt1000 MARC 记录中的若干 -01 字段中选择一个来源数据库
-                // /132.147.160.100/图书总库/ctlno/0000001
-                int ret = ReaderInfoForm.SelectDt1000G01Source(
-                    this.MainForm,
-                    record,
-                    out string source,
-                    out string _);
-                if (ret == -1)
-                {
-                    strError = "第一条 MARC 记录中缺乏 -01 字段，无法获得来源";
-                    goto ERROR1;
-                }
-                if (ret == 0)
-                {
-                    strError = "用户放弃";
-                    goto ERROR1;
-                }
-                _source = source;
-            }
-
-            if (ReaderInfoForm.GetDt1000G01Path(
+            int nRet = PrepareSource(
                 record,
-                _source,
                 out string path,
-                out string timestamp) != 1)
-            {
-                strError = $"MARC 记录中没有找到匹配 '{_source}' 的 -01 字段";
+                out string timestamp,
+                out strError);
+            if (nRet == -1)
                 goto ERROR1;
-            }
 
             string strXml = "";
-            int nRet = MarcUtil.Marc2XmlEx(this.MARC,
+            nRet = MarcUtil.Marc2XmlEx(this.MARC,
     this.Syntax,
     ref strXml,
     out strError);
@@ -585,7 +614,7 @@ out string timestamp);
             return 0;
         }
 
-        static void FillValueTable(Hashtable table,
+        public static void FillValueTable(Hashtable table,
     string strValue)
         {
             object o = table[strValue];
@@ -1374,7 +1403,7 @@ out strNextSubfieldName);
         // 必须符合下列定义：
         // 将$a放入到Barcode
         // 将$h放入到RegisterNo
-        static int BuildGroups(string strField,
+        public static int BuildGroups(string strField,
             out List<ItemGroup> groups,
             out string strWarning,
             out string strError)
@@ -1664,7 +1693,7 @@ CALIS中，许可重复010$d来表达价格实录和获赠或其它币种价格�
 #endif
 
         // 针对一个（册信息）子字段组的描述
-        class ItemGroup
+        public class ItemGroup
         {
             public string strBarcode = "";
             public string strRegisterNo = "";

@@ -2001,9 +2001,9 @@ false);
             List<string> dbnames = new List<string>();
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var prop in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
                         continue;   // 没有订购功能的书目库不在考虑之列
@@ -2318,9 +2318,9 @@ false);
 
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var prop in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
                         continue;   // 没有订购功能的书目库不在考虑之列
@@ -2395,9 +2395,9 @@ false);
             string strText = this.comboBox_inputBiblioDbName.Text;
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var prop in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (strText == prop.DbName)
                     {
@@ -2441,9 +2441,9 @@ false);
             }
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var prop in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (strText == prop.OrderDbName)
                     {
@@ -3449,9 +3449,9 @@ false);
 
             if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                foreach (var prop in Program.MainForm.BiblioDbProperties)
                 {
-                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
+                    // BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
                         continue;

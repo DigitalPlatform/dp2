@@ -88,6 +88,15 @@ namespace DigitalPlatform
             }
         }
 
+        // 2022/6/4
+        public static ColumnSortStyle Width
+        {
+            get
+            {
+                return new ColumnSortStyle("Width");
+            }
+        }
+
         public override bool Equals(System.Object obj)
         {
             ColumnSortStyle o = obj as ColumnSortStyle;
@@ -501,6 +510,14 @@ namespace DigitalPlatform
             return -1;
         }
 
+        // 先按照宽度进行比较，然后同宽度的按照普通 string 比较
+        public static int CompareWidth(string s1, string s2)
+        {
+            if (s1.Length != s2.Length)
+                return s1.Length - s2.Length;
+            return string.CompareOrdinal(s1, s2);
+        }
+
         #region RFC1123 时间处理
 
         // 把字符串转换为DateTime对象
@@ -845,6 +862,10 @@ namespace DigitalPlatform
                 else if (column.SortStyle == ColumnSortStyle.RFC1123)
                 {
                     nRet = CompareRFC1123(s1, s2);
+                }
+                else if (column.SortStyle == ColumnSortStyle.Width)
+                {
+                    nRet = CompareWidth(s1, s2);
                 }
                 else if (this.EventCompare != null)
                 {

@@ -16067,29 +16067,55 @@ strLibraryCode);    // 读者所在的馆代码
 
                     // 注意： strPath 中的斜杠应该是 '/'
                     string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
-                    if (StringUtil.IsInList("managedatabase,backup", strRights) == false)
+                    if (StringUtil.IsInList("managedatabase,backup", strRights))
                     {
+                        // 具备 managedatabase 或 backup 权限可以列出任何文件和目录
+                    }
+                    else if (StringUtil.IsInList("download,upload", strRights))
+                    {
+                        // 具备 download 或 upload 权限，可以列 upload 目录。注意不能列 backup 目录，这是因为 backup 目录中的文件高度敏感
+                        if (strFirstLevel == "upload")
+                        {
+
+                        }
+                        else
+                        {
+                            strError = $"读取文件 {strResPath} 被拒绝。不具备 download 或 upload 权限";
+                            return 0;
+                        }
+                    }
+                    else if (StringUtil.IsInList("managedatabase,backup", strRights) == false)
+                    {
+                        // 不具备 managedatabase 或 backup 权限，只能列出 upload 子目录
+
                         // 2022/5/20
                         if (string.Compare(strFirstLevel, "upload", true) != 0
-                            && string.IsNullOrEmpty(strFirstLevel)
-                            && string.IsNullOrEmpty(strPath))
+                            && string.IsNullOrEmpty(strFirstLevel)  // 列目录请求
+                            && string.IsNullOrEmpty(strPath))   // 各级别已经全部吃掉
                         {
                             strError = "因当前用户不具备权限 managedatabase 或 backup，能列出的第一级目录名被限定为 'upload'";
-                            return 2;
+                            return 2;   // 具备部分权限
                         }
 
                         if (string.Compare(strFirstLevel, "upload", true) != 0)
                         {
-                            strError = "因当前用户不具备权限 managedatabase 或 backup，能列出的第一级目录名被限定为 'upload'";
+                            strError = $"因当前用户不具备权限 managedatabase 或 backup，不能列出第一级目录 '{strFirstLevel}' (能列出的第一级目录名被限定为 'upload')";
                             return -1;
                         }
                     }
-
-                    if (StringUtil.IsInList("download,backup", strRights) == false)
+                    else // 2022/5/31
                     {
-                        strError = "读取文件 " + strResPath + " 被拒绝。不具备 download 或 backup 权限";
+                        strError = $"读取文件 {strResPath} 被拒绝。不具备 download 或 upload 或 backup 权限";
                         return 0;
                     }
+                    /*
+                    if (StringUtil.IsInList("download,backup", strRights) == false)
+                    {
+                        strError = $"读取文件 {strResPath} 被拒绝。不具备 download 或 backup 权限";
+                        return 0;
+                    }
+                    */
+
                     // 用于限定的根目录
                     string strLimitDir = Path.Combine(strTargetDir, strFirstLevel);
                     if (PathUtil.IsChildOrEqual(strFilePath, strLimitDir) == false)

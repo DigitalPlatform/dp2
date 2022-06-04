@@ -87,6 +87,7 @@
             this.toolStripDropDownButton_otherFunc = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_saveTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripMenuItem_loadBlankRecord = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_notifyOverdue = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_createRfidCard = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_bindCardNumber = new System.Windows.Forms.ToolStripMenuItem();
@@ -107,7 +108,7 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.toolStripMenuItem_notifyOverdue = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_notifyRecall = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -686,6 +687,7 @@
             this.toolStripDropDownButton_otherFunc.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_saveTemplate,
             this.toolStripMenuItem_loadBlankRecord,
+            this.toolStripMenuItem_notifyRecall,
             this.toolStripMenuItem_notifyOverdue,
             this.toolStripSeparator8,
             this.toolStripMenuItem_createRfidCard,
@@ -724,6 +726,13 @@
             this.toolStripMenuItem_loadBlankRecord.Size = new System.Drawing.Size(443, 40);
             this.toolStripMenuItem_loadBlankRecord.Text = "装载空白记录";
             this.toolStripMenuItem_loadBlankRecord.Visible = false;
+            // 
+            // toolStripMenuItem_notifyOverdue
+            // 
+            this.toolStripMenuItem_notifyOverdue.Name = "toolStripMenuItem_notifyOverdue";
+            this.toolStripMenuItem_notifyOverdue.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_notifyOverdue.Text = "立即发出超期通知";
+            this.toolStripMenuItem_notifyOverdue.Click += new System.EventHandler(this.toolStripMenuItem_notifyOverdue_Click);
             // 
             // toolStripSeparator8
             // 
@@ -885,12 +894,12 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1118, 500);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
-            // toolStripMenuItem_notifyOverdue
+            // toolStripMenuItem_notifyRecall
             // 
-            this.toolStripMenuItem_notifyOverdue.Name = "toolStripMenuItem_notifyOverdue";
-            this.toolStripMenuItem_notifyOverdue.Size = new System.Drawing.Size(443, 40);
-            this.toolStripMenuItem_notifyOverdue.Text = "立即发出超期通知";
-            this.toolStripMenuItem_notifyOverdue.Click += new System.EventHandler(this.toolStripMenuItem_notifyOverdue_Click);
+            this.toolStripMenuItem_notifyRecall.Name = "toolStripMenuItem_notifyRecall";
+            this.toolStripMenuItem_notifyRecall.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_notifyRecall.Text = "立即发出召回通知 ...";
+            this.toolStripMenuItem_notifyRecall.Click += new System.EventHandler(this.toolStripMenuItem_notifyRecall_Click);
             // 
             // ReaderInfoForm
             // 
@@ -1010,5 +1019,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_loadBlankRecord;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_registerFaceByFile;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_notifyOverdue;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_notifyRecall;
     }
 }

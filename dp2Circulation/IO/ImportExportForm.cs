@@ -308,6 +308,12 @@ strStringTable);
                 {
                     return this.checkBox_target_dontSearchDup.Checked;
                 }));
+
+                info.PreSearchItemBarcode = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_preSearchItemBarcode.Checked;
+                }));
+
                 info.AutoPostfix = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_target_autoPostfix.Checked;
@@ -2040,6 +2046,7 @@ new string[] { "继续", "中断" });
             public bool SuppressOperLog = false;
             public bool DontSearchDup = false;
             public bool AutoPostfix = false;
+            public bool PreSearchItemBarcode = false;
 
             public string RestoreMode = "";
 
