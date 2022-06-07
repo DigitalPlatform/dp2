@@ -1114,18 +1114,12 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
             }
-            else if (strAction == "instantlyCheckOverdue")
+            else if (strAction == "notifyOverdue"
+                || strAction == "notifyRecall")
             {
-                /*
-                if (String.IsNullOrEmpty(strNewXml) == false)
-                {
-                    strError = "strAction 值为 instantlyCheckOverdue 时, strNewXml 参数必须为空";
-                    goto ERROR1;
-                }
-                */
                 if (String.IsNullOrEmpty(strOldXml) == false)
                 {
-                    strError = "strAction 值为 instantlyCheckOverdue 时, strOldXml 参数必须为空";
+                    strError = $"strAction 值为 {strAction} 时, strOldXml 参数必须为空";
                     goto ERROR1;
                 }
             }
@@ -1172,7 +1166,8 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            if (strAction == "instantlyCheckOverdue")
+            if (strAction == "notifyOverdue"
+                || strAction == "notifyRecall")
             {
                 RmsChannel channel0 = sessioninfo.Channels.GetChannel(this.WsUrl);
                 if (channel0 == null)
@@ -1255,7 +1250,7 @@ strLibraryCode,
 readerdom,
 types,
 0,
-"instantly," + strNewXml,
+$"{strAction}," + strNewXml,
 (t, e) => { if (e == "error") errors.Add(t); },
 null,
 ref changed);

@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
-[assembly: AssemblyVersion("2.2.2")]
-[assembly: AssemblyFileVersion("2.2.2.0")]
+[assembly: AssemblyVersion("2.3.0")]
+[assembly: AssemblyFileVersion("2.3.0.0")]
 
 // V1.1 2019/2/21 第二个版本
 // V1.2 2019/4/12 采用最新 dp-library submodule 的版本
@@ -44,3 +44,7 @@ using System.Runtime.InteropServices;
 //                      解决 MainForm::_cancel 中途被 Cancel() 导致 ClientInfo.BeginUpdate() 失效的 bug
 //                      增加“检查升级”菜单
 //      2.2.2 (2021/9/8) 保存和装载 settings.xml 的过程增加了十个 .bak? 文件作为备份。如果遇到 settings.xml 损坏的情况，会自动从 .bak? 文件中找最新的一个进行恢复
+// V2.3 2022/6/7 实现 GetImage() API。指纹登记中途可以获得指纹图像
+//              GetFingerprintString() API 的 strExcludeBarcodes 参数增加包含 disableUI，表示压制 UI 出现。(如果不包含，表示要出现 UI)
+//              指纹登记过程中会向前端发送各种文字过程消息。
+

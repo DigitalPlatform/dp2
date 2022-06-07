@@ -10854,6 +10854,10 @@ true);
                     if (strAction == "delete")
                     {
                         // 检查用户使用 WriteRes API 的权限
+                        // parameters:
+                        //      strLibraryCodeList  当前用户所管辖的馆代码列表
+                        //      strAction   要执行的动作。为 change 和 delete 之一
+                        //      strLibraryCode  [out]如果是写入读者库，这里返回实际写入的读者库的馆代码。如果不是写入读者库，则返回空
                         // return:
                         //      -1  error
                         //      0   不具备权限
@@ -10861,7 +10865,9 @@ true);
                         nRet = app.CheckWriteResRights(
                             sessioninfo.LibraryCodeList,
                             sessioninfo.RightsOrigin,
+                            // string.IsNullOrEmpty(strFileName) ? strCategory : strCategory + "/" + strFileName,
                             strCategory,
+                            "delete",
                             out strLibraryCode,
                             out strError);
                     }
@@ -10941,11 +10947,15 @@ true);
                     {
                         List<string> root_paths = new List<string>();
                         // 根据不同的权限限定不同的 root 起点
-                        if (StringUtil.IsInList("backup,managedatabase", sessioninfo.RightsOrigin))
+                        if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin))
+                        {
+                            root_paths.Add(EnsureRootPath(app.DataDir));
+                        }
+                        if (StringUtil.IsInList("backup", sessioninfo.RightsOrigin))
                         {
                             root_paths.Add(EnsureRootPath(Path.Combine(app.DataDir, "backup")));
                         }
-                        if (StringUtil.IsInList("upload,managedatabase", sessioninfo.RightsOrigin))
+                        if (StringUtil.IsInList("upload", sessioninfo.RightsOrigin))
                         {
                             root_paths.Add(EnsureRootPath(Path.Combine(app.DataDir, "upload")));
                         }
@@ -10959,6 +10969,12 @@ true);
                         }
 #endif
 
+                        // 不允许删除的特殊文件或目录
+                        List<string> special_paths = new List<string>();
+                        special_paths.Add(Path.Combine(app.DataDir, "library.xml"));
+                        special_paths.Add(Path.Combine(app.DataDir, "log"));
+                        special_paths.Add(Path.Combine(app.DataDir, "operlog"));
+                        
                         // 删除文件或者目录
                         // return:
                         //      -1  出错
@@ -10967,6 +10983,14 @@ true);
                             root_paths,
                             strCurrentDirectory,
                             strFileName,
+                            (full_path) => {
+                                foreach (var path in special_paths)
+                                {
+                                    if (PathUtil.IsChildOrEqual(full_path, path))
+                                        return "不允许删除特殊文件";
+                                }
+                                return null;
+                            },
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -14021,6 +14045,10 @@ Stack:
 
                 {
                     // 检查用户使用 WriteRes API 的权限
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的馆代码列表
+                    //      strAction   要执行的动作。为 change 和 delete 之一
+                    //      strLibraryCode  [out]如果是写入读者库，这里返回实际写入的读者库的馆代码。如果不是写入读者库，则返回空
                     // return:
                     //      -1  error
                     //      0   不具备权限
@@ -14029,6 +14057,7 @@ Stack:
                         sessioninfo.LibraryCodeList,
                         sessioninfo.RightsOrigin,
                         strResPath,
+                        StringUtil.IsInList("delete", strStyle) ? "delete" : "change",
                         out strLibraryCode,
                         out strError);
 

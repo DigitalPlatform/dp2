@@ -67,6 +67,14 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
+#if NEWFINGER
+            this.groupBox_palmprintUrl.Text = "指纹或掌纹阅读器接口 URL";
+            this.groupBox_fingerprint.Visible = false;
+            this.button_fingerprint_setDefaultValue_new.Visible = true;
+#else
+            this.button_fingerprint_setDefaultValue_new.Visible = false;
+#endif
+
             // *** 服务器
 
             // serverurl
@@ -1910,6 +1918,22 @@ MessageBoxDefaultButton.Button2);
         {
             var url = "https://dp2003.com/facecenter/v1/publish.htm";
             Process.Start(url);
+        }
+
+        private void button_fingerprint_setDefaultValue_new_Click(object sender, EventArgs e)
+        {
+            string strDefaultValue = "ipc://FingerprintChannel/FingerprintServer";
+
+            DialogResult result = MessageBox.Show(this,
+    "确实要将 指纹阅读器接口URL 的值设置为常用值\r\n \"" + strDefaultValue + "\" ? ",
+    "CfgDlg",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            this.textBox_palmprint_readerUrl.Text = strDefaultValue;
         }
     }
 

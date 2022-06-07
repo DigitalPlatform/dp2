@@ -1109,7 +1109,7 @@ namespace DigitalPlatform.LibraryServer
         public delegate void Delegate_appendResultText(string text, string color);
 
         // parameters:
-        //      strStyle    如果包含 instantly，表示立即发出通知
+        //      strStyle    如果包含 notifyOverdue，表示立即发出超期通知。如果包含 notifyRecall，表示立即发出召回通知
         // return:
         //      返回实际发送的消息类型列表
         public static List<string> NotifyOverdue(

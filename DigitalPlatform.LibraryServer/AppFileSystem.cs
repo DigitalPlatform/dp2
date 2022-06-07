@@ -1042,6 +1042,11 @@ namespace DigitalPlatform.LibraryServer
             return false;
         }
 
+        // return:
+        //      null 可以删除
+        //      其他  不可以删除。所返回的字符串内容为不可删除的理由
+        public delegate string Delegate_filterDelete(string fullname);
+
         // 删除文件或者目录
         // parameters:
         //      root_paths  可用的根目录列表。只要在其中之一以下，就允许删除。否则不允许删除
@@ -1054,6 +1059,7 @@ namespace DigitalPlatform.LibraryServer
             List<string> root_paths,
             string strCurrentDirectory,
             string strPattern,
+            Delegate_filterDelete proc_filter,
             out string strError)
         {
             strError = "";
@@ -1074,6 +1080,16 @@ namespace DigitalPlatform.LibraryServer
                     {
                         errors.Add("文件 " + si.Name + " 所在目录在限制范围以外，因此删除操作被拒绝");
                         continue;
+                    }
+
+                    if (proc_filter != null)
+                    {
+                        var error = proc_filter(si.FullName);
+                        if (error != null)
+                        {
+                            errors.Add($"文件 { si.Name } 删除操作被拒绝: {error}");
+                            continue;
+                        }
                     }
 
                     if (si is DirectoryInfo)

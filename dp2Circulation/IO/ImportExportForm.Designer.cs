@@ -54,6 +54,7 @@
             this.checkBox_convert_refreshRefID = new System.Windows.Forms.CheckBox();
             this.checkBox_target_randomItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_target = new System.Windows.Forms.TabPage();
+            this.checkBox_target_preSearchItemBarcode = new System.Windows.Forms.CheckBox();
             this.groupBox_danger = new System.Windows.Forms.GroupBox();
             this.checkBox_target_dontSearchDup = new System.Windows.Forms.CheckBox();
             this.checkBox_target_subrecordRestoreOldID = new System.Windows.Forms.CheckBox();
@@ -71,7 +72,6 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.checkBox_target_preSearchItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -352,7 +352,7 @@
             this.panel_map.Location = new System.Drawing.Point(5, 275);
             this.panel_map.Margin = new System.Windows.Forms.Padding(5);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(616, 213);
+            this.panel_map.Size = new System.Drawing.Size(586, 213);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -410,6 +410,18 @@
             this.tabPage_target.TabIndex = 0;
             this.tabPage_target.Text = "目标库";
             this.tabPage_target.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_target_preSearchItemBarcode
+            // 
+            this.checkBox_target_preSearchItemBarcode.AutoSize = true;
+            this.checkBox_target_preSearchItemBarcode.Location = new System.Drawing.Point(17, 77);
+            this.checkBox_target_preSearchItemBarcode.Margin = new System.Windows.Forms.Padding(5);
+            this.checkBox_target_preSearchItemBarcode.Name = "checkBox_target_preSearchItemBarcode";
+            this.checkBox_target_preSearchItemBarcode.Size = new System.Drawing.Size(478, 25);
+            this.checkBox_target_preSearchItemBarcode.TabIndex = 14;
+            this.checkBox_target_preSearchItemBarcode.Text = "预查重册条码号(若发现重复则不导入册和书目)";
+            this.checkBox_target_preSearchItemBarcode.UseVisualStyleBackColor = true;
+            this.checkBox_target_preSearchItemBarcode.Visible = false;
             // 
             // groupBox_danger
             // 
@@ -610,17 +622,6 @@
             this.button_next.Text = "下一步(&N)";
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
-            // 
-            // checkBox_target_preSearchItemBarcode
-            // 
-            this.checkBox_target_preSearchItemBarcode.AutoSize = true;
-            this.checkBox_target_preSearchItemBarcode.Location = new System.Drawing.Point(17, 77);
-            this.checkBox_target_preSearchItemBarcode.Margin = new System.Windows.Forms.Padding(5);
-            this.checkBox_target_preSearchItemBarcode.Name = "checkBox_target_preSearchItemBarcode";
-            this.checkBox_target_preSearchItemBarcode.Size = new System.Drawing.Size(478, 25);
-            this.checkBox_target_preSearchItemBarcode.TabIndex = 14;
-            this.checkBox_target_preSearchItemBarcode.Text = "预查重册条码号(若发现重复则不导入册和书目)";
-            this.checkBox_target_preSearchItemBarcode.UseVisualStyleBackColor = true;
             // 
             // ImportExportForm
             // 

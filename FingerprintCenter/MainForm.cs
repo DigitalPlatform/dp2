@@ -619,6 +619,12 @@ OutputHistory(text, level);
 
         private void FingerPrint_Captured(object sender, CapturedEventArgs e)
         {
+            // 2022/6/7
+            if (e != null && e.Text != null && e.Text.StartsWith("register:"))
+                return;
+            if (e != null && e.Quality == -1)
+                return;
+
             this.Invoke((Action)(() =>
             {
                 this.toolStripStatusLabel_message.Text = e.Score.ToString();

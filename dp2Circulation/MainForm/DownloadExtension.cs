@@ -1861,7 +1861,13 @@ namespace dp2Circulation
                         goto ERROR1;
                     }
 
-                    string strTargetPath = Path.Combine(e.TargetFolder, Path.GetFileName(localfilename)).Replace("\\", "/");
+                    string strTargetPath = "";
+                    // 2022/6/6
+                    // 感叹号要特殊处理
+                    if (e.TargetFolder == "!")
+                        strTargetPath = "!" + Path.GetFileName(localfilename).Replace("\\", "/");
+                    else
+                        strTargetPath = Path.Combine(e.TargetFolder, Path.GetFileName(localfilename)).Replace("\\", "/");
                     // channel.UploadResChunkSize = nChunkSize;
 
                     this.Invoke((Action)(() =>

@@ -4388,6 +4388,7 @@ MessageBoxDefaultButton.Button2);
 
         private void ToolStripMenuItem_initFingerprintCache_Click(object sender, EventArgs e)
         {
+#if !NEWFINGER
             // return:
             //      -2  remoting服务器连接失败。指纹接口程序尚未启动
             //      -1  出错
@@ -4399,8 +4400,10 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
+#if !NEWFINGER
         // parameters:
         //      bDelayShow  延迟显示当前窗口。如果为 false，表示不操心显示的事儿
         // return:
@@ -4835,6 +4838,8 @@ out strError);
             }
         }
 
+#endif
+
         // 获取指纹信息，追加到结果集文件的尾部
         // parameters:
         //      update_table   key为读者记录路径
@@ -5046,6 +5051,7 @@ out strError);
                 strFingerprint = parts[2];
         }
 
+#if !NEWFINGER
         // return:
         //      -3  新版本 fingerprintcenter，不需要进行缓存初始化
         //      -2  remoting服务器连接失败。驱动程序尚未启动
@@ -5166,6 +5172,7 @@ out strFingerprint);
                 EndFingerprintChannel(channel);
             }
         }
+#endif
 
 #if NO
         // return:
@@ -5246,9 +5253,9 @@ out strFingerprint);
 
 #endif
 
-        #endregion
+#endregion
 
-        #region 属性区有关功能
+#region 属性区有关功能
 
         internal override bool InSearching
         {
@@ -5344,9 +5351,9 @@ out strFingerprint);
             return 0;
         }
 
-        #endregion
+#endregion
 
-        #region C# 脚本程序
+#region C# 脚本程序
 
 
 
@@ -5804,7 +5811,7 @@ out strFingerprint);
             return -1;
         }
 
-        #endregion
+#endregion
 
         // 创建读者详情 Excel 文件。这是便于被外部调用的版本，只需要提供读者 XML 记录即可
         // return:

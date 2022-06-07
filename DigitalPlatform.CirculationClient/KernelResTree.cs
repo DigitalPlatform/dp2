@@ -660,9 +660,15 @@ namespace DigitalPlatform.CirculationClient
             }
 
             // TODO: checked 的状态是否可以
-            string strTagetFolder = GetNodePath(this.SelectedNode);
+            string strTargetFolder = GetNodePath(this.SelectedNode);
             if (this.SelectedNode.ImageIndex == RESTYPE_FILE)
-                strTagetFolder = Path.GetDirectoryName(strTagetFolder);
+            {
+                // strTargetFolder = Path.GetDirectoryName(strTargetFolder);
+                string path = strTargetFolder;
+                ParseFolderAndFileName(path,
+out strTargetFolder,
+out string _);
+            }
 #if NO
             List<string> paths = new List<string>();
             foreach (TreeNode node in nodes)
@@ -696,7 +702,7 @@ namespace DigitalPlatform.CirculationClient
             if (this._hideConfirmMessageBox == false)
             {
                 DialogResult result = MessageDialog.Show(this,
-                    "确认将以下本地文件上传到位置 '" + strTagetFolder + "':\r\n---\r\n" + string.Join("\r\n", dlg.FileNames),
+                    "确认将以下本地文件上传到位置 '" + strTargetFolder + "':\r\n---\r\n" + string.Join("\r\n", dlg.FileNames),
     MessageBoxButtons.OKCancel,
     MessageBoxDefaultButton.Button1,
     "此后不再出现本对话框",
@@ -708,7 +714,7 @@ namespace DigitalPlatform.CirculationClient
 
             UploadFilesEventArgs e1 = new UploadFilesEventArgs
             {
-                TargetFolder = strTagetFolder,
+                TargetFolder = strTargetFolder,
                 SourceFileNames = new List<string>(dlg.FileNames),
                 FuncEnd = (bError) => { Refresh(this.SelectedNode); }   // 完成后才刷新
             };
@@ -1090,6 +1096,7 @@ namespace DigitalPlatform.CirculationClient
                 goto ERROR1;
             }
 #endif
+            List<int> path_types = new List<int>(); // 节点类型
             List<string> paths = new List<string>();
             foreach (TreeNode node in selected_file_nodes)
             {
@@ -1103,6 +1110,7 @@ namespace DigitalPlatform.CirculationClient
                 }
 
                 paths.Add(strPath);
+                path_types.Add(node.ImageIndex);
             }
 
             string strNameList = StringUtil.MakePathList(paths);
@@ -1127,12 +1135,46 @@ MessageBoxDefaultButton.Button2);
             channel.Timeout = new TimeSpan(0, 5, 0);
             try
             {
+                int i = 0;
                 foreach (string strPath in paths)
                 {
                     FileItemInfo[] infos = null;
 
+                    // 节点类型
+                    int type = path_types[i];
+
+                    string strCurrentDirectory = "";
+                    string strFileName = "";
+
+                    if (type == RESTYPE_FILE)
+                    {
+                        /*
+                        if (strPath.StartsWith("!"))
+                        {
+                            string path = strPath.Replace("!", "(folder)/");
+                            strCurrentDirectory = Path.GetDirectoryName(path).Replace("(folder)", "!");
+                            strFileName = Path.GetFileName(path);
+                        }
+                        else
+                        {
+                            strCurrentDirectory = Path.GetDirectoryName(strPath);
+                            strFileName = Path.GetFileName(strPath);
+                        }
+                        */
+                        ParseFolderAndFileName(strPath,
+    out strCurrentDirectory,
+    out strFileName);
+                    }
+                    else
+                    {
+                        strCurrentDirectory = strPath;
+                        strFileName = "";
+                    }
+
+                    /*
                     string strCurrentDirectory = Path.GetDirectoryName(strPath);
                     string strFileName = Path.GetFileName(strPath);
+                    */
 
                     long nRet = channel.ListFile(
                         null,
@@ -1156,6 +1198,7 @@ MessageBoxDefaultButton.Button2);
                     else
                         goto ERROR1;
 #endif
+                    i++;
                 }
             }
             finally
@@ -1174,6 +1217,25 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        static void ParseFolderAndFileName(string strPath,
+            out string strCurrentDirectory,
+            out string strFileName)
+        {
+            if (strPath.StartsWith("!") 
+                && strPath.StartsWith("!/") == false
+                && strPath.StartsWith("!\\") == false)
+            {
+                string path = strPath.Replace("!", "(folder)/");
+                strCurrentDirectory = Path.GetDirectoryName(path).Replace("(folder)", "!").Replace("\\", "/");
+                strFileName = Path.GetFileName(path);
+            }
+            else
+            {
+                strCurrentDirectory = Path.GetDirectoryName(strPath).Replace("\\", "/");
+                strFileName = Path.GetFileName(strPath);
+            }
         }
 
         // 获得共同的 parent fold nodes

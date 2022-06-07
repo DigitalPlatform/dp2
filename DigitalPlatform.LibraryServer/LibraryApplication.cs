@@ -15572,6 +15572,7 @@ strLibraryCode);    // 读者所在的馆代码
         //      writeres 写入数据库记录、配置文件、对象等所需要的笼统的权限
         // parameters:
         //      strLibraryCodeList  当前用户所管辖的馆代码列表
+        //      strAction   要执行的动作。为 change 和 delete 之一
         //      strLibraryCode  [out]如果是写入读者库，这里返回实际写入的读者库的馆代码。如果不是写入读者库，则返回空
         // return:
         //      -1  error
@@ -15581,25 +15582,109 @@ strLibraryCode);    // 读者所在的馆代码
             string strLibraryCodeList,
             string strRights,
             string strResPath,
+            string strAction,
             out string strLibraryCode,
             out string strError)
         {
             strError = "";
             strLibraryCode = "";
 
-            string strPath = strResPath;
+            string strActionName = "写入";
+            if (strAction == "delete")
+                strActionName = "删除";
+
+            string strPath = strResPath.Replace("\\", "/");
 
             // 写入 dp2library 本地文件
             if (string.IsNullOrEmpty(strPath) == false
                 && strPath[0] == '!')
             {
                 strPath = strPath.Substring(1);
+                // 2022/6/7
+                // 兼容 !/cfgs 这样的形态。等同于 !cfgs
+                if (strPath.StartsWith("/"))
+                    strPath = strPath.Substring(1);
 
                 string strTargetDir = this.DataDir;
                 string strFilePath = Path.Combine(strTargetDir, strPath);
 
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
 
+                if (strFirstLevel == "")
+                {
+                    if (strAction == "delete" && string.Compare(strPath, "library.xml", true) == 0)
+                    {
+                        strError = "删除文件 " + strResPath + " 被拒绝。特殊文件不允许任何用户删除";
+                        return 0;
+                    }
+                    if (StringUtil.IsInList("managedatabase", strRights) == false)
+                    {
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 managedatabase 权限";
+                        return 0;
+                    }
+                }
+                else if (string.Compare(strFirstLevel, "backup", true) == 0)
+                {
+                    if (StringUtil.IsInList("backup,managedatabase", strRights) == false)
+                    {
+                        strError = $"{strActionName}文件 { strResPath } 被拒绝。不具备 backup 或 managedatabase 权限";
+                        return 0;
+                    }
+                }
+                else if (string.Compare(strFirstLevel, "cfgs", true) == 0)
+                {
+                    if (StringUtil.IsInList("managedatabase", strRights) == false)
+                    {
+                        strError = $"{strActionName}文件 { strResPath } 被拒绝。不具备 managedatabase 权限";
+                        return 0;
+                    }
+                }
+                else if (string.Compare(strFirstLevel, "log", true) == 0)
+                {
+                    strError = $"{strActionName}文件 { strResPath } 被拒绝。特殊目录不允许进行{strActionName}";
+                    return 0;
+                }
+                else if (string.Compare(strFirstLevel, "operlog", true) == 0)
+                {
+                    strError = $"{strActionName}文件 { strResPath } 被拒绝。特殊目录不允许进行{strActionName}";
+                    return 0;
+                }
+                else if (string.Compare(strFirstLevel, "upload", true) == 0)
+                {
+                    if (StringUtil.IsInList("upload,managedatabase", strRights) == false)
+                    {
+                        strError = $"{strActionName}文件 { strResPath } 被拒绝。不具备 upload 或 managedatabase 权限";
+                        return 0;
+                    }
+                }
+                else if (string.Compare(strFirstLevel, "library.xml", true) == 0
+    && string.IsNullOrEmpty(strPath))
+                {
+                    if (strAction == "delete")
+                    {
+                        strError = "删除文件 " + strResPath + " 被拒绝。特殊文件不允许任何用户删除";
+                        return 0;
+                    }
+                    if (StringUtil.IsInList("managedatabase", strRights) == false)
+                    {
+                        strError = $"{strActionName}文件 { strResPath } 被拒绝。不具备 managedatabase 权限";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    /*
+                    strError = $"意外的第一级目录名 '{strFirstLevel}'";
+                    return -1;
+                    */
+                    if (StringUtil.IsInList("managedatabase", strRights) == false)
+                    {
+                        strError = $"{strActionName}文件或目录 { strResPath } 被拒绝。不具备 managedatabase 权限";
+                        return 0;
+                    }
+                }
+
+                /*
                 if (string.Compare(strFirstLevel, "backup", true) == 0
                     || string.Compare(strFirstLevel, "cfgs", true) == 0)
                 {
@@ -15631,6 +15716,7 @@ strLibraryCode);    // 读者所在的馆代码
                     strError = "第一级目录名必须为 'upload' 'backup' 或 'cfgs'";
                     return -1;
                 }
+                */
 
                 // 用于限定的根目录
                 string strLimitDir = Path.Combine(strTargetDir, strFirstLevel);
@@ -15943,10 +16029,17 @@ strLibraryCode);    // 读者所在的馆代码
                 return -1;
             }
 
+            strPath = strPath.Replace("\\", "/");
+
             // 读取 dp2library 本地文件
             if (strPath.StartsWith("!"))
             {
                 strPath = strPath.Substring(1);
+                // 2022/6/7
+                // 兼容 !/cfgs 这样的形态。等同于 !cfgs
+                if (strPath.StartsWith("/"))
+                    strPath = strPath.Substring(1);
+
                 strStartDir = LibraryApplication.CanonicalizeDir(this.DataDir);
                 return 1;
             }
@@ -16039,7 +16132,7 @@ strLibraryCode);    // 读者所在的馆代码
             strLibraryCode = "";
             strFilePath = "";
 
-            string strPath = strResPath;
+            string strPath = strResPath.Replace("\\", "/");
 
             // 根据逻辑名称找到对应的起始物理目录
             // return:
@@ -16063,7 +16156,7 @@ strLibraryCode);    // 读者所在的馆代码
                     // strPath = strPath.Substring(1);
 
                     // string strTargetDir = this.DataDir;
-                    strFilePath = Path.Combine(strTargetDir, strPath);
+                    strFilePath = Path.Combine(strTargetDir, strPath).Replace("\\", "/");
 
                     // 注意： strPath 中的斜杠应该是 '/'
                     string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);

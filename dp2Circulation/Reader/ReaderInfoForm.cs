@@ -187,6 +187,27 @@ namespace dp2Circulation
             ClearBorrowHistoryPage();
             ClearQrCodePage();
 
+#if NEWFINGER
+            if (string.IsNullOrEmpty(Program.MainForm.PalmprintReaderUrl))
+            {
+                this.toolStripSplitButton_registerPalmprint.Visible = false;
+                this.toolStripSplitButton_registerFingerprint.Visible = false;
+            }
+            else
+            {
+                if (Program.MainForm.IsFingerprint())
+                {
+                    this.toolStripSplitButton_registerPalmprint.Visible = false;
+                    this.toolStripSplitButton_registerFingerprint.Visible = true;
+                }
+                else
+                {
+                    this.toolStripSplitButton_registerPalmprint.Visible = true;
+                    this.toolStripSplitButton_registerFingerprint.Visible = false;
+                }
+            }
+#endif
+
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
         }
 
@@ -365,24 +386,11 @@ namespace dp2Circulation
 #endif
             if (_inFingerprintCall > 0)
             {
+#if !NEWFINGER
                 // TODO: 增加一个参数，表示不需要显示“已取消操作”提示对话框
                 var task = CancelReadFingerprintString();
-                /*
-                try
-                {
-                    GetFingerprintStringResult result = await CancelReadFingerprintString();
-                    if (result.Value == -1)
-                    {
-                        ShowMessageBox(result.ErrorInfo);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ShowMessageBox(ex.Message);
-                }
-                */
+#endif
             }
-
 
             if (this.ReaderXmlChanged == true
                 || this.ObjectChanged == true)
@@ -2414,6 +2422,7 @@ strNewDefault);
                             warnings.Add(result.ErrorInfo);
                     }
 
+#if !NEWFINGER
                     // TODO: 对比新旧记录，如果指纹信息变化了，或者册条码号变化了，才请求立即刷新指纹缓存
                     // 更新指纹高速缓存
                     if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
@@ -2435,6 +2444,8 @@ strNewDefault);
                         }
                         // -2 故意不报错。因为用户可能配置了URL，但是当前驱动程序并没有启动
                     }
+
+#endif
 
                     if (warnings.Count > 0)
                     {
@@ -3118,6 +3129,7 @@ strSavedXml);
                 this.readerEditControl1.Changed = false;
                 ClearImportantFields();
 
+#if !NEWFINGER
                 // 更新指纹高速缓存
                 if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
                     && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
@@ -3137,6 +3149,7 @@ strSavedXml);
                     }
                     // -2 故意不报错。因为用户可能配置了URL，但是当前接口程序(zkfingerprint.exe)并没有启动
                 }
+#endif
             }
             finally
             {
@@ -5388,6 +5401,8 @@ MessageBoxDefaultButton.Button2);
 
         #region 指纹登记功能
 
+#if !NEWFINGER
+
         // 局部更新指纹信息高速缓存
         // return:
         //      -2  remoting服务器连接失败。驱动程序尚未启动
@@ -5442,6 +5457,7 @@ MessageBoxDefaultButton.Button2);
 
             return 0;
         }
+
 
         async Task<GetFingerprintStringResult> CancelReadFingerprintString()
         {
@@ -5563,6 +5579,54 @@ MessageBoxDefaultButton.Button2);
             return result;
         }
 
+#endif
+        public class GetVersionResult : NormalResult
+        {
+            public string CfgInfo { get; set; }
+            public string Version { get; set; }
+        }
+
+        public static GetVersionResult CallGetVersion(FingerprintChannel channel)
+        {
+            GetVersionResult result = new GetVersionResult();
+            try
+            {
+                // 获得一个指纹特征字符串
+                // return:
+                //      -1  error
+                //      0   放弃输入
+                //      1   成功输入
+                int nRet = channel.Object.GetVersion(out string strVersion,
+                    out string strCfgInfo,
+                    out string strError);
+
+                result.CfgInfo = strCfgInfo;
+                result.Version = strVersion;
+                result.ErrorInfo = strError;
+                result.Value = nRet;
+
+                // 2019/2/19
+                channel.Version = result.Version;
+                channel.CfgInfo = result.CfgInfo;
+
+                return result;
+            }
+            catch (System.Runtime.Remoting.RemotingException)
+            {
+                result.CfgInfo = "";
+                result.Version = "1.0";
+                result.ErrorInfo = "";
+                result.Value = 0;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.ErrorInfo = "CallGetVersion() 异常: " + ex.Message;
+                result.Value = -1;
+                return result;
+            }
+        }
+
         class GetFingerprintStringResult
         {
             public string Fingerprint { get; set; }
@@ -5633,53 +5697,6 @@ MessageBoxDefaultButton.Button2);
             catch (Exception ex)
             {
                 result.ErrorInfo = "GetFingerprintString() 异常: " + ex.Message;
-                result.Value = -1;
-                return result;
-            }
-        }
-
-        public class GetVersionResult : NormalResult
-        {
-            public string CfgInfo { get; set; }
-            public string Version { get; set; }
-        }
-
-        public static GetVersionResult CallGetVersion(FingerprintChannel channel)
-        {
-            GetVersionResult result = new GetVersionResult();
-            try
-            {
-                // 获得一个指纹特征字符串
-                // return:
-                //      -1  error
-                //      0   放弃输入
-                //      1   成功输入
-                int nRet = channel.Object.GetVersion(out string strVersion,
-                    out string strCfgInfo,
-                    out string strError);
-
-                result.CfgInfo = strCfgInfo;
-                result.Version = strVersion;
-                result.ErrorInfo = strError;
-                result.Value = nRet;
-
-                // 2019/2/19
-                channel.Version = result.Version;
-                channel.CfgInfo = result.CfgInfo;
-
-                return result;
-            }
-            catch (System.Runtime.Remoting.RemotingException)
-            {
-                result.CfgInfo = "";
-                result.Version = "1.0";
-                result.ErrorInfo = "";
-                result.Value = 0;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.ErrorInfo = "CallGetVersion() 异常: " + ex.Message;
                 result.Value = -1;
                 return result;
             }
@@ -5854,9 +5871,13 @@ MessageBoxDefaultButton.Button2);
 
         private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
-            string strError = "";
-
             bool bPractice = (Control.ModifierKeys == Keys.Control);
+
+#if NEWFINGER
+            await registerPalmprintAsync(bPractice);
+
+#else
+            string strError = "";
 
             this.ShowMessage("等待扫描指纹 ...");
             this.EnableControls(false);
@@ -5929,6 +5950,7 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             Program.MainForm.StatusBarMessage = strError;
             ShowMessageBox(strError);
+#endif
         }
 
         private void toolStripMenuItem_clearFingerprint_Click(object sender, EventArgs e)
@@ -7341,14 +7363,23 @@ MessageBoxDefaultButton.Button1);
 
         private async void toolStripSplitButton_registerFingerprint_ButtonClick(object sender, EventArgs e)
         {
+#if NEWFINGER
+            await registerPalmprintAsync(false);
+#else
             await registerFingerprint(false);
+#endif
         }
 
         private async void ToolStripMenuItem_fingerprintPracticeMode_Click(object sender, EventArgs e)
         {
+#if NEWFINGER
+            await registerPalmprintAsync(true);
+#else
             await registerFingerprint(true);
+#endif
         }
 
+#if !NEWFINGER
         async Task registerFingerprint(bool bPractice)
         {
             string strError = "";
@@ -7428,6 +7459,7 @@ MessageBoxDefaultButton.Button1);
             this.ShowMessage(strError, "red", true);
             // ShowMessageBox(strError);
         }
+#endif
 
         private void ToolStripMenuItem_saveChangeState_Click(object sender, EventArgs e)
         {
@@ -7451,9 +7483,12 @@ MessageBoxDefaultButton.Button1);
         {
             string strError = "";
 
+            string caption = Program.MainForm.GetPalmName();
+
             CancellationTokenSource _cancel = new CancellationTokenSource();
 
             RegisterPalmprintDialog dlg = new RegisterPalmprintDialog();
+            dlg.Text = $"登记{caption}";
             dlg.FormClosed += (s, e) =>
             {
                 {
@@ -7469,11 +7504,11 @@ MessageBoxDefaultButton.Button1);
             // dlg.StartPosition = FormStartPosition.CenterScreen;
             MainForm.AppInfo.LinkFormState(dlg, "RegisterPalmprintDialog_state");
             dlg.Show(this);
-            dlg.Message = "等待扫入掌纹 ...";
+            dlg.Message = $"等待扫入{caption} ...";
 
             FingerprintManager.Touched += PalmprintManager_Touched;
 
-            this.ShowMessage("等待扫描掌纹 ...");
+            this.ShowMessage($"等待扫描{caption} ...");
             this.EnableControls(false);
 
             // TODO: 关联到 form 的 cancel 对象
@@ -7514,7 +7549,7 @@ MessageBoxDefaultButton.Button1);
                 catch (Exception ex)
                 {
                     // 写入错误日志
-                    MainForm.WriteErrorLog($"显示掌纹图像出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    MainForm.WriteErrorLog($"显示{caption}图像出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
                 finally
                 {
@@ -7528,7 +7563,7 @@ MessageBoxDefaultButton.Button1);
                 NormalResult getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "");
                 if (getstate_result.Value == -1)
                 {
-                    strError = $"掌纹中心当前状态不正确：{getstate_result.ErrorInfo}";
+                    strError = $"{caption}中心当前状态不正确：{getstate_result.ErrorInfo}";
                     goto ERROR1;
                 }
 
@@ -7541,7 +7576,7 @@ MessageBoxDefaultButton.Button1);
                 else if (getstate_result.ErrorCode != null &&
                     getstate_result.ErrorCode != Program.MainForm.ServerUID)
                 {
-                    strError = $"掌纹中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行掌纹登记";
+                    strError = $"{caption}中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行{caption}登记";
                     goto ERROR1;
                 }
 
@@ -7556,8 +7591,15 @@ MessageBoxDefaultButton.Button1);
             // TODO: 练习模式需要判断版本 2.2 以上
 
             REDO:
+                string exclude = this.readerEditControl1.Barcode;
+                if (bPractice)
+                    exclude = "!practice";
+#if NEWFINGER
+                if (Program.MainForm.IsFingerprint())
+                    exclude += ",!disableUI";
+#endif
                 GetFingerprintStringResult result = await ReadPalmprintString(
-                    bPractice == true ? "!practice" : this.readerEditControl1.Barcode);
+                    exclude);
                 /*
                 if (result.Value == -1)
                 {
@@ -7591,10 +7633,20 @@ MessageBoxDefaultButton.Button1);
 
                 if (bPractice == false)
                 {
-                    this.readerEditControl1.PalmprintFeature = result.Fingerprint;   // strFingerprint;
-                    this.readerEditControl1.PalmprintFeatureVersion = result.Version;    // strVersion;
-                    this.readerEditControl1.Changed = true;
-                    AddImportantField("palmprint");
+                    if (Program.MainForm.IsFingerprint() == false)
+                    {
+                        this.readerEditControl1.PalmprintFeature = result.Fingerprint;   // strFingerprint;
+                        this.readerEditControl1.PalmprintFeatureVersion = result.Version;    // strVersion;
+                        this.readerEditControl1.Changed = true;
+                        AddImportantField("palmprint");
+                    }
+                    else
+                    {
+                        this.readerEditControl1.FingerprintFeature = result.Fingerprint;
+                        this.readerEditControl1.FingerprintFeatureVersion = result.Version;
+                        this.readerEditControl1.Changed = true;
+                        AddImportantField("fingerprint");
+                    }
                 }
 
                 try
@@ -7614,7 +7666,7 @@ MessageBoxDefaultButton.Button1);
                     var getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "continueCapture");
                     if (getstate_result.Value == -1)
                     {
-                        MainForm.WriteErrorLog($"registerPalmprintAsync() 中恢复识别掌纹时出错: {getstate_result.ErrorInfo}");
+                        MainForm.WriteErrorLog($"registerPalmprintAsync() 中恢复识别{caption}时出错: {getstate_result.ErrorInfo}");
                     }
                 }
 
@@ -9195,7 +9247,7 @@ MessageBoxDefaultButton.Button1);
             {
                 long lRet = Channel.SetReaderInfo(
     stop,
-    "instantlyCheckOverdue",
+    "notifyOverdue",
     strRecPath,
     "bodytypes:mq", // strNewXml,
     "",
@@ -9203,7 +9255,7 @@ MessageBoxDefaultButton.Button1);
     out string strExistingXml,
     out string strSavedXml,
     out string strSavedPath,
-    out byte [] baNewTimestamp,
+    out byte[] baNewTimestamp,
     out ErrorCodeValue kernel_errorcode,
     out strError);
                 if (lRet == -1)
@@ -9255,9 +9307,9 @@ MessageBoxDefaultButton.Button1);
             {
                 long lRet = Channel.SetReaderInfo(
     stop,
-    "instantlyCheckOverdue",
+    "notifyRecall",
     strRecPath,
-    $"bodytypes:mq,recall:{StringUtil.EscapeString(reason, ":,")}", // strNewXml,
+    $"bodytypes:mq,reason:{StringUtil.EscapeString(reason, ":,")}", // strNewXml,
     "",
     null,
     out string strExistingXml,

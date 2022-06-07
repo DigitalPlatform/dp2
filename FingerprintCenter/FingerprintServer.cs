@@ -4,10 +4,15 @@ using System.Threading.Tasks;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
+using System.Threading;
+using System.Drawing.Imaging;
+using System.Drawing;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Text;
 
 namespace FingerprintCenter
 {
@@ -438,6 +443,8 @@ Exception rethrown at [0]:
         // 2.0 增加的函数
         // TODO: 防止函数过程重入
         // 获得一个指纹特征字符串
+        // parameters:
+        //      strExcludeBarcodes  想要排除的证条码号列表。如果包含 disableUI，表示压制 UI 出现。(如果不包含，表示要出现 UI)
         // return:
         //      -1  error
         //      0   放弃输入
@@ -452,11 +459,18 @@ Exception rethrown at [0]:
             strFingerprintString = "";
             strVersion = "";
 
-            Program.MainForm?.ActivateWindow(true);
-            Program.MainForm?.DisplayCancelButton(true);
+            // 是否出现用户界面
+            bool ui = StringUtil.IsInList("!disableUI", strExcludeBarcodes) == false;
+
+            if (ui)
+            {
+                Program.MainForm?.ActivateWindow(true);
+                Program.MainForm?.DisplayCancelButton(true);
+            }
             try
             {
-                if (strExcludeBarcodes == "!practice")
+                // if (strExcludeBarcodes == "!practice")
+                if (StringUtil.IsInList("!practice", strExcludeBarcodes))
                 {
                     TextResult result = Program.FingerPrint.Practice();
                     if (result.Value == -1)
@@ -490,8 +504,11 @@ Exception rethrown at [0]:
             }
             finally
             {
-                Program.MainForm?.ActivateWindow(false);
-                Program.MainForm?.DisplayCancelButton(false);
+                if (ui)
+                {
+                    Program.MainForm?.ActivateWindow(false);
+                    Program.MainForm?.DisplayCancelButton(false);
+                }
             }
         }
 
@@ -584,6 +601,7 @@ Exception rethrown at [0]:
             Program.FingerPrint?.CancelRegisterString();
         }
 
+        /*
         // 2021/12/24 尚未实现
         // 获得一副图像。
         // parameters:
@@ -597,6 +615,80 @@ Exception rethrown at [0]:
                 Value = -1,
                 ErrorInfo = "尚未实现 GetImage() API 功能"
             };
+        }
+        */
+
+        // 2022/6/7
+        // 获取即时掌纹图像
+        // parameters:
+        //          style   如果包含 wait:xxx，表示需要延迟最多这么多毫秒尽量等到有图像可以返回
+        //                  如果包含 rect，表示要返回 8 个数字的矩形数据
+        public GetImageResult GetImage(string strStyle)
+        {
+            string patronBarcode = StringUtil.GetParameterByPrefix(strStyle, "patron");
+            if (patronBarcode != null)
+            {
+                // TODO: 获得先前存储的读者掌纹图像
+                return new GetImageResult
+                {
+                    Value = -1,
+                    ErrorInfo = "暂时不支持 strStyle 参数的 patron: 用法",
+                    ErrorCode = "notSupport"
+                };
+            }
+
+            TimeSpan waitLength = TimeSpan.FromSeconds(0);
+            string timeoutString = StringUtil.GetParameterByPrefix(strStyle, "wait", ":");
+            if (string.IsNullOrEmpty(timeoutString) == false)
+            {
+                if (Int32.TryParse(timeoutString, out int value) == false)
+                    return new GetImageResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"wait 参数值 '{timeoutString}' 不合法",
+                        ErrorCode = "invalidParameter"
+                    };
+                waitLength = TimeSpan.FromMilliseconds(value);
+            }
+
+            bool rect = StringUtil.IsInList("rect", strStyle);
+
+            DateTime start = DateTime.Now;
+            while (true)
+            {
+                // 如果 image 为空，则等待一定时间再尝试获取
+                using (var image = Program.FingerPrint.TryGetImage(out string text))
+                {
+                    // 如果 style 中有 wait:xxx 参数，则需要重新尝试获得图像
+                    if (image == null
+                        && string.IsNullOrEmpty(timeoutString) == false
+                        && DateTime.Now - start < waitLength)
+                    {
+                        Thread.Sleep(10);
+                        continue;
+                    }
+
+                    return new GetImageResult
+                    {
+                        Value = 0,
+                        // 用 jpg 格式返回图象，尺寸更小
+                        ImageData = image == null ? null : GetImageBytes(image, ImageFormat.Jpeg),
+                        Text = rect ? text : null,
+                    };
+                }
+            }
+        }
+
+        static byte[] GetImageBytes(Image image, ImageFormat format)
+        {
+            using (Stream stream = new MemoryStream())
+            {
+                image.Save(stream, format);
+                stream.Seek(0, SeekOrigin.Begin);
+                byte[] buffer = new byte[stream.Length];
+                stream.Read(buffer, 0, buffer.Length);
+                return buffer;
+            }
         }
     }
 }

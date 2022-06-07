@@ -2903,6 +2903,7 @@ out string strError)
 
         #region 指纹有关功能
 
+
         public class FingerprintChannel
         {
             public IpcClientChannel Channel { get; set; }
@@ -2983,12 +2984,24 @@ out string strError)
             // [System.Runtime.Remoting.RemotingException] = {"连接到 IPC 端口失败: 系统找不到指定的文件。\r\n "}
             catch (System.Runtime.Remoting.RemotingException ex)
             {
-                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
+                strError = "针对 "
+#if NEWFINGER
+                    + $"{Program.MainForm.GetPalmName()}中心"
+#else
+                    + Program.MainForm.FingerprintReaderUrl
+#endif
+                    + " 的 AddItems() 操作失败: " + ex.Message;
                 return -2;
             }
             catch (Exception ex)
             {
-                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
+                strError = "针对 "
+#if NEWFINGER
+                    + $"{Program.MainForm.GetPalmName()}中心"
+#else
+                    + Program.MainForm.FingerprintReaderUrl
+#endif
+                    + " 的 AddItems() 操作失败: " + ex.Message;
                 return -1;
             }
 
@@ -3041,9 +3054,9 @@ out string strError)
             }
         }
 
-        #endregion
+#endregion
 
-        #region 其他 API
+#region 其他 API
 
         // 获得馆藏地列表
         public int GetLocationList(
@@ -3207,7 +3220,7 @@ out strError);
             }
         }
 
-        #endregion
+#endregion
 
 #if NO
         protected override bool ProcessDialogKey(

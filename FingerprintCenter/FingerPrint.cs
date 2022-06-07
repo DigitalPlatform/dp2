@@ -16,6 +16,8 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using Serilog;
+using System.Drawing.Imaging;
+using System.Text;
 
 namespace FingerprintCenter
 {
@@ -136,6 +138,8 @@ namespace FingerprintCenter
             BrowseStyle = "fingerprint";
             SearchFrom = "指纹时间戳";
             ElementName = "fingerprint";
+
+            GetImage += PalmDriver_GetImage;
         }
 
         public override NormalResult Init(int dev_index)
@@ -648,7 +652,7 @@ namespace FingerprintCenter
                     // Thread.Sleep(200);
                 }
             }
-            catch(OperationCanceledException)
+            catch (OperationCanceledException)
             {
 
             }
@@ -711,7 +715,7 @@ namespace FingerprintCenter
 
             strResult += v.ToString() + " 分";
 
-            END1:
+        END1:
             m_gameScores.Add(v);
             while (this.m_gameScores.Count > 100)
             {
@@ -742,6 +746,12 @@ namespace FingerprintCenter
                         _captureData.mfpHeight,
                         ref ms);
                     TriggerImageReady(null, new ImageReadyEventArgs { Image = new Bitmap(ms), Quality = quality });
+
+                    // 2022/6/7
+                    SetImage(image_buffer,
+                        _captureData.mfpWidth,
+                        _captureData.mfpHeight,
+                        null);
                 });
             }
 
@@ -757,6 +767,14 @@ namespace FingerprintCenter
                     string text = GetScoreString(quality);
                     Speaking(text,
                         $"{text}\r\n质量: {quality}");
+
+                    SendTextMessage(
+                        new CapturedEventArgs
+                        {
+                            Text = "register:" + text,
+                            Quality = -1,  // 表示这是提示信息，不是识别的号码
+                            MessageID = "?",
+                        });
                 }
                 return;
             }
@@ -770,6 +788,16 @@ namespace FingerprintCenter
                     string text = $"指纹图像质量不佳({quality})，请重新扫入";
                     Speaking(text,
                         $"{text}\r\n质量: {quality}");
+
+
+                    SendTextMessage(
+                        //"!register",
+                        new CapturedEventArgs
+                        {
+                            Text = "register:" + text,
+                            Quality = -1,  // 表示这是提示信息，不是识别的号码
+                            MessageID = "?",
+                        });
                     return;
                 }
             }
@@ -832,6 +860,16 @@ namespace FingerprintCenter
                     Light("green");
                     // 结束 register 轮回
                     _eventRegisterFinished.Set();
+
+                    SendTextMessage(
+                        //"!register",
+                        new CapturedEventArgs
+                        {
+                            Text = "register:指纹扫入完成",
+                            Quality = -1,  // 表示这是提示信息，不是识别的号码
+                            MessageID = "?",
+                        });
+
                     return;
                 }
                 Light("green");
@@ -839,10 +877,19 @@ namespace FingerprintCenter
                     string text = "很好。还需要扫入 " + (3 - _register_template_list.Count) + " 个指纹";
                     Speaking(text,
                         $"{text}\r\n质量: {quality}");
+
+                    SendTextMessage(
+                        //"!register",
+                        new CapturedEventArgs
+                        {
+                            Text = "register:" + text,
+                            Quality = -1,  // 表示这是提示信息，不是识别的号码
+                            MessageID = "?",
+                        });
                 }
+
                 return;
             }
-
 
             // 指纹识别
             {
@@ -865,6 +912,8 @@ namespace FingerprintCenter
                         Text = strBarcode,
                         Score = score,
                         Quality = quality,
+                        MessageID = NewMessageID(),
+                        CreateTime = DateTime.Now,
                     };
                     Light("green");
                     TriggerCaptured(null, e1);
@@ -884,12 +933,36 @@ namespace FingerprintCenter
                         Score = score,
                         ErrorInfo = $"无法识别, 错误码={ret}",
                         Quality = quality,
+                        MessageID = NewMessageID(),
+                        CreateTime = DateTime.Now,
                     };
                     Light("red");
                     TriggerCaptured(null, e1);
                 }
             }
         }
+
+        static int _messageID = 1;
+
+        static string NewMessageID()
+        {
+            return _messageID++.ToString();
+        }
+
+        bool SendTextMessage(
+    // string barcode,
+    CapturedEventArgs e1)
+        {
+            // var is_text = barcode.StartsWith("!");
+            var now = DateTime.Now;
+
+            e1.MessageID = NewMessageID();
+            e1.CreateTime = now;
+            TriggerCaptured(null, e1);
+
+            return true;    // 已经发送
+        }
+
 
         // exception:
         //      可能会抛出异常。在 token 中断时
@@ -905,6 +978,15 @@ namespace FingerprintCenter
                 _exclude = StringUtil.SplitList(strExcludeBarcodes);
                 _cancelOfRegister = new CancellationTokenSource();
                 _eventRegisterFinished.Reset();
+                // 让前端可以显示开始文字
+                SendTextMessage(
+                    //"!register",
+                    new CapturedEventArgs
+                    {
+                        Text = "register:请扫入指纹。一共需要扫三遍",
+                        Quality = -1,  // 表示这是提示信息，不是识别的号码
+                        MessageID = "?",
+                    });
                 Speaking("请扫入指纹。一共需要扫三遍");
 
                 while (_eventRegisterFinished.WaitOne(TimeSpan.FromMilliseconds(500)) == false)
@@ -999,6 +1081,125 @@ namespace FingerprintCenter
                 _mode = save_mode;
             }
         }
+
+        #region 动态图像
+
+        // Image _palmImage = null;
+        byte[] _raw_image = null;
+        int _raw_width = 0;
+        int _raw_height = 0;
+        int[] _raw_points = new int[8];
+
+        object _syncRoot_image = new object();
+
+        private void PalmDriver_GetImage(object sender, GetImageEventArgs e)
+        {
+            // 取走一张图片
+            byte[] buffer = null;
+            int width = 0;
+            int height = 0;
+            int[] points = null;
+            lock (_syncRoot_image)
+            {
+                buffer = _raw_image;
+                _raw_image = null;
+
+                width = _raw_width;
+                height = _raw_height;
+
+                points = _raw_points;
+                _raw_points = null;
+            }
+
+            if (buffer != null)
+            {
+                // DateTime start = DateTime.Now;
+                e.Image = ToGrayBitmap(buffer, width, height);
+                // Debug.WriteLine($"ToGrayBitmap() 耗用时间: {(DateTime.Now - start)}");
+            }
+            else
+                e.Image = null;
+
+            e.Text = ToString(points);
+        }
+
+        static string ToString(int[] points)
+        {
+            if (points == null)
+                return null;
+            StringBuilder text = new StringBuilder();
+            foreach (var v in points)
+            {
+                if (text.Length > 0)
+                    text.Append(",");
+                text.Append(v.ToString());
+            }
+
+            return text.ToString();
+        }
+
+        // 设置图像(原始数据)
+        void SetImage(byte[] raw_buffer,
+            int width,
+            int height,
+            int[] points)
+        {
+            lock (_syncRoot_image)
+            {
+                _raw_image = raw_buffer;
+                _raw_width = width;
+                _raw_height = height;
+                _raw_points = points;
+            }
+        }
+
+        public static Bitmap ToGrayBitmap(byte[] rawValues, int width, int height)
+        {
+            //// 申请目标位图的变量，并将其内存区域锁定
+            Bitmap bmp = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
+            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, width, height),
+                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+
+            //// 获取图像参数
+            int stride = bmpData.Stride;  // 扫描线的宽度
+            int offset = stride - width;  // 显示宽度与扫描线宽度的间隙
+            IntPtr iptr = bmpData.Scan0;  // 获取bmpData的内存起始位置
+            int scanBytes = stride * height;   // 用stride宽度，表示这是内存区域的大小
+
+            //// 下面把原始的显示大小字节数组转换为内存中实际存放的字节数组
+            int posScan = 0, posReal = 0;   // 分别设置两个位置指针，指向源数组和目标数组
+            byte[] pixelValues = new byte[scanBytes];  //为目标数组分配内存
+            for (int x = 0; x < height; x++)
+            {
+                //// 下面的循环节是模拟行扫描
+                for (int y = 0; y < width; y++)
+                {
+                    pixelValues[posScan++] = rawValues[posReal++];
+                }
+                posScan += offset;  //行扫描结束，要将目标位置指针移过那段“间隙”
+            }
+
+            //// 用Marshal的Copy方法，将刚才得到的内存字节数组复制到BitmapData中
+            System.Runtime.InteropServices.Marshal.Copy(pixelValues, 0, iptr, scanBytes);
+            bmp.UnlockBits(bmpData);  // 解锁内存区域
+
+            //// 下面的代码是为了修改生成位图的索引表，从伪彩修改为灰度
+            ColorPalette tempPalette;
+            using (Bitmap tempBmp = new Bitmap(1, 1, PixelFormat.Format8bppIndexed))
+            {
+                tempPalette = tempBmp.Palette;
+            }
+            for (int i = 0; i < 256; i++)
+            {
+                tempPalette.Entries[i] = Color.FromArgb(i, i, i);
+            }
+            bmp.Palette = tempPalette;
+            //// 算法到此结束，返回结果
+            return bmp;
+        }
+
+        #endregion
+
 
 #if NO
         // 同步

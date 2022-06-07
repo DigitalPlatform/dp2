@@ -1660,6 +1660,26 @@ MessageBoxDefaultButton.Button1);
 
             StartOrStopRfidManager();
 
+#if NEWFINGER
+            // 2022/6/7
+            // 迁移以前的 fingerprintReaderUrl 到 palmprintReaderUrl
+            if (string.IsNullOrEmpty(this.PalmprintReaderUrl))
+            {
+                var old_url = this.AppInfo.GetString("fingerprint",
+                    "fingerPrintReaderUrl",
+                    "");
+                if (string.IsNullOrEmpty(old_url) == false)
+                {
+                    this.AppInfo.SetString("palmprint",
+                    "palmPrintReaderUrl",
+                    old_url);
+                    this.AppInfo.SetString("fingerprint",
+                    "fingerPrintReaderUrl",
+                    "");
+                }
+            }
+#endif
+
             // 2020/1/3
             StartOrStopPalmManager();
 
@@ -1772,13 +1792,13 @@ MessageBoxDefaultButton.Button1);
             {
                 string session_id = $"内务 {DateTime.Now.ToShortTimeString()}";
                 // Program.MainForm.OperHistory.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"掌纹监控任务启动") }</div>");
-                WriteInfoLog($"掌纹监控任务启动。session_id={session_id}");
+                WriteInfoLog($"{GetPalmName()}监控任务启动。session_id={session_id}");
 
                 _cancelPalmManager?.Cancel();
 
                 _cancelPalmManager = new CancellationTokenSource();
                 FingerprintManager.Base.ShortWaitTime = TimeSpan.FromMilliseconds(1);   // 2021/11/1
-                FingerprintManager.Base.Name = "掌纹中心";
+                FingerprintManager.Base.Name = $"{GetPalmName()}中心";
                 FingerprintManager.SessionID = session_id;
                 FingerprintManager.Url = this.PalmprintReaderUrl;
                 FingerprintManager.Touched += PalmprintManager_Touched;
@@ -1798,6 +1818,18 @@ MessageBoxDefaultButton.Button1);
                 FingerprintManager.Url = "";
                 FingerprintManager.Touched -= PalmprintManager_Touched;
             }
+        }
+
+        public bool IsFingerprint()
+        {
+            return ProcessManager.IsFingerprintUrl(this.PalmprintReaderUrl);
+        }
+
+        public string GetPalmName()
+        {
+            if (ProcessManager.IsFingerprintUrl(this.PalmprintReaderUrl))
+                return "指纹";
+            return "掌纹";
         }
 
 #if REMOVED
@@ -1848,25 +1880,43 @@ MessageBoxDefaultButton.Button1);
             {
                 var result = FingerprintManager.GetState("restart");
                 if (result.Value == -1)
-                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"重启掌纹中心出错: {result.ErrorInfo}") }</div>");
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"重启{GetPalmName()}中心出错: {result.ErrorInfo}") }</div>");
                 else
-                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"重启掌纹中心成功。重启完成可能需要一定时间，请耐心等待") }</div>");
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"重启{GetPalmName()}中心成功。重启完成可能需要一定时间，请耐心等待") }</div>");
             }
         }
 
         const string pamcenter_base_version = "1.1.3";   // "1.0.14";
+        const string fingerprint_base_version = "2.3.0";
+
         public void CheckPalmCenterVersion()
         {
             if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
             {
                 var result = FingerprintManager.GetVersion();
                 if (result.Value == -1)
-                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"获得掌纹中心版本号时出错: {result.ErrorInfo}") }</div>");
-                else
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"获得{GetPalmName()}中心版本号时出错: {result.ErrorInfo}") }</div>");
+                else if (this.IsFingerprint() == false)
                 {
                     if (StringUtil.CompareVersion(result.Version, pamcenter_base_version) < 0)
                     {
                         string error = $"当前连接的掌纹中心版本号太低(为 {result.Version})，请升级到 {pamcenter_base_version} 或以上版本";
+                        Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode(error) }</div>");
+                        _ = Task.Run(() =>
+                        {
+                            this.BeginInvoke((Action)(() =>
+                            {
+                                MessageBox.Show(this, error);
+                            }));
+                        });
+                    }
+                }
+                else
+                {
+                    // 检查指纹中心版本号
+                    if (StringUtil.CompareVersion(result.Version, fingerprint_base_version) < 0)
+                    {
+                        string error = $"当前连接的指纹中心版本号太低(为 {result.Version})，请升级到 {fingerprint_base_version} 或以上版本";
                         Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode(error) }</div>");
                         _ = Task.Run(() =>
                         {
@@ -1993,7 +2043,7 @@ MessageBoxDefaultButton.Button1);
             if (_palmprintForm != null)
                 _palmprintForm.DisableSendKey = false;
 
-            string text = $"重新启用掌纹输入";
+            string text = $"重新启用{GetPalmName()}输入";
             Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");
         }
 
@@ -2004,7 +2054,7 @@ MessageBoxDefaultButton.Button1);
             if (_palmprintForm != null)
                 _palmprintForm.DisableSendKey = true;
 
-            string text = $"临时禁用掌纹输入";
+            string text = $"临时禁用{GetPalmName()}输入";
             Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");
         }
 
@@ -2044,14 +2094,24 @@ MessageBoxDefaultButton.Button1);
                         ShortcutPath = "DigitalPlatform/dp2 V3/RFID中心",
                         MutexName = "{CF1B7B4A-C7ED-4DB8-B5CC-59A067880F92}"
                     });
-                if (string.IsNullOrEmpty(this.FingerprintReaderUrl) == false
+
+                if (
+#if NEWFINGER
+                    (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false
+                    && ProcessManager.IsFingerprintUrl(this.PalmprintReaderUrl))
+#else
+                    ||
+                    (string.IsNullOrEmpty(this.FingerprintReaderUrl) == false
                     && ProcessManager.IsIpcUrl(this.FingerprintReaderUrl))
+#endif
+                    )
                     infos.Add(new DigitalPlatform.IO.ProcessInfo
                     {
                         Name = "指纹中心",
                         ShortcutPath = "DigitalPlatform/dp2 V3/dp2-指纹中心",
                         MutexName = "{75FB942B-5E25-4228-9093-D220FFEDB33C}"
                     });
+
                 ProcessManager.Start(infos,
                     (info, text) =>
                     {
@@ -2061,6 +2121,13 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        /*
+        // 启动指纹监控任务。这个任务会不断尝试 GetMessage()
+        public void StartFingerprintTask()
+        {
+
+        }
+        */
 
         #endregion
 

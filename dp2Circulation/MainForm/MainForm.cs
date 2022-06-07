@@ -363,7 +363,8 @@ namespace dp2Circulation
 
             InitializeComponent();
 
-            FormClientInfo.CommunityModeChanged += (s, e) => {
+            FormClientInfo.CommunityModeChanged += (s, e) =>
+            {
                 SetTitle();
             };
 
@@ -446,6 +447,12 @@ namespace dp2Circulation
             }
 
             SetTitle();
+
+#if NEWFINGER
+            if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false
+                && this.IsFingerprint())
+                this.MenuItem_displayPalmprintDialog.Text = "指纹窗";
+#endif
 
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
@@ -1544,7 +1551,13 @@ Stack:
             string strOldMessagePassword = this.MessagePassword;
             bool bOldPrintLabelMode = this.PrintLabelMode;
 
-            string oldUrl = this.FaceReaderUrl + "|" + this.RfidCenterUrl + "|" + this.FingerprintReaderUrl;
+            string oldUrl = this.FaceReaderUrl + "|" + this.RfidCenterUrl + "|"
+#if NEWFINGER
+                + this.PalmprintReaderUrl
+#else
+                + this.FingerprintReaderUrl
+#endif
+                ;
 
             CfgDlg dlg = new CfgDlg();
 
@@ -1631,7 +1644,13 @@ Stack:
                 }
             }
 
-            string strUrl = this.FaceReaderUrl + "|" + this.RfidCenterUrl + "|" + this.FingerprintReaderUrl;
+            string strUrl = this.FaceReaderUrl + "|" + this.RfidCenterUrl + "|"
+#if NEWFINGER
+                + this.PalmprintReaderUrl
+#else
+                + this.FingerprintReaderUrl
+#endif
+                ;
             if (oldUrl != strUrl)
                 StartProcessManager();
         }
@@ -2302,7 +2321,7 @@ false);
             }
         }
 
-        #endregion
+#endregion
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
@@ -4021,7 +4040,7 @@ Stack:
             return -1;
         }
 
-        #region EnsureXXXForm ...
+#region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4309,7 +4328,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-        #endregion
+#endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -7665,10 +7684,10 @@ out strError);
             }
         }
 
-
         // 初始化指纹缓存
         private void MenuItem_initFingerprintCache_Click(object sender, EventArgs e)
         {
+#if !NEWFINGER
             ReaderSearchForm form = new ReaderSearchForm();
             form.FingerPrintMode = true;
             form.MdiParent = this;
@@ -7686,6 +7705,7 @@ out strError);
         ERROR1:
             MessageBox.Show(this, strError);
             form.Close();
+#endif
         }
 
 #if REMOVED
@@ -7759,6 +7779,7 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
             }
         }
 
+#if !NEWFINGER
         /// <summary>
         /// 指纹阅读器 URL
         /// </summary>
@@ -7773,6 +7794,7 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
                     "");  // 常用值 "ipc://FingerprintChannel/FingerprintServer"
             }
         }
+#endif
 
         /// <summary>
         /// 掌纹阅读器 URL
@@ -8111,7 +8133,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-        #region 序列号机制
+#region 序列号机制
 
         bool _testMode = false;
 
@@ -8464,7 +8486,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
 #if REMOVED
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
@@ -8593,7 +8615,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-        #region servers.xml
+#region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -8934,8 +8956,9 @@ Keys keyData)
             return null;
         }
 
-        #endregion // servers.xml
+#endregion // servers.xml
 
+#if !NEWFINGER
         void EnableFingerprintSendKey(bool enable)
         {
             if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
@@ -8960,6 +8983,41 @@ Keys keyData)
                 MyForm.EndFingerprintChannel(channel);
             }
         }
+#endif
+
+        /*
+        public DigitalPlatform.Interfaces.GetMessageResult FingerprintGetMessage(string style)
+        {
+            if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
+                return null;
+
+            FingerprintChannel channel = MyForm.StartFingerprintChannel(
+                this.FingerprintReaderUrl,
+                out string strError);
+            if (channel == null)
+                return new DigitalPlatform.Interfaces.GetMessageResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"StartFingerprintChannel error: {strError}"
+                };
+            try
+            {
+                return channel?.Object?.GetMessage(style);
+            }
+            catch(Exception ex)
+            {
+                return new DigitalPlatform.Interfaces.GetMessageResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"FingerprintGetMessage() 异常: {ex.Message}"
+                };
+            }
+            finally
+            {
+                MyForm.EndFingerprintChannel(channel);
+            }
+        }
+        */
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
@@ -8972,18 +9030,10 @@ Keys keyData)
         {
             _isActivated = true;
 
+#if !NEWFINGER
             // fingerprint enableSendkey
             // this.Speak("activated");
             EnableFingerprintSendKey(true);
-#if NO
-            foreach (Form form in this.OwnedForms)
-            {
-                if (form is LineLayerForm)
-                {
-                    if (form.TopMost == false)
-                    form.TopMost = true;
-                }
-            }
 #endif
 
             // 激活 RfidManager
@@ -9035,7 +9085,7 @@ Keys keyData)
 #endif
         }
 
-        #region 消息过滤
+#region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -9065,7 +9115,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名
@@ -10005,6 +10055,10 @@ out strError);
             {
                 _palmprintForm.Activate();
             }
+
+#if NEWFINGER
+            _palmprintForm.Text = $"{GetPalmName()}识别";
+#endif
 
             this.MenuItem_displayPalmprintDialog.Checked = true;
         }

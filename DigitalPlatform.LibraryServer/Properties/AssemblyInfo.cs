@@ -325,4 +325,4 @@ ItemCanReturn()
 //		3.117 (2022/5/18) 消除 SetSystemParameter() API 中一处 sessioninfo = null 的 bug
 //		3.118 (2022/5/20) library.xml 增加 fileShare 元素定义共享文件夹
 //		3.119 (2022/5/24) Return() API 执行 "transfer" 动作时，如果册记录中没有 currentLocation 元素，本次请求修改的字符串中包含星号(表示使用原有内容)，会报错
-//		3.120 (2022/5/27) SetReaderInfo() API 增加 "instantlyCheckOverdue" 功能
+//		3.120 (2022/5/27) SetReaderInfo() API 增加 "notifyOverdue" 和 "notifyRecall" 功能

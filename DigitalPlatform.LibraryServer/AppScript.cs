@@ -1192,7 +1192,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 执行脚本函数 NotifyReader
         // parameters:
-        //      strStyle    如果包含 instantly，表示立即发出通知
+        //      strStyle    如果包含 notifyOverdue，表示立即发出超期通知。如果包含 notifyRecall，表示立即发出召回通知
         // return:
         //      -2  not found script
         //      -1  出错
@@ -1277,7 +1277,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 早绑定
                 // parameters:
-                //      strStyle    如果包含 instantly，表示立即发出通知
+                //      strStyle    如果包含 notifyOverdue，表示立即发出超期通知。如果包含 notifyRecall，表示立即发出召回通知
                 nResultValue = host.NotifyReader(
                     readerdom,
                     calendar,
@@ -3174,7 +3174,7 @@ strRoom1);
         // 超期提醒
         // 新版本，可以处理超期前提醒
         // parameters:
-        //      strStyle    如果包含 instantly，表示立即发出通知
+        //      strStyle    如果包含 notifyOverdue，表示立即发出超期通知。如果包含 notifyRecall，表示立即发出召回通知
         // retun:
         //      -1  出错
         //      0   没有必要发送
@@ -3235,14 +3235,27 @@ strRoom1);
             if (nodes.Count == 0)
                 return 0;
 
-            var instantly = StringUtil.IsInList("instantly", strStyle);
+            var instantlyNotifyOverdue = StringUtil.IsInList("notifyOverdue", strStyle);
+
+            // 是否立即进行召回？
+            var instantlyNotifyRecall = StringUtil.IsInList("notifyRecall", strStyle);
+
+            var recall_reason = StringUtil.GetParameterByPrefix(strStyle, "reason");
+            if (string.IsNullOrEmpty(recall_reason) == false)
+                recall_reason = StringUtil.UnescapeString(recall_reason);
+            if (instantlyNotifyRecall && string.IsNullOrEmpty(recall_reason))
+                recall_reason = "业务需要";
 
             string strLink = "<LINK href='" + App.OpacServerUrl + "/readerhtml.css' type='text/css' rel='stylesheet'>";
             strResult = "<html><head>" + strLink + "</head><body>";
 
             string strName = DomUtil.GetElementText(readerdom.DocumentElement,
     "name");
-            strResult += "尊敬的 " + strName + " 您好！<br/><br/>您在图书馆借阅的下列图书：";
+            strResult += "尊敬的 " + strName + " 您好！<br/><br/>";
+
+            if (instantlyNotifyRecall)
+                strResult += $"因 {recall_reason}，图书馆提醒您尽快归还下列书刊：";
+            else strResult += "您在图书馆借阅的下列书刊：";
 
             // 借阅的册
             // strResult += "<br/>借阅信息<br/>";
@@ -3315,10 +3328,14 @@ strRoom1);
                     strBodyType,
                     strHistory);
 
-                if (instantly)
+                if (instantlyNotifyOverdue || instantlyNotifyRecall == true)
                     strChars = new string('n', strChars.Length);
 
-                if (bOverdue == true)
+                if (instantlyNotifyRecall)
+                {
+                    nNormalCount++;
+                }
+                else if (bOverdue == true)
                 {
                     strColor = "bgcolor=#ff9999";	// 超期
 
@@ -3347,7 +3364,7 @@ strRoom1);
                     nOverdueCount++;
                 }
                 else if (string.IsNullOrEmpty(App.NotifyDef) == false
-                    && instantly == false)
+                    && instantlyNotifyOverdue == false && instantlyNotifyRecall == false)
                 {
                     // 检查超期前的通知点
 
@@ -3508,7 +3525,7 @@ strRoom1);
          * */
         // MQ 通知读者超期的版本。供 NotifyReader() 的重载版本必要时引用
         // parameters:
-        //      strStyle    如果包含 instantly，表示立即发出通知
+        //      strStyle    如果包含 notifyOverdue，表示立即发出超期通知。如果包含 notifyRecall，表示立即发出召回通知
         public int NotifyReaderMQ(
             XmlDocument readerdom,
             Calendar calendar,
@@ -3537,17 +3554,17 @@ strRoom1);
                 return 0;
             }
 
-            var recall_reason = StringUtil.GetParameterByPrefix(strStyle, "recall");
-            // 是否为“召回”通知类型。false 表示为“超期通知”
-            bool recall = recall_reason != null;
-            if (recall && string.IsNullOrEmpty(recall_reason))
-                recall_reason = "业务需要";
+            // 是否立即发出超期通知？
+            var instantlyNotifyOverdue = StringUtil.IsInList("notifyOverdue", strStyle);
 
+            // 是否立即进行召回？
+            var instantlyNotifyRecall = StringUtil.IsInList("notifyRecall", strStyle);
+
+            var recall_reason = StringUtil.GetParameterByPrefix(strStyle, "reason");
             if (string.IsNullOrEmpty(recall_reason) == false)
                 recall_reason = StringUtil.UnescapeString(recall_reason);
-            
-            // 是否立即进行超期通知或召回？
-            var instantly = StringUtil.IsInList("instantly", strStyle);
+            if (instantlyNotifyRecall && string.IsNullOrEmpty(recall_reason))
+                recall_reason = "业务需要";
 
             // 表达通知信息的 XML 记录
             XmlDocument output_dom = new XmlDocument();
@@ -3556,14 +3573,14 @@ strRoom1);
             string strName = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
 
-            DomUtil.SetElementText(output_dom.DocumentElement, "type", recall ? "召回" : "超期通知");
+            DomUtil.SetElementText(output_dom.DocumentElement, "type", instantlyNotifyRecall ? "召回" : "超期通知");
             XmlElement items = output_dom.CreateElement("items");
             output_dom.DocumentElement.AppendChild(items);
 
             string strRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
             bool bTestNotify = (StringUtil.IsInList("_testoverduenotify", strRights) == true);
 
-            if (recall)
+            if (instantlyNotifyRecall)
                 strResult += $"因 {recall_reason}，图书馆提醒您尽快归还下列书刊：\n";
             else
                 strResult += "您借阅的下列书刊：\n";
@@ -3651,7 +3668,7 @@ strRoom1);
                     strBodyType,
                     strHistory);
 
-                if (instantly)
+                if (instantlyNotifyOverdue || instantlyNotifyRecall)
                 {
                     strChars = new string('n', strChars.Length);
                     debugInfo?.AppendLine($"(instantly) GetNotifiedChars() strBodyType='{strBodyType}', strHistory='{strHistory}', return strChars='{strChars}'");
@@ -3660,7 +3677,7 @@ strRoom1);
                     debugInfo?.AppendLine($"GetNotifiedChars() strBodyType='{strBodyType}', strHistory='{strHistory}', return strChars='{strChars}'");
 
                 debugInfo?.AppendLine($"bOverdue={bOverdue}");
-                if (recall)
+                if (instantlyNotifyRecall)
                 {
                     nNormalCount++;
                 }
@@ -3697,7 +3714,7 @@ strRoom1);
                     nOverdueCount++;
                 }
                 else if (string.IsNullOrEmpty(App.NotifyDef) == false
-                    && instantly == false)
+                    && instantlyNotifyOverdue == false && instantlyNotifyRecall == false)
                 {
                     // 检查超期前的通知点
                     debugInfo?.AppendLine($"检查“即将超期”情况。App.NotifyDef='{App.NotifyDef}'");
@@ -3798,7 +3815,7 @@ strRoom1);
                 // strResult += (i + 1).ToString() + ") " 
                 strResult += strSummary + " ";
 
-                if (recall)
+                if (instantlyNotifyRecall)
                 {
                     strResult += "\n";
                 }
@@ -3893,7 +3910,7 @@ if (nNormalCount > 0)
 
         // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用
         // parameters:
-        //      strStyle    如果包含 instantly，表示立即发出通知
+        //      strStyle    如果包含 notifyOverdue，表示立即发出超期通知。如果包含 notifyRecall，表示立即发出召回通知
         public int NotifyReaderSMS(
             XmlDocument readerdom,
             Calendar calendar,
@@ -3921,11 +3938,25 @@ if (nNormalCount > 0)
             if (nodes.Count == 0)
                 return 0;
 
-            var instantly = StringUtil.IsInList("instantly", strStyle);
+            // 是否立即发出超期通知？
+            var instantlyNotifyOverdue = StringUtil.IsInList("notifyOverdue", strStyle);
+
+            // 是否立即进行召回？
+            var instantlyNotifyRecall = StringUtil.IsInList("notifyRecall", strStyle);
+
+            var recall_reason = StringUtil.GetParameterByPrefix(strStyle, "reason");
+            if (string.IsNullOrEmpty(recall_reason) == false)
+                recall_reason = StringUtil.UnescapeString(recall_reason);
+            if (instantlyNotifyRecall && string.IsNullOrEmpty(recall_reason))
+                recall_reason = "业务需要";
 
             string strName = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
-            strResult += "您借阅的下列书刊：\n";
+
+            if (instantlyNotifyRecall)
+                strResult += $"因 {recall_reason}，图书馆提醒您尽快归还下列书刊：\n";
+            else
+                strResult += "您借阅的下列书刊：\n";
 
             // 借阅的册
             // for (int i = 0; i < nodes.Count; i++)
@@ -3984,10 +4015,14 @@ if (nNormalCount > 0)
                     strBodyType,
                     strHistory);
 
-                if (instantly)
+                if (instantlyNotifyOverdue || instantlyNotifyRecall)
                     strChars = new string('n', strChars.Length);
 
-                if (bOverdue == true)
+                if (instantlyNotifyRecall)
+                {
+                    nNormalCount++;
+                }
+                else if (bOverdue == true)
                 {
                     // 看看是不是已经通知过
                     if (string.IsNullOrEmpty(strChars) == false
@@ -4013,7 +4048,7 @@ if (nNormalCount > 0)
                     nOverdueCount++;
                 }
                 else if (string.IsNullOrEmpty(App.NotifyDef) == false
-                    && instantly == false)
+                    && instantlyNotifyOverdue == false && instantlyNotifyRecall == false)
                 {
                     // 检查超期前的通知点
 
@@ -4090,9 +4125,16 @@ if (nNormalCount > 0)
 
                 // strResult += (i + 1).ToString() + ") " 
                 strResult += strSummary + " ";
-                // strResult += "借阅日期: " + DateTimeUtil.LocalDate(strBorrowDate) + " ";
-                strResult += "应还日期: " + timeReturning.ToString("d") + " ";
-                strResult += strOverDue + "\n";
+
+                if (instantlyNotifyRecall)
+                {
+                    strResult += "\n";
+                }
+                else
+                {
+                    strResult += "应还日期: " + timeReturning.ToString("d") + " ";
+                    strResult += strOverDue + "\n";
+                }
             }
 
             /*
