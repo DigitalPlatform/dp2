@@ -43,6 +43,9 @@ namespace dp2Circulation
     /// </summary>
     public partial class ReaderInfoForm : MyForm
     {
+        // 和 form_closed 关联
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         int m_nChannelInUse = 0; // >0表示通道正在被使用
 
         Commander commander = null;
@@ -407,15 +410,19 @@ namespace dp2Circulation
                     if (result != DialogResult.Yes)
                     {
                         e.Cancel = true;
-                        return;
                     }
                 }));
+                if (e.Cancel == true)   // 2022/6/10
+                    return;
             }
 
         }
 
         private void ReaderInfoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            // 2022/6/10
+            _cancel.Cancel();
+
             this.commander.Destroy();
 
             if (this.m_webExternalHost != null)
@@ -5720,7 +5727,7 @@ MessageBoxDefaultButton.Button2);
 
             if (string.IsNullOrEmpty(Program.MainForm.PalmprintReaderUrl) == true)
             {
-                strError = "尚未配置 掌纹阅读器URL 系统参数，无法更新掌纹高速缓存";
+                strError = $"尚未配置 {Program.MainForm.GetPalmName()}阅读器URL 系统参数，无法更新{Program.MainForm.GetPalmName()}高速缓存";
                 return -1;
             }
 
@@ -5768,7 +5775,7 @@ MessageBoxDefaultButton.Button2);
 
             if (string.IsNullOrEmpty(Program.MainForm.PalmprintReaderUrl) == true)
             {
-                strError = "尚未配置 掌纹阅读器URL 系统参数，无法读取掌纹信息";
+                strError = $"尚未配置 {Program.MainForm.GetPalmName()}阅读器URL 系统参数，无法读取{Program.MainForm.GetPalmName()}信息";
                 goto ERROR1;
             }
 
@@ -5836,7 +5843,7 @@ MessageBoxDefaultButton.Button2);
 
             if (string.IsNullOrEmpty(Program.MainForm.PalmprintReaderUrl) == true)
             {
-                strError = "尚未配置 掌纹阅读器URL 系统参数，无法读取掌纹信息";
+                strError = $"尚未配置 {Program.MainForm.GetPalmName()}阅读器URL 系统参数，无法读取{Program.MainForm.GetPalmName()}信息";
                 goto ERROR1;
             }
 
@@ -7482,225 +7489,244 @@ MessageBoxDefaultButton.Button1);
         async Task registerPalmprintAsync(bool bPractice)
         {
             string strError = "";
-
             string caption = Program.MainForm.GetPalmName();
 
-            CancellationTokenSource _cancel = new CancellationTokenSource();
-
-            RegisterPalmprintDialog dlg = new RegisterPalmprintDialog();
-            dlg.Text = $"登记{caption}";
-            dlg.FormClosed += (s, e) =>
+            using (CancellationTokenSource cancel = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token))
             {
+                var token = cancel.Token;
+
+                RegisterPalmprintDialog dlg = new RegisterPalmprintDialog();
+                dlg.Text = $"登记{caption}";
+                dlg.FormClosed += (s, e) =>
                 {
-                    if (MainForm.AppInfo != null)
-                        MainForm.AppInfo.UnlinkFormState(dlg);
-                }
-                _cancel.Cancel();
-                _ = Task.Run(async () =>
+                    {
+                        if (MainForm.AppInfo != null)
+                            MainForm.AppInfo.UnlinkFormState(dlg);
+                    }
+                    cancel.Cancel();
+                    _ = Task.Run(async () =>
+                    {
+                        await CancelReadPalmprintString();
+                    });
+                };
+                token.Register(() =>
                 {
-                    await CancelReadPalmprintString();
+                    this.Invoke((Action)(() =>
+                    {
+                        dlg.Close();
+                    }));
                 });
-            };
-            // dlg.StartPosition = FormStartPosition.CenterScreen;
-            MainForm.AppInfo.LinkFormState(dlg, "RegisterPalmprintDialog_state");
-            dlg.Show(this);
-            dlg.Message = $"等待扫入{caption} ...";
+                // dlg.StartPosition = FormStartPosition.CenterScreen;
+                MainForm.AppInfo.LinkFormState(dlg, "RegisterPalmprintDialog_state");
+                dlg.Show(this);
+                dlg.Message = $"等待扫入{caption} ...";
 
-            FingerprintManager.Touched += PalmprintManager_Touched;
+                FingerprintManager.Touched += PalmprintManager_Touched;
 
-            this.ShowMessage($"等待扫描{caption} ...");
-            this.EnableControls(false);
+                this.ShowMessage($"等待扫描{caption} ...");
+                this.EnableControls(false);
 
-            // TODO: 关联到 form 的 cancel 对象
-            CancellationTokenSource cancel = new CancellationTokenSource();
-            var token = cancel.Token;
-            var task = Task.Run(async () =>
-            {
-                // 暂停掌纹图像对话框的显示
-                MainForm.PausePalmprintDisplay();
+                var task = Task.Run(async () =>
+                {
+                    // 暂停掌纹图像对话框的显示
+                    MainForm.PausePalmprintDisplay();
+                    try
+                    {
+                        while (token.IsCancellationRequested == false)
+                        {
+                            // 2021/11/1
+                            if (FingerprintManager.Pause == true)
+                            {
+                                dlg.DisplayError("暂停显示", Color.DarkGray);
+                                await Task.Delay(TimeSpan.FromSeconds(1), token);
+                                continue;
+                            }
+
+                            var result = FingerprintManager.GetImage("wait:1000,rect");
+                            if (result.ImageData == null)
+                            {
+                                Thread.Sleep(50);
+                                continue;
+                            }
+
+                            var image = FromBytes(result.ImageData);
+                            if (string.IsNullOrEmpty(result.Text) == false)
+                                Charging.PalmprintForm.PaintLines(image, result.Text);
+                            dlg.Invoke(new Action(() =>
+                            {
+                                dlg.Image = image;
+                            }));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // 写入错误日志
+                        MainForm.WriteErrorLog($"显示{caption}图像出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                    finally
+                    {
+                        // 恢复掌纹图像对话框的显示
+                        MainForm.ContinuePalmprintDisplay();
+                    }
+                });
+
                 try
                 {
-                    while (token.IsCancellationRequested == false)
+                    NormalResult getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "");
+                    if (getstate_result.Value == -1)
                     {
-                        // 2021/11/1
-                        if (FingerprintManager.Pause == true)
-                        {
-                            dlg.DisplayError("暂停显示", Color.DarkGray);
-                            await Task.Delay(TimeSpan.FromSeconds(1), token);
-                            continue;
-                        }
-
-                        var result = FingerprintManager.GetImage("wait:1000,rect");
-                        if (result.ImageData == null)
-                        {
-                            Thread.Sleep(50);
-                            continue;
-                        }
-
-                        var image = FromBytes(result.ImageData);
-                        if (string.IsNullOrEmpty(result.Text) == false)
-                            Charging.PalmprintForm.PaintLines(image, result.Text);
-                        dlg.Invoke(new Action(() =>
-                        {
-                            dlg.Image = image;
-                        }));
+                        strError = $"{caption}中心当前状态不正确：{getstate_result.ErrorInfo}";
+                        goto ERROR1;
                     }
-                }
-                catch (Exception ex)
-                {
-                    // 写入错误日志
-                    MainForm.WriteErrorLog($"显示{caption}图像出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                }
-                finally
-                {
-                    // 恢复掌纹图像对话框的显示
-                    MainForm.ContinuePalmprintDisplay();
-                }
-            });
 
-            try
-            {
-                NormalResult getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "");
-                if (getstate_result.Value == -1)
-                {
-                    strError = $"{caption}中心当前状态不正确：{getstate_result.ErrorInfo}";
-                    goto ERROR1;
-                }
+                    // 2022/6/9
+                    strError = Program.MainForm.CheckPalmCenterVersion();
+                    if (strError != null)
+                    {
+                        goto ERROR1;
+                    }
 
-                getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "getLibraryServerUID");
-                if (getstate_result.Value == -1)
-                {
-                    strError = getstate_result.ErrorInfo;
-                    goto ERROR1;
-                }
-                else if (getstate_result.ErrorCode != null &&
-                    getstate_result.ErrorCode != Program.MainForm.ServerUID)
-                {
-                    strError = $"{caption}中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行{caption}登记";
-                    goto ERROR1;
-                }
+                    getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "getLibraryServerUID");
+                    if (getstate_result.Value == -1)
+                    {
+                        strError = getstate_result.ErrorInfo;
+                        goto ERROR1;
+                    }
+                    else if (getstate_result.ErrorCode != null &&
+                        getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                    {
+                        strError = $"{caption}中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行{caption}登记";
+                        goto ERROR1;
+                    }
 
-                // 暂停识别掌纹
-                getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "pauseCapture");
-                if (getstate_result.Value == -1)
-                {
-                    strError = getstate_result.ErrorInfo;
-                    goto ERROR1;
-                }
+                    // 暂停识别掌纹
+                    getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "pauseCapture");
+                    if (getstate_result.Value == -1)
+                    {
+                        strError = getstate_result.ErrorInfo;
+                        goto ERROR1;
+                    }
 
-            // TODO: 练习模式需要判断版本 2.2 以上
+                // TODO: 练习模式需要判断版本 2.2 以上
 
-            REDO:
-                string exclude = this.readerEditControl1.Barcode;
-                if (bPractice)
-                    exclude = "!practice";
+                REDO:
+                    string exclude = this.readerEditControl1.Barcode;
+                    if (bPractice)
+                        exclude = "!practice";
 #if NEWFINGER
-                if (Program.MainForm.IsFingerprint())
-                    exclude += ",!disableUI";
+                    if (Program.MainForm.IsFingerprint())
+                        exclude += ",!disableUI";
 #endif
-                GetFingerprintStringResult result = await ReadPalmprintString(
-                    exclude);
-                /*
-                if (result.Value == -1)
-                {
-                    DialogResult temp_result = MessageBox.Show(this,
-result.ErrorInfo + "\r\n\r\n是否重试?",
-"ReaderInfoForm",
-MessageBoxButtons.RetryCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                    if (temp_result == DialogResult.Retry)
-                        goto REDO;
-                }
-                */
+                    GetFingerprintStringResult result = await ReadPalmprintString(
+                        exclude);
+                    /*
+                    if (result.Value == -1)
+                    {
+                        DialogResult temp_result = MessageBox.Show(this,
+    result.ErrorInfo + "\r\n\r\n是否重试?",
+    "ReaderInfoForm",
+    MessageBoxButtons.RetryCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                        if (temp_result == DialogResult.Retry)
+                            goto REDO;
+                    }
+                    */
 
-                if (result.Value == -1 || result.Value == 0)
-                {
-                    strError = result.ErrorInfo;
-                    goto ERROR1;
-                }
+                    if (result.Value == -1 || result.Value == 0)
+                    {
+                        strError = result.ErrorInfo;
+                        goto ERROR1;
+                    }
 
-                this.Invoke((Action)(() =>
-                {
-                    dlg.CancelButtonText = "关闭";
-                    dlg.ColorMode = "green";
-                }));
+                    this.Invoke((Action)(() =>
+                    {
+                        dlg.CancelButtonText = "关闭";
+                        dlg.ColorMode = "green";
+                    }));
 
 #if NO
                 strFingerprint = "12345";   // test
                 strVersion = "test-version";
 #endif
 
-                if (bPractice == false)
-                {
-                    if (Program.MainForm.IsFingerprint() == false)
+                    if (bPractice == false)
                     {
-                        this.readerEditControl1.PalmprintFeature = result.Fingerprint;   // strFingerprint;
-                        this.readerEditControl1.PalmprintFeatureVersion = result.Version;    // strVersion;
-                        this.readerEditControl1.Changed = true;
-                        AddImportantField("palmprint");
+                        if (Program.MainForm.IsFingerprint() == false)
+                        {
+                            this.readerEditControl1.PalmprintFeature = result.Fingerprint;   // strFingerprint;
+                            this.readerEditControl1.PalmprintFeatureVersion = result.Version;    // strVersion;
+                            this.readerEditControl1.Changed = true;
+                            AddImportantField("palmprint");
+                        }
+                        else
+                        {
+                            this.readerEditControl1.FingerprintFeature = result.Fingerprint;
+                            this.readerEditControl1.FingerprintFeatureVersion = result.Version;
+                            this.readerEditControl1.Changed = true;
+                            AddImportantField("fingerprint");
+                        }
                     }
-                    else
+
+                    try
                     {
-                        this.readerEditControl1.FingerprintFeature = result.Fingerprint;
-                        this.readerEditControl1.FingerprintFeatureVersion = result.Version;
-                        this.readerEditControl1.Changed = true;
-                        AddImportantField("fingerprint");
+                        // await Task.Delay(TimeSpan.FromSeconds(5), _cancel.Token);
+                        await Task.Delay(TimeSpan.FromSeconds(5), cancel.Token);
                     }
-                }
-
-                try
-                {
-                    // await Task.Delay(TimeSpan.FromSeconds(5), _cancel.Token);
-                    await Task.Delay(TimeSpan.FromSeconds(5), _cancel.Token);
-                }
-                catch
-                {
-
-                }
-            }
-            finally
-            {
-                {
-                    // 恢复识别掌纹
-                    var getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "continueCapture");
-                    if (getstate_result.Value == -1)
+                    catch
                     {
-                        MainForm.WriteErrorLog($"registerPalmprintAsync() 中恢复识别{caption}时出错: {getstate_result.ErrorInfo}");
+
                     }
                 }
-
-                this.EnableControls(true);
-                this.ClearMessage();
-
-                FingerprintManager.Touched -= PalmprintManager_Touched;
-
-                cancel.Cancel();
-                dlg.Close();
-            }
-
-            // 显示获取掌纹中途的信息
-            void PalmprintManager_Touched(object sender, TouchedEventArgs e)
-            {
-                // this.ShowMessage(e.Message);
-
-                // 此处不接受除提示外的其他消息
-                if (e.Quality != -1)
-                    return;
-
-                string type = "";
-                var text = e.Message;
-                if (text.Contains(":"))
+                finally
                 {
-                    var parts = StringUtil.ParseTwoPart(text, ":");
-                    type = parts[0];
-                    text = parts[1];
+                    {
+                        // 恢复识别掌纹
+                        var getstate_result = await FingerprintGetState(Program.MainForm.PalmprintReaderUrl, "continueCapture");
+                        if (getstate_result.Value == -1)
+                        {
+                            MainForm.WriteErrorLog($"registerPalmprintAsync() 中恢复识别{caption}时出错: {getstate_result.ErrorInfo}");
+                        }
+                    }
+
+                    try
+                    {
+                        this.EnableControls(true);
+                    }
+                    catch
+                    {
+
+                    }
+                    this.ClearMessage();
+
+                    FingerprintManager.Touched -= PalmprintManager_Touched;
+
+                    cancel.Cancel();
+                    dlg.Close();
                 }
 
-                if (type == "register")
+                // 显示获取掌纹中途的信息
+                void PalmprintManager_Touched(object sender, TouchedEventArgs e)
                 {
-                    dlg.Invoke((Action)(() =>
+                    // this.ShowMessage(e.Message);
+
+                    // 此处不接受除提示外的其他消息
+                    if (e.Quality != -1)
+                        return;
+
+                    string type = "";
+                    var text = e.Message;
+                    if (text.Contains(":"))
                     {
+                        var parts = StringUtil.ParseTwoPart(text, ":");
+                        type = parts[0];
+                        text = parts[1];
+                    }
+
+                    if (type == "register")
+                    {
+                        dlg.Invoke((Action)(() =>
+                        {
 #if REMOVED
                     // 2021/10/28
                     if (e.Message.StartsWith("!image")
@@ -7722,13 +7748,14 @@ MessageBoxDefaultButton.Button1);
                     }
                     else
 #endif
-                        dlg.Message = text; //  e.Message;
-                    }));
+                            dlg.Message = text; //  e.Message;
+                        }));
+                    }
                 }
             }
 
             // Program.MainForm.Speak("掌纹信息获取成功");
-            Program.MainForm.StatusBarMessage = "掌纹信息获取成功";
+            Program.MainForm.StatusBarMessage = $"{caption}信息获取成功";
             return;
         ERROR1:
             Program.MainForm.StatusBarMessage = strError;

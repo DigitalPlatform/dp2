@@ -216,6 +216,7 @@ out strError);
                     }
                     else
                     {
+                        strError = $"上传前检查目标文件过程中出错: {strError}";   // 2022/6/8
                         // 探测过程通讯或其他出错
                         if (prompt_func != null)
                         {

@@ -113,8 +113,11 @@ namespace DigitalPlatform.RFID
 
         public static void Clear()
         {
-            Base.Clear();
-            Base2?.Clear();
+            //Base.Clear();
+            _ = Base.ClearAsync();
+
+            // Base2?.Clear();
+            _ = Base2?.ClearAsync();
         }
 
         public static string Url
@@ -638,7 +641,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                await Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -714,7 +719,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -750,7 +757,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();   // ??
+                // Base.Clear();   // ??
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -786,7 +795,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -822,7 +833,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -860,7 +873,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -996,7 +1011,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1032,7 +1049,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1068,7 +1087,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1103,7 +1124,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1139,7 +1162,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1174,7 +1199,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1211,7 +1238,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1251,7 +1280,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1291,7 +1322,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -1333,7 +1366,9 @@ new SetErrorEventArgs
             }
             catch (Exception ex)
             {
-                Base.Clear();
+                // Base.Clear();
+                _ = Base.ClearAsync();
+
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {

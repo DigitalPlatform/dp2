@@ -575,6 +575,21 @@ Exception rethrown at [0]:
                     ErrorCode = Program.MainForm.ServerUID,
                 };
 
+            // 2022/6/9
+            if (style == "pauseCapture")
+            {
+                Program.FingerPrint.CapturePaused = true;
+                return new NormalResult();
+            }
+
+            // 2022/6/9
+            if (style == "continueCapture")
+            {
+                Program.FingerPrint.CapturePaused = false;
+                return new NormalResult();
+            }
+
+
             if (ClientInfo.ErrorState == "normal")
                 return new NormalResult
                 {

@@ -138,7 +138,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(960, 39);
+            this.menuStrip1.Size = new System.Drawing.Size(960, 38);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -391,7 +391,7 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolButton_stop,
             this.toolStripDropDownButton_stopAll});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 39);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 38);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(960, 34);
             this.toolStrip1.TabIndex = 1;
@@ -461,11 +461,11 @@
             this.tabControl_main.Controls.Add(this.tabPage_operHistory);
             this.tabControl_main.Controls.Add(this.tabPage_cfg);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl_main.Location = new System.Drawing.Point(0, 73);
+            this.tabControl_main.Location = new System.Drawing.Point(0, 72);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(960, 431);
+            this.tabControl_main.Size = new System.Drawing.Size(960, 432);
             this.tabControl_main.TabIndex = 3;
             // 
             // tabPage_start
@@ -476,7 +476,7 @@
             this.tabPage_start.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_start.Name = "tabPage_start";
             this.tabPage_start.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_start.Size = new System.Drawing.Size(952, 390);
+            this.tabPage_start.Size = new System.Drawing.Size(952, 391);
             this.tabPage_start.TabIndex = 0;
             this.tabPage_start.Text = "开始";
             this.tabPage_start.UseVisualStyleBackColor = true;
@@ -498,7 +498,7 @@
             // splitContainer_start.Panel2
             // 
             this.splitContainer_start.Panel2.Controls.Add(this.label_message);
-            this.splitContainer_start.Size = new System.Drawing.Size(939, 308);
+            this.splitContainer_start.Size = new System.Drawing.Size(939, 309);
             this.splitContainer_start.SplitterDistance = 252;
             this.splitContainer_start.SplitterWidth = 15;
             this.splitContainer_start.TabIndex = 5;
@@ -509,7 +509,7 @@
             this.pictureBox_fingerprint.Location = new System.Drawing.Point(0, 0);
             this.pictureBox_fingerprint.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox_fingerprint.Name = "pictureBox_fingerprint";
-            this.pictureBox_fingerprint.Size = new System.Drawing.Size(252, 308);
+            this.pictureBox_fingerprint.Size = new System.Drawing.Size(252, 309);
             this.pictureBox_fingerprint.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox_fingerprint.TabIndex = 0;
             this.pictureBox_fingerprint.TabStop = false;
@@ -521,14 +521,14 @@
             this.label_message.Location = new System.Drawing.Point(0, 0);
             this.label_message.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(672, 308);
+            this.label_message.Size = new System.Drawing.Size(672, 309);
             this.label_message.TabIndex = 0;
             this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button_cancel
             // 
             this.button_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cancel.Location = new System.Drawing.Point(783, 325);
+            this.button_cancel.Location = new System.Drawing.Point(783, 326);
             this.button_cancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(160, 63);
@@ -544,7 +544,7 @@
             this.tabPage_operHistory.Location = new System.Drawing.Point(4, 37);
             this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_operHistory.Name = "tabPage_operHistory";
-            this.tabPage_operHistory.Size = new System.Drawing.Size(952, 390);
+            this.tabPage_operHistory.Size = new System.Drawing.Size(952, 391);
             this.tabPage_operHistory.TabIndex = 2;
             this.tabPage_operHistory.Text = "操作历史";
             this.tabPage_operHistory.UseVisualStyleBackColor = true;
@@ -556,7 +556,7 @@
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(24, 27);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(952, 390);
+            this.webBrowser1.Size = new System.Drawing.Size(952, 391);
             this.webBrowser1.TabIndex = 1;
             // 
             // tabPage_cfg
@@ -594,7 +594,7 @@
             this.tabPage_cfg.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_cfg.Name = "tabPage_cfg";
             this.tabPage_cfg.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_cfg.Size = new System.Drawing.Size(952, 390);
+            this.tabPage_cfg.Size = new System.Drawing.Size(952, 391);
             this.tabPage_cfg.TabIndex = 1;
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
@@ -851,7 +851,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(691, 35);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(867, 35);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
@@ -879,7 +879,7 @@
             this.toolStripButton_cfg_setHongnibaServer});
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
-            this.toolStrip_server.Size = new System.Drawing.Size(691, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(867, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 

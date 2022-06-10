@@ -130,14 +130,17 @@ namespace FingerprintCenter
         * 函数出参：无
         * 函数返回：无
         *********************************************/
-        public static void GetBitmap(byte[] buffer, int nWidth, int nHeight, ref MemoryStream ms)
+        public static void GetBitmap(byte[] buffer,
+            int nWidth,
+            int nHeight,
+            /*ref*/ MemoryStream ms)
         {
             int ColorIndex = 0;
             ushort m_nBitCount = 8;
             int m_nColorTableEntries = 256;
             byte[] ResBuf = new byte[nWidth * nHeight * 2];
 
-            try
+            //try
             {
                 BITMAPFILEHEADER BmpHeader = new BITMAPFILEHEADER();
                 BITMAPINFOHEADER BmpInfoHeader = new BITMAPINFOHEADER();
@@ -168,7 +171,7 @@ namespace FingerprintCenter
                 ms.Write(StructToBytes(BmpHeader, 14), 0, 14);
                 ms.Write(StructToBytes(BmpInfoHeader, Marshal.SizeOf(BmpInfoHeader)), 0, Marshal.SizeOf(BmpInfoHeader));
 
-                //调试板信息
+                // 调色板信息
                 for (ColorIndex = 0; ColorIndex < m_nColorTableEntries; ColorIndex++)
                 {
                     ColorMask[ColorIndex].redmask = (byte)ColorIndex;
@@ -196,11 +199,13 @@ namespace FingerprintCenter
                     }
                 }
             }
-            catch (Exception /*ex*/)
+            /*
+            catch (Exception)
             {
                 // ZKCE.SysException.ZKCELogger logger = new ZKCE.SysException.ZKCELogger(ex);
                 // logger.Append();
             }
+            */
         }
 
         /*******************************************

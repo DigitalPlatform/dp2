@@ -272,7 +272,7 @@ TimeSpan.FromMinutes(60),
 _cancel.Token,
 (text, level) =>
 {
-OutputHistory(text, level);
+    OutputHistory(text, level);
 });
 
             if (StringUtil.IsDevelopMode() == false)
@@ -367,6 +367,8 @@ OutputHistory(text, level);
 
                 });
             }
+
+            RefreshSendKeyMenu();
         }
 
         // 指纹功能是否初始化成功
@@ -439,7 +441,7 @@ OutputHistory(text, level);
         }
 
         private static readonly Object _syncRoot_start = new Object(); // 2019/5/20
-        
+
         // 2021/9/8
         CancellationTokenSource _cancelFingerPrint = new CancellationTokenSource();
 
@@ -614,7 +616,19 @@ OutputHistory(text, level);
             set
             {
                 _sendKeyEnabled = value;
+
+                RefreshSendKeyMenu();
             }
+        }
+
+        // 刷新和 Sendkey 有关的菜单项状态
+        void RefreshSendKeyMenu()
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.MenuItem_openSendKey.Enabled = !_sendKeyEnabled;
+                this.MenuItem_closeSendKey.Enabled = _sendKeyEnabled;
+            }));
         }
 
         private void FingerPrint_Captured(object sender, CapturedEventArgs e)
@@ -1165,7 +1179,7 @@ MessageBoxDefaultButton.Button2);
             _cancel.Cancel();
         }
 
-#region ipc channel
+        #region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1240,7 +1254,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-#endregion
+        #endregion
 
         delegate void _ActivateWindow(bool bActive);
 
@@ -1303,7 +1317,7 @@ MessageBoxDefaultButton.Button2);
             FingerPrint.CancelRegisterString();
         }
 
-#region 浏览器控件
+        #region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1457,7 +1471,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-#endregion
+        #endregion
 
         void DisplayText(string text,
             string textColor = "white",
@@ -1520,7 +1534,7 @@ Keys keyData)
         }
 
 #if NO
-#region device changed
+        #region device changed
 
         const int WM_DEVICECHANGE = 0x0219; //see msdn site
         const int DBT_DEVNODES_CHANGED = 0x0007;
@@ -1552,7 +1566,7 @@ Keys keyData)
             base.WndProc(ref m);
         }
 
-#endregion
+        #endregion
 #endif
 
         public void ActivateWindow()
@@ -2023,11 +2037,11 @@ token);
                 this.ShowMessage("请配置参数。\r\n配置完成后，请用菜单命令“文件/启动”来开始首次运行。\r\n\r\n(请用鼠标点此文字继续)", "green", true);
                 this.WaitClicked();
             }
-            catch(ObjectDisposedException)
+            catch (ObjectDisposedException)
             {
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ClientInfo.WriteErrorLog($"FirstSetup() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
             }
@@ -2185,7 +2199,8 @@ token);
 
         private void MenuItem_setupDriver_Click(object sender, EventArgs e)
         {
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 try
                 {
                     InstallDriver("本功能将重新安装'中控'指纹仪厂家驱动。");

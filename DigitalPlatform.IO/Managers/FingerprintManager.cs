@@ -35,7 +35,19 @@ namespace DigitalPlatform.IO
 
         public static void Clear()
         {
-            Base.Clear();
+            // Base.Clear();
+            _ = Base.ClearAsync();
+        }
+
+        public static Task ClearAsync()
+        {
+            return Base.ClearAsync();
+        }
+
+        // 注意有死锁的风险
+        public static void ClearChannels()
+        {
+            Base.ClearChannels();
         }
 
         public static string Url

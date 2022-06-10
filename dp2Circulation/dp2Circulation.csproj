@@ -21,8 +21,8 @@
     <SccProvider>
     </SccProvider>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>3EC46D6B99520A1DCDAD027B726C38528625A83D</ManifestCertificateThumbprint>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>57CE53D10A26B55C487F4A07A2D6B3BCCB573D75</ManifestCertificateThumbprint>
+    <ManifestKeyFile>数字平台（北京）软件有限责任公司_2022.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
@@ -54,7 +54,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>271</ApplicationRevision>
+    <ApplicationRevision>279</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -3310,6 +3310,7 @@
     <None Include="代码签名证书-2019.pfx" />
     <None Include="代码签名证书-2020.pfx" />
     <None Include="数字平台（北京）软件有限责任公司.pfx" />
+    <None Include="数字平台（北京）软件有限责任公司_2022.pfx" />
     <None Include="日志文件格式.txt" />
     <None Include="Docs\测试.txt" />
     <None Include="Docs\测试工作单.txt" />

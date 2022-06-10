@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 using System.Web;
 using System.IO;
+using System.Windows.Forms;
 
 namespace dp2Circulation
 {
@@ -196,6 +197,40 @@ namespace dp2Circulation
             else if (nWarningLevel >= 2)
                 strClass = "error";
             Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+        }
+
+        // 2022/6/9
+        // 从 ListView 中移除 ListViewItem
+        public void RemoveUiItem()
+        {
+            var form = this.UiForm as ItemSearchForm;
+            form.ListViewRecords.Items.Remove(this.UiItem as ListViewItem);
+        }
+
+        // 2022/6/9
+        // 从 ListView 中删除所有没有发生修改的 ListViewItem
+        public void RemoveUnchangedUiItems()
+        {
+            var form = this.UiForm as ItemSearchForm;
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in form.ListViewRecords.SelectedItems)
+            {
+                if (form.IsItemChanged(item) == false)
+                    items.Add(item);
+            }
+
+            form.ListViewRecords.BeginUpdate();
+            try
+            {
+                foreach (var item in items)
+                {
+                    form.ListViewRecords.Items.Remove(item);
+                }
+            }
+            finally
+            {
+                form.ListViewRecords.EndUpdate();
+            }
         }
     }
 }

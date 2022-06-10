@@ -7,17 +7,17 @@ using System.Xml;
 using System.IO;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Text;
 
 using libzkfpcsharp;
+using Serilog;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.LibraryClient;
-using Serilog;
-using System.Drawing.Imaging;
-using System.Text;
+using DigitalPlatform.Drawing;
 
 namespace FingerprintCenter
 {
@@ -235,6 +235,7 @@ namespace FingerprintCenter
         void _free()
         {
             zkfp2.Terminate();
+            SetImage(null);
         }
 
         NormalResult OpenZK(int dev_index)
@@ -726,6 +727,24 @@ namespace FingerprintCenter
 
         #endregion
 
+        public static Bitmap BuildTextImage(string strText,
+    Color backColor,
+float fFontSize = 64,
+int nWidth = 400)
+        {
+            // 文字图片
+            return ArtText.BuildArtText(
+                strText,
+                "Microsoft YaHei",  // "Consolas", // 
+                fFontSize,  // (float)16,
+                FontStyle.Regular,  // .Bold,
+                Color.White,
+                backColor,  // Color.DarkRed,
+                Color.Gray,
+                ArtEffect.None,
+                nWidth);
+        }
+
         // parameters:
         //      template_buffer 指纹模板数据
         //      length  template_buffer 数组内有效数据长度
@@ -739,19 +758,44 @@ namespace FingerprintCenter
             {
                 Task.Run(() =>
                 {
-                    // TODO: 注意检查这里是否会出现内存泄漏
-                    MemoryStream ms = new MemoryStream();
-                    BitmapFormat.GetBitmap(image_buffer,
-                        _captureData.mfpWidth,
-                        _captureData.mfpHeight,
-                        ref ms);
-                    TriggerImageReady(null, new ImageReadyEventArgs { Image = new Bitmap(ms), Quality = quality });
+                    try
+                    {
+                        // TODO: 注意检查这里是否会出现内存泄漏
+                        MemoryStream ms = new MemoryStream();
 
+                        BitmapFormat.GetBitmap(image_buffer,
+                            _captureData.mfpWidth,
+                            _captureData.mfpHeight,
+                            /*ref*/ ms);
+
+                        ms.Seek(0, SeekOrigin.Begin);
+                        TriggerImageReady(null, new ImageReadyEventArgs { Image = new Bitmap(ms), Quality = quality });
+
+                        // 2022/6/10
+                        ms.Seek(0, SeekOrigin.Begin);
+                        SetImage(new Bitmap(ms));
+                    }
+                    catch (Exception ex)
+                    {
+                        // 返回一个带有文字的图片
+                        SetImage(BuildTextImage(
+ex.Message,
+Color.DarkRed,
+32,
+600));
+                    }
+
+                    /*
                     // 2022/6/7
-                    SetImage(image_buffer,
-                        _captureData.mfpWidth,
-                        _captureData.mfpHeight,
-                        null);
+                    {
+                        byte[] temp = new byte[image_buffer.Length];
+                        Array.Copy(image_buffer, temp, image_buffer.Length);
+                        SetImage(temp,  // image_buffer,
+                            _captureData.mfpWidth,
+                            _captureData.mfpHeight,
+                            null);
+                    }
+                    */
                 });
             }
 
@@ -768,13 +812,7 @@ namespace FingerprintCenter
                     Speaking(text,
                         $"{text}\r\n质量: {quality}");
 
-                    SendTextMessage(
-                        new CapturedEventArgs
-                        {
-                            Text = "register:" + text,
-                            Quality = -1,  // 表示这是提示信息，不是识别的号码
-                            MessageID = "?",
-                        });
+                    SendRegisterMessage(text);
                 }
                 return;
             }
@@ -789,15 +827,7 @@ namespace FingerprintCenter
                     Speaking(text,
                         $"{text}\r\n质量: {quality}");
 
-
-                    SendTextMessage(
-                        //"!register",
-                        new CapturedEventArgs
-                        {
-                            Text = "register:" + text,
-                            Quality = -1,  // 表示这是提示信息，不是识别的号码
-                            MessageID = "?",
-                        });
+                    SendRegisterMessage(text);
                     return;
                 }
             }
@@ -828,6 +858,8 @@ namespace FingerprintCenter
                             string text = $"您的指纹以前已经被 {strBarcode} 注册过了(id={id})，无法重复注册";
                             Speaking(text,
                                 $"{text}\r\n质量: {quality}");
+
+                            SendRegisterMessage(text);
                             return;
                         }
                     }
@@ -844,6 +876,7 @@ namespace FingerprintCenter
                         string text = "刚扫入的指纹和先前的指纹不一致，请继续重新扫入";
                         Speaking(text,
                             $"{text}\r\n质量: {quality}");
+                        SendRegisterMessage(text);
                         return;
                     }
                 }
@@ -861,15 +894,7 @@ namespace FingerprintCenter
                     // 结束 register 轮回
                     _eventRegisterFinished.Set();
 
-                    SendTextMessage(
-                        //"!register",
-                        new CapturedEventArgs
-                        {
-                            Text = "register:指纹扫入完成",
-                            Quality = -1,  // 表示这是提示信息，不是识别的号码
-                            MessageID = "?",
-                        });
-
+                    SendRegisterMessage("指纹扫入完成");
                     return;
                 }
                 Light("green");
@@ -878,14 +903,7 @@ namespace FingerprintCenter
                     Speaking(text,
                         $"{text}\r\n质量: {quality}");
 
-                    SendTextMessage(
-                        //"!register",
-                        new CapturedEventArgs
-                        {
-                            Text = "register:" + text,
-                            Quality = -1,  // 表示这是提示信息，不是识别的号码
-                            MessageID = "?",
-                        });
+                    SendRegisterMessage(text);
                 }
 
                 return;
@@ -949,6 +967,17 @@ namespace FingerprintCenter
             return _messageID++.ToString();
         }
 
+        bool SendRegisterMessage(string text)
+        {
+            return SendTextMessage(
+                new CapturedEventArgs
+                {
+                    Text = "register:" + text,
+                    Quality = -1,  // 表示这是提示信息，不是识别的号码
+                    MessageID = "?",
+                });
+        }
+
         bool SendTextMessage(
     // string barcode,
     CapturedEventArgs e1)
@@ -979,14 +1008,7 @@ namespace FingerprintCenter
                 _cancelOfRegister = new CancellationTokenSource();
                 _eventRegisterFinished.Reset();
                 // 让前端可以显示开始文字
-                SendTextMessage(
-                    //"!register",
-                    new CapturedEventArgs
-                    {
-                        Text = "register:请扫入指纹。一共需要扫三遍",
-                        Quality = -1,  // 表示这是提示信息，不是识别的号码
-                        MessageID = "?",
-                    });
+                SendRegisterMessage("请扫入指纹。一共需要扫三遍");
                 Speaking("请扫入指纹。一共需要扫三遍");
 
                 while (_eventRegisterFinished.WaitOne(TimeSpan.FromMilliseconds(500)) == false)
@@ -1084,16 +1106,25 @@ namespace FingerprintCenter
 
         #region 动态图像
 
-        // Image _palmImage = null;
+        Image _image = null;
+        /*
         byte[] _raw_image = null;
         int _raw_width = 0;
         int _raw_height = 0;
         int[] _raw_points = new int[8];
+        */
 
         object _syncRoot_image = new object();
 
         private void PalmDriver_GetImage(object sender, GetImageEventArgs e)
         {
+            lock (_syncRoot_image)
+            {
+                // 所有权转移
+                e.Image = _image;
+                _image = null;
+            }
+            /*
             // 取走一张图片
             byte[] buffer = null;
             int width = 0;
@@ -1121,6 +1152,7 @@ namespace FingerprintCenter
                 e.Image = null;
 
             e.Text = ToString(points);
+            */
         }
 
         static string ToString(int[] points)
@@ -1138,6 +1170,7 @@ namespace FingerprintCenter
             return text.ToString();
         }
 
+        /*
         // 设置图像(原始数据)
         void SetImage(byte[] raw_buffer,
             int width,
@@ -1150,6 +1183,18 @@ namespace FingerprintCenter
                 _raw_width = width;
                 _raw_height = height;
                 _raw_points = points;
+            }
+        }
+        */
+
+        // 设置图像
+        void SetImage(Image image)
+        {
+            lock (_syncRoot_image)
+            {
+                if (_image != null)
+                    _image.Dispose();
+                _image = image;
             }
         }
 
@@ -1200,6 +1245,20 @@ namespace FingerprintCenter
 
         #endregion
 
+        bool _capturePaused = false;
+
+        // 捕获指纹是否被暂停
+        public bool CapturePaused
+        {
+            get
+            {
+                return _capturePaused;
+            }
+            set
+            {
+                _capturePaused = value;
+            }
+        }
 
 #if NO
         // 同步

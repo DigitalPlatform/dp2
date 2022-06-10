@@ -36,7 +36,8 @@ namespace DigitalPlatform.Face
 
         public static void Clear()
         {
-            Base.Clear();
+            // Base.Clear();
+            _ = Base.ClearAsync();
         }
 
         public static string Url

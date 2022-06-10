@@ -331,7 +331,7 @@ namespace DigitalPlatform.CirculationClient
                 throw new ArgumentException("UserDir 尚未初始化");
 
             string filename = Path.Combine(UserDir, _settingsFileName/*"settings.xml"*/);
-            _config = ConfigSetting.Open(filename, 
+            _config = ConfigSetting.Open(filename,
                 true,
                 StringUtil.IsInList("debugInfo", style));
 
@@ -728,9 +728,15 @@ namespace DigitalPlatform.CirculationClient
                         ErrorInfo = "自动更新出现异常: " + ExceptionUtil.GetDebugText(ex)
                     };
                 }
+
+                return new NormalResult();
             }
 
-            return new NormalResult();
+            return new NormalResult
+            {
+                Value = 0,
+                ErrorInfo = "当前不是 ClickOnce 方式，无法进行更新"
+            };
         }
 
 

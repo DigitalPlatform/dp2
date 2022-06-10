@@ -2624,7 +2624,8 @@ true);
 
             SaveMarcEditorParam();
 
-            Program.MainForm.StreamProgressChanged -= MainForm_StreamProgressChanged;
+            if (Program.MainForm != null)
+                Program.MainForm.StreamProgressChanged -= MainForm_StreamProgressChanged;
 
             if (this.m_webExternalHost_biblio != null)
                 this.m_webExternalHost_biblio.Destroy();

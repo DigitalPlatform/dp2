@@ -22,6 +22,15 @@ namespace DigitalPlatform.IO
     // T: IFingerprint 或 IRfid
     public class ManagerBase<T>
     {
+        // 2022/6/11
+        Task _task = null;
+        public Task Task
+        {
+            get
+            {
+                return _task;
+            }
+        }
         public TimeSpan ShortWaitTime = TimeSpan.FromMilliseconds(500);
         public TimeSpan LongWaitTime = TimeSpan.FromMilliseconds(2000);
 
@@ -75,12 +84,28 @@ namespace DigitalPlatform.IO
         }
         */
 
-        public void Clear()
+        // 注意有死锁的风险
+        public void ClearChannels()
         {
-            // 2020/6/22 放入独立的 Task 避免出现死锁
-            Task.Run(() =>
+            this.Lock.EnterWriteLock();
+            try
+            {
+                _clear();
+            }
+            catch
             {
 
+            }
+            finally
+            {
+                this.Lock.ExitWriteLock();
+            }
+        }
+
+        public Task ClearAsync()
+        {
+            return Task.Run(() =>
+            {
                 this.Lock.EnterWriteLock();
                 try
                 {
@@ -94,9 +119,28 @@ namespace DigitalPlatform.IO
                 {
                     this.Lock.ExitWriteLock();
                 }
-
             });
+        }
 
+        public void Clear()
+        {
+            // 2020/6/22 放入独立的 Task 避免出现死锁
+            Task.Run(() =>
+            {
+                this.Lock.EnterWriteLock();
+                try
+                {
+                    _clear();
+                }
+                catch
+                {
+
+                }
+                finally
+                {
+                    this.Lock.ExitWriteLock();
+                }
+            });
 
 #if LOG
             LibraryChannelManager.Log?.Debug($"{this.Name} channels Clear() completed. IdleCount={this.Channels.IdleCount}, UsedCount={this.Channels.UsedCount}");
@@ -133,7 +177,7 @@ namespace DigitalPlatform.IO
         {
             _new_action = new_action;
 
-            Task.Run(async () =>
+            _task = Task.Run(async () =>
             {
                 TimeSpan wait_time = this.ShortWaitTime;
                 while (token.IsCancellationRequested == false)
@@ -229,7 +273,10 @@ namespace DigitalPlatform.IO
 
                     // 出过错以后就要清理通道集合
                     if (error)
-                        this.Clear();
+                    {
+                        // this.Clear();
+                        _ = this.ClearAsync();
+                    }
                 }
 
                 // App.CurrentApp.Speak("退出后台循环");

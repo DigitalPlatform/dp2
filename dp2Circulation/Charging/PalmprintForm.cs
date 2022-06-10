@@ -71,7 +71,7 @@ namespace dp2Circulation.Charging
                     {
                         if (string.IsNullOrEmpty(FingerprintManager.Url))
                         {
-                            DisplayError("尚未启用掌纹识别功能", Color.DarkGray);
+                            DisplayError($"尚未启用{Program.MainForm.GetPalmName()}识别功能", Color.DarkGray);
                             await Task.Delay(TimeSpan.FromSeconds(5), token);
                             continue;
                         }
@@ -95,10 +95,6 @@ namespace dp2Circulation.Charging
                         if (result.Value == -1)
                         {
                             // 显示错误
-                            /*
-                            DisplayError(result.ErrorInfo + "\r\n掌纹图像显示已停止", Color.DarkRed);
-                            return;
-                            */
                             DisplayError(result.ErrorInfo, Color.DarkRed);
                             await Task.Delay(TimeSpan.FromSeconds(5), token);
                             continue;
@@ -122,9 +118,9 @@ namespace dp2Circulation.Charging
                 catch (Exception ex)
                 {
                     // 写入错误日志
-                    MainForm.WriteErrorLog($"显示掌纹图像出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                    MainForm.WriteErrorLog($"显示{Program.MainForm.GetPalmName()}图像出现异常: {ExceptionUtil.GetDebugText(ex)}");
                     // 显示错误
-                    DisplayError($"显示线程出现异常: {ex.Message}\r\n掌纹图像显示已停止", Color.DarkRed);
+                    DisplayError($"显示线程出现异常: {ex.Message}\r\n{Program.MainForm.GetPalmName()}图像显示已停止", Color.DarkRed);
                 }
                 finally
                 {

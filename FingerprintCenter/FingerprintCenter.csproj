@@ -31,7 +31,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>67</ApplicationRevision>
+    <ApplicationRevision>70</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -62,10 +62,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>3EC46D6B99520A1DCDAD027B726C38528625A83D</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>57CE53D10A26B55C487F4A07A2D6B3BCCB573D75</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司.pfx</ManifestKeyFile>
+    <ManifestKeyFile>数字平台（北京）软件有限责任公司_2022.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestTimestampUrl>http://timestamp.digicert.com</ManifestTimestampUrl>
@@ -150,6 +150,7 @@
     <None Include="代码签名证书-2019.pfx" />
     <None Include="代码签名证书-2020.pfx" />
     <None Include="数字平台（北京）软件有限责任公司.pfx" />
+    <None Include="数字平台（北京）软件有限责任公司_2022.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -162,6 +163,10 @@
     <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
       <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
       <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
+      <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
+      <Name>DigitalPlatform.Drawing</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
       <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>

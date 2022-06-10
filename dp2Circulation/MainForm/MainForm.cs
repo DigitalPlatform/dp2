@@ -448,12 +448,6 @@ namespace dp2Circulation
 
             SetTitle();
 
-#if NEWFINGER
-            if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false
-                && this.IsFingerprint())
-                this.MenuItem_displayPalmprintDialog.Text = "指纹窗";
-#endif
-
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
@@ -1687,9 +1681,9 @@ Stack:
             if (e.Section == "palmprint"
     && e.Entry == "palmPrintReaderUrl")
             {
-                _ = Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
-                    StartOrStopPalmManager();
+                    await StartOrStopPalmManager();
                 });
             }
 
@@ -9055,7 +9049,7 @@ Keys keyData)
                 ClearPalmMessage();
 
             FingerprintManager.Pause = pause;
-            this.toolStripStatusLabel_palm.Text = pause || string.IsNullOrEmpty(FingerprintManager.Url) ? "" : "掌纹";
+            this.toolStripStatusLabel_palm.Text = pause || string.IsNullOrEmpty(FingerprintManager.Url) ? "" : Program.MainForm.GetPalmName();
         }
 
         private void MainForm_Deactivate(object sender, EventArgs e)

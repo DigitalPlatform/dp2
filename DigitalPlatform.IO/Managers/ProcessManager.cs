@@ -37,11 +37,10 @@ namespace DigitalPlatform.IO
                         if (HasModuleStarted(info.MutexName) == true)
                             continue;
 
-                        // TODO: 写入日志
-                        writeLog?.Invoke(info, "进程被重新启动");
-
                         // 启动
-                        StartModule(info.ShortcutPath, "minimize");
+                        var ret = StartModule(info.ShortcutPath, "minimize");
+                        if (ret == true)
+                            writeLog?.Invoke(info, "进程被重新启动");
                     }
 
                     // 延时

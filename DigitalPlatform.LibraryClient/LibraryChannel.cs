@@ -7760,11 +7760,13 @@ out strError);
             {
                 baContent = ByteArray.CompressGzip(baContent);
                 // 2022/4/12
-                compressed_content_length = baContent.Length;
+                if (baContent != null)
+                    compressed_content_length = baContent.Length;
             }
             else
             {
-                compressed_content_length = baContent.Length;
+                if (baContent != null)
+                    compressed_content_length = baContent.Length;
             }
 
         REDO:

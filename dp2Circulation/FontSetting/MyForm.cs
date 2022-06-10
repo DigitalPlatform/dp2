@@ -2521,7 +2521,7 @@ out string strError)
             _inFaceCall++;
             try
             {
-                return await Task.Factory.StartNew<RecognitionFaceResult>(
+                return await Task./*Factory.StartNew*/Run<RecognitionFaceResult>(
                     () =>
                     {
                         return channel.Object.RecognitionFace(strStyle);
@@ -2568,7 +2568,7 @@ out string strError)
             _inFaceCall++;
             try
             {
-                return await Task.Factory.StartNew<NormalResult>(
+                return await Task./*Factory.StartNew*/Run<NormalResult>(
                     () =>
                     {
                         return channel.Object.GetState(strStyle);
@@ -2614,7 +2614,7 @@ out string strError)
             {
                 try
                 {
-                    return Task.Factory.StartNew<NormalResult>(
+                    return Task./*Factory.StartNew*/Run<NormalResult>(
                         () =>
                         {
                             NormalResult temp_result = new NormalResult();
@@ -2678,7 +2678,7 @@ out string strError)
             {
                 try
                 {
-                    return await Task.Factory.StartNew<NormalResult>(
+                    return await Task./*Factory.StartNew*/Run<NormalResult>(
                         () =>
                         {
                             NormalResult temp_result = new NormalResult();
@@ -2784,7 +2784,7 @@ out string strError)
             string strExcludeBarcodes,
             string strStyle)
         {
-            return Task.Factory.StartNew<GetFeatureStringResult>(
+            return Task./*Factory.StartNew*/Run<GetFeatureStringResult>(
                 () =>
                 {
                     // 获得一个指纹特征字符串
@@ -3033,7 +3033,7 @@ out string strError)
 
             try
             {
-                return await Task.Factory.StartNew<NormalResult>(
+                return await Task.Run<NormalResult>(
                     () =>
                     {
                         return channel.Object.GetState(strStyle);

@@ -16171,9 +16171,15 @@ strLibraryCode);    // 读者所在的馆代码
                         {
 
                         }
+                        else if (string.IsNullOrEmpty(strFirstLevel)
+                            && string.IsNullOrEmpty(strPath))
+                        {
+                            strError = "可以列目录。实际上只有 upload 子目录才有权限";
+                            return 2;
+                        }
                         else
                         {
-                            strError = $"读取文件 {strResPath} 被拒绝。不具备 download 或 upload 权限";
+                            strError = $"读取文件 {strResPath} 被拒绝";    // 实际上只能读取 upload 子目录
                             return 0;
                         }
                     }
