@@ -1687,7 +1687,7 @@ MessageBoxDefaultButton.Button1);
 #endif
 
             // 2020/1/3
-            _ = StartOrStopPalmManager();
+            _ = StartOrStopPalmManagerAsync();
 
             // 2019/9/13
             StartProcessManager();
@@ -1787,7 +1787,7 @@ MessageBoxDefaultButton.Button1);
 
         CancellationTokenSource _cancelPalmManager = new CancellationTokenSource();
 
-        public async Task StartOrStopPalmManager()
+        public async Task StartOrStopPalmManagerAsync()
         {
             // 2021/3/19
             // 保护。防止重复 +=

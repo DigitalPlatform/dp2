@@ -270,6 +270,10 @@ namespace DigitalPlatform.LibraryServer
                 + "@LUID:" + this.App.UID,
                 "xml",
                 strBodyXml,
+                (text) =>
+                {
+                    ReadersMonitor.WriteMqLogConditional(this.App, text);
+                },
                 out strError);
         }
 

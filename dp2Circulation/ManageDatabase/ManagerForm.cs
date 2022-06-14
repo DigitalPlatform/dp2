@@ -130,7 +130,7 @@ namespace dp2Circulation
 
             this.kernelResTree1.AppInfo = Program.MainForm.AppInfo;
             this.kernelResTree1.HideIndices = new int[] { KernelResTree.RESTYPE_FROM };
-            this.kernelResTree1.DownloadFiles += kernelResTree1_DownloadFiles;
+            this.kernelResTree1.DownloadFilesAsync += kernelResTree1_DownloadFilesAsync;
             this.kernelResTree1.UploadFiles += KernelResTree1_UploadFiles;
         }
 
@@ -206,7 +206,7 @@ namespace dp2Circulation
             ShowMessageBox(strError);
         }
 
-        async void kernelResTree1_DownloadFiles(object sender,
+        async Task kernelResTree1_DownloadFilesAsync(object sender,
             DownloadFilesEventArgs e)
         {
             string strError = "";

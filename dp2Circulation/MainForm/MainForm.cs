@@ -1683,7 +1683,7 @@ Stack:
             {
                 _ = Task.Run(async () =>
                 {
-                    await StartOrStopPalmManager();
+                    await StartOrStopPalmManagerAsync();
                 });
             }
 

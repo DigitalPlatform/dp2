@@ -3326,7 +3326,12 @@ strRoom1);
                 // 获得一种 body type 的全部通知字符
                 strChars = ReadersMonitor.GetNotifiedChars(App,
                     strBodyType,
-                    strHistory);
+                    strHistory,
+                    out strError);
+                if (strChars == null)
+                {
+                    return -1;
+                }
 
                 if (instantlyNotifyOverdue || instantlyNotifyRecall == true)
                     strChars = new string('n', strChars.Length);
@@ -3441,14 +3446,14 @@ strRoom1);
 
             strResult += "</table>";
 
-            if (nOverdueCount > 0)
+            if (nOverdueCount > 0 && instantlyNotifyRecall == false)
             {
                 strResult += "<p>";
                 strResult += "有 " + nOverdueCount.ToString() + " 册图书已经超期, 请尽快归还。";
                 strResult += "</p>";
             }
 
-            if (nNormalCount > 0)
+            if (nNormalCount > 0 && instantlyNotifyRecall == false)
             {
                 strResult += "<p>";
                 strResult += "有 " + nNormalCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
@@ -3573,7 +3578,7 @@ strRoom1);
             string strName = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
 
-            DomUtil.SetElementText(output_dom.DocumentElement, "type", instantlyNotifyRecall ? "召回" : "超期通知");
+            DomUtil.SetElementText(output_dom.DocumentElement, "type", instantlyNotifyRecall ? "召回通知" : "超期通知");
             XmlElement items = output_dom.CreateElement("items");
             output_dom.DocumentElement.AppendChild(items);
 
@@ -3666,8 +3671,12 @@ strRoom1);
                 // 获得一种 body type 的全部通知字符
                 strChars = ReadersMonitor.GetNotifiedChars(App,
                     strBodyType,
-                    strHistory);
-
+                    strHistory,
+                    out strError);
+                if (strChars == null)
+                {
+                    return -1;
+                }
                 if (instantlyNotifyOverdue || instantlyNotifyRecall)
                 {
                     strChars = new string('n', strChars.Length);
@@ -4013,7 +4022,12 @@ if (nNormalCount > 0)
                 // 获得一种 body type 的全部通知字符
                 strChars = ReadersMonitor.GetNotifiedChars(App,
                     strBodyType,
-                    strHistory);
+                    strHistory,
+                    out strError);
+                if (strChars == null)
+                {
+                    return -1;
+                }
 
                 if (instantlyNotifyOverdue || instantlyNotifyRecall)
                     strChars = new string('n', strChars.Length);

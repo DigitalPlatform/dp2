@@ -376,6 +376,8 @@ namespace DigitalPlatform.LibraryServer
 
         public string MessageReserveTimeSpan = "365day";  // 消息在信箱中的保留期限。含时间单位。缺省为一年
 
+        public string MessageLogTypes = "";    // 要记入文本日志的消息类型 2022/6/13
+
         public string OpacServerUrl = "";
 
         // 将来会废止这个变量
@@ -1250,7 +1252,7 @@ out strError);
 
                     // 消息
                     // 元素<message>
-                    // 属性dbname/reserveTimeSpan/defaultQueue
+                    // 属性dbname/reserveTimeSpan/defaultQueue/logTypes
                     node = dom.DocumentElement.SelectSingleNode("message") as XmlElement;
                     if (node != null)
                     {
@@ -1262,12 +1264,16 @@ out strError);
                         // 2010/12/31 add
                         if (String.IsNullOrEmpty(this.MessageReserveTimeSpan) == true)
                             this.MessageReserveTimeSpan = "365day";
+
+                        // logTypes="dpmail,email,mq,sms"
+                        this.MessageLogTypes = node.GetAttribute("logTypes");
                     }
                     else
                     {
                         this.MessageDbName = "";
                         this.MessageReserveTimeSpan = "365day";
                         this.OutgoingQueue = "";
+                        this.MessageLogTypes = "";
                     }
 
                     // OPAC服务器
@@ -4034,6 +4040,8 @@ out strError);
                         writer.WriteAttributeString("reserveTimeSpan", this.MessageReserveTimeSpan);    // 2007/11/5 
                         if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
                             writer.WriteAttributeString("defaultQueue", this.OutgoingQueue);
+                        if (string.IsNullOrEmpty(this.MessageLogTypes) == false)
+                            writer.WriteAttributeString("logTypes", this.MessageLogTypes);
                         writer.WriteEndElement();
 
                         // 拼音
@@ -16185,6 +16193,10 @@ strLibraryCode);    // 读者所在的馆代码
                     }
                     else if (StringUtil.IsInList("managedatabase,backup", strRights) == false)
                     {
+                        strError = $"因当前用户不具备权限 managedatabase 或 backup，不允许列目录 '{strResPath}'";
+                        return 0;
+
+                        /*
                         // 不具备 managedatabase 或 backup 权限，只能列出 upload 子目录
 
                         // 2022/5/20
@@ -16201,6 +16213,7 @@ strLibraryCode);    // 读者所在的馆代码
                             strError = $"因当前用户不具备权限 managedatabase 或 backup，不能列出第一级目录 '{strFirstLevel}' (能列出的第一级目录名被限定为 'upload')";
                             return -1;
                         }
+                        */
                     }
                     else // 2022/5/31
                     {
@@ -16625,6 +16638,10 @@ strLibraryCode);    // 读者所在的馆代码
                         strRecipient,
                         strMime,
                         strBody,
+                        (text) =>
+                        {
+                            ReadersMonitor.WriteMqLogConditional(this, text);
+                        },
                         out strError);
                     if (nRet == -1 || nRet == -2)
                         return -1;
@@ -16681,6 +16698,10 @@ strLibraryCode);    // 读者所在的馆代码
                     strUserName + "@LUID:" + this.UID,
                     "xml",
                     dom.DocumentElement.OuterXml,
+                    (text) =>
+                    {
+                        ReadersMonitor.WriteMqLogConditional(this, text);
+                    },
                     out strError);
                 if (nRet == -1 || nRet == -2)
                 {

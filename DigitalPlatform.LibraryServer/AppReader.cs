@@ -1208,7 +1208,7 @@ namespace DigitalPlatform.LibraryServer
                 var bodytypes = StringUtil.GetParameterByPrefix(strNewXml, "bodytypes");
                 if (bodytypes == null)
                     bodytypes = "mq";
-                List<string> types = StringUtil.SplitList(bodytypes);
+                List<string> types = StringUtil.SplitList(bodytypes, '|');
 
                 MessageQueue queue = null;
                 if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
@@ -1252,7 +1252,7 @@ types,
 0,
 $"{strAction}," + strNewXml,
 (t, e) => { if (e == "error") errors.Add(t); },
-null,
+(t) => { ReadersMonitor.WriteTypeLog(this, "readersMonitor", $"(setReaderInfo action {strAction}) {t}"); },
 ref changed);
                 if (errors.Count > 0)
                 {

@@ -13,6 +13,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -25,7 +26,9 @@ namespace DigitalPlatform.CirculationClient
 
         public event UploadFilesEventHandler UploadFiles = null;
 
-        public event DownloadFilesEventHandler DownloadFiles = null;
+        // public event DownloadFilesEventHandler DownloadFiles = null;
+        // https://codereview.stackexchange.com/questions/261396/asynchronous-event-handler
+        public event Func<object, DownloadFilesEventArgs, Task> DownloadFilesAsync;
 
         public event GuiAppendMenuEventHandle OnSetMenu = null;
 
@@ -906,13 +909,13 @@ out string _);
 
         // 下载动态文件
         // 动态文件就是一直在不断增长的文件。允许一边增长一边下载
-        void menu_downloadDynamicFile(object sender, System.EventArgs e)
+        async void menu_downloadDynamicFile(object sender, System.EventArgs e)
         {
             string strError = "";
 
-            if (this.DownloadFiles == null)
+            if (this.DownloadFilesAsync == null)
             {
-                strError = "尚未绑定 DownloadFiles 事件";
+                strError = "尚未绑定 DownloadFilesAsync 事件";
                 goto ERROR1;
             }
 
@@ -948,7 +951,7 @@ out string _);
             DownloadFilesEventArgs e1 = new DownloadFilesEventArgs();
             e1.Action = "download";
             e1.FileNames = paths;
-            this.DownloadFiles(this, e1);
+            await this.DownloadFilesAsync.InvokeAsync(this, e1);
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
             {
                 strError = e1.ErrorInfo;
@@ -985,13 +988,13 @@ out string _);
             MessageBox.Show(this, strError);
         }
 
-        void menu_getmd5(object sender, System.EventArgs e)
+        async void menu_getmd5(object sender, System.EventArgs e)
         {
             string strError = "";
 
-            if (this.DownloadFiles == null)
+            if (this.DownloadFilesAsync == null)
             {
-                strError = "尚未绑定 DownloadFiles 事件";
+                strError = "尚未绑定 DownloadFilesAsync 事件";
                 goto ERROR1;
             }
 
@@ -1020,7 +1023,7 @@ out string _);
             DownloadFilesEventArgs e1 = new DownloadFilesEventArgs();
             e1.Action = "getmd5";
             e1.FileNames = paths;
-            this.DownloadFiles(this, e1);
+            await this.DownloadFilesAsync.InvokeAsync(this, e1);
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
             {
                 strError = e1.ErrorInfo;

@@ -553,7 +553,7 @@ namespace dp2Circulation
                                 {
                                     Value = -1,
                                     ErrorInfo = strError
-                                };
+                               };
                             }
                             if (result.Value == 0)
                             {

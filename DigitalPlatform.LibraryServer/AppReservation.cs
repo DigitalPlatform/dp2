@@ -1844,6 +1844,10 @@ namespace DigitalPlatform.LibraryServer
                         + "@LUID:" + this.UID,
                         "xml",
                         dom.DocumentElement.OuterXml,
+                        (text) =>
+                        {
+                            ReadersMonitor.WriteMqLogConditional(this, text);
+                        },
                         out strError);
                     if (nRet == -1 || nRet == -2)
                     {
@@ -1912,6 +1916,10 @@ namespace DigitalPlatform.LibraryServer
                         "放弃取书通知",
                         strBody,
                         "text",
+                        (text) =>
+                        {
+                            ReadersMonitor.WriteEmailLogConditional(this, text);
+                        },
                         out strError);
                     if (nRet == -1)
                     {
@@ -2458,6 +2466,10 @@ namespace DigitalPlatform.LibraryServer
                         + "@LUID:" + this.UID,
                         "xml",
                         dom.DocumentElement.OuterXml,
+                        (text) =>
+                        {
+                            ReadersMonitor.WriteMqLogConditional(this, text);
+                        },
                         out strError);
                     if (nRet == -1 || nRet == -2)
                     {
@@ -2524,6 +2536,10 @@ namespace DigitalPlatform.LibraryServer
                         "预约到书通知",
                         strBody,
                         "text",
+                        (text) =>
+                        {
+                            ReadersMonitor.WriteEmailLogConditional(this, text);
+                        },
                         out strError);
                     if (nRet == -1)
                     {

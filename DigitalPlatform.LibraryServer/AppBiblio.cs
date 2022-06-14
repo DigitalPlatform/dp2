@@ -4470,6 +4470,9 @@ nsmgr);
                         strTitle,
                         strBody,
                         strMime,
+                        (text) => {
+                            ReadersMonitor.WriteEmailLogConditional(this, text);
+                        },
                         out strError);
                     if (nRet == -1)
                     {

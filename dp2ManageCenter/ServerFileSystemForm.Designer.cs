@@ -82,7 +82,7 @@
             this.kernelResTree1.Size = new System.Drawing.Size(800, 375);
             this.kernelResTree1.TabIndex = 1;
             this.kernelResTree1.UploadFiles += new DigitalPlatform.CirculationClient.UploadFilesEventHandler(this.kernelResTree1_UploadFiles);
-            this.kernelResTree1.DownloadFiles += new DigitalPlatform.CirculationClient.DownloadFilesEventHandler(this.kernelResTree1_DownloadFiles);
+            // this.kernelResTree1.DownloadFiles += new DigitalPlatform.CirculationClient.DownloadFilesEventHandler(this.kernelResTree1_DownloadFiles);
             this.kernelResTree1.GetChannel += new DigitalPlatform.LibraryClient.GetChannelEventHandler(this.kernelResTree1_GetChannel);
             this.kernelResTree1.ReturnChannel += new DigitalPlatform.LibraryClient.ReturnChannelEventHandler(this.kernelResTree1_ReturnChannel);
             // 

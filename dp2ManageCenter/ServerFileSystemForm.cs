@@ -41,6 +41,8 @@ namespace dp2ManageCenter
         public ServerFileSystemForm()
         {
             InitializeComponent();
+
+            this.kernelResTree1.DownloadFilesAsync += this.kernelResTree1_DownloadFilesAsync;
         }
 
         private void ServerFileSystemForm_Load(object sender, EventArgs e)
@@ -91,14 +93,14 @@ namespace dp2ManageCenter
             this.kernelResTree1.Refresh(this.kernelResTree1.SelectedNode);
         }
 
-        private void kernelResTree1_DownloadFiles(object sender, DownloadFilesEventArgs e)
+        private async Task kernelResTree1_DownloadFilesAsync(object sender, DownloadFilesEventArgs e)
         {
             string strError = "";
             string strOutputFolder = "";
 
             if (e.Action == "getmd5")
             {
-                Task.Run(() =>
+                _ = Task.Run(() =>
                 {
                     GetMd5(e);
                 });

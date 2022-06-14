@@ -1289,6 +1289,10 @@ namespace DigitalPlatform.LibraryServer
                             strRecipient,
                             strMime,
                             strBody,
+                            (text) =>
+                            {
+                                ReadersMonitor.WriteMqLogConditional(app, text);
+                            },
                             out strError);
                         if (nRet == -1 || nRet == -2)
                         {
@@ -1325,6 +1329,12 @@ namespace DigitalPlatform.LibraryServer
 
                     if (strBodyType == "dpmail")
                     {
+                        string strSubject = "借阅信息提示";
+                        if (StringUtil.IsInList("notifyRecall", strStyle))
+                            strSubject = "召回通知";
+
+                        ReadersMonitor.WriteDpmailLogConditional(app, $"readerBarcode={strReaderBarcode}, sender={"图书馆"}, strSubject={strSubject}, mime={strMime}, body={strBody}");
+
                         // 发送消息
                         // return:
                         //      -1  出错
@@ -1333,7 +1343,7 @@ namespace DigitalPlatform.LibraryServer
                             RmsChannels,
                             strReaderBarcode,
                             "图书馆",
-                            "借阅信息提示",
+                            strSubject,
                             strMime,    // "text",
                             strBody,
                             false,
@@ -1352,6 +1362,8 @@ namespace DigitalPlatform.LibraryServer
 
                             app.WriteErrorLog(strError);
                             WriteMonitorLog?.Invoke(strError);
+                            ReadersMonitor.WriteDpmailLogConditional(app, strError);
+
                             readerdom = new XmlDocument();
                             readerdom.LoadXml(strOldReaderXml);
                         }
@@ -1379,6 +1391,8 @@ namespace DigitalPlatform.LibraryServer
                         // 发送消息
                         try
                         {
+                            ReadersMonitor.WriteTypeLogConditional(app, external_interface.Type, $"readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
+
                             // 发送一条消息
                             // parameters:
                             //      strPatronBarcode    读者证条码号
@@ -1417,6 +1431,7 @@ namespace DigitalPlatform.LibraryServer
 
                             app.WriteErrorLog(strError);
                             WriteMonitorLog?.Invoke(strError);
+                            ReadersMonitor.WriteTypeLogConditional(app, external_interface.Type, strError);
 
                             readerdom = new XmlDocument();
                             readerdom.LoadXml(strOldReaderXml);
@@ -1445,6 +1460,10 @@ namespace DigitalPlatform.LibraryServer
                             "借阅信息提示",
                             strBody,
                             strMime,
+                            (text) =>
+                            {
+                                ReadersMonitor.WriteEmailLogConditional(app, text);
+                            },
                             out strError);
                         if (nRet == -1)
                         {
@@ -1493,7 +1512,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (send_types.Count > 0)
                 AppendResultText?.Invoke($"已发出 {StringUtil.MakePathList(send_types)}", "");
-            
+
             return send_types;
         }
 
@@ -1550,6 +1569,8 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        public delegate void Delegate_writeMessageLog(string text);
+
         // 向 MSMQ 消息队列发送消息
         // parameters:
         //      strRecipient    消息最终接收者。常见的格式为 R0000001@LUID:xxxxxx 或者 !refID:xxxxxx@LUID:xxxxxx
@@ -1563,6 +1584,7 @@ namespace DigitalPlatform.LibraryServer
             string strRecipient,
             string strMime,
             string strBody,
+            Delegate_writeMessageLog writeLog,
             out string strError)
         {
             strError = "";
@@ -1570,6 +1592,7 @@ namespace DigitalPlatform.LibraryServer
             if (myQueue == null)
             {
                 strError = "SendToQueue() 的 myQueue 参数值不能为 null";
+                writeLog?.Invoke(strError);
                 return -1;
             }
 
@@ -1582,6 +1605,9 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
+                writeLog?.Invoke(DomUtil.GetIndentXml(dom.DocumentElement.OuterXml)
+                    + "\r\n\r\n===\r\n单独显示 body 部分:\r\n" + DomUtil.GetIndentXml(strBody));
+
                 System.Messaging.Message myMessage = new System.Messaging.Message();
                 myMessage.Body = dom.DocumentElement.OuterXml;
                 myMessage.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
@@ -1591,11 +1617,13 @@ namespace DigitalPlatform.LibraryServer
             catch (System.Messaging.MessageQueueException ex)
             {
                 strError = "发送消息到 MQ 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                writeLog?.Invoke(strError);
                 return -2;
             }
             catch (Exception ex)
             {
                 strError = "发送消息到 MQ 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                writeLog?.Invoke(strError);
                 return -1;
             }
         }
@@ -1905,8 +1933,10 @@ namespace DigitalPlatform.LibraryServer
         // 获得一种 body type 的全部通知字符
         public static string GetNotifiedChars(LibraryApplication app,
             string strBodyType,
-            string strHistory)
+            string strHistory,
+            out string strError)
         {
+            strError = "";
             int nExtendCount = 0;   // 扩展接口的个数
             if (app.m_externalMessageInterfaces != null)
                 nExtendCount = app.m_externalMessageInterfaces.Count;
@@ -1931,7 +1961,7 @@ namespace DigitalPlatform.LibraryServer
                 MessageInterface external_interface = app.GetMessageInterface(strBodyType);
                 if (external_interface == null)
                 {
-                    // strError = "不能识别的 message type '" + strBodyType + "'";
+                    strError = $"没有找到 message type '{ strBodyType }' 的定义";
                     // return -1;
                     return null;
                 }
@@ -1939,7 +1969,7 @@ namespace DigitalPlatform.LibraryServer
                 index = app.m_externalMessageInterfaces.IndexOf(external_interface);
                 if (index == -1)
                 {
-                    // strError = "external_interface (type '" + external_interface.Type + "') 没有在 m_externalMessageInterfaces 数组中找到";
+                    strError = $"external_interface (type '{ external_interface.Type }') 没有在 m_externalMessageInterfaces 集合中找到";
                     // return -1;
                     return null;
                 }
@@ -2301,8 +2331,69 @@ namespace DigitalPlatform.LibraryServer
         // 写入日志信息到一个专门的 .log 文件，避免基本的 .log 文件尺寸太大
         public WriteMonitorLogResult WriteMonitorLog(string text)
         {
+            /*
             DateTime now = DateTime.Now;
             string path = Path.Combine(this.App.LogDir, "readersMonitor_" + DateTimeUtil.DateTimeToString8(now) + ".txt");
+            string time = now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
+            File.AppendAllText(path, time + "  " + text + "\r\n");
+            return new WriteMonitorLogResult
+            {
+                FileName = path,
+                Time = time
+            };
+            */
+            return WriteTypeLog(this.App, "readersMonitor", text);
+        }
+
+        public static WriteMonitorLogResult WriteMqLogConditional(
+            LibraryApplication app,
+            string text)
+        {
+            return WriteTypeLogConditional(app, "mq", text);
+        }
+
+        public static WriteMonitorLogResult WriteDpmailLogConditional(
+            LibraryApplication app,
+            string text)
+        {
+            return WriteTypeLogConditional(app, "dpmail", text);
+        }
+
+        public static WriteMonitorLogResult WriteEmailLogConditional(
+            LibraryApplication app,
+            string text)
+        {
+            return WriteTypeLogConditional(app, "email", text);
+        }
+
+        public static WriteMonitorLogResult WriteSmsLogConditional(
+            LibraryApplication app,
+            string text)
+        {
+            return WriteTypeLogConditional(app, "sms", text);
+        }
+
+        public static WriteMonitorLogResult WriteTypeLogConditional(
+    LibraryApplication app,
+    string type,
+    string text)
+        {
+            if (StringUtil.IsInList(type, app.MessageLogTypes))
+                return WriteTypeLog(app, type, text);
+            return new WriteMonitorLogResult
+            {
+                Value = 0,
+                ErrorCode = "skip"
+            };
+        }
+
+        public static WriteMonitorLogResult WriteTypeLog(
+            LibraryApplication app,
+            string type,
+            string text)
+        {
+            DateTime now = DateTime.Now;
+            string path = Path.Combine(app.LogDir, $"{type}_" + DateTimeUtil.DateTimeToString8(now) + ".txt");
             string time = now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
             File.AppendAllText(path, time + "  " + text + "\r\n");
             return new WriteMonitorLogResult

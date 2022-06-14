@@ -17166,7 +17166,7 @@ out string _);
                 "smtpServer");
             if (node == null)
             {
-                strError = "在library.xml中没有找到<smtpServer>元素";
+                strError = "在 library.xml 中没有找到<smtpServer>元素";
                 return 0;
             }
             strAddress = DomUtil.GetAttr(node, "address");
@@ -17254,6 +17254,7 @@ out string _);
             string strSubject,
             string strBody,
             string strMime,
+            ReadersMonitor.Delegate_writeMessageLog writeLog,
             out string strError)
         {
             strError = "";
@@ -17272,9 +17273,15 @@ out string _);
                 out strManagerEmail,
                 out strError);
             if (nRet == -1)
+            {
+                writeLog?.Invoke(strError);
                 return -1;
+            }
             if (nRet == 0)
+            {
+                writeLog?.Invoke(strError);
                 return 0;   // not found cfg
+            }
 
             if (String.IsNullOrEmpty(strSmtpServerAddress) == true)
                 strSmtpServerAddress = "127.0.0.1";
@@ -17290,6 +17297,8 @@ out string _);
                 if (strMime == "html")
                     message.IsBodyHtml = true;
 
+                writeLog?.Invoke($"from:{strManagerEmail}\r\nto:{strUserEmail}\r\nsubject:{strSubject}\r\nmime:{strMime}\r\nbody:{strBody}\r\n");
+
                 SmtpClient client = new SmtpClient(strSmtpServerAddress);
                 // Credentials are necessary if the server requires the client 
                 // to authenticate before it will send e-mail on the client's behalf.
@@ -17299,6 +17308,7 @@ out string _);
             catch (Exception ex/*System.Web.HttpException ehttp*/)
             {
                 strError = ExceptionUtil.GetDebugText(ex);  // GetInnerMessage(ex);
+                writeLog?.Invoke($"发送 email 出现异常: {strError}");
                 return -1;
             }
 
