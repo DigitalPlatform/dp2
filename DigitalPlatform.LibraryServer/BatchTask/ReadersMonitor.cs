@@ -1129,25 +1129,32 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
             int nRet = 0;
 
+            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                "barcode");
+            string strRefID = DomUtil.GetElementText(readerdom.DocumentElement,
+                "refID");
+            string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,
+                "readerType");
+
+            WriteMonitorLog?.Invoke($"NotifyOverdue() barcode='{strReaderBarcode}', refID='{strRefID}', bodytypes='{StringUtil.MakePathList(bodytypes)}', strStyle='{strStyle}', strLibraryCode='{strLibraryCode}', nRedoCount={nRedoCount}");
+
+            string strSubject = "超期通知";
+            if (StringUtil.IsInList("notifyRecall", strStyle))
+                strSubject = "召回通知";
+
             List<string> send_types = new List<string>();
 
             var borrow_nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
             if (borrow_nodes.Count == 0)
             {
-                WriteMonitorLog?.Invoke("目前没有 borrows/borrow 元素。跳过超期通知部分");
+                WriteMonitorLog?.Invoke($"目前没有 borrows/borrow 元素。跳过{strSubject}部分");
                 return send_types;
             }
 
             // testing
             // calendar = null;
 
-            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
-"barcode");
-            string strRefID = DomUtil.GetElementText(readerdom.DocumentElement,
-                "refID");
 
-            string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,
-"readerType");
 
             // return:
             //      -1  出错
@@ -1299,8 +1306,8 @@ namespace DigitalPlatform.LibraryServer
                             strError = "发送 MQ 出错: " + strError;
                             if (app.Statis != null)
                                 app.Statis.IncreaseEntryValue(strLibraryCode,
-                                "超期通知",
-                                "MQ超期通知消息发送错误数",
+                                strSubject, // "超期通知",
+                                $"MQ{strSubject}消息发送错误数",
                                 1);
                             AppendResultText?.Invoke(strError + "\r\n", "error");
                             bSendMessageError = true;
@@ -1315,8 +1322,8 @@ namespace DigitalPlatform.LibraryServer
                             if (app.Statis != null)
                                 app.Statis.IncreaseEntryValue(
                                 strLibraryCode,
-                                "超期通知",
-                                "MQ超期通知人数",
+                                strSubject, // "超期通知",
+                                $"MQ{strSubject}人数",
                                 1);
 
                             // 2020/1/17
@@ -1329,9 +1336,11 @@ namespace DigitalPlatform.LibraryServer
 
                     if (strBodyType == "dpmail")
                     {
+                        /*
                         string strSubject = "借阅信息提示";
                         if (StringUtil.IsInList("notifyRecall", strStyle))
                             strSubject = "召回通知";
+                        */
 
                         ReadersMonitor.WriteDpmailLogConditional(app, $"readerBarcode={strReaderBarcode}, sender={"图书馆"}, strSubject={strSubject}, mime={strMime}, body={strBody}");
 
@@ -1353,8 +1362,8 @@ namespace DigitalPlatform.LibraryServer
                             strError = "发送dpmail出错: " + strError;
                             if (app.Statis != null)
                                 app.Statis.IncreaseEntryValue(strLibraryCode,
-                                "超期通知",
-                                "dpmail message 超期通知消息发送错误数",
+                                strSubject, // "超期通知",
+                                $"dpmail message {strSubject}消息发送错误数",
                                 1);
                             AppendResultText?.Invoke(strError + "\r\n", "error");
                             bSendMessageError = true;
@@ -1372,8 +1381,8 @@ namespace DigitalPlatform.LibraryServer
                             if (app.Statis != null)
                                 app.Statis.IncreaseEntryValue(
                                 strLibraryCode,
-                                "超期通知",
-                                "dpmail超期通知人数",
+                                strSubject, // "超期通知",
+                                $"dpmail{strSubject}人数",
                                 1);
 
                             WriteMonitorLog?.Invoke($"成功发出 dpmail 消息: readerBarcode={strReaderBarcode}, mime={strMime}, body={strBody}");
@@ -1422,8 +1431,8 @@ namespace DigitalPlatform.LibraryServer
                             if (app.Statis != null)
                                 app.Statis.IncreaseEntryValue(
                                 strLibraryCode,
-                                "超期通知",
-                                external_interface.Type + " message 超期通知消息发送错误数",
+                                strSubject, // "超期通知",
+                                $"{external_interface.Type} message {strSubject}消息发送错误数",
                                 1);
                             AppendResultText?.Invoke(strError + "\r\n", "error");
                             bSendMessageError = true;
@@ -1440,8 +1449,8 @@ namespace DigitalPlatform.LibraryServer
                         {
                             if (app.Statis != null)
                                 app.Statis.IncreaseEntryValue(strLibraryCode,
-                                "超期通知",
-                                external_interface.Type + " message 超期通知人数",
+                                strSubject, // "超期通知",
+                                $"{external_interface.Type} message {strSubject}人数",
                                 1);
 
                             WriteMonitorLog?.Invoke($"成功发出 {external_interface.Type} 消息: readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
@@ -1471,8 +1480,8 @@ namespace DigitalPlatform.LibraryServer
                             if (app.Statis != null)
                                 app.Statis.IncreaseEntryValue(
                                 strLibraryCode,
-                                "超期通知",
-                                "email message 超期通知消息发送错误数",
+                                strSubject, // "超期通知",
+                                $"email message {strSubject}消息发送错误数",
                                 1);
                             AppendResultText?.Invoke(strError + "\r\n", "error");
                             bSendMessageError = true;
@@ -1488,8 +1497,8 @@ namespace DigitalPlatform.LibraryServer
                             if (app.Statis != null)
                                 app.Statis.IncreaseEntryValue(
                                 strLibraryCode,
-                                "超期通知",
-                                "email超期通知人数",
+                                strSubject, // "超期通知",
+                                $"email{strSubject}人数",
                                 1);
 
                             WriteMonitorLog?.Invoke($"成功发出 email 消息: strReaderEmailAddress={strReaderEmailAddress}, mime={strMime}, body={strBody}");

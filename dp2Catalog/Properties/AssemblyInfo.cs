@@ -29,11 +29,12 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.3.*")]
-[assembly: AssemblyFileVersion("3.3.0.0")]
+[assembly: AssemblyVersion("3.4.*")]
+[assembly: AssemblyFileVersion("3.4.0.0")]
 
 // 2.5 (2015/12/11) 调用 dp2library Login() API 的时候发送了 client 参数
 // 3.0 (2018/6/23) 改用 .NET Framework 4.6.1 编译
 // 3.1 (2018/8/25) Z39.50 服务器属性中增加了 “ISSN 自动规整为 8 位” 功能
 // 3.2 (2019/5/13) 改用 .NET Framework 4.7.2 编译
 // 3.3 (2021/10/25) MARC 编辑器的定长字段模板支持最新 marcdef marcvaluelist 配置文件语法改进
+// 3.4 (2022/6/17) dp2 检索窗增加了导出 MARCXML 文件功能。目前 UNIMARC 采用 dp2003 UNIMARC 名字空间，MARC21 采用国会图书馆 slim 名字空间

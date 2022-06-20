@@ -1412,6 +1412,7 @@ namespace DigitalPlatform.Marc
             using (MemoryStream s = new MemoryStream())
             using (MarcXmlWriter writer = new MarcXmlWriter(s, Encoding.UTF8))
             {
+                /*
                 if (strMarcSyntax == "unimarc")
                 {
                     writer.MarcNameSpaceUri = DpNs.unimarcxml;
@@ -1427,8 +1428,13 @@ namespace DigitalPlatform.Marc
                     writer.MarcNameSpaceUri = DpNs.unimarcxml;
                     writer.MarcPrefix = "unimarc";
                 }
+                */
 
-                int nRet = writer.WriteRecord(strMARC,
+                int nRet = writer.WriteRecord(
+                    strMarcSyntax,
+                    strMARC,
+                    (string)null,
+                    (string)null,
                     out strError);
                 if (nRet == -1)
                     return -1; ;
@@ -1604,6 +1610,7 @@ out strError);
             using (StringWriter s = new StringWriter())
             using (MarcXmlWriter writer = new MarcXmlWriter(s))
             {
+                /*
                 if (strMarcSyntax == "unimarc")
                 {
                     writer.MarcNameSpaceUri = DpNs.unimarcxml;
@@ -1619,8 +1626,13 @@ out strError);
                     writer.MarcNameSpaceUri = DpNs.unimarcxml;
                     writer.MarcPrefix = "unimarc";
                 }
+                */
 
-                int nRet = writer.WriteRecord(strMARC,
+                int nRet = writer.WriteRecord(
+                    strMarcSyntax,
+                    strMARC,
+                    (string)null,
+                    (string)null,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -2233,7 +2245,6 @@ out strError);
             }
 
             strTarget = target_dom.OuterXml;
-
             return 0;
         }
 

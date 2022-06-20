@@ -9031,7 +9031,7 @@ message,
             channel.Timeout = TimeSpan.FromMinutes(2);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在导出到 XML 文件 ...");
+            stop.Initial("正在导出到 .bdf 文件 ...");
             stop.BeginLoop();
 
             XmlTextWriter writer = null;

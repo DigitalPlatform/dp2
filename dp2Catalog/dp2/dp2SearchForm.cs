@@ -1723,13 +1723,10 @@ namespace dp2Catalog
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                goto ERROR1;
-                            }
+                            strError = "用户中断";
+                            goto ERROR1;
                         }
 
                         stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
@@ -3600,7 +3597,7 @@ namespace dp2Catalog
         //      bOpendNew   是否打开新的详细窗
         void LoadDetail(int index,
             string strStyle = "new"
-            // bool bOpenNew = true
+                // bool bOpenNew = true
                 )
         {
             // 取出记录路径，析出书目库名，然后看这个书目库的syntax
@@ -5111,6 +5108,156 @@ namespace dp2Catalog
             this.commander.AddMessage(WM_SELECT_INDEX_CHANGED);
         }
 
+        public void SaveOriginRecordToMarcXml()
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (this.listView_browse.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要保存的记录";
+                goto ERROR1;
+            }
+
+            // Encoding preferredEncoding = this.CurrentEncoding;
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要保存的 MARCXML 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = MainForm.LastMarcXmlFileName;
+            dlg.Filter = "XML文件 (*.xml)|*.xml|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            /*
+            Encoding targetEncoding = null;
+            nRet = this.MainForm.GetEncoding(dlg.EncodingName,
+                out targetEncoding,
+                out strError);
+            if (nRet == -1)
+            {
+                goto ERROR1;
+            }
+             * */
+            MainForm.LastMarcXmlFileName = dlg.FileName;
+
+            this.EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在保存到 MARCXML 格式 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+
+                using (MarcXmlWriter writer = new MarcXmlWriter(MainForm.LastMarcXmlFileName, Encoding.UTF8))
+                {
+                    writer.Formatting = Formatting.Indented;
+                    writer.WriteBegin();
+                    int i = 0;
+                    foreach (ListViewItem item in this.listView_browse.SelectedItems)
+                    {
+                        Application.DoEvents(); // 出让界面控制权
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        string strPath = item.Text;
+
+                        /*
+                        string strRecord = "";
+                        string strOutputPath = "";
+                        string strOutStyle = "";
+                        byte[] baTimestamp = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
+                        Encoding currrentEncoding;
+                        string strXmlFragment = "";
+                        */
+
+                        // 获得一条MARC/XML记录
+                        // parameters:
+                        //      strPath 记录路径。格式为"中文图书/1 @服务器名"
+                        //      strDirection    方向。为 prev/next/current之一。current可以缺省。
+                        //      strOutputPath   [out]返回的实际路径。格式和strPath相同。
+                        // return:
+                        //      -1  error 包括not found
+                        //      0   found
+                        //      1   为诊断记录
+                        nRet = InternalGetOneRecord(
+                            false,
+                            "marc",
+                            strPath,
+                            "current",
+                            "",
+                            out string strRecord,
+                            out string strXmlFragment,
+                            out string strOutputPath,
+                            out string strOutStyle,
+                            out byte[] baTimestamp,
+                            out DigitalPlatform.OldZ3950.Record record,
+                            out Encoding currrentEncoding,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        string strMarcSyntax = "";
+                        if (record.m_strSyntaxOID == "1.2.840.10003.5.1")
+                            strMarcSyntax = "unimarc";
+                        if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
+                            strMarcSyntax = "usmarc";
+
+                        Debug.Assert(strMarcSyntax != "", "");
+
+                        var timestamp = ByteArray.GetHexTimeStampString(baTimestamp);
+
+                        nRet = writer.WriteRecord(
+                            strMarcSyntax,
+                            strRecord,
+                            strOutputPath,
+                            timestamp,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        stop.SetProgressValue(i + 1);
+                        i++;
+                    }
+
+                    writer.WriteEnd();
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 " + MainForm.LastMarcXmlFileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.EnableControls(true);
+            }
+
+            MainForm.MessageText = this.listView_browse.SelectedItems.Count.ToString()
+                    + "条记录成功保存到文件 " + MainForm.LastMarcXmlFileName + " 中";
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         public void SaveOriginRecordToWorksheet()
         {
             string strError = "";
@@ -5204,13 +5351,10 @@ namespace dp2Catalog
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
+                        strError = "用户中断";
+                        goto ERROR1;
                     }
 
                     string strPath = this.listView_browse.SelectedItems[i].Text;
@@ -5279,8 +5423,6 @@ namespace dp2Catalog
 
                     stop.SetProgressValue(i + 1);
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -5306,7 +5448,6 @@ namespace dp2Catalog
             else
                 MainForm.MessageText = this.listView_browse.SelectedItems.Count.ToString()
                     + "条记录成功保存到新文件 " + MainForm.LastWorksheetFileName + " 尾部";
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -5778,7 +5919,7 @@ MessageBoxDefaultButton.Button2);
 
             menuItem = new ToolStripMenuItem("刷新所选择的 " + nSelectedCount.ToString() + " 个浏览行(&B)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItems_Click);
-            if (nSelectedCount == 0)
+            if (nSelectedCount == 0 || this.InSearching == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
@@ -5873,7 +6014,7 @@ MessageBoxDefaultButton.Button2);
                 // 追加保存到数据库
                 subMenuItem = new ToolStripMenuItem("将选定的 " + nSelectedCount.ToString() + " 条记录以追加方式保存到数据库(&A)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveToDatabase_Click);
-                if (nSelectedCount == 0)
+                if (nSelectedCount == 0 || this.InSearching == true)
                     subMenuItem.Enabled = false;
                 menuItem.DropDownItems.Add(subMenuItem);
             }
@@ -5884,7 +6025,7 @@ MessageBoxDefaultButton.Button2);
 
             menuItem = new ToolStripMenuItem("导出所选择的 " + nSelectedCount.ToString() + " 个事项到记录路径文件(&S)...");
             menuItem.Click += new System.EventHandler(this.menu_saveToRecordPathFile_Click);
-            if (this._linkMarcFile != null || nSelectedCount == 0)
+            if (this._linkMarcFile != null || nSelectedCount == 0 || this.InSearching == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
@@ -5913,7 +6054,7 @@ MessageBoxDefaultButton.Button2);
             menuItem = new ToolStripMenuItem("保存选定的 "
                 + nSelectedCount.ToString()
                 + " 条记录到工作单文件(&W)");
-            if (nSelectedCount > 0)
+            if (nSelectedCount > 0 && this.m_bInSearching == false)
                 menuItem.Enabled = true;
             else
                 menuItem.Enabled = false;
@@ -5925,12 +6066,24 @@ MessageBoxDefaultButton.Button2);
             menuItem = new ToolStripMenuItem("保存选定的 "
                 + nSelectedCount.ToString()
                 + " 条记录到 MARC 文件(&S)");
-            if (nSelectedCount > 0)
+            if (nSelectedCount > 0 && this.m_bInSearching == false)
                 menuItem.Enabled = true;
             else
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_saveOriginRecordToIso2709_Click);
             contextMenu.Items.Add(menuItem);
+
+            // 保存记录到 MARCXML 文件
+            menuItem = new ToolStripMenuItem("保存选定的 "
+                + nSelectedCount.ToString()
+                + " 条记录到 MARCXML 文件(&X)");
+            if (nSelectedCount > 0 && this.m_bInSearching == false)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+            menuItem.Click += new EventHandler(menuItem_saveOriginRecordToMarcXml_Click);
+            contextMenu.Items.Add(menuItem);
+
 
             // ---
             sep = new ToolStripSeparator();
@@ -6054,18 +6207,18 @@ MessageBoxDefaultButton.Button2);
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
-									Environment.CurrentDirectory + "\\documentformat.openxml.dll",
+                                    Environment.CurrentDirectory + "\\documentformat.openxml.dll",
                                     Environment.CurrentDirectory + "\\dp2catalog.exe",
             };
 
@@ -7245,15 +7398,15 @@ out string strError)
                 goto ERROR1;
 
             string[] saAddRef1 = {
-										 this.BinDir + "\\digitalplatform.core.dll",
+                                         this.BinDir + "\\digitalplatform.core.dll",
                                          this.BinDir + "\\digitalplatform.marcdom.dll",
 										 // this.BinDir + "\\digitalplatform.marckernel.dll",
 										 // this.BinDir + "\\digitalplatform.libraryserver.dll",
 										 this.BinDir + "\\digitalplatform.dll",
-										 this.BinDir + "\\digitalplatform.Text.dll",
-										 this.BinDir + "\\digitalplatform.IO.dll",
-										 this.BinDir + "\\digitalplatform.Xml.dll",
-										 this.BinDir + "\\dp2catalog.exe" };
+                                         this.BinDir + "\\digitalplatform.Text.dll",
+                                         this.BinDir + "\\digitalplatform.IO.dll",
+                                         this.BinDir + "\\digitalplatform.Xml.dll",
+                                         this.BinDir + "\\dp2catalog.exe" };
 
             Assembly assembly = null;
             string strWarning = "";
@@ -7892,7 +8045,7 @@ out string strError)
                 this.EnableControlsInSearching(true);
             }
 
-            // return 0;
+        // return 0;
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -8429,6 +8582,11 @@ out string strError)
 
             this.listView_browse.EndUpdate();
 
+        }
+
+        void menuItem_saveOriginRecordToMarcXml_Click(object sender, EventArgs e)
+        {
+            this.SaveOriginRecordToMarcXml();
         }
 
         void menuItem_saveOriginRecordToWorksheet_Click(object sender, EventArgs e)

@@ -1240,6 +1240,22 @@ namespace DigitalPlatform.LibraryServer
 
                 bool changed = false;
                 List<string> errors = new List<string>();
+
+                {
+                    ReadersMonitor.WriteTypeLog(this,
+    "readersMonitor",
+    $"SetReaderInfo() 调用 NotifyOverdue()");
+
+                    string name = DomUtil.GetElementText(readerdom.DocumentElement, "name");
+                    string barcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                    string refID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+                    string department = DomUtil.GetElementText(readerdom.DocumentElement, "department");
+
+                    ReadersMonitor.WriteTypeLog(this,
+                        "readersMonitor",
+                        $"姓名:{name}, 单位:{department}, 证条码号:{barcode}, 参考ID:{refID}");
+                }
+
                 // parameters:
                 //      strStyle    如果包含 instantly，表示立即发出通知
                 var send_types = ReadersMonitor.NotifyOverdue(

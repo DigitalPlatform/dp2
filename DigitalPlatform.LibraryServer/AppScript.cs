@@ -3254,7 +3254,7 @@ strRoom1);
             strResult += "尊敬的 " + strName + " 您好！<br/><br/>";
 
             if (instantlyNotifyRecall)
-                strResult += $"因 {recall_reason}，图书馆提醒您尽快归还下列书刊：";
+                strResult += $"因{recall_reason}，图书馆提醒您尽快归还下列书刊：";
             else strResult += "您在图书馆借阅的下列书刊：";
 
             // 借阅的册
@@ -3579,6 +3579,9 @@ strRoom1);
                 "name");
 
             DomUtil.SetElementText(output_dom.DocumentElement, "type", instantlyNotifyRecall ? "召回通知" : "超期通知");
+            if (string.IsNullOrEmpty(recall_reason) == false)   // 2022/6/17
+                DomUtil.SetElementText(output_dom.DocumentElement, "reason", recall_reason);
+
             XmlElement items = output_dom.CreateElement("items");
             output_dom.DocumentElement.AppendChild(items);
 
@@ -3586,7 +3589,7 @@ strRoom1);
             bool bTestNotify = (StringUtil.IsInList("_testoverduenotify", strRights) == true);
 
             if (instantlyNotifyRecall)
-                strResult += $"因 {recall_reason}，图书馆提醒您尽快归还下列书刊：\n";
+                strResult += $"因{recall_reason}，图书馆提醒您尽快归还下列书刊：\n";
             else
                 strResult += "您借阅的下列书刊：\n";
 
@@ -3963,7 +3966,7 @@ if (nNormalCount > 0)
                 "name");
 
             if (instantlyNotifyRecall)
-                strResult += $"因 {recall_reason}，图书馆提醒您尽快归还下列书刊：\n";
+                strResult += $"因{recall_reason}，图书馆提醒您尽快归还下列书刊：\n";
             else
                 strResult += "您借阅的下列书刊：\n";
 

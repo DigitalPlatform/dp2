@@ -383,8 +383,6 @@ namespace DigitalPlatform.OPAC.Web
             pager_bottom.TotalCount = this.PageCount;
         }
 
-
-
         // public string Title = "";
         public string Title
         {
@@ -592,7 +590,7 @@ namespace DigitalPlatform.OPAC.Web
             CreateDebugLine(debugline);
 
             this.Controls.Add(new LiteralControl(
-                // "</table></div>"
+               // "</table></div>"
                "</table>" + this.GetPostfixString()
                ));
         }
@@ -2059,15 +2057,21 @@ namespace DigitalPlatform.OPAC.Web
                                         "<td class='item'>"
                                     ));
 
-                                    string strParentID = "";
+                                    // return:
+                                    //      -1  出错
+                                    //      0   本册已经隐藏显示
+                                    //      1   成功
                                     nRet = itemcontrol.LoadRecord(strItemPath,
-                                        out strParentID,
+                                        out string strParentID,
                                         out strError);
                                     if (nRet == -1)
                                     {
                                         strContent = "ERROR : " + strError;
                                         goto SKIP0;
                                     }
+
+                                    if (nRet == 0)
+                                        line.Visible = false;
 
                                     string strBiblioDbName = "";
 

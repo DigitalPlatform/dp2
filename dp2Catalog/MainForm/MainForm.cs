@@ -110,6 +110,9 @@ namespace dp2Catalog
         // 最后使用过的工作单文件名
         public string LastWorksheetFileName = "";
 
+        // 最后使用过的 MarcXml 文件名
+        public string LastMarcXmlFileName = "";
+
         public MainForm()
         {
             InitializeComponent();

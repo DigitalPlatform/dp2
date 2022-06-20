@@ -1453,6 +1453,9 @@ namespace DigitalPlatform.OPAC.Web
                 goto ERROR1;
             }
 
+            // 状态
+            string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
+
             PlaceHolder line = (PlaceHolder)this.FindControl("line" + Convert.ToString(e.Index));
             if (line == null)
             {
@@ -1476,11 +1479,17 @@ namespace DigitalPlatform.OPAC.Web
             if (string.IsNullOrEmpty(strBarcode) == true)
                 strBarcode = "@refID:" + strRefID;
 
-            this.tempItemBarcodes.Add(strBarcode);
+            this.tempItemBarcodes.Add(strBarcode);  // 即便是“内部”状态也不要跳过
+
+            if (StringUtil.IsInList("内部", strState)
+    && loginstate != LoginState.Librarian)
+            {
+                line.Visible = false;
+                return;
+            }
 
             if (this.m_hidecolumns == null)
             {
-
                 string strItemDbName = StringUtil.GetDbName(e.Path);
                 string strBiblioDbName = "";
 
@@ -1538,8 +1547,6 @@ namespace DigitalPlatform.OPAC.Web
                 strClass += " bindingmember";
             }
 
-            // 状态
-            string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
             // 2015/1/9
             if (StringUtil.IsInList("注销", strState) == true)
                 strClass += " absolute";

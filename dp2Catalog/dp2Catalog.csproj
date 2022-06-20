@@ -11,8 +11,8 @@
     <RootNamespace>dp2Catalog</RootNamespace>
     <AssemblyName>dp2Catalog</AssemblyName>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>3EC46D6B99520A1DCDAD027B726C38528625A83D</ManifestCertificateThumbprint>
-    <ManifestKeyFile>数字平台（北京）软件有限责任公司.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>57CE53D10A26B55C487F4A07A2D6B3BCCB573D75</ManifestCertificateThumbprint>
+    <ManifestKeyFile>数字平台（北京）软件有限责任公司_2022.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <SccProjectName>
@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>27</ApplicationRevision>
+    <ApplicationRevision>28</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -352,6 +352,12 @@
     <Compile Include="dp2\DupForm.Designer.cs">
       <DependentUpon>DupForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="dp2\SelectMarcXmlDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dp2\SelectMarcXmlDialog.Designer.cs">
+      <DependentUpon>SelectMarcXmlDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="DTLP\DtlpLogForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -488,6 +494,9 @@
     <EmbeddedResource Include="dp2\DupForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DupForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dp2\SelectMarcXmlDialog.resx">
+      <DependentUpon>SelectMarcXmlDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DTLP\DtlpLogForm.resx">
       <SubType>Designer</SubType>
@@ -767,6 +776,7 @@
     <None Include="代码签名证书-2019.pfx" />
     <None Include="代码签名证书-2020.pfx" />
     <None Include="数字平台（北京）软件有限责任公司.pfx" />
+    <None Include="数字平台（北京）软件有限责任公司_2022.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.AmazonInterface\DigitalPlatform.AmazonInterface.csproj">

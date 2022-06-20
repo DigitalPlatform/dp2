@@ -6936,6 +6936,7 @@ out _);
                         this.EntityLocks.LockForWrite(strItemBarcode);
                         bEntityLocked = true;
 
+#if REMOVED // 节省重新读入册记录的时间损耗
                         // 因为前面对于册记录一直没有加锁，所以这里锁定后要
                         // 检查时间戳，确保记录内容没有（实质性）改变
                         lRet = channel.GetRes(
@@ -6999,7 +7000,7 @@ out _);
                             item_timestamp = temp_timestamp;
                             strItemXml = strTempItemXml;
                         }
-
+#endif
                         // 如果时间戳没有发生过改变，则不必刷新任何参数
                     }
 
@@ -9300,7 +9301,7 @@ out string _);
 
 #endif
 
-        #region Return()下级函数
+#region Return()下级函数
 
         // 看看新旧册记录是否有实质性改变
         // 所谓实质性改变，就是<barcode>和<borrower>两个字段的内容发生了变化
@@ -9464,7 +9465,7 @@ out string _);
             return 1;   // Undo已经成功
         }
 
-        #endregion
+#endregion
 
         // 包装版本,为了兼容脚本使用
         // return:

@@ -20,6 +20,7 @@ using DigitalPlatform.IO;
 
 //using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -85,8 +86,7 @@ namespace DigitalPlatform.OPAC.Web
             // 册条码号
             this.Controls.Add(new LiteralControl("<tr class='itembarcode'><td class='name'>"
                 + this.GetString("册条码号")
-                + "</td><td class='value'>"
-                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "itembarcode";
             this.Controls.Add(literal);
@@ -100,8 +100,7 @@ namespace DigitalPlatform.OPAC.Web
             // 状态
             this.Controls.Add(new LiteralControl("<tr class='state'><td class='name'>"
                 + this.GetString("状态")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "state";
             this.Controls.Add(literal);
@@ -111,8 +110,7 @@ namespace DigitalPlatform.OPAC.Web
             // 馆藏地点
             this.Controls.Add(new LiteralControl("<tr class='location'><td class='name'>"
                 + this.GetString("馆藏地点")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "location";
             this.Controls.Add(literal);
@@ -122,8 +120,7 @@ namespace DigitalPlatform.OPAC.Web
             // 册价格
             this.Controls.Add(new LiteralControl("<tr class='price'><td class='name'>"
                 + this.GetString("册价格")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "price";
             this.Controls.Add(literal);
@@ -134,8 +131,7 @@ namespace DigitalPlatform.OPAC.Web
             // 出版时间
             this.Controls.Add(new LiteralControl("<tr class='publishtime'><td class='name'>"
                 + this.GetString("出版时间")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "publishtime";
             this.Controls.Add(literal);
@@ -145,8 +141,7 @@ namespace DigitalPlatform.OPAC.Web
             // 渠道
             this.Controls.Add(new LiteralControl("<tr class='seller'><td class='name'>"
                 + this.GetString("渠道")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "seller";
             this.Controls.Add(literal);
@@ -156,8 +151,7 @@ namespace DigitalPlatform.OPAC.Web
             // 经费来源
             this.Controls.Add(new LiteralControl("<tr class='source'><td class='name'>"
                 + this.GetString("经费来源")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "source";
             this.Controls.Add(literal);
@@ -167,8 +161,7 @@ namespace DigitalPlatform.OPAC.Web
             // 索取号
             this.Controls.Add(new LiteralControl("<tr class='callnumber'><td class='name'>"
                 + this.GetString("索取号")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "callnumber";
             this.Controls.Add(literal);
@@ -178,8 +171,7 @@ namespace DigitalPlatform.OPAC.Web
             // 卷
             this.Controls.Add(new LiteralControl("<tr class='volume'><td class='name'>"
                 + this.GetString("卷")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "volume";
             this.Controls.Add(literal);
@@ -189,8 +181,7 @@ namespace DigitalPlatform.OPAC.Web
             // 册类型
             this.Controls.Add(new LiteralControl("<tr class='booktype'><td class='name'>"
                 + this.GetString("册类型")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "booktype";
             this.Controls.Add(literal);
@@ -201,8 +192,7 @@ namespace DigitalPlatform.OPAC.Web
             // 登录号
             this.Controls.Add(new LiteralControl("<tr class='registerno'><td class='name'>"
                 + this.GetString("登录号")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "registerno";
             this.Controls.Add(literal);
@@ -212,8 +202,7 @@ namespace DigitalPlatform.OPAC.Web
             // 注释
             this.Controls.Add(new LiteralControl("<tr class='comment'><td class='name'>"
                 + this.GetString("注释")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "comment";
             this.Controls.Add(literal);
@@ -224,8 +213,7 @@ namespace DigitalPlatform.OPAC.Web
             // 批次号
             this.Controls.Add(new LiteralControl("<tr class='batchno'><td class='name'>"
                 + this.GetString("批次号")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "batchno";
             this.Controls.Add(literal);
@@ -236,8 +224,7 @@ namespace DigitalPlatform.OPAC.Web
             // 借者 + 借阅日期 + 借阅期限
             this.Controls.Add(new LiteralControl("<tr class='borrower'><td class='name'>"
                 + this.GetString("借阅情况")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "borrower";
             this.Controls.Add(literal);
@@ -248,8 +235,7 @@ namespace DigitalPlatform.OPAC.Web
             // 参考ID
             this.Controls.Add(new LiteralControl("<tr class='refid'><td class='name'>"
                 + this.GetString("参考ID")
-                + "</td><td class='value'>"
-                                                ));
+                + "</td><td class='value'>"));
             literal = new LiteralControl();
             literal.ID = "refid";
             this.Controls.Add(literal);
@@ -304,6 +290,10 @@ namespace DigitalPlatform.OPAC.Web
         bool m_bLoaded = false;
 
         // 提前获得记录体，然后可以获得parentid
+        // return:
+        //      -1  出错
+        //      0   本册已经隐藏显示
+        //      1   成功
         public int LoadRecord(string strItemRecPath,
             out string strParentID,
             out string strError)
@@ -407,10 +397,19 @@ namespace DigitalPlatform.OPAC.Web
 
             LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
+            // 2022/6/17
+            bool hidden = false;
+            string strState = DomUtil.GetElementText(itemdom.DocumentElement, "state");
+            if (StringUtil.IsInList("内部", strState)
+&& loginstate != LoginState.Librarian)
+            {
+                // this.Visible = false;
+                hidden = true;
+            }
 
             // 借者
             string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement,
-                "borrower");
+                            "borrower");
             if (String.IsNullOrEmpty(strBorrower) == false)
             {
                 string strBorrowDate = DomUtil.GetElementText(itemdom.DocumentElement,
@@ -437,6 +436,8 @@ namespace DigitalPlatform.OPAC.Web
 
             this.ItemRecPath = strItemRecPath;
             this.m_bLoaded = true;
+            if (hidden)
+                return 0;
             return 1;
         ERROR1:
             return -1;
@@ -452,12 +453,18 @@ namespace DigitalPlatform.OPAC.Web
 
             if (m_bLoaded == false)
             {
-                string strParentID = "";
+                // return:
+                //      -1  出错
+                //      0   本册已经隐藏显示
+                //      1   成功
                 nRet = LoadRecord(this.ItemRecPath,
-                    out strParentID,
+                    out string strParentID,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                if (nRet == 0)
+                    this.Visible = false;
             }
 
             base.Render(output);

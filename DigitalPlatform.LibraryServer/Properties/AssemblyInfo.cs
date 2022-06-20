@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.120.*")]
-[assembly: AssemblyFileVersion("3.120.0.0")]
+[assembly: AssemblyVersion("3.121.*")]
+[assembly: AssemblyFileVersion("3.121.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -326,3 +326,5 @@ ItemCanReturn()
 //		3.118 (2022/5/20) library.xml 增加 fileShare 元素定义共享文件夹
 //		3.119 (2022/5/24) Return() API 执行 "transfer" 动作时，如果册记录中没有 currentLocation 元素，本次请求修改的字符串中包含星号(表示使用原有内容)，会报错
 //		3.120 (2022/5/27) SetReaderInfo() API 增加 "notifyOverdue" 和 "notifyRecall" 功能
+//		3.121 (2022/6/20) 为 LibraryService 去掉 OperationContext.Current.Channel.Closing 和 Closed 事件处理代码，恢复原先用 Dispose() 的方式
+//							在 Return() API 中去掉加锁册记录时重新读入册记录验证时间戳这一步骤，节省了一次读册记录的动作

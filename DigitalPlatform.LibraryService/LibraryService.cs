@@ -89,6 +89,7 @@ namespace dp2Library
             _disposed = true;
         }
 
+        /*
         public LibraryService()
         {
             if (OperationContext.Current != null && OperationContext.Current.Channel != null)
@@ -100,6 +101,7 @@ namespace dp2Library
                 OperationContext.Current.Channel.Closed += Channel_Closed;
             }
         }
+        */
 
         #region 基础函数
 
@@ -586,6 +588,7 @@ namespace dp2Library
             app.WriteErrorLog(text.ToString());
         }
 
+        /*
         private void Channel_Closed(object sender, EventArgs e)
         {
             if (this.app != null
@@ -611,6 +614,7 @@ namespace dp2Library
             if (OperationContext.Current != null && OperationContext.Current.Channel != null)
                 OperationContext.Current.Channel.Closing -= Channel_Closing;
         }
+        */
 
         #endregion
 

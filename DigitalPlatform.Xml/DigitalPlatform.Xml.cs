@@ -16,6 +16,7 @@ namespace DigitalPlatform.Xml
 		public const string xml = "http://www.w3.org/XML/1998/namespace";
         public const string usmarcxml = "http://www.loc.gov/MARC21/slim";
 		public const string unimarcxml = "http://dp2003.com/UNIMARC";
+		public const string marcxchange = "info:lc/xmlns/marcxchange-v1";	// 2022/6/17
 	}
 
 	public class DpNs
