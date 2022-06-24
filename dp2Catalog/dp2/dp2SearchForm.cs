@@ -6046,6 +6046,12 @@ MessageBoxDefaultButton.Button2);
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
+            menuItem = new ToolStripMenuItem("从 MARCXML 文件导入(&X)...");
+            menuItem.Click += new System.EventHandler(this.menu_importFromMarcXmlFile_Click);
+            if (this.m_bInSearching == true)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
             // ---
             sep = new ToolStripSeparator();
             contextMenu.Items.Add(sep);
@@ -7099,6 +7105,149 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        // 从 MARCXML 文件中导入
+        async void menu_importFromMarcXmlFile_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定要打开的 MARCXML 文件名";
+            dlg.FileName = this.m_strUsedRecPathFilename;
+            dlg.Filter = "MARCXML文件 (*.xml)|*.xml|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string strError = "";
+
+            ClearListViewItems();
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在从 MARCXML 文件导入 ...");
+            stop.BeginLoop();
+
+            this.listView_browse.BeginUpdate();
+            try
+            {
+                int count = 0;
+
+                ListViewUtil.ClearSortColumns(this.listView_browse);
+                // stop.SetProgressRange(0, _linkMarcFile.Stream.Length);
+
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.Async = true;
+
+                int i = 0;
+                using (XmlReader reader = XmlReader.Create(dlg.FileName, settings))
+                {
+                    // 定位到 collection 元素
+                    while (true)
+                    {
+                        bool bRet = await reader.ReadAsync();
+                        if (bRet == false)
+                        {
+                            strError = $"文件 { dlg.FileName } 没有根元素";
+                            goto ERROR1;
+                        }
+                        if (reader.NodeType == XmlNodeType.Element)
+                            break;
+                    }
+
+                    while (await reader.ReadAsync())
+                    {
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        if (reader.NodeType == XmlNodeType.Element)
+                        {
+                            string record_xml = await reader.ReadOuterXmlAsync();
+                            XmlDocument dom = new XmlDocument();
+                            dom.LoadXml(record_xml);
+
+                            int nRet = MarcUtil.Xml2Marc(record_xml,
+                                false,
+                                null,
+                                out string strMarcSyntax,
+                                out string strMARC,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            {
+                                string strRecPath = i.ToString() + " @file";
+                                BiblioInfo info = new BiblioInfo();
+                                info.RecPath = strRecPath;
+                                this.m_biblioTable[strRecPath] = info;
+
+                                info.OldXml = record_xml;
+                                info.Timestamp = null;
+                                info.RecPath = strRecPath;
+
+                                string strSytaxOID = "";
+
+                                if (strMarcSyntax == "unimarc")
+                                    strSytaxOID = "1.2.840.10003.5.1";                // unimarc
+                                else if (strMarcSyntax == "usmarc")
+                                    strSytaxOID = "1.2.840.10003.5.10";               // usmarc
+
+                                string strBrowseText = "";
+                                if (strSytaxOID == "1.2.840.10003.5.1"    // unimarc
+                    || strSytaxOID == "1.2.840.10003.5.10")  // usmarc
+                                {
+                                    nRet = BuildMarcBrowseText(
+                                        strSytaxOID,
+                                        strMARC,
+                                        out strBrowseText,
+                                        out strError);
+                                    if (nRet == -1)
+                                        strBrowseText = strError;
+                                }
+
+                                string[] cols = strBrowseText.Split(new char[] { '\t' });
+
+                                // 创建浏览行
+                                NewLine(
+                    this.listView_browse,
+                    strRecPath,
+                    cols);
+                                stop.SetMessage(i.ToString());
+                                // stop.SetProgressValue(_linkMarcFile.Stream.Position);
+                            }
+
+                            i++;
+                            count++;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                this.listView_browse.EndUpdate();
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+            }
+
+            return;
+        ERROR1:
+            MessageBoxShow(strError);
+        }
+
+        void MessageBoxShow(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, text);
+            }));
+        }
+
         // 从 MARC 文件中导入
         void menu_importFromMarcFile_Click(object sender, EventArgs e)
         {
@@ -7149,14 +7298,11 @@ MessageBoxDefaultButton.Button2);
             stop.Initial("正在从 MARC 文件导入 ...");
             stop.BeginLoop();
 
-
             this.listView_browse.BeginUpdate();
             try
             {
-
                 ListViewUtil.ClearSortColumns(this.listView_browse);
                 stop.SetProgressRange(0, _linkMarcFile.Stream.Length);
-
 
                 bool bEOF = false;
                 for (int i = 0; bEOF == false; i++)

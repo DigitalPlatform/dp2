@@ -66,7 +66,7 @@ namespace DigitalPlatform.LibraryServer
                 XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("externalMessageInterface");
                 if (root == null)
                 {
-                    strError = "在library.xml中没有找到<externalMessageInterface>元素";
+                    strError = "在 library.xml 中没有找到 <externalMessageInterface> 元素";
                     return 0;
                 }
 
@@ -3233,7 +3233,10 @@ strRoom1);
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
 
             if (nodes.Count == 0)
+            {
+                strError = "没有在借册";
                 return 0;
+            }
 
             var instantlyNotifyOverdue = StringUtil.IsInList("notifyOverdue", strStyle);
 
@@ -3327,6 +3330,7 @@ strRoom1);
                 strChars = ReadersMonitor.GetNotifiedChars(App,
                     strBodyType,
                     strHistory,
+                    strStyle,
                     out strError);
                 if (strChars == null)
                 {
@@ -3356,6 +3360,7 @@ strRoom1);
                         strBodyType,
                         "y",
                         ref strHistory,
+                        strStyle,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -3425,6 +3430,7 @@ strRoom1);
                     strBodyType,
                     strChars,
                     ref strHistory,
+                    strStyle,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -3470,6 +3476,7 @@ strRoom1);
             else
             {
                 strBody = "";
+                strError = "没有发现符合条件的册";
                 return 0;
             }
         }
@@ -3556,6 +3563,7 @@ strRoom1);
             if (nodes.Count == 0)
             {
                 debugInfo?.AppendLine("没有 borrows/borrow 元素");
+                strError = "没有在借册";
                 return 0;
             }
 
@@ -3675,6 +3683,7 @@ strRoom1);
                 strChars = ReadersMonitor.GetNotifiedChars(App,
                     strBodyType,
                     strHistory,
+                    strStyle,
                     out strError);
                 if (strChars == null)
                 {
@@ -3710,6 +3719,7 @@ strRoom1);
                         strBodyType,
                         "y",
                         ref strHistory,
+                        strStyle,
                         out strError);
                     debugInfo?.AppendLine($"SetNotifiedChars() strBodyType='{strBodyType}' strHistory='{strHistory}', return nRet={nRet}, strHistry='{strHistory}', strError='{strError}'");
                     if (nRet == -1)
@@ -3796,6 +3806,7 @@ strRoom1);
                     strBodyType,
                     strChars,
                     ref strHistory,
+                    strStyle,
                     out strError);
                 debugInfo?.AppendLine($"SetNotifiedChars() strBodyType='{strBodyType}' strChars='{strChars}' strHistory='{strHistory}', return nRet={nRet} strHistory='{strHistory}' strError='{strError}'");
 
@@ -3893,6 +3904,7 @@ if (nNormalCount > 0)
             {
                 strBody = "";   // 2021/10/25
                 debugInfo?.AppendLine($"退出 NotifyReaderMQ() 函数, 返回 0");
+                strError = "没有发现符合条件的册";
                 return 0;
             }
         }
@@ -3948,7 +3960,10 @@ if (nNormalCount > 0)
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
 
             if (nodes.Count == 0)
+            {
+                strError = "没有在借册";
                 return 0;
+            }
 
             // 是否立即发出超期通知？
             var instantlyNotifyOverdue = StringUtil.IsInList("notifyOverdue", strStyle);
@@ -4026,6 +4041,7 @@ if (nNormalCount > 0)
                 strChars = ReadersMonitor.GetNotifiedChars(App,
                     strBodyType,
                     strHistory,
+                    strStyle,
                     out strError);
                 if (strChars == null)
                 {
@@ -4053,6 +4069,7 @@ if (nNormalCount > 0)
                         strBodyType,
                         "y",
                         ref strHistory,
+                        strStyle,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -4120,6 +4137,7 @@ if (nNormalCount > 0)
                     strBodyType,
                     strChars,
                     ref strHistory,
+                    strStyle,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -4169,6 +4187,7 @@ if (nNormalCount > 0)
             else
             {
                 strBody = "";   // 2021/10/25
+                strError = "没有发现符合条件的册";
                 return 0;
             }
         }

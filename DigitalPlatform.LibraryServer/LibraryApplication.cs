@@ -10633,7 +10633,7 @@ out strError);
                             // 通过 MSMQ 发送手机短信
                             // parameters:
                             //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
-                            nRet = SendSms(
+                            nRet = SendSmsByMq(
                             sessioninfo.Account == null ? "[none]" : sessioninfo.Account.UserID,
                             strTelParam,
                             strBody,
@@ -15990,6 +15990,8 @@ strLibraryCode);    // 读者所在的馆代码
             return 0;
         }
 
+        // exception:
+        //      可能会抛出 Exception 异常
         public bool IsFileDir(string strPath,
             SessionInfo sessioninfo)
         {
@@ -16002,9 +16004,11 @@ strLibraryCode);    // 读者所在的馆代码
                 sessioninfo,
                 "read",
                 out string _,
-                out string _);
+                out string strError);
             if (nRet == 1)
                 return true;
+            if (nRet == -1)
+                throw new Exception(strError);
             return false;
         }
 
@@ -16068,6 +16072,13 @@ strLibraryCode);    // 读者所在的馆代码
 
                 if (strFirstLevel.ToLower() == name.ToLower())
                 {
+                    // 2022/6/21
+                    if (PathUtil.IsValidPath(path) == false)
+                    {
+                        strError = $"{directory.OuterXml} 中 path 属性值 '{path}' 不是合法的目录名(library.xml 中 fileShare 元素内)";
+                        return -1;
+                    }
+
                     // 检查权限
                     string userName = sessioninfo.UserID;
 
@@ -16658,7 +16669,7 @@ strLibraryCode);    // 读者所在的馆代码
         // 通过 MSMQ 发送手机短信
         // parameters:
         //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
-        public int SendSms(
+        public int SendSmsByMq(
             string strUserName,
             string strPhoneNumber,
             string strText,

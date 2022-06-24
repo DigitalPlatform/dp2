@@ -1319,7 +1319,7 @@ namespace dp2Library
                         // 通过 MSMQ 发送手机短信
                         // parameters:
                         //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
-                        nRet = app.SendSms(
+                        nRet = app.SendSmsByMq(
                             sessioninfo.Account.UserID,
                             strPhoneNumber,
                             strMessage,

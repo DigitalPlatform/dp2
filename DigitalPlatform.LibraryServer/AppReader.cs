@@ -1210,6 +1210,13 @@ namespace DigitalPlatform.LibraryServer
                     bodytypes = "mq";
                 List<string> types = StringUtil.SplitList(bodytypes, '|');
 
+                // 2022/6/24
+                if (types.IndexOf("sms") != -1)
+                {
+                    strError = "本功能暂时不支持 sms 消息类型";
+                    goto ERROR1;
+                }
+
                 MessageQueue queue = null;
                 if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
                 {
@@ -1224,8 +1231,8 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                if (queue == null 
-                    && types.IndexOf("mq") == -1
+                if (queue == null
+                    && types.IndexOf("mq") != -1
                     && types.Count == 1)
                 {
                     strError = "dp2library 当前没有配置 MQ，无法触发 mq 类型的通知";
@@ -1266,20 +1273,27 @@ strLibraryCode,
 readerdom,
 types,
 0,
-$"{strAction}," + strNewXml,
+$"{strAction}," + strNewXml + ",enableSmsByMq",
 (t, e) => { if (e == "error") errors.Add(t); },
 (t) => { ReadersMonitor.WriteTypeLog(this, "readersMonitor", $"(setReaderInfo action {strAction}) {t}"); },
-ref changed);
+ref changed,
+out List<string> send_errors,
+out List<string> send_skips);
                 if (errors.Count > 0)
                 {
                     strError = $"{StringUtil.MakePathList(errors, "; ")}";
                     goto ERROR1;
                 }
 
+                string strWarning = "";
+                if (send_errors != null)
+                    strWarning += StringUtil.MakePathList(send_errors, "; ");
+                if (send_skips != null)
+                    strWarning += StringUtil.MakePathList(send_skips, "; ");
                 return new LibraryServerResult
                 {
                     Value = send_types.Count,
-                    ErrorInfo = (send_types.Count == 0 ? "未发出任何通知消息" : $"已发出 {StringUtil.MakePathList(send_types)}")
+                    ErrorInfo = ((send_types.Count == 0 ? "未发出任何通知消息" : $"已发出 {StringUtil.MakePathList(send_types)}")) + "。" + strWarning
                 };
             }
 

@@ -521,7 +521,9 @@ namespace DigitalPlatform.LibraryServer
     "",
     (t, e) => this.AppendResultText(t),
     (t) => WriteMonitorLog(t),
-    ref bChanged);
+    ref bChanged,
+    out List<string> _,
+    out List<string> _);
 
 #if REMOVED
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
@@ -1124,10 +1126,15 @@ namespace DigitalPlatform.LibraryServer
             string strStyle,
             Delegate_appendResultText AppendResultText,
             Delegate_writeLog WriteMonitorLog,
-            ref bool bChanged)
+            ref bool bChanged,
+            out List<string> send_errors,
+            out List<string> send_skips)
         {
             string strError = "";
             int nRet = 0;
+
+            send_errors = new List<string>();
+            send_skips = new List<string>();
 
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
@@ -1268,6 +1275,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nResultValue == 0)
                 {
+                    send_skips.Add(string.IsNullOrEmpty(strError) ? $"{strBodyType} 没有发送: NotifyReader() 返回表示没有必要发送" : $"{strBodyType} 没有发送: {strError}");
                     // 不要发送邮件
                     WriteMonitorLog?.Invoke("nResultValue == 0，不发送任何邮件");
                     continue;
@@ -1310,6 +1318,7 @@ namespace DigitalPlatform.LibraryServer
                                 $"MQ{strSubject}消息发送错误数",
                                 1);
                             AppendResultText?.Invoke(strError + "\r\n", "error");
+                            send_errors.Add(strError);
                             bSendMessageError = true;
 
                             app.WriteErrorLog(strError);
@@ -1366,6 +1375,7 @@ namespace DigitalPlatform.LibraryServer
                                 $"dpmail message {strSubject}消息发送错误数",
                                 1);
                             AppendResultText?.Invoke(strError + "\r\n", "error");
+                            send_errors.Add(strError);
                             bSendMessageError = true;
                             // return -1;
 
@@ -1390,71 +1400,142 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
-                    MessageInterface external_interface = app.GetMessageInterface(strBodyType);
-
-                    if (external_interface == null)
-                        WriteMonitorLog?.Invoke("external_interface == null");
-
-                    if (external_interface != null)
+                    // SMS
+                    if (string.IsNullOrEmpty(app.OutgoingQueue) == false
+                        && strBodyType == "sms"
+                        && StringUtil.IsInList("enableSmsByMq", strStyle))
                     {
-                        // 发送消息
-                        try
+                        var numbers = GetMobileNumbers(readerdom);
+                        if (numbers.Count == 0)
                         {
-                            ReadersMonitor.WriteTypeLogConditional(app, external_interface.Type, $"readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
-
-                            // 发送一条消息
-                            // parameters:
-                            //      strPatronBarcode    读者证条码号
-                            //      strPatronXml    读者记录XML字符串。如果需要除证条码号以外的某些字段来确定消息发送地址，可以从XML记录中取
-                            //      strMessageText  消息文字
-                            //      strError    [out]返回错误字符串
-                            // return:
-                            //      -1  发送失败
-                            //      0   没有必要发送
-                            //      >=1   发送成功，返回实际发送的消息条数
-                            nRet = external_interface.HostObj.SendMessage(
-                                strReaderBarcode,
-                                readerdom.DocumentElement.OuterXml,
-                                strBody,
-                                strLibraryCode,
-                                out strError);
-                        }
-                        catch (Exception ex)
-                        {
-                            strError = external_interface.Type + " 类型的外部消息接口Assembly中SendMessage()函数抛出异常: " + ex.Message;
-                            nRet = -1;
-                        }
-
-                        if (nRet == -1)
-                        {
-                            strError = "向读者 '" + strReaderBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
-                            if (app.Statis != null)
-                                app.Statis.IncreaseEntryValue(
-                                strLibraryCode,
-                                strSubject, // "超期通知",
-                                $"{external_interface.Type} message {strSubject}消息发送错误数",
-                                1);
-                            AppendResultText?.Invoke(strError + "\r\n", "error");
-                            bSendMessageError = true;
-                            // return -1;
-
-                            app.WriteErrorLog(strError);
+                            strError = $"读者记录中没有手机号信息，跳过发送 sms 消息: readerBarcode={strReaderBarcode} strMime={strMime} strBody={strBody}";
                             WriteMonitorLog?.Invoke(strError);
-                            ReadersMonitor.WriteTypeLogConditional(app, external_interface.Type, strError);
-
-                            readerdom = new XmlDocument();
-                            readerdom.LoadXml(strOldReaderXml);
+                            ReadersMonitor.WriteSmsLogConditional(app, strError);
                         }
-                        else if (nRet >= 1)
+                        else
                         {
-                            if (app.Statis != null)
-                                app.Statis.IncreaseEntryValue(strLibraryCode,
-                                strSubject, // "超期通知",
-                                $"{external_interface.Type} message {strSubject}人数",
-                                1);
+                            ReadersMonitor.WriteTypeLogConditional(app, strBodyType, $"借助 MQ 发送 SMS 消息: readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
 
-                            WriteMonitorLog?.Invoke($"成功发出 {external_interface.Type} 消息: readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
-                            send_types.Add(external_interface.Type);
+                            // 通过 MSMQ 发送手机短信
+                            // parameters:
+                            //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
+                            nRet = app.SendSmsByMq(
+                            strReaderBarcode,
+                            numbers[0],
+                            strBody,
+                            out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "向读者 '" + strReaderBarcode + "' (借助 MQ)发送 SMS 时出错: " + strError;
+                                if (app.Statis != null)
+                                    app.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    strSubject,
+                                    $"SMS(by MQ) message {strSubject}消息发送错误数",
+                                    1);
+
+                                AppendResultText?.Invoke(strError + "\r\n", "error");
+                                send_errors.Add(strError);
+                                bSendMessageError = true;
+
+                                app.WriteErrorLog(strError);
+                                WriteMonitorLog?.Invoke(strError);
+                                ReadersMonitor.WriteSmsLogConditional(app, strError);
+
+                                readerdom = new XmlDocument();
+                                readerdom.LoadXml(strOldReaderXml);
+                            }
+                            else
+                            {
+                                if (app.Statis != null)
+                                    app.Statis.IncreaseEntryValue(
+                strLibraryCode,
+                strSubject,
+                "SMS(by MQ) message 重设密码通知消息发送数",
+                1);  // 短信条数可能多于次数
+
+                                WriteMonitorLog?.Invoke($"成功发出 SMS(by MQ) 消息: readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
+                                send_types.Add("sms");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // 用 library.xml 中配置的 externalInterfaces 处理
+                        MessageInterface external_interface = app.GetMessageInterface(strBodyType);
+
+                        if (external_interface == null)
+                            WriteMonitorLog?.Invoke("external_interface == null");
+
+                        if (external_interface != null)
+                        {
+                            // 发送消息
+                            try
+                            {
+                                ReadersMonitor.WriteTypeLogConditional(app, external_interface.Type, $"readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
+
+                                // 发送一条消息
+                                // parameters:
+                                //      strPatronBarcode    读者证条码号
+                                //      strPatronXml    读者记录XML字符串。如果需要除证条码号以外的某些字段来确定消息发送地址，可以从XML记录中取
+                                //      strMessageText  消息文字
+                                //      strError    [out]返回错误字符串
+                                // return:
+                                //      -1  发送失败
+                                //      0   没有必要发送
+                                //      >=1   发送成功，返回实际发送的消息条数
+                                nRet = external_interface.HostObj.SendMessage(
+                                    strReaderBarcode,
+                                    readerdom.DocumentElement.OuterXml,
+                                    strBody,
+                                    strLibraryCode,
+                                    out strError);
+                                ReadersMonitor.WriteTypeLogConditional(app, external_interface.Type, $"external_interface.HostObj.SendMessage() return nRet={nRet}, strError='{strError}'");
+                            }
+                            catch (Exception ex)
+                            {
+                                ReadersMonitor.WriteTypeLogConditional(app, external_interface.Type, $"external_interface.HostObj.SendMessage() exception: {ExceptionUtil.GetDebugText(ex)}");
+                                strError = external_interface.Type + " 类型的外部消息接口Assembly中SendMessage()函数抛出异常: " + ex.Message;
+                                nRet = -1;
+                            }
+
+                            if (nRet == -1)
+                            {
+                                strError = "向读者 '" + strReaderBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
+                                if (app.Statis != null)
+                                    app.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    strSubject, // "超期通知",
+                                    $"{external_interface.Type} message {strSubject}消息发送错误数",
+                                    1);
+                                AppendResultText?.Invoke(strError + "\r\n", "error");
+                                send_errors.Add(strError);
+                                bSendMessageError = true;
+
+                                // return -1;
+
+                                app.WriteErrorLog(strError);
+                                WriteMonitorLog?.Invoke(strError);
+                                ReadersMonitor.WriteTypeLogConditional(app, external_interface.Type, strError);
+
+                                readerdom = new XmlDocument();
+                                readerdom.LoadXml(strOldReaderXml);
+                            }
+                            else if (nRet == 0)
+                            {
+                                send_skips.Add(string.IsNullOrEmpty(strError) ? $"{external_interface.Type}没有发送: 没有必要发送" : $"{external_interface.Type}没有发送: {strError}");
+                            }
+                            else if (nRet >= 1)
+                            {
+                                if (app.Statis != null)
+                                    app.Statis.IncreaseEntryValue(strLibraryCode,
+                                    strSubject, // "超期通知",
+                                    $"{external_interface.Type} message {strSubject}人数",
+                                    1);
+
+                                WriteMonitorLog?.Invoke($"成功发出 {external_interface.Type} 消息: readerBarcode={strReaderBarcode}, strLibraryCode={strLibraryCode} mime={strMime}, body={strBody}");
+                                send_types.Add(external_interface.Type);
+                            }
                         }
                     }
 
@@ -1484,13 +1565,19 @@ namespace DigitalPlatform.LibraryServer
                                 $"email message {strSubject}消息发送错误数",
                                 1);
                             AppendResultText?.Invoke(strError + "\r\n", "error");
+                            send_errors.Add(strError);
                             bSendMessageError = true;
+
                             // return -1;
 
                             app.WriteErrorLog(strError);
                             WriteMonitorLog?.Invoke(strError);
                             readerdom = new XmlDocument();
                             readerdom.LoadXml(strOldReaderXml);
+                        }
+                        else if (nRet == 0)
+                        {
+                            send_skips.Add(string.IsNullOrEmpty(strError) ? "email 没有发送: smtp 服务器没有配置" : $"email 没有发送: {strError}");
                         }
                         else if (nRet == 1)
                         {
@@ -1523,6 +1610,27 @@ namespace DigitalPlatform.LibraryServer
                 AppendResultText?.Invoke($"已发出 {StringUtil.MakePathList(send_types)}", "");
 
             return send_types;
+        }
+
+        public static List<string> GetMobileNumbers(XmlDocument dom)
+        {
+            List<string> mobiles = new List<string>();
+
+            // 获得电话号码
+            string strTel = DomUtil.GetElementText(dom.DocumentElement, "tel");
+            if (string.IsNullOrEmpty(strTel) == true)
+                return mobiles;
+
+            // 提取出手机号
+            string[] tels = strTel.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string tel in tels)
+            {
+                string strText = tel.Trim();
+                if (strText.Length == 11)
+                    mobiles.Add(strTel);
+            }
+
+            return mobiles;
         }
 
         // 修改读者记录后存回
@@ -1940,9 +2048,12 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
         // 获得一种 body type 的全部通知字符
+        // parameters:
+        //      strStyle 若包含 enableSmsByMq，且 sms interface 没有定义，则当作 index = 0 处理
         public static string GetNotifiedChars(LibraryApplication app,
             string strBodyType,
             string strHistory,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -1967,12 +2078,21 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
+                var enableSmsByMq = StringUtil.IsInList("enableSmsByMq", strStyle);
+
                 MessageInterface external_interface = app.GetMessageInterface(strBodyType);
                 if (external_interface == null)
                 {
+                    if (enableSmsByMq)
+                    {
+                        index = 0;
+                        goto SKIP;
+                    }
+
                     strError = $"没有找到 message type '{ strBodyType }' 的定义";
                     // return -1;
                     return null;
+
                 }
 
                 index = app.m_externalMessageInterfaces.IndexOf(external_interface);
@@ -1982,6 +2102,7 @@ namespace DigitalPlatform.LibraryServer
                     // return -1;
                     return null;
                 }
+            SKIP:
                 index += 3; // 原来是 2
             }
 
@@ -2005,17 +2126,26 @@ namespace DigitalPlatform.LibraryServer
 
         // 合并设置一种 body type 的全部通知字符
         // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
+        // parameters:
+        //      strStyle 若包含 enableSmsByMq，且 sms interface 没有定义，则当作 index = 0 处理
         public static int SetNotifiedChars(LibraryApplication app,
             string strBodyType,
             string strChars,
             ref string strHistory,
+            string strStyle,
             out string strError)
         {
             strError = "";
 
+            var enableSmsByMq = StringUtil.IsInList("enableSmsByMq", strStyle);
+
             int nExtendCount = 0;   // 扩展接口的个数
             if (app.m_externalMessageInterfaces != null)
                 nExtendCount = app.m_externalMessageInterfaces.Count;
+
+            // 2022/6/23 修正 nExtendCount
+            if (nExtendCount == 0 && enableSmsByMq)
+                nExtendCount = 1;
 
             int nSegmentLength = nExtendCount + 3;  // 原来是 2 // 每个小部分的长度
 
@@ -2037,6 +2167,11 @@ namespace DigitalPlatform.LibraryServer
                 MessageInterface external_interface = app.GetMessageInterface(strBodyType);
                 if (external_interface == null)
                 {
+                    if (enableSmsByMq)
+                    {
+                        index = 0;
+                        goto SKIP;
+                    }
                     strError = "不能识别的 message type '" + strBodyType + "'";
                     return -1;
                 }
@@ -2047,6 +2182,7 @@ namespace DigitalPlatform.LibraryServer
                     strError = "external_interface (type '" + external_interface.Type + "') 没有在 m_externalMessageInterfaces 数组中找到";
                     return -1;
                 }
+            SKIP:
                 index += 3; // 原来是 2
             }
 

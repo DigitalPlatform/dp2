@@ -1241,6 +1241,21 @@ namespace DigitalPlatform.IO
             return strPath;
         }
 
+        // 2022/6/21
+        public static bool IsValidPath(string strPath)
+        {
+            try
+            {
+                FileSystemInfo fi = new DirectoryInfo(strPath);
+                var fullPath = fi.FullName;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         // 测试strPath1是否为strPath2的下级目录或文件
         //	strPath1正好等于strPath2的情况也返回true
         public static bool IsChildOrEqual(string strPath1, string strPath2)
