@@ -4,6 +4,7 @@ using System.Threading;
 
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace DigitalPlatform
 {
@@ -147,11 +148,26 @@ namespace DigitalPlatform
                 manager.Active(this);
         }
 
+        // parameters:
+        //      bActive 是否激活改变后的顶层 Stop 对象
         public void Unregister(bool bActive = true)
         {
             if (m_manager != null)
             {
-                m_manager.Remove(this, false);
+                // var old_top = m_manager.ActiveStop;
+
+                m_manager.Remove(this, true);
+
+                /*
+                // 2022/6/29
+                if (bActive)
+                {
+                    var new_top = m_manager.ActiveStop;
+                    if (new_top != old_top)
+                        m_manager.Active(new_top);
+                }
+                */
+
                 m_manager = null;
             }
         }
@@ -309,7 +325,6 @@ namespace DigitalPlatform
                     StateParts.Message,
                     true);
             }
-
         }
 
         public void SetProgressRange(long lStart, long lEnd)
@@ -1449,11 +1464,9 @@ string strText)
             {
                 this.m_collectionlock.ReleaseWriterLock();
                 WriteDebugInfo("collection write unlock 3\r\n");
-
             }
 
             //SetToolTipText();
-
         }
 
         // 激活按钮
@@ -1472,7 +1485,6 @@ string strText)
                 EnableReverseButtons(true, StateParts.None);
                 InternalSetMessage("");
                 InternalSetProgressBar(-1, -1, -1);
-
                 return false;
             }
 
@@ -1482,7 +1494,6 @@ string strText)
             this.m_collectionlock.AcquireWriterLock(Stop.m_nLockTimeout);
             try
             {
-
                 for (int i = 0; i < stops.Count; i++)
                 {
                     if (stops[i] == stop)
@@ -1499,9 +1510,7 @@ string strText)
             {
                 this.m_collectionlock.ReleaseWriterLock();
                 WriteDebugInfo("collection write unlock 4\r\n");
-
             }
-
 
             if (bFound == false)
             {
@@ -1511,7 +1520,6 @@ string strText)
                     StateParts.None);
                 InternalSetMessage("");
                 InternalSetProgressBar(-1, -1, -1);
-
                 return false;
             }
 
@@ -1541,9 +1549,7 @@ string strText)
 
             InternalSetProgressBar(stop.ProgressMin, stop.ProgressMax, stop.ProgressValue);
 
-
             //SetToolTipText();
-
 
             return true;
         }
@@ -1659,19 +1665,6 @@ string strText)
             if (stops.Count == 0)
                 return;
 
-            // TODO: 这里的整个逻辑有问题: 即便视觉上不表现，内存也应当兑现修改，以备后面切换时显示出来。动态不那么及时更新是可以的，但是关键状态变化，例如显示、隐藏等动作，一定要兑现到内存
-            if (stop != null && stop.ProgressValue == -1)
-            {
-                if ((parts & StateParts.ProgressValue) != 0)
-                {
-                    // 如果为隐藏progress的意图，
-                    // 将max和min都设置为-1，以便将来刷新的时候能体现隐藏
-                    // 2011/10/12
-                    stop.ProgressMax = -1;
-                    stop.ProgressMin = -1;
-                }
-            }
-
             if (bLock == true)
             {
                 WriteDebugInfo("collection read lock 7\r\n");
@@ -1682,7 +1675,6 @@ string strText)
 
             try
             {
-
                 if (bMultiple == false)
                 {
                     if (stop == null)
@@ -1730,6 +1722,23 @@ string strText)
                 {
                     this.m_collectionlock.ReleaseReaderLock();
                     WriteDebugInfo("collection read unlock 7\r\n");
+                }
+            }
+
+            // 2022/6/29 移动到这里
+            // TODO: 这里的整个逻辑有问题: 即便视觉上不表现，内存也应当兑现修改，以备后面切换时显示出来。动态不那么及时更新是可以的，但是关键状态变化，例如显示、隐藏等动作，一定要兑现到内存
+            if (stop != null && stop.ProgressValue == -1)
+            {
+                if ((parts & StateParts.ProgressValue) != 0)
+                {
+                    // testing
+                    if (stop.Name == "test")
+                        Debug.Assert(false);
+                    // 如果为隐藏progress的意图，
+                    // 将max和min都设置为-1，以便将来刷新的时候能体现隐藏
+                    // 2011/10/12
+                    stop.ProgressMax = -1;
+                    stop.ProgressMin = -1;
                 }
             }
 

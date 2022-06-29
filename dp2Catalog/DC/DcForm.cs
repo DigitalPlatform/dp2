@@ -1125,7 +1125,8 @@ channel,
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    nRet = dp2_searchform.GetDbSyntax(null, // this.stop, BUG!!!
+                    nRet = dp2_searchform.GetDbSyntax(
+                        // null, // this.stop, BUG!!!
                         strServerName,
                         strDbName,
                         out strSyntax,
@@ -1791,7 +1792,7 @@ channel,
                 //      0   not found
                 //      1   found
                 nRet = dp2_searchform.GetDbSyntax(
-                    null,
+                    // null,
                     strServerName,
                     strBiblioDbName,
                     out strSyntax,
@@ -1995,7 +1996,7 @@ channel,
                 //      0   not found
                 //      1   found
                 nRet = dp2_searchform.GetDbSyntax(
-                    null,
+                    // null,
                     strServerName,
                     strBiblioDbName,
                     out strSyntax,

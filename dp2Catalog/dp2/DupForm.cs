@@ -1261,7 +1261,7 @@ namespace dp2Catalog
             //      0   not found
             //      1   found
             int nRet = dp2_searchform.GetDbSyntax(
-                null,
+                // null,
                 strServerName,
                 strBiblioDbName,
                 out strSyntax,

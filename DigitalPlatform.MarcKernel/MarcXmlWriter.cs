@@ -6,6 +6,7 @@ using System.Xml;
 using System.Diagnostics;
 
 using DigitalPlatform.Xml;  // DpNs
+using System.Linq;
 
 namespace DigitalPlatform.Marc
 {
@@ -113,7 +114,9 @@ namespace DigitalPlatform.Marc
         // 写开头，包括:
         // <? xml version='1.0' encoding='utf-8'?>
         // collection 根元素，及根据情况判断是否带命名空间
-        public int WriteBegin()
+        // parameters:
+        //      namespace_type  空/usmarc/unimarc
+        public int WriteBegin(string namespace_type = "")
         {
             _writer.WriteStartDocument();
 
@@ -124,8 +127,22 @@ namespace DigitalPlatform.Marc
                 _writer.WriteStartElement(MarcPrefix,
                     "collection", MarcNameSpaceUri);
             */
-            // 2022/6/17
-            _writer.WriteStartElement("dprms", "collection", DpNs.dprms);
+
+            if (namespace_type == "unimarc")
+            {
+                _writer.WriteStartElement("unimarc",
+    "collection", DpNs.unimarcxml);
+            }
+            else if (namespace_type == "usmarc")
+            {
+                _writer.WriteStartElement("usmarc",
+"collection", Ns.usmarcxml);
+            }
+            else
+            {
+                // 2022/6/17
+                _writer.WriteStartElement("dprms", "collection", DpNs.dprms);
+            }
 
             // dprms名字空间 2010/11/15
             _writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
@@ -221,7 +238,7 @@ namespace DigitalPlatform.Marc
                 _writer.WriteStartElement(MarcPrefix,
                     "record", MarcNameSpaceUri);
 
-            if (String.IsNullOrEmpty(_writer.LookupPrefix("dprms")) == true)
+            if (String.IsNullOrEmpty(_writer.LookupPrefix(DpNs.dprms)) == true)
             {
                 // dprms名字空间 2010/11/15
                 _writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
@@ -237,7 +254,7 @@ namespace DigitalPlatform.Marc
                 _writer.WriteAttributeString("timestamp", DpNs.dprms, timestamp);
             }
 
-            //循环，写头标区及每个子段
+            //循环，写头标区及每个字段
             for (int i = 0; i < saField.Length; i++)
             {
                 string strLine = saField[i];
@@ -258,6 +275,8 @@ namespace DigitalPlatform.Marc
                             strLine += " ";
                         }
                     }
+
+                    strLine = ReplaceInvalidXmlChars(strLine);
 
                     if (WriteMarcPrefix == false)
                         _writer.WriteElementString("leader", strLine);
@@ -295,7 +314,7 @@ namespace DigitalPlatform.Marc
 
                     _writer.WriteAttributeString("tag", strFieldName);
 
-                    _writer.WriteString(strContent);
+                    _writer.WriteString(ReplaceInvalidXmlChars(strContent));
                     _writer.WriteEndElement();
                     continue;
                 }
@@ -327,9 +346,9 @@ namespace DigitalPlatform.Marc
                     _writer.WriteStartElement(MarcPrefix,
                         "datafield", MarcNameSpaceUri);
 
-                _writer.WriteAttributeString("tag", strFieldName);
-                _writer.WriteAttributeString("ind1", strInd1);
-                _writer.WriteAttributeString("ind2", strInd2);
+                _writer.WriteAttributeString("tag", ReplaceInvalidXmlChars(strFieldName));
+                _writer.WriteAttributeString("ind1", ReplaceInvalidXmlChars(strInd1));
+                _writer.WriteAttributeString("ind2", ReplaceInvalidXmlChars(strInd2));
 
                 // 得到子字段数组
 
@@ -370,7 +389,7 @@ namespace DigitalPlatform.Marc
                             "subfield", MarcNameSpaceUri);
 
                     if (strSubfieldName != null)
-                        _writer.WriteAttributeString("code", strSubfieldName);
+                        _writer.WriteAttributeString("code", ReplaceInvalidXmlChars(strSubfieldName));
                     _writer.WriteString(strSubfieldContent); //注意这里是否有越界的危险
                     _writer.WriteEndElement();
                 }
@@ -380,6 +399,29 @@ namespace DigitalPlatform.Marc
 
             _writer.WriteEndElement();
             return 0;
+        }
+
+        // https://stackoverflow.com/questions/8170739/dealing-with-invalid-xml-hexadecimal-characters
+        public static string RemoveInvalidXmlChars(string content)
+        {
+            return new string(content.Where(ch => System.Xml.XmlConvert.IsXmlChar(ch)).ToArray());
+        }
+
+        // 2022/6/28
+        public static string ReplaceInvalidXmlChars(
+            string content,
+            char replaceChar = '*')
+        {
+            StringBuilder results = new StringBuilder();
+            foreach(char ch in content)
+            {
+                if (System.Xml.XmlConvert.IsXmlChar(ch))
+                    results.Append(ch);
+                else
+                    results.Append(replaceChar);
+            }
+
+            return results.ToString();
         }
 
         public int WriteXChangeRecord(

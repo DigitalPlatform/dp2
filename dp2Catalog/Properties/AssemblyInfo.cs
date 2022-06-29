@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.4.*")]
-[assembly: AssemblyFileVersion("3.4.0.0")]
+[assembly: AssemblyVersion("3.6.*")]
+[assembly: AssemblyFileVersion("3.6.0.0")]
 
 // 2.5 (2015/12/11) 调用 dp2library Login() API 的时候发送了 client 参数
 // 3.0 (2018/6/23) 改用 .NET Framework 4.6.1 编译
@@ -38,3 +38,7 @@ using System.Runtime.InteropServices;
 // 3.2 (2019/5/13) 改用 .NET Framework 4.7.2 编译
 // 3.3 (2021/10/25) MARC 编辑器的定长字段模板支持最新 marcdef marcvaluelist 配置文件语法改进
 // 3.4 (2022/6/17) dp2 检索窗增加了导出 MARCXML 文件功能。目前 UNIMARC 采用 dp2003 UNIMARC 名字空间，MARC21 采用国会图书馆 slim 名字空间
+// 3.5 (2022/6/29) dp2 检索窗增加了导入 MARCXML 文件功能。和 880/平行模式转换功能
+// 3.6 (2022/6/29) 重构 stop.BeginLoop() 为 var looping = BeginLoop()
+//                  重构了下列代码文件: dp2SearchForm MarcDetailHost ZhongcihaoForm MyForm
+//                  dp2 检索窗在检索装入浏览框的中途点浏览行，现在可以在固定面板区“属性”属性页看到书目记录详细信息(此前版本检索中途是无法看到的)

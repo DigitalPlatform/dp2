@@ -205,30 +205,36 @@ namespace DigitalPlatform.CirculationClient
                 if (node == null)
                 {
                     children.Clear();
-
-                    for (int i = 0; i < Servers.Count; i++)
+                    this.BeginUpdate();
+                    try
                     {
-                        Application.DoEvents();	// 出让界面控制权
+                        for (int i = 0; i < Servers.Count; i++)
+                        {
+                            // Application.DoEvents();	// 出让界面控制权
 
-                        dp2Server server = (dp2Server)Servers[i];
-                        TreeNode nodeNew = new TreeNode(server.Name,
-                            RESTYPE_SERVER,
-                            RESTYPE_SERVER);
-                        SetLoading(nodeNew);
+                            dp2Server server = (dp2Server)Servers[i];
+                            TreeNode nodeNew = new TreeNode(server.Name,
+                                RESTYPE_SERVER,
+                                RESTYPE_SERVER);
+                            SetLoading(nodeNew);
 
-                        if (EnabledIndices != null
-                            && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
-                            nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+                            if (EnabledIndices != null
+                                && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                                nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
-                        children.Add(nodeNew);
+                            children.Add(nodeNew);
 
-                        dp2ServerNodeInfo info = new dp2ServerNodeInfo();
-                        info.Name = server.Name;
-                        info.Url = server.Url;
+                            dp2ServerNodeInfo info = new dp2ServerNodeInfo();
+                            info.Name = server.Name;
+                            info.Url = server.Url;
 
-                        nodeNew.Tag = info;
+                            nodeNew.Tag = info;
+                        }
                     }
-
+                    finally
+                    {
+                        this.EndUpdate();
+                    }
                     return 0;
                 }
 
@@ -268,27 +274,34 @@ namespace DigitalPlatform.CirculationClient
         ref properties);
                     }
 
-                    for (int i = 0; i < properties.Count; i++)
+                    this.BeginUpdate();
+                    try
                     {
-                        NormalDbProperty prop = properties[i];
+                        for (int i = 0; i < properties.Count; i++)
+                        {
+                            NormalDbProperty prop = properties[i];
 
-                        string strDbName = prop.DbName;
-                        TreeNode nodeNew = new TreeNode(strDbName,
-                            RESTYPE_DB, RESTYPE_DB);
+                            string strDbName = prop.DbName;
+                            TreeNode nodeNew = new TreeNode(strDbName,
+                                RESTYPE_DB, RESTYPE_DB);
 
-                        // nodeNew.Tag = items[i].TypeString;  // 类型字符串
+                            // nodeNew.Tag = items[i].TypeString;  // 类型字符串
 
-                        SetLoading(nodeNew);
+                            SetLoading(nodeNew);
 
-                        if (EnabledIndices != null
-                            && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
-                            nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+                            if (EnabledIndices != null
+                                && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                                nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
-                        children.Add(nodeNew);
+                            children.Add(nodeNew);
 
-                        nodeNew.Tag = prop;
+                            nodeNew.Tag = prop;
+                        }
                     }
-
+                    finally
+                    {
+                        this.EndUpdate();
+                    }
                 }
 
                 // 数据库
@@ -327,28 +340,35 @@ namespace DigitalPlatform.CirculationClient
         ref styles);
                     }
 
-
-                    for (int i = 0; i < froms.Count; i++)
+                    this.BeginUpdate();
+                    try
                     {
-                        Application.DoEvents();	// 出让界面控制权
+                        for (int i = 0; i < froms.Count; i++)
+                        {
+                            Application.DoEvents(); // 出让界面控制权
 
-                        string strFrom = froms[i];
-                        TreeNode nodeNew = new TreeNode(strFrom,
-                            RESTYPE_FROM, RESTYPE_FROM);
+                            string strFrom = froms[i];
+                            TreeNode nodeNew = new TreeNode(strFrom,
+                                RESTYPE_FROM, RESTYPE_FROM);
 
-                        dp2FromInfo info = new dp2FromInfo();
-                        info.Caption = strFrom;
-                        info.Style = styles[i];
+                            dp2FromInfo info = new dp2FromInfo();
+                            info.Caption = strFrom;
+                            info.Style = styles[i];
 
-                        nodeNew.Tag = info;  // dp2FromInfo类
+                            nodeNew.Tag = info;  // dp2FromInfo类
 
-                        // SetLoading(nodeNew);
+                            // SetLoading(nodeNew);
 
-                        if (EnabledIndices != null
-                            && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
-                            nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+                            if (EnabledIndices != null
+                                && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                                nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
-                        children.Add(nodeNew);
+                            children.Add(nodeNew);
+                        }
+                    }
+                    finally
+                    {
+                        this.EndUpdate();
                     }
                 }
             }

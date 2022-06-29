@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Collections;
+using System.Threading.Tasks;
 
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
@@ -13,7 +14,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
-using System.Threading.Tasks;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -214,6 +214,24 @@ namespace DigitalPlatform.CirculationClient
             return true;
         }
 
+        string _libraryServerVersion = "";
+
+        int EnsureGetVersion(LibraryChannel channel,
+            out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(_libraryServerVersion) == false)
+                return 0;
+            long lRet = channel.GetVersion(null,
+    out string version,
+    out string uid,
+    out strError);
+            if (lRet == -1)
+                return -1;
+            _libraryServerVersion = version;
+            return 0;
+        }
+
         // 填充全部内容
         int Fill(LibraryChannel channel_param,
             TreeNode node,
@@ -277,12 +295,55 @@ namespace DigitalPlatform.CirculationClient
                         return string.Compare(a.Name, b.Name);
                     });
 
-                    // foreach (ResInfoItem item in loader)
-                    foreach (ResInfoItem item in items)
+                    this.BeginUpdate();
+                    try
                     {
-                        // 2017/9/23
-                        if (string.IsNullOrEmpty(item.Name))
-                            continue;
+                        // foreach (ResInfoItem item in loader)
+                        foreach (ResInfoItem item in items)
+                        {
+                            // 2017/9/23
+                            if (string.IsNullOrEmpty(item.Name))
+                                continue;
+
+                            TreeNode nodeNew = new TreeNode(item.Name, item.Type, item.Type);
+
+                            nodeNew.Tag = item;
+                            if (item.HasChildren)
+                                SetLoading(nodeNew);
+
+                            if (EnabledIndices != null
+                                && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                                nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+
+                            if (HideIndices != null
+                                && StringUtil.IsInList(nodeNew.ImageIndex, HideIndices) == true)
+                                continue;
+
+                            children.Add(nodeNew);
+                        }
+                    }
+                    finally
+                    {
+                        this.EndUpdate();
+                    }
+                }
+
+                // 在根级追加 '!' 下的 dp2library 本地文件或目录
+                if (string.IsNullOrEmpty(start_path))
+                {
+                    // 2022/6/27
+                    int nRet = EnsureGetVersion(channel,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    string new_version = "3.122";
+                    if (StringUtil.CompareVersion(_libraryServerVersion, new_version) < 0)
+                    {
+                        ResInfoItem item = new ResInfoItem();
+                        item.Name = "!";
+                        item.Type = 4;
+                        item.HasChildren = true;
 
                         TreeNode nodeNew = new TreeNode(item.Name, item.Type, item.Type);
 
@@ -291,44 +352,18 @@ namespace DigitalPlatform.CirculationClient
                             SetLoading(nodeNew);
 
                         if (EnabledIndices != null
-                            && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+        && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
                             nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
                         if (HideIndices != null
                             && StringUtil.IsInList(nodeNew.ImageIndex, HideIndices) == true)
-                            continue;
-
-                        children.Add(nodeNew);
+                        {
+                        }
+                        else
+                            children.Add(nodeNew);
                     }
                 }
 
-                /*
-                // 在根级追加 '!' 下的 dp2library 本地文件或目录
-                if (string.IsNullOrEmpty(start_path))
-                {
-                    ResInfoItem item = new ResInfoItem();
-                    item.Name = "!";
-                    item.Type = 4;
-                    item.HasChildren = true;
-
-                    TreeNode nodeNew = new TreeNode(item.Name, item.Type, item.Type);
-
-                    nodeNew.Tag = item;
-                    if (item.HasChildren)
-                        SetLoading(nodeNew);
-
-                    if (EnabledIndices != null
-    && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
-                        nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
-
-                    if (HideIndices != null
-                        && StringUtil.IsInList(nodeNew.ImageIndex, HideIndices) == true)
-                    {
-                    }
-                    else
-                        children.Add(nodeNew);
-                }
-                */
                 restoreLoading = false;  // 防止 finally 复原
                 return 0;
             }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define USE_STOP
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -87,8 +89,11 @@ namespace dp2Catalog
             }
         }
 
+#if USE_STOP
         internal DigitalPlatform.Stop stop = null;
+#endif
 
+#if USE_STOP
         /// <summary>
         /// 进度条和停止按钮
         /// </summary>
@@ -99,6 +104,7 @@ namespace dp2Catalog
                 return this.stop;
             }
         }
+#endif
 
         string FormName
         {
@@ -116,7 +122,6 @@ namespace dp2Catalog
             }
         }
 
-
         /// <summary>
         /// 窗口 Load 时被触发
         /// </summary>
@@ -125,9 +130,10 @@ namespace dp2Catalog
             if (this.MainForm == null)
                 return;
 
+#if USE_STOP
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
-
+#endif
             {
                 _floatingMessage = new FloatingMessageForm(this, true);
                 // _floatingMessage.AutoHide = false;
@@ -147,6 +153,7 @@ namespace dp2Catalog
         /// <param name="e">事件参数</param>
         public virtual void OnMyFormClosing(FormClosingEventArgs e)
         {
+#if USE_STOP
             if ((stop != null && stop.State == 0)    // 0 表示正在处理
     || _processing > 0)
             {
@@ -154,6 +161,14 @@ namespace dp2Catalog
                 e.Cancel = true;
                 return;
             }
+#else
+            if (HasLooping() || _processing > 0)
+            {
+                MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。或等待长时操作完成");
+                e.Cancel = true;
+                return;
+            }
+#endif
         }
 
         // 在 base.OnFormClosed(e); 之前调用
@@ -162,11 +177,13 @@ namespace dp2Catalog
         /// </summary>
         public virtual void OnMyFormClosed()
         {
+#if USE_STOP
             if (stop != null) // 脱离关联
             {
                 stop.Unregister();	// 和容器关联
                 stop = null;
             }
+#endif
 
             if (this.MainForm != null)
                 this.MainForm.Move -= new EventHandler(MainForm_Move);
@@ -291,5 +308,96 @@ namespace dp2Catalog
         }
 
         #endregion
+
+        List<Looping> _loopings = new List<Looping>();
+        object _syncRoot_loopings = new object();
+
+        public Looping BeginLoop(StopEventHandler handler,
+            string text)
+        {
+            var looping = new Looping(handler, text);
+            lock (_syncRoot_loopings)
+            {
+                _loopings.Add(looping);
+            }
+            return looping;
+        }
+
+        public void EndLoop(Looping looping)
+        {
+            lock (_syncRoot_loopings)
+            {
+                _loopings.Remove(looping);
+            }
+            looping.Dispose();
+        }
+
+        public bool HasLooping()
+        {
+            lock (_syncRoot_loopings)
+            {
+                foreach (var looping in _loopings)
+                {
+                    if (looping.stop != null && looping.stop.State == 0)
+                        return true;
+                }
+                return false;
+            }
+        }
+
+        public Looping TopLooping
+        {
+            get
+            {
+                lock (_syncRoot_loopings)
+                {
+                    if (_loopings.Count == 0)
+                        return null;
+                    return (_loopings[_loopings.Count - 1]);
+                }
+            }
+        }
+    }
+
+    public class Looping : IDisposable
+    {
+        public Stop stop { get; set; }
+        StopEventHandler _handler = null;
+
+        public void Dispose()
+        {
+            if (stop != null)
+            {
+                stop.EndLoop();
+                stop.OnStop -= _handler;
+                stop.Initial("");
+                stop.HideProgress();
+
+                stop.Unregister();	// 和容器解除关联
+                stop = null;
+            }
+        }
+
+        public Looping(StopEventHandler handler,
+            string text)
+        {
+            stop = new Stop();
+            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+
+            _handler = handler;
+            stop.OnStop += handler;
+            stop.Initial(text);
+            stop.BeginLoop();
+        }
+
+        public bool Stopped
+        {
+            get
+            {
+                if (stop != null && stop.State != 0)
+                    return true;
+                return false;
+            }
+        }
     }
 }

@@ -405,7 +405,11 @@ namespace dp2Catalog
             string strPath = DigitalPlatform.DTLP.Global.ModifyDtlpRecPath(strPath,
                 "ctlno");
              * */
+            /*
             Stop temp_stop = this.stop;
+            */
+            var looping = BeginLoop(this.DoStop, "正在获取记录 ...");
+
             DtlpChannel channel = null;
 
             bool bNewChannel = false;
@@ -416,6 +420,7 @@ namespace dp2Catalog
                 channel = this.DtlpChannels.CreateChannel(0);
                 bNewChannel = true;
 
+                /*
                 temp_stop = new Stop();
                 temp_stop.Tag = channel;
                 temp_stop.Register(MainForm.stopManager, true);	// 和容器关联
@@ -423,10 +428,10 @@ namespace dp2Catalog
                 temp_stop.OnStop += new StopEventHandler(this.DoNewStop);
                 temp_stop.Initial("正在初始化浏览器组件 ...");
                 temp_stop.BeginLoop();
-
+                */
             }
 
-                byte[] baPackage = null;
+            byte[] baPackage = null;
             Encoding encoding = null;
             try
             {
@@ -460,17 +465,20 @@ namespace dp2Catalog
             {
                 if (bNewChannel == true)
                 {
+                    /*
                     temp_stop.EndLoop();
                     temp_stop.OnStop -= new StopEventHandler(this.DoNewStop);
                     temp_stop.Initial("");
-
+                    */
                     this.DtlpChannels.DestroyChannel(channel);
                     channel = null;
 
-
+                    /*
                     temp_stop.Unregister();	// 和容器关联
                     temp_stop = null;
+                    */
                 }
+                EndLoop(looping);
             }
             Package package = new Package();
             package.LoadPackage(baPackage,
@@ -566,7 +574,7 @@ namespace dp2Catalog
             out string strError)
         {
             strError = "";
-                    // 获得一条记录的检索点
+            // 获得一条记录的检索点
             return this.DtlpChannel.GetAccessPoint(strPath,
                 strMARC,
                 out results,
@@ -600,7 +608,7 @@ namespace dp2Catalog
 
             this.dtlpResDirControl1.channelarray = DtlpChannels;
             dtlpResDirControl1.Channel = this.DtlpChannel;
-            dtlpResDirControl1.Stop = this.stop;
+            dtlpResDirControl1.Stop = null; // this.stop;
 
             /*
             dtlpResDirControl1.procItemSelected = new Delegate_ItemSelected(
@@ -828,32 +836,11 @@ namespace dp2Catalog
 
         private void DtlpSearchForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if NO
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
-            }
-#endif
+
         }
 
         private void DtlpSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-#if NO
-            if (stop != null) // 脱离关联
-            {
-                stop.Style = StopStyle.None;    // 需要强制中断
-                stop.DoStop();
-
-                stop.Unregister();	// 和容器脱离关联
-                stop = null;
-            }
-#endif
-
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
                 Debug.Assert(this.dtlpResDirControl1.PathSeparator == "\\", "");
@@ -919,7 +906,7 @@ namespace dp2Catalog
 
             if (String.IsNullOrEmpty(strContent) == false)
             {
-                cols = strContent.Split(new char[] {'\t'});
+                cols = strContent.Split(new char[] { '\t' });
             }
 
             return 0;
@@ -983,12 +970,15 @@ Stack:
                 this.listView_browse.Items.Clear();
                 EnableControls(false);
 
+                /*
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.SetMessage("开始检索 ...");
                 stop.BeginLoop();
 
                 this.Update();
                 this.MainForm.Update();
+                */
+                var looping = BeginLoop(this.DoStop, "开始检索 ...");
 
                 this.m_nInSearching++;
                 /*
@@ -1003,15 +993,12 @@ Stack:
                     bool bFirst = true;       // 第一次检索
                     while (true)
                     {
-                        Application.DoEvents();	// 出让界面控制权
+                        Application.DoEvents(); // 出让界面控制权
 
-                        if (stop != null)
+                        if (looping.Stopped)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                goto ERROR1;
-                            }
+                            strError = "用户中断";
+                            goto ERROR1;
                         }
 
                         Encoding encoding = this.DtlpChannel.GetPathEncoding(strPath);
@@ -1021,14 +1008,14 @@ Stack:
                         byte[] baPackage;
                         if (bFirst == true)
                         {
-                            stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath);
+                            looping.stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath);
                             nRet = this.DtlpChannel.Search(strPath,
                                 nStyle,
                                 out baPackage);
                         }
                         else
                         {
-                            stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath + " " + encoding.GetString(baNext));
+                            looping.stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath + " " + encoding.GetString(baNext));
                             nRet = this.DtlpChannel.Search(strPath,
                                 baNext,
                                 nStyle,
@@ -1067,7 +1054,9 @@ Stack:
                         }
 
                         ///
-                        nRet = FillBrowseList(package,
+                        nRet = FillBrowseList(
+                            looping,
+                            package,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -1094,9 +1083,12 @@ Stack:
                     this.m_nInSearching--;
                     try
                     {
+                        /*
                         stop.EndLoop();
                         stop.OnStop -= new StopEventHandler(this.DoStop);
                         stop.Initial("");
+                        */
+                        EndLoop(looping);
 
                         EnableControls(true);
 
@@ -1148,7 +1140,9 @@ Stack:
 
         // return:
         //      本次重复的记录数
-        int FillBrowseList(Package package,
+        int FillBrowseList(
+            Looping looping,
+            Package package,
             out string strError)
         {
             strError = "";
@@ -1158,15 +1152,12 @@ Stack:
             // 处理每条记录
             for (int i = 0; i < package.Count; i++)
             {
-                Application.DoEvents();	// 出让界面控制权
+                Application.DoEvents(); // 出让界面控制权
 
-                if (stop != null)
+                if (looping.Stopped)
                 {
-                    if (stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        return -1;
-                    }
+                    strError = "用户中断";
+                    return -1;
                 }
 
                 Cell cell = (Cell)package[i];
@@ -1210,7 +1201,7 @@ Stack:
 
                 this.listView_browse.Items.Add(item);
                 // this.listView_browse.UpdateItem(this.listView_browse.Items.Count - 1);
-                
+
             }
 
             return nDupCount;
@@ -1234,8 +1225,11 @@ Stack:
 
         private void DtlpSearchForm_Activated(object sender, EventArgs e)
         {
+            /*
             if (stop != null)
                 MainForm.stopManager.Active(this.stop);
+            */
+            MainForm.stopManager.Active(this.TopLooping?.stop);
 
             MainForm.SetMenuItemState();
 
@@ -1418,7 +1412,7 @@ Stack:
 
             return 0;
         }
-        
+
         protected override bool ProcessDialogKey(
             Keys keyData)
         {

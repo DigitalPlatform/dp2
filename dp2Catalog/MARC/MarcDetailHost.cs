@@ -603,7 +603,7 @@ namespace dp2Catalog
 
                 string strDebugInfo = "";
 
-                BeginGcatLoop("正在获取 '" + strAuthor + "' 的著者号，从 " + strGcatWebServiceUrl + " ...");
+                var looping = BeginGcatLoop("正在获取 '" + strAuthor + "' 的著者号，从 " + strGcatWebServiceUrl + " ...");
                 try
                 {
                     // return:
@@ -612,7 +612,7 @@ namespace dp2Catalog
                     //      1   succeed
                     long nRet = GetAuthorNumber(
                         ref question_table,
-                        this.DetailForm.stop,
+                        looping.stop,   // this.DetailForm.stop,
                         this.DetailForm,
                         strGcatWebServiceUrl,
                         strAuthor,
@@ -632,7 +632,7 @@ namespace dp2Catalog
                 }
                 finally
                 {
-                    EndGcatLoop();
+                    EndGcatLoop(looping);
                 }
             }
 
@@ -794,11 +794,12 @@ namespace dp2Catalog
 
         bool bMarcEditorFocued = false;
 
-        public void BeginGcatLoop(string strMessage)
+        public Looping BeginGcatLoop(string strMessage)
         {
             bMarcEditorFocued = this.DetailForm.MarcEditor.Focused;
             this.DetailForm.EnableControls(false);
 
+            /*
             Stop stop = this.DetailForm.stop;
 
             stop.OnStop += new StopEventHandler(this.DoGcatStop);
@@ -807,14 +808,19 @@ namespace dp2Catalog
 
             this.DetailForm.Update();
             this.DetailForm.MainForm.Update();
+            */
+            return this.DetailForm.BeginLoop(this.DoGcatStop, strMessage);
         }
 
-        public void EndGcatLoop()
+        public void EndGcatLoop(Looping looping)
         {
+            /*
             Stop stop = this.DetailForm.stop;
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoGcatStop);
             stop.Initial("");
+            */
+            this.DetailForm.EndLoop(looping);
 
             this.DetailForm.EnableControls(true);
             if (bMarcEditorFocued == true)

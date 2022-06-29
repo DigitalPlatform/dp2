@@ -648,7 +648,7 @@ namespace dp2Catalog
                 strAction,
                 out strError);
             return nRet;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -798,7 +798,7 @@ namespace dp2Catalog
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1127,7 +1127,7 @@ namespace dp2Catalog
             {
                 _processing--;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1274,7 +1274,7 @@ namespace dp2Catalog
 
             this.MarcEditor.Focus();
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1506,7 +1506,7 @@ namespace dp2Catalog
 
                 index = Convert.ToInt32(strIndex) - 1;
 
-                REDO:
+            REDO:
                 if (strDirection == "prev")
                 {
                     index--;
@@ -1555,7 +1555,7 @@ namespace dp2Catalog
             {
                 this._processing--;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1642,7 +1642,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
 
             this._processing++;
-            this.stop.BeginLoop();  // 在这里启用 stop，可以防止在装载的中途 Form 被关闭、造成 MarcEditor 设置 MARC 字符串过程抛出异常
+            // this.stop.BeginLoop();  // 在这里启用 stop，可以防止在装载的中途 Form 被关闭、造成 MarcEditor 设置 MARC 字符串过程抛出异常
             this.EnableControls(false);
             try
             {
@@ -1806,19 +1806,22 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             }
             finally
             {
-                this.stop.EndLoop();
+                // this.stop.EndLoop();
                 this.EnableControls(true);
                 this._processing--;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
 
         private void MarcDetailForm_Activated(object sender, EventArgs e)
         {
+            /*
             if (stop != null)
                 MainForm.stopManager.Active(this.stop);
+            */
+            MainForm.stopManager.Active(this.TopLooping?.stop);
 
             MainForm.SetMenuItemState();
 
@@ -1929,7 +1932,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2062,7 +2065,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2320,7 +2323,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 s.Close();
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2426,7 +2429,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 //      0   not found
                 //      1   found
                 nRet = dp2_searchform.GetDbSyntax(
-                    null,
+                    // null,
                     strServerName,
                     strBiblioDbName,
                     out strSyntax,
@@ -2475,7 +2478,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 return;
             }
 
-            OTHER:
+        OTHER:
             {
                 string strCfgFileName = e.Path;
                 nRet = strCfgFileName.IndexOf("#");
@@ -2507,7 +2510,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             e.ErrorInfo = strError;
         }
 
@@ -2568,7 +2571,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 //      0   not found
                 //      1   found
                 nRet = dp2_searchform.GetDbSyntax(
-                    null,
+                    // null,
                     strServerName,
                     strBiblioDbName,
                     out strSyntax,
@@ -2632,7 +2635,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 return;
             }
 
-            OTHER:
+        OTHER:
             {
                 string strCfgFileName = e.Path;
                 nRet = strCfgFileName.IndexOf("#");
@@ -2673,7 +2676,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             }
 
             return;
-            ERROR1:
+        ERROR1:
             e.ErrorInfo = strError;
         }
 
@@ -2824,7 +2827,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             }
             LoadLinkedMarcRecord(strMarc, baRecord);
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -2924,7 +2927,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
             this.MarcEditor.Focus();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3128,7 +3131,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    nRet = dp2_searchform.GetDbSyntax(null, // this.stop, bug!!!
+                    nRet = dp2_searchform.GetDbSyntax(
+                        // null, // this.stop, bug!!!
                         strServerName,
                         strDbName,
                         out strSyntax,
@@ -3198,7 +3202,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 this.EnableControls(true);
             }
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
 
@@ -3254,7 +3258,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 "current",
                 true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3350,7 +3354,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 if (nRet == -1)
                     goto ERROR1;
 
-                this.stop.BeginLoop();
+                // this.stop.BeginLoop();
 
                 this.EnableControls(false);
                 try
@@ -3555,7 +3559,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                             bVerifyed = true;
                         }
 
-                        REDO_SAVE_DP2:
+                    REDO_SAVE_DP2:
                         string strOutputPath = "";
                         byte[] baOutputTimestamp = null;
                         // return:
@@ -3765,7 +3769,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                             this.LoginInfo = new dp2Catalog.LoginInfo();
 
                         bool bRedo = false;
-                        REDO_LOGIN:
+                    REDO_LOGIN:
                         if (string.IsNullOrEmpty(this.LoginInfo.UserName) == true
                             || bRedo == true)
                         {
@@ -3869,7 +3873,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 }
                 finally
                 {
-                    this.stop.EndLoop();
+                    // this.stop.EndLoop();
 
                     this.EnableControls(true);
                 }
@@ -3878,7 +3882,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             {
                 _processing--;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -4115,8 +4119,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 this.EnableControls(true);
             }
 
-            // return 0;
-            ERROR1:
+        // return 0;
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -4177,7 +4181,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 return 0;
             }
 
-            this.stop.BeginLoop();
+            // this.stop.BeginLoop();
 
             this.EnableControls(false);
             try
@@ -4279,7 +4283,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                         this.LoginInfo = new dp2Catalog.LoginInfo();
 
                     bool bRedo = false;
-                    REDO_LOGIN:
+                REDO_LOGIN:
                     if (string.IsNullOrEmpty(this.LoginInfo.UserName) == true
                         || bRedo == true)
                     {
@@ -4379,13 +4383,13 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             }
             finally
             {
-                this.stop.EndLoop();
+                // this.stop.EndLoop();
 
                 this.EnableControls(true);
             }
 
-            // return 0;
-            ERROR1:
+        // return 0;
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -5476,7 +5480,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 goto ERROR1;
             }
 
-            BEGIN:
+        BEGIN:
             // 如果必要，重新准备Assembly
             if (m_autogenDataAssembly == null
                 || m_strAutogenDataCfgFilename != strAutogenDataCfgFilename)
@@ -5625,7 +5629,7 @@ out strError);
             if (bAssemblyReloaded == true)
                 return 1;
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -5815,7 +5819,7 @@ Stack:
             {
                 this._processing--;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5908,7 +5912,7 @@ Stack:
                 this.m_genDataViewer.CloseWhenComplete = bOpenWindow;
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, "DisplayAutoGenMenu() 出错: " + strError);
         }
 
@@ -6017,7 +6021,7 @@ Stack:
                     this.m_genDataViewer.RefreshState();
             }
             return;
-            ERROR1:
+        ERROR1:
             // MessageBox.Show(this, strError);
             {
                 bool bSendReport = true;
@@ -6449,7 +6453,7 @@ Stack:
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -6572,7 +6576,7 @@ Stack:
 
             this.LinkedSearchForm = null;  // 切断和原来关联的检索窗的联系。这样就没法前后翻页了
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -6723,7 +6727,7 @@ Stack:
                     //      0   not found
                     //      1   found
                     nRet = dp2_searchform.GetDbSyntax(
-                        null,
+                        // null,
                         strServerName,
                         strBiblioDbName,
                         out strSyntax,
@@ -6840,7 +6844,7 @@ Stack:
 
                 this.LinkedSearchForm = null;  // 切断和原来关联的检索窗的联系。这样就没法前后翻页了
                 return 0;
-                ERROR1:
+            ERROR1:
                 MessageBox.Show(this, strError);
                 return -1;
             }
@@ -6894,7 +6898,7 @@ Stack:
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -6991,7 +6995,7 @@ Stack:
 
             MessageBox.Show(this, "修改模板 '" + strCfgPath + "' 成功");
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -7074,7 +7078,7 @@ Stack:
                 //      0   not found
                 //      1   found
                 nRet = dp2_searchform.GetDbSyntax(
-                    null,
+                    // null,
                     strServerName,
                     strBiblioDbName,
                     out strSyntax,
@@ -7173,7 +7177,7 @@ Stack:
 
             MessageBox.Show(this, "修改模板 '" + strCfgFilePath + "' 成功");
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -7455,7 +7459,7 @@ Keys keyData)
             }
 
             return bVerifyFail == true ? 2 : 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             if (this.m_verifyViewer != null)
                 this.m_verifyViewer.ResultString = strError;
@@ -7661,7 +7665,7 @@ Keys keyData)
 
             filter.Assembly = assembly;
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -7730,7 +7734,7 @@ Keys keyData)
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, "DoViewVerifyResult() 出错: " + strError);
         }
 
@@ -7874,7 +7878,7 @@ Keys keyData)
 
             this.MarcEditor.SelectCurEdit(subfield.Offset + 2, 0);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7973,7 +7977,7 @@ Keys keyData)
                 return;
             }
 
-            ERROR1:
+        ERROR1:
             e.Canceled = true;  // 不能解释处理
             return;
         }
@@ -8068,7 +8072,7 @@ Keys keyData)
                 }
 
                 return "";
-                ERROR1:
+            ERROR1:
                 // throw new Exception(strError);
                 return null;
             }

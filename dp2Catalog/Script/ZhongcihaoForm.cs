@@ -695,7 +695,7 @@ namespace dp2Catalog
                 m_strMaxNumber = value;
             }
         }
- 
+
         /// <summary>
         /// 尾号
         /// </summary>
@@ -823,19 +823,22 @@ namespace dp2Catalog
 
             EnableControls(false);
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索同类书记录 ...");
             stop.BeginLoop();
 
             this.Update();
             this.MainForm.Update();
+            */
+            var looping = BeginLoop(this.DoStop, "正在检索同类书记录 ...");
 
             try
             {
                 string strQueryXml = "";
 
                 long lRet = Channel.SearchUsedZhongcihao(
-                    stop,
+                    looping.stop,
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
@@ -850,28 +853,24 @@ namespace dp2Catalog
                     return 0;   // not found
                 }
 
-
                 long lHitCount = lRet;
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
                 ZhongcihaoSearchResult[] searchresults = null;
 
-                if (stop != null)
-                    stop.SetProgressRange(0, lHitCount);
+                if (looping.stop != null)
+                    looping.stop.SetProgressRange(0, lHitCount);
 
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    Application.DoEvents(); // 出让界面控制权
 
-                    if (stop != null)
+                    if (looping.Stopped)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
+                        strError = "用户中断";
+                        goto ERROR1;
                     }
 
                     long lCurrentPerCount = lPerCount;
@@ -884,11 +883,10 @@ namespace dp2Catalog
                         lCurrentPerCount = lPerCount * 10;
                     }
 
-
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = Channel.GetZhongcihaoSearchResult(
-                        stop,
+                        looping.stop,
                         GetZhongcihaoDbGroupName(this.BiblioDbName),
                         // "!" + this.BiblioDbName,
                         "zhongcihao",   // strResultSetName
@@ -925,8 +923,8 @@ namespace dp2Catalog
                         }
 
                         this.listView_number.Items.Add(item);
-                        if (stop != null)
-                            stop.SetProgressValue(lStart + i + 1);
+                        if (looping.stop != null)
+                            looping.stop.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
@@ -936,10 +934,13 @@ namespace dp2Catalog
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+                */
+                EndLoop(looping);
 
                 EnableControls(true);
             }
@@ -1046,7 +1047,7 @@ namespace dp2Catalog
         }
 
 
-                /// <summary>
+        /// <summary>
         ///  检索获得种次号库中对应类目的尾号。此功能比较单纯，所获得的结果并不放入面板界面元素
         /// </summary>
         /// <param name="strTailNumber">返回尾号</param>
@@ -1077,14 +1078,17 @@ namespace dp2Catalog
 
             EnableControls(false);
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获得尾号 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在获得尾号 ...");
 
             try
             {
                 long lRet = Channel.GetZhongcihaoTailNumber(
-                    stop,
+                    looping.stop,
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
@@ -1097,14 +1101,17 @@ namespace dp2Catalog
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+                */
+                EndLoop(looping);
 
                 EnableControls(true);
             }
 
-            // return 0;
+        // return 0;
         ERROR1:
             return -1;
         }
@@ -1144,14 +1151,17 @@ namespace dp2Catalog
 
                 EnableControls(false);
 
+                /*
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在推动尾号 ...");
                 stop.BeginLoop();
+                */
+                var looping = BeginLoop(this.DoStop, "正在推动尾号 ...");
 
                 try
                 {
                     long lRet = Channel.SetZhongcihaoTailNumber(
-                        stop,
+                        looping.stop,
                         "conditionalpush",
                         GetZhongcihaoDbGroupName(this.BiblioDbName),
                         // "!" + this.BiblioDbName,
@@ -1166,9 +1176,12 @@ namespace dp2Catalog
                 }
                 finally
                 {
+                    /*
                     stop.EndLoop();
                     stop.OnStop -= new StopEventHandler(this.DoStop);
                     stop.Initial("");
+                    */
+                    EndLoop(looping);
 
                     EnableControls(true);
                 }
@@ -1178,7 +1191,7 @@ namespace dp2Catalog
                 this._processing--;
             }
 
-            // return 0;
+        // return 0;
         ERROR1:
             return -1;
         }
@@ -1209,14 +1222,17 @@ namespace dp2Catalog
 
             EnableControls(false);
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存尾号 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在保存尾号 ...");
 
             try
             {
                 long lRet = Channel.SetZhongcihaoTailNumber(
-                    stop,
+                    looping.stop,
                     "save",
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
@@ -1231,14 +1247,17 @@ namespace dp2Catalog
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+                */
+                EndLoop(looping);
 
                 EnableControls(true);
             }
 
-            // return 0;
+        // return 0;
         ERROR1:
             return -1;
         }
@@ -1506,9 +1525,10 @@ namespace dp2Catalog
             out List<string> dbnames,
             out string strError)
         {
-            dbnames  = new List<string>();
+            dbnames = new List<string>();
             strError = "";
 
+            /*
             bool bInitialStop = false;
             if (stop == null)
             {
@@ -1520,12 +1540,15 @@ namespace dp2Catalog
 
                 bInitialStop = true;
             }
+            */
+            var looping = BeginLoop(this.DoStop, "正在获得服务器 " + strServerUrl + " 的信息 ...");
 
             dp2ServerInfo info = null;
 
             try
             {
-                info = this.MainForm.ServerInfos.GetServerInfo(stop,
+                info = this.MainForm.ServerInfos.GetServerInfo(
+                    looping.stop,
                     false,
 #if OLD_CHANNEL
                     this.Channels,
@@ -1539,12 +1562,15 @@ namespace dp2Catalog
             }
             finally
             {
+                /*
                 if (bInitialStop == true)
                 {
                     stop.EndLoop();
                     stop.OnStop -= new StopEventHandler(this.DoStop);
                     stop.Initial("");
                 }
+                */
+                EndLoop(looping);
             }
 
             for (int i = 0; i < info.BiblioDbProperties.Count; i++)
@@ -1597,14 +1623,17 @@ namespace dp2Catalog
 
             EnableControls(false);
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在增量尾号 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在增量尾号 ...");
 
             try
             {
                 long lRet = Channel.SetZhongcihaoTailNumber(
-                    stop,
+                    looping.stop,
                     "increase",
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
@@ -1619,14 +1648,17 @@ namespace dp2Catalog
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+                */
+                EndLoop(looping);
 
                 EnableControls(true);
             }
 
-            // return 0;
+        // return 0;
         ERROR1:
             return -1;
         }
@@ -1668,7 +1700,7 @@ namespace dp2Catalog
             this.ClassNumber = strClass;
             this.BiblioDbName = strBiblioDbName;
 
-        // 仅利用书目统计最大号
+            // 仅利用书目统计最大号
             if (style == ZhongcihaoStyle.Biblio)
             {
                 // 得到当前书目中统计出来的最大号的加1以后的号
@@ -1694,7 +1726,7 @@ namespace dp2Catalog
                 // 如果本类尚未创建种次号条目
                 if (String.IsNullOrEmpty(strTailNumber) == true)
                 {
-                     // 毕竟初始值还是利用了统计结果
+                    // 毕竟初始值还是利用了统计结果
                     string strTestNumber = "";
                     // 得到当前书目中统计出来的最大号的加1以后的号
                     // return:
