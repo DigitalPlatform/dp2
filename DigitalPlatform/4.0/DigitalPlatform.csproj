@@ -280,7 +280,9 @@
       <DependentUpon>SerialCodeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="..\SortColumns.cs" />
-    <Compile Include="..\Stop.cs" />
+    <Compile Include="..\Stop.cs">
+      <Link>Stop\Stop.cs</Link>
+    </Compile>
     <Compile Include="..\ThreadBase.cs" />
     <Compile Include="..\TransparentToolStripRenderer.cs" />
     <Compile Include="..\TreeViewUtil.cs" />
@@ -317,6 +319,8 @@
     <Compile Include="SelectDlg.Designer.cs">
       <DependentUpon>SelectDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="Stop\Looping.cs" />
+    <Compile Include="Stop\StopManager.cs" />
     <Compile Include="WebBrowserExtension.cs" />
     <EmbeddedResource Include="..\AutoCloseMessageBox.resx">
       <DependentUpon>AutoCloseMessageBox.cs</DependentUpon>

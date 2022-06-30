@@ -30,6 +30,9 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 
+// TODO: 记录窗里面修改后，反馈到 dp2 检索窗这里的浏览列表行，行的背景色应该变为淡黄色
+// TODO: 点选浏览行，固定面板区“属性”属性页的显示装载过程应该用后台线程进行，不要阻挡继续点选
+
 namespace dp2Catalog
 {
     public partial class dp2SearchForm : MyForm, ISearchForm
@@ -3208,11 +3211,13 @@ namespace dp2Catalog
                 this.MainForm.Update();
             }
             */
-            var looping = BeginLoop(this.DoStop, "正在装入书目记录 ...");
+            Looping looping = null;
+            if (bUseLoop)
+                looping = BeginLoop(this.DoStop, "正在装入书目记录 ...");
 
             try
             {
-                looping.stop.SetMessage("正在装入书目记录 " + strPath + " ...");
+                looping?.stop?.SetMessage("正在装入书目记录 " + strPath + " ...");
 
                 string[] formats = null;
                 formats = new string[2];
@@ -3229,7 +3234,7 @@ namespace dp2Catalog
                     strCmd += "$" + strDirection;
 
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,   // temp_stop,
+                    looping == null ? null : looping.stop,   // temp_stop,
                     strCmd,
                     "",
                     formats,
@@ -3284,7 +3289,8 @@ namespace dp2Catalog
                     temp_stop.Initial("");
                 }
                 */
-                EndLoop(looping);
+                if (looping != null)
+                    EndLoop(looping);
 
                 Program.MainForm.ReturnChannel(channel);
 #if OLD_CHANNEL
@@ -4586,7 +4592,9 @@ namespace dp2Catalog
                 //this.MainForm.Update();
             }
             */
-            var looping = BeginLoop(this.DoStop, "正在保存 MARC 记录 ...");
+            Looping looping = null;
+            if (bUseLoop)
+                looping = BeginLoop(this.DoStop, "正在保存 MARC 记录 ...");
 
             try
             {
@@ -4664,12 +4672,12 @@ namespace dp2Catalog
                 if (IsAppendRecPath(strPurePath) == true)
                     strAction = "new";
 
-                looping.stop.SetMessage("正在保存书目记录 " + strPath + " ...");
+                looping?.stop?.SetMessage("正在保存书目记录 " + strPath + " ...");
 
                 string strOutputBiblioRecPath = "";
 
                 long lRet = channel.SetBiblioInfo(
-                    looping.stop,   // temp_stop,
+                    looping == null ? null : looping.stop,   // temp_stop,
                     strAction,
                     strPurePath,
                     "xml",
@@ -4706,7 +4714,8 @@ namespace dp2Catalog
                     temp_stop.OnStop -= new StopEventHandler(this.DoStop);
                 }
                 */
-                EndLoop(looping);
+                if (looping != null)
+                    EndLoop(looping);
 
                 Program.MainForm.ReturnChannel(channel);
 #if OLD_CHANNEL
@@ -5219,6 +5228,7 @@ namespace dp2Catalog
                     // writer.WriteBegin();
                     bool begin_writed = false;  // 延迟写 collection
                     int i = 0;
+                    int count = this.listView_browse.SelectedItems.Count;
                     foreach (ListViewItem item in this.listView_browse.SelectedItems)
                     {
                         Application.DoEvents(); // 出让界面控制权
@@ -5293,6 +5303,7 @@ namespace dp2Catalog
                             goto ERROR1;
 
                         looping.stop.SetProgressValue(i + 1);
+                        looping.stop.SetMessage($"正在导出 {strPath}  {i + 1}/{count} ...");
                         i++;
                     }
 
@@ -5685,7 +5696,12 @@ namespace dp2Catalog
             {
                 looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
                 bool bAsked = false;
-                for (int i = 0; i < this.listView_browse.SelectedItems.Count; i++)
+
+                int i = 0;
+                int count = this.listView_browse.SelectedItems.Count;
+                
+                // for (int i = 0; i < this.listView_browse.SelectedItems.Count; i++)
+                foreach(ListViewItem item in this.listView_browse.SelectedItems)
                 {
                     Application.DoEvents(); // 出让界面控制权
 
@@ -5695,7 +5711,7 @@ namespace dp2Catalog
                         goto ERROR1;
                     }
 
-                    string strPath = this.listView_browse.SelectedItems[i].Text;
+                    string strPath = item.Text;
 
                     byte[] baTarget = null;
 
@@ -5835,6 +5851,8 @@ MessageBoxDefaultButton.Button2);
                     nCount++;
 
                     looping.stop.SetProgressValue(i + 1);
+                    looping.stop.SetMessage($"正在导出 {strPath}  {i + 1}/{count} ...");
+                    i++;
                 }
             }
             catch (Exception ex)
@@ -7402,14 +7420,17 @@ Program.MainForm,
                 int count = 0;
 
                 ListViewUtil.ClearSortColumns(this.listView_browse);
-                // stop.SetProgressRange(0, _linkMarcFile.Stream.Length);
 
                 XmlReaderSettings settings = new XmlReaderSettings();
                 settings.Async = true;
+                // settings.ValidationEventHandler
 
                 int i = 0;
-                using (XmlReader reader = XmlReader.Create(dlg.FileName, settings))
+                using (var stream = File.OpenRead(dlg.FileName))
+                using (XmlReader reader = XmlReader.Create(stream, settings))
                 {
+                    looping.stop.SetProgressRange(0, stream.Length);
+
                     // 定位到 collection 元素
                     while (true)
                     {
@@ -7485,12 +7506,20 @@ Program.MainForm,
                     this.listView_browse,
                     strRecPath,
                     cols);
-                                looping.stop.SetMessage(i.ToString());
-                                // stop.SetProgressValue(_linkMarcFile.Stream.Position);
+                                looping.stop.SetProgressValue(stream.Position);
+                                looping.stop.SetMessage($"正在导入 {i + 1} ...");
                             }
 
                             i++;
                             count++;
+
+                            // 中途刷新一下
+                            if ((i % 100) == 1)
+                            {
+                                this.listView_browse.EndUpdate();
+                                Application.DoEvents();
+                                this.listView_browse.BeginUpdate();
+                            }
                         }
                     }
                 }
@@ -7555,6 +7584,187 @@ Program.MainForm,
 
             string strError = "";
 
+            string marcSyntax = dlg.MarcSyntax;
+
+            ClearListViewItems();
+
+            var looping = BeginLoop(this.DoStop, "正在从 MARC 文件导入 ...");
+            looping.stop.Style = StopStyle.EnableHalfStop;
+
+            this.listView_browse.BeginUpdate();
+            try
+            {
+                ListViewUtil.ClearSortColumns(this.listView_browse);
+
+                using (var stream = File.OpenRead(dlg.FileName))
+                {
+                    looping.stop.SetProgressRange(0, stream.Length);
+
+                    bool bEOF = false;
+                    for (int i = 0; bEOF == false; i++)
+                    {
+                        Application.DoEvents(); // 出让界面控制权
+
+                        if (looping.Stopped)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        string strMARC = "";
+                        byte[] baRecord = null;
+
+                        // 从ISO2709文件中读入一条MARC记录
+                        // return:
+                        //	-2	MARC格式错
+                        //	-1	出错
+                        //	0	正确
+                        //	1	结束(当前返回的记录有效)
+                        //	2	结束(当前返回的记录无效)
+                        int nRet = MarcUtil.ReadMarcRecord(stream,
+                            dlg.Encoding,
+                            true,   // bRemoveEndCrLf,
+                            true,   // bForce,
+                            out strMARC,
+                            out baRecord,
+                            out strError);
+                        if (nRet == -2 || nRet == -1)
+                        {
+                            strError = "读入MARC记录(" + i.ToString() + ")出错: " + strError;
+                            goto ERROR1;
+                        }
+
+                        if (nRet == 1)
+                            bEOF = true;
+                        if (nRet == 2)
+                            break;
+
+                        if (dlg.MarcSyntax == "<自动>"
+        || dlg.MarcSyntax.ToLower() == "<auto>")
+                        {
+                            // 自动识别MARC格式
+                            string strOutMarcSyntax = "";
+                            // 探测记录的MARC格式 unimarc / usmarc / reader
+                            // return:
+                            //      0   没有探测出来。strMarcSyntax为空
+                            //      1   探测出来了
+                            nRet = MarcUtil.DetectMarcSyntax(strMARC,
+                                out strOutMarcSyntax);
+                            marcSyntax = strOutMarcSyntax;    // 有可能为空，表示探测不出来
+                            if (String.IsNullOrEmpty(marcSyntax) == true)
+                            {
+                                MessageBox.Show(this, "软件无法确定此 MARC 文件的 MARC 格式");
+                            }
+                        }
+
+                        if (dlg.Mode880 == true && marcSyntax == "usmarc")
+                        {
+                            MarcRecord temp = new MarcRecord(strMARC);
+                            MarcQuery.ToParallel(temp);
+                            strMARC = temp.Text;
+                        }
+
+                        string strXml = "";
+                        nRet = MarcUtil.Marc2XmlEx(strMARC,
+            marcSyntax,
+            ref strXml,
+            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        string strRecPath = i.ToString() + " @file";
+                        BiblioInfo info = new BiblioInfo();
+                        info.RecPath = strRecPath;
+                        this.m_biblioTable[strRecPath] = info;
+
+                        info.OldXml = strXml;
+                        info.Timestamp = null;
+                        info.RecPath = strRecPath;
+
+                        string strSytaxOID = "";
+
+                        if (marcSyntax == "unimarc")
+                            strSytaxOID = "1.2.840.10003.5.1";                // unimarc
+                        else if (marcSyntax == "usmarc")
+                            strSytaxOID = "1.2.840.10003.5.10";               // usmarc
+
+                        string strBrowseText = "";
+                        if (strSytaxOID == "1.2.840.10003.5.1"    // unimarc
+            || strSytaxOID == "1.2.840.10003.5.10")  // usmarc
+                        {
+                            nRet = BuildMarcBrowseText(
+                                strSytaxOID,
+                                strMARC,
+                                out strBrowseText,
+                                out strError);
+                            if (nRet == -1)
+                                strBrowseText = strError;
+                        }
+
+                        string[] cols = strBrowseText.Split(new char[] { '\t' });
+
+                        // 创建浏览行
+                        NewLine(
+            this.listView_browse,
+            strRecPath,
+            cols);
+                        looping.stop.SetMessage($"正在导入 {i + 1} ...");
+                        looping.stop.SetProgressValue(stream.Position);
+
+                        // 中途刷新一下
+                        if ((i % 100) == 0)
+                        {
+                            this.listView_browse.EndUpdate();
+                            Application.DoEvents();
+                            this.listView_browse.BeginUpdate();
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                this.listView_browse.EndUpdate();
+                EndLoop(looping);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+#if OLD
+        // 从 MARC 文件中导入
+        void menu_importFromMarcFile_Click(object sender, EventArgs e)
+        {
+            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
+            GuiUtil.SetControlFont(dlg, this.Font);
+            dlg.IsOutput = false;
+            dlg.GetEncoding -= new GetEncodingEventHandler(dlg_GetEncoding);
+            dlg.GetEncoding += new GetEncodingEventHandler(dlg_GetEncoding);
+            dlg.FileName = this.MainForm.LinkedMarcFileName;
+            // dlg.CrLf = MainForm.LastCrLfIso2709;
+            dlg.EncodingListItems = Global.GetEncodingList(true);
+            // dlg.EncodingName = ""; GetEncodingForm.GetEncodingName(preferredEncoding);
+            // dlg.EncodingComment = "注: 原始编码方式为 " + GetEncodingForm.GetEncodingName(preferredEncoding);
+            // dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
+            dlg.EnableMarcSyntax = true;
+
+            if (String.IsNullOrEmpty(this.MainForm.LinkedEncodingName) == false)
+                dlg.EncodingName = this.MainForm.LinkedEncodingName;
+            if (String.IsNullOrEmpty(this.MainForm.LinkedMarcSyntax) == false)
+                dlg.MarcSyntax = this.MainForm.LinkedMarcSyntax;
+
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            // 储存用过的文件名
+            // 2009/9/21
+            this.MainForm.LinkedMarcFileName = dlg.FileName;
+            this.MainForm.LinkedEncodingName = dlg.EncodingName;
+            this.MainForm.LinkedMarcSyntax = dlg.MarcSyntax;
+
+            string strError = "";
 
             _linkMarcFile = new LinkMarcFile();
             int nRet = _linkMarcFile.Open(dlg.FileName,
@@ -7680,7 +7890,7 @@ Program.MainForm,
         this.listView_browse,
         strRecPath,
         cols);
-                    looping.stop.SetMessage(i.ToString());
+                    looping.stop.SetMessage($"正在导入 {i+1} ...");
                     looping.stop.SetProgressValue(_linkMarcFile.Stream.Position);
                 }
             }
@@ -7705,6 +7915,8 @@ Program.MainForm,
             MessageBox.Show(this, strError);
             _linkMarcFile = null;
         }
+#endif
+
 
         void dlg_GetEncoding(object sender, GetEncodingEventArgs e)
         {
@@ -8903,12 +9115,14 @@ out string strError)
             string strError = "";
             int nRet = 0;
 
-            AmazonSearchForm amazon_searchform = this.MainForm.GetAmazonSearchForm();
+            // AmazonSearchForm amazon_searchform = this.MainForm.GetAmazonSearchForm();
 
             foreach (ListViewItem item in this.listView_browse.SelectedItems)
             {
                 if (item.Tag is AmazonSearchForm.ItemInfo)
                 {
+                    AmazonSearchForm amazon_searchform = this.MainForm.GetAmazonSearchForm();
+
                     AmazonSearchForm.ItemInfo origin = (AmazonSearchForm.ItemInfo)item.Tag;
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
 

@@ -359,45 +359,4 @@ namespace dp2Catalog
         }
     }
 
-    public class Looping : IDisposable
-    {
-        public Stop stop { get; set; }
-        StopEventHandler _handler = null;
-
-        public void Dispose()
-        {
-            if (stop != null)
-            {
-                stop.EndLoop();
-                stop.OnStop -= _handler;
-                stop.Initial("");
-                stop.HideProgress();
-
-                stop.Unregister();	// 和容器解除关联
-                stop = null;
-            }
-        }
-
-        public Looping(StopEventHandler handler,
-            string text)
-        {
-            stop = new Stop();
-            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
-
-            _handler = handler;
-            stop.OnStop += handler;
-            stop.Initial(text);
-            stop.BeginLoop();
-        }
-
-        public bool Stopped
-        {
-            get
-            {
-                if (stop != null && stop.State != 0)
-                    return true;
-                return false;
-            }
-        }
-    }
 }

@@ -122,6 +122,7 @@ namespace dp2Catalog
                 SetTitle();
             };
             */
+            Looping.Initialize(stopManager);
         }
 
         private void MainForm_Load(object sender, EventArgs e)

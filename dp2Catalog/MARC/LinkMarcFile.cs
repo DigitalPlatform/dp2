@@ -189,7 +189,6 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKeyT
             }
 
             this.CurrentIndex = index;
-
             return 0;
         }
 

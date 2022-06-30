@@ -390,7 +390,7 @@ namespace DigitalPlatform.Marc
 
                     if (strSubfieldName != null)
                         _writer.WriteAttributeString("code", ReplaceInvalidXmlChars(strSubfieldName));
-                    _writer.WriteString(strSubfieldContent); //注意这里是否有越界的危险
+                    _writer.WriteString(ReplaceInvalidXmlCharsEx(strSubfieldContent)); //注意这里是否有越界的危险
                     _writer.WriteEndElement();
                 }
 
@@ -419,6 +419,21 @@ namespace DigitalPlatform.Marc
                     results.Append(ch);
                 else
                     results.Append(replaceChar);
+            }
+
+            return results.ToString();
+        }
+
+        public static string ReplaceInvalidXmlCharsEx(
+    string content)
+        {
+            StringBuilder results = new StringBuilder();
+            foreach (char ch in content)
+            {
+                if (System.Xml.XmlConvert.IsXmlChar(ch))
+                    results.Append(ch);
+                else
+                    results.Append($"(0x{(int)ch:X})");
             }
 
             return results.ToString();
