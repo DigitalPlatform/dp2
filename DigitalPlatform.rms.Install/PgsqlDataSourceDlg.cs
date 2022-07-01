@@ -239,6 +239,7 @@ namespace DigitalPlatform.rms
             this.Close();
         }
 
+        // TODO: 建议分数据库类型存储。比如存储在一个 hashtable 中
         string adminUserName = "";
         string adminPassword = "";
 
@@ -249,7 +250,11 @@ namespace DigitalPlatform.rms
         }
 
         // 询问超级用户名和密码
-        string AskAdminUserName(out string userName, out string password)
+        string AskAdminUserName(
+            string title,
+            string defaultUserName,
+            out string userName, 
+            out string password)
         {
             if (string.IsNullOrEmpty(adminUserName))
             {
@@ -258,9 +263,9 @@ namespace DigitalPlatform.rms
 
                 using (LoginDlg dlg = new LoginDlg())
                 {
-                    dlg.Comment = "请提供 PostgreSQL 超级用户名和密码";
+                    dlg.Comment = title;    // "请提供 PostgreSQL 超级用户名和密码";
                     dlg.ServerUrl = " ";
-                    dlg.UserName = "postgres";
+                    dlg.UserName = defaultUserName; //  "postgres";
                     dlg.Password = "";
                     dlg.SavePassword = true;
                     dlg.ShowDialog(this);
@@ -305,7 +310,10 @@ out string strError)
                 return -1;
             }
 
-            strError = func_getAdminUserName(out string strAdminUserName, out string strAdminPassword);
+            strError = func_getAdminUserName("请提供 PostgreSQL 超级用户名和密码",
+                "postgres",
+                out string strAdminUserName, 
+                out string strAdminPassword);
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 
@@ -424,7 +432,11 @@ out string strError)
 
 #endif
 
-        public delegate string Delegate_getAdminUserName(out string userName, out string password);
+        public delegate string Delegate_getAdminUserName(
+            string title,
+            string defaultUserName,
+            out string userName,
+            out string password);
 
         // 创建用户
         public static int CreateUser(
@@ -442,7 +454,10 @@ out string strError)
                 return -1;
             }
 
-            strError = func_getAdminUserName(out string strAdminUserName, out string strAdminPassword);
+            strError = func_getAdminUserName("请提供 PostgreSQL 超级用户名和密码",
+                "postgres",
+                out string strAdminUserName,
+                out string strAdminPassword);
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 
@@ -506,7 +521,10 @@ out string strError)
                 return -1;
             }
 
-            strError = func_getAdminUserName(out string strAdminUserName, out string strAdminPassword);
+            strError = func_getAdminUserName("请提供 PostgreSQL 超级用户名和密码",
+                "postgres",
+                out string strAdminUserName,
+                out string strAdminPassword);
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 
@@ -574,7 +592,10 @@ out string strError)
                 return -1;
             }
 
-            strError = func_getAdminUserName(out string strAdminUserName, out string strAdminPassword);
+            strError = func_getAdminUserName("请提供 PostgreSQL 超级用户名和密码",
+                "postgres",
+                out string strAdminUserName, 
+                out string strAdminPassword);
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 

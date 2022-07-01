@@ -1069,9 +1069,26 @@ out strError);
                     sql_dbnames.Add(strSqlDbName);
                 }
 
-                if (sql_dbnames.Count == 0)
-                    return 0;
+                if (sql_dbnames.Count > 0)
+                {
+                    // 删除所有的 table
+                    nRet = DeleteOracleTables(strConnectionString,
+        sql_dbnames,
+        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
 
+                // 2022/7/1
+                // 用 system 用户身份删除 dp2kernel_oracle 账户(和表空间)
+                nRet = OracleDataSourceWizard.DeleteUser(
+                    info.SqlServerName,
+                    info.DatabaseLoginName,
+                    AskAdminUserName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+#if REMOVED
                 string strCommand = " SELECT table_name FROM user_tables WHERE ";
 
                 int i = 0;
@@ -1133,11 +1150,84 @@ out strError);
                     strError = "执行 SQL 命令时出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
                     return -1;
                 }
+#endif
             }
 
             return 1;
         }
 
+        static int DeleteOracleTables(string strConnectionString,
+            List<string> sql_dbnames,
+            out string strError)
+        {
+            strError = "";
+
+            string strCommand = " SELECT table_name FROM user_tables WHERE ";
+
+            int i = 0;
+            foreach (string strSqlDbName in sql_dbnames)
+            {
+                string pattern = (strSqlDbName + "_%").Replace("_", "\\_");
+                if (i > 0)
+                    strCommand += " or ";
+                strCommand += " table_name like '" + pattern.ToUpper() + "_%' ESCAPE '\\'";
+                i++;
+            }
+
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(strConnectionString))
+                {
+                    connection.Open();
+
+                    List<string> table_names = new List<string>();
+                    using (OracleCommand command = new OracleCommand(strCommand, connection))
+                    {
+                        using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
+                        {
+                            while (dr.Read())
+                            {
+                                if (dr.IsDBNull(0) == false)
+                                    table_names.Add(dr.GetString(0));
+                            }
+                        }
+
+                        // 第二步，删除这些表
+                        List<string> cmd_lines = new List<string>();
+                        foreach (string strTableName in table_names)
+                        {
+                            cmd_lines.Add("DROP TABLE " + strTableName + " \n");
+                        }
+
+                        foreach (string strLine in cmd_lines)
+                        {
+                            command.CommandText = strLine;
+                            try
+                            {
+                                command.ExecuteNonQuery();
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "删除所有表时出错：\r\n"
+                                    + ex.Message + "\r\n"
+                                    + "SQL命令:\r\n"
+                                    + strLine;
+                                return -1;
+                            }
+                        }
+
+                        return 0;
+                    } // end of using command
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "执行 SQL 命令时出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+        }
+
+        // TODO: 建议分数据库类型存储。比如存储在一个 hashtable 中
         string adminUserName = "";
         string adminPassword = "";
 
@@ -1148,7 +1238,11 @@ out strError);
         }
 
         // 询问超级用户名和密码
-        string AskAdminUserName(out string userName, out string password)
+        string AskAdminUserName(
+            string title,
+            string defaultUserName,
+            out string userName,
+            out string password)
         {
             if (string.IsNullOrEmpty(adminUserName))
             {
@@ -1157,9 +1251,9 @@ out strError);
 
                 using (LoginDlg dlg = new LoginDlg())
                 {
-                    dlg.Comment = "请提供 PostgreSQL 超级用户名和密码";
+                    dlg.Comment = title;
                     dlg.ServerUrl = " ";
-                    dlg.UserName = "postgres";
+                    dlg.UserName = defaultUserName; //  "postgres";
                     dlg.Password = "";
                     dlg.SavePassword = true;
                     dlg.ShowDialog(this);
