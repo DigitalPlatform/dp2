@@ -6452,7 +6452,6 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-
                 if (looping.stop != null)
                     looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
 
@@ -6507,7 +6506,11 @@ Program.MainForm,
                     looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
-
+                    if (string.IsNullOrEmpty(info.NewXml) == false)
+                    {
+                        // 将 OldXml 内容设为起点内容
+                        info.OldXml = info.NewXml;
+                    }
                     string strMARC = "";
                     string strMarcSyntax = "";
                     // 将XML格式转换为MARC格式
@@ -7288,6 +7291,11 @@ Program.MainForm,
                     looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
+                    if (string.IsNullOrEmpty(info.NewXml) == false)
+                    {
+                        // 将 OldXml 内容设为起点内容
+                        info.OldXml = info.NewXml;
+                    }
 
                     // 将XML格式转换为MARC格式
                     // 自动从数据记录中获得MARC语法
@@ -7302,7 +7310,6 @@ Program.MainForm,
                         strError = "XML转换到MARC记录时出错: " + strError;
                         goto ERROR1;
                     }
-
 
                     if (strMarcSyntax != "usmarc")
                     {

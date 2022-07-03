@@ -116,11 +116,23 @@ namespace DigitalPlatform.CommonDialog
                 if (type.Width == -1)
                 {
                     result = this.ImageInfo.BackupImage;
+
+                    // 2022/7/1
+                    if (result != null)
+                        result = result.Clone() as Image;
+
                     type.ProcessCommand = this.ImageInfo.ProcessCommand;
                 }
                 else if (this.ImageInfo.Image.Width >= type.Width)
                 {
-                    result = CreateImage(this.ImageInfo.Image, type.Width);
+                    result = CreateImage(this.ImageInfo.Image,
+                        type.Width,
+                        out bool created);
+                    if (created == false)
+                    {
+                        result = result.Clone() as Image;
+                        // result = CopyImage(result);    //复制图像 2022/7/1
+                    }
                 }
                 else
                 {
@@ -158,8 +170,21 @@ namespace DigitalPlatform.CommonDialog
             return 0;
         }
 
-        Image CreateImage(Image image, int nWidth)
+        static Bitmap CopyImage(Image source)
         {
+            Bitmap img = new Bitmap(source.Width, source.Height);
+            using (Graphics gr = Graphics.FromImage(img))
+            {
+                gr.DrawImage(source, new Point(0, 0));
+            }
+            return img;
+        }
+
+        Image CreateImage(Image image,
+            int nWidth,
+            out bool created)
+        {
+            created = false;
             Image result = null;
 
             if (nWidth == -1)
@@ -188,13 +213,13 @@ namespace DigitalPlatform.CommonDialog
                 out strError);
             if (nRet == -1)
                 throw new Exception(strError);
-
+            created = true;
             return result;
         }
 
         void ClearDefaultTypes()
         {
-            foreach(ImageType type in _defaultTypes)
+            foreach (ImageType type in _defaultTypes)
             {
                 // 不要 Dispose() this.ImageInfo 管辖的两个图像对象
                 if (this.ImageInfo != null)

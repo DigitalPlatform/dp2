@@ -66,7 +66,6 @@ namespace DigitalPlatform.CirculationClient
             //_inSearch++;
             try
             {
-
                 // 获得媒体类型
                 long lRet = Channel.GetRes(
                     null,
@@ -226,7 +225,6 @@ namespace DigitalPlatform.CirculationClient
             {
                 m_lCurrent = value;
             }
-
         }
 
         public override int Read(byte[] buffer,

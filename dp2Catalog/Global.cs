@@ -691,14 +691,21 @@ namespace dp2Catalog
             List<string> result = new List<string>();
 
             EncodingInfo[] infos = Encoding.GetEncodings();
-            for (int i = 0; i < infos.Length; i++)
+
+            // 2022/7/11
+            Array.Sort(infos, 
+                (a, b) => {
+                    return string.Compare(a.Name, b.Name);
+                });
+
+            foreach (var info in infos)
             {
-                if (infos[i].GetEncoding().Equals(Encoding.GetEncoding(936)) == true)
-                    result.Insert(0, infos[i].Name);
-                else if (infos[i].GetEncoding().Equals(Encoding.UTF8) == true)
-                    result.Insert(0, infos[i].Name);
+                if (info.GetEncoding().Equals(Encoding.GetEncoding(936)) == true)
+                    result.Insert(0, info.Name);
+                else if (info.GetEncoding().Equals(Encoding.UTF8) == true)
+                    result.Insert(0, info.Name);
                 else
-                    result.Add(infos[i].Name);
+                    result.Add(info.Name);
             }
 
             if (bHasMarc8 == true)
