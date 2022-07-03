@@ -31,6 +31,23 @@ namespace dp2KernelApiTester
             MainForm.AppendHtml(text);
         }
 
+        public static void ShowImage(string fileName)
+        {
+            MainForm.AppendHtml($"<img src='{fileName}' border='1'></img>");
+        }
+
+        public static void ShowProgressMessage(string id, string text)
+        {
+            MainForm.ShowProgressMessage(id, text);
+        }
+
+        static int _progressIdSeed = 0;
+
+        public static string NewProgressID()
+        {
+            return _progressIdSeed++.ToString();
+        }
+
         static string EncryptKey = "dp2kernelapitester_key";
 
         internal static string DecryptPasssword(string strEncryptedText)
@@ -58,6 +75,19 @@ namespace dp2KernelApiTester
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
+        public static string [] Urls
+        {
+            get
+            {
+                var list = ClientInfo.Config.Get("dp2kernel", "urls", null);
+                return StringUtil.SplitList(list).ToArray();
+            }
+            set
+            {
+
+                ClientInfo.Config.Set("dp2kernel", "urls", StringUtil.MakePathList(value));
+            }
+        }
 
         public static string dp2kernelServerUrl
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Xml;
 
 using DigitalPlatform.Xml;
@@ -125,9 +126,48 @@ namespace DigitalPlatform.rms
 			return strResult;
 		}
 
-        // 对集合进行去重，去重之前先用DpKeys.Sort()进行排序。
-        public void RemoveDup()
+		// static Encoding _encoding = null;
+		static string _old = new String((char)0x00, 1);
+
+		// 确保字符串将来转换为 UTF-8 以后是合法的
+		// https://docs.microsoft.com/en-us/dotnet/api/system.text.decoderreplacementfallback?redirectedfrom=MSDN&view=net-6.0#examples
+		public static string VerifyUtf8(string value)
+		{
+			if (string.IsNullOrEmpty(value))
+				return value;
+
+			return value.Replace(_old, "");
+			/*
+			if (_encoding == null)
+			{
+				_encoding = Encoding.GetEncoding(
+				  "utf-8",
+				  new EncoderReplacementFallback("*"),
+				  new DecoderReplacementFallback("*"));
+			}
+
+			byte[] bytes = _encoding.GetBytes(value);
+			return _encoding.GetString(bytes);
+			*/
+		}
+
+		// 2022/3/12
+		// 矫正 .Key，使得对于 UTF-8 合法
+		public void VerifyUtf8()
         {
+			foreach (KeyItem keyItem in this)
+			{
+				keyItem.Key = VerifyUtf8(keyItem.Key);
+			}
+		}
+
+		// 对集合进行去重，去重之前先用DpKeys.Sort()进行排序。
+		public void RemoveDup()
+        {
+			this.VerifyUtf8();
+
+			this.Sort();
+
             KeyItem prev = null;
             for (int i = 0; i < this.Count; i++)
             {

@@ -5522,7 +5522,6 @@ ref strNewStyle);	// 不要数据体和metadata
             REDO:
                 try
                 {
-
                     string strMessage = "";
 
                     string strPercent = "";
@@ -5713,7 +5712,7 @@ ref strNewStyle);	// 不要数据体和metadata
             return 0;
         }
 
-        string BuildMetadataXml(string strMime,
+        public static string BuildMetadataXml(string strMime,
             string strLocalPath,
             string strLastModifyTime)
         {

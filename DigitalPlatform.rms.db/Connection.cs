@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -8,20 +9,21 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MySqlConnector;
 
 //using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
+using MySqlConnector;
+using Npgsql;
 
 namespace DigitalPlatform.rms
 {
     // 包装多种类型的Connection
-    public class Connection : IDisposable
+    public class Connection : IDisposable, IDbConnection
     {
         public SqlDatabase SqlDatabase = null;
         public SqlServerType SqlServerType = SqlServerType.None;
 
-        object _connection = null;
+        IDbConnection _connection = null;
         bool _bGlobal = false;
         internal IDbTransaction _globalTrans = null;
 
@@ -105,7 +107,8 @@ namespace DigitalPlatform.rms
 #endif
                 if ((style & ConnectionStyle.Global) == ConnectionStyle.Global)
                 {
-                    this._bGlobal = true;
+                    // 2022/2/19 暂时屏蔽全局 Connection 功能
+                    // this._bGlobal = true;
                 }
                 this._connection = new SQLiteConnection(strConnectionString);
             }
@@ -113,6 +116,8 @@ namespace DigitalPlatform.rms
                 this._connection = new MySqlConnection(strConnectionString);
             else if (this.SqlServerType == rms.SqlServerType.Oracle)
                 this._connection = new OracleConnection(strConnectionString);
+            else if (this.SqlServerType == rms.SqlServerType.Pgsql)
+                this._connection = new NpgsqlConnection(strConnectionString);
             else
             {
                 throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
@@ -158,20 +163,16 @@ namespace DigitalPlatform.rms
                 catch (MySqlException ex)
                 {
                     // 异常记入日志
-                    if (database != null
-                        && database.container != null
-                        && database.container.KernelApplication != null)
-                        database.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
+                    if (database != null)
+                        database.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
 
                     exception = ex;
                     if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
                         && ex.InnerException is ArgumentException)
                     {
                         // 重试过程记入日志
-                        if (database != null
-                            && database.container != null
-                            && database.container.KernelApplication != null)
-                            database.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
+                        if (database != null)
+                            database.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
 
                         {
                             Thread.Sleep(500);
@@ -199,20 +200,16 @@ namespace DigitalPlatform.rms
                 catch (MySqlException ex)
                 {
                     // 异常记入日志
-                    if (this.SqlDatabase != null
-                        && this.SqlDatabase.container != null
-                        && this.SqlDatabase.container.KernelApplication != null)
-                        this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
+                    if (this.SqlDatabase != null)
+                        this.SqlDatabase.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
 
                     exception = ex;
                     if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
                         && ex.InnerException is ArgumentException)
                     {
                         // 重试过程记入日志
-                        if (this.SqlDatabase != null
-                            && this.SqlDatabase.container != null
-                            && this.SqlDatabase.container.KernelApplication != null)
-                            this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
+                        if (this.SqlDatabase != null)
+                            this.SqlDatabase.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
 
                         {
                             Thread.Sleep(500);
@@ -230,9 +227,7 @@ namespace DigitalPlatform.rms
         /*public*/
         void _open()
         {
-            if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
-                this.SqlConnection.Open();
-            else if (this.SqlServerType == rms.SqlServerType.SQLite)
+            if (this.SqlServerType == rms.SqlServerType.SQLite)
             {
                 if (this._bGlobal == false)
                 {
@@ -248,6 +243,7 @@ namespace DigitalPlatform.rms
                     if (this._lock == null)
                         _lock = new ReaderWriterLockSlim();
 
+                    // ?? 会多次重复锁定么？如何防止？
                     if (this._lock != null && this._lock.TryEnterWriteLock(this._nLockTimeout) == false)
                         throw new ApplicationException("为Database全局Connection (Open) 加写锁时失败。Timeout=" + this._nLockTimeout.ToString());
 
@@ -274,49 +270,20 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
+#if OLD_CODE
+            else if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
+                this.SqlConnection.Open();
             else if (this.SqlServerType == rms.SqlServerType.MySql)
                 this.MySqlConnection.Open();
             else if (this.SqlServerType == rms.SqlServerType.Oracle)
             {
                 this.OracleConnection.Open();
-
-#if NO
-                int nRedoCount = 0;
-            REDO_OPEN:
-                try
-                {
-                    this.OracleConnection.Open();
-                    if (this.OracleConnection.State != ConnectionState.Open)
-                    {
-                        if (nRedoCount <= 5)
-                        {
-                            nRedoCount++;
-                            goto REDO_OPEN;
-                        }
-                        else
-                        {
-                            Debug.Assert(false, "");
-                        }
-                    }
-
-                }
-                catch (OracleException ex)
-                {
-                    if (ex.Errors.Count > 0 && ex.Errors[0].Number == 12520
-                        && nRedoCount <= 0)
-                    {
-                        nRedoCount++;
-                        this.OracleConnection.Close();
-                        goto REDO_OPEN;
-                    }
-
-                    throw ex;
-                }
-#endif
             }
+#endif
             else
             {
-                throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
+                this._connection.Open();    // 2022/2/16
+                // throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
             }
         }
 
@@ -356,12 +323,7 @@ namespace DigitalPlatform.rms
         {
             try
             {
-                if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
-                {
-                    this.SqlConnection?.Close();
-                    this.SqlConnection?.Dispose();
-                }
-                else if (this.SqlServerType == rms.SqlServerType.SQLite)
+                if (this.SqlServerType == rms.SqlServerType.SQLite)
                 {
                     // 需要加锁
                     // 只有强制关闭，全局的Connection才能真正关闭
@@ -401,6 +363,12 @@ namespace DigitalPlatform.rms
                         this.SQLiteConnection?.Dispose();
                     }
                 }
+#if OLD_CODE
+                else if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
+                {
+                    this.SqlConnection?.Close();
+                    this.SqlConnection?.Dispose();
+                }
                 else if (this.SqlServerType == rms.SqlServerType.MySql)
                 {
                     this.MySqlConnection?.Close();
@@ -408,20 +376,15 @@ namespace DigitalPlatform.rms
                 }
                 else if (this.SqlServerType == rms.SqlServerType.Oracle)
                 {
-                    /*
-                    using (OracleCommand command = new OracleCommand("select count(*) from v$session", this.OracleConnection))
-                    {
-                        object result = command.ExecuteScalar();
-                        Debug.WriteLine("session=" + result.ToString());
-                    }
-                     * */
-
                     this.OracleConnection?.Close();
                     this.OracleConnection?.Dispose();
                 }
+#endif
                 else
                 {
-                    throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
+                    this._connection?.Close();
+                    this._connection?.Dispose();
+                    // throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
                 }
             }
             finally
@@ -440,12 +403,14 @@ namespace DigitalPlatform.rms
                 // 只有强制关闭，全局的Connection才能真正关闭
                 if (this._bGlobal == true)
                 {
+                    /*
                     // 强制提交
                     if (bLock == true)
                     {
                         if (this._lock != null && this._lock.TryEnterWriteLock(this._nLockTimeout) == false)
                             throw new ApplicationException("为Database全局Connection (Commit) 加写锁时失败。Timeout=" + this._nLockTimeout.ToString());
                     }
+                    */
 
                     try
                     {
@@ -468,11 +433,13 @@ namespace DigitalPlatform.rms
                     }
                     finally
                     {
+                        /*
                         if (bLock == true)
                         {
                             if (this._lock != null)
                                 this._lock.ExitWriteLock();
                         }
+                        */
                     }
                     return;
                 }
@@ -529,6 +496,121 @@ namespace DigitalPlatform.rms
                 return (OracleConnection)_connection;
             }
         }
+
+        public NpgsqlConnection NpgsqlConnection
+        {
+            get
+            {
+                return (NpgsqlConnection)_connection;
+            }
+        }
+
+        public bool IsMsSqlServer()
+        {
+            return (this.SqlServerType == SqlServerType.MsSqlServer);
+        }
+
+        public bool IsSqlite()
+        {
+            return (this.SqlServerType == SqlServerType.SQLite);
+        }
+
+        public bool IsMySQL()
+        {
+            return (this.SqlServerType == SqlServerType.MySql);
+        }
+
+        public bool IsOracle()
+        {
+            return (this.SqlServerType == SqlServerType.Oracle);
+        }
+
+        public bool IsPgsql()
+        {
+            return (this.SqlServerType == SqlServerType.Pgsql);
+        }
+
+        public static bool ClearAllPools(SqlServerType type)
+        {
+            if (type == SqlServerType.MsSqlServer)
+                SqlConnection.ClearAllPools();
+            else if (type == SqlServerType.SQLite)
+                SQLiteConnection.ClearAllPools();
+            else if (type == SqlServerType.MySql)
+                MySqlConnection.ClearAllPools();
+            else if (type == SqlServerType.Oracle)
+                OracleConnection.ClearAllPools();
+            else if (type == SqlServerType.Pgsql)
+                NpgsqlConnection.ClearAllPools();
+            else
+                return false;
+
+            return true;
+        }
+
+        public DbCommand NewCommand(string command)
+        {
+            if (IsMsSqlServer())
+                return new SqlCommand(command, this.SqlConnection);
+            else if (IsSqlite())
+                return new SQLiteCommand(command, this.SQLiteConnection);
+            else if (IsMySQL())
+                return new MySqlCommand(command, this.MySqlConnection);
+            else if (IsOracle())
+                return new OracleCommand(command, this.OracleConnection);
+            else if (IsPgsql())
+                return new NpgsqlCommand(command, this.NpgsqlConnection);
+            else
+                throw new Exception($"无法识别的数据库类型 '{this.SqlServerType}'");
+        }
+
+        #region 实现 IDbConnection 接口
+
+        public IDbTransaction BeginTransaction()
+        {
+            return _connection.BeginTransaction();
+        }
+
+        public IDbTransaction BeginTransaction(IsolationLevel il)
+        {
+            return _connection.BeginTransaction(il);
+        }
+
+        public void Close()
+        {
+            if (this._bGlobal == false)
+                _connection.Close();
+            else
+            {
+                // 输出调试信息：全局 Connection 不会关闭
+            }
+        }
+
+        public void ChangeDatabase(string databaseName)
+        {
+            _connection.ChangeDatabase(databaseName);
+        }
+
+        public IDbCommand CreateCommand()
+        {
+            return _connection.CreateCommand();
+        }
+
+        public void Open()
+        {
+            _connection.Open();
+        }
+
+        public string ConnectionString { get => _connection.ConnectionString; set => _connection.ConnectionString = value; }
+
+        public int ConnectionTimeout => _connection.ConnectionTimeout;
+
+        public string Database => _connection.Database;
+
+        public ConnectionState State => _connection.State;
+
+
+        #endregion
     }
 
 }

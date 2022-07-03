@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using static DigitalPlatform.rms.PgsqlDataSourceDlg;
 
 namespace DigitalPlatform.rms
 {
@@ -270,7 +271,7 @@ namespace DigitalPlatform.rms
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -398,7 +399,7 @@ namespace DigitalPlatform.rms
             dlg.SqlServerName = strSqlServerName;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            REDO_INPUT:
+        REDO_INPUT:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -608,7 +609,9 @@ namespace DigitalPlatform.rms
 
                         string strTableSpaceName = "ts_" + strLoginName;
 
-                        strCommand = "create tablespace " + strTableSpaceName + " datafile '" + strTableSpaceFileName + "' size 100m autoextend on ; "
+                        // https://ittutorial.org/ora-65096-invalid-common-user-or-role-name-oracle-create-user/
+                        strCommand = "alter session set \"_ORACLE_SCRIPT\"=true;"
+                            + "create tablespace " + strTableSpaceName + " datafile '" + strTableSpaceFileName + "' size 100m autoextend on ; "
                             + "create user " + strLoginName + " identified by " + strLoginPassword + " default tablespace " + strTableSpaceName + "; "
                             + "grant dba, connect to " + strLoginName;
                         string[] lines = strCommand.Split(new char[] { ';' });
@@ -630,6 +633,142 @@ namespace DigitalPlatform.rms
                                 strError = "执行命令 " + strLine + " 出错：" + ex.Message + " 类型：" + ex.GetType().ToString();
                                 return -1;
                             }
+                        }
+                    }
+                }
+            }
+            catch (OracleException sqlEx)
+            {
+                strError = "出错：" + sqlEx.Message + "。";
+                int nError = sqlEx.ErrorCode;
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                strError = "出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+
+            return 0;
+        }
+
+        public static int DeleteUser(
+string strSqlServerName,
+string strSqlUserName,
+Delegate_getAdminUserName func_getAdminUserName,
+out string strError)
+        {
+            strError = "";
+
+            strError = func_getAdminUserName("请提供 Oracle 超级用户名和密码",
+                "system",
+                out string strAdminUserName,
+                out string strAdminPassword);
+            if (string.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            string strConnection = @"Persist Security Info=False;"
+    + "User ID=" + strAdminUserName + ";"
+    + "Password=" + strAdminPassword + ";"
+    + "Data Source=" + strSqlServerName + ";"
+    + "Connect Timeout=30";
+
+            // 防止占用即将被删除的资源的 session 存在影响删除
+            OracleConnection.ClearAllPools();
+
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(strConnection))
+                {
+                    connection.Open();
+
+                    string strTableSpaceName = "ts_" + strSqlUserName;
+
+                    string strCommand =
+                        "alter session set \"_oracle_script\"=true;"    // 如果不加这一句会出现 Oracle.ManagedDataAccess.Client.OracleException:“ORA-28014: 无法删除管理用户或角色”
+                        + "drop user " + strSqlUserName + " cascade; "    // cascade 表示同时删除 此用户名下的所有表和视图
+                        + "drop tablespace " + strTableSpaceName + " including contents and datafiles; ";
+                    string[] lines = strCommand.Split(new char[] { ';' });
+                    foreach (string line in lines)
+                    {
+                        string strLine = line.Trim();
+                        if (string.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        try
+                        {
+                            using (OracleCommand command = new OracleCommand(strLine, connection))
+                            {
+                                int nRet = command.ExecuteNonQuery();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "执行命令 " + strLine + " 出错：" + ex.Message + " 类型：" + ex.GetType().ToString();
+                            return -1;
+                        }
+                    }
+                }
+            }
+            catch (OracleException sqlEx)
+            {
+                strError = "出错：" + sqlEx.Message + "。";
+                int nError = sqlEx.ErrorCode;
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                strError = "出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+
+            return 0;
+        }
+
+
+        int DropLogin(
+            OracleSqlServerInfo info,
+            string strLoginName,
+            out string strError)
+        {
+            strError = "";
+
+            string strConnection = @"Persist Security Info=False;"
+    + "User ID=" + info.SqlUserName + ";"    //帐户和密码
+    + "Password=" + info.SqlUserPassword + ";"
+    + "Data Source=" + info.ServerName + ";"
+    + "Connect Timeout=30";
+
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(strConnection))
+                {
+                    connection.Open();
+
+
+                    string strTableSpaceName = "ts_" + strLoginName;
+
+                    string strCommand =
+                        "drop user " + strLoginName + "; "
+                        + "drop tablespace " + strTableSpaceName + "; ";
+                    string[] lines = strCommand.Split(new char[] { ';' });
+                    foreach (string line in lines)
+                    {
+                        string strLine = line.Trim();
+                        if (string.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        try
+                        {
+                            using (OracleCommand command = new OracleCommand(strLine, connection))
+                            {
+                                int nRet = command.ExecuteNonQuery();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "执行命令 " + strLine + " 出错：" + ex.Message + " 类型：" + ex.GetType().ToString();
+                            return -1;
                         }
                     }
                 }

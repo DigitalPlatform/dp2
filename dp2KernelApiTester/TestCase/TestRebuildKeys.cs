@@ -1,20 +1,43 @@
-﻿using System;
+﻿using DigitalPlatform;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using DigitalPlatform;
-using DigitalPlatform.Text;
-
 namespace dp2KernelApiTester
 {
-    // 测试初始化和删除数据库
-    public static class TestCreateDatabase
+    // 测试重建检索点有关的功能
+    // 中途修改 keys 以后，重建检索点，然后检查新的检索点是否可以检索命中
+    public static class TestRebuildKeys
     {
         static string strDatabaseName = "__test";
 
         public static NormalResult TestAll(string style = null)
+        {
+            {
+                var result = PrepareEnvironment();
+                if (result.Value == -1)
+                    return result;
+            }
+
+            {
+                var result = RefreshNotExist();
+                if (result.Value == -1)
+                    return result;
+            }
+            
+
+            {
+                var result = Finish();
+                if (result.Value == -1)
+                    return result;
+            }
+
+            return new NormalResult();
+        }
+
+        public static NormalResult PrepareEnvironment()
         {
             string strError = "";
 
@@ -226,48 +249,11 @@ namespace dp2KernelApiTester
                 goto ERROR1;
             }
 
-            if (StringUtil.IsInList("refresh_database", style))
-            {
-                var result = RefreshDatabase(true);
-                if (result.Value == -1)
-                {
-                    DataModel.SetMessage($"RefreshDatabase() error: {result.ErrorInfo}", "error");
-                    return result;
-                }
-            }
-
-            if (StringUtil.IsInList("create_records", style))
-            {
-                var result = CreateRecords(100);
-                if (result.Value == -1)
-                {
-                    DataModel.SetMessage($"CreateRecords() error: {result.ErrorInfo}", "error");
-                    return result;
-                }
-            }
-
-            if (StringUtil.IsInList("buildkeys", style))
-            {
-                var result = RebuildKeys();
-                if (result.Value == -1)
-                {
-                    DataModel.SetMessage($"RebuildKeys() error: {result.ErrorInfo}", "error");
-                    return result;
-                }
-            }
-
-            ret = channel.DoDeleteDB(strDatabaseName, out strError);
-            if (ret == -1)
-            {
-                strError = $"删除数据库时出错: {strError}";
-                goto ERROR1;
-            }
-
-            DataModel.SetMessage("创建数据库和删除数据库成功", "green");
+            DataModel.SetMessage("创建数据库成功", "green");
 
             return new NormalResult();
         ERROR1:
-            DataModel.SetMessage($"TestAll() error: {strError}", "error");
+            DataModel.SetMessage($"PrepareEnvironment() error: {strError}", "error");
             return new NormalResult
             {
                 Value = -1,
@@ -275,13 +261,39 @@ namespace dp2KernelApiTester
             };
         }
 
-        public static NormalResult RebuildKeys()
+        public static NormalResult Finish()
+        {
+            string strError = "";
+
+            var channel = DataModel.GetChannel();
+
+            long ret = channel.DoDeleteDB(strDatabaseName, out strError);
+            if (ret == -1)
+            {
+                strError = $"删除数据库时出错: {strError}";
+                goto ERROR1;
+            }
+
+            DataModel.SetMessage("删除数据库成功", "green");
+            return new NormalResult();
+        ERROR1:
+            DataModel.SetMessage($"Finish() error: {strError}", "error");
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
+        }
+
+        // 刷新一条并不存在的记录的检索点
+        static public NormalResult RefreshNotExist()
         {
             var channel = DataModel.GetChannel();
 
-            var ret = channel.DoRefreshDB("disablekeysindex",
-    strDatabaseName,
-    false,
+            string path = strDatabaseName + "/100";
+            var ret = channel.DoRebuildResKeys(path,
+    "forcedeleteoldkeys",
+    out string output_path,
     out string strError);
             if (ret == -1)
                 return new NormalResult
@@ -290,98 +302,10 @@ namespace dp2KernelApiTester
                     ErrorInfo = strError
                 };
 
-            ret = channel.DoRefreshDB("rebuildkeysindex",
-                strDatabaseName,
-                false,
-                out strError);
-            if (ret == -1)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = strError
-                };
-
-            DataModel.SetMessage($"刷新数据库定义成功");
-            return new NormalResult();
-        }
-
-
-        // 刷新数据库定义
-        public static NormalResult RefreshDatabase(bool bClearAllKeysTable)
-        {
-            var channel = DataModel.GetChannel();
-            var ret = channel.DoRefreshDB("begin", 
-                strDatabaseName,
-                bClearAllKeysTable,
-                out string strError);
-            if (ret == -1)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = strError
-                };
-
-            ret = channel.DoRefreshDB("end",
-    strDatabaseName,
-    bClearAllKeysTable,
-    out strError);
-            if (ret == -1)
-                return new NormalResult
-                {
-                    Value = -1,
-                    ErrorInfo = strError
-                };
-
-            DataModel.SetMessage($"刷新数据库定义成功");
-            return new NormalResult();
-        }
-
-        // 创建若干条数据库记录
-        public static NormalResult CreateRecords(int count)
-        {
-            var channel = DataModel.GetChannel();
-
-            for (int i = 0; i < count; i++)
-            {
-                string path = $"{strDatabaseName}/?";
-
-                string xml = @"<root>
-<barcode>{barcode}</barcode>
-</root>".Replace("{barcode}", (i + 1).ToString().PadLeft(10, '0'));
-                var bytes = Encoding.UTF8.GetBytes(xml);
-
-                var ret = channel.DoSaveTextRes(path,
-                    xml, // strMetadata,
-                    false,
-                    "",
-                    null,
-                    out byte[] output_timestamp,
-                    out string output_path,
-                    out string strError);
-                if (ret == -1)
-                    return new NormalResult
-                    {
-                        Value = -1,
-                        ErrorInfo = strError
-                    };
-
-                DataModel.SetMessage($"创建记录 {output_path} 成功");
-
-            }
+            DataModel.SetMessage($"强制刷新记录 {path} 的检索点成功", "green");
 
             return new NormalResult();
         }
 
-        /*
-        public static NormalResult PrepareEnvironment()
-        {
-
-        }
-
-        public static NormalResult Finish()
-        {
-
-        }
-        */
     }
 }

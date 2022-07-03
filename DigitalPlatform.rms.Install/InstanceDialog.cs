@@ -177,7 +177,7 @@ MessageBoxDefaultButton.Button2);
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -212,7 +212,7 @@ MessageBoxDefaultButton.Button2);
         // 获得一个目前尚未被使用过的instancename值
         string GetNewInstanceName(int nStart)
         {
-            REDO:
+        REDO:
             string strResult = "instance" + nStart.ToString();
             for (int i = 0; i < this.listView_instance.Items.Count; i++)
             {
@@ -288,7 +288,7 @@ MessageBoxDefaultButton.Button2);
                 this.DebugInfo += "\r\n\r\n";
             this.DebugInfo += new_instance_dlg.DebugInfo;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -472,7 +472,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -917,7 +917,7 @@ out strError);
         //      -1  出错
         //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
         //      1   成功删除
-        public static int DeleteAllSqlDatabase(string strDataDir,
+        public int DeleteAllSqlDatabase(string strDataDir,
             out string strError)
         {
             strError = "";
@@ -998,6 +998,31 @@ out strError);
                 }
             }
 
+            if (info.SqlServerType == "PostgreSQL")
+            {
+                nRet = PgsqlDataSourceDlg.DeleteDatabase(
+info.SqlServerName,
+info.DatabaseInstanceName,
+AskAdminUserName,
+out strError);
+                if (nRet == -1)
+                {
+                    strError = $"删除 Pgsql 实例数据库 '{info.DatabaseInstanceName}' 时出错: {strError}";
+                    return -1;
+                }
+
+                nRet = PgsqlDataSourceDlg.DeleteUser(
+                    info.SqlServerName,
+                    info.DatabaseLoginName,
+                    AskAdminUserName,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = $"删除 Pgsql 用户 '{info.DatabaseLoginName}' 时出错: {strError}";
+                    return -1;
+                }
+            }
+
             if (info.SqlServerType == "MySQL Server")
             {
                 StringBuilder command = new StringBuilder();
@@ -1044,17 +1069,35 @@ out strError);
                     sql_dbnames.Add(strSqlDbName);
                 }
 
-                if (sql_dbnames.Count == 0)
-                    return 0;
+                if (sql_dbnames.Count > 0)
+                {
+                    // 删除所有的 table
+                    nRet = DeleteOracleTables(strConnectionString,
+        sql_dbnames,
+        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
 
+                // 2022/7/1
+                // 用 system 用户身份删除 dp2kernel_oracle 账户(和表空间)
+                nRet = OracleDataSourceWizard.DeleteUser(
+                    info.SqlServerName,
+                    info.DatabaseLoginName,
+                    AskAdminUserName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+#if REMOVED
                 string strCommand = " SELECT table_name FROM user_tables WHERE ";
 
                 int i = 0;
                 foreach (string strSqlDbName in sql_dbnames)
                 {
+                    string pattern = (strSqlDbName + "_%").Replace("_", "\\_");
                     if (i > 0)
                         strCommand += " or ";
-                    strCommand += " table_name like '" + strSqlDbName.ToUpper() + "_%' ";
+                    strCommand += " table_name like '" + pattern.ToUpper() + "_%' ESCAPE '\\'";
                     i++;
                 }
 
@@ -1107,9 +1150,138 @@ out strError);
                     strError = "执行 SQL 命令时出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
                     return -1;
                 }
+#endif
             }
 
             return 1;
+        }
+
+        static int DeleteOracleTables(string strConnectionString,
+            List<string> sql_dbnames,
+            out string strError)
+        {
+            strError = "";
+
+            string strCommand = " SELECT table_name FROM user_tables WHERE ";
+
+            int i = 0;
+            foreach (string strSqlDbName in sql_dbnames)
+            {
+                string pattern = (strSqlDbName + "_%").Replace("_", "\\_");
+                if (i > 0)
+                    strCommand += " or ";
+                strCommand += " table_name like '" + pattern.ToUpper() + "_%' ESCAPE '\\'";
+                i++;
+            }
+
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(strConnectionString))
+                {
+                    connection.Open();
+
+                    List<string> table_names = new List<string>();
+                    using (OracleCommand command = new OracleCommand(strCommand, connection))
+                    {
+                        using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
+                        {
+                            while (dr.Read())
+                            {
+                                if (dr.IsDBNull(0) == false)
+                                    table_names.Add(dr.GetString(0));
+                            }
+                        }
+
+                        // 第二步，删除这些表
+                        List<string> cmd_lines = new List<string>();
+                        foreach (string strTableName in table_names)
+                        {
+                            cmd_lines.Add("DROP TABLE " + strTableName + " \n");
+                        }
+
+                        foreach (string strLine in cmd_lines)
+                        {
+                            command.CommandText = strLine;
+                            try
+                            {
+                                command.ExecuteNonQuery();
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "删除所有表时出错：\r\n"
+                                    + ex.Message + "\r\n"
+                                    + "SQL命令:\r\n"
+                                    + strLine;
+                                return -1;
+                            }
+                        }
+
+                        return 0;
+                    } // end of using command
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "执行 SQL 命令时出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
+                return -1;
+            }
+        }
+
+        // TODO: 建议分数据库类型存储。比如存储在一个 hashtable 中
+        string adminUserName = "";
+        string adminPassword = "";
+
+        void ClearCachedAdminUserName()
+        {
+            adminUserName = "";
+            adminPassword = "";
+        }
+
+        // 询问超级用户名和密码
+        string AskAdminUserName(
+            string title,
+            string defaultUserName,
+            out string userName,
+            out string password)
+        {
+            if (string.IsNullOrEmpty(adminUserName))
+            {
+                userName = "";
+                password = "";
+
+                using (LoginDlg dlg = new LoginDlg())
+                {
+                    dlg.Comment = title;
+                    dlg.ServerUrl = " ";
+                    dlg.UserName = defaultUserName; //  "postgres";
+                    dlg.Password = "";
+                    dlg.SavePassword = true;
+                    dlg.ShowDialog(this);
+
+                    if (dlg.DialogResult != DialogResult.OK)
+                    {
+                        return "放弃操作";
+                    }
+
+                    userName = dlg.UserName;
+                    password = dlg.Password;
+
+                    if (dlg.SavePassword == true)
+                    {
+                        adminUserName = dlg.UserName;
+                        adminPassword = dlg.Password;
+                    }
+                    else
+                        ClearCachedAdminUserName();
+                }
+            }
+            else
+            {
+                userName = adminUserName;
+                password = adminPassword;
+            }
+
+            return null;
         }
 
 
@@ -1189,6 +1361,11 @@ out strError);
             {
                 strError = "SQLite 暂时不使用本函数";
                 return -1;
+            }
+
+            if (info.SqlServerType == "PostgreSQL")
+            {
+                return 0;
             }
 
             strError = "未知的 SQL 服务器类型 '" + info.SqlServerType + "'";
@@ -1307,7 +1484,7 @@ out strError);
                 this.Enabled = true;
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -1319,7 +1496,7 @@ out strError);
             out string strError)
         {
             strError = "";
-            REDO_DELETE_DATADIR:
+        REDO_DELETE_DATADIR:
             try
             {
                 MessageBar bar = new MessageBar();
@@ -2153,7 +2330,7 @@ MessageBoxDefaultButton.Button1);
 
                 if (string.IsNullOrEmpty(strDataDir) == false)
                 {
-                    REDO_DELETE_DATADIR:
+                REDO_DELETE_DATADIR:
                     // 删除数据目录
                     try
                     {
@@ -2704,13 +2881,13 @@ MessageBoxDefaultButton.Button1);
             else if (this.SqlServerType == "MySQL Server")
                 this.SslMode = "None";  // 兼容以前无 mode 属性时的情况，此情况下等于 SslMode:None
 
-            XmlNode nodeDbs = dom.DocumentElement.SelectSingleNode("dbs");
+            var nodeDbs = dom.DocumentElement.SelectSingleNode("dbs") as XmlElement;
             if (nodeDbs == null)
             {
                 strError = "文件 " + strFilename + " 内容不合法，根下的<dbs>元素不存在。";
                 return -1;
             }
-            this.DatabaseInstanceName = DomUtil.GetAttr(nodeDbs, "instancename");
+            this.DatabaseInstanceName = nodeDbs.GetAttribute("instancename");
             return 1;
         }
 

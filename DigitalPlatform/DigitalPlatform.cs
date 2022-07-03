@@ -476,13 +476,13 @@ namespace DigitalPlatform
             if (lStart < 0
                 || lTotalLength < 0)
             {
-                strError = "范围错误:nStart < 0 或 nTotalLength <0 \r\n";
+                strError = $"范围不合法: lStart({lStart}) < 0 或 lTotalLength({lTotalLength}) < 0";
                 return -1;
             }
             if (lStart != 0
                 && lStart > lTotalLength)   // >= 2017/8/15 修改
             {
-                strError = "范围错误: 起始值 " + lStart.ToString() + " 大于总长度 " + lTotalLength.ToString() + "\r\n";
+                strError = "范围不合法: 起始值 " + lStart.ToString() + " 大于总长度 " + lTotalLength.ToString();
                 return -1;
             }
 

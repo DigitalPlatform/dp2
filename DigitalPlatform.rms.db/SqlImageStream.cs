@@ -2,32 +2,39 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+
+using Dapper;
 
 namespace DigitalPlatform.rms
 {
     public class SqlImageStream : Stream
     {
-        Connection _connection = null;
+        //Connection _connection = null;
 
-        string m_strSqlDbName = "";
-        string m_strDataFieldName = "";
+        //string m_strSqlDbName = "";
+        //string m_strDataFieldName = "";
 
-        byte[] _textPtr = null;
+        //byte[] _textPtr = null;
+        //string _id = null;
 
         long m_lLength = 0;	// 长度
         long m_lCurrent = 0;	// 文件指针当前位置
 
+        IDataReader m_reader = null;
+
+#if OLD
         public SqlImageStream(Connection connection,
             string strSqlDbName,
             string strDataFieldName,
             byte[] textPtr,
             long lTotalLength)
         {
-            if (connection.SqlServerType != SqlServerType.MsSqlServer)
-                throw new ArgumentException("SqlImageStream 只能用于 MS SQL Server 类型");
+            if (connection.IsMsSqlServer() == false)
+                throw new ArgumentException("此构造函数只能用于 MS SQL Server 类型");
 
             this._connection = connection;
             this.m_lLength = lTotalLength;
@@ -35,10 +42,48 @@ namespace DigitalPlatform.rms
             this.m_strDataFieldName = strDataFieldName;
             this._textPtr = textPtr;
         }
+#endif
+
+        public SqlImageStream(Connection connection,
+    string strSqlDbName,
+    string strDataFieldName,
+    string id/*,
+    long lTotalLength*/)
+        {
+            if (connection.IsPgsql() == false && connection.IsMsSqlServer() == false)
+                throw new ArgumentException("此构造函数只能用于 Pgsql 和 MS SQL Server 类型");
+
+            //this._connection = connection;
+            // this.m_lLength = lTotalLength;
+            //this.m_strSqlDbName = strSqlDbName;
+            //this.m_strDataFieldName = strDataFieldName;
+            //this._id = id;
+
+            string strCommand = "";
+            if (connection.IsMsSqlServer())
+                strCommand = $" SELECT DataLength({strDataFieldName}) as length, {strDataFieldName}"  // 1
+                    + $" FROM {strSqlDbName}records "
+                    + " WHERE id = @id";
+            else if (connection.IsPgsql())
+                strCommand = $" SELECT length({strDataFieldName}) as length, {strDataFieldName}"  // 1
+                    + $" FROM {strSqlDbName}records "
+                    + " WHERE id = @id";
+
+            m_reader = connection.ExecuteReader(strCommand, new { id = id });
+            var ret = m_reader.Read();
+            if (ret == false)
+                throw new Exception($"记录 '{id}' 不存在");
+            m_lLength = SqlDatabase.GetLong(m_reader, 0);
+        }
 
         public override void Close()
         {
-
+            if (m_reader != null)
+            {
+                m_reader.Close();
+                m_reader.Dispose();
+                m_reader = null;
+            }
         }
 
         public override bool CanRead
@@ -96,10 +141,52 @@ namespace DigitalPlatform.rms
             {
                 m_lCurrent = value;
             }
-
         }
 
+#if OLD
         public override int Read(byte[] buffer,
+    int offset,
+    int count)
+        {
+            if (_connection.IsMsSqlServer())
+                return ReadPgsql(buffer, offset, count);
+            else if (_connection.IsPgsql())
+                return ReadPgsql(buffer, offset, count);
+            throw new NotSupportedException();
+        }
+#endif
+
+        public override int Read(byte[] buffer,
+    int offset,
+    int count)
+        {
+            if (m_lCurrent >= m_lLength)
+                return 0;
+
+            // 修正本次读取尺寸
+            if (m_lCurrent + count > m_lLength)
+                count = (int)(m_lLength - m_lCurrent);
+
+            if (count <= 0)
+                return 0;
+
+            // TODO: 可否限定超过一定尺寸的 data 内容就不要返回? 
+
+            long length = m_lLength;
+            if (m_lCurrent + offset + count > length)
+                throw new Exception($"m_lCurrent({m_lCurrent}) + offset({offset}) + count({count}) > length({length})");
+            var read_length = m_reader.GetBytes(1,
+m_lCurrent + offset,
+buffer,
+0,
+count);
+            m_lCurrent += read_length;
+            Debug.Assert(read_length == count);
+            return (int)read_length;
+        }
+
+#if OLD
+        public int ReadMsSql(byte[] buffer,
             int offset,
             int count)
         {
@@ -162,7 +249,7 @@ namespace DigitalPlatform.rms
                 }
             } // end of using command
         }
-
+#endif
         public override long Seek(
             long offset,
             SeekOrigin origin)
@@ -200,6 +287,5 @@ namespace DigitalPlatform.rms
         {
             throw (new NotSupportedException("PartStream不支持SetLength()"));
         }
-
     }
 }

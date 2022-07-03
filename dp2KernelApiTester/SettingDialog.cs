@@ -22,7 +22,9 @@ namespace dp2KernelApiTester
 
         private void SettingDialog_Load(object sender, EventArgs e)
         {
-            this.textBox_dp2kernel_serverUrl.Text = DataModel.dp2kernelServerUrl;
+            this.comboBox_dp2kernel_serverUrl.Items.AddRange(DataModel.Urls);
+
+            this.comboBox_dp2kernel_serverUrl.Text = DataModel.dp2kernelServerUrl;
             this.textBox_dp2kernel_userName.Text = DataModel.dp2kernelUserName;
             this.textBox_dp2kernel_password.Text = DataModel.dp2kernelPassword;
         }
@@ -51,7 +53,16 @@ namespace dp2KernelApiTester
                 goto ERROR1;
             }
 
-            DataModel.dp2kernelServerUrl = this.textBox_dp2kernel_serverUrl.Text;
+            string new_url = this.comboBox_dp2kernel_serverUrl.Text;
+            if (string.IsNullOrEmpty(new_url) == false)
+            {
+                if (this.comboBox_dp2kernel_serverUrl.Items.IndexOf(new_url) == -1)
+                    this.comboBox_dp2kernel_serverUrl.Items.Add(new_url);
+            }
+
+            DataModel.Urls = new List<string>(this.comboBox_dp2kernel_serverUrl.Items.Cast<string>()).ToArray();
+
+            DataModel.dp2kernelServerUrl = this.comboBox_dp2kernel_serverUrl.Text;
             DataModel.dp2kernelUserName = this.textBox_dp2kernel_userName.Text;
 
             DataModel.dp2kernelPassword = this.textBox_dp2kernel_password.Text;

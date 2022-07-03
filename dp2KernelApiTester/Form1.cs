@@ -40,7 +40,7 @@ string style = "")
         {
             using (SettingDialog dlg = new SettingDialog())
             {
-                GuiUtil.SetControlFont(dlg, parent.Font);
+                // GuiUtil.SetControlFont(dlg, parent.Font);
                 ClientInfo.MemoryState(dlg, "settingDialog", "state");
                 dlg.ShowDialog(parent);
             }
@@ -204,6 +204,33 @@ string style = "")
             this.webBrowser1.ScrollToEnd();
         }
 
+        // 线程安全
+        public void ShowProgressMessage(string strID,
+            string strText)
+        {
+            if (this.webBrowser1 == null || this.webBrowser1.IsDisposed == true)
+                return;
+
+            if (this.webBrowser1.InvokeRequired)
+            {
+                this.webBrowser1.Invoke(new Action<string, string>(ShowProgressMessage), strID, strText);
+                return;
+            }
+
+            if (webBrowser1.Document == null)
+                return;
+
+            HtmlElement obj = this.webBrowser1.Document.GetElementById(strID);
+            if (obj != null)
+            {
+                obj.InnerText = strText;
+                return;
+            }
+
+            // <div class='debug {style}'>
+            AppendHtml("<div id='" + strID + "' class='debug'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+        }
+
 
         #endregion
 
@@ -231,7 +258,7 @@ string style = "")
         {
 
         }
-        
+
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _cancel?.Dispose();
@@ -253,7 +280,6 @@ string style = "")
                     FormProperty.SetProperty(state, this, ClientInfo.IsMinimizeMode());
                 }
             }
-
         }
 
         void SaveSettings()
@@ -294,13 +320,177 @@ string style = "")
         {
             Task.Run(() =>
             {
+                EnableControls(false);
                 try
                 {
-                    TestCreateDatabase.TestAll();
+                    var result = TestCreateDatabase.TestAll("refresh_database,create_records,buildkeys");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
                 }
                 catch (Exception ex)
                 {
                     AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            });
+        }
+
+        private void MenuItem_test_records_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                EnableControls(false);
+                try
+                {
+                    var result = TestRecord.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            });
+        }
+
+        private void MenuItem_test_search_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                EnableControls(false);
+                try
+                {
+                    var result = TestSearch.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            });
+        }
+
+        private void MenuItem_test_refreshKeys_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                EnableControls(false);
+                try
+                {
+                    var result = TestRebuildKeys.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            });
+        }
+
+        private void MenuItem_fragmentWrite_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                EnableControls(false);
+                try
+                {
+                    var result = TestRecord.PrepareEnvironment();
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+
+                    /*
+                    result = TestRecord.SpecialTest(1000); // 1000
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                    */
+
+                    result = TestRecord.FragmentCreateRecords(1000, 1, "overlap"); // 1000
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+
+                    DataModel.SetMessage("碎片式写入完成", "green");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            });
+        }
+
+        void EnableControls(bool enable)
+        {
+            this.Invoke(new Action(() => {
+                this.menuStrip1.Enabled = enable;
+            }));
+        }
+
+        private void MenuItem_test_largeObject_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                EnableControls(false);
+                try
+                {
+                    var result = TestRecord.PrepareEnvironment();
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+
+                    result = TestRecord.LargeObjectTest(5);
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+
+                    DataModel.SetMessage("大对象写入完成", "green");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            });
+        }
+
+        private void MenuItem_test_pdf_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                EnableControls(false);
+                try
+                {
+                    var result = TestPdfPage.TestAll("");
+                    if (result.Value == -1)
+                        DataModel.SetMessage(result.ErrorInfo, "error");
+                }
+                catch (Exception ex)
+                {
+                    AppendString($"exception: {ex.Message}");
+                }
+                finally
+                {
+                    EnableControls(true);
                 }
             });
         }

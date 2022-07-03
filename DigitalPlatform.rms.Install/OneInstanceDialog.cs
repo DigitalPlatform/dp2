@@ -292,7 +292,6 @@ namespace DigitalPlatform.rms
                 this.LineInfo.DatabaseLoginName = "";
                 this.LineInfo.DatabaseLoginPassword = "";
                 RefreshSqlDef();
-
             }
             else if (this.comboBox_sqlServerType.Text == "MS SQL Server")
             {
@@ -437,6 +436,50 @@ namespace DigitalPlatform.rms
 
                 RefreshSqlDef();
             }
+            else if (this.comboBox_sqlServerType.Text == "PostgreSQL")
+            {
+                // PostgreSQL
+
+                // 调对话框得到数据源配置参数
+                PgsqlDataSourceDlg datasource_dlg = new PgsqlDataSourceDlg();
+                GuiUtil.AutoSetDefaultFont(datasource_dlg);
+
+                // datasource_dlg.Comment = "dp2Kernel 内核的数据库功能可以基于 MySQL Server 5.5/5.6 以上版本实现。请设置下列 MySQL Server 相关参数。";
+                if (this.LineInfo != null)
+                {
+                    datasource_dlg.SqlServerName = this.LineInfo.SqlServerName;
+                    datasource_dlg.InstanceName = this.LineInfo.DatabaseInstanceName;
+                    datasource_dlg.KernelLoginName = this.LineInfo.DatabaseLoginName;
+                    datasource_dlg.KernelLoginPassword = this.LineInfo.DatabaseLoginPassword;
+                    //datasource_dlg.MySqlSslMode = this.LineInfo.SslMode;
+                }
+                else
+                {
+                    datasource_dlg.SqlServerName = "localhost"; // ;Database=postgres
+                    datasource_dlg.InstanceName = "dp2kernel"
+                        + (String.IsNullOrEmpty(this.InstanceName) == false ? "_" : "")
+                        + this.InstanceName;    // 应当没有空格和特殊字符
+                    datasource_dlg.KernelLoginName = datasource_dlg.InstanceName;   // "postgres";
+                    datasource_dlg.KernelLoginPassword = "";
+                    //datasource_dlg.MySqlSslMode = "";
+                }
+
+                datasource_dlg.StartPosition = FormStartPosition.CenterScreen;
+                datasource_dlg.ShowDialog(this);
+                if (datasource_dlg.DialogResult != DialogResult.OK)
+                    return;
+
+                if (this.LineInfo == null)
+                    this.LineInfo = new LineInfo();
+
+                this.LineInfo.SqlServerType = "PostgreSQL";
+                this.LineInfo.SqlServerName = datasource_dlg.SqlServerName;
+                this.LineInfo.DatabaseInstanceName = datasource_dlg.InstanceName;
+                this.LineInfo.DatabaseLoginName = datasource_dlg.KernelLoginName;
+                this.LineInfo.DatabaseLoginPassword = datasource_dlg.KernelLoginPassword;
+                // this.LineInfo.SslMode = datasource_dlg.MySqlSslMode;
+                RefreshSqlDef();
+            }
             else
             {
                 strError = "未知的 SQL 服务器类型 '" + this.comboBox_sqlServerType.Text + "'";
@@ -548,6 +591,19 @@ namespace DigitalPlatform.rms
                 {
                     this.m_nDisableTextChange++;
                     this.comboBox_sqlServerType.Text = "Oracle";
+                    this.m_nDisableTextChange--;
+                }
+            }
+            else if (this.LineInfo.SqlServerType == "PostgreSQL")
+            {
+                this.textBox_sqlDef.Text = "SQL Server Name = " + this.LineInfo.SqlServerName
+                    + "; Database Prefix = " + this.LineInfo.DatabaseInstanceName
+                    + "; SQL Login Name = " + this.LineInfo.DatabaseLoginName
+                    + "; SQL Login Password = " + new string('*', this.LineInfo.DatabaseLoginPassword.Length);
+                if (this.comboBox_sqlServerType.Text != "PostgreSQL")
+                {
+                    this.m_nDisableTextChange++;
+                    this.comboBox_sqlServerType.Text = "PostgreSQL";
                     this.m_nDisableTextChange--;
                 }
             }

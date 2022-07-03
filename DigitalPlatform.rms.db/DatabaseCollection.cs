@@ -55,13 +55,15 @@ namespace DigitalPlatform.rms
             {
                 if (this.SqlServerTypeString == "SQLite")
                     return SqlServerType.SQLite;
-                if (this.SqlServerTypeString == "MS SQL Server")
+                else if (this.SqlServerTypeString == "MS SQL Server")
                     return SqlServerType.MsSqlServer;
-                if (this.SqlServerTypeString == "MySQL Server")
+                else if (this.SqlServerTypeString == "MySQL Server")
                     return SqlServerType.MySql;
-                if (this.SqlServerTypeString == "Oracle")
+                else if (this.SqlServerTypeString == "Oracle")
                     return SqlServerType.Oracle;
-                if (string.Compare(this.SqlServerName, "~sqlite", true) == 0)
+                else if (this.SqlServerTypeString == "PostgreSQL")
+                    return SqlServerType.Pgsql;
+                else if (string.Compare(this.SqlServerName, "~sqlite", true) == 0)
                     return SqlServerType.SQLite;
 
                 return SqlServerType.MsSqlServer;
@@ -256,7 +258,7 @@ namespace DigitalPlatform.rms
             }
 
             if (PathUtil.TryClearDir(strTempDir) == false)
-                this.KernelApplication.WriteErrorLog("清除临时文件目录 " + strTempDir + " 时出错");
+                this.WriteErrorLog("清除临时文件目录 " + strTempDir + " 时出错");
 
             this.TempDir = strTempDir;
 
@@ -325,9 +327,10 @@ namespace DigitalPlatform.rms
                     if (this.SqlServerTypeString != "MS SQL Server"
                         && this.SqlServerTypeString != "MySQL Server"
                         && this.SqlServerTypeString != "Oracle"
-                        && this.SqlServerTypeString != "SQLite")
+                        && this.SqlServerTypeString != "SQLite"
+                        && this.SqlServerTypeString != "PostgreSQL")
                     {
-                        strError = "服务器配置文件不合法，根元素下级的<datasource>元素的'servertype'属性值 '" + this.SqlServerTypeString + "' 不合法。应当为 MS SQL Server/MySQL Server/Oracle SQL Server/SQLite 之一(缺省为 'MS SQL Server')。";
+                        strError = "服务器配置文件不合法，根元素下级的<datasource>元素的'servertype'属性值 '" + this.SqlServerTypeString + "' 不合法。应当为 MS SQL Server/MySQL Server/Oracle SQL Server/PostgreSQL/SQLite 之一(缺省为 'MS SQL Server')。";
                         return -1;
                     }
                 }
@@ -357,7 +360,7 @@ namespace DigitalPlatform.rms
                         return -1;
                 }
 
-                this.KernelApplication.WriteErrorLog("初始化数据库内存对象完毕。");
+                this.WriteErrorLog("初始化数据库内存对象完毕。");
 
                 /*
                 // 检验各个数据库记录尾号
@@ -478,22 +481,26 @@ namespace DigitalPlatform.rms
                         out string strError);
                     if (nRet == -1)
                     {
-                        this.KernelApplication.WriteErrorLog("DatabaseCollection.Close() flushkeys 出错：" + strError);
+                        this.WriteErrorLog("DatabaseCollection.Close() flushkeys 出错：" + strError);
                     }
                 }
                 catch (Exception ex)
                 {
-                    this.KernelApplication.WriteErrorLog("DatabaseCollection.Close() flushkeys 抛出异常：" + ex.Message);
+                    this.WriteErrorLog("DatabaseCollection.Close() flushkeys 抛出异常：" + ex.Message);
                 }
             }
 
             // 2012/2/21
             foreach (Database db in this)
             {
+                db.GetDbType();
                 db.Close();
             }
             // 保存内存对象到文件
             this.SaveXmlSafety(true);
+
+            // 2022/4/8
+            Connection.ClearAllPools(this.SqlServerType);
 
             // 2019/5/8
             if (this.DelayTables != null)
@@ -569,7 +576,7 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    this.KernelApplication.WriteErrorLog("删除 streamCache 文件 " + filename + " 出现异常: " + ExceptionUtil.GetAutoText(ex));
+                                    this.WriteErrorLog("删除 streamCache 文件 " + filename + " 出现异常: " + ExceptionUtil.GetAutoText(ex));
                                 }
                             },
                             token);
@@ -607,7 +614,7 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
-                // this.KernelApplication.WriteErrorLog("开始校验数据库尾号。");
+                // this.WriteErrorLog("开始校验数据库尾号。");
 
                 int nRet = 0;
                 try
@@ -677,7 +684,7 @@ namespace DigitalPlatform.rms
 
                 if (FileUtil.IsFileExsitAndNotNull(this.m_strDbsCfgFilePath) == true)
                 {
-                    this.KernelApplication.WriteErrorLog("备份 " + this.m_strDbsCfgFilePath + " 到 " + strBackupFilename);
+                    this.WriteErrorLog("备份 " + this.m_strDbsCfgFilePath + " 到 " + strBackupFilename);
                     File.Copy(this.m_strDbsCfgFilePath, strBackupFilename, true);
                 }
 
@@ -690,7 +697,7 @@ namespace DigitalPlatform.rms
                 }
 
                 this.Changed = false;
-                this.KernelApplication.WriteErrorLog("完成保存内存 DOM 到 '" + this.m_strDbsCfgFilePath + "' 文件。");
+                this.WriteErrorLog("完成保存内存 DOM 到 '" + this.m_strDbsCfgFilePath + "' 文件。");
             }
             finally
             {
@@ -895,7 +902,8 @@ namespace DigitalPlatform.rms
                 {
                     // TODO: 这里要注意是否有SQL数据库名中不允许的字符？
 
-                    if (this.SqlServerType == rms.SqlServerType.Oracle)
+                    if (this.SqlServerType == SqlServerType.Oracle
+                        || this.SqlServerType == SqlServerType.Pgsql)
                     {
                         if (strEnLoginName.Length > 3)
                             strEnLoginName = strEnLoginName.Substring(0, 3);
@@ -908,7 +916,8 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    if (this.SqlServerType == rms.SqlServerType.Oracle)
+                    if (this.SqlServerType == rms.SqlServerType.Oracle
+                        || this.SqlServerType == SqlServerType.Pgsql)
                         strTempSqlDbName = "db_" + strDbID;
                     else
                         strTempSqlDbName = "dprms_" + strDbID + "_db";
@@ -920,7 +929,7 @@ namespace DigitalPlatform.rms
                     strSqlDbName = strTempSqlDbName;
                 else
                 {
-                    if (this.SqlServerType == rms.SqlServerType.Oracle
+                    if ((this.SqlServerType == rms.SqlServerType.Oracle || this.SqlServerType == SqlServerType.Pgsql)
                         && strSqlDbName.Length > 3)
                     {
                         strError = "所指定的 SQL 数据库名 '" + strSqlDbName + "' 不应超过3字符";
@@ -933,7 +942,8 @@ namespace DigitalPlatform.rms
                     // TODO: 最好在这里增加检查SQL Sever中已有数据库名的功能
                     strSqlDbName = this.GetFinalSqlDbName(strSqlDbName);
 
-                    if (this.SqlServerType != rms.SqlServerType.Oracle)
+                    if (this.SqlServerType != rms.SqlServerType.Oracle
+                        && this.SqlServerType != SqlServerType.Pgsql)
                     {
                         // 2007/7/20
                         if (this.InstanceName != "")
@@ -2357,7 +2367,7 @@ namespace DigitalPlatform.rms
                 if (length >= slow_length)
                 {
                     long count = resultSet == null ? 0 : resultSet.Count;
-                    KernelApplication.WriteErrorLog(string.Format("检索式 '{0}' 耗时 {1} (检索是否成功 {2} 命中条数 {3})，超过慢速阈值 {4}",
+                    WriteErrorLog(string.Format("检索式 '{0}' 耗时 {1} (检索是否成功 {2} 命中条数 {3})，超过慢速阈值 {4}",
                         strQuery,
                         length.ToString(),
                         nRet,
@@ -6839,6 +6849,11 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        public void WriteErrorLog(string text)
+        {
+            this.KernelApplication.WriteErrorLog(text);
+        }
+
     } // end of class DatabaseCollection
 
 
@@ -7260,6 +7275,7 @@ dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, Publ
 #if NO
         LocalDB = 5,    // MS SQL Server LocalDB, 2015/5/17
 #endif
+        Pgsql = 6,
     }
 }
 
