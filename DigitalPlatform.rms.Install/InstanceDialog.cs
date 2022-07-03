@@ -917,7 +917,7 @@ out strError);
         //      -1  出错
         //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
         //      1   成功删除
-        public int DeleteAllSqlDatabase(string strDataDir,
+        public static int DeleteAllSqlDatabase(string strDataDir,
             out string strError)
         {
             strError = "";
@@ -1228,17 +1228,17 @@ out strError);
         }
 
         // TODO: 建议分数据库类型存储。比如存储在一个 hashtable 中
-        string adminUserName = "";
-        string adminPassword = "";
+        static string adminUserName = "";
+        static string adminPassword = "";
 
-        void ClearCachedAdminUserName()
+        static void ClearCachedAdminUserName()
         {
             adminUserName = "";
             adminPassword = "";
         }
 
         // 询问超级用户名和密码
-        string AskAdminUserName(
+        static string AskAdminUserName(
             string title,
             string defaultUserName,
             out string userName,
@@ -1256,7 +1256,7 @@ out strError);
                     dlg.UserName = defaultUserName; //  "postgres";
                     dlg.Password = "";
                     dlg.SavePassword = true;
-                    dlg.ShowDialog(this);
+                    dlg.ShowDialog(/*this*/);
 
                     if (dlg.DialogResult != DialogResult.OK)
                     {
