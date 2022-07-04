@@ -1277,7 +1277,9 @@ https://github.com/digitalplatform/dp2"
             //      -1  出错
             //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
             //      1   成功删除
-            int nRet = DigitalPlatform.rms.InstanceDialog.DeleteAllSqlDatabase(strDirectory,
+            int nRet = DigitalPlatform.rms.InstanceDialog.DeleteAllSqlDatabase(
+                this,
+                strDirectory,
                 out strError);
             if (nRet == -1)
             {

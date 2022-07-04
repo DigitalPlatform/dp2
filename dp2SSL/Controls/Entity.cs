@@ -836,7 +836,7 @@ Stack:
         {
             if (this.TagInfo == null)
                 return false;
-            TagList.SetTagInfoEAS(this.TagInfo, enable);
+            RfidTagList.SetTagInfoEAS(this.TagInfo, enable);
             return true;
         }
 

@@ -67,7 +67,7 @@ namespace dp2SSL
             }
 
             // 如果有读者卡，要延时提醒不要忘了拿走读者卡
-            if (TagList.Patrons?.Count > 0)
+            if (RfidTagList.Patrons?.Count > 0)
             {
                 PageBorrow.BeginNotifyTask();
             }
@@ -110,7 +110,7 @@ namespace dp2SSL
         private void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
         {
             // 如果有读者卡，要延时提醒不要忘了拿走读者卡
-            if (/*PageBorrow.isPatronChanged(e) &&*/ TagList.Patrons?.Count > 0)
+            if (/*PageBorrow.isPatronChanged(e) &&*/ RfidTagList.Patrons?.Count > 0)
             {
                 PageBorrow.BeginNotifyTask();
             }

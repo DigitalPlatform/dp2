@@ -55,7 +55,7 @@ namespace dp2Circulation.Charging
         //      其他 天线编号
         NormalResult GetAntennaByUID(string uid)
         {
-            foreach (var data in TagList.Books)
+            foreach (var data in RfidTagList.Books)
             {
                 if (data.OneTag.UID != uid)
                     continue;
@@ -83,7 +83,7 @@ namespace dp2Circulation.Charging
         //      1   On
         GetEasStateResult GetEasStateByUID(string uid)
         {
-            foreach (var data in TagList.Books)
+            foreach (var data in RfidTagList.Books)
             {
                 if (data.OneTag.UID != uid)
                     continue;
@@ -116,7 +116,7 @@ namespace dp2Circulation.Charging
         //      1   On
         GetEasStateResult GetEasStateByPII(string pii)
         {
-            foreach (var data in TagList.Books)
+            foreach (var data in RfidTagList.Books)
             {
                 TagInfo tag_info = null;
                 if (data.OneTag.TagInfo == null)
@@ -235,7 +235,7 @@ namespace dp2Circulation.Charging
                 if (result.Value == 1)
                     break;
             }
-            TagList.ClearTagTable(uid);
+            RfidTagList.ClearTagTable(uid);
             TaskList.FillTagList();
 
             if (result.Value != 1)
@@ -484,12 +484,12 @@ out string strError);
             if (nRet == 1 && tag_info.EAS == true)
             {
                 seteas_result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, false);
-                TagList.SetEasData(tag_info.UID, false);
+                RfidTagList.SetEasData(tag_info.UID, false);
             }
             else if (nRet == 0 && tag_info.EAS == false)
             {
                 seteas_result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, true);
-                TagList.SetEasData(tag_info.UID, true);
+                RfidTagList.SetEasData(tag_info.UID, true);
             }
             else
             {

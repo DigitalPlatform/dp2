@@ -2210,7 +2210,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     if (isBorrow == true/* || numberShown == false*/)
                     {
-                        TagList.Refresh(sender as BaseChannel<IRfid>,
+                        RfidTagList.Refresh(sender as BaseChannel<IRfid>,
                             e.ReaderNameList,
                             e.Result.Results,
                                 (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
@@ -2233,7 +2233,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                         // 标签总数显示 图书+读者卡
                         if (CurrentApp != null)
-                            CurrentApp.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+                            CurrentApp.Number = $"{RfidTagList.Books.Count}:{RfidTagList.Patrons.Count}";
                         //numberShown = true;
                     }
                 }

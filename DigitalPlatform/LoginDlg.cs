@@ -6,61 +6,61 @@ using System.Windows.Forms;
 
 namespace DigitalPlatform
 {
-	/// <summary>
-	/// Summary description for LoginDlg.
-	/// </summary>
-	public class LoginDlg : System.Windows.Forms.Form
-	{
-		public System.Windows.Forms.CheckBox checkBox_savePassword;
-		public System.Windows.Forms.TextBox textBox_password;
-		public System.Windows.Forms.TextBox textBox_userName;
-		private System.Windows.Forms.Button button_cancel;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Button button_OK;
-		public System.Windows.Forms.TextBox textBox_serverAddr;
-		public System.Windows.Forms.TextBox textBox_comment;
+    /// <summary>
+    /// Summary description for LoginDlg.
+    /// </summary>
+    public class LoginDlg : System.Windows.Forms.Form
+    {
+        public System.Windows.Forms.CheckBox checkBox_savePassword;
+        public System.Windows.Forms.TextBox textBox_password;
+        public System.Windows.Forms.TextBox textBox_userName;
+        private System.Windows.Forms.Button button_cancel;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button_OK;
+        public System.Windows.Forms.TextBox textBox_serverAddr;
+        public System.Windows.Forms.TextBox textBox_comment;
         private StatusStrip statusStrip1;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public LoginDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public LoginDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginDlg));
             this.checkBox_savePassword = new System.Windows.Forms.CheckBox();
             this.textBox_password = new System.Windows.Forms.TextBox();
@@ -107,7 +107,7 @@ namespace DigitalPlatform
             // 
             // textBox_serverAddr
             // 
-            this.textBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverAddr.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_serverAddr.Location = new System.Drawing.Point(12, 119);
@@ -168,8 +168,8 @@ namespace DigitalPlatform
             // 
             // textBox_comment
             // 
-            this.textBox_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_comment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_comment.Location = new System.Drawing.Point(12, 12);
             this.textBox_comment.Multiline = true;
@@ -212,51 +212,49 @@ namespace DigitalPlatform
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			if (textBox_serverAddr.Text == "" 
-				&& textBox_serverAddr.Enabled == true)
-			{
-				MessageBox.Show(this, "尚未输入服务器地址");
-				return;
-			}
-			if (textBox_userName.Text == "")
-			{
-				MessageBox.Show(this, "尚未输入用户名");
-				return;
-			}
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            if (textBox_serverAddr.Text == ""
+                && textBox_serverAddr.Enabled == true)
+            {
+                MessageBox.Show(this, "尚未输入服务器地址");
+                return;
+            }
+            if (textBox_userName.Text == "")
+            {
+                MessageBox.Show(this, "尚未输入用户名");
+                return;
+            }
 
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void button_cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+        private void button_cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-		private void LoginDlg_Load(object sender, System.EventArgs e)
-		{
-			if (textBox_comment.Text == "")
-				textBox_comment.Visible = false;
+        private void LoginDlg_Load(object sender, System.EventArgs e)
+        {
+            if (textBox_comment.Text == "")
+                textBox_comment.Visible = false;
 
             this.BeginInvoke(new Delegate_SetFocus(SetFocus));
-		}
+        }
 
         public delegate void Delegate_SetFocus();
 
         void SetFocus()
         {
-            
-if (this.textBox_userName.Text == "")
-    this.textBox_userName.Focus();
-else
-    this.textBox_password.Focus();
-
+            if (this.textBox_userName.Text == "")
+                this.textBox_userName.Focus();
+            else
+                this.textBox_password.Focus();
         }
 
         public string UserName
@@ -320,6 +318,19 @@ else
             }
         }
 
+        // 2022/7/4
+        public bool SavePasswordVisible
+        {
+            get
+            {
+                return this.checkBox_savePassword.Visible;
+            }
+            set
+            {
+                this.checkBox_savePassword.Visible = value;
+            }
+        }
+
         public string Comment
         {
             get
@@ -341,5 +352,5 @@ else
         {
             this.AcceptButton = this.button_OK;
         }
-	}
+    }
 }

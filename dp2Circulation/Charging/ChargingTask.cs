@@ -1153,7 +1153,7 @@ end_time);
                             break;
                     }
 
-                    TagList.ClearTagTable("");
+                    RfidTagList.ClearTagTable("");
                     FillTagList();
 
                     // testing
@@ -1185,7 +1185,7 @@ end_time);
             BaseChannel<IRfid> channel = RfidManager.GetChannel();
             try
             {
-                TagList.FillTagInfo(channel);
+                RfidTagList.FillTagInfo(channel);
             }
             finally
             {

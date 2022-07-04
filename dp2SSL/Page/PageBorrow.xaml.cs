@@ -516,7 +516,7 @@ namespace dp2SSL
 
                     // 自动返回菜单页面
                     if (App.AutoBackMenuPage
-                        && (IsVerticalCard()/*_patron.IsFingerprintSource || App.PatronReaderVertical == true*/ || TagList.Patrons.Count == 0))
+                        && (IsVerticalCard()/*_patron.IsFingerprintSource || App.PatronReaderVertical == true*/ || RfidTagList.Patrons.Count == 0))
                         TryBackMenuPage();
                 }
 
@@ -527,8 +527,8 @@ namespace dp2SSL
 
                 // 当列表为空的时候，主动清空一次 tag 缓存。这样读者可以用拿走全部标签一次的方法来迫使清除缓存(比如中途利用内务修改过 RFID 标签的 EAS)
                 // TODO: 不过此举对反复拿放图书的响应速度有一定影响。后面也可以考虑继续改进(比如设立一个专门的清除缓存按钮，这里就不要清除缓存了)
-                if (_entities.Count == 0 && TagList.TagTableCount > 0)
-                    TagList.ClearTagTable(null);
+                if (_entities.Count == 0 && RfidTagList.TagTableCount > 0)
+                    RfidTagList.ClearTagTable(null);
             }
         }
 
@@ -553,7 +553,7 @@ namespace dp2SSL
 
             if (booksControl.Visibility == Visibility.Visible)  // 2020/4/8
             {
-                var books = TagList.Books;
+                var books = RfidTagList.Books;
                 if (books.Count > 0)
                 {
                     List<Entity> update_entities = new List<Entity>();
@@ -633,7 +633,7 @@ namespace dp2SSL
             //_lock_refreshPatrons.EnterWriteLock();
             try
             {
-                var patrons = TagList.Patrons;
+                var patrons = RfidTagList.Patrons;
                 if (patrons.Count == 1)
                     _patron.IsRfidSource = true;
 
@@ -705,7 +705,7 @@ namespace dp2SSL
             finally
             {
                 //_lock_refreshPatrons.ExitWriteLock();
-                _prev_patron_count = TagList.Patrons.Count;
+                _prev_patron_count = RfidTagList.Patrons.Count;
             }
         }
 
@@ -2471,7 +2471,7 @@ out string strError);
                 var result = RfidManager.SetEAS($"{uid}", antenna_id, enable);
                 if (result.Value != -1)
                 {
-                    TagList.SetEasData(uid, enable);
+                    RfidTagList.SetEasData(uid, enable);
                     _entities.SetEasData(uid, enable);
                 }
                 return result;
@@ -3791,7 +3791,7 @@ string usage)
         public void PatronClear(bool check_card_existance = false)
         {
             // 清除以前检查一下身份读卡器上是否有读者卡
-            if (check_card_existance && TagList.Patrons.Count >= 1)
+            if (check_card_existance && RfidTagList.Patrons.Count >= 1)
             {
                 BeginWarningCard((s) =>
                 {
@@ -3876,7 +3876,7 @@ string usage)
                 () =>
                 {
                     // 延时到点后，如果读者卡确实还在，则提醒不要忘了拿走
-                    if (TagList.Patrons.Count >= 1)
+                    if (RfidTagList.Patrons.Count >= 1)
                     {
                         BeginWarningCard(null);
                     }
@@ -3928,13 +3928,13 @@ string usage)
                     // 如果读者卡还在读卡器上，如果决定要清除屏幕信息，则最好语音提示不要忘了拿走读者卡；
                     //          如果决定不清除读者信息也可以，意在让路过屏幕的人看到屏幕信息从而意识到读卡器上还遗留了读者卡。此时语音提示不要忘了拿走读者卡也是可以的，和保留屏幕信息不矛盾
                     // TODO: 语音提示是否要一直持续下去呢？直到有其他操作才中断语音提示
-                    if (TagList.Patrons.Count >= 1)
+                    if (RfidTagList.Patrons.Count >= 1)
                     {
                         BeginWarningCard((s) =>
                         {
                             // 延迟清除
                             // if (s == "cancelled" && App.PatronReaderVertical)
-                            if (TagList.Patrons.Count == 0) // 2019/12/13
+                            if (RfidTagList.Patrons.Count == 0) // 2019/12/13
                                 PatronClear(false);
                         });
                         // App.CurrentApp.Speak("注意，不要忘了拿走读者卡；注意，不要忘了拿走读者卡");
@@ -3979,12 +3979,12 @@ string usage)
                 {
                     while (token.IsCancellationRequested == false)
                     {
-                        if (TagList.Patrons.Count == 0)
+                        if (RfidTagList.Patrons.Count == 0)
                         {
                             func_cancelled?.Invoke("patron_removed");
                             break;
                         }
-                        if (TagList.Books.Count > 0)
+                        if (RfidTagList.Books.Count > 0)
                         {
                             func_cancelled?.Invoke("book_added");
                             break;
@@ -4036,7 +4036,7 @@ string usage)
                     BeginNotifyTask();
 
                 if (IsVerticalCard()/*App.PatronReaderVertical*/ == true
-    && TagList.Books.Count == 0)
+    && RfidTagList.Books.Count == 0)
                     BeginDelayClearTask();
                 return;
             }
@@ -4065,7 +4065,7 @@ string usage)
             // 身份读写器竖放
             // 读写器上没有图书的时候，才启动延时清除
             if (IsVerticalCard() /*App.PatronReaderVertical == true*/
-                && TagList.Books.Count == 0)
+                && RfidTagList.Books.Count == 0)
                 BeginDelayClearTask();
 
             if (_commands != null && _commands.Count > 0)
@@ -4185,10 +4185,10 @@ string usage)
                 // TODO: 是否一开始要探测读卡器上是否有没有拿走的读者卡，提醒读者先拿走？
                 while (token.IsCancellationRequested == false)
                 {
-                    if (TagList.Patrons.Count == 0)
+                    if (RfidTagList.Patrons.Count == 0)
                         break;
 
-                    var tag = TagList.Patrons[0].OneTag;
+                    var tag = RfidTagList.Patrons[0].OneTag;
                     if (tag.Protocol == InventoryInfo.ISO14443A)
                     {
                         App.Invoke(new Action(() =>
@@ -4236,7 +4236,7 @@ string usage)
             {
                 while (token.IsCancellationRequested == false)
                 {
-                    if (TagList.Patrons.Count == 0)
+                    if (RfidTagList.Patrons.Count == 0)
                     {
                         App.Invoke(new Action(() =>
                         {
@@ -4248,7 +4248,7 @@ string usage)
                         }));
                     }
 
-                    var results = TagList.Patrons.FindAll(o => o.OneTag.Protocol == InventoryInfo.ISO14443A);
+                    var results = RfidTagList.Patrons.FindAll(o => o.OneTag.Protocol == InventoryInfo.ISO14443A);
                     if (results.Count != 1)
                     {
                         string remove_text = "";

@@ -506,7 +506,7 @@ namespace dp2SSL
 
         List<Entity> InitialEntities()
         {
-            var books = TagList.Books;
+            var books = RfidTagList.Books;
             if (books.Count == 0)
                 return new List<Entity>();
 
@@ -529,7 +529,7 @@ namespace dp2SSL
             //_lock_refreshPatrons.EnterWriteLock();
             try
             {
-                var patrons = TagList.Patrons;
+                var patrons = RfidTagList.Patrons;
                 if (patrons.Count == 1)
                     _patron.IsRfidSource = true;
 

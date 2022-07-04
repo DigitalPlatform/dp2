@@ -300,7 +300,7 @@ namespace dp2Circulation
         // 检查当前是否有多张读者卡持续放在读卡器上
         void CheckMultiPatronCard()
         {
-            var count = TagList.Patrons.Count;
+            var count = RfidTagList.Patrons.Count;
             if (count > 1)
                 SetError("multi", $"请拿走多余的读者卡(当前一共放了 {count} 张)");
             else
@@ -311,7 +311,7 @@ namespace dp2Circulation
 
         void RefreshRfidTagNumber()
         {
-            _rfidNumber = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+            _rfidNumber = $"{RfidTagList.Books.Count}:{RfidTagList.Patrons.Count}";
             this.Invoke((Action)(() =>
             {
                 if (this.label_rfidMessage.Visible == false)
@@ -330,7 +330,7 @@ namespace dp2Circulation
         {
             DateTime now = DateTime.Now;
 
-            var books = TagList.Books;
+            var books = RfidTagList.Books;
             if (books.Count > 0)
             {
                 foreach (var tag in books)
@@ -339,7 +339,7 @@ namespace dp2Circulation
                 }
             }
 
-            var patrons = TagList.Patrons;
+            var patrons = RfidTagList.Patrons;
             if (patrons.Count > 0)
             {
                 foreach (var tag in patrons)

@@ -155,7 +155,6 @@ namespace DigitalPlatform.rms
             this.button_OK.Enabled = false;
             try
             {
-
                 nRet = CreateUser(
                     this.SqlServerName,
                     this.textBox_loginName.Text,
@@ -265,6 +264,7 @@ namespace DigitalPlatform.rms
                 {
                     dlg.Comment = title;    // "请提供 PostgreSQL 超级用户名和密码";
                     dlg.ServerUrl = " ";
+                    dlg.ServerAddrEnabled = false;
                     dlg.UserName = defaultUserName; //  "postgres";
                     dlg.Password = "";
                     dlg.SavePassword = true;
@@ -312,7 +312,7 @@ out string strError)
 
             strError = func_getAdminUserName("请提供 PostgreSQL 超级用户名和密码",
                 "postgres",
-                out string strAdminUserName, 
+                out string strAdminUserName,
                 out string strAdminPassword);
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
@@ -594,7 +594,7 @@ out string strError)
 
             strError = func_getAdminUserName("请提供 PostgreSQL 超级用户名和密码",
                 "postgres",
-                out string strAdminUserName, 
+                out string strAdminUserName,
                 out string strAdminPassword);
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;

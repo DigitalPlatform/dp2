@@ -433,7 +433,7 @@ out strError);
     _tagExisting.ReaderName,
     _tagExisting.TagInfo,
     new_tag_info);
-                TagList.ClearTagTable(_tagExisting.UID);
+                RfidTagList.ClearTagTable(_tagExisting.UID);
 #endif
                 if (result.Value == -1)
                 {

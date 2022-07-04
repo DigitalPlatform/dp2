@@ -276,14 +276,14 @@ this.toolStripButton_autoFixEas.Checked);
                     }
 #else
                     List<TagAndData> tags = new List<TagAndData>();
-                    foreach (var book in TagList.Books)
+                    foreach (var book in RfidTagList.Books)
                     {
                         if (book.OneTag.TagInfo == null)
                             continue;
                         tags.Add(book);
                     }
 
-                    tags.AddRange(TagList.Patrons);
+                    tags.AddRange(RfidTagList.Patrons);
 
 #endif
 
@@ -1140,7 +1140,7 @@ this.toolStripButton_autoFixEas.Checked);
 #else
                         {
                             result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, false);
-                            TagList.SetEasData(tag_info.UID, false);
+                            RfidTagList.SetEasData(tag_info.UID, false);
                         }
 #endif
                         else if (nRet == 0 && tag_info.EAS == false)
@@ -1149,7 +1149,7 @@ this.toolStripButton_autoFixEas.Checked);
 #else
                         {
                             result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, true);
-                            TagList.SetEasData(tag_info.UID, true);
+                            RfidTagList.SetEasData(tag_info.UID, true);
                         }
 #endif
                         else
@@ -1566,7 +1566,7 @@ this.toolStripButton_autoFixEas.Checked);
 
         void menu_clearTagsCache_Click(object sender, EventArgs e)
         {
-            TagList.ClearTagTable(null);
+            RfidTagList.ClearTagTable(null);
         }
 
         void menu_test_Click(object sender, EventArgs e)
@@ -1707,7 +1707,7 @@ this.toolStripButton_autoFixEas.Checked);
                     old_tag_info,
                     new_tag_info);
 #else
-                TagList.ClearTagTable(item_info.OneTag.UID);
+                RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
     old_tag_info,
     new_tag_info);
@@ -1873,7 +1873,7 @@ this.toolStripButton_autoFixEas.Checked);
                         new_tag_info.LockStatus);
                 }
 
-                TagList.ClearTagTable(item_info.OneTag.UID);
+                RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
                     new_tag_info);
@@ -1983,7 +1983,7 @@ this.toolStripButton_autoFixEas.Checked);
                     new_tag_info.Bytes = bytes;
                 }
 
-                TagList.ClearTagTable(item_info.OneTag.UID);
+                RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
                     new_tag_info);
@@ -2049,7 +2049,7 @@ this.toolStripButton_autoFixEas.Checked);
                     new_tag_info.Bytes = temp.ToArray();
                 }
 
-                TagList.ClearTagTable(item_info.OneTag.UID);
+                RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
                     new_tag_info);
@@ -2118,7 +2118,7 @@ this.toolStripButton_autoFixEas.Checked);
                     old_tag_info,
                     new_tag_info);
 #else
-                TagList.ClearTagTable(item_info.OneTag.UID);
+                RfidTagList.ClearTagTable(item_info.OneTag.UID);
                 var result = RfidManager.WriteTagInfo(item_info.OneTag.ReaderName,
                     old_tag_info,
                     new_tag_info);

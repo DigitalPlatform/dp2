@@ -917,11 +917,15 @@ out strError);
         //      -1  出错
         //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
         //      1   成功删除
-        public static int DeleteAllSqlDatabase(string strDataDir,
+        public static int DeleteAllSqlDatabase(
+            IWin32Window owner,
+            string strDataDir,
             out string strError)
         {
             strError = "";
             int nRet = 0;
+
+            ClearCachedAdminUserName();
 
             string strFileName = Path.Combine(strDataDir, "databases.xml");
             if (File.Exists(strFileName) == false)
@@ -955,7 +959,6 @@ out strError);
 
             if (info.SqlServerType == "SQLite")
                 return 0;
-
 
             string strConnectionString = "";
             nRet = GetConnectionString(info,
@@ -1000,6 +1003,7 @@ out strError);
 
             if (info.SqlServerType == "PostgreSQL")
             {
+                _owner = owner;
                 nRet = PgsqlDataSourceDlg.DeleteDatabase(
 info.SqlServerName,
 info.DatabaseInstanceName,
@@ -1011,6 +1015,7 @@ out strError);
                     return -1;
                 }
 
+                _owner = owner;
                 nRet = PgsqlDataSourceDlg.DeleteUser(
                     info.SqlServerName,
                     info.DatabaseLoginName,
@@ -1059,26 +1064,32 @@ out strError);
 
             if (info.SqlServerType == "Oracle")
             {
-                List<string> sql_dbnames = new List<string>();
-                foreach (XmlElement database in databases)
+                // 注: 这里删除表没有必要，因为后面 OracleDataSourceWizard.DeleteUser() 会删除该用户创建的所有表
+                /*
                 {
-                    string strSqlDbName = database.GetAttribute("name");
-                    if (string.IsNullOrEmpty(strSqlDbName) == true)
-                        continue;
+                    List<string> sql_dbnames = new List<string>();
+                    foreach (XmlElement database in databases)
+                    {
+                        string strSqlDbName = database.GetAttribute("name");
+                        if (string.IsNullOrEmpty(strSqlDbName) == true)
+                            continue;
 
-                    sql_dbnames.Add(strSqlDbName);
+                        sql_dbnames.Add(strSqlDbName);
+                    }
+
+                    if (sql_dbnames.Count > 0)
+                    {
+                        // 删除所有的 table
+                        nRet = DeleteOracleTables(strConnectionString,
+            sql_dbnames,
+            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
                 }
+                */
 
-                if (sql_dbnames.Count > 0)
-                {
-                    // 删除所有的 table
-                    nRet = DeleteOracleTables(strConnectionString,
-        sql_dbnames,
-        out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
-
+                _owner = owner;
                 // 2022/7/1
                 // 用 system 用户身份删除 dp2kernel_oracle 账户(和表空间)
                 nRet = OracleDataSourceWizard.DeleteUser(
@@ -1237,7 +1248,10 @@ out strError);
             adminPassword = "";
         }
 
+        static IWin32Window _owner = null;
+
         // 询问超级用户名和密码
+        // 注意调用前要设置好 _owner
         static string AskAdminUserName(
             string title,
             string defaultUserName,
@@ -1253,10 +1267,12 @@ out strError);
                 {
                     dlg.Comment = title;
                     dlg.ServerUrl = " ";
+                    dlg.ServerAddrEnabled = false;
                     dlg.UserName = defaultUserName; //  "postgres";
                     dlg.Password = "";
                     dlg.SavePassword = true;
-                    dlg.ShowDialog(/*this*/);
+                    dlg.SavePasswordVisible = false;
+                    dlg.ShowDialog(_owner);
 
                     if (dlg.DialogResult != DialogResult.OK)
                     {
@@ -1266,6 +1282,7 @@ out strError);
                     userName = dlg.UserName;
                     password = dlg.Password;
 
+                    /*
                     if (dlg.SavePassword == true)
                     {
                         adminUserName = dlg.UserName;
@@ -1273,6 +1290,9 @@ out strError);
                     }
                     else
                         ClearCachedAdminUserName();
+                    */
+                    adminUserName = dlg.UserName;
+                    adminPassword = dlg.Password;
                 }
             }
             else
@@ -1283,7 +1303,6 @@ out strError);
 
             return null;
         }
-
 
         /*
 <datasource servername="XIETAO-THINKPAD" mode="SSPI" servertype="MS SQL Server" userid='' password=''/>
@@ -1434,7 +1453,10 @@ out strError);
                     //      -1  出错
                     //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
                     //      1   成功删除
-                    nRet = DeleteAllSqlDatabase(strDataDir, out strError);
+                    nRet = DeleteAllSqlDatabase(
+                        this,
+                        strDataDir,
+                        out strError);
                     if (nRet == -1)
                     {
                         result = MessageBox.Show(this,
@@ -2315,12 +2337,16 @@ MessageBoxDefaultButton.Button1);
                 string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
                 string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
 
-                // TODO: 删除全部 SQL 数据库
+                _owner = this;
+                // 删除全部 SQL 数据库
                 // return:
                 //      -1  出错
                 //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
                 //      1   成功删除
-                nRet = DeleteAllSqlDatabase(strDataDir, out strError);
+                nRet = DeleteAllSqlDatabase(
+                    this,
+                    strDataDir,
+                    out strError);
                 if (nRet == -1)
                 {
                     MessageBox.Show(this,

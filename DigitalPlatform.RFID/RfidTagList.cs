@@ -12,7 +12,8 @@ namespace DigitalPlatform.RFID
 {
 
     // 存储 Tag 的数据结构。可以动态表现当前读卡器上的所有标签
-    public static class TagList
+    // 原名为 TagList，为避免和 System.Diagnostics.TagList 名字冲突，改为 RfidTagList
+    public static class RfidTagList
     {
         static object _sync_books = new object();
         static List<TagAndData> _books = new List<TagAndData>();
