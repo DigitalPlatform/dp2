@@ -14512,6 +14512,17 @@ trans);
                         return -2;
                     }
                 }
+                else
+                {
+                    // 2022/7/6
+                    if (StringUtil.IsInList("checkcreatingtimestamp", strStyle)
+                        && baInputTimestamp != null)
+                    {
+                        strError = $"当创建记录的位置 {GetRecordPath(strID)} 原先不存在记录时，创建用的时间戳应该为 null，而不应为 '{ByteArray.GetHexTimeStampString(baInputTimestamp)}'";
+                        baOutputTimestamp = null;   // 返回给前端，让前端能够得知应使用的时间戳
+                        return -2;
+                    }
+                }
             }
 
 #if OLD
@@ -19642,7 +19653,7 @@ strID);
                     }
                     catch (SqlException ex)
                     {
-                        strError = "插入数据行时出错，记录路径'" + this.GetCaption("zh-CN") + "/" + strID + "，原因：" + ex.Message;
+                        strError = $"插入数据行时出错，记录路径 '{GetRecordPath(strID)}'，原因：" + ex.Message;
 
                         // 检查 SQL 错误码
                         if (ContainsErrorCode(ex, 1105))
@@ -21270,7 +21281,7 @@ strID);
                     catch (Exception ex)
                     {
 #if DEBUG
-                        strError = $"删除 { this.GetCaption("zh-CN") } 库中 ID 为 { strRecordID } 的记录时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}";
+                        strError = $"删除记录 { GetRecordPath(strRecordID) } 时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}";
 #else
                         strError = "删除'" + this.GetCaption("zh-CN") + "'库中id为'" + strRecordID + "'的记录时出错,原因:" + ex.Message;
 #endif
@@ -21520,7 +21531,7 @@ strID);
                 }
                 catch (Exception ex)
                 {
-                    strError = "重建 '" + this.GetCaption("zh-CN") + "' 库中id为 '" + strRecordID + "' 的记录的相关keys时出错,原因:" + ex.Message;
+                    strError = $"RebuildRecordKeys() 重建和记录 '{GetRecordPath(strRecordID) }' 的相关的 keys 时出错，原因:" + ex.Message;
                     return -1;
                 }
                 finally // 连接
@@ -22672,7 +22683,8 @@ out strError);
                     }
                     catch (Exception ex)
                     {
-                        strError = "删除数据库 '" + this.GetCaption("zh-CN") + "' 中 ID为 '" + strID + "' 的对象文件时发生错误: " + ex.Message;
+                        // strError = "删除数据库 '" + this.GetCaption("zh-CN") + "' 中 ID为 '" + strID + "' 的对象文件时发生错误: " + ex.Message;
+                        strError = $"DeleteRecordByID() 1 删除数据库记录 '{GetRecordPath(strID)}' 时发生错误: " + ex.Message;
                         this.WriteErrorLog(strError);
                         return -1;
                     }
@@ -22694,7 +22706,7 @@ out strError);
                         }
                         catch (Exception ex)
                         {
-                            strError = "删除数据库 '" + this.GetCaption("zh-CN") + "' 中 ID为 '" + strID + "' 的对象文件时发生错误: " + ex.Message;
+                            strError = $"DeleteRecordByID() 2 删除数据库记录 '{GetRecordPath(strID)}' 时发生错误: " + ex.Message;
                             this.WriteErrorLog(strError);
                             return -1;
                         }
@@ -23012,6 +23024,11 @@ out strError);
             byte[] buffer = new byte[length];
             dr.GetBytes(index, 0, buffer, 0, (int)length);
             return buffer;
+        }
+
+        public string GetRecordPath(string strRecordID)
+        {
+            return this.GetCaption("zh-CN") + "/" + strRecordID;
         }
     }
 

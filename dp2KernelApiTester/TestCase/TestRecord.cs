@@ -72,6 +72,8 @@ namespace dp2KernelApiTester
 
                 for (int i = 1; i < 10; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var result = FragmentReadRecords(
                         token,
                         create_result.CreatedPaths, i);
@@ -81,6 +83,8 @@ namespace dp2KernelApiTester
 
                 for (int i = 0; i < 10; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var result = FragmentOverwriteRecords(
                         token,
                         create_result.CreatedPaths, -1);
@@ -1490,7 +1494,7 @@ out string strError);
 
                     DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}创建记录 {current_path} {start + delta}-{end} {StringUtil.GetPercentText(end + 1, bytes.Length)}...");
 
-                    var ret = channel.WriteRes(current_path,
+                    var ret = channel.TryWriteRes(current_path,
                         $"{start + delta}-{end}",
                         bytes.Length,
                         fragment,
@@ -1591,7 +1595,7 @@ out string strError);
 
                         byte[] chunk_contents = new byte[end_offs - (start_offs + delta) + 1];
                         Array.Copy(contents, (start_offs + delta), chunk_contents, 0, chunk_contents.Length);
-                        var ret = channel.WriteRes(object_path,
+                        var ret = channel.TryWriteRes(object_path,
                             $"{start_offs + delta}-{end_offs}",
                             length,
                             chunk_contents,
@@ -1780,7 +1784,7 @@ out string strError);
                     if (start + delta == 0)
                         timestamp_param = origin_timestamp;
 
-                    var ret = channel.WriteRes(path,
+                    var ret = channel.TryWriteRes(path,
                         $"{start + delta}-{end}",
                         bytes.Length,
                         fragment,
@@ -2096,7 +2100,7 @@ out string strError);
 
                                     DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} {start}-{start + read_length - 1} {StringUtil.GetPercentText(start + read_length, file.Length)}...");
 
-                                    ret = channel.WriteRes(object_path,
+                                    ret = channel.TryWriteRes(object_path,
                                         $"{start}-{start + read_length - 1}",
                                         file.Length,
                                         bytes,
@@ -2386,7 +2390,7 @@ out string strError);
 
                                     // TODO: 在覆盖已有对象内容的时候，要故意使用一次错误的时间戳写入，要报错才对
 
-                                    ret = channel.WriteRes(object_path,
+                                    ret = channel.TryWriteRes(object_path,
                                         $"{start}-{start + read_length - 1}",
                                         file.Length,
                                         bytes,
@@ -2532,6 +2536,71 @@ out string strError);
                 if (File.Exists(output_fileName))
                     File.Delete(output_fileName);
             }
+        }
+
+        static long TryWriteRes(this RmsChannel channel,
+            string strResPath,
+            string strRanges,
+            long lTotalLength,
+            byte[] baContent,
+            string strMetadata,
+            string strStyle,
+            byte[] baInputTimestamp,
+            out string strOutputResPath,
+            out byte[] baOutputTimestamp,
+            out string strError)
+        {
+            if (strResPath.EndsWith("?"))
+                return channel.WriteRes(strResPath,
+strRanges,
+lTotalLength,
+baContent,
+strMetadata,
+strStyle,
+baInputTimestamp,
+out strOutputResPath,
+out baOutputTimestamp,
+out strError);
+
+            // 先尝试用一个不合适的 timestamp 写入
+            var ret = channel.WriteRes(strResPath,
+            strRanges,
+            lTotalLength,
+            baContent,
+            strMetadata,
+            strStyle + ",checkcreatingtimestamp",   // checkcreatingtimestamp 表示，如果记录以前不存在，新创建，则要检查请求参数中的 timestamp 必须是 null，否则就报错
+            GetRandomTimestamp(),
+            out strOutputResPath,
+            out baOutputTimestamp,
+            out strError);
+            if (ret == -1 && channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+            {
+                // 再正式写入
+                return channel.WriteRes(strResPath,
+strRanges,
+lTotalLength,
+baContent,
+strMetadata,
+strStyle,
+baInputTimestamp,
+out strOutputResPath,
+out baOutputTimestamp,
+out strError);
+            }
+
+            strError = $"在用随机 timestamp 写入 '{strResPath}' 时居然没有出错，这是错误的效果。strRanges='{strRanges}' lTotalLength={lTotalLength} baContent.Length={(baContent == null ? 0 : baContent.Length)}";
+            return -1;
+        }
+
+        static byte[] GetRandomTimestamp()
+        {
+            List<byte> results = new List<byte>();
+            for (int i = 0; i < 16; i++)
+            {
+                results.Add((byte)i);
+            }
+
+            return results.ToArray();
         }
     }
 }
