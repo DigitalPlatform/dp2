@@ -105,6 +105,20 @@ namespace dp2KernelApiTester
                     return result;
             }
 
+            // 测试交替上载覆盖小于 100K 和大于 100K 的对象
+            {
+                var create_result = UploadSmallLargObject(1);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(create_result.CreatedPaths,
+    create_result.AccessPoints,
+    "");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            /*
             {
                 var create_result = UploadLargObject(count);
                 if (create_result.Value == -1)
@@ -116,6 +130,7 @@ namespace dp2KernelApiTester
                 if (result.Value == -1)
                     return result;
             }
+            */
 
             {
                 var result = Finish();
@@ -134,6 +149,25 @@ namespace dp2KernelApiTester
                     return result;
             }
 
+            // 临时测试
+            // 碎片方式创建记录，overlap 风格
+            {
+                var create_result = CreateRecords(1, false);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = FragmentOverwriteRecords(create_result.CreatedPaths, 1, "overlap");
+                if (result.Value == -1)
+                    return result;
+
+                var result1 = DeleteRecords(create_result.CreatedPaths,
+    null,
+    "");
+                if (result1.Value == -1)
+                    return result1;
+            }
+
+            ////
             {
                 var create_result = CreateRecords(2, true);
                 if (create_result.Value == -1)
@@ -165,7 +199,7 @@ namespace dp2KernelApiTester
 
             // 碎片方式创建记录，overlap 风格
             {
-                var create_result = FragmentCreateRecords(1,1,"overlap");
+                var create_result = FragmentCreateRecords(1, 1, "overlap");
                 if (create_result.Value == -1)
                     return create_result;
 
@@ -1332,7 +1366,7 @@ out string strError);
 
                     if (end > bytes.Length - 1)
                     {
-                        end = chunk_length - 1;
+                        end = bytes.Length - 1; // chunk_length
                         chunk_length = (int)(end - start + 1);
                     }
 
@@ -1343,16 +1377,16 @@ out string strError);
                     {
                         delta = -10;
                         if (start + delta < 0)
-                            delta = -1*start;
+                            delta = -1 * start;
                     }
 
                     byte[] fragment = new byte[end - (start + delta) + 1];
                     Array.Copy(bytes, (start + delta), fragment, 0, fragment.Length);
 
-                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}创建记录 {current_path} {start+delta}-{end} {StringUtil.GetPercentText(end+1, bytes.Length)}...");
+                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}创建记录 {current_path} {start + delta}-{end} {StringUtil.GetPercentText(end + 1, bytes.Length)}...");
 
                     var ret = channel.WriteRes(current_path,
-                        $"{start+delta}-{end}",
+                        $"{start + delta}-{end}",
                         bytes.Length,
                         fragment,
                         "", // strMetadata
@@ -1444,10 +1478,10 @@ out string strError);
                                 delta = -1 * start_offs;
                         }
 
-                        byte[] chunk_contents = new byte[end_offs - (start_offs + delta)+ 1];
+                        byte[] chunk_contents = new byte[end_offs - (start_offs + delta) + 1];
                         Array.Copy(contents, (start_offs + delta), chunk_contents, 0, chunk_contents.Length);
                         var ret = channel.WriteRes(object_path,
-                            $"{start_offs+delta}-{end_offs}",
+                            $"{start_offs + delta}-{end_offs}",
                             length,
                             chunk_contents,
                             "",
@@ -1616,17 +1650,22 @@ out string strError);
                     }
 
                     byte[] fragment = new byte[end - (start + delta) + 1];
-                    Array.Copy(bytes, start+delta, fragment, 0, fragment.Length);
+                    Array.Copy(bytes, start + delta, fragment, 0, fragment.Length);
 
-                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}覆盖记录 {path} {start+delta}-{end} {StringUtil.GetPercentText(end+1, bytes.Length)}...");
+                    DataModel.ShowProgressMessage(progress_id, $"正在用 Fragment 方式{style}覆盖记录 {path} {start + delta}-{end} {StringUtil.GetPercentText(end + 1, bytes.Length)}...");
+
+                    byte[] timestamp_param = timestamp;
+                    // 如果是从头覆盖，则需要使用读出时的完成时间戳
+                    if (start + delta == 0)
+                        timestamp_param = origin_timestamp;
 
                     var ret = channel.WriteRes(path,
-                        $"{start+delta}-{end}",
+                        $"{start + delta}-{end}",
                         bytes.Length,
                         fragment,
                         "", // strMetadata
                         "", // strStyle,
-                        timestamp,
+                        timestamp_param,
                         out string output_path,
                         out byte[] output_timestamp,
                         out string strError);
@@ -1828,6 +1867,7 @@ out string strError);
             return new NormalResult();
         }
 
+        // 测试上载大对象
         public static CreateResult UploadLargObject(int count)
         {
             var channel = DataModel.GetChannel();
@@ -1891,7 +1931,7 @@ out string strError);
                         for (int j = 0; j < Math.Min(10, count); j++)
                         {
                             long object_size = object_size_unit * (j + 1);
-                            string fileName = Path.Combine(Environment.CurrentDirectory, $"temp_object_{j+1}");
+                            string fileName = Path.Combine(Environment.CurrentDirectory, $"temp_object_{j + 1}");
                             File.Delete(fileName);
                             DataModel.SetMessage($"正在创建大文件 {fileName} size={object_size} ...");
                             CreateObjectFile(fileName, object_size);
@@ -1915,7 +1955,7 @@ out string strError);
                                     if (read_length == 0)
                                         break;
 
-                                    DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} {start}-{start + read_length - 1} {StringUtil.GetPercentText(start+read_length, file.Length)}...");
+                                    DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} {start}-{start + read_length - 1} {StringUtil.GetPercentText(start + read_length, file.Length)}...");
 
                                     ret = channel.WriteRes(object_path,
                                         $"{start}-{start + read_length - 1}",
@@ -1953,7 +1993,7 @@ out string strError);
                     {
                         string object_path = $"{output_path}/object/{j + 1}";
                         string fileName = filenames[j];
-                        string output_fileName = Path.Combine(Environment.CurrentDirectory, $"output_{j+1}");
+                        string output_fileName = Path.Combine(Environment.CurrentDirectory, $"output_{j + 1}");
                         File.Delete(output_fileName);
                         try
                         {
@@ -2101,6 +2141,244 @@ out string strError);
             }
 
             return new NormalResult();
+        }
+
+        // 测试交替上载覆盖大小对象
+        public static CreateResult UploadSmallLargObject(int count)
+        {
+            var channel = DataModel.GetChannel();
+
+            List<string> created_paths = new List<string>();
+            List<AccessPoint> created_accesspoints = new List<AccessPoint>();
+
+            for (int i = 0; i < 1; i++)
+            {
+                string path = $"{strDatabaseName}/?";
+                string current_barcode = (i + 1).ToString().PadLeft(10, '0');
+
+                string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
+<barcode>{barcode}</barcode>
+<dprms:file id='1' />
+<dprms:file id='2' />
+<dprms:file id='3' />
+<dprms:file id='4' />
+<dprms:file id='5' />
+<dprms:file id='6' />
+<dprms:file id='7' />
+<dprms:file id='8' />
+<dprms:file id='9' />
+<dprms:file id='10' />
+</root>".Replace("{barcode}", current_barcode);
+                // var bytes = Encoding.UTF8.GetBytes(xml);
+
+                var ret = channel.DoSaveTextRes(path,
+                    xml, // strMetadata,
+                    false,
+                    "",
+                    null,
+                    out byte[] output_timestamp,
+                    out string output_path,
+                    out string strError);
+                if (ret == -1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        CreatedPaths = created_paths,
+                        AccessPoints = created_accesspoints,
+                    };
+
+                created_paths.Add(output_path);
+                created_accesspoints.Add(new AccessPoint
+                {
+                    Key = current_barcode,
+                    From = "册条码号",
+                    Path = output_path,
+                });
+
+                List<string> filenames = new List<string>();
+
+                try
+                {
+                    long[] size_list = new long[] {
+                        5433, 2279569,
+                        4096, 100*1024,
+                        5555, 200*1024,
+                    };
+                    {
+                        byte[] timestamp = null;
+
+                        // 上载对象
+                        for (int j = 0; j < size_list.Length; j++)
+                        {
+                            long object_size = size_list[j];
+                            string fileName = Path.Combine(Environment.CurrentDirectory, $"temp_object_{j + 1}");
+                            File.Delete(fileName);
+                            DataModel.SetMessage($"正在创建文件 {fileName} size={object_size} ...");
+                            CreateObjectFile(fileName, object_size);
+
+                            filenames.Add(fileName);
+
+                            string object_path = $"{output_path}/object/1";
+
+                            string progress_id = DataModel.NewProgressID();
+                            DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} ...");
+
+                            long start = 0;
+                            using (var file = File.OpenRead(fileName))
+                            {
+                                while (true)
+                                {
+                                    long rest_length = file.Length - start;
+                                    byte[] bytes = new byte[Math.Min((long)(300 * 1024), rest_length)];
+                                    int read_length = file.Read(bytes, 0, bytes.Length);
+                                    if (read_length == 0)
+                                        break;
+
+                                    DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} {start}-{start + read_length - 1} {StringUtil.GetPercentText(start + read_length, file.Length)}...");
+
+                                    // TODO: 在覆盖已有对象内容的时候，要故意使用一次错误的时间戳写入，要报错才对
+
+                                    ret = channel.WriteRes(object_path,
+                                        $"{start}-{start + read_length - 1}",
+                                        file.Length,
+                                        bytes,
+                                        "",
+                                        "content,data",
+                                        timestamp,
+                                        out string output_object_path,
+                                        out byte[] output_object_timestamp,
+                                        out strError);
+                                    if (ret == -1)
+                                        return new CreateResult
+                                        {
+                                            Value = -1,
+                                            ErrorInfo = strError,
+                                            CreatedPaths = created_paths,
+                                            AccessPoints = created_accesspoints,
+                                        };
+                                    timestamp = output_object_timestamp;
+                                    // testing
+                                    // timestamp = null;
+                                    start += read_length;
+                                    if (read_length < bytes.Length
+                                        || start >= file.Length)
+                                        break;
+                                }
+                            }
+
+                            DataModel.ShowProgressMessage(progress_id, $"文件 {object_path} 上传完成");
+
+                            var compare_result = DownloadAndCompare(
+        channel,
+        object_path,
+        fileName,
+        timestamp);
+                            if (compare_result.Value != 0)
+                                return new CreateResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = compare_result.ErrorInfo
+                                };
+
+                            File.Delete(fileName);
+                        }
+                    }
+
+                    DataModel.SetMessage($"上传大、小对象 {output_path} 成功");
+                }
+                finally
+                {
+                    foreach (var fileName in filenames)
+                    {
+                        if (File.Exists(fileName))
+                            File.Delete(fileName);
+                    }
+                }
+            }
+
+            return new CreateResult
+            {
+                CreatedPaths = created_paths,
+                AccessPoints = created_accesspoints,
+            };
+        }
+
+        // 下载，比较
+        // TODO: 注意比较 timestamp
+        static NormalResult DownloadAndCompare(
+            RmsChannel channel,
+            string object_path,
+            string fileName,
+            byte[] timestamp)
+        {
+
+            string output_fileName = Path.Combine(Environment.CurrentDirectory, $"output_temp");
+            File.Delete(output_fileName);
+            try
+            {
+                string progress_id = DataModel.NewProgressID();
+                DataModel.ShowProgressMessage(progress_id, $"正在下载大文件 {object_path} ...");
+
+                var stop = new Stop();
+                stop.OnProgressChanged += (o, e) =>
+                {
+                    DataModel.ShowProgressMessage(progress_id, e.Message);
+                };
+                stop.BeginLoop();
+                try
+                {
+                    var lRet = channel.GetRes(object_path,
+    output_fileName,
+    stop,
+    out string strMetaData,
+    out byte[] baOutputTimeStamp,
+    out string strOutputPath,
+    out string strError);
+                    if (lRet == -1)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError,
+                        };
+
+                    if (ByteArray.Compare(baOutputTimeStamp, timestamp) != 0)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"记录 {object_path} 的时间戳({ByteArray.GetHexTimeStampString(baOutputTimeStamp)})期望的时间戳({ByteArray.GetHexTimeStampString(timestamp)}) 不一致"
+                        };
+                }
+                finally
+                {
+                    stop.EndLoop();
+                }
+                DataModel.ShowProgressMessage(progress_id, $"文件 {object_path} 下载完成");
+
+                // compare
+                progress_id = DataModel.NewProgressID();
+                string compare_error = CompareFiles(fileName,
+                    output_fileName,
+                    (offset, total_length) =>
+                    {
+                        DataModel.ShowProgressMessage(progress_id, $"正在比较文件 {fileName} {output_fileName} {StringUtil.GetPercentText(offset, total_length)}...");
+                    });
+                if (compare_error != null)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"原始文件和下载文件比较发现不同: {compare_error}",
+                    };
+
+                DataModel.ShowProgressMessage(progress_id, $"文件 {fileName} {output_fileName} 比较完成");
+
+                return new NormalResult();
+            }
+            finally
+            {
+                if (File.Exists(output_fileName))
+                    File.Delete(output_fileName);
+            }
         }
 
     }

@@ -38,7 +38,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>260</ApplicationRevision>
+    <ApplicationRevision>261</ApplicationRevision>
     <ApplicationVersion>3.1.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -492,6 +492,9 @@
   </Target>
   <PropertyGroup>
     <PreBuildEvent>CD /D $(ProjectDir)
+
+$(ProjectDir)..\updateAssemblyBinding\bin\debug\updateAssemblyBinding.exe source:$(ProjectDir)..\dp2opac\web.config target:$(ProjectDir)web.config
+
 CALL copyopac.bat
 CALL copydata.bat
 

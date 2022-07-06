@@ -24,6 +24,9 @@ using System.Data.SQLite;
 
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
+using MySqlConnector;
+using Dapper;
+using Npgsql;
 
 using Ghostscript.NET.Rasterizer;
 
@@ -32,9 +35,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
-using MySqlConnector;
-using Dapper;
-using Npgsql;
 
 namespace DigitalPlatform.rms
 {
@@ -6859,7 +6859,8 @@ handle.CancelTokenSource.Token).Result;
                             strDataFieldName,
                             textPtr,
                             lTotalLength);
-                        else */ if (connection.IsPgsql() || connection.IsMsSqlServer())
+                        else */
+                        if (connection.IsPgsql() || connection.IsMsSqlServer())
                             source = new SqlImageStream(connection,
                             db_prefix,
                             strDataFieldName,
@@ -14145,7 +14146,6 @@ trans);
                 // 检查时间戳
                 if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
                 {
-
                     if (baExistTimestamp != null
                         && ByteArray.Compare(baInputTimestamp,
                             baExistTimestamp) != 0)
@@ -14390,7 +14390,9 @@ trans);
             byte[] textptr = row_info.newdata_textptr;  // 数据指针
             long lCurrentLength = row_info.newdata_length;  // 数据体积长度
             string strCompleteTimestamp = row_info.TimestampString; // 上次完整写入时的时间戳
+            // string strCompleteTimestamp = row_info.GetCompleteTimestamp(); // 上次完整写入时的时间戳
             string strCurrentTimestamp = row_info.NewTimestampString; // 本次的时间戳
+            bool mix_mode = false;  // 是否为混合模式? 2022/7/5
 
             // Pgsql 坚持用 data 字段存储 bytea 数据。这样可以把 newfilename 和 newdptimestamp 让出来给对象文件，构成混合模式
             if (IsPgsql())
@@ -14418,10 +14420,12 @@ trans);
                 && String.IsNullOrEmpty(strCurrentRange) == false
                 && strCurrentRange[0] == '#')
             {
+                // # 表示对象文件模式。FileName 恒为完成了的数据，NewFileName 恒为没有完成的数据
                 bObjectFile = true;
                 strCurrentRange = strCurrentRange.Substring(1);
 
                 lCurrentLength = GetObjectFileLength(strID, true);
+                mix_mode = true;    // 表示本次希望用混合模式写入
             }
             else if (this.m_lObjectStartSize != -1 && lTotalLength >= this.m_lObjectStartSize
 #if !XML_WRITE_TO_FILE
@@ -14474,9 +14478,17 @@ trans);
                 strCurrentTimestamp = row_info.NewTimestampString;
             }
 
+            // 2022/7/5
+            if (IsPgsql() && mix_mode)
+            {
+                // bObjectFile = true;
+                strCompleteTimestamp = row_info.NewTimestampString;  // 前次完成的时间戳在 new 一侧
+            }
+
             // 当strStyle存在 ignorechecktimestamp时，不判断时间戳
             if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
             {
+                /*
                 // 如果临时区有内容，则要把临时时间戳用来比较。否则就比较完成区的时间戳
                 if (string.IsNullOrEmpty(strCurrentRange) == false)
                 {
@@ -14486,6 +14498,43 @@ trans);
                 {
                     strCurrentTimestamp = strCompleteTimestamp;
                 }
+                */
+                string comp_timestamp = strCurrentTimestamp;
+
+                if (bFirst == true)
+                    comp_timestamp = strCompleteTimestamp;
+
+                if (string.IsNullOrEmpty(comp_timestamp) == false)
+                {
+                    byte[] baExistTimestamp = ByteArray.GetTimeStampByteArray(comp_timestamp);
+                    if (ByteArray.Compare(baInputTimestamp,
+                        baExistTimestamp) != 0)
+                    {
+                        strError = "时间戳不匹配";
+                        baOutputTimestamp = baExistTimestamp;   // 返回给前端，让前端能够得知当前的时间戳
+                        return -2;
+                    }
+                }
+            }
+
+#if OLD
+            // 当strStyle存在 ignorechecktimestamp时，不判断时间戳
+            if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
+            {
+                /*
+                // 如果临时区有内容，则要把临时时间戳用来比较。否则就比较完成区的时间戳
+                if (string.IsNullOrEmpty(strCurrentRange) == false)
+                {
+                    // strCurrentTimestamp = strCurrentTimestamp;
+                }
+                else
+                {
+                    strCurrentTimestamp = strCompleteTimestamp;
+                }
+                */
+                // 2022/7/6
+                if (string.IsNullOrEmpty(strCurrentRange) == false)
+                    strCurrentTimestamp = strCompleteTimestamp;
 
                 if (string.IsNullOrEmpty(strCurrentTimestamp) == false)
                 {
@@ -14500,6 +14549,7 @@ trans);
                 }
             }
 
+#endif
             // 对象 bytes 是否最后 WriteLine() 一次性写入 SQL row。null 表示不等到最后 WriteLine() 就提前写入
             byte[] direct_write_data = null;
 
