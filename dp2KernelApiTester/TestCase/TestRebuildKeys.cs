@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace dp2KernelApiTester
@@ -13,7 +14,9 @@ namespace dp2KernelApiTester
     {
         static string strDatabaseName = "__test";
 
-        public static NormalResult TestAll(string style = null)
+        public static NormalResult TestAll(
+            CancellationToken token,
+            string style = null)
         {
             {
                 var result = PrepareEnvironment();
@@ -22,7 +25,7 @@ namespace dp2KernelApiTester
             }
 
             {
-                var result = RefreshNotExist();
+                var result = RefreshNotExist(token);
                 if (result.Value == -1)
                     return result;
             }
@@ -286,7 +289,7 @@ namespace dp2KernelApiTester
         }
 
         // 刷新一条并不存在的记录的检索点
-        static public NormalResult RefreshNotExist()
+        static public NormalResult RefreshNotExist(CancellationToken token)
         {
             var channel = DataModel.GetChannel();
 
@@ -306,6 +309,5 @@ namespace dp2KernelApiTester
 
             return new NormalResult();
         }
-
     }
 }

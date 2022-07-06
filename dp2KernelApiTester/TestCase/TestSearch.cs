@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
@@ -22,7 +23,9 @@ namespace dp2KernelApiTester
         static string _strDatabaseName1 = "__test1";
         static string _strDatabaseName2 = "__test2";
 
-        public static NormalResult TestAll(string style = null)
+        public static NormalResult TestAll(
+            CancellationToken token,
+            string style = null)
         {
             {
                 var result = PrepareEnvironment();
@@ -31,19 +34,19 @@ namespace dp2KernelApiTester
             }
 
             {
-                var create_result = CreateRecords(2);
+                var create_result = CreateRecords(2, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var search_result = TestSingleDbLogicSearch();
+                var search_result = TestSingleDbLogicSearch(token);
                 if (search_result.Value == -1)
                     return search_result;
 
-                search_result = TestSingleDbIdSearch();
+                search_result = TestSingleDbIdSearch(token);
                 if (search_result.Value == -1)
                     return search_result;
 
-                search_result = TestMultiDbLogicSearch();
+                search_result = TestMultiDbLogicSearch(token);
                 if (search_result.Value == -1)
                     return search_result;
 
@@ -55,7 +58,7 @@ namespace dp2KernelApiTester
             }
 
             {
-                var result = UnicodeSearch();
+                var result = UnicodeSearch(token);
                 if (result.Value == -1)
                     return result;
             }
@@ -327,9 +330,11 @@ namespace dp2KernelApiTester
             };
         }
 
-        public static NormalResult UnicodeSearch()
+        public static NormalResult UnicodeSearch(CancellationToken token)
         {
             var channel = DataModel.GetChannel();
+
+            token.ThrowIfCancellationRequested();
 
             {
                 string path = $"{_strDatabaseName}/?";
@@ -351,6 +356,8 @@ namespace dp2KernelApiTester
 <dprms:file id='10' />
 </root>".Replace("{barcode}", current_barcode).Replace("{location}", current_location);
 
+                token.ThrowIfCancellationRequested();
+
                 var ret = channel.DoSaveTextRes(path,
                     xml, // strMetadata,
                     false,
@@ -365,6 +372,8 @@ namespace dp2KernelApiTester
                         Value = -1,
                         ErrorInfo = strError,
                     };
+
+                token.ThrowIfCancellationRequested();
 
                 // 从 dp2kernel 获得检索点
                 var get_keys = GetKeys(channel,
@@ -381,6 +390,8 @@ namespace dp2KernelApiTester
 
                 foreach (var key in get_keys)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (key.Path != output_path)
                         return new CreateResult
                         {
@@ -419,6 +430,8 @@ namespace dp2KernelApiTester
                         string strQueryXml = $"<target list='{ _strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
                         querys.Add(strQueryXml);
 
+                        token.ThrowIfCancellationRequested();
+
                         ret = channel.DoSearch(strQueryXml, "default", out strError);
                         if (ret == -1)
                             return new CreateResult
@@ -437,7 +450,8 @@ namespace dp2KernelApiTester
                         {
                             path_list.Add(output_path);
                         }
-                        var verify_result = VerifyHitRecord(channel, "default", path_list);
+                        var verify_result = VerifyHitRecord(
+                            channel, "default", path_list, token);
                         if (verify_result.Value == -1)
                             return new CreateResult
                             {
@@ -446,6 +460,8 @@ namespace dp2KernelApiTester
                             };
                     }
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // 删除记录
                 ret = channel.DoDeleteRes(output_path,
@@ -463,6 +479,8 @@ namespace dp2KernelApiTester
                 // 删除记录后，再检查检索点是否被删除干净了
                 foreach (string strQueryXml in querys)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     ret = channel.DoSearch(strQueryXml, "default", out strError);
                     if (ret == -1)
                         return new CreateResult
@@ -485,7 +503,7 @@ namespace dp2KernelApiTester
         }
 
         // 创建若干条数据库记录
-        public static CreateResult CreateRecords(int count)
+        public static CreateResult CreateRecords(int count, CancellationToken token)
         {
             var channel = DataModel.GetChannel();
 
@@ -494,10 +512,14 @@ namespace dp2KernelApiTester
 
             foreach (var database_name in database_names)
             {
+                token.ThrowIfCancellationRequested();
+
                 List<AccessPoint> created_accesspoints = new List<AccessPoint>();
 
                 for (int i = 0; i < count; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     string path = $"{database_name}/?";
                     string current_barcode = (i + 1).ToString().PadLeft(10, '0');
                     string current_location = "海淀分馆/阅览室";
@@ -592,6 +614,8 @@ namespace dp2KernelApiTester
                     // 检查检索点是否被成功创建
                     foreach (var group in groups)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         var accesspoint = new AccessPoint
                         {
                             Key = group.Key.Key,
@@ -619,7 +643,8 @@ namespace dp2KernelApiTester
                         {
                             path_list.Add(r.Path);
                         }
-                        var verify_result = VerifyHitRecord(channel, "default", path_list);
+                        var verify_result = VerifyHitRecord(
+                            channel, "default", path_list, token);
                         if (verify_result.Value == -1)
                             return new CreateResult
                             {
@@ -741,13 +766,15 @@ namespace dp2KernelApiTester
         }
 
         // 针对单一数据库的 __id 检索
-        public static NormalResult TestSingleDbIdSearch()
+        public static NormalResult TestSingleDbIdSearch(CancellationToken token)
         {
             var channel = DataModel.GetChannel();
             string resultset_name = "default";
 
             foreach (var database_name in database_names)
             {
+                token.ThrowIfCancellationRequested();
+
                 // 非逻辑检索
                 {
                     string query = $"<target list='{ database_name}:__id'><item><word>1</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
@@ -760,12 +787,15 @@ namespace dp2KernelApiTester
                         };
                     var verify_result = VerifyHitRecord(channel,
             resultset_name,
-            new string[] { database_name + "/1" });
+            new string[] { database_name + "/1" },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"__id 单一检索验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // AND
                 {
@@ -781,12 +811,15 @@ namespace dp2KernelApiTester
                         };
                     var verify_result = VerifyHitRecord(channel,
             resultset_name,
-            new string[] { database_name + "/1" });
+            new string[] { database_name + "/1" },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"__id 逻辑检索 AND 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // OR
                 {
@@ -805,12 +838,15 @@ namespace dp2KernelApiTester
             new string[] {
             database_name + "/1",
             database_name + "/2"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"__id 逻辑检索 OR 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(1)
                 {
@@ -828,12 +864,15 @@ namespace dp2KernelApiTester
             resultset_name,
             new string[] {
             database_name + "/1"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"__id 逻辑检索 SUB(1) 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(2)
                 {
@@ -850,12 +889,15 @@ namespace dp2KernelApiTester
                     var verify_result = VerifyHitRecord(channel,
             resultset_name,
             new string[] {
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"__id 逻辑检索 SUB(2) 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(3)
                 {
@@ -873,7 +915,8 @@ namespace dp2KernelApiTester
             resultset_name,
             new string[] {
                         database_name + "/2"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
@@ -886,13 +929,15 @@ namespace dp2KernelApiTester
 
 
         // 针对单一数据库的逻辑检索
-        public static NormalResult TestSingleDbLogicSearch()
+        public static NormalResult TestSingleDbLogicSearch(CancellationToken token)
         {
             var channel = DataModel.GetChannel();
             string resultset_name = "default";
 
             foreach (var database_name in database_names)
             {
+                token.ThrowIfCancellationRequested();
+
                 // AND
                 {
                     string query1 = $"<target list='{ database_name}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
@@ -907,12 +952,15 @@ namespace dp2KernelApiTester
                         };
                     var verify_result = VerifyHitRecord(channel,
             resultset_name,
-            new string[] { database_name + "/1" });
+            new string[] { database_name + "/1" },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"逻辑检索 AND 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // OR
                 {
@@ -931,12 +979,15 @@ namespace dp2KernelApiTester
             new string[] {
             database_name + "/1",
             database_name + "/2"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"逻辑检索 OR 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(1)
                 {
@@ -954,12 +1005,15 @@ namespace dp2KernelApiTester
             resultset_name,
             new string[] {
             database_name + "/1"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"逻辑检索 SUB(1) 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(2)
                 {
@@ -976,12 +1030,15 @@ namespace dp2KernelApiTester
                     var verify_result = VerifyHitRecord(channel,
             resultset_name,
             new string[] {
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"逻辑检索 SUB(2) 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(3)
                 {
@@ -999,7 +1056,8 @@ namespace dp2KernelApiTester
             resultset_name,
             new string[] {
                         database_name + "/2"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
@@ -1011,7 +1069,7 @@ namespace dp2KernelApiTester
         }
 
         // 针对多个数据库的逻辑检索
-        public static NormalResult TestMultiDbLogicSearch()
+        public static NormalResult TestMultiDbLogicSearch(CancellationToken token)
         {
             var channel = DataModel.GetChannel();
             string resultset_name = "default";
@@ -1020,6 +1078,8 @@ namespace dp2KernelApiTester
             var database_name2 = _strDatabaseName2;
 
             {
+                token.ThrowIfCancellationRequested();
+
                 // AND
                 {
                     string query1 = $"<target list='{ database_name1}:册条码号'><item><word>0000000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
@@ -1035,12 +1095,15 @@ namespace dp2KernelApiTester
                     var verify_result = VerifyHitRecord(channel,
             resultset_name,
             new string[] {
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"多库逻辑检索 AND 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // OR
                 {
@@ -1059,12 +1122,15 @@ namespace dp2KernelApiTester
             new string[] {
             database_name1 + "/1",
             database_name2 + "/2"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"多库逻辑检索 OR 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(1)
                 {
@@ -1082,12 +1148,15 @@ namespace dp2KernelApiTester
             resultset_name,
             new string[] {
             database_name1 + "/1"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"多库逻辑检索 SUB(1) 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(2)
                 {
@@ -1105,12 +1174,15 @@ namespace dp2KernelApiTester
             resultset_name,
             new string[] {
                             database_name1 + "/1"
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"多库逻辑检索 SUB(2) 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // SUB(3)
                 {
@@ -1129,12 +1201,15 @@ namespace dp2KernelApiTester
             new string[] {
                         database_name1 + "/1",
                         database_name1 + "/2",
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"多库逻辑检索 SUB(3) 验证成功");
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 // OR
                 // keycount
@@ -1157,14 +1232,13 @@ namespace dp2KernelApiTester
             new KeyCount[] {
                 new KeyCount{ Key="0000000001", Count = "1"},
                 new KeyCount{ Key="0000000002", Count = "1"},
-            });
+            },
+            token);
                     if (verify_result.Value == -1)
                         return verify_result;
 
                     DataModel.SetMessage($"多库逻辑检索 OR 验证成功");
                 }
-
-
             }
 
             return new NormalResult();
@@ -1216,7 +1290,8 @@ namespace dp2KernelApiTester
         // 验证命中记录
         static NormalResult VerifyHitKeys(RmsChannel channel,
             string resultset_name,
-            IEnumerable<KeyCount> keys_list)
+            IEnumerable<KeyCount> keys_list,
+            CancellationToken token)
         {
             SearchResultLoader loader = new SearchResultLoader(channel,
 null,
@@ -1227,6 +1302,8 @@ resultset_name,
             List<KeyCount> results = new List<KeyCount>();
             foreach (Record record in loader)
             {
+                token.ThrowIfCancellationRequested();
+
                 results.Add(new KeyCount
                 {
                     Key = record.Path,
@@ -1248,11 +1325,11 @@ resultset_name,
             return new NormalResult();
         }
 
-
         // 验证命中记录
         static NormalResult VerifyHitRecord(RmsChannel channel,
             string resultset_name,
-            IEnumerable<string> path_list)
+            IEnumerable<string> path_list,
+            CancellationToken token)
         {
             SearchResultLoader loader = new SearchResultLoader(channel,
 null,
@@ -1263,6 +1340,8 @@ resultset_name,
             List<string> results = new List<string>();
             foreach (Record record in loader)
             {
+                token.ThrowIfCancellationRequested();
+
                 results.Add(record.Path);
             }
 

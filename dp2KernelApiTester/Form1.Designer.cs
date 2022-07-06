@@ -29,8 +29,10 @@ namespace dp2KernelApiTester
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,36 +45,48 @@ namespace dp2KernelApiTester
             this.MenuItem_test_largeObject = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_fragmentWrite = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_test_pdf = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // webBrowser1
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 88);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(5);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(33, 34);
+            this.webBrowser1.Location = new System.Drawing.Point(0, 74);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(1309, 661);
+            this.webBrowser1.Size = new System.Drawing.Size(800, 354);
             this.webBrowser1.TabIndex = 7;
             // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Location = new System.Drawing.Point(0, 63);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_stop});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 36);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
-            this.toolStrip1.Size = new System.Drawing.Size(1309, 25);
+            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
+            this.toolStrip1.Size = new System.Drawing.Size(800, 38);
             this.toolStrip1.TabIndex = 6;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton_stop
+            // 
+            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_stop.Enabled = false;
+            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
+            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_stop.Name = "toolStripButton_stop";
+            this.toolStripButton_stop.Size = new System.Drawing.Size(58, 32);
+            this.toolStripButton_stop.Text = "停止";
+            this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
             // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.statusStrip1.Location = new System.Drawing.Point(0, 749);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 428);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 23, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(1309, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(800, 22);
             this.statusStrip1.TabIndex = 5;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -85,8 +99,7 @@ namespace dp2KernelApiTester
             this.MenuItem_test});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(10, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1309, 63);
+            this.menuStrip1.Size = new System.Drawing.Size(800, 36);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -95,13 +108,13 @@ namespace dp2KernelApiTester
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_settings});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(120, 57);
+            this.MenuItem_file.Size = new System.Drawing.Size(72, 32);
             this.MenuItem_file.Text = "文件";
             // 
             // MenuItem_settings
             // 
             this.MenuItem_settings.Name = "MenuItem_settings";
-            this.MenuItem_settings.Size = new System.Drawing.Size(328, 66);
+            this.MenuItem_settings.Size = new System.Drawing.Size(192, 40);
             this.MenuItem_settings.Text = "设置 ...";
             this.MenuItem_settings.Click += new System.EventHandler(this.MenuItem_settings_Click);
             // 
@@ -116,73 +129,74 @@ namespace dp2KernelApiTester
             this.MenuItem_fragmentWrite,
             this.MenuItem_test_pdf});
             this.MenuItem_test.Name = "MenuItem_test";
-            this.MenuItem_test.Size = new System.Drawing.Size(120, 57);
+            this.MenuItem_test.Size = new System.Drawing.Size(72, 32);
             this.MenuItem_test.Text = "测试";
             // 
             // MenuItem_test_initializeDatabase
             // 
             this.MenuItem_test_initializeDatabase.Name = "MenuItem_test_initializeDatabase";
-            this.MenuItem_test_initializeDatabase.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_initializeDatabase.Size = new System.Drawing.Size(297, 40);
             this.MenuItem_test_initializeDatabase.Text = "创建和删除数据库";
             this.MenuItem_test_initializeDatabase.Click += new System.EventHandler(this.MenuItem_test_initializeDatabase_Click);
             // 
             // MenuItem_test_records
             // 
             this.MenuItem_test_records.Name = "MenuItem_test_records";
-            this.MenuItem_test_records.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_records.Size = new System.Drawing.Size(297, 40);
             this.MenuItem_test_records.Text = "记录相关";
             this.MenuItem_test_records.Click += new System.EventHandler(this.MenuItem_test_records_Click);
             // 
             // MenuItem_test_search
             // 
             this.MenuItem_test_search.Name = "MenuItem_test_search";
-            this.MenuItem_test_search.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_search.Size = new System.Drawing.Size(297, 40);
             this.MenuItem_test_search.Text = "检索相关";
             this.MenuItem_test_search.Click += new System.EventHandler(this.MenuItem_test_search_Click);
             // 
             // MenuItem_test_refreshKeys
             // 
             this.MenuItem_test_refreshKeys.Name = "MenuItem_test_refreshKeys";
-            this.MenuItem_test_refreshKeys.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_refreshKeys.Size = new System.Drawing.Size(297, 40);
             this.MenuItem_test_refreshKeys.Text = "刷新检索点";
             this.MenuItem_test_refreshKeys.Click += new System.EventHandler(this.MenuItem_test_refreshKeys_Click);
             // 
             // MenuItem_test_largeObject
             // 
             this.MenuItem_test_largeObject.Name = "MenuItem_test_largeObject";
-            this.MenuItem_test_largeObject.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_largeObject.Size = new System.Drawing.Size(297, 40);
             this.MenuItem_test_largeObject.Text = "大对象";
             this.MenuItem_test_largeObject.Click += new System.EventHandler(this.MenuItem_test_largeObject_Click);
             // 
             // MenuItem_fragmentWrite
             // 
             this.MenuItem_fragmentWrite.Name = "MenuItem_fragmentWrite";
-            this.MenuItem_fragmentWrite.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_fragmentWrite.Size = new System.Drawing.Size(297, 40);
             this.MenuItem_fragmentWrite.Text = "碎片式写入";
             this.MenuItem_fragmentWrite.Click += new System.EventHandler(this.MenuItem_fragmentWrite_Click);
             // 
             // MenuItem_test_pdf
             // 
             this.MenuItem_test_pdf.Name = "MenuItem_test_pdf";
-            this.MenuItem_test_pdf.Size = new System.Drawing.Size(538, 66);
+            this.MenuItem_test_pdf.Size = new System.Drawing.Size(297, 40);
             this.MenuItem_test_pdf.Text = "PDF 相关";
             this.MenuItem_test_pdf.Click += new System.EventHandler(this.MenuItem_test_pdf_Click);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(18F, 36F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1309, 771);
+            this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
-            this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "MainForm";
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -206,6 +220,7 @@ namespace dp2KernelApiTester
         private System.Windows.Forms.ToolStripMenuItem MenuItem_fragmentWrite;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_largeObject;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test_pdf;
+        private System.Windows.Forms.ToolStripButton toolStripButton_stop;
     }
 }
 

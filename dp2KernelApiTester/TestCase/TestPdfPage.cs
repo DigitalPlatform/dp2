@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Threading;
 
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
@@ -19,7 +20,9 @@ namespace dp2KernelApiTester
     {
         static string strDatabaseName = "__test";
 
-        public static NormalResult TestAll(string style = null)
+        public static NormalResult TestAll(
+            CancellationToken token,
+            string style = null)
         {
             {
                 var result = PrepareEnvironment();
@@ -28,7 +31,7 @@ namespace dp2KernelApiTester
             }
 
             {
-                var create_result = TestUploadAndDownload();
+                var create_result = TestUploadAndDownload(token);
                 if (create_result.Value == -1)
                     return create_result;
             }
@@ -292,7 +295,7 @@ namespace dp2KernelApiTester
         }
 
 
-        public static CreateResult TestUploadAndDownload()
+        public static CreateResult TestUploadAndDownload(CancellationToken token)
         {
             var channel = DataModel.GetChannel();
 
@@ -301,6 +304,8 @@ namespace dp2KernelApiTester
 
             for (int i = 0; i < 1; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 string path = $"{strDatabaseName}/?";
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
 
@@ -352,10 +357,12 @@ namespace dp2KernelApiTester
                         // 上载对象
                         for (int j = 0; j < 10; j++)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             string fileName = Path.Combine(Environment.CurrentDirectory, $"test{j+1}.pdf");
                             File.Delete(fileName);
                             DataModel.SetMessage($"正在创建 PDF 文件 {fileName} ...");
-                            CreatePdfFile(fileName);
+                            CreatePdfFile(fileName, token);
 
                             filenames.Add(fileName);
 
@@ -402,6 +409,8 @@ namespace dp2KernelApiTester
                     // 下载和显示第一个 PDF 文件的十个 Page
                     for (int j = 0; j < 10; j++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         string object_path = $"{output_path}/object/1/page:{j+1}";
                         string output_fileName = Path.Combine(Environment.CurrentDirectory, $"~output_page_{j + 1}");
                         File.Delete(output_fileName);
@@ -469,12 +478,14 @@ namespace dp2KernelApiTester
             };
         }
 
-        public static void CreatePdfFile(string fileName)
+        public static void CreatePdfFile(string fileName, CancellationToken token)
         {
             PdfDocument document = new PdfDocument();
 
             for (int i = 0; i < 10; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 PdfPage page = document.AddPage();
                 XGraphics gfx = XGraphics.FromPdfPage(page);
                 XFont font = new XFont("Verdana", 40, XFontStyle.Bold);

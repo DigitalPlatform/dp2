@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
@@ -14,7 +15,9 @@ namespace dp2KernelApiTester
     {
         static string strDatabaseName = "__test";
 
-        public static NormalResult TestAll(string style = null)
+        public static NormalResult TestAll(
+            CancellationToken token,
+            string style = null)
         {
             string strError = "";
 
@@ -200,12 +203,16 @@ namespace dp2KernelApiTester
   </col>
 </root>";
 
+            token.ThrowIfCancellationRequested();
+
             // 试探性删除以前残留的数据库
             var ret = channel.DoDeleteDB(strDatabaseName, out strError);
             if (ret == -1 && channel.ErrorCode != DigitalPlatform.rms.Client.ChannelErrorCode.NotFound)
             {
                 goto ERROR1;
             }
+
+            token.ThrowIfCancellationRequested();
 
             ret = channel.DoCreateDB(logicNames,
                 "", // type
@@ -219,6 +226,8 @@ namespace dp2KernelApiTester
                 goto ERROR1;
             }
 
+            token.ThrowIfCancellationRequested();
+
             ret = channel.DoInitialDB(strDatabaseName, out strError);
             if (ret == -1)
             {
@@ -228,6 +237,8 @@ namespace dp2KernelApiTester
 
             if (StringUtil.IsInList("refresh_database", style))
             {
+                token.ThrowIfCancellationRequested();
+
                 var result = RefreshDatabase(true);
                 if (result.Value == -1)
                 {
@@ -238,6 +249,8 @@ namespace dp2KernelApiTester
 
             if (StringUtil.IsInList("create_records", style))
             {
+                token.ThrowIfCancellationRequested();
+
                 var result = CreateRecords(100);
                 if (result.Value == -1)
                 {
@@ -248,6 +261,8 @@ namespace dp2KernelApiTester
 
             if (StringUtil.IsInList("buildkeys", style))
             {
+                token.ThrowIfCancellationRequested();
+
                 var result = RebuildKeys();
                 if (result.Value == -1)
                 {
@@ -255,6 +270,8 @@ namespace dp2KernelApiTester
                     return result;
                 }
             }
+
+            token.ThrowIfCancellationRequested();
 
             ret = channel.DoDeleteDB(strDatabaseName, out strError);
             if (ret == -1)

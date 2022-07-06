@@ -21,7 +21,7 @@ namespace dp2KernelApiTester
 {
     public partial class MainForm : Form
     {
-        CancellationTokenSource _cancel = new CancellationTokenSource();
+        CancellationTokenSource _cancelApp = new CancellationTokenSource();
 
         public MainForm()
         {
@@ -261,7 +261,7 @@ string style = "")
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            _cancel?.Dispose();
+            _cancelApp?.Dispose();
 
             DataModel.Free();
 
@@ -316,183 +316,228 @@ string style = "")
             }
         }
 
-        private void MenuItem_test_initializeDatabase_Click(object sender, EventArgs e)
+        private async void MenuItem_test_initializeDatabase_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
-                EnableControls(false);
-                try
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
                 {
-                    var result = TestCreateDatabase.TestAll("refresh_database,create_records,buildkeys");
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
-                }
-                catch (Exception ex)
-                {
-                    AppendString($"exception: {ex.Message}");
-                }
-                finally
-                {
-                    EnableControls(true);
-                }
-            });
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestCreateDatabase.TestAll(cancel.Token,
+                            "refresh_database,create_records,buildkeys");
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
         }
 
-        private void MenuItem_test_records_Click(object sender, EventArgs e)
+        private async void MenuItem_test_records_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
-                EnableControls(false);
-                try
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
                 {
-                    var result = TestRecord.TestAll("");
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
-                }
-                catch (Exception ex)
-                {
-                    AppendString($"exception: {ex.Message}");
-                }
-                finally
-                {
-                    EnableControls(true);
-                }
-            });
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestRecord.TestAll(cancel.Token,
+                            "");
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
         }
 
-        private void MenuItem_test_search_Click(object sender, EventArgs e)
+        private async void MenuItem_test_search_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
-                EnableControls(false);
-                try
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
                 {
-                    var result = TestSearch.TestAll("");
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
-                }
-                catch (Exception ex)
-                {
-                    AppendString($"exception: {ex.Message}");
-                }
-                finally
-                {
-                    EnableControls(true);
-                }
-            });
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestSearch.TestAll(cancel.Token,
+                            "");
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
         }
 
-        private void MenuItem_test_refreshKeys_Click(object sender, EventArgs e)
+        private async void MenuItem_test_refreshKeys_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
-                EnableControls(false);
-                try
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
                 {
-                    var result = TestRebuildKeys.TestAll("");
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
-                }
-                catch (Exception ex)
-                {
-                    AppendString($"exception: {ex.Message}");
-                }
-                finally
-                {
-                    EnableControls(true);
-                }
-            });
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestRebuildKeys.TestAll(cancel.Token,
+                            "");
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
         }
 
-        private void MenuItem_fragmentWrite_Click(object sender, EventArgs e)
+        private async void MenuItem_fragmentWrite_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
-                EnableControls(false);
-                try
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
                 {
-                    var result = TestRecord.PrepareEnvironment();
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestRecord.PrepareEnvironment();
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
 
-                    /*
-                    result = TestRecord.SpecialTest(1000); // 1000
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
-                    */
+                        /*
+                        result = TestRecord.SpecialTest(1000); // 1000
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                        */
 
-                    result = TestRecord.FragmentCreateRecords(1000, 1, "overlap"); // 1000
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
+                        result = TestRecord.FragmentCreateRecords(
+                            cancel.Token,
+                            1000, 1, "overlap"); // 1000
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
 
-                    DataModel.SetMessage("碎片式写入完成", "green");
-                }
-                catch (Exception ex)
-                {
-                    AppendString($"exception: {ex.Message}");
-                }
-                finally
-                {
-                    EnableControls(true);
-                }
-            });
+                        DataModel.SetMessage("碎片式写入完成", "green");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
         }
 
         void EnableControls(bool enable)
         {
-            this.Invoke(new Action(() => {
+            this.Invoke(new Action(() =>
+            {
                 this.menuStrip1.Enabled = enable;
+                this.toolStripButton_stop.Enabled = !enable;
             }));
         }
 
-        private void MenuItem_test_largeObject_Click(object sender, EventArgs e)
+        private async void MenuItem_test_largeObject_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
-                EnableControls(false);
-                try
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
                 {
-                    var result = TestRecord.PrepareEnvironment();
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestRecord.PrepareEnvironment();
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
 
-                    result = TestRecord.LargeObjectTest(5);
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
+                        result = TestRecord.LargeObjectTest(cancel.Token,
+                            5);
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
 
-                    DataModel.SetMessage("大对象写入完成", "green");
-                }
-                catch (Exception ex)
-                {
-                    AppendString($"exception: {ex.Message}");
-                }
-                finally
-                {
-                    EnableControls(true);
-                }
-            });
+                        DataModel.SetMessage("大对象写入完成", "green");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
         }
 
-        private void MenuItem_test_pdf_Click(object sender, EventArgs e)
+        private async void MenuItem_test_pdf_Click(object sender, EventArgs e)
         {
-            Task.Run(() =>
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
             {
-                EnableControls(false);
-                try
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
                 {
-                    var result = TestPdfPage.TestAll("");
-                    if (result.Value == -1)
-                        DataModel.SetMessage(result.ErrorInfo, "error");
-                }
-                catch (Exception ex)
-                {
-                    AppendString($"exception: {ex.Message}");
-                }
-                finally
-                {
-                    EnableControls(true);
-                }
-            });
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestPdfPage.TestAll(cancel.Token,
+                            "");
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
+        }
+
+        CancellationTokenSource _cancelCurrent = null;
+
+        private void toolStripButton_stop_Click(object sender, EventArgs e)
+        {
+            _cancelCurrent?.Cancel();
         }
     }
 }

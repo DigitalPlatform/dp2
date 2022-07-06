@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -21,7 +22,7 @@ namespace dp2KernelApiTester
     {
         static string strDatabaseName = "__test";
 
-        public static NormalResult SpecialTest(int count)
+        public static NormalResult SpecialTest(int count, CancellationToken token)
         {
             {
                 var result = PrepareEnvironment();
@@ -44,16 +45,20 @@ namespace dp2KernelApiTester
             */
 
             {
-                var create_result = QuickCreateRecords(100);
+                var create_result = QuickCreateRecords(100, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = BatchRefreshRecords(create_result.CreatedPaths,
+                var result = BatchRefreshRecords(
+                    token,
+                    create_result.CreatedPaths,
                     create_result.AccessPoints);
                 if (result.Value == -1)
                     return result;
 
-                result = DeleteRecords(create_result.CreatedPaths,
+                result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
                     create_result.AccessPoints,
                     "");
                 if (result.Value == -1)
@@ -67,21 +72,27 @@ namespace dp2KernelApiTester
 
                 for (int i = 1; i < 10; i++)
                 {
-                    var result = FragmentReadRecords(create_result.CreatedPaths, i);
+                    var result = FragmentReadRecords(
+                        token,
+                        create_result.CreatedPaths, i);
                     if (result.Value == -1)
                         return result;
                 }
 
                 for (int i = 0; i < 10; i++)
                 {
-                    var result = FragmentOverwriteRecords(create_result.CreatedPaths, -1);
+                    var result = FragmentOverwriteRecords(
+                        token,
+                        create_result.CreatedPaths, -1);
                     if (result.Value == -1)
                         return result;
                 }
 
-                var result1 = DeleteRecords(create_result.CreatedPaths,
-    null,
-    "");
+                var result1 = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    null,
+                    "");
                 if (result1.Value == -1)
                     return result1;
             }
@@ -97,7 +108,9 @@ namespace dp2KernelApiTester
             return new NormalResult();
         }
 
-        public static NormalResult LargeObjectTest(int count)
+        public static NormalResult LargeObjectTest(
+            CancellationToken token,
+            int count)
         {
             {
                 var result = PrepareEnvironment();
@@ -107,30 +120,32 @@ namespace dp2KernelApiTester
 
             // 测试交替上载覆盖小于 100K 和大于 100K 的对象
             {
-                var create_result = UploadSmallLargObject(1);
+                var create_result = UploadSmallLargObject(1, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
-    create_result.AccessPoints,
-    "");
+                var result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
                 if (result.Value == -1)
                     return result;
             }
 
-            /*
             {
-                var create_result = UploadLargObject(count);
+                var create_result = UploadLargObject(count, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
-    create_result.AccessPoints,
-    "");
+                var result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
                 if (result.Value == -1)
                     return result;
             }
-            */
 
             {
                 var result = Finish();
@@ -141,7 +156,9 @@ namespace dp2KernelApiTester
             return new NormalResult();
         }
 
-        public static NormalResult TestAll(string style = null)
+        public static NormalResult TestAll(
+            CancellationToken token,
+            string style = null)
         {
             {
                 var result = PrepareEnvironment();
@@ -152,28 +169,33 @@ namespace dp2KernelApiTester
             // 临时测试
             // 碎片方式创建记录，overlap 风格
             {
-                var create_result = CreateRecords(1, false);
+                var create_result = CreateRecords(1, false, true, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = FragmentOverwriteRecords(create_result.CreatedPaths, 1, "overlap");
+                var result = FragmentOverwriteRecords(token,
+                    create_result.CreatedPaths, 1, "overlap");
                 if (result.Value == -1)
                     return result;
 
-                var result1 = DeleteRecords(create_result.CreatedPaths,
-    null,
-    "");
+                var result1 = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    null,
+                    "");
                 if (result1.Value == -1)
                     return result1;
             }
 
             ////
             {
-                var create_result = CreateRecords(2, true);
+                var create_result = CreateRecords(2, true, true, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
+                var result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
                     create_result.AccessPoints,
                     "");
                 if (result.Value == -1)
@@ -182,68 +204,83 @@ namespace dp2KernelApiTester
 
             // 碎片方式创建记录
             {
-                var create_result = FragmentCreateRecords(1);
+                var create_result = FragmentCreateRecords(token, 1);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = FragmentOverwriteRecords(create_result.CreatedPaths);
+                var result = FragmentOverwriteRecords(
+                    token,
+                    create_result.CreatedPaths);
                 if (result.Value == -1)
                     return result;
 
-                var result1 = DeleteRecords(create_result.CreatedPaths,
-    null,
-    "");
+                var result1 = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    null,
+                    "");
                 if (result1.Value == -1)
                     return result1;
             }
 
             // 碎片方式创建记录，overlap 风格
             {
-                var create_result = FragmentCreateRecords(1, 1, "overlap");
+                var create_result = FragmentCreateRecords(
+                    token, 1, 1, "overlap");
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = FragmentOverwriteRecords(create_result.CreatedPaths, 1, "overlap");
+                var result = FragmentOverwriteRecords(
+                    token, create_result.CreatedPaths, 1, "overlap");
                 if (result.Value == -1)
                     return result;
 
-                var result1 = DeleteRecords(create_result.CreatedPaths,
-    null,
-    "");
+                var result1 = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    null,
+                    "");
                 if (result1.Value == -1)
                     return result1;
             }
 
             {
-                var create_result = FragmentCreateRecords(1);
+                var create_result = FragmentCreateRecords(token, 1);
                 if (create_result.Value == -1)
                     return create_result;
 
                 for (int i = 1; i < 10; i++)
                 {
-                    var result = FragmentReadRecords(create_result.CreatedPaths, i);
+                    token.ThrowIfCancellationRequested();
+
+                    var result = FragmentReadRecords(token, create_result.CreatedPaths, i);
                     if (result.Value == -1)
                         return result;
                 }
 
-                var result1 = DeleteRecords(create_result.CreatedPaths,
-    null,
-    "");
+                var result1 = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    null,
+                    "");
                 if (result1.Value == -1)
                     return result1;
             }
 
             {
-                var create_result = QuickCreateRecords(100);
+                var create_result = QuickCreateRecords(100, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = BatchRefreshRecords(create_result.CreatedPaths,
+                var result = BatchRefreshRecords(token,
+                    create_result.CreatedPaths,
                     create_result.AccessPoints);
                 if (result.Value == -1)
                     return result;
 
-                result = DeleteRecords(create_result.CreatedPaths,
+                result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
                     create_result.AccessPoints,
                     "");
                 if (result.Value == -1)
@@ -251,11 +288,12 @@ namespace dp2KernelApiTester
             }
 
             {
-                var create_result = BatchCreateRecords(1);
+                var create_result = BatchCreateRecords(1, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
+                var result = DeleteRecords(token,
+                    create_result.CreatedPaths,
                     create_result.AccessPoints,
                     "");
                 if (result.Value == -1)
@@ -264,11 +302,13 @@ namespace dp2KernelApiTester
 
             //
             {
-                var create_result = CreateRecords(1, true);
+                var create_result = CreateRecords(1, true, true, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
+                var result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
                     create_result.AccessPoints,
                     "forcedeleteoldkeys");
                 if (result.Value == -1)
@@ -276,32 +316,38 @@ namespace dp2KernelApiTester
             }
 
             {
-                var create_result = CreateRecords(1, true);
+                var create_result = CreateRecords(1, true, true, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = RebuildRecordKeys(create_result.CreatedPaths,
+                var result = RebuildRecordKeys(
+                    token,
+                    create_result.CreatedPaths,
                     create_result.AccessPoints,
                     "");
                 if (result.Value == -1)
                     return result;
 
-                result = DeleteRecords(create_result.CreatedPaths,
-    create_result.AccessPoints,
-    "");
+                result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
                 if (result.Value == -1)
                     return result;
             }
 
             // 上传下载大文件
             {
-                var create_result = UploadLargObject(1);
+                var create_result = UploadLargObject(1, token);
                 if (create_result.Value == -1)
                     return create_result;
 
-                var result = DeleteRecords(create_result.CreatedPaths,
-    create_result.AccessPoints,
-    "");
+                var result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
                 if (result.Value == -1)
                     return result;
             }
@@ -581,7 +627,8 @@ namespace dp2KernelApiTester
         // 创建若干条数据库记录
         public static CreateResult CreateRecords(int count,
             bool upload_object = false,
-            bool verify_accesspoint = true)
+            bool verify_accesspoint = true,
+            CancellationToken token = default)
         {
             var channel = DataModel.GetChannel();
 
@@ -590,6 +637,8 @@ namespace dp2KernelApiTester
 
             for (int i = 0; i < count; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 string path = $"{strDatabaseName}/?";
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
 
@@ -607,6 +656,8 @@ namespace dp2KernelApiTester
 <dprms:file id='10' />
 </root>".Replace("{barcode}", current_barcode);
                 // var bytes = Encoding.UTF8.GetBytes(xml);
+
+                token.ThrowIfCancellationRequested();
 
                 var ret = channel.DoSaveTextRes(path,
                     xml, // strMetadata,
@@ -638,6 +689,8 @@ namespace dp2KernelApiTester
                     // 上载对象
                     for (int j = 0; j < 10; j++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         byte[] bytes = new byte[4096];
                         ret = channel.WriteRes($"{output_path}/object/{j + 1}",
                             $"0-{bytes.Length - 1}",
@@ -665,6 +718,8 @@ namespace dp2KernelApiTester
                     // 检查检索点是否被成功创建
                     foreach (var accesspoint in created_accesspoints)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                         ret = channel.DoSearch(strQueryXml, "default", out strError);
@@ -694,7 +749,7 @@ namespace dp2KernelApiTester
         }
 
         // 成批创建记录
-        public static CreateResult BatchCreateRecords(int count)
+        public static CreateResult BatchCreateRecords(int count, CancellationToken token)
         {
             var channel = DataModel.GetChannel();
 
@@ -704,6 +759,8 @@ namespace dp2KernelApiTester
             List<RecordBody> inputs = new List<RecordBody>();
             for (int i = 0; i < count; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 string path = $"{strDatabaseName}/?";
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
                 string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
@@ -729,6 +786,8 @@ namespace dp2KernelApiTester
                 });
             }
 
+            token.ThrowIfCancellationRequested();
+
             var ret = channel.DoWriteRecords(null,
 inputs.ToArray(), // strMetadata,
 "",
@@ -745,6 +804,8 @@ out string strError);
 
             foreach (var output in outputs)
             {
+                token.ThrowIfCancellationRequested();
+
                 created_paths.Add(output.Path);
                 string output_xml = output.Xml;
                 XmlDocument dom = new XmlDocument();
@@ -762,6 +823,8 @@ out string strError);
                 // 上载对象
                 for (int j = 0; j < 10; j++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     byte[] bytes = new byte[4096];
                     ret = channel.WriteRes($"{output.Path}/object/{j + 1}",
                         $"0-{bytes.Length - 1}",
@@ -787,6 +850,8 @@ out string strError);
             // 检查检索点是否被成功创建
             foreach (var accesspoint in created_accesspoints)
             {
+                token.ThrowIfCancellationRequested();
+
                 string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                 ret = channel.DoSearch(strQueryXml, "default", out strError);
@@ -812,7 +877,9 @@ out string strError);
         }
 
         // 用 CreateRecords() 刷新检索点
-        public static NormalResult BatchRefreshRecords(IEnumerable<string> paths,
+        public static NormalResult BatchRefreshRecords(
+            CancellationToken token,
+            IEnumerable<string> paths,
             IEnumerable<AccessPoint> created_accesspoints)
         {
             var channel = DataModel.GetChannel();
@@ -821,6 +888,8 @@ out string strError);
 
             foreach (var path in paths)
             {
+                token.ThrowIfCancellationRequested();
+
                 inputs.Add(new RecordBody
                 {
                     Path = path,
@@ -828,6 +897,8 @@ out string strError);
                     Timestamp = null,
                 });
             }
+
+            token.ThrowIfCancellationRequested();
 
             var ret = channel.DoWriteRecords(null,
 inputs.ToArray(),
@@ -844,6 +915,8 @@ out string strError);
             // 检查检索点是否被成功创建
             foreach (var accesspoint in created_accesspoints)
             {
+                token.ThrowIfCancellationRequested();
+
                 string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                 ret = channel.DoSearch(strQueryXml, "default", out strError);
@@ -873,7 +946,9 @@ out string strError);
 
         // parameters:
         //      delete_style 如果为 "forcedeleteoldkeys" 表示希望强制删除记录的检索点
-        public static NormalResult DeleteRecords(IEnumerable<string> paths,
+        public static NormalResult DeleteRecords(
+            CancellationToken token,
+            IEnumerable<string> paths,
             IEnumerable<AccessPoint> created_accesspoints,
             string delete_style)
         {
@@ -881,6 +956,8 @@ out string strError);
 
             foreach (var path in paths)
             {
+                token.ThrowIfCancellationRequested();
+
                 // string path = $"{strDatabaseName}/{i+1}";
 
                 var ret = channel.DoDeleteRes(path,
@@ -898,6 +975,8 @@ out string strError);
                 // 检查对象是否被删除
                 for (int j = 0; j < 9; j++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     ret = channel.GetRes($"{path}/object/{j + 1}",
                         0,
                         1,
@@ -927,6 +1006,8 @@ out string strError);
                 // 检查检索点是否被成功删除
                 foreach (var accesspoint in created_accesspoints)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     var result = VerifyAccessPoint(
                         channel,
                         accesspoint,
@@ -939,16 +1020,19 @@ out string strError);
             return new NormalResult();
         }
 
-
-        public static NormalResult RebuildRecordKeys(IEnumerable<string> paths,
-    IEnumerable<AccessPoint> created_accesspoints,
-    string delete_style)
+        public static NormalResult RebuildRecordKeys(
+            CancellationToken token,
+            IEnumerable<string> paths,
+            IEnumerable<AccessPoint> created_accesspoints,
+            string delete_style)
         {
             var channel = DataModel.GetChannel();
 
             // 刷新前，检查检索点是否存在
             foreach (var accesspoint in created_accesspoints)
             {
+                token.ThrowIfCancellationRequested();
+
                 var result = VerifyAccessPoint(
                     channel,
                     accesspoint,
@@ -959,6 +1043,8 @@ out string strError);
 
             foreach (var path in paths)
             {
+                token.ThrowIfCancellationRequested();
+
                 // string path = $"{strDatabaseName}/{i+1}";
 
                 var ret = channel.DoRebuildResKeys(path,
@@ -978,6 +1064,8 @@ out string strError);
             // 检查检索点是否被成功刷新
             foreach (var accesspoint in created_accesspoints)
             {
+                token.ThrowIfCancellationRequested();
+
                 var result = VerifyAccessPoint(
                     channel,
                     accesspoint,
@@ -1050,7 +1138,7 @@ out string strError);
         }
 
         // 用 BulkCopy 方式灌入大量记录
-        public static CreateResult QuickCreateRecords(int count)
+        public static CreateResult QuickCreateRecords(int count, CancellationToken token)
         {
             var channel = DataModel.GetChannel();
 
@@ -1062,6 +1150,8 @@ out string strError);
             List<RecordBody> inputs = new List<RecordBody>();
             for (int i = 0; i < count; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 string path = $"{strDatabaseName}/?";
                 string strDbUrl = DataModel.dp2kernelServerUrl + "?" + strDatabaseName;
                 // 记载每个数据库的 URL
@@ -1082,6 +1172,8 @@ out string strError);
                         };
                     target_dburls.Add(strDbUrl);
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
                 string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
@@ -1109,6 +1201,8 @@ out string strError);
 
             DataModel.SetMessage($"正在一次性创建 {inputs.Count} 条记录");
 
+            token.ThrowIfCancellationRequested();
+
             var ret = channel.DoWriteRecords(null,
     inputs.ToArray(), // strMetadata,
     "fastmode",
@@ -1125,6 +1219,8 @@ out string strError);
 
             foreach (var output in outputs)
             {
+                token.ThrowIfCancellationRequested();
+
                 created_paths.Add(output.Path);
                 string output_xml = output.Xml;
                 XmlDocument dom = new XmlDocument();
@@ -1168,12 +1264,15 @@ out string strError);
 
             DataModel.SetMessage($"创建记录 {StringUtil.MakePathList(created_paths, ", ")} 成功");
 
+            token.ThrowIfCancellationRequested();
 
             EndFastAppend(channel, target_dburls);
 
             // 检查检索点是否被成功创建
             foreach (var accesspoint in created_accesspoints)
             {
+                token.ThrowIfCancellationRequested();
+
                 string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                 ret = channel.DoSearch(strQueryXml, "default", out strError);
@@ -1301,7 +1400,9 @@ out string strError);
         }
 
         // 用片段方式创建记录
-        public static CreateResult FragmentCreateRecords(int count,
+        public static CreateResult FragmentCreateRecords(
+            CancellationToken token,
+            int count,
             int fragment_length = 1,
             string style = "")
         {
@@ -1317,6 +1418,8 @@ out string strError);
 
             for (int i = 0; i < count; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 string path = $"{strDatabaseName}/?";
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
                 string xml = @"<root xmlns:dprms='http://dp2003.com/dprms'>
@@ -1360,6 +1463,8 @@ out string strError);
 
                 while (true)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     int chunk_length = fragment_length;
 
                     end = start + chunk_length - 1;
@@ -1414,6 +1519,8 @@ out string strError);
 
                 DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式{style}创建记录 {current_path} 完成");
 
+                token.ThrowIfCancellationRequested();
+
                 // TODO: 读出记录检查内容是否和发出的一致
                 {
                     var ret = channel.GetRes(current_path,
@@ -1452,6 +1559,8 @@ out string strError);
                 // 上载对象
                 for (int j = 0; j < 1; j++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     int length = 1024 * 1024;
                     byte[] contents = new byte[length];
                     for (int k = 0; k < length; k++)
@@ -1466,6 +1575,8 @@ out string strError);
                     byte[] object_timestamp = null;
                     while (start_offs < length)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         long end_offs = start_offs + chunk - 1;
                         if (end_offs >= length)
                             end_offs = length - 1;
@@ -1502,6 +1613,8 @@ out string strError);
 
                         start_offs += chunk_contents.Length;
                     }
+
+                    token.ThrowIfCancellationRequested();
 
                     // 读出比较
                     using (var stream = new MemoryStream())
@@ -1547,6 +1660,8 @@ out string strError);
                 // 检查检索点是否被成功创建
                 foreach (var accesspoint in created_accesspoints)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     string strQueryXml = $"<target list='{ strDatabaseName}:{accesspoint.From}'><item><word>{accesspoint.Key}</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
 
                     var ret = channel.DoSearch(strQueryXml, "default", out string strError);
@@ -1575,7 +1690,9 @@ out string strError);
         }
 
         // 用 Fragment 方式覆盖已经创建好的记录
-        public static NormalResult FragmentOverwriteRecords(IEnumerable<string> paths,
+        public static NormalResult FragmentOverwriteRecords(
+            CancellationToken token,
+            IEnumerable<string> paths,
     int fragment_length = 1,
     string style = "")
         {
@@ -1584,6 +1701,8 @@ out string strError);
             int i = 1;
             foreach (var path in paths)
             {
+                token.ThrowIfCancellationRequested();
+
                 string origin_xml = "";
                 byte[] origin_timestamp = null;
                 // 先获得一次原始记录。然后 Fragment 覆盖，在覆盖完以前，每次中途再获取一次记录，应该是看到原始记录
@@ -1626,6 +1745,8 @@ out string strError);
 
                 while (true)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     int chunk_length = fragment_length;
 
                     if (chunk_length == -1)
@@ -1679,6 +1800,8 @@ out string strError);
                     // 马上读取检验
                     if (end < bytes.Length - 1)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         ret = channel.GetRes(path,
     out string read_xml,
     out string _,
@@ -1713,6 +1836,8 @@ out string strError);
                 }
 
                 DataModel.ShowProgressMessage(progress_id, $"用 Fragment 方式{style}覆盖记录 {path} 完成");
+
+                token.ThrowIfCancellationRequested();
 
                 // 覆盖成功后，马上读取检验
                 {
@@ -1755,14 +1880,18 @@ out string strError);
         }
 
         // 用 Fragment 方式读已经创建好的记录
-        public static NormalResult FragmentReadRecords(IEnumerable<string> paths,
-    int fragment_length = 1)
+        public static NormalResult FragmentReadRecords(
+            CancellationToken token,
+            IEnumerable<string> paths,
+            int fragment_length = 1)
         {
             var channel = DataModel.GetChannel();
 
             int i = 1;
             foreach (var path in paths)
             {
+                token.ThrowIfCancellationRequested();
+
                 byte[] origin_bytes = null;
                 byte[] origin_timestamp = null;
                 string origin_metadata = "";
@@ -1792,6 +1921,8 @@ out string strError);
 
                 while (true)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     int chunk_length = fragment_length;
 
                     if (chunk_length == -1)
@@ -1809,6 +1940,8 @@ out string strError);
 
                     byte[] fragment = new byte[end - start + 1];
                     Array.Copy(origin_bytes, start, fragment, 0, fragment.Length);
+
+                    token.ThrowIfCancellationRequested();
 
                     var ret = channel.GetRes(path,
                         start,
@@ -1868,7 +2001,7 @@ out string strError);
         }
 
         // 测试上载大对象
-        public static CreateResult UploadLargObject(int count)
+        public static CreateResult UploadLargObject(int count, CancellationToken token)
         {
             var channel = DataModel.GetChannel();
 
@@ -1879,6 +2012,8 @@ out string strError);
 
             for (int i = 0; i < 1; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 string path = $"{strDatabaseName}/?";
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
 
@@ -1930,6 +2065,8 @@ out string strError);
                         // 上载对象
                         for (int j = 0; j < Math.Min(10, count); j++)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             long object_size = object_size_unit * (j + 1);
                             string fileName = Path.Combine(Environment.CurrentDirectory, $"temp_object_{j + 1}");
                             File.Delete(fileName);
@@ -1949,6 +2086,8 @@ out string strError);
                                 byte[] timestamp = null;
                                 while (true)
                                 {
+                                    token.ThrowIfCancellationRequested();
+
                                     long rest_length = file.Length - start;
                                     byte[] bytes = new byte[Math.Min((long)(300 * 1024), rest_length)];
                                     int read_length = file.Read(bytes, 0, bytes.Length);
@@ -1991,6 +2130,8 @@ out string strError);
                     // 下载，比较
                     for (int j = 0; j < filenames.Count; j++)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         string object_path = $"{output_path}/object/{j + 1}";
                         string fileName = filenames[j];
                         string output_fileName = Path.Combine(Environment.CurrentDirectory, $"output_{j + 1}");
@@ -2144,7 +2285,7 @@ out string strError);
         }
 
         // 测试交替上载覆盖大小对象
-        public static CreateResult UploadSmallLargObject(int count)
+        public static CreateResult UploadSmallLargObject(int count, CancellationToken token)
         {
             var channel = DataModel.GetChannel();
 
@@ -2153,6 +2294,8 @@ out string strError);
 
             for (int i = 0; i < 1; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 string path = $"{strDatabaseName}/?";
                 string current_barcode = (i + 1).ToString().PadLeft(10, '0');
 
@@ -2211,6 +2354,8 @@ out string strError);
                         // 上载对象
                         for (int j = 0; j < size_list.Length; j++)
                         {
+                            token.ThrowIfCancellationRequested();
+
                             long object_size = size_list[j];
                             string fileName = Path.Combine(Environment.CurrentDirectory, $"temp_object_{j + 1}");
                             File.Delete(fileName);
@@ -2229,6 +2374,8 @@ out string strError);
                             {
                                 while (true)
                                 {
+                                    token.ThrowIfCancellationRequested();
+
                                     long rest_length = file.Length - start;
                                     byte[] bytes = new byte[Math.Min((long)(300 * 1024), rest_length)];
                                     int read_length = file.Read(bytes, 0, bytes.Length);
@@ -2273,7 +2420,8 @@ out string strError);
         channel,
         object_path,
         fileName,
-        timestamp);
+        timestamp,
+        token);
                             if (compare_result.Value != 0)
                                 return new CreateResult
                                 {
@@ -2310,7 +2458,8 @@ out string strError);
             RmsChannel channel,
             string object_path,
             string fileName,
-            byte[] timestamp)
+            byte[] timestamp,
+            CancellationToken token)
         {
 
             string output_fileName = Path.Combine(Environment.CurrentDirectory, $"output_temp");
@@ -2355,12 +2504,16 @@ out string strError);
                 }
                 DataModel.ShowProgressMessage(progress_id, $"文件 {object_path} 下载完成");
 
+                token.ThrowIfCancellationRequested();
+
                 // compare
                 progress_id = DataModel.NewProgressID();
                 string compare_error = CompareFiles(fileName,
                     output_fileName,
                     (offset, total_length) =>
                     {
+                        token.ThrowIfCancellationRequested();
+
                         DataModel.ShowProgressMessage(progress_id, $"正在比较文件 {fileName} {output_fileName} {StringUtil.GetPercentText(offset, total_length)}...");
                     });
                 if (compare_error != null)
@@ -2380,6 +2533,5 @@ out string strError);
                     File.Delete(output_fileName);
             }
         }
-
     }
 }
