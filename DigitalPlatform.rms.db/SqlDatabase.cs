@@ -14401,8 +14401,8 @@ trans);
                 strDataFieldName = "data";
                 textptr = row_info.data_textptr;
                 lCurrentLength = row_info.data_length;
-                strCompleteTimestamp = row_info.NewTimestampString;
-                strCurrentTimestamp = row_info.TimestampString;
+                //strCompleteTimestamp = row_info.NewTimestampString;
+                //strCurrentTimestamp = row_info.TimestampString;
             }
 
             // 已有数据的时间戳
@@ -14473,16 +14473,13 @@ trans);
             if (IsPgsql() && bObjectFile == false && bSingleFull == false)
             {
                 bObjectFile = true;
-                //lCurrentLength = 0;
-                //strCurrentRange = "";
-                strCurrentTimestamp = row_info.NewTimestampString;
+                // strCurrentTimestamp = row_info.NewTimestampString;
             }
 
             // 2022/7/5
             if (IsPgsql() && mix_mode)
             {
-                // bObjectFile = true;
-                strCompleteTimestamp = row_info.NewTimestampString;  // 前次完成的时间戳在 new 一侧
+                // strCompleteTimestamp = row_info.NewTimestampString;  // 前次完成的时间戳在 new 一侧
             }
 
             // 当strStyle存在 ignorechecktimestamp时，不判断时间戳
