@@ -14230,7 +14230,7 @@ trans);
              * */
 
 
-            // 准备rangelist
+            // 准备rangelist。这是前端请求的 strRanges
             RangeList rangeList = null;
             if (string.IsNullOrEmpty(strRanges) == true)
             {
@@ -14558,6 +14558,12 @@ trans);
             }
 
 #endif
+            /*
+            // 2022/7/7
+            if (bFirst)
+                strCurrentRange = "";
+            */
+
             // 对象 bytes 是否最后 WriteLine() 一次性写入 SQL row。null 表示不等到最后 WriteLine() 就提前写入
             byte[] direct_write_data = null;
 
@@ -14586,24 +14592,52 @@ trans);
                 string strThisRange = Convert.ToString(lStartOfTarget)
                     + "-" + strThisEnd;
 
-                string strNewRange;
-                nState = RangeList.MergeContentRangeString(strThisRange,
+                // return
+                //		-1	出错 
+                //		0	还有未覆盖的部分 
+                //		1	本次已经完全覆盖
+                //      2   整个范围有超出 lWholeLength 长度的部分
+                nState = MergeContentRangeString(strThisRange,
                     strCurrentRange,
                     lTotalLength,
-                    out strNewRange,
+                    out string strNewRange,
                     out strError);
                 if (nState == -1)
                 {
                     strError = "MergeContentRangeString() error 4 : " + strError + " (strThisRange='" + strThisRange + "' strCurrentRange='" + strCurrentRange + "' ) lTotalLength=" + lTotalLength.ToString() + "";
                     return -1;
                 }
+                if (nState == 2)
+                {
+                    // 进一步判断，strThisRange 是否触达 lTotalLength
+                    // 判断一个 range 是否触达指定的长度
+                    // return:
+                    //      0   没有触达
+                    //      1   末尾刚好触达
+                    //      2   末尾越过 length
+                    nRet = ReachEnd(strThisRange, lTotalLength);
+                    if (nRet == 2)
+                    {
+                        strError = $"范围 '{strThisRange}' 部分越过长度 {lTotalLength}。请检查参数 strRanges 值 '{strRanges}' 的正确性";
+                        return -1;
+                    }
+                    if (nRet == 1)
+                    {
+                        // 去掉尾部多出的部分范围
+                        strNewRange = TruncateRange(strNewRange, lTotalLength);
+                        nState = 1;
+                        // 然后继续
+                    }
+                }
                 if (nState == 1)  //范围已满
                 {
                     bFull = true;
                     string strFullEnd = "";
-                    int nPosition = strNewRange.IndexOf('-');
-                    if (nPosition >= 0)
-                        strFullEnd = strNewRange.Substring(nPosition + 1);
+                    {
+                        int nPosition = strNewRange.IndexOf('-');
+                        if (nPosition >= 0)
+                            strFullEnd = strNewRange.Substring(nPosition + 1);
+                    }
 
                     // 当为范围的最后一次,且本次范围的末尾等于总范围的末尾,且还没有删除时
                     if (i == rangeList.Count - 1
@@ -15145,6 +15179,105 @@ trans);
 
             // 注：如果是最后一次写入，函数返回时，newdata字段内容被清除
             return 0;
+        }
+
+        // 2022/7/7
+        // 把 range 中超越 length 的部分截掉
+        static string TruncateRange(string range, long length)
+        {
+            var source = new RangeList(range);
+            var result = new RangeList();
+            foreach(var item in source)
+            {
+                if (item.lStart >= length)
+                    continue;
+                if (item.lStart + item.lLength > length)
+                    item.lLength = length - item.lStart;
+
+                result.Add(item);
+            }
+
+            // 排序
+            result.Sort();
+            // 合并事项
+            result.Merge();
+            return result.GetContentRangeString();
+        }
+
+        // 2022/7/7
+        // 判断一个 range 是否触达指定的长度
+        // return:
+        //      0   没有触达
+        //      1   末尾刚好触达
+        //      2   末尾越过 length
+        static int ReachEnd(string range,
+            long length)
+        {
+            var rl = new RangeList(range);
+            if (rl.Count == 0)
+                throw new ArgumentException($"范围 '{range}' 不合法。应具备至少一个段");
+            var last_item = rl[rl.Count - 1];
+            if (last_item.lStart + last_item.lLength > length)
+                return 2;
+            if (last_item.lStart + last_item.lLength == length)
+                return 1;
+            return 0;
+        }
+
+        // 合并两个contentrange字符串为一个新串
+        // parameters:
+        //		strS1	第一个范围字符串
+        //		strS2	第二个范围字符串
+        //		lWholeLength	大文件的尺寸。用来检测本次合并后的字符串是否已经完全覆盖整个文件范围
+        //		strResult	out参数，返回合并后的字符串
+        // return
+        //		-1	出错 
+        //		0	还有未覆盖的部分 
+        //		1	本次已经完全覆盖
+        //      2   整个范围有超出 lWholeLength 长度的部分
+        public static int MergeContentRangeString(string strS1,
+            string strS2,
+            long lWholeLength,
+            out string strResult,
+            out string strError)
+        {
+            strError = "";
+
+            RangeList rl1 = new RangeList(strS1);
+
+            RangeList rl2 = new RangeList(strS2);
+
+            // 组合两个RangeList
+            rl1.AddRange(rl2);
+
+            // 排序
+            rl1.Sort();
+
+            // 合并事项
+            rl1.Merge();
+
+            // 调试用!
+            // Debug.Assert(rl1.Count == 1, "");
+
+            // 返回合并后的contentrange字符串
+            strResult = rl1.GetContentRangeString();
+
+            if (rl1.Count == 1)
+            {
+                RangeItem item = (RangeItem)rl1[0];
+
+                if (item.lLength > lWholeLength)
+                {
+                    strError = "唯一一个事项的长度 " + item.lLength.ToString() + " 居然大于整体长度 " + lWholeLength.ToString();
+                    return 2;	// 唯一一个事项的长度居然超过检测的长度，通常表明有输入参数错误
+                }
+
+                if (item.lStart == 0
+                    && item.lLength == lWholeLength)
+                    return 1;	// 表示完全覆盖
+            }
+
+            return 0;	// 还有未覆盖的部分
         }
 
 #if NO

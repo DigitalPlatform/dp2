@@ -124,7 +124,26 @@ namespace dp2KernelApiTester
 
             // 测试交替上载覆盖小于 100K 和大于 100K 的对象
             {
-                var create_result = UploadSmallLargObject(1, token);
+                var create_result = UploadSmallLargObject(1,
+                    "",
+                    token);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(
+                    token,
+                    create_result.CreatedPaths,
+                    create_result.AccessPoints,
+                    "");
+                if (result.Value == -1)
+                    return result;
+            }
+
+            // 测试交替上载覆盖小于 100K 和大于 100K 的对象，并且在一次上载大对象的中途中断
+            {
+                var create_result = UploadSmallLargObject(1,
+                    "interrupt",
+                    token);
                 if (create_result.Value == -1)
                     return create_result;
 
@@ -2179,6 +2198,7 @@ out string strError);
                             progress_id = DataModel.NewProgressID();
                             string compare_error = CompareFiles(fileName,
                                 output_fileName,
+                                token,
                                 (offset, total_length) =>
                                 {
                                     DataModel.ShowProgressMessage(progress_id, $"正在比较文件 {fileName} {output_fileName} {StringUtil.GetPercentText(offset, total_length)}...");
@@ -2227,8 +2247,11 @@ out string strError);
 
         static string CompareFiles(string file1,
             string file2,
+            CancellationToken token,
             Delegate_showProgress proc_showProgress)
         {
+            token.ThrowIfCancellationRequested();
+
             using (var h1 = File.OpenRead(file1))
             using (var h2 = File.OpenRead(file1))
             {
@@ -2241,6 +2264,8 @@ out string strError);
                 long offset = 0;
                 while (true)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     proc_showProgress?.Invoke(offset, h1.Length);
 
                     int read_length = (int)Math.Min((long)buffer1.Length, h1.Length - offset);
@@ -2289,9 +2314,14 @@ out string strError);
         }
 
         // 测试交替上载覆盖大小对象
-        public static CreateResult UploadSmallLargObject(int count, CancellationToken token)
+        public static CreateResult UploadSmallLargObject(
+            int count, 
+            string strStyle,
+            CancellationToken token)
         {
             var channel = DataModel.GetChannel();
+
+            bool interrupt = StringUtil.IsInList("interrupt", strStyle);
 
             List<string> created_paths = new List<string>();
             List<AccessPoint> created_accesspoints = new List<AccessPoint>();
@@ -2373,12 +2403,22 @@ out string strError);
                             string progress_id = DataModel.NewProgressID();
                             DataModel.ShowProgressMessage(progress_id, $"正在上传大文件 {object_path} ...");
 
+                            var start_timestamp = timestamp;    // 保存上传开始时的 timestamp
+
+                            bool interrupted = false;
                             long start = 0;
                             using (var file = File.OpenRead(fileName))
                             {
                                 while (true)
                                 {
                                     token.ThrowIfCancellationRequested();
+
+                                    if (interrupt && j == 1 && start >= 2 * 4096)
+                                    {
+                                        DataModel.SetMessage($"****** 在上载文件 {fileName} size={object_size} 的中途故意中断");
+                                        interrupted = true;
+                                        break;
+                                    }
 
                                     long rest_length = file.Length - start;
                                     byte[] bytes = new byte[Math.Min((long)(300 * 1024), rest_length)];
@@ -2420,18 +2460,25 @@ out string strError);
 
                             DataModel.ShowProgressMessage(progress_id, $"文件 {object_path} 上传完成");
 
-                            var compare_result = DownloadAndCompare(
-        channel,
-        object_path,
-        fileName,
-        timestamp,
-        token);
-                            if (compare_result.Value != 0)
-                                return new CreateResult
-                                {
-                                    Value = -1,
-                                    ErrorInfo = compare_result.ErrorInfo
-                                };
+                            if (interrupted == false)
+                            {
+                                var compare_result = DownloadAndCompare(
+            channel,
+            object_path,
+            fileName,
+            timestamp,
+            token);
+                                if (compare_result.Value != 0)
+                                    return new CreateResult
+                                    {
+                                        Value = -1,
+                                        ErrorInfo = compare_result.ErrorInfo
+                                    };
+                            }
+
+                            // 中断后，恢复开始前的时间戳
+                            if (interrupted)
+                                timestamp = start_timestamp;
 
                             File.Delete(fileName);
                         }
@@ -2514,6 +2561,7 @@ out string strError);
                 progress_id = DataModel.NewProgressID();
                 string compare_error = CompareFiles(fileName,
                     output_fileName,
+                    token,
                     (offset, total_length) =>
                     {
                         token.ThrowIfCancellationRequested();

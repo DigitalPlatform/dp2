@@ -6314,13 +6314,14 @@ MessageBoxDefaultButton.Button2);
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
@@ -6482,6 +6483,27 @@ MessageBoxDefaultButton.Button2);
                     items.Add(item);
                 }
 
+                bool bOldSource = true; // 是否要从 OldXml 开始做起
+
+                int nChangeCount = this.GetItemsChangeCount(items);
+                if (nChangeCount > 0)
+                {
+                    bool bHideMessageBox = true;
+                    DialogResult result = MessageDialog.Show(this,
+                        "当前选定的 " + items.Count.ToString() + " 个事项中有 " + nChangeCount + " 项修改尚未保存。\r\n\r\n请问如何进行修改? \r\n\r\n(重新修改) 重新进行修改，忽略以前内存中的修改; \r\n(继续修改) 以上次的修改为基础继续修改; \r\n(放弃) 放弃整个操作",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxDefaultButton.Button1,
+    null,
+    ref bHideMessageBox,
+    new string[] { "重新修改", "继续修改", "放弃" });
+                    if (result == DialogResult.Cancel)
+                        return;
+                    if (result == DialogResult.No)
+                    {
+                        bOldSource = false;
+                    }
+                }
+
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(
 #if OLD_CHANNEL
                     this.Channels,
@@ -6506,20 +6528,33 @@ Program.MainForm,
                     looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
-                    if (string.IsNullOrEmpty(info.NewXml) == false)
+
+                    string source_xml = info.OldXml;
+                    if (bOldSource == true)
                     {
-                        // 将 OldXml 内容设为起点内容
-                        info.OldXml = info.NewXml;
+                        source_xml = info.OldXml;
+                        // 放弃上一次的修改
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                        {
+                            info.NewXml = "";
+                            this.m_nChangedCount--;
+                        }
                     }
-                    string strMARC = "";
-                    string strMarcSyntax = "";
+                    else
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            source_xml = info.NewXml;
+                        else
+                            source_xml = info.OldXml;
+                    }
+
                     // 将XML格式转换为MARC格式
                     // 自动从数据记录中获得MARC语法
-                    nRet = MarcUtil.Xml2Marc(info.OldXml,
+                    nRet = MarcUtil.Xml2Marc(source_xml,
                         true,
                         null,
-                        out strMarcSyntax,
-                        out strMARC,
+                        out string strMarcSyntax,
+                        out string strMARC,
                         out strError);
                     if (nRet == -1)
                     {
@@ -6551,7 +6586,7 @@ Program.MainForm,
 
                     if (host.Changed == true)
                     {
-                        string strXml = info.OldXml;
+                        string strXml = source_xml;
                         nRet = MarcUtil.Marc2XmlEx(host.MarcRecord.Text,
                             strMarcSyntax,
                             ref strXml,
@@ -7267,6 +7302,27 @@ MessageBoxDefaultButton.Button2);
                     items.Add(item);
                 }
 
+                bool bOldSource = true; // 是否要从 OldXml 开始做起
+
+                int nChangeCount = this.GetItemsChangeCount(items);
+                if (nChangeCount > 0)
+                {
+                    bool bHideMessageBox = true;
+                    DialogResult result = MessageDialog.Show(this,
+                        "当前选定的 " + items.Count.ToString() + " 个事项中有 " + nChangeCount + " 项修改尚未保存。\r\n\r\n请问如何进行修改? \r\n\r\n(重新修改) 重新进行修改，忽略以前内存中的修改; \r\n(继续修改) 以上次的修改为基础继续修改; \r\n(放弃) 放弃整个操作",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxDefaultButton.Button1,
+    null,
+    ref bHideMessageBox,
+    new string[] { "重新修改", "继续修改", "放弃" });
+                    if (result == DialogResult.Cancel)
+                        return;
+                    if (result == DialogResult.No)
+                    {
+                        bOldSource = false;
+                    }
+                }
+
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(
 #if OLD_CHANNEL
                     this.Channels,
@@ -7291,15 +7347,29 @@ Program.MainForm,
                     looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
-                    if (string.IsNullOrEmpty(info.NewXml) == false)
+
+                    string source_xml = info.OldXml;
+                    if (bOldSource == true)
                     {
-                        // 将 OldXml 内容设为起点内容
-                        info.OldXml = info.NewXml;
+                        source_xml = info.OldXml;
+                        // 放弃上一次的修改
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                        {
+                            info.NewXml = "";
+                            this.m_nChangedCount--;
+                        }
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                            source_xml = info.NewXml;
+                        else
+                            source_xml = info.OldXml;
                     }
 
                     // 将XML格式转换为MARC格式
                     // 自动从数据记录中获得MARC语法
-                    nRet = MarcUtil.Xml2Marc(info.OldXml,
+                    nRet = MarcUtil.Xml2Marc(source_xml,
                         true,
                         null,
                         out string strMarcSyntax,
@@ -7331,7 +7401,7 @@ Program.MainForm,
                     string strChangedMarc = record.Text;
                     if (strMARC != strChangedMarc)
                     {
-                        string strXml = info.OldXml;
+                        string strXml = source_xml;
                         nRet = MarcUtil.Marc2XmlEx(record.Text,
                             strMarcSyntax,
                             ref strXml,
@@ -7384,6 +7454,21 @@ Program.MainForm,
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        internal int GetItemsChangeCount(List<ListViewItem> items)
+        {
+            if (this.m_nChangedCount == 0)
+                return 0;   // 提高速度
+
+            int nResult = 0;
+            foreach (ListViewItem item in items)
+            {
+                if (IsItemChanged(item) == true)
+                    nResult++;
+            }
+            return nResult;
+        }
+
 
         LinkMarcFile _linkMarcFile = null;
 
