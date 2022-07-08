@@ -2806,12 +2806,15 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             {
                 // 自动识别MARC格式
                 string strOutMarcSyntax = "";
-                // 探测记录的MARC格式 unimarc / usmarc / reader
+                // 探测记录的MARC格式 unimarc / usmarc / dt1000reader
                 // return:
                 //      0   没有探测出来。strMarcSyntax为空
                 //      1   探测出来了
                 nRet = MarcUtil.DetectMarcSyntax(strMarc,
                     out strOutMarcSyntax);
+                // 2022/7/8
+                if (strOutMarcSyntax == "dt1000reader")
+                    strOutMarcSyntax = "unimarc";
                 this.linkMarcFile.MarcSyntax = strOutMarcSyntax;    // 有可能为空，表示探测不出来
                 if (String.IsNullOrEmpty(this.linkMarcFile.MarcSyntax) == true)
                 {
@@ -6544,12 +6547,14 @@ Stack:
 
             // 自动识别MARC格式
             string strOutMarcSyntax = "";
-            // 探测记录的MARC格式 unimarc / usmarc / reader
+            // 探测记录的MARC格式 unimarc / usmarc / dt1000reader
             nRet = MarcUtil.DetectMarcSyntax(tempdlg.SelectedRecordMarc,
                 out strOutMarcSyntax);
             if (strOutMarcSyntax == "")
                 strOutMarcSyntax = "unimarc";
-
+            // 2022/7/8
+            if (strOutMarcSyntax == "dt1000reader")
+                strOutMarcSyntax = "unimarc";
             if (strOutMarcSyntax == "unimarc" || strOutMarcSyntax == "")
                 this.AutoDetectedMarcSyntaxOID = "1.2.840.10003.5.1";
             else if (strOutMarcSyntax == "usmarc")

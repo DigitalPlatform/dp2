@@ -3831,13 +3831,15 @@ namespace dp2Catalog
                 bInitialStop = true;
             }
             */
-            var looping = BeginLoop(this.DoStop, "正在获得服务器 " + strServerUrl + " 的信息 ...");
+            Looping looping = null;
+            if (bUseNewChannel == true)
+                looping = BeginLoop(this.DoStop, "正在获得服务器 " + strServerUrl + " 的信息 ...");
 
             dp2ServerInfo info = null;
 
             try
             {
-                info = this.MainForm.ServerInfos.GetServerInfo(looping.stop,
+                info = this.MainForm.ServerInfos.GetServerInfo(looping?.stop,
                     bUseNewChannel,
 #if OLD_CHANNEL
                     this.Channels,
@@ -3865,7 +3867,8 @@ namespace dp2Catalog
                     }
                 }
                 */
-                EndLoop(looping);
+                if (bUseNewChannel == true)
+                    EndLoop(looping);
             }
 
             for (int i = 0; i < info.BiblioDbProperties.Count; i++)
@@ -4700,8 +4703,6 @@ namespace dp2Catalog
                 }
 
                 // this.BiblioTimestamp = baTimestamp;
-
-
             }
             finally
             {
@@ -7736,12 +7737,15 @@ Program.MainForm,
                         {
                             // 自动识别MARC格式
                             string strOutMarcSyntax = "";
-                            // 探测记录的MARC格式 unimarc / usmarc / reader
+                            // 探测记录的MARC格式 unimarc / usmarc / dt1000reader
                             // return:
                             //      0   没有探测出来。strMarcSyntax为空
                             //      1   探测出来了
                             nRet = MarcUtil.DetectMarcSyntax(strMARC,
                                 out strOutMarcSyntax);
+                            // 2022/7/8
+                            if (strOutMarcSyntax == "dt1000reader")
+                                strOutMarcSyntax = "unimarc";
                             marcSyntax = strOutMarcSyntax;    // 有可能为空，表示探测不出来
                             if (String.IsNullOrEmpty(marcSyntax) == true)
                             {
@@ -8605,7 +8609,6 @@ out string strError)
             this.EnableControlsInSearching(false);
             try
             {
-
                 // dtlp协议的记录保存
                 if (strProtocol.ToLower() == "dtlp")
                 {
@@ -8628,7 +8631,7 @@ out string strError)
                             strError = "用户中断";
                             goto ERROR1;
                         }
-                        looping.stop.SetProgressValue(i);
+                        // looping.stop.SetProgressValue(i);
 
                         ListViewItem item = this.listView_browse.SelectedItems[i];
                         string strSourcePath = item.Text;
@@ -8678,6 +8681,9 @@ out string strError)
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
+
+                        looping.stop?.SetProgressValue(i + 1);
+                        looping.stop?.SetMessage($"正在保存到 {strOutputPath} ...");
                     }
 
                     MessageBox.Show(this, "保存成功");
@@ -8685,8 +8691,9 @@ out string strError)
                 }
                 else if (strProtocol.ToLower() == "dp2library")
                 {
+                    int count = this.listView_browse.SelectedItems.Count;
                     if (looping.stop != null)
-                        looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+                        looping.stop.SetProgressRange(0, count);
 
                     for (int i = 0; i < this.listView_browse.SelectedItems.Count; i++)
                     {
@@ -8698,8 +8705,10 @@ out string strError)
                             goto ERROR1;
                         }
 
+                        /*
                         if (looping.stop != null)
                             looping.stop.SetProgressValue(i);
+                        */
 
                         ListViewItem item = this.listView_browse.SelectedItems[i];
                         string strSourcePath = item.Text;
@@ -8752,6 +8761,8 @@ out string strError)
                         if (nRet == -1)
                             goto ERROR1;
 
+                        looping.stop?.SetProgressValue(i + 1);
+                        looping.stop?.SetMessage($"正在保存到 {strOutputPath} ({i+1}/{count}) ...");
                     }
                     MessageBox.Show(this, "保存成功");
                     return;
@@ -8766,7 +8777,6 @@ out string strError)
                     strError = "无法识别的协议名 '" + strProtocol + "'";
                     goto ERROR1;
                 }
-
             }
             finally
             {

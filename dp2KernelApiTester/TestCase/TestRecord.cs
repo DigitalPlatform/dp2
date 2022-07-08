@@ -2167,6 +2167,7 @@ out string strError);
                             var stop = new Stop();
                             stop.OnProgressChanged += (o, e) =>
                             {
+                                token.ThrowIfCancellationRequested();
                                 DataModel.ShowProgressMessage(progress_id, e.Message);
                             };
                             stop.BeginLoop();

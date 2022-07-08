@@ -537,7 +537,7 @@ namespace dp2Catalog
 
             // 自动识别MARC格式
             string strOutMarcSyntax = "";
-            // 探测记录的MARC格式 unimarc / usmarc / reader
+            // 探测记录的MARC格式 unimarc / usmarc / dt1000reader
             // return:
             //      0   没有探测出来。strMarcSyntax为空
             //      1   探测出来了

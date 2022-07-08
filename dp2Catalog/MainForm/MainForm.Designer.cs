@@ -151,7 +151,7 @@
             this.menuStrip_main.MdiWindowListItem = this.MenuItem_window;
             this.menuStrip_main.Name = "menuStrip_main";
             this.menuStrip_main.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
-            this.menuStrip_main.Size = new System.Drawing.Size(1060, 42);
+            this.menuStrip_main.Size = new System.Drawing.Size(1060, 38);
             this.menuStrip_main.TabIndex = 0;
             this.menuStrip_main.Text = "menuStrip1";
             // 
@@ -180,7 +180,7 @@
             this.toolStripSeparator4,
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(97, 33);
+            this.MenuItem_file.Size = new System.Drawing.Size(97, 32);
             this.MenuItem_file.Text = "文件(&F)";
             // 
             // MenuItem_openZSearchForm
@@ -406,7 +406,7 @@
             this.MenuItem_openZBatchSearchForm,
             this.MenuItem_openAdvertiseForm});
             this.MenuItem_function.Name = "MenuItem_function";
-            this.MenuItem_function.Size = new System.Drawing.Size(102, 33);
+            this.MenuItem_function.Size = new System.Drawing.Size(102, 32);
             this.MenuItem_function.Text = "功能(&U)";
             // 
             // MenuItem_saveToTemplate
@@ -473,7 +473,7 @@
             this.MenuItem_ui.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_font});
             this.MenuItem_ui.Name = "MenuItem_ui";
-            this.MenuItem_ui.Size = new System.Drawing.Size(92, 33);
+            this.MenuItem_ui.Size = new System.Drawing.Size(92, 32);
             this.MenuItem_ui.Text = "外观(&I)";
             // 
             // MenuItem_font
@@ -491,7 +491,7 @@
             this.MenuItem_cascade,
             this.MenuItem_arrangeIcons});
             this.MenuItem_window.Name = "MenuItem_window";
-            this.MenuItem_window.Size = new System.Drawing.Size(107, 33);
+            this.MenuItem_window.Size = new System.Drawing.Size(107, 32);
             this.MenuItem_window.Text = "窗口(&W)";
             // 
             // MenuItem_tileHorizontal
@@ -534,7 +534,7 @@
             this.MenuItem_resetSerialCode,
             this.MenuItem_copyright});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(102, 33);
+            this.MenuItem_help.Size = new System.Drawing.Size(102, 32);
             this.MenuItem_help.Text = "帮助(&H)";
             // 
             // MenuItem_cfg
@@ -619,9 +619,9 @@
             this.toolButton_search,
             this.toolButton_stop,
             this.toolStripButton_testSearch});
-            this.toolStrip_main.Location = new System.Drawing.Point(0, 42);
+            this.toolStrip_main.Location = new System.Drawing.Point(0, 38);
             this.toolStrip_main.Name = "toolStrip_main";
-            this.toolStrip_main.Size = new System.Drawing.Size(1060, 44);
+            this.toolStrip_main.Size = new System.Drawing.Size(1060, 38);
             this.toolStrip_main.TabIndex = 1;
             this.toolStrip_main.Text = "toolStrip1";
             // 
@@ -632,7 +632,7 @@
             this.toolButton_saveTo.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_saveTo.Image")));
             this.toolButton_saveTo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_saveTo.Name = "toolButton_saveTo";
-            this.toolButton_saveTo.Size = new System.Drawing.Size(40, 38);
+            this.toolButton_saveTo.Size = new System.Drawing.Size(40, 32);
             this.toolButton_saveTo.Text = "保存到...";
             this.toolButton_saveTo.Click += new System.EventHandler(this.toolButton_saveTo_Click);
             // 
@@ -879,7 +879,6 @@
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar_main,
             this.toolStripStatusLabel_main});
-            this.statusStrip_main.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.statusStrip_main.Location = new System.Drawing.Point(0, 516);
             this.statusStrip_main.MinimumSize = new System.Drawing.Size(0, 40);
             this.statusStrip_main.Name = "statusStrip_main";
@@ -891,7 +890,6 @@
             // 
             // toolStripProgressBar_main
             // 
-            this.toolStripProgressBar_main.AutoSize = false;
             this.toolStripProgressBar_main.BackColor = System.Drawing.SystemColors.Control;
             this.toolStripProgressBar_main.Name = "toolStripProgressBar_main";
             this.toolStripProgressBar_main.Size = new System.Drawing.Size(183, 30);
@@ -901,10 +899,11 @@
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
+            this.toolStripStatusLabel_main.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripStatusLabel_main.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(212, 28);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(799, 31);
             this.toolStripStatusLabel_main.Spring = true;
-            this.toolStripStatusLabel_main.Text = "欢迎使用dp2Catalog";
+            this.toolStripStatusLabel_main.Text = "欢迎使用 dp2Catalog";
             this.toolStripStatusLabel_main.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panel_fixed
@@ -912,10 +911,10 @@
             this.panel_fixed.Controls.Add(this.tabControl_panelFixed);
             this.panel_fixed.Controls.Add(this.toolStrip_panelFixed);
             this.panel_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel_fixed.Location = new System.Drawing.Point(762, 86);
+            this.panel_fixed.Location = new System.Drawing.Point(762, 76);
             this.panel_fixed.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panel_fixed.Name = "panel_fixed";
-            this.panel_fixed.Size = new System.Drawing.Size(298, 430);
+            this.panel_fixed.Size = new System.Drawing.Size(298, 440);
             this.panel_fixed.TabIndex = 6;
             // 
             // tabControl_panelFixed
@@ -926,21 +925,21 @@
             this.tabControl_panelFixed.Controls.Add(this.tabPage_verifyResult);
             this.tabControl_panelFixed.Controls.Add(this.tabPage_generateData);
             this.tabControl_panelFixed.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl_panelFixed.Location = new System.Drawing.Point(0, 44);
+            this.tabControl_panelFixed.Location = new System.Drawing.Point(0, 25);
             this.tabControl_panelFixed.Margin = new System.Windows.Forms.Padding(0);
             this.tabControl_panelFixed.Name = "tabControl_panelFixed";
             this.tabControl_panelFixed.Padding = new System.Drawing.Point(0, 0);
             this.tabControl_panelFixed.SelectedIndex = 0;
-            this.tabControl_panelFixed.Size = new System.Drawing.Size(298, 386);
+            this.tabControl_panelFixed.Size = new System.Drawing.Size(298, 415);
             this.tabControl_panelFixed.TabIndex = 1;
             // 
             // tabPage_operHistory
             // 
             this.tabPage_operHistory.Controls.Add(this.webBrowser_history);
             this.tabPage_operHistory.Location = new System.Drawing.Point(4, 34);
-            this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_operHistory.Name = "tabPage_operHistory";
-            this.tabPage_operHistory.Size = new System.Drawing.Size(290, 348);
+            this.tabPage_operHistory.Size = new System.Drawing.Size(290, 377);
             this.tabPage_operHistory.TabIndex = 4;
             this.tabPage_operHistory.Text = "操作历史";
             this.tabPage_operHistory.UseVisualStyleBackColor = true;
@@ -949,18 +948,18 @@
             // 
             this.webBrowser_history.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_history.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_history.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.webBrowser_history.Margin = new System.Windows.Forms.Padding(5);
             this.webBrowser_history.MinimumSize = new System.Drawing.Size(37, 35);
             this.webBrowser_history.Name = "webBrowser_history";
-            this.webBrowser_history.Size = new System.Drawing.Size(290, 348);
+            this.webBrowser_history.Size = new System.Drawing.Size(290, 377);
             this.webBrowser_history.TabIndex = 0;
             // 
             // tabPage_property
             // 
             this.tabPage_property.Location = new System.Drawing.Point(4, 34);
-            this.tabPage_property.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_property.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(290, 374);
+            this.tabPage_property.Size = new System.Drawing.Size(290, 367);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -968,9 +967,9 @@
             // tabPage_verifyResult
             // 
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 34);
-            this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(290, 374);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(290, 367);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -978,9 +977,9 @@
             // tabPage_generateData
             // 
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 34);
-            this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(290, 374);
+            this.tabPage_generateData.Size = new System.Drawing.Size(290, 367);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;
@@ -993,7 +992,7 @@
             this.toolStripButton_close});
             this.toolStrip_panelFixed.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_panelFixed.Name = "toolStrip_panelFixed";
-            this.toolStrip_panelFixed.Size = new System.Drawing.Size(298, 44);
+            this.toolStrip_panelFixed.Size = new System.Drawing.Size(298, 25);
             this.toolStrip_panelFixed.TabIndex = 3;
             this.toolStrip_panelFixed.Text = "toolStrip1";
             // 
@@ -1012,10 +1011,10 @@
             // splitter_fixed
             // 
             this.splitter_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitter_fixed.Location = new System.Drawing.Point(758, 86);
+            this.splitter_fixed.Location = new System.Drawing.Point(758, 76);
             this.splitter_fixed.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.splitter_fixed.Name = "splitter_fixed";
-            this.splitter_fixed.Size = new System.Drawing.Size(4, 430);
+            this.splitter_fixed.Size = new System.Drawing.Size(4, 440);
             this.splitter_fixed.TabIndex = 7;
             this.splitter_fixed.TabStop = false;
             // 
