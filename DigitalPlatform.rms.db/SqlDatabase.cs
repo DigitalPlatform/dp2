@@ -14558,11 +14558,6 @@ trans);
             }
 
 #endif
-            /*
-            // 2022/7/7
-            if (bFirst)
-                strCurrentRange = "";
-            */
 
             // 对象 bytes 是否最后 WriteLine() 一次性写入 SQL row。null 表示不等到最后 WriteLine() 就提前写入
             byte[] direct_write_data = null;
@@ -15183,7 +15178,7 @@ trans);
 
         // 2022/7/7
         // 把 range 中超越 length 的部分截掉
-        static string TruncateRange(string range, long length)
+        public static string TruncateRange(string range, long length)
         {
             var source = new RangeList(range);
             var result = new RangeList();
@@ -15210,7 +15205,7 @@ trans);
         //      0   没有触达
         //      1   末尾刚好触达
         //      2   末尾越过 length
-        static int ReachEnd(string range,
+        public static int ReachEnd(string range,
             long length)
         {
             var rl = new RangeList(range);

@@ -321,6 +321,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sipApiTester", "sipApiTeste
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateAssemblyBinding", "UpdateAssemblyBinding\UpdateAssemblyBinding.csproj", "{3A99BF16-F41C-44B1-83FE-57BC26444CB2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDp2kernel", "TestDp2kernel\TestDp2kernel.csproj", "{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2746,6 +2748,24 @@ Global
 		{3A99BF16-F41C-44B1-83FE-57BC26444CB2}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{3A99BF16-F41C-44B1-83FE-57BC26444CB2}.Test|x86.ActiveCfg = Debug|Any CPU
 		{3A99BF16-F41C-44B1-83FE-57BC26444CB2}.Test|x86.Build.0 = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Debug|x86.Build.0 = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Release|x86.ActiveCfg = Release|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Release|x86.Build.0 = Release|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|x86.ActiveCfg = Debug|Any CPU
+		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

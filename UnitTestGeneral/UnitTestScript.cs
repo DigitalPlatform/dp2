@@ -9,7 +9,7 @@ namespace UnitTestGeneral
     public class TestScript
     {
         [TestMethod]
-        public void TestMethod_paseAuthorString_1()
+        public void TestMethod_parseAuthorString_1()
         {
             var infos = ParseAuthorString("(美)肯·费雪(Ken Fisher)");
             Assert.AreEqual(1, infos.Count);
@@ -21,7 +21,7 @@ namespace UnitTestGeneral
         }
 
         [TestMethod]
-        public void TestMethod_paseAuthorString_2()
+        public void TestMethod_parseAuthorString_2()
         {
             var infos = ParseAuthorString("(美)肯·费雪(Ken Fisher), (美)劳拉·霍夫曼斯(Lara Hoffmans)");
             Assert.AreEqual(2, infos.Count);
@@ -44,7 +44,7 @@ namespace UnitTestGeneral
         }
 
         [TestMethod]
-        public void TestMethod_paseAuthorString_3()
+        public void TestMethod_parseAuthorString_3()
         {
             var infos = ParseAuthorString("(美)珍妮弗·周(Jennifer Chou)著");
             Assert.AreEqual(1, infos.Count);
