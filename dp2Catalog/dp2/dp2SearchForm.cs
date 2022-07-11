@@ -3530,7 +3530,6 @@ namespace dp2Catalog
                 strBiblioDbName,
                 out strSyntax,
                 out strError);
-
             if (nRet == -1)
                 return -1;
 
@@ -3554,11 +3553,15 @@ namespace dp2Catalog
 #endif
 
             string strSyntax = "";
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
             int nRet = GetOneRecordSyntax(index,
                 this.m_bInSearching,
                 out strSyntax,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == 0)
                 goto ERROR1;
 
             if (strSyntax == "" // default = unimarc
@@ -3607,11 +3610,15 @@ namespace dp2Catalog
 #endif
 
             string strSyntax = "";
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
             int nRet = GetOneRecordSyntax(index,
                 this.m_bInSearching,
                 out strSyntax,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == 0)
                 goto ERROR1;
 
             if (strSyntax == "" // default = unimarc
@@ -3881,6 +3888,7 @@ namespace dp2Catalog
                 }
             }
 
+            strError = $"没有找到数据库 '{strDbName}' 的定义信息，因而无法确定其 MARC 格式";
             return 0;   // not found dbname
         }
 
@@ -4500,6 +4508,9 @@ namespace dp2Catalog
                 out strError);
             if (nRet == -1)
                 return -1;
+            // 2022/7/11
+            if (nRet == 0)
+                return 0;
 
             if (String.IsNullOrEmpty(strSyntax) == true)
                 strSyntax = "unimarc";
@@ -4616,7 +4627,7 @@ namespace dp2Catalog
                     strDbName,
                     out strSyntax,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == 0)
                     goto ERROR1;
 
                 if (String.IsNullOrEmpty(strSyntax) == true)
@@ -5560,11 +5571,15 @@ namespace dp2Catalog
             else
             {
                 // 观察要保存的第一条记录的marc syntax
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
                 nRet = GetOneRecordSyntax(0,
                     this.m_bInSearching,
                     out strPreferedMarcSyntax,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == 0)
                     goto ERROR1;
 
             }
@@ -8497,11 +8512,15 @@ out string strError)
             else
             {
                 // 观察要保存的第一条记录的marc syntax
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
                 nRet = GetOneRecordSyntax(0,
                     this.m_bInSearching,
                     out strPreferedMarcSyntax,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == 0)
                     goto ERROR1;
             }
 

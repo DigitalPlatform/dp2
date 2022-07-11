@@ -2434,7 +2434,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     strBiblioDbName,
                     out strSyntax,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == 0)
                 {
                     strError = "获取书目库 '" + strBiblioDbName + "的数据格式时发生错误: " + strError;
                     goto ERROR1;
@@ -2576,7 +2576,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     strBiblioDbName,
                     out strSyntax,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == 0)
                 {
                     strError = "获取书目库 '" + strBiblioDbName + "的数据格式时发生错误: " + strError;
                     goto ERROR1;
@@ -3140,7 +3140,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                         strDbName,
                         out strSyntax,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == 0)
                         goto ERROR1;
 
                     if (String.IsNullOrEmpty(strSyntax) == true)
@@ -6737,7 +6737,7 @@ Stack:
                         strBiblioDbName,
                         out strSyntax,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == 0)
                     {
                         strError = "获取书目库 '" + strBiblioDbName + "的数据格式时发生错误: " + strError;
                         goto ERROR1;
@@ -7088,7 +7088,7 @@ Stack:
                     strBiblioDbName,
                     out strSyntax,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == 0)
                 {
                     strError = "获取书目库 '" + strBiblioDbName + "的数据格式时发生错误: " + strError;
                     goto ERROR1;

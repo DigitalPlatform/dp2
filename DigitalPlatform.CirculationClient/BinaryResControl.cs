@@ -15,6 +15,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -2183,14 +2184,55 @@ out strError);
                         channel.Timeout = new TimeSpan(0, 5, 0);
                         try
                         {
+                            // bool _hide_dialog = false;
+                            // int _hide_dialog_count = 0;
+
                             lRet = channel.UploadFile(
-Stop,
-strLocalFilename,
-strResPath,
-strMetadata,
-(StringUtil.CompareVersion(dp2library_version, "2.117") >= 0) ? "gzip" : "",
-timestamp,   // timestamp,
-false,
+                                Stop,
+                                strLocalFilename,
+                                strResPath,
+                                strMetadata,
+                                (StringUtil.CompareVersion(dp2library_version, "2.117") >= 0) ? "gzip" : "",
+                                timestamp,   // timestamp,
+                                false,
+                                false,
+                                null,
+                                /*
+                                (c, m, buttons, sec) =>
+                                {
+                                    DialogResult result = DialogResult.Yes;
+                                    if (_hide_dialog == false)
+                                    {
+                                        this.Invoke((Action)(() =>
+                                        {
+                                            MessageBoxButtons v = MessageBoxButtons.YesNoCancel;
+                                            if (buttons.Length == 2)
+                                                v = MessageBoxButtons.YesNo;
+                                            result = MessageDialog.Show(this,
+                                        m,
+                                        v,
+                                        MessageBoxDefaultButton.Button1,
+                                        "此后不再出现本对话框",
+                                        ref _hide_dialog,
+                                        buttons,    // new string[] { "重试", "中断" },
+                                        sec);
+                                        }));
+                                        _hide_dialog_count = 0;
+                                    }
+                                    else
+                                    {
+                                        _hide_dialog_count++;
+                                        if (_hide_dialog_count > 10)
+                                            _hide_dialog = false;
+                                    }
+
+                                    if (result == DialogResult.Yes)
+                                        return buttons[0];
+                                    else if (result == DialogResult.No)
+                                        return buttons[1];
+                                    return buttons[2];
+                                },
+                                */
 out output_timestamp,
 out strError);
 

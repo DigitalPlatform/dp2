@@ -1149,10 +1149,14 @@ namespace dp2Catalog
             }
 
             string strSyntax = "";
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
             int nRet = GetOneRecordSyntax(index,
                 out strSyntax,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == 0)
                 goto ERROR1;
 
             if (strSyntax == "" // default = unimarc
@@ -1266,7 +1270,6 @@ namespace dp2Catalog
                 strBiblioDbName,
                 out strSyntax,
                 out strError);
-
             if (nRet == -1)
                 return -1;
 
