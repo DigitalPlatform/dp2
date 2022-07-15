@@ -426,6 +426,8 @@ namespace dp2Circulation
         {
             string strError = "";
 
+            bool quick_load = ((Control.ModifierKeys & Keys.Shift) == Keys.Shift);
+
             {
                 if (this.m_nChangedCount > 0)
                 {
@@ -523,12 +525,18 @@ namespace dp2Circulation
                         return;
                     }
 
+                    bool current_quick_load = quick_load;
+
+                    if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                        current_quick_load = true;
+
+
                     lRet = channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName
                         lStart,
                         lCount,
-                        "id,cols", // "id,cols,xml",
+                        current_quick_load ? "id" : "id,cols", // "id,cols,xml",
                         this.Lang,
                         out searchresults,
                         out strError);

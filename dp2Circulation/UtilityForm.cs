@@ -1887,7 +1887,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 取书目摘要
-        private void toolStrip_textLines_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void toolStripButton_textLines_getBiblioSummary_Click(object sender, EventArgs e)
         {
             this.textBox_textLines_target.Text = "";
             this.textBox_textLines_source2.Text = "";

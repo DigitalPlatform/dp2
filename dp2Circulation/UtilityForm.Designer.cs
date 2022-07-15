@@ -201,7 +201,7 @@
             this.tabPage_sjhm.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_sjhm.Name = "tabPage_sjhm";
             this.tabPage_sjhm.Padding = new System.Windows.Forms.Padding(5);
-            this.tabPage_sjhm.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_sjhm.Size = new System.Drawing.Size(943, 592);
             this.tabPage_sjhm.TabIndex = 0;
             this.tabPage_sjhm.Text = "四角号码";
             this.tabPage_sjhm.UseVisualStyleBackColor = true;
@@ -276,7 +276,7 @@
             this.tabPage_xmlEditor.Location = new System.Drawing.Point(4, 31);
             this.tabPage_xmlEditor.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_xmlEditor.Name = "tabPage_xmlEditor";
-            this.tabPage_xmlEditor.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_xmlEditor.Size = new System.Drawing.Size(943, 592);
             this.tabPage_xmlEditor.TabIndex = 1;
             this.tabPage_xmlEditor.Text = "XML编辑器";
             this.tabPage_xmlEditor.UseVisualStyleBackColor = true;
@@ -289,9 +289,9 @@
             this.toolStripButton_xmlEditor_replaceControlChar,
             this.toolStripButton_xmlEditor_htmlEncode,
             this.toolStripButton_xmlEditor_htmlDecode});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 555);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 554);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(986, 38);
+            this.toolStrip1.Size = new System.Drawing.Size(943, 38);
             this.toolStrip1.TabIndex = 9;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -426,7 +426,7 @@
             this.tabPage_webCamera.Location = new System.Drawing.Point(4, 31);
             this.tabPage_webCamera.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_webCamera.Name = "tabPage_webCamera";
-            this.tabPage_webCamera.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_webCamera.Size = new System.Drawing.Size(943, 592);
             this.tabPage_webCamera.TabIndex = 2;
             this.tabPage_webCamera.Text = "摄像头";
             this.tabPage_webCamera.UseVisualStyleBackColor = true;
@@ -487,7 +487,7 @@
             this.tabPage_currency.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_currency.Name = "tabPage_currency";
             this.tabPage_currency.Padding = new System.Windows.Forms.Padding(11, 10, 11, 10);
-            this.tabPage_currency.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_currency.Size = new System.Drawing.Size(943, 592);
             this.tabPage_currency.TabIndex = 3;
             this.tabPage_currency.Text = "金额";
             this.tabPage_currency.UseVisualStyleBackColor = true;
@@ -506,8 +506,8 @@
             // splitContainer_currency.Panel2
             // 
             this.splitContainer_currency.Panel2.Controls.Add(this.tableLayoutPanel_currency_target);
-            this.splitContainer_currency.Size = new System.Drawing.Size(964, 573);
-            this.splitContainer_currency.SplitterDistance = 362;
+            this.splitContainer_currency.Size = new System.Drawing.Size(921, 572);
+            this.splitContainer_currency.SplitterDistance = 345;
             this.splitContainer_currency.SplitterWidth = 15;
             this.splitContainer_currency.TabIndex = 4;
             // 
@@ -524,7 +524,7 @@
             this.tableLayoutPanel_currency_source.RowCount = 2;
             this.tableLayoutPanel_currency_source.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_currency_source.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_currency_source.Size = new System.Drawing.Size(362, 573);
+            this.tableLayoutPanel_currency_source.Size = new System.Drawing.Size(345, 572);
             this.tableLayoutPanel_currency_source.TabIndex = 2;
             // 
             // label5
@@ -565,7 +565,7 @@
             this.tableLayoutPanel_currency_target.RowCount = 2;
             this.tableLayoutPanel_currency_target.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_currency_target.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_currency_target.Size = new System.Drawing.Size(587, 573);
+            this.tableLayoutPanel_currency_target.Size = new System.Drawing.Size(561, 572);
             this.tableLayoutPanel_currency_target.TabIndex = 5;
             // 
             // label6
@@ -774,7 +774,6 @@
             this.toolStrip_textLines.Size = new System.Drawing.Size(943, 38);
             this.toolStrip_textLines.TabIndex = 2;
             this.toolStrip_textLines.Text = "toolStrip1";
-            this.toolStrip_textLines.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip_textLines_ItemClicked);
             // 
             // toolStripButton_textLines_sub
             // 
@@ -858,6 +857,7 @@
             this.toolStripButton_textLines_getBiblioSummary.Name = "toolStripButton_textLines_getBiblioSummary";
             this.toolStripButton_textLines_getBiblioSummary.Size = new System.Drawing.Size(121, 32);
             this.toolStripButton_textLines_getBiblioSummary.Text = "取书目摘要";
+            this.toolStripButton_textLines_getBiblioSummary.Click += new System.EventHandler(this.toolStripButton_textLines_getBiblioSummary_Click);
             // 
             // textBox_textLines_target
             // 
@@ -883,7 +883,7 @@
             this.tabPage_isbn.Location = new System.Drawing.Point(4, 31);
             this.tabPage_isbn.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_isbn.Name = "tabPage_isbn";
-            this.tabPage_isbn.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_isbn.Size = new System.Drawing.Size(943, 592);
             this.tabPage_isbn.TabIndex = 6;
             this.tabPage_isbn.Text = "ISBN";
             this.tabPage_isbn.UseVisualStyleBackColor = true;
@@ -899,9 +899,9 @@
             this.toolStripSeparator2,
             this.toolStripButton_isbn_hyphen,
             this.toolStripButton_isbn_removeHyphen});
-            this.toolStrip_isbn.Location = new System.Drawing.Point(0, 555);
+            this.toolStrip_isbn.Location = new System.Drawing.Point(0, 554);
             this.toolStrip_isbn.Name = "toolStrip_isbn";
-            this.toolStrip_isbn.Size = new System.Drawing.Size(986, 38);
+            this.toolStrip_isbn.Size = new System.Drawing.Size(943, 38);
             this.toolStrip_isbn.TabIndex = 4;
             this.toolStrip_isbn.Text = "toolStrip1";
             // 
@@ -989,7 +989,7 @@
             this.tabPage_health.Location = new System.Drawing.Point(4, 31);
             this.tabPage_health.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_health.Name = "tabPage_health";
-            this.tabPage_health.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_health.Size = new System.Drawing.Size(943, 592);
             this.tabPage_health.TabIndex = 5;
             this.tabPage_health.Text = "系统健康";
             this.tabPage_health.UseVisualStyleBackColor = true;
@@ -1043,7 +1043,7 @@
             this.tabPage_serverFileSystem.Location = new System.Drawing.Point(4, 31);
             this.tabPage_serverFileSystem.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_serverFileSystem.Name = "tabPage_serverFileSystem";
-            this.tabPage_serverFileSystem.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_serverFileSystem.Size = new System.Drawing.Size(943, 592);
             this.tabPage_serverFileSystem.TabIndex = 7;
             this.tabPage_serverFileSystem.Text = "上传文件";
             this.tabPage_serverFileSystem.UseVisualStyleBackColor = true;
@@ -1130,7 +1130,7 @@
             this.tabPage_systemInfo.Location = new System.Drawing.Point(4, 31);
             this.tabPage_systemInfo.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_systemInfo.Name = "tabPage_systemInfo";
-            this.tabPage_systemInfo.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_systemInfo.Size = new System.Drawing.Size(943, 592);
             this.tabPage_systemInfo.TabIndex = 8;
             this.tabPage_systemInfo.Text = "系统信息";
             this.tabPage_systemInfo.UseVisualStyleBackColor = true;
@@ -1181,7 +1181,7 @@
             this.tabPage_worToIso.Location = new System.Drawing.Point(4, 31);
             this.tabPage_worToIso.Margin = new System.Windows.Forms.Padding(5);
             this.tabPage_worToIso.Name = "tabPage_worToIso";
-            this.tabPage_worToIso.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_worToIso.Size = new System.Drawing.Size(943, 592);
             this.tabPage_worToIso.TabIndex = 9;
             this.tabPage_worToIso.Text = "工作单 --> ISO2709";
             this.tabPage_worToIso.UseVisualStyleBackColor = true;
@@ -1275,7 +1275,7 @@
             this.tabPage_biblioTable.Location = new System.Drawing.Point(4, 31);
             this.tabPage_biblioTable.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage_biblioTable.Name = "tabPage_biblioTable";
-            this.tabPage_biblioTable.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_biblioTable.Size = new System.Drawing.Size(943, 592);
             this.tabPage_biblioTable.TabIndex = 10;
             this.tabPage_biblioTable.Text = "书目 table 格式";
             this.tabPage_biblioTable.UseVisualStyleBackColor = true;
@@ -1355,7 +1355,7 @@
             this.tabPage_addCrLf.Controls.Add(this.button_addCrLf_getSourceFileName);
             this.tabPage_addCrLf.Location = new System.Drawing.Point(4, 31);
             this.tabPage_addCrLf.Name = "tabPage_addCrLf";
-            this.tabPage_addCrLf.Size = new System.Drawing.Size(986, 593);
+            this.tabPage_addCrLf.Size = new System.Drawing.Size(943, 592);
             this.tabPage_addCrLf.TabIndex = 11;
             this.tabPage_addCrLf.Text = "添加回车换行";
             this.tabPage_addCrLf.UseVisualStyleBackColor = true;
