@@ -5444,13 +5444,13 @@ out strError);
                 if (nRet == -1)
                 {
                     // text-level: 用户提示
-                    strError = "在获取" + GetReaderTypeCaption(strItemLibraryCode,strReaderLibraryCode, strReaderType) + " 的 可借总册数 参数过程中出错: " + strError + "。因此拒绝" + strOperName + "操作";
+                    strError = "在获取" + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 的 可借总册数 参数过程中出错: " + strError + "。因此拒绝" + strOperName + "操作";
                     return -1;
                 }
                 if (nRet < 3)
                 {
                     // text-level: 用户提示
-                    strError = GetReaderTypeCaption( strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 尚未定义 可借总册数 参数, 因此拒绝" + strOperName + "操作";
+                    strError = GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 尚未定义 可借总册数 参数, 因此拒绝" + strOperName + "操作";
                     return -1;
                 }
 
@@ -5463,7 +5463,7 @@ out strError);
                 catch
                 {
                     // text-level: 用户提示
-                    strError = GetReaderTypeCaption( strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 的 可借总册数 参数值 '" + strParamValue + "' 格式有问题, 因此拒绝" + strOperName + "操作";
+                    strError = GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 的 可借总册数 参数值 '" + strParamValue + "' 格式有问题, 因此拒绝" + strOperName + "操作";
                     return -1;
                 }
 
@@ -5477,7 +5477,7 @@ out strError);
                 if (nCount + 1 > nMax)
                 {
                     // text-level: 用户提示
-                    strError = "读者 '" + strReaderBarcode + "' 所借册数将超过 " + GetReaderTypeCaption( strItemLibraryCode,strReaderLibraryCode, strReaderType) + " 可借总册数 值'" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
+                    strError = "读者 '" + strReaderBarcode + "' 所借册数将超过 " + GetReaderTypeCaption(strItemLibraryCode, strReaderLibraryCode, strReaderType) + " 可借总册数 值'" + strParamValue + "'，因此本次" + strOperName + "操作被拒绝";
                     return 0;
                 }
             }
@@ -7804,7 +7804,7 @@ out _);
                     {
 
                         // 2015/9/2
-                        this.WriteErrorLog($"Return({api_summary}) 写入读者记录 '{ strOutputReaderRecPath }' 时出错: {strError}");
+                        this.WriteErrorLog($"Return({api_summary}) 写入读者记录 '{strOutputReaderRecPath}' 时出错: {strError}");
 
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
@@ -9301,7 +9301,7 @@ out string _);
 
 #endif
 
-#region Return()下级函数
+        #region Return()下级函数
 
         // 看看新旧册记录是否有实质性改变
         // 所谓实质性改变，就是<barcode>和<borrower>两个字段的内容发生了变化
@@ -9465,7 +9465,7 @@ out string _);
             return 1;   // Undo已经成功
         }
 
-#endregion
+        #endregion
 
         // 包装版本,为了兼容脚本使用
         // return:
@@ -12601,8 +12601,40 @@ out string _);
             sessioninfo.LibraryCodeList,
             out strLibraryCode) == false)
                     {
-                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
-                        goto ERROR1;
+                        // TOOD: 进一步检查册条码号代表的册记录是否被当前用户管辖
+                        // 取出违约金记录中的金额数字
+                        nRet = GetAmerceRecordField(strAmercedXml,
+                            "itemBarcode",
+                            out string strItemBarcode,
+                            out strError);
+                        // 进一步判断册记录是否在当前用户管辖范围内
+                        if (string.IsNullOrEmpty(strItemBarcode) == false)
+                        {
+                            // return:
+                            //      -1  errpr
+                            //      0   不在控制范围
+                            //      1   在控制范围
+                            nRet = IsItemInControl(
+                                sessioninfo,
+                                channel,
+                                strItemBarcode,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = $"读者记录路径 '{strOutputReaderRecPath}' 从属的读者库超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
+                                goto ERROR1;
+                            }
+                            if (nRet == 0)
+                            {
+                                strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
+                            goto ERROR1;
+                        }
                     }
                 }
 
@@ -12813,7 +12845,8 @@ out string _);
                     {
                         string strPrice = "";
                         // 取出违约金记录中的金额数字
-                        nRet = GetAmerceRecordPrice(strAmercedXml,
+                        nRet = GetAmerceRecordField(strAmercedXml,
+                            "price",
                             out strPrice,
                             out strError);
                         if (nRet != -1)
@@ -12852,6 +12885,58 @@ out string _);
             return 0;
         ERROR1:
             return -1;
+        }
+
+        // 判断册记录是否在当前用户管辖范围内
+        // return:
+        //      -1  errpr
+        //      0   不在控制范围
+        //      1   在控制范围
+        public int IsItemInControl(
+            SessionInfo sessioninfo,
+            RmsChannel channel,
+            string strItemBarcode,
+            out string strError)
+        {
+            strError = "";
+
+            // 获得册记录
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   命中1条
+            //      >1  命中多于1条
+            int nRet = GetItemRecXml(
+                channel,
+                strItemBarcode,
+                "first",    // 在若干实体库中顺次检索，命中一个以上则返回，不再继续检索更多
+                out string strItemXml,
+                100,
+                out _,
+                out _,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet != 1)
+            {
+                strError = $"在尝试检索册记录 '{strItemBarcode}' 时没有命中或者命中不唯一: {strError}";
+                return -1;
+            }
+            XmlDocument item_dom = new XmlDocument();
+            item_dom.LoadXml(strItemXml);
+            // return:
+            //      -1  检查过程出错
+            //      0   符合要求
+            //      1   不符合要求
+            nRet = CheckItemLibraryCode(item_dom,
+                sessioninfo.LibraryCodeList,
+                out string strItemLibraryCode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 1;
+            return 0;
         }
 
         // UNDO违约金交纳
@@ -13240,10 +13325,10 @@ out string _);
                     if (nRet == -1)
                         goto ERROR1;
 
-                    // 检查当前操作者是否管辖这个读者库
+                    // 检查当前操作者是否管辖这个读者库，或者因为馆际互借关系可以连带管理这个读者库
                     // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                     if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
-            sessioninfo.LibraryCodeList) == false)
+            sessioninfo.ExpandLibraryCodeList) == false)
                     {
                         strError = "读者记录路径 '" + strOutputReaderRecPath + "' 从属的读者库不在当前用户管辖范围内";
                         goto ERROR1;
@@ -13307,7 +13392,6 @@ out string _);
                 List<string> CreatedNewPaths = null;
 
                 List<string> Ids = null;
-
 
                 string strOperTimeString = this.Clock.GetClock();   // RFC1123格式
 
@@ -13401,8 +13485,10 @@ out string _);
                 //      0   读者dom没有变化
                 //      1   读者dom发生了变化
                 nRet = DoAmerceReaderXml(
+                    sessioninfo,
                     strLibraryCode,
                     ref readerdom,
+                    strOutputReaderRecPath,
                     amerce_items,
                     sessioninfo.UserID,
                     strOperTimeString,
@@ -13530,7 +13616,8 @@ out string _);
                             {
                                 string strPrice = "";
                                 // 取出违约金记录中的金额数字
-                                nRet = GetAmerceRecordPrice(AmerceRecordXmls[i],
+                                nRet = GetAmerceRecordField(AmerceRecordXmls[i],
+                                    "price",
                                     out strPrice,
                                     out strError);
                                 if (nRet != -1)
@@ -14011,7 +14098,8 @@ out string _);
         }
 
         // 取出违约金记录中的金额数字
-        static int GetAmerceRecordPrice(string strAmercedXml,
+        static int GetAmerceRecordField(string strAmercedXml,
+            string strElementName,
             out string strPrice,
             out string strError)
         {
@@ -14030,7 +14118,7 @@ out string _);
             }
 
             strPrice = DomUtil.GetElementText(dom.DocumentElement,
-                "price");
+                strElementName);  // "price"
             return 0;
         }
 
@@ -14390,9 +14478,11 @@ out string _);
         //      -1  error
         //      0   读者dom没有变化
         //      1   读者dom发生了变化
-        static int DoAmerceReaderXml(
+        int DoAmerceReaderXml(
+            SessionInfo sessioninfo,
             string strLibraryCode,
             ref XmlDocument readerdom,
+            string strReaderRecPath,
             AmerceItem[] amerce_items,
             string strOperator,
             string strOperTimeString,
@@ -14415,6 +14505,25 @@ out string _);
                 return -1;
             }
 
+            // 2022/7/21
+            // 当前账户是否完全控制这条读者记录？
+            bool completely_control = true;
+            if (sessioninfo != null)
+                completely_control = this.IsCurrentChangeableReaderPath(strReaderRecPath,
+    sessioninfo.LibraryCodeList);
+
+            // 当前账户的扩展管辖范围是否控制这条读者记录？
+            bool expand_control = false;
+            if (sessioninfo != null)
+                expand_control = this.IsCurrentChangeableReaderPath(strReaderRecPath,
+sessioninfo.ExpandLibraryCodeList);
+
+            if (completely_control == false && expand_control == false)
+            {
+                strError = $"当前账户对读者 '{strReaderBarcode}' 没有管辖权";
+                return -1;
+            }
+
             bool bChanged = false;  // 读者dom是否发生了改变
 
             // string strNotFoundIds = "";
@@ -14427,7 +14536,7 @@ out string _);
                 if (String.IsNullOrEmpty(item.ID) == true)
                     continue;
 
-                XmlNode node = readerdom.DocumentElement.SelectSingleNode("overdues/overdue[@id='" + item.ID + "']");
+                XmlElement node = readerdom.DocumentElement.SelectSingleNode("overdues/overdue[@id='" + item.ID + "']") as XmlElement;
                 if (node == null)
                 {
                     NotFoundIds.Add(item.ID);
@@ -14464,6 +14573,38 @@ out string _);
                 AmerceRecordXmls.Add(strAmerceRecord);
 
                 Ids.Add(item.ID);
+
+                if (completely_control == false && expand_control == true)
+                {
+                    // 2022/7/21
+                    string strItemBarcode = node.GetAttribute("barcode");
+                    string strItemLocation = node.GetAttribute("location");
+
+                    // 如果不涉及到任何册记录，就不允许交费
+                    if (string.IsNullOrEmpty(strItemBarcode))
+                    {
+                        strError = $"ID 为 '{item.ID}' 的违约金事项无法进行交费，因为当前账户不具备管辖读者 '{strReaderBarcode}' 的权限";
+                        return -1;
+                    }
+
+                    // TODO: 进一步观察当前账户是否管辖这条册记录
+                    // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
+                    // return:
+                    //      -1  检查过程出错
+                    //      0   符合要求
+                    //      1   不符合要求
+                    nRet = this.CheckItemLibraryCodeByLocation(strItemLocation,
+                        sessioninfo.LibraryCodeList,
+                        out string strItemLibraryCode,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                    {
+                        strError = $"ID 为 '{item.ID}' 的违约金事项无法进行交费，因为当前账户既不具备管辖读者 '{strReaderBarcode}' 的权限，也不具备管辖册 '{strItemBarcode}' 的权限";
+                        return -1;
+                    }
+                }
 
                 // 如果是押金，需要增/减<foregift>元素内的价格值。交费为增，退费为减。不过正负号已经含在价格字符串中，可以都理解为交费
                 string strReason = "";

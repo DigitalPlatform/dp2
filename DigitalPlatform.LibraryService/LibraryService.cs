@@ -948,7 +948,7 @@ namespace dp2Library
 
                     if (nRet == 1 && passwordExpired2 == true)
                     {
-                        strError = $"'{strUserName }' 登录失败: 密码已经失效";
+                        strError = $"'{strUserName}' 登录失败: 密码已经失效";
                         sessioninfo.Account = null;
                         result.Value = -1;
                         result.ErrorInfo = strError;
@@ -1504,7 +1504,7 @@ namespace dp2Library
             }
             catch (Exception ex)
             {
-                string strErrorText = $"dp2Library Logout() API出现异常: { ExceptionUtil.GetDebugText(ex)}\r\nsession_dumptext: {session_dumptext}";
+                string strErrorText = $"dp2Library Logout() API出现异常: {ExceptionUtil.GetDebugText(ex)}\r\nsession_dumptext: {session_dumptext}";
                 app.WriteErrorLog(strErrorText);
 
                 result.Value = -1;
@@ -3926,8 +3926,35 @@ namespace dp2Library
                         goto ERROR1;
                     }
                     string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
+                    string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement, "itemBarcode");
                     if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
                     {
+                        // 进一步判断册记录是否在当前用户管辖范围内
+                        if (string.IsNullOrEmpty(strItemBarcode) == false)
+                        {
+                            // return:
+                            //      -1  errpr
+                            //      0   不在控制范围
+                            //      1   在控制范围
+                            int nRet = app.IsItemInControl(
+                                sessioninfo,
+                                channel,
+                                strItemBarcode,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = $"违约金记录 '{strPath}' 超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                            if (nRet == 1)
+                            {
+                                lRet = 1;
+                                goto END1;
+                            }
+                        }
                         result.Value = -1;
                         result.ErrorInfo = "违约金记录 '" + strPath + "' 超出当前用户管辖范围，无法获取";
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -3935,6 +3962,7 @@ namespace dp2Library
                     }
                 }
 
+            END1:
                 result.Value = lRet;
                 result.ErrorInfo = strError;
 
@@ -5900,13 +5928,29 @@ namespace dp2Library
 
                         if (nRet == 1)
                         {
-                            // 把借阅人的证条码号覆盖
                             string strBorrower = DomUtil.GetElementText(item_dom.DocumentElement,
-                                "borrower");
-                            if (string.IsNullOrEmpty(strBorrower) == false)
-                                DomUtil.SetElementText(item_dom.DocumentElement,
-                                    "borrower", new string('*', strBorrower.Length));
-                            strXml = item_dom.DocumentElement.OuterXml;
+    "borrower");
+                            RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                            if (channel == null)
+                            {
+                                strError = "channel == null";
+                                goto ERROR1;
+                            }
+
+                            // 还需要检查 strBorrower 这个读者是否在当前账户的管辖范围内？如果是，那么可能是这个读者借了其他图书馆的图书，当前账户也要了解这一点，那么不应该脱敏这个证条码号
+                            // return:
+                            //      -1  出错
+                            //      0   不在控制下
+                            //      1   在控制下
+                            if (app.IsPatronInControl(channel, sessioninfo, strBorrower, out _) != 1)
+                            {
+                                // 把借阅人的证条码号覆盖
+
+                                if (string.IsNullOrEmpty(strBorrower) == false)
+                                    DomUtil.SetElementText(item_dom.DocumentElement,
+                                        "borrower", new string('*', strBorrower.Length));
+                                strXml = item_dom.DocumentElement.OuterXml;
+                            }
                         }
                     }
                 }
@@ -10978,7 +11022,7 @@ true);
                         special_paths.Add(Path.Combine(app.DataDir, "library.xml"));
                         special_paths.Add(Path.Combine(app.DataDir, "log"));
                         special_paths.Add(Path.Combine(app.DataDir, "operlog"));
-                        
+
                         // 删除文件或者目录
                         // return:
                         //      -1  出错
@@ -10987,7 +11031,8 @@ true);
                             root_paths,
                             strCurrentDirectory,
                             strFileName,
-                            (full_path) => {
+                            (full_path) =>
+                            {
                                 foreach (var path in special_paths)
                                 {
                                     if (PathUtil.IsChildOrEqual(full_path, path))

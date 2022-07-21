@@ -2028,13 +2028,22 @@ namespace DigitalPlatform.LibraryServer
 
                             if (nRet == 1)
                             {
-                                // 把借阅人的证条码号覆盖
                                 string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement,
                                     "borrower");
-                                if (string.IsNullOrEmpty(strBorrower) == false)
-                                    DomUtil.SetElementText(itemdom.DocumentElement,
-                                        "borrower", new string('*', strBorrower.Length));
-                                strXml = itemdom.DocumentElement.OuterXml;
+
+                                // 还需要检查 strBorrower 这个读者是否在当前账户的管辖范围内？如果是，那么可能是这个读者借了其他图书馆的图书，当前账户也要了解这一点，那么不应该脱敏这个证条码号
+                                // return:
+                                //      -1  出错
+                                //      0   不在控制下
+                                //      1   在控制下
+                                if (IsPatronInControl(channel, sessioninfo, strBorrower, out _) != 1)
+                                {
+                                    // 把借阅人的证条码号覆盖
+                                    if (string.IsNullOrEmpty(strBorrower) == false)
+                                        DomUtil.SetElementText(itemdom.DocumentElement,
+                                            "borrower", new string('*', strBorrower.Length));
+                                    strXml = itemdom.DocumentElement.OuterXml;
+                                }
                             }
                         }
                     }
@@ -2103,6 +2112,33 @@ namespace DigitalPlatform.LibraryServer
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 检查一个读者记录是否在当前账户的控制范围内
+        // return:
+        //      -1  出错
+        //      0   不在控制下
+        //      1   在控制下
+        public int IsPatronInControl(
+            RmsChannel channel,
+            SessionInfo sessioninfo,
+            string strReaderBarcode,
+            out string strError)
+        {
+            // 读入读者记录
+            int nRet = GetReaderRecXml(
+                // sessioninfo.Channels,
+                channel,
+                strReaderBarcode,
+                out string strReaderXml,
+                out string strReaderRecPath,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (IsCurrentChangeableReaderPath(strReaderRecPath,
+sessioninfo.LibraryCodeList) == false)
+                return 0;
+            return 1;
         }
 
         // 给册记录内增加OPAC信息
@@ -4151,11 +4187,6 @@ out strError);
             return CheckItemLibraryCode(dom, strLibraryCodeList, out strLibraryCode, out strError);
         }
 
-        // TODO: location 海淀分馆/阅览室 应该属于 libraryCodeList 海淀分馆/*
-        // 检查一个册记录的馆藏地点是否符合馆代码列表要求
-        // parameters:
-        //      strLibraryCodeList  当前用户管辖的馆代码列表
-        //      strLibraryCode  [out]册记录中的馆代码
         // return:
         //      -1  检查过程出错
         //      0   符合要求
@@ -4165,11 +4196,35 @@ out strError);
             out string strLibraryCode,
             out string strError)
         {
+            string strLocation = DomUtil.GetElementText(dom.DocumentElement,
+                "location");
+            return CheckItemLibraryCodeByLocation(strLocation,
+            strLibraryCodeList,
+            out strLibraryCode,
+            out strError);
+        }
+
+            // TODO: location 海淀分馆/阅览室 应该属于 libraryCodeList 海淀分馆/*
+            // 检查一个册记录的馆藏地点是否符合馆代码列表要求
+            // parameters:
+            //      strLibraryCodeList  当前用户管辖的馆代码列表
+            //      strLibraryCode  [out]册记录中的馆代码
+            // return:
+            //      -1  检查过程出错
+            //      0   符合要求
+            //      1   不符合要求
+            public int CheckItemLibraryCodeByLocation(string strLocation,
+            string strLibraryCodeList,
+            out string strLibraryCode,
+            out string strError)
+        {
             strError = "";
             strLibraryCode = "";
 
+            /*
             string strLocation = DomUtil.GetElementText(dom.DocumentElement,
                 "location");
+            */
 #if NO
             // 去掉 #xxx, 部分
             if (strLocation.IndexOf("#") != -1)
@@ -5210,7 +5265,7 @@ out strError);
                             if (bForce == false)
                             {
                                 // 值得注意的是如何记录进操作日志，将来如何进行recover的问题
-                                strError = $"修改操作被拒绝。因册记录 '{  info.NewRecPath  }' 中包含有流通信息({ strDetailInfo  })，所以修改它时 {field_name} 元素内容不能改变。(当前值 '{ strOldLocation }'，试图修改为 '{ strNewLocation }')";
+                                strError = $"修改操作被拒绝。因册记录 '{info.NewRecPath}' 中包含有流通信息({strDetailInfo})，所以修改它时 {field_name} 元素内容不能改变。(当前值 '{strOldLocation}'，试图修改为 '{strNewLocation}')";
                                 goto ERROR1;
                             }
                         }
@@ -6206,7 +6261,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                strError = $"WriteEntities() API move 操作中，实体记录 '{ info.OldRecPath }' 已经成功移动到 '{ strTargetPath }' ，但在写入新内容时发生错误: " + strError + "。注意此时被移动的册记录内容可能处在错误状态(比如 parent 元素没有来得及修改)，会引起一些系统故障";
+                strError = $"WriteEntities() API move 操作中，实体记录 '{info.OldRecPath}' 已经成功移动到 '{strTargetPath}' ，但在写入新内容时发生错误: " + strError + "。注意此时被移动的册记录内容可能处在错误状态(比如 parent 元素没有来得及修改)，会引起一些系统故障";
 
                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                 {

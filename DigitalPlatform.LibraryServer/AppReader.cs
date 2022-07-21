@@ -148,7 +148,7 @@ namespace DigitalPlatform.LibraryServer
                 out string strLibraryCode);
         }
 
-        // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内? 戍边获得读者库(strReaderRecPath)的馆代码
+        // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内? 顺便获得读者库(strReaderRecPath)的馆代码
         public bool IsCurrentChangeableReaderPath(string strReaderRecPath,
             string strAccountLibraryCodeList,
             out string strLibraryCode)

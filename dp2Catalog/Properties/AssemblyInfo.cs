@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.7.*")]
-[assembly: AssemblyFileVersion("3.7.0.0")]
+[assembly: AssemblyVersion("3.8.*")]
+[assembly: AssemblyFileVersion("3.8.0.0")]
 
 // 2.5 (2015/12/11) 调用 dp2library Login() API 的时候发送了 client 参数
 // 3.0 (2018/6/23) 改用 .NET Framework 4.6.1 编译
@@ -43,3 +43,4 @@ using System.Runtime.InteropServices;
 //                  重构了下列代码文件: dp2SearchForm MarcDetailHost ZhongcihaoForm MyForm
 //                  dp2 检索窗在检索装入浏览框的中途点浏览行，现在可以在固定面板区“属性”属性页看到书目记录详细信息(此前版本检索中途是无法看到的)
 // 3.7 (2022/7/11) dp2 检索窗追加保存记录到指定的书目库，如果书目库是 dp2catalog 启动以后在内务里面新创建的一个书目库，则追加保存的时候有可能把书目库的 MARC 格式搞错。这个 bug 已经修复
+// 3.8 (2022/7/18) Marc8Encoding 类里面增加了处理 Kf}ujxlm&#x03ac; kf&#x03ac;xury 这样的在 MARC-8 中无法表达的字符的处理能力

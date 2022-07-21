@@ -5562,8 +5562,10 @@ out strError);
                     //      0   读者dom没有变化
                     //      1   读者dom发生了变化
                     nRet = DoAmerceReaderXml(
+                        null,
                         strLibraryCode,
                         ref readerdom,
+                        strOutputReaderRecPath,
                         amerce_items,
                         strOperator,
                         strOperTime,

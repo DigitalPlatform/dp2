@@ -13,7 +13,7 @@ namespace dp2Catalog
 {
     public class Marc8Encoding : Encoding
     {
-        // http://www.loc.gov/marc/specifications/speccharmarc8.html
+        // https://www.loc.gov/marc/specifications/speccharmarc8.html
         // ASCII graphics are the default G0 set and ANSEL graphics are the default G1 set for MARC 21 records
         public int DefaultG0CodePage = 0x42;
         public int DefaultG1CodePage = 0x45;
@@ -137,6 +137,22 @@ namespace dp2Catalog
                 byte b = (byte)strSource[i];
                 int u = 0;
 
+                // 2022/7/18 处理 &#x????; 序列
+                // Kf}ujxlm&#x03ac; kf&#x03ac;xury 
+                // https://www.loc.gov/marc/specifications/speccharconversion.html
+                if (b == '&')
+                {
+                    string strSequence = GetSequence(strSource, i);
+                    if (strSequence != null)
+                    {
+                        strTarget += GetChar(strSequence);
+                        i += strSequence.Length - 1;
+                        continue;
+                    }
+
+                    // 没有找到 ';'，只好继续向后处理
+                }
+
                 if (b >= 0xa1 && b <= 0xfe)
                 {
                     // 应用G1代码页
@@ -159,6 +175,40 @@ namespace dp2Catalog
             }
 
             return 0;
+        }
+
+        // &#x03ac;
+        static string GetSequence(string strSource, int i)
+        {
+            string strSequence = strSource.Substring(i);
+            int pos = strSequence.IndexOf(";");
+            if (pos == -1)
+                return null;    // 没有找到 ';'
+
+            string result = strSequence.Substring(0, pos + 1);
+            if (result.StartsWith("&#x") == false
+                && result.StartsWith("&#") == false)
+                return null;
+            return result;
+        }
+
+        // 将 &#x03ac; 这样的序列转换为 Unicode Char
+        static char GetChar(string strSequence)
+        {
+            if (strSequence.EndsWith(";"))
+                strSequence = strSequence.Substring(0, strSequence.Length - 1);
+            if (strSequence.StartsWith("&#x"))
+            {
+                strSequence = strSequence.Substring(3);
+                return (char)Int32.Parse(strSequence, System.Globalization.NumberStyles.HexNumber | System.Globalization.NumberStyles.AllowHexSpecifier);
+            }
+            else if (strSequence.StartsWith("&#"))
+            {
+                strSequence = strSequence.Substring(2);
+                return (char)Int32.Parse(strSequence, System.Globalization.NumberStyles.Number);
+            }
+
+            return (char)Int32.Parse(strSequence, System.Globalization.NumberStyles.Number);
         }
 
         public int SetDefaultCodePage(string strField066Value)
@@ -302,7 +352,7 @@ Thai for Thai
 
             string strError = "";
 
-            for (int i = 0; i <= baSource.Length; )
+            for (int i = 0; i <= baSource.Length;)
             {
                 // char ch = strSource[i];
                 if (i >= baSource.Length || baSource[i] == 0x1b)
@@ -511,7 +561,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
         public override int GetMaxByteCount(
             int charCount)
         {
-            return charCount*3;
+            return charCount * 3;
         }
 
         public override int GetByteCount(
@@ -564,15 +614,15 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
     char[] chars,
     int charIndex)
         {
-            byte [] baSource = new byte[byteCount];
+            byte[] baSource = new byte[byteCount];
             Array.Copy(bytes, byteIndex, baSource, 0, byteCount);
 
             string strTarget = null;
             this.Marc8_to_Unicode(
-                baSource, 
+                baSource,
                 out strTarget);
             strTarget.CopyTo(0, chars, charIndex, strTarget.Length);
-          
+
             return strTarget.Length;
         }
 
