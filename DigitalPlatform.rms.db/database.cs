@@ -1739,7 +1739,8 @@ namespace DigitalPlatform.rms
         //		strRecordID	一般自由位数的记录号，或10位数字的记录号
         //      strXml  记录体。如果为空，本函数会自动获取记录体
         //      nStartCol   开始的列号。一般为0
-        //		cols	out参数，返回浏览格式数组
+        //      strStyle    构造 cols 的风格。"titles:type1|type2"
+        //		cols        	out参数，返回浏览格式数组
         // 当出错时,错误信息也保存在列里
         // return:
         //      // cols中包含的字符总数
@@ -1750,7 +1751,8 @@ namespace DigitalPlatform.rms
             string strFormat,
             string strRecordID,
             string strXml,
-            int nStartCol,
+            // int nStartCol,
+            string strStyle,
             out string[] cols,
             out string strError)
         {
@@ -1880,7 +1882,8 @@ namespace DigitalPlatform.rms
                     //		-1	出错
                     //		>=0	成功。数字值代表每个列包含的字符数之和
                     nRet = browseCfg.BuildCols(domData,
-                        nStartCol,
+                        // nStartCol,
+                        strStyle,
                         out cols,
                         out strError);
                     if (nRet == -1)
@@ -1903,7 +1906,7 @@ namespace DigitalPlatform.rms
                         ref m_xpath_table,
                         strColDef,
                         domData,
-                        nStartCol,
+                        // nStartCol,
                         out cols,
                         out strError);
                     if (nRet == -1)
@@ -1967,7 +1970,7 @@ namespace DigitalPlatform.rms
             ref Hashtable xpath_table,
             string strColDef,
             XmlDocument domData,
-            int nStartCol,
+            // int nStartCol,
             out string[] cols,
             out string strError)
         {
@@ -2104,8 +2107,11 @@ namespace DigitalPlatform.rms
             }
 
             // 把col_array转到cols里
+            cols = col_array.ToArray();
+            /*
             cols = new string[col_array.Count + nStartCol];
             col_array.CopyTo(cols, nStartCol);
+            */
             return nResultLength;
         }
 

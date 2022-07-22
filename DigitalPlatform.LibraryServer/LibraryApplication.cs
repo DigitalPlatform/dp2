@@ -17182,7 +17182,14 @@ strLibraryCode);    // 读者所在的馆代码
 
 
 
-
+        // 2022/7/22
+        public bool IsPatron
+        {
+            get
+            {
+                return this.PatronDom != null;
+            }
+        }
 
         // 匹配 IP 地址
         // parameters:

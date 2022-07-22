@@ -642,7 +642,8 @@ out strError);
                             strFormat,
                             path.ID10,
                             strXml,
-                            0,
+                            //0,
+                            strStyle,
                             out cols,
                             out strError);
 #if NO
@@ -695,7 +696,8 @@ out strError);
                             strFormat,
                             path.ID10,
                             strXml,
-                            0,
+                            //0,
+                            strStyle,
                             out cols,
                             out strError);
 #if NO
@@ -922,7 +924,8 @@ out strError);
                                 strFormat,
                                 dbpath.ID10,
                                 "",
-                                0,
+                                //0,
+                                strStyle,
                                 out cols,
                                 out strError);
 #if NO
@@ -1187,7 +1190,8 @@ out strError);
                         strFormat,
                         info.RecordID10,    // path.ID10,
                         "",
-                        0,
+                        //0,
+                        strStyle,   // TODO: 可以考虑削减 titles:type1|type2 以外的其他子参数
                         out cols,
                         out strError);
 #if NO

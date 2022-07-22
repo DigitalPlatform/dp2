@@ -3372,7 +3372,7 @@ namespace dp2Library
                                 ClearCols(record, LibraryApplication.FILTERED);
                             }
                             else
-                                AddItemOI(app, record);
+                                AddItemOI(app, sessioninfo, record, "filter_borrower");
                         }
                         else if (app.IsIssueDbName(strDbName))
                         {
@@ -3632,7 +3632,7 @@ namespace dp2Library
                             strFormat,
                             strBiblioDbName,
                             xml,
-                            0,  // nStartCol,
+                            // 0,
                             out string[] cols,
                             out strError);
                         // TODO: 检查 nRet == -1 时候 cols 是否为报错信息
@@ -3732,7 +3732,7 @@ namespace dp2Library
                             strFormat,
                             strPatronDbName,
                             record.RecordBody.Xml,
-                            0,  // nStartCol,
+                            // 0,
                             out string[] cols,
                             out string strError);
                         // TODO: 检查 nRet == -1 时候 cols 是否为报错信息
@@ -4144,7 +4144,7 @@ namespace dp2Library
                                 ClearCols(record, LibraryApplication.FILTERED);
                             }
                             else
-                                AddItemOI(app, record);
+                                AddItemOI(app, sessioninfo, record, "filter_borrower");
                         }
                         else if (app.IsReaderDbName(strDbName))
                         {
@@ -4323,24 +4323,62 @@ namespace dp2Library
             };
         }
 
-        // 给册记录 XML 加上 OI 元素
+        // 给册记录 XML 加上 OI 元素，和执行附加的 actions
         static void AddItemOI(LibraryApplication app,
-            Record record)
+            SessionInfo sessioninfo,
+            Record record,
+            string actions)
         {
-            if (record == null
-                || record.RecordBody == null
-                || string.IsNullOrEmpty(record.RecordBody.Xml))
-                return;
-            try
+            if (record != null
+                && record.Cols != null
+                && record.Cols.Length > 0)
             {
-                XmlDocument itemdom = new XmlDocument();
-                itemdom.LoadXml(record.RecordBody.Xml);
-                app.AddItemOI(itemdom);
-                record.RecordBody.Xml = itemdom.DocumentElement?.OuterXml;
+                // 2022/7/22
+                // 替换 Cols 中的 borrower
+                if (StringUtil.IsInList("filter_borrower", actions)
+                    && record.Cols != null && record.Cols.Length > 0)
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   cols 没有发生改变
+                    //      1   cols 发生了改变
+                    int nRet = app.FilterBorrower(
+                        sessioninfo,
+                        record.Cols,
+                        "error_in_field",
+                        out string _);
+                }
             }
-            catch
-            {
 
+            if (record != null
+                && record.RecordBody != null
+                && string.IsNullOrEmpty(record.RecordBody.Xml) == false)
+            {
+                try
+                {
+                    XmlDocument itemdom = new XmlDocument();
+                    itemdom.LoadXml(record.RecordBody.Xml);
+                    app.AddItemOI(itemdom);
+
+                    if (StringUtil.IsInList("filter_borrower", actions))
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   itemdom 没有发生改变
+                        //      1   itemdom 发生了改变
+                        int nRet = app.FilterBorrower(
+                            sessioninfo,
+                            itemdom,
+                            "error_in_field",
+                            out string _);
+                    }
+
+                    record.RecordBody.Xml = itemdom.DocumentElement?.OuterXml;
+                }
+                catch
+                {
+
+                }
             }
         }
 
@@ -5502,7 +5540,6 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
-
         }
 
         // 获得册信息
@@ -5913,6 +5950,22 @@ namespace dp2Library
                         goto ERROR1;
 #endif
 
+
+                    // return:
+                    //      -1  出错
+                    //      0   itemdom 没有发生改变
+                    //      1   itemdom 发生了改变
+                    nRet = app.FilterBorrower(
+                        sessioninfo,
+                        item_dom,
+                        "error_in_field",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        strXml = item_dom.DocumentElement.OuterXml;
+
+#if REMOVED
                     {
                         // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
                         // return:
@@ -5945,7 +5998,6 @@ namespace dp2Library
                             if (app.IsPatronInControl(channel, sessioninfo, strBorrower, out _) != 1)
                             {
                                 // 把借阅人的证条码号覆盖
-
                                 if (string.IsNullOrEmpty(strBorrower) == false)
                                     DomUtil.SetElementText(item_dom.DocumentElement,
                                         "borrower", new string('*', strBorrower.Length));
@@ -5953,6 +6005,8 @@ namespace dp2Library
                             }
                         }
                     }
+
+#endif
                 }
 
                 // 取得册信息

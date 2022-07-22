@@ -88,14 +88,16 @@ namespace DigitalPlatform.rms
         // 创建指定记录的浏览格式集合
         // parameters:
         //		domData	    记录数据dom 不能为null
-        //      nStartCol   开始的列号。一般为0
+        //      nStartCol   (废止)开始的列号。一般为0
+        //      style       处理风格。(尚未实现) "title:c1|c2" 指要在列内容中包含列标题
         //      cols        浏览格式数组
         //		strError	out参数，出错信息
         // return:
         //		-1	出错
         //		>=0	成功。数字值代表每个列包含的字符数之和
         public int BuildCols(XmlDocument domData,
-            int nStartCol,
+            // int nStartCol,
+            string style,
             out string[] cols,
             out string strError)
         {
@@ -107,6 +109,18 @@ namespace DigitalPlatform.rms
             // 没有浏览格式定义时，就没有信息
             if (this._dom == null)
                 return 0;
+
+            /*
+            List<string> type_list = null;
+            var title_string = StringUtil.GetParameterByPrefix(style, "titles");
+            if (title_string != null)
+            {
+                if (string.IsNullOrEmpty(title_string))
+                    type_list = new List<string>(); // 表示任意 type 值都匹配
+                else
+                    type_list = StringUtil.SplitList(title_string, '|');
+            }
+            */
 
             int nResultLength = 0;
 
@@ -169,7 +183,7 @@ namespace DigitalPlatform.rms
 
                         // 把 convert 参数也缓存起来
                         // XmlNode nodeCol = nodeXpath.ParentNode;
-                        string strConvert = DomUtil.GetAttr(nodeCol, "convert");
+                        string strConvert = nodeCol.GetAttribute("convert");
                         if (string.IsNullOrEmpty(strConvert) == false)
                         {
                             List<string> convert_methods = GetMethods(strConvert);
@@ -230,6 +244,8 @@ namespace DigitalPlatform.rms
                         string strConvert = DomUtil.GetAttr(nodeCol, "convert");
                         convert_methods = GetMethods(strConvert);
                     }
+
+                    string prefix = nodeCol.GetAttribute("prefix");
 
                     string strText = "";
 
@@ -359,7 +375,20 @@ namespace DigitalPlatform.rms
 
                     // 空内容也要算作一列
 
-                    // 2008/12/18
+                    /*
+                    // 2022/7/22
+                    // 包含列标题
+                    if (string.IsNullOrEmpty(strText) == false
+                        && type_list != null
+                        && (type_list.Count == 0 || type_list.IndexOf(type) != -1))
+                        strText = $"~{type}:" + strText;
+                    */
+
+                    // 2022/7/22
+                    // 包含前缀
+                    if (string.IsNullOrEmpty(strText) == false
+                        && string.IsNullOrEmpty(prefix) == false)
+                        strText = prefix + strText;
 
                     col_array.Add(strText);
                     nResultLength += strText.Length;
@@ -411,7 +440,7 @@ namespace DigitalPlatform.rms
                         resultDom.LoadXml("<root />");
 
                     XmlNodeList colList = resultDom.DocumentElement.SelectNodes("//col");
-                    foreach (XmlNode colNode in colList)
+                    foreach (XmlElement colNode in colList)
                     {
                         string strColText = colNode.InnerText.Trim();  // 2012/2/16
 
@@ -424,6 +453,14 @@ namespace DigitalPlatform.rms
                             strColText = ConvertText(convert_methods, strColText);
 
                         //if (strColText != "")  //空内容也要算作一列
+
+                        // 2022/7/22
+                        // 包含前缀
+                        string prefix = colNode.GetAttribute("prefix");
+                        if (string.IsNullOrEmpty(strColText) == false
+                            && string.IsNullOrEmpty(prefix) == false)
+                            strColText = prefix + strColText;
+
                         col_array.Add(strColText);
                         nResultLength += strColText.Length;
                     }
@@ -443,8 +480,11 @@ namespace DigitalPlatform.rms
             }
 
             // 把col_array转到cols里
+            cols = col_array.ToArray();
+            /*
             cols = new string[col_array.Count + nStartCol];
             col_array.CopyTo(cols, nStartCol);
+            */
             // cols = ConvertUtil.GetStringArray(nStartCol, col_array);
             return nResultLength;
         }

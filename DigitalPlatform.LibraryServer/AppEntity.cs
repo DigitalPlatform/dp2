@@ -2013,6 +2013,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                             goto ERROR1;
 
+                        /*
                         {
                             // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
                             // return:
@@ -2046,6 +2047,21 @@ namespace DigitalPlatform.LibraryServer
                                 }
                             }
                         }
+                        */
+
+                        // return:
+                        //      -1  出错
+                        //      0   itemdom 没有发生改变
+                        //      1   itemdom 发生了改变
+                        nRet = FilterBorrower(
+                            sessioninfo,
+                            itemdom,
+                            "error_in_field",
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                            strXml = itemdom.DocumentElement.OuterXml;
                     }
 
                     // 把实体记录按照OPAC要求进行加工，增补一些元素
@@ -2114,6 +2130,191 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
+        // 根据当前账户的权限，过滤浏览列中的 borrower 元素内容
+        // return:
+        //      -1  出错
+        //      0   cols 没有发生改变
+        //      1   cols 发生了改变
+        public int FilterBorrower(
+            SessionInfo sessioninfo,
+            string[] cols,
+            string style,
+            out string strError)
+        {
+            strError = "";
+
+            if (cols == null || cols.Length == 0)
+                return 0;
+
+            int IndexOf(string prefix)
+            {
+                int i = 0;
+                foreach (string s in cols)
+                {
+                    if (s != null && s.StartsWith(prefix))
+                        return i;
+                    i++;
+                }
+                return -1;
+            }
+
+            bool RemovePrefix()
+            {
+                bool c = false;
+                int i = 0;
+                foreach (string s in cols)
+                {
+                    if (s != null && s.StartsWith("~"))
+                    {
+                        cols[i] = s.Replace("~b:", "").Replace("~l:", "");
+                        c = true;
+                    }
+                    i++;
+                }
+
+                return c;
+            }
+
+            bool changed = false;
+
+            // 找到 ~b: 前缀
+            int index = IndexOf("~b:");
+            if (index == -1)
+                goto REMOVE_RETURN;
+            string strBorrower = cols[index].Substring("~b:".Length);
+            cols[index] = strBorrower;
+            changed = true;
+            if (string.IsNullOrEmpty(strBorrower))
+                goto REMOVE_RETURN;
+
+            // 找到 ~l: 前缀
+            int temp = IndexOf("~l:");
+            if (temp == -1)
+                goto REMOVE_RETURN;
+
+            string location = cols[temp].Substring("~l:".Length);
+            cols[temp] = location;
+            changed = true;
+
+            if (RemovePrefix())
+                changed = true;
+
+            var error_in_field = StringUtil.IsInList("error_in_field", style);
+
+            // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
+            // return:
+            //      -1  检查过程出错
+            //      0   符合要求
+            //      1   不符合要求
+            int nRet = CheckItemLibraryCodeByLocation(location,
+                        sessioninfo.ExpandLibraryCodeList,  // sessioninfo.LibraryCodeList,
+                        out string strLibraryCode,
+                        out strError);
+            if (nRet == -1)
+            {
+                if (error_in_field)
+                {
+                    cols[index] = "error:{strError}";
+                    return 1;
+                }
+                return -1;
+            }
+
+            if (nRet == 1)
+            {
+                // 还需要检查 strBorrower 这个读者是否在当前账户的管辖范围内？如果是，那么可能是这个读者借了其他图书馆的图书，当前账户也要了解这一点，那么不应该脱敏这个证条码号
+                // return:
+                //      -1  出错
+                //      0   不在控制下
+                //      1   在控制下
+                nRet = IsPatronInControl(null, sessioninfo, strBorrower, out strError);
+                if (nRet == -1 && error_in_field)
+                {
+                    cols[index] = "error:{strError}";
+                    return 1;
+                }
+                if (nRet != 1)
+                {
+                    // 把借阅人的证条码号覆盖
+                    if (string.IsNullOrEmpty(strBorrower) == false)
+                        cols[index] = new string('*', strBorrower.Length);
+                    return 1;
+                }
+            }
+
+            return (changed ? 1 : 0);
+        REMOVE_RETURN:
+            return RemovePrefix() ? 1 : (changed ? 1 : 0);
+        }
+
+        // 根据当前账户的权限，过滤册记录中的 borrower 元素内容
+        // return:
+        //      -1  出错
+        //      0   itemdom 没有发生改变
+        //      1   itemdom 发生了改变
+        public int FilterBorrower(
+            SessionInfo sessioninfo,
+            XmlDocument itemdom,
+            string style,
+            out string strError)
+        {
+            strError = "";
+
+            string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement,
+"borrower");
+            if (string.IsNullOrEmpty(strBorrower))
+                return 0;
+
+            var error_in_field = StringUtil.IsInList("error_in_field", style);
+
+            // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
+            // return:
+            //      -1  检查过程出错
+            //      0   符合要求
+            //      1   不符合要求
+            int nRet = CheckItemLibraryCode(itemdom,
+                        sessioninfo.ExpandLibraryCodeList,  // sessioninfo.LibraryCodeList,
+                        out string strLibraryCode,
+                        out strError);
+            if (nRet == -1)
+            {
+                if (error_in_field)
+                {
+                    DomUtil.SetElementText(itemdom.DocumentElement,
+    "borrower", $"error:{strError}");
+                    return 1;
+                }
+                return -1;
+            }
+
+            if (nRet == 1)
+            {
+                // 还需要检查 strBorrower 这个读者是否在当前账户的管辖范围内？如果是，那么可能是这个读者借了其他图书馆的图书，当前账户也要了解这一点，那么不应该脱敏这个证条码号
+                // return:
+                //      -1  出错
+                //      0   不在控制下
+                //      1   在控制下
+                nRet = IsPatronInControl(null, sessioninfo, strBorrower, out strError);
+                if (nRet == -1 && error_in_field)
+                {
+                    DomUtil.SetElementText(itemdom.DocumentElement,
+"borrower", $"error:{strError}");
+                    return 1;
+                }
+                if (nRet != 1)
+                {
+                    // 把借阅人的证条码号覆盖
+                    if (string.IsNullOrEmpty(strBorrower) == false)
+                        DomUtil.SetElementText(itemdom.DocumentElement,
+                            "borrower", new string('*', strBorrower.Length));
+                    // strXml = itemdom.DocumentElement.OuterXml;
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
         // 检查一个读者记录是否在当前账户的控制范围内
         // return:
         //      -1  出错
@@ -2125,6 +2326,16 @@ namespace DigitalPlatform.LibraryServer
             string strReaderBarcode,
             out string strError)
         {
+            if (channel == null)
+            {
+                channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "channel == null";
+                    return -1;
+                }
+            }
+
             // 读入读者记录
             int nRet = GetReaderRecXml(
                 // sessioninfo.Channels,
@@ -2135,6 +2346,17 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
                 return -1;
+
+            if (sessioninfo.Account != null
+                && sessioninfo.Account.IsPatron == true)
+            {
+                // 如果当前用户是读者 strReaderBarcode 自己
+                if (sessioninfo.Account.Barcode == strReaderBarcode)
+                    return 1;
+                // 如果当前用户是其他读者
+                return 0;
+            }
+
             if (IsCurrentChangeableReaderPath(strReaderRecPath,
 sessioninfo.LibraryCodeList) == false)
                 return 0;
@@ -4204,19 +4426,19 @@ out strError);
             out strError);
         }
 
-            // TODO: location 海淀分馆/阅览室 应该属于 libraryCodeList 海淀分馆/*
-            // 检查一个册记录的馆藏地点是否符合馆代码列表要求
-            // parameters:
-            //      strLibraryCodeList  当前用户管辖的馆代码列表
-            //      strLibraryCode  [out]册记录中的馆代码
-            // return:
-            //      -1  检查过程出错
-            //      0   符合要求
-            //      1   不符合要求
-            public int CheckItemLibraryCodeByLocation(string strLocation,
-            string strLibraryCodeList,
-            out string strLibraryCode,
-            out string strError)
+        // TODO: location 海淀分馆/阅览室 应该属于 libraryCodeList 海淀分馆/*
+        // 检查一个册记录的馆藏地点是否符合馆代码列表要求
+        // parameters:
+        //      strLibraryCodeList  当前用户管辖的馆代码列表
+        //      strLibraryCode  [out]册记录中的馆代码
+        // return:
+        //      -1  检查过程出错
+        //      0   符合要求
+        //      1   不符合要求
+        public int CheckItemLibraryCodeByLocation(string strLocation,
+        string strLibraryCodeList,
+        out string strLibraryCode,
+        out string strError)
         {
             strError = "";
             strLibraryCode = "";

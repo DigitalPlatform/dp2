@@ -6,7 +6,7 @@
   <col title="状态">
     <xpath>*/state</xpath>
   </col>
-  <col title="馆藏地点" type="location">
+  <col title="馆藏地点" type="location" prefix="~l:">
     <xpath>*/location</xpath>
   </col>
   <col title="架号" type="shelf_number">
@@ -39,7 +39,7 @@
   <col title="注释">
     <xpath>*/comment</xpath>
   </col>
-  <col title="借阅者" type="borrower">
+  <col title="借阅者" type="borrower" prefix="~b:">
     <xpath>*/borrower</xpath>
   </col>
   <col title="借阅日期" convert="rfc1123tolocaltimeu" type="borrowDate">

@@ -46,7 +46,7 @@ namespace DigitalPlatform.LibraryServer
             string strDbName,
             // string strRecordID,
             string strXml,
-            int nStartCol,
+            // int nStartCol,
             out string[] cols,
             out string strError)
         {
@@ -130,7 +130,8 @@ namespace DigitalPlatform.LibraryServer
                 //		-1	出错
                 //		>=0	成功。数字值代表每个列包含的字符数之和
                 nRet = browseCfg.BuildCols(domData,
-                    nStartCol,
+                    // nStartCol,
+                    "",
                     out cols,
                     out strError);
                 if (nRet == -1)
@@ -153,7 +154,7 @@ namespace DigitalPlatform.LibraryServer
                     // ref m_xpath_table,
                     strColDef,
                     domData,
-                    nStartCol,
+                    // nStartCol,
                     out cols,
                     out strError);
                 if (nRet == -1)
@@ -298,7 +299,7 @@ namespace DigitalPlatform.LibraryServer
         // ref Hashtable xpath_table,
         string strColDef,
         XmlDocument domData,
-        int nStartCol,
+        // int nStartCol,
         out string[] cols,
         out string strError)
         {
@@ -423,8 +424,11 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 把col_array转到cols里
+            cols = col_array.ToArray();
+            /*
             cols = new string[col_array.Count + nStartCol];
             col_array.CopyTo(cols, nStartCol);
+            */
             return nResultLength;
         }
 
