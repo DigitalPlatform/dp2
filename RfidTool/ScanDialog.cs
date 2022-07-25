@@ -185,7 +185,8 @@ namespace RfidTool
 
         public void BeginVerifyEnvironment()
         {
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 if (UseLocalStoreage() && EntityStoreage.GetCount() == 0)
                 {
                     string text = "尚未导入脱机册信息";
@@ -368,6 +369,9 @@ namespace RfidTool
         // 刷新一个 ListViewItem 的所有列显示
         void RefreshItem(ListViewItem item, TagAndData tag)
         {
+            // 2022/7/24
+            SetItemColor(item, "normal");
+
             string pii = "(尚未填充)";
             string tou = "";
             string eas = "";
@@ -477,6 +481,12 @@ namespace RfidTool
 
                 if (string.IsNullOrEmpty(tag.Error) == false)
                 {
+                    /*
+                    // 2022/7/23
+                    if (iteminfo.TagData != null && iteminfo.TagData.Error == null)
+                        iteminfo.TagData.Error = tag.Error;
+                    */
+
                     ListViewUtil.ChangeItemText(item, COLUMN_PII, pii + " error:" + tag.Error);
                     SetItemColor(item, "error");
                 }
@@ -525,6 +535,9 @@ namespace RfidTool
             }
             catch (Exception ex)
             {
+                // 2022/7/23
+                // iteminfo.TagData.Error = ex.Message;
+                iteminfo.Exception = ex;
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + ex.Message);
                 SetItemColor(item, "error");
             }
@@ -579,10 +592,13 @@ namespace RfidTool
         // 寻找一个可用于写入的空白标签，或者相同 PII 的标签
         FindTagResult FindBlankTag(string pii, string oi)
         {
+            var overwrite_error_tag = DataModel.ErrorContentAsBlank;
+
             lock (_syncRootFill)
             {
                 List<FindTagResult> blank_results = new List<FindTagResult>();
                 List<FindTagResult> pii_results = new List<FindTagResult>();
+                List<FindTagResult> error_results = new List<FindTagResult>();
                 //FindTagResult blank_result = null;
                 //FindTagResult pii_result = null;
 
@@ -597,6 +613,17 @@ namespace RfidTool
                         ItemInfo info = item.Tag as ItemInfo;
                         if (info == null)
                             continue;
+
+                        if (info.Exception != null && info.Exception is TagDataException)
+                        {
+                            error_results.Add(new FindTagResult
+                            {
+                                Value = 1,
+                                Item = item,
+                                Tag = info.TagData.OneTag,
+                            });
+                            continue;
+                        }
 
                         if (string.IsNullOrEmpty(info.TagData.Error) == false)
                             continue;
@@ -639,6 +666,14 @@ namespace RfidTool
                     // 次优先返回 PII 为空的行
                     if (blank_results.Count == 1)
                         return blank_results[0];
+                }
+
+                // 2022/7/23
+                // 如果有解析错误的标签，则返回
+                if (DataModel.ErrorContentAsBlank
+                    && error_results.Count == 1)
+                {
+                    return error_results[0];
                 }
 
                 // 返回无法满足条件的具体原因
@@ -858,6 +893,13 @@ namespace RfidTool
                 if (tou == "10")
                     DataModel.WriteToUidLogFile(uid,
                         ModifyDialog.MakeOiPii(barcode, oi, aoi));
+
+                /*
+                // 2022/7/24
+                TagAndData data = new TagAndData();
+                data.OneTag.TagInfo = new_tag_info;
+                UpdateTags(new List<TagAndData> { data });
+                */
 
                 // 语音提示写入成功
                 FormClientInfo.Speak($"{barcode} 写入成功", false, true);
@@ -1210,12 +1252,6 @@ MessageBoxDefaultButton.Button2);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("测试创建错误的标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
-            menuItem.Click += new System.EventHandler(this.menu_saveSelectedErrorTagContent_Click);
-            if (this.listView_tags.SelectedItems.Count == 0)
-                menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
-
             menuItem = new MenuItem("测试创建 PII 为空的标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
             menuItem.Click += new System.EventHandler(this.menu_saveSelectedErrorTagContent_1_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
@@ -1227,6 +1263,12 @@ MessageBoxDefaultButton.Button2);
             contextMenu.MenuItems.Add(menuItem);
             */
 
+            menuItem = new MenuItem("测试创建错误的标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&E)");
+            menuItem.Click += new System.EventHandler(this.menu_saveSelectedErrorTagContent_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("清除标签缓存 (&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearTagsCache_Click);
             contextMenu.MenuItems.Add(menuItem);
@@ -1237,6 +1279,115 @@ MessageBoxDefaultButton.Button2);
         void menu_clearTagsCache_Click(object sender, EventArgs e)
         {
             DataModel.TagList.ClearTagTable(null);
+        }
+
+        void menu_saveSelectedErrorTagContent_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+    $"确实要写入错误内容到选定的 {this.listView_tags.SelectedItems.Count} 个标签中?",
+    "RfidTool",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                SaveErrorTagContent(item);
+            }
+        }
+
+        // 2022/7/23
+        // 写入错误标签内容
+        void SaveErrorTagContent(ListViewItem item)
+        {
+            string strError = "";
+
+            try
+            {
+                ItemInfo item_info = (ItemInfo)item.Tag;
+                var old_tag_info = item_info.TagData.OneTag.TagInfo;
+                var new_tag_info = old_tag_info.Clone();
+
+                {
+                    var bytes = ByteArray.GetTimeStampByteArray("E14018000300FE30303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030");
+
+                    var count = old_tag_info.BlockSize * old_tag_info.MaxBlockCount;
+                    // 修正
+                    if (bytes.Length < count)
+                    {
+                        var temp = new List<byte>(bytes);
+                        while (temp.Count < count)
+                        {
+                            temp.Add(temp[temp.Count - 1]);
+                        }
+                        bytes = temp.ToArray();
+                        Debug.Assert(bytes.Length == count);
+                    }
+                    else if (bytes.Length > count)
+                    {
+                        var temp = new List<byte>(bytes);
+                        temp.RemoveRange((int)count, temp.Count - (int)count);
+                        bytes = temp.ToArray();
+                        Debug.Assert(bytes.Length == count);
+                    }
+
+                    new_tag_info.Bytes = bytes;
+                }
+
+#if REMOVED
+                // 制造一套空内容
+                {
+                    new_tag_info.AFI = 0;
+                    new_tag_info.DSFID = 0;
+                    new_tag_info.EAS = false;
+                    if (old_tag_info.Protocol == InventoryInfo.ISO15693)
+                    {
+                        List<byte> bytes = new List<byte>();
+                        for (int i = 0; i < new_tag_info.BlockSize * new_tag_info.MaxBlockCount; i++)
+                        {
+                            bytes.Add(0);
+                        }
+                        new_tag_info.Bytes = bytes.ToArray();
+                        new_tag_info.LockStatus = "";
+                    }
+                    else if (old_tag_info.Protocol == InventoryInfo.ISO18000P6C)
+                    {
+                        // var pc = UhfUtility.ParsePC(Element.FromHexString(old_tag_info.UID), 2);
+                        new_tag_info.UID = "0000" + Element.GetHexString(UhfUtility.BuildBlankEpcBank());
+                        new_tag_info.Bytes = null;  // 这样可使得 User Bank 被清除
+                    }
+                }
+#endif
+                var result = DataModel.WriteTagInfo(item_info.TagData.OneTag.ReaderName,
+    old_tag_info,
+    new_tag_info);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                // await Task.Run(() => { GetTagInfo(item); });
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = "SaveErrorTagContent() 出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+            }
+        ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
+                // 把 item 修改为红色背景，表示出错的状态
+                SetItemColor(item, "error");
+                MessageBox.Show(this, strError);
+            }));
         }
 
 #if REMOVED
@@ -1641,5 +1792,8 @@ MessageBoxDefaultButton.Button2);
         public TagAndData TagData { get; set; }
         // 标签所用的 UHF 标准。空/gb/gxlm 其中空表示未知
         public string UhfProtocol { get; set; }
+
+        // 2022/7/23
+        public Exception Exception { get; set; }
     }
 }

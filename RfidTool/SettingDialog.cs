@@ -34,7 +34,7 @@ namespace RfidTool
 
             this.checkBox_writeTag_verifyPii.Checked = DataModel.VerifyPiiWhenWriteTag;
             this.checkBox_writeTag_useLocalStoreage.Checked = DataModel.UseLocalStoreage;
-
+            this.checkBox_writeTag_errorContentAsBlank.Checked = DataModel.ErrorContentAsBlank;
 
             this.checkBox_enableTagCache.Checked = DataModel.EnableTagCache;
 
@@ -157,6 +157,7 @@ namespace RfidTool
 
             DataModel.VerifyPiiWhenWriteTag = this.checkBox_writeTag_verifyPii.Checked;
             DataModel.UseLocalStoreage = this.checkBox_writeTag_useLocalStoreage.Checked;
+            DataModel.ErrorContentAsBlank = this.checkBox_writeTag_errorContentAsBlank.Checked;
 
             DataModel.EnableTagCache = this.checkBox_enableTagCache.Checked;
 

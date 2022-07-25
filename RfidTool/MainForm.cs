@@ -294,7 +294,7 @@ bool bClickClose = false)
                 _scanDialog.UiState = ClientInfo.Config.Get("scanDialog", "uiState", null);
             }
 
-            _scanDialog.BeginVerifyEnvironment();
+            // _scanDialog.BeginVerifyEnvironment();
         }
 
         private void _scanDialog_WriteComplete(object sender, WriteCompleteventArgs e)
@@ -658,6 +658,8 @@ _cancel.Token,
 
             _taskConnect = Task.Run(() =>
             {
+                this.StatusReaderCount = $"读写器：(正在连接 ...)";
+
                 _scanDialog?.EnableControls(false);
                 {
                     _modifyDialog?.EnableControls(false);
@@ -708,13 +710,17 @@ _cancel.Token,
                     {
                         this.ShowMessage(null);
 
-                        var count = DataModel.GetReadNameList("").Count;
-                        this.Invoke((Action)(() =>
+                        var list = DataModel.GetReadNameList("");
                         {
-                            this.StatusReaderCount = $"读写器: {count}";
-                        }));
+                            if (list.Count == 0)
+                                this.StatusReaderCount = $"读写器：(无)";
+                            else if (list.Count < 3)
+                                this.StatusReaderCount = $"读写器: {StringUtil.MakePathList(list)}";
+                            else
+                                this.StatusReaderCount = $"读写器: {list.Count}";
+                        };
 
-                        if (count == 0)
+                        if (list.Count == 0)
                         {
                             this.ShowErrorMessage("error_initial", $"当前没有连接任何读写器");
                         }
@@ -772,7 +778,10 @@ _cancel.Token,
             }
             set
             {
-                this.toolStripStatusLabel_readerCount.Text = value;
+                this.Invoke((Action)(() =>
+                {
+                    this.toolStripStatusLabel_readerCount.Text = value;
+                }));
             }
         }
 

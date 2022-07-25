@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.17")]
-[assembly: AssemblyFileVersion("1.0.17.0")]
+[assembly: AssemblyVersion("1.0.18")]
+[assembly: AssemblyFileVersion("1.0.18.0")]
 
 // 1.0.1 (2020/12/10) 增加保存“写入历史”列表功能; 感知 USB 插拔、自动重新连接读写器;
 //                      读写器连接成功后，会在状态行显示可用读卡器数量;
@@ -55,3 +55,5 @@ using System.Runtime.InteropServices;
 // 1.0.15 (2021/5/12) 设置对话框中增加了检查，勾选“校验条码号”要求同时设置了条码号校验规则
 // 1.0.16 (2021/6/17) 扫入对话框增加了利用脱机册信息验证的状态
 // 1.0.17 (2021/8/10) RfidDriver 中增加 URL105 型号数据
+// 1.0.18 (2022/7/24) 扫入对话框增加了一个命令“测试创建错误的标签内容”，用于写入会导致解析错误的内容
+//                      设置对话框的“写入标签”属性页增加了一个 checkbox “写入时遇到解析错误的标签要当作空白标签覆盖”

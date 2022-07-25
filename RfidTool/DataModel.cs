@@ -380,6 +380,21 @@ namespace RfidTool
             }
         }
 
+        // 2022/7/23
+        // 写入时是否把解析错误的标签当作空白标签直接覆盖
+        public static bool ErrorContentAsBlank
+        {
+            get
+            {
+                return ClientInfo.Config.GetBoolean("writeTag", "errorContentAsBlank", false);
+            }
+            set
+            {
+                ClientInfo.Config.SetBoolean("writeTag", "errorContentAsBlank", value);
+            }
+        }
+        
+
         // 写入标签
         public static NormalResult WriteTagInfo(string one_reader_name,
             TagInfo old_tag_info,
