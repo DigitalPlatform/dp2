@@ -446,11 +446,13 @@ namespace RfidTool
                         // *** ISO15693 HF
                         if (taginfo.Bytes != null)
                         {
+                            iteminfo.Exception = null;
                             // Exception:
                             //      可能会抛出异常 ArgumentException TagDataException
                             chip = LogicChip.From(taginfo.Bytes,
                 (int)taginfo.BlockSize,
                 "");
+
                             pii = GetPIICaption(chip.FindElement(ElementOID.PII)?.Text);
                         }
                     }
@@ -902,7 +904,7 @@ namespace RfidTool
                 */
 
                 // 语音提示写入成功
-                FormClientInfo.Speak($"{barcode} 写入成功", false, true);
+                FormClientInfo.Speak($"{GetSpeakNumber(barcode)} 写入成功", false, true);
                 ShowMessage($"{barcode} 写入成功");
                 ShowMessageBox("processBarcode", null);
                 ClearBarcode();
@@ -919,6 +921,22 @@ namespace RfidTool
             {
                 _inProcessing--;
             }
+        }
+
+        // 把号码转换为方便 text-to-speech 念出来的方式
+        static string GetSpeakNumber(string number)
+        {
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach(var ch in number)
+            {
+                if (i > 0)
+                    text.Append(" ");
+                text.Append(ch);
+                i++;
+            }
+
+            return text.ToString();
         }
 
         bool IsBook()

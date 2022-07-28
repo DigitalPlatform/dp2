@@ -2201,6 +2201,7 @@ namespace DigitalPlatform.LibraryServer
 
             var error_in_field = StringUtil.IsInList("error_in_field", style);
 
+            /*
             // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
             // return:
             //      -1  检查过程出错
@@ -2219,15 +2220,16 @@ namespace DigitalPlatform.LibraryServer
                 }
                 return -1;
             }
+            */
 
-            if (nRet == 1)
+            if (true/*nRet == 1*/)
             {
                 // 还需要检查 strBorrower 这个读者是否在当前账户的管辖范围内？如果是，那么可能是这个读者借了其他图书馆的图书，当前账户也要了解这一点，那么不应该脱敏这个证条码号
                 // return:
                 //      -1  出错
                 //      0   不在控制下
                 //      1   在控制下
-                nRet = IsPatronInControl(null, sessioninfo, strBorrower, out strError);
+                int nRet = IsPatronInControl(null, sessioninfo, strBorrower, out strError);
                 if (nRet == -1 && error_in_field)
                 {
                     cols[index] = "error:{strError}";
@@ -2267,6 +2269,7 @@ namespace DigitalPlatform.LibraryServer
 
             var error_in_field = StringUtil.IsInList("error_in_field", style);
 
+            /*
             // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
             // return:
             //      -1  检查过程出错
@@ -2286,15 +2289,16 @@ namespace DigitalPlatform.LibraryServer
                 }
                 return -1;
             }
+            */
 
-            if (nRet == 1)
+            if (true/*nRet == 1*/)
             {
                 // 还需要检查 strBorrower 这个读者是否在当前账户的管辖范围内？如果是，那么可能是这个读者借了其他图书馆的图书，当前账户也要了解这一点，那么不应该脱敏这个证条码号
                 // return:
                 //      -1  出错
                 //      0   不在控制下
                 //      1   在控制下
-                nRet = IsPatronInControl(null, sessioninfo, strBorrower, out strError);
+                int nRet = IsPatronInControl(null, sessioninfo, strBorrower, out strError);
                 if (nRet == -1 && error_in_field)
                 {
                     DomUtil.SetElementText(itemdom.DocumentElement,
@@ -2326,6 +2330,14 @@ namespace DigitalPlatform.LibraryServer
             string strReaderBarcode,
             out string strError)
         {
+            strError = "";
+
+            if (string.IsNullOrEmpty(strReaderBarcode))
+            {
+                strError = "IsPatronInControl() 调用参数错误，strReaderBarcode 值不应为空";
+                return -1;
+            }
+
             if (channel == null)
             {
                 channel = sessioninfo.Channels.GetChannel(this.WsUrl);
@@ -2335,6 +2347,18 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
             }
+
+            if (sessioninfo.Account != null
+                && sessioninfo.Account.IsPatron == true)
+            {
+                // 如果当前用户是读者 strReaderBarcode 自己
+                if (sessioninfo.Account.Barcode == strReaderBarcode)
+                    return 1;
+                // 如果当前用户是其他读者
+                return 0;
+            }
+
+            // 注: 根据证条码号读取读者记录，这里可能成为性能的堵塞点，要想办法改进
 
             // 读入读者记录
             int nRet = GetReaderRecXml(
@@ -2346,16 +2370,6 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
                 return -1;
-
-            if (sessioninfo.Account != null
-                && sessioninfo.Account.IsPatron == true)
-            {
-                // 如果当前用户是读者 strReaderBarcode 自己
-                if (sessioninfo.Account.Barcode == strReaderBarcode)
-                    return 1;
-                // 如果当前用户是其他读者
-                return 0;
-            }
 
             if (IsCurrentChangeableReaderPath(strReaderRecPath,
 sessioninfo.LibraryCodeList) == false)
