@@ -389,6 +389,21 @@ namespace dp2Circulation
         }
 
         /// <summary>
+        /// 发票号
+        /// </summary>
+        public string InvoiceNo
+        {
+            get
+            {
+                return this.textBox_invoiceNo.Text;
+            }
+            set
+            {
+                this.textBox_invoiceNo.Text = value;
+            }
+        }
+
+        /// <summary>
         /// 参考 ID
         /// </summary>
         public string RefID
@@ -738,6 +753,7 @@ namespace dp2Circulation
                     this.textBox_barcode.Dock = DockStyle.Fill;
 
                     this.textBox_uid.ReadOnly = true;
+                    this.textBox_invoiceNo.ReadOnly = true;
                     this.textBox_refID.ReadOnly = true;
 
                     this.tableLayoutPanel_main.Margin = new Padding(0, 0, 0, 0);
@@ -1138,6 +1154,7 @@ namespace dp2Circulation
             this.ParentId = DomUtil.GetElementText(this._dataDom.DocumentElement, "parent");
 
             this.UID = DomUtil.GetElementText(this._dataDom.DocumentElement, "uid");
+            this.InvoiceNo = DomUtil.GetElementText(this._dataDom.DocumentElement, "invoiceNo");
 
             this.RefID = DomUtil.GetElementText(this._dataDom.DocumentElement, "refID");
 
@@ -1184,6 +1201,7 @@ namespace dp2Circulation
             this.ParentId = "";
 
             this.UID = "";
+            this.InvoiceNo = "";
             this.RefID = "";
 
             this.ResetColor();
@@ -1200,6 +1218,7 @@ namespace dp2Circulation
             DomUtil.SetElementText(this._dataDom.DocumentElement, "parent", this.ParentId);
 
             DomUtil.SetElementText(this._dataDom.DocumentElement, "uid", this.UID);
+            DomUtil.SetElementText(this._dataDom.DocumentElement, "invoiceNo", this.InvoiceNo);
             DomUtil.SetElementText(this._dataDom.DocumentElement, "refID", this.RefID);
 
             DomUtil.SetElementText(this._dataDom.DocumentElement, "barcode", this.Barcode);
@@ -1719,6 +1738,7 @@ namespace dp2Circulation
                 this.textBox_borrowPeriod.ReadOnly = true;
                 this.textBox_recPath.ReadOnly = true;
                 this.textBox_uid.ReadOnly = true;
+                this.textBox_invoiceNo.ReadOnly = true;
                 this.textBox_refID.ReadOnly = true;
                 this.textBox_intact.ReadOnly = true;
                 this.textBox_binding.ReadOnly = true;
@@ -1753,6 +1773,7 @@ namespace dp2Circulation
             this.textBox_recPath.ReadOnly = false;
 
             this.textBox_uid.ReadOnly = false;
+            this.textBox_invoiceNo.ReadOnly = false;
             this.textBox_refID.ReadOnly = false;
             this.textBox_intact.ReadOnly = false;
             this.textBox_binding.ReadOnly = false;
@@ -1786,6 +1807,7 @@ namespace dp2Circulation
                 this.textBox_borrowDate.ReadOnly = true;
                 this.textBox_recPath.ReadOnly = true;
                 this.textBox_uid.ReadOnly = true; // 2021/2/3 
+                this.textBox_invoiceNo.ReadOnly = true; // 2022/8/8
                 this.textBox_refID.ReadOnly = true; // 2009/6/2 
 
                 if (this.textBox_borrower.Text != "")
@@ -1810,6 +1832,7 @@ namespace dp2Circulation
             this.textBox_borrowDate.ReadOnly = false;
             this.textBox_recPath.ReadOnly = false;
             this.textBox_uid.ReadOnly = false;  // 2021/2/3
+            this.textBox_invoiceNo.ReadOnly = false;    // 2022/8/8
             this.textBox_refID.ReadOnly = false; // 2009/6/2 
 
             this.textBox_barcode.ReadOnly = false;
@@ -2069,6 +2092,9 @@ namespace dp2Circulation
             if (this.UID != refControl.UID)
                 this.label_uid_color.BackColor = this.ColorDifference;
 
+            if (this.InvoiceNo != refControl.InvoiceNo)
+                this.label_invoiceNo_color.BackColor = this.ColorDifference;
+
             if (this.RefID != refControl.RefID)
                 this.label_refID_color.BackColor = this.ColorDifference;
 
@@ -2126,6 +2152,8 @@ namespace dp2Circulation
                     e1.Name = "BatchNo";
                 else if (sender == (object)this.textBox_uid)
                     e1.Name = "Uid";
+                else if (sender == (object)this.textBox_invoiceNo)
+                    e1.Name = "InvoiceNo";
                 else if (sender == (object)this.textBox_refID)
                     e1.Name = "RefID";
                 else if (sender == (object)this.textBox_volume)
@@ -2200,6 +2228,8 @@ namespace dp2Circulation
                     e1.Name = "BatchNo";
                 else if (sender == (object)this.textBox_uid)
                     e1.Name = "Uid";
+                else if (sender == (object)this.textBox_invoiceNo)
+                    e1.Name = "InvoiceNo";
                 else if (sender == (object)this.textBox_refID)
                     e1.Name = "RefID";
                 else if (sender == (object)this.textBox_volume)

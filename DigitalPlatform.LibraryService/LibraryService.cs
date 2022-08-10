@@ -5940,7 +5940,8 @@ namespace dp2Library
 
                 // 修改<borrower>
                 if (item_dom != null && item_dom.DocumentElement != null
-                    && strItemDbType == "item" && sessioninfo.GlobalUser == false) // 分馆用户必须要过滤，因为要修改<borrower>
+                    && strItemDbType == "item" && (sessioninfo.GlobalUser == false || sessioninfo.UserType == "reader") // 分馆用户必须要过滤，因为要修改<borrower>
+                )
                 {
 #if NO
                     nRet = LibraryApplication.LoadToDom(strXml,

@@ -619,6 +619,23 @@ namespace dp2Circulation
             }
         }
 
+        /// <summary>
+        /// 发票号
+        /// </summary>
+        public string InvoiceNo
+        {
+            get
+            {
+                return DomUtil.GetElementText(this.RecordDom.DocumentElement, "invoiceNo");
+            }
+            set
+            {
+                DomUtil.SetElementText(this.RecordDom.DocumentElement, "invoiceNo", value);
+                this.Changed = true;
+            }
+        }
+
+
         // 只修改 RecordDom 字段内容，不改变 Changed 状态
         // TODO: 修改 Parent 可以用这个函数来实现
         public void SetElementText(string strName, string strValue)

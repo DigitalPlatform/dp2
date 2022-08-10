@@ -31,6 +31,9 @@ namespace DigitalPlatform.Text
 		}
 	}
 
+#if REMOVED
+	// 类 Cryptography 已经移动到了 DigitalPlatform.Core.dll 中
+
 	/// <summary>
 	/// 和加密有关的函数
 	/// </summary>
@@ -120,4 +123,6 @@ namespace DigitalPlatform.Text
 
 
 	}
+
+#endif
 }

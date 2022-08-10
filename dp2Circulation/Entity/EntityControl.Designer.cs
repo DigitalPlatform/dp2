@@ -57,6 +57,7 @@ namespace dp2Circulation
             this.columnHeader_recpath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_refID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageList_itemType = new System.Windows.Forms.ImageList(this.components);
+            this.columnHeader_invoiceNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // listView
@@ -70,6 +71,7 @@ namespace dp2Circulation
             this.columnHeader_location,
             this.columnHeader_seller,
             this.columnHeader_source,
+            this.columnHeader_invoiceNo,
             this.columnHeader_price,
             this.columnHeader_volume,
             this.columnHeader_accessNo,
@@ -241,12 +243,17 @@ namespace dp2Circulation
             this.imageList_itemType.Images.SetKeyName(3, "deleted_entity.bmp");
             this.imageList_itemType.Images.SetKeyName(4, "error_entity.bmp");
             // 
+            // columnHeader_invoiceNo
+            // 
+            this.columnHeader_invoiceNo.Text = "·¢Æ±ºÅ";
+            this.columnHeader_invoiceNo.Width = 100;
+            // 
             // EntityControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.listView);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "EntityControl";
             this.Size = new System.Drawing.Size(777, 182);
             this.ResumeLayout(false);
@@ -282,5 +289,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader_operations;
         private System.Windows.Forms.ColumnHeader columnHeader_bindingCost;
         private System.Windows.Forms.ColumnHeader columnHeader_shelfNo;
+        private System.Windows.Forms.ColumnHeader columnHeader_invoiceNo;
     }
 }

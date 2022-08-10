@@ -845,6 +845,9 @@ true);
   <field element='source' width='100'>
     <caption lang='zh'>经费来源</caption>
   </field>
+  <field element='invoiceNo' width='100'>
+    <caption lang='zh'>发票号</caption>
+  </field>
   <field element='price' width='150'>
     <caption lang='zh'>册价格</caption>
   </field>

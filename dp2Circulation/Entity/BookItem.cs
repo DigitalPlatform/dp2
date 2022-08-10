@@ -52,80 +52,86 @@ namespace dp2Circulation
         /// ListView 栏目下标：经费来源
         /// </summary>
         public const int COLUMN_SOURCE = 6;
+
+        /// <summary>
+        /// ListView 栏目下标：发票号
+        /// </summary>
+        public const int COLUMN_INVOICENO = 7;
+
         /// <summary>
         /// ListView 栏目下标：价格
         /// </summary>
-        public const int COLUMN_PRICE = 7;
+        public const int COLUMN_PRICE = 8;
         /// <summary>
         /// ListView 栏目下标：卷册信息
         /// </summary>
-        public const int COLUMN_VOLUME = 8;
+        public const int COLUMN_VOLUME = 9;
         /// <summary>
         /// ListView 栏目下标：索取号
         /// </summary>
-        public const int COLUMN_ACCESSNO = 9;
+        public const int COLUMN_ACCESSNO = 10;
         /// <summary>
         /// ListView 栏目下标：架号
         /// </summary>
-        public const int COLUMN_SHELFNO = 10;
+        public const int COLUMN_SHELFNO = 11;
         /// <summary>
         /// ListView 栏目下标：图书类型
         /// </summary>
-        public const int COLUMN_BOOKTYPE = 11;
+        public const int COLUMN_BOOKTYPE = 12;
         /// <summary>
         /// ListView 栏目下标：登录号
         /// </summary>
-        public const int COLUMN_REGISTERNO = 12;
+        public const int COLUMN_REGISTERNO = 13;
         /// <summary>
         /// ListView 栏目下标：注释
         /// </summary>
-        public const int COLUMN_COMMENT = 13;
+        public const int COLUMN_COMMENT = 14;
         /// <summary>
         /// ListView 栏目下标：合并注释
         /// </summary>
-        public const int COLUMN_MERGECOMMENT = 14;
+        public const int COLUMN_MERGECOMMENT = 15;
         /// <summary>
         /// ListView 栏目下标：批次号
         /// </summary>
-        public const int COLUMN_BATCHNO = 15;
+        public const int COLUMN_BATCHNO = 16;
         /// <summary>
         /// ListView 栏目下标：借阅者
         /// </summary>
-        public const int COLUMN_BORROWER = 16;
+        public const int COLUMN_BORROWER = 17;
         /// <summary>
         /// ListView 栏目下标：借阅日期
         /// </summary>
-        public const int COLUMN_BORROWDATE = 17;
+        public const int COLUMN_BORROWDATE = 18;
         /// <summary>
         /// ListView 栏目下标：借阅期限
         /// </summary>
-        public const int COLUMN_BORROWPERIOD = 18;
+        public const int COLUMN_BORROWPERIOD = 19;
 
         /// <summary>
         /// ListView 栏目下标：完好率
         /// </summary>
-        public const int COLUMN_INTACT = 19;
+        public const int COLUMN_INTACT = 20;
         /// <summary>
         /// ListView 栏目下标：装订费用
         /// </summary>
-        public const int COLUMN_BINDINGCOST = 20;
+        public const int COLUMN_BINDINGCOST = 21;
         /// <summary>
         /// ListView 栏目下标：装订信息
         /// </summary>
-        public const int COLUMN_BINDING = 21;
+        public const int COLUMN_BINDING = 22;
         /// <summary>
         /// ListView 栏目下标：操作历史信息
         /// </summary>
-        public const int COLUMN_OPERATIONS = 22;
+        public const int COLUMN_OPERATIONS = 23;
 
         /// <summary>
         /// ListView 栏目下标：册记录路径
         /// </summary>
-        public const int COLUMN_RECPATH = 23;
+        public const int COLUMN_RECPATH = 24;
         /// <summary>
         /// ListView 栏目下标：参考 ID
         /// </summary>
-        public const int COLUMN_REFID = 24;
+        public const int COLUMN_REFID = 25;
 
         /// <summary>
         /// 根据当前对象克隆出一个新对象
@@ -226,6 +232,8 @@ namespace dp2Circulation
                 this.RecPath = strText;
             else if (nCol == COLUMN_REFID)
                 this.RefID = strText;
+            else if (nCol == COLUMN_INVOICENO)
+                this.InvoiceNo = strText;
             else
                 throw new Exception("未知的列号 " + nCol.ToString());
         }
@@ -927,6 +935,9 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item,
                 COLUMN_REFID,
                 this.RefID);
+            ListViewUtil.ChangeItemText(item,
+    COLUMN_INVOICENO,
+    this.InvoiceNo);
         }
 
 

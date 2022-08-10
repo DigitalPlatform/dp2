@@ -2455,7 +2455,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
 
             return "<tr>" +
                 "<td class='name'>" + HttpUtility.HtmlEncode(strCaption) + "</td>" +
-                "<td class='content'>" + HttpUtility.HtmlEncode(strValue).Replace("\n", "<br/>").Replace(" ","&nbsp;").Replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") + "</td>" +
+                "<td class='content'>" + HttpUtility.HtmlEncode(strValue).Replace("\n", "<br/>").Replace(" ", "&nbsp;").Replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") + "</td>" +
                 "</tr>";
         }
 
@@ -5956,6 +5956,13 @@ FileShare.ReadWrite))
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("导出原始册记录到 XML 文件(&I) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_exportOriginEntityToXml_Click);
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -5970,6 +5977,17 @@ FileShare.ReadWrite))
 
             menuItem = new MenuItem("补做 SetBiblioInfo-move (&M) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_redoSetBiblioInfoMove_Click);
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("移除(&R) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_removeLines_Click);
             if (this.listView_records.SelectedItems.Count == 0
                 || this._processing == true)
                 menuItem.Enabled = false;
@@ -6328,6 +6346,163 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 导出原始册信息到 XML 文件
+        void menu_exportOriginEntityToXml_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的 XML 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = "";
+            dlg.Filter = "XML 文件 (*.xml)|*.xml|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            // path --> (path, date, index, xml)
+            Hashtable _table = new Hashtable();
+
+            int nRet = ProcessSelectedRecords((date, index, dom, timestamp) =>
+            {
+                if (dom.DocumentElement != null)
+                {
+                    var operation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+                    if (operation != "setEntity")
+                        return true;
+
+                    var xml = DomUtil.GetElementText(dom.DocumentElement,
+                        "oldRecord",
+                        out XmlNode node);
+                    if (node == null || string.IsNullOrEmpty(xml))
+                        return true;
+                    string path = ((XmlElement)node).GetAttribute("recPath");
+
+                    var item = (EntityItem)_table[path];
+                    if (item == null)
+                    {
+                        item = new EntityItem
+                        {
+                            Path = path,
+                            Date = date,
+                            Index = index,
+                            Xml = xml,
+                        };
+                        item.Xml = xml;
+                        _table[path] = item;
+                    }
+                    else
+                    {
+                        if (EntityItem.Compare(date, index, item.Date, item.Index) < 0)
+                        {
+                            item.Date = date;
+                            item.Index = index;
+                            item.Xml = xml;
+                        }
+                    }
+                }
+
+                return true;
+            },
+    out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (_table.Count == 0)
+            {
+                strError = "没有输出任何结果";
+                goto ERROR1;
+            }
+
+            int count = 0;
+            using (XmlTextWriter writer = new XmlTextWriter(dlg.FileName, Encoding.UTF8))
+            {
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 4;
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("dprms", "collection", DpNs.dprms);
+                writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
+
+                List<EntityItem> items = new List<EntityItem>();
+                foreach (string key in _table.Keys)
+                {
+                    items.Add(_table[key] as EntityItem);
+                }
+
+                // 按照日志文件位置排序
+                items.Sort((a, b) =>
+                {
+                    int ret = string.Compare(a.Date, b.Date);
+                    if (ret != 0)
+                        return ret;
+                    return (int)(a.Index - b.Index);
+                });
+
+                foreach (var item in items)
+                {
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(item.Xml);
+                    if (dom.DocumentElement != null)
+                    {
+                        // 给根元素设置几个参数
+                        //DomUtil.SetAttr(dom.DocumentElement, "date", date);
+                        //DomUtil.SetAttr(dom.DocumentElement, "index", index.ToString());
+
+                        dom.DocumentElement.SetAttribute("path", item.Path);
+                        dom.DocumentElement.SetAttribute("_operlogPosition", $"{item.Date}:{item.Index}:oldRecord");
+
+                        dom.DocumentElement.WriteTo(writer);
+                        count++;
+                    }
+                }
+
+                writer.WriteEndElement();   // </collection>
+                writer.WriteEndDocument();
+            }
+            MessageBox.Show(this, $"{count} 条册记录已经成功写入 {dlg.FileName}");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        class EntityItem
+        {
+            public string Path { get; set; }
+            public string Date { get; set; }
+            public long Index { get; set; }
+            public string Xml { get; set; }
+
+            public static long Compare(string date1, long index1, string date2, long index2)
+            {
+                int ret = string.Compare(date1, date2);
+                if (ret != 0)
+                    return ret;
+                return index1 - index2;
+            }
+        }
+
+        // 移除选定的行
+        void menu_removeLines_Click(object sender, EventArgs e)
+        {
+            // 对话框警告
+            DialogResult result = MessageBox.Show(this,
+                $"确实要移除选定的 {this.listView_records.SelectedItems.Count} 行?",
+                "OperLogForm",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            ListViewUtil.DeleteSelectedItems(this.listView_records);
         }
 
         // 导出到 XML 文件
@@ -7257,7 +7432,7 @@ MessageBoxDefaultButton.Button1);
             {
                 return CreateAssembly(strCode, 10);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 return null;
@@ -7332,12 +7507,12 @@ MessageBoxDefaultButton.Button1);
 
                         if (codeIssue.Severity == DiagnosticSeverity.Error)
                         {
-                            string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()}, 行: {line_number} 字符: {line_character}, Severity: { codeIssue.Severity}";
+                            string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()}, 行: {line_number} 字符: {line_character}, Severity: {codeIssue.Severity}";
                             errors.Add(issue);
                         }
                         else
                         {
-                            string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()}, 行: {line_number} 字符: {line_character}, Severity: { codeIssue.Severity}";
+                            string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()}, 行: {line_number} 字符: {line_character}, Severity: {codeIssue.Severity}";
                             warnings.Add(issue);
                         }
                     }
@@ -9617,7 +9792,7 @@ dlg.UiState);
                             {
                                 bDontAsk = false;
                                 timestamp_result = MessageDlg.Show(this,
-                                    $"保存{data.DbType}记录 { strBiblioRecPath} 时遭遇时间戳不匹配: { strError}。这意味着保存的位置原来存在一条记录，本次保存会覆盖这条记录。\r\n\r\n请问是否要重试保存记录? 这个位置确实要被覆盖么? 您了解覆盖前的原记录是什么内容么?\r\n\r\n[重试覆盖] 重试(导致覆盖)；\r\n[跳过] 放弃保存此条、但继续处理后面的记录保存; \r\n[中断] 中断整批保存操作",
+                                    $"保存{data.DbType}记录 {strBiblioRecPath} 时遭遇时间戳不匹配: {strError}。这意味着保存的位置原来存在一条记录，本次保存会覆盖这条记录。\r\n\r\n请问是否要重试保存记录? 这个位置确实要被覆盖么? 您了解覆盖前的原记录是什么内容么?\r\n\r\n[重试覆盖] 重试(导致覆盖)；\r\n[跳过] 放弃保存此条、但继续处理后面的记录保存; \r\n[中断] 中断整批保存操作",
                                     "OperLogForm",
                                     MessageBoxButtons.YesNoCancel,
                                     MessageBoxDefaultButton.Button1,

@@ -14,12 +14,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+
+using SendFace.Properties;
+
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.Face;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.WPF;
-using SendFace.Properties;
 
 namespace SendFace
 {
@@ -73,7 +75,7 @@ namespace SendFace
         {
             FaceManager.Base.Name = "人脸中心";
             FaceManager.Url = "ipc://FaceChannel/FaceServer";
-            FaceManager.SetError += FaceManager_SetError; ;
+            FaceManager.SetError += FaceManager_SetError;
             FaceManager.Start(_cancelRefresh.Token);
 
             InterceptMouse.MouseClick += InterceptMouse_MouseClick;
@@ -96,7 +98,7 @@ namespace SendFace
                     else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                         SetError("update", result.ErrorInfo);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WpfClientInfo.WriteErrorLog($"自动后台更新出现异常: {ExceptionUtil.GetDebugText(ex)}");
                 }
@@ -134,15 +136,17 @@ namespace SendFace
                 {
                     CancelButton_Click(this, new RoutedEventArgs());
                 });
-
             }
             else
             {
                 // 开始识别
+                /*
                 Task.Run(() =>
                 {
                     recognitionFace();
                 });
+                */
+                _ = recognitionFaceAsync();
             }
         }
 
@@ -170,16 +174,28 @@ namespace SendFace
             _errorTable.SetError(type, "");
         }
 
-        async void recognitionFace()
+        static TimeSpan _timeout = TimeSpan.FromMinutes(1);
+
+        async Task recognitionFaceAsync()
         {
             EnterMode("video");
 
             RecognitionFaceResult result = null;
 
+            DateTime start_time = DateTime.Now;
             _stopVideo = false;
             var task = Task.Run(() =>
             {
-                DisplayVideo();
+                DisplayVideo(() =>
+                {
+                    if (DateTime.Now - start_time > _timeout)
+                    {
+                        FaceManager.CancelRecognitionFace();
+                        _stopVideo = true;
+                        return false;
+                    }
+                    return true;
+                });
             });
             try
             {
@@ -187,11 +203,11 @@ namespace SendFace
                 if (result.Value == -1)
                 {
                     if (result.ErrorCode != "cancelled")
-                        SetError("face", result.ErrorInfo);
+                        SetError("recog", result.ErrorInfo);
                     return;
                 }
 
-                SetError("face", null);
+                SetError("recog", null);
             }
             finally
             {
@@ -219,7 +235,7 @@ namespace SendFace
                             ErrorInfo = result.ErrorInfo,
                             ErrorCode = result.ErrorCode
                         };
-                    return FaceManager.RecognitionFace("");
+                    return FaceManager.RecognitionFace(style);
                 });
             }
             finally
@@ -228,14 +244,12 @@ namespace SendFace
             }
         }
 
-
         // parameters:
         //      mode    "standby" "video"
         public void EnterMode(string mode)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-
                 if (mode == "standby")
                 {
                     this.photo.Visibility = Visibility.Collapsed;
@@ -259,7 +273,6 @@ namespace SendFace
                     this.Background = new SolidColorBrush(Colors.DarkGray);
 
                     SetWindowPos(_position);
-
                 }
             }));
         }
@@ -302,12 +315,18 @@ namespace SendFace
             _stopVideo = true;
         }
 
+        delegate bool delegate_idle();
+
         bool _stopVideo = false;
 
-        void DisplayVideo()
+        void DisplayVideo(delegate_idle func_idle)
         {
             while (_stopVideo == false)
             {
+                var loop = func_idle?.Invoke();
+                if (loop == false)
+                    return;
+
                 var result = FaceManager.GetImage("");
                 if (result.ImageData == null)
                 {

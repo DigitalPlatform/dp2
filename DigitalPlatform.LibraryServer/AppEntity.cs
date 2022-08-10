@@ -52,6 +52,7 @@ namespace DigitalPlatform.LibraryServer
                 "shelfNo", // 2017/6/15 架号。例如 10-1 表示第十个架的第一排
                 "currentLocation",  // 2019/7/27 新增
                 "uid",  // 2020/8/23 RFID 标签的 UID
+                "invoiceNo",    // 2022/8/7 新增
             };
 
         static string[] transfer_entity_element_names = new string[] {
@@ -2004,7 +2005,7 @@ namespace DigitalPlatform.LibraryServer
                     XmlDocument itemdom = null;
 
                     // 修改<borrower>
-                    if (sessioninfo.GlobalUser == false // 分馆用户必须要过滤，因为要修改<borrower>
+                    if ((sessioninfo.GlobalUser == false || sessioninfo.UserType == "reader") // 分馆用户必须要过滤，因为要修改<borrower>
                         && string.IsNullOrEmpty(strXml) == false)
                     {
                         nRet = LibraryApplication.LoadToDom(strXml,
@@ -2131,6 +2132,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 根据当前账户的权限，过滤浏览列中的 borrower 元素内容
+        // 注: browse 配置文件的 location 和 borrower 列要增配 prefix 属性，才能实现过滤效果
         // return:
         //      -1  出错
         //      0   cols 没有发生改变

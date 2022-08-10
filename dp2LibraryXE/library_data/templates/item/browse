@@ -51,6 +51,9 @@
   <col title="渠道(书商)" type="item_seller">
     <xpath>*/seller</xpath>
   </col>
+  <col title="发票号" type="invoice_no">
+    <xpath>*/invoiceNo</xpath>
+  </col>
   <col title="参考ID" type="item_refid">
     <xpath>*/refID</xpath>
   </col>

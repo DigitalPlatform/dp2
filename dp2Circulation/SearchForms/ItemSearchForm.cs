@@ -75,6 +75,9 @@ namespace dp2Circulation
         /// </summary>
         public string ExportBiblioDumpFilename = "";
 
+        // 最近一次导出到册记录 XML 文件时使用过的文件名
+        public string ExportXmlFilename = "";
+
         /// <summary>
         /// 浏览框。显示检索命中记录的浏览格式
         /// </summary>
@@ -1731,7 +1734,7 @@ bClearList);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage($"共命中 { lHitCount} 条，已处理 { lStart } 条，跳过 {lSkipCount} 条");
+                    stop.SetMessage($"共命中 {lHitCount} 条，已处理 {lStart} 条，跳过 {lSkipCount} 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -3128,6 +3131,12 @@ out strError);
                     menuItemExport.MenuItems.Add(subMenuItem);
                 }
 
+                subMenuItem = new MenuItem($"到{this.DbTypeCaption} XML文件 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
+                subMenuItem.Click += new System.EventHandler(this.menu_exportXmlFile_Click);
+                if (nPathItemCount == 0 || bLooping == true)
+                    subMenuItem.Enabled = false;
+                menuItemExport.MenuItems.Add(subMenuItem);
+
                 if (this.DbType == "order")
                 {
                     subMenuItem = new MenuItem("订购分配表到 Excel 文件 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&E)...");
@@ -3227,6 +3236,16 @@ out strError);
 
                     subMenuItem = new MenuItem("从条码号文件中导入(&R)...");
                     subMenuItem.Click += new System.EventHandler(this.menu_importFromBarcodeFile_Click);
+                    if (bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItemImport.MenuItems.Add(subMenuItem);
+
+                    // ---
+                    subMenuItem = new MenuItem("-");
+                    menuItemImport.MenuItems.Add(subMenuItem);
+
+                    subMenuItem = new MenuItem("从册记录 XML 文件中导入覆盖(&O)...");
+                    subMenuItem.Click += new System.EventHandler(this.menu_importFromXmlFile_Click);
                     if (bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItemImport.MenuItems.Add(subMenuItem);
@@ -6477,7 +6496,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                     stop.SetProgressValue(i);
 
                     this.listView_records.Items.Remove(item.ListViewItem);
-                    
+
                     if (display)
                     {
                         this.listView_records.EndUpdate();
@@ -9610,7 +9629,20 @@ MessageBoxDefaultButton.Button1);
             ShowMessageBox(strError);
         }
 
+        // 从册记录 XML 文件中导入覆盖
+        void menu_importFromXmlFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
 
+            int nRet = ImportFromXmlFile(null,
+                "clear",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            ShowMessageBox(strError);
+        }
 
         // 从记录路径文件中导入
         void menu_importFromRecPathFile_Click(object sender, EventArgs e)
@@ -10600,6 +10632,128 @@ dlg.UiState);
             }
 
             return 0;
+        }
+
+        // 保存选择的行中的有路径的部分行 到册记录 XML 文件
+        void menu_exportXmlFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的册记录 XML 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = this.ExportXmlFilename;
+            dlg.Filter = "册记录 XML 文件 (*.xml)|*.xml|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            this.ExportXmlFilename = dlg.FileName;
+
+            int count = 0;
+
+            if (stop.IsInLoop == true)
+            {
+                strError = "无法重复进入循环";
+                goto ERROR1;
+            }
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出册记录 ...");
+            stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+            var old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(10);
+            try
+            {
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == false)
+                        items.Add(item);
+                }
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
+stop,
+items,
+this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                using (XmlTextWriter w = new XmlTextWriter(
+                    this.ExportXmlFilename, Encoding.UTF8))
+                {
+                    w.Formatting = System.Xml.Formatting.Indented;
+                    w.Indentation = 4;
+
+                    w.WriteStartDocument();
+                    w.WriteStartElement("dprms", "collection", DpNs.dprms);
+                    w.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
+
+                    int i = 0;
+                    foreach (LoaderItem item in loader)
+                    {
+                        Application.DoEvents(); // 出让界面控制权
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        BiblioInfo info = item.BiblioInfo;
+
+                        Debug.Assert(item.ListViewItem == items[i], "");
+
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(info.OldXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "(册记录被跳过)XML 装入 DOM 失败: " + ex.Message;
+                            // goto ERROR1;
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"{info.RecPath} {strError}") + "</div>");
+                            goto CONTINUE;
+                        }
+
+                        dom.DocumentElement.SetAttribute("path", info.RecPath);
+                        dom.DocumentElement.WriteTo(w);
+
+                    CONTINUE:
+                        i++;
+                        stop?.SetProgressValue(i);
+                        count++;
+                    }
+
+                    w.WriteEndElement();
+                    w.WriteEndDocument();
+                }
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+            }
+
+            Program.MainForm.StatusBarMessage = $"已成功导出 {count} 个册记录到文件 " + this.ExportXmlFilename;
+            return;
+        ERROR1:
+            ShowMessageBox(strError);
         }
 
         // 保存选择的行中的有路径的部分行 到书目转储文件
@@ -13661,7 +13815,7 @@ Keys keyData)
                     return;
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-                this.LabelMessageText = $"检索共命中 { lHitCount} 条(跳过 {lSkipCount} 条)，已全部装入";
+                this.LabelMessageText = $"检索共命中 {lHitCount} 条(跳过 {lSkipCount} 条)，已全部装入";
             }
             finally
             {

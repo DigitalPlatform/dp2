@@ -44,12 +44,14 @@
             this.label10 = new System.Windows.Forms.Label();
             this.textBox_barcode = new System.Windows.Forms.TextBox();
             this.textBox_price = new System.Windows.Forms.TextBox();
+            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.textBox_borrower = new System.Windows.Forms.TextBox();
             this.textBox_borrowDate = new System.Windows.Forms.TextBox();
             this.textBox_borrowPeriod = new System.Windows.Forms.TextBox();
             this.textBox_recPath = new System.Windows.Forms.TextBox();
             this.textBox_registerNo = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
+            this.textBox_mergeComment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.textBox_batchNo = new System.Windows.Forms.TextBox();
@@ -92,8 +94,11 @@
             this.textBox_intact = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
             this.label_binding_color = new System.Windows.Forms.Label();
+            this.textBox_binding = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.checkedComboBox_state = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label22 = new System.Windows.Forms.Label();
             this.label_operations_color = new System.Windows.Forms.Label();
+            this.textBox_operations = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.label_bindingCost_color = new System.Windows.Forms.Label();
             this.textBox_bindingCost = new System.Windows.Forms.TextBox();
@@ -104,11 +109,9 @@
             this.label_uid_color = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
             this.button_clearUid = new System.Windows.Forms.Button();
-            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
-            this.textBox_mergeComment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
-            this.textBox_binding = new DigitalPlatform.CommonControl.AutoHeightTextBox();
-            this.checkedComboBox_state = new DigitalPlatform.CommonControl.CheckedComboBox();
-            this.textBox_operations = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.label25 = new System.Windows.Forms.Label();
+            this.label_invoiceNo_color = new System.Windows.Forms.Label();
+            this.textBox_invoiceNo = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel_main.SuspendLayout();
             this.contextMenuStrip_barcode.SuspendLayout();
             this.SuspendLayout();
@@ -133,14 +136,14 @@
             this.tableLayoutPanel_main.Controls.Add(this.label7, 0, 15);
             this.tableLayoutPanel_main.Controls.Add(this.label8, 0, 16);
             this.tableLayoutPanel_main.Controls.Add(this.label9, 0, 17);
-            this.tableLayoutPanel_main.Controls.Add(this.label10, 0, 23);
+            this.tableLayoutPanel_main.Controls.Add(this.label10, 0, 24);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_barcode, 2, 0);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_price, 2, 6);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_comment, 2, 12);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_borrower, 2, 15);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_borrowDate, 2, 16);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_borrowPeriod, 2, 17);
-            this.tableLayoutPanel_main.Controls.Add(this.textBox_recPath, 2, 23);
+            this.tableLayoutPanel_main.Controls.Add(this.textBox_recPath, 2, 24);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_registerNo, 2, 11);
             this.tableLayoutPanel_main.Controls.Add(this.label11, 0, 10);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_mergeComment, 2, 13);
@@ -161,7 +164,7 @@
             this.tableLayoutPanel_main.Controls.Add(this.label_borrower_color, 1, 15);
             this.tableLayoutPanel_main.Controls.Add(this.label_borrowDate_color, 1, 16);
             this.tableLayoutPanel_main.Controls.Add(this.label_borrowPeriod_color, 1, 17);
-            this.tableLayoutPanel_main.Controls.Add(this.label_recPath_color, 1, 23);
+            this.tableLayoutPanel_main.Controls.Add(this.label_recPath_color, 1, 24);
             this.tableLayoutPanel_main.Controls.Add(this.label14, 0, 9);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_volume, 2, 9);
             this.tableLayoutPanel_main.Controls.Add(this.label_volume_color, 1, 9);
@@ -174,9 +177,9 @@
             this.tableLayoutPanel_main.Controls.Add(this.label17, 0, 5);
             this.tableLayoutPanel_main.Controls.Add(this.comboBox_source, 2, 5);
             this.tableLayoutPanel_main.Controls.Add(this.label_source_color, 1, 5);
-            this.tableLayoutPanel_main.Controls.Add(this.label18, 0, 24);
-            this.tableLayoutPanel_main.Controls.Add(this.label_refID_color, 1, 24);
-            this.tableLayoutPanel_main.Controls.Add(this.textBox_refID, 2, 24);
+            this.tableLayoutPanel_main.Controls.Add(this.label18, 0, 25);
+            this.tableLayoutPanel_main.Controls.Add(this.label_refID_color, 1, 25);
+            this.tableLayoutPanel_main.Controls.Add(this.textBox_refID, 2, 25);
             this.tableLayoutPanel_main.Controls.Add(this.label19, 0, 7);
             this.tableLayoutPanel_main.Controls.Add(this.label_accessNo_color, 1, 7);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_accessNo, 2, 7);
@@ -197,16 +200,20 @@
             this.tableLayoutPanel_main.Controls.Add(this.label1, 0, 8);
             this.tableLayoutPanel_main.Controls.Add(this.label_shelfNo_color, 1, 8);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_shelfNo, 2, 8);
-            this.tableLayoutPanel_main.Controls.Add(this.textBox_uid, 2, 22);
-            this.tableLayoutPanel_main.Controls.Add(this.label_uid_color, 1, 22);
-            this.tableLayoutPanel_main.Controls.Add(this.label24, 0, 22);
-            this.tableLayoutPanel_main.Controls.Add(this.button_clearUid, 3, 22);
+            this.tableLayoutPanel_main.Controls.Add(this.textBox_uid, 2, 23);
+            this.tableLayoutPanel_main.Controls.Add(this.label_uid_color, 1, 23);
+            this.tableLayoutPanel_main.Controls.Add(this.label24, 0, 23);
+            this.tableLayoutPanel_main.Controls.Add(this.button_clearUid, 3, 23);
+            this.tableLayoutPanel_main.Controls.Add(this.label25, 0, 22);
+            this.tableLayoutPanel_main.Controls.Add(this.label_invoiceNo_color, 1, 22);
+            this.tableLayoutPanel_main.Controls.Add(this.textBox_invoiceNo, 2, 22);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
             this.tableLayoutPanel_main.Padding = new System.Windows.Forms.Padding(22, 23, 22, 23);
-            this.tableLayoutPanel_main.RowCount = 26;
+            this.tableLayoutPanel_main.RowCount = 27;
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -370,7 +377,7 @@
             // 
             this.label10.AutoSize = true;
             this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label10.Location = new System.Drawing.Point(27, 794);
+            this.label10.Location = new System.Drawing.Point(27, 824);
             this.label10.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(115, 30);
@@ -407,6 +414,21 @@
             this.textBox_price.TabIndex = 20;
             this.textBox_price.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_price.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            // 
+            // textBox_comment
+            // 
+            this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_comment.Location = new System.Drawing.Point(163, 441);
+            this.textBox_comment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_comment.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_comment.Multiline = true;
+            this.textBox_comment.Name = "textBox_comment";
+            this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_comment.Size = new System.Drawing.Size(444, 28);
+            this.textBox_comment.TabIndex = 36;
+            this.textBox_comment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.textBox_comment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
             // textBox_borrower
             // 
@@ -453,7 +475,7 @@
             // 
             this.textBox_recPath.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_recPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_recPath.Location = new System.Drawing.Point(163, 797);
+            this.textBox_recPath.Location = new System.Drawing.Point(163, 827);
             this.textBox_recPath.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_recPath.MinimumSize = new System.Drawing.Size(220, 0);
             this.textBox_recPath.Name = "textBox_recPath";
@@ -488,6 +510,21 @@
             this.label11.TabIndex = 28;
             this.label11.Text = "册类型";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // textBox_mergeComment
+            // 
+            this.textBox_mergeComment.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_mergeComment.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_mergeComment.Location = new System.Drawing.Point(163, 475);
+            this.textBox_mergeComment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_mergeComment.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_mergeComment.Multiline = true;
+            this.textBox_mergeComment.Name = "textBox_mergeComment";
+            this.textBox_mergeComment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_mergeComment.Size = new System.Drawing.Size(444, 28);
+            this.textBox_mergeComment.TabIndex = 39;
+            this.textBox_mergeComment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.textBox_mergeComment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
             // label12
             // 
@@ -684,7 +721,7 @@
             // 
             this.label_recPath_color.AutoSize = true;
             this.label_recPath_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_recPath_color.Location = new System.Drawing.Point(151, 794);
+            this.label_recPath_color.Location = new System.Drawing.Point(151, 824);
             this.label_recPath_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_recPath_color.Name = "label_recPath_color";
             this.label_recPath_color.Size = new System.Drawing.Size(4, 30);
@@ -841,7 +878,7 @@
             // 
             this.label18.AutoSize = true;
             this.label18.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label18.Location = new System.Drawing.Point(27, 824);
+            this.label18.Location = new System.Drawing.Point(27, 854);
             this.label18.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(115, 30);
@@ -853,7 +890,7 @@
             // 
             this.label_refID_color.AutoSize = true;
             this.label_refID_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_refID_color.Location = new System.Drawing.Point(151, 824);
+            this.label_refID_color.Location = new System.Drawing.Point(151, 854);
             this.label_refID_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_refID_color.Name = "label_refID_color";
             this.label_refID_color.Size = new System.Drawing.Size(4, 30);
@@ -863,7 +900,7 @@
             // 
             this.textBox_refID.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_refID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_refID.Location = new System.Drawing.Point(163, 827);
+            this.textBox_refID.Location = new System.Drawing.Point(163, 857);
             this.textBox_refID.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_refID.MinimumSize = new System.Drawing.Size(220, 0);
             this.textBox_refID.Name = "textBox_refID";
@@ -978,6 +1015,40 @@
             this.label_binding_color.Size = new System.Drawing.Size(4, 34);
             this.label_binding_color.TabIndex = 56;
             // 
+            // textBox_binding
+            // 
+            this.textBox_binding.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_binding.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_binding.Location = new System.Drawing.Point(163, 689);
+            this.textBox_binding.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_binding.MaxLength = 0;
+            this.textBox_binding.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_binding.Multiline = true;
+            this.textBox_binding.Name = "textBox_binding";
+            this.textBox_binding.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_binding.Size = new System.Drawing.Size(444, 28);
+            this.textBox_binding.TabIndex = 57;
+            this.textBox_binding.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.textBox_binding.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            // 
+            // checkedComboBox_state
+            // 
+            this.checkedComboBox_state.BackColor = System.Drawing.SystemColors.Window;
+            this.checkedComboBox_state.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkedComboBox_state.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkedComboBox_state.Location = new System.Drawing.Point(161, 55);
+            this.checkedComboBox_state.Margin = new System.Windows.Forms.Padding(2);
+            this.checkedComboBox_state.MinimumSize = new System.Drawing.Size(165, 0);
+            this.checkedComboBox_state.Name = "checkedComboBox_state";
+            this.checkedComboBox_state.Padding = new System.Windows.Forms.Padding(6);
+            this.checkedComboBox_state.ReadOnly = false;
+            this.checkedComboBox_state.Size = new System.Drawing.Size(448, 36);
+            this.checkedComboBox_state.TabIndex = 5;
+            this.checkedComboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
+            this.checkedComboBox_state.TextChanged += new System.EventHandler(this.checkedComboBox_state_TextChanged);
+            this.checkedComboBox_state.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.checkedComboBox_state.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            // 
             // label22
             // 
             this.label22.AutoSize = true;
@@ -999,6 +1070,22 @@
             this.label_operations_color.Name = "label_operations_color";
             this.label_operations_color.Size = new System.Drawing.Size(4, 34);
             this.label_operations_color.TabIndex = 59;
+            // 
+            // textBox_operations
+            // 
+            this.textBox_operations.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_operations.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_operations.Location = new System.Drawing.Point(163, 723);
+            this.textBox_operations.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_operations.MaxLength = 0;
+            this.textBox_operations.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_operations.Multiline = true;
+            this.textBox_operations.Name = "textBox_operations";
+            this.textBox_operations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_operations.Size = new System.Drawing.Size(444, 28);
+            this.textBox_operations.TabIndex = 60;
+            this.textBox_operations.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.textBox_operations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
             // label23
             // 
@@ -1072,7 +1159,7 @@
             // 
             this.textBox_uid.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_uid.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_uid.Location = new System.Drawing.Point(163, 757);
+            this.textBox_uid.Location = new System.Drawing.Point(163, 787);
             this.textBox_uid.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.textBox_uid.MinimumSize = new System.Drawing.Size(220, 0);
             this.textBox_uid.Name = "textBox_uid";
@@ -1083,7 +1170,7 @@
             // 
             this.label_uid_color.AutoSize = true;
             this.label_uid_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_uid_color.Location = new System.Drawing.Point(151, 754);
+            this.label_uid_color.Location = new System.Drawing.Point(151, 784);
             this.label_uid_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_uid_color.Name = "label_uid_color";
             this.label_uid_color.Size = new System.Drawing.Size(4, 40);
@@ -1093,7 +1180,7 @@
             // 
             this.label24.AutoSize = true;
             this.label24.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label24.Location = new System.Drawing.Point(27, 754);
+            this.label24.Location = new System.Drawing.Point(27, 784);
             this.label24.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(115, 40);
@@ -1105,7 +1192,7 @@
             // 
             this.button_clearUid.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_clearUid.AutoSize = true;
-            this.button_clearUid.Location = new System.Drawing.Point(615, 757);
+            this.button_clearUid.Location = new System.Drawing.Point(615, 787);
             this.button_clearUid.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_clearUid.MinimumSize = new System.Drawing.Size(12, 0);
             this.button_clearUid.Name = "button_clearUid";
@@ -1115,85 +1202,38 @@
             this.button_clearUid.UseVisualStyleBackColor = true;
             this.button_clearUid.Click += new System.EventHandler(this.button_clearUid_Click);
             // 
-            // textBox_comment
+            // label25
             // 
-            this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_comment.Location = new System.Drawing.Point(163, 441);
-            this.textBox_comment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_comment.MinimumSize = new System.Drawing.Size(220, 0);
-            this.textBox_comment.Multiline = true;
-            this.textBox_comment.Name = "textBox_comment";
-            this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_comment.Size = new System.Drawing.Size(444, 28);
-            this.textBox_comment.TabIndex = 36;
-            this.textBox_comment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.textBox_comment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            this.label25.AutoSize = true;
+            this.label25.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label25.Location = new System.Drawing.Point(27, 754);
+            this.label25.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(115, 30);
+            this.label25.TabIndex = 77;
+            this.label25.Text = "发票号";
+            this.label25.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // textBox_mergeComment
+            // label_invoiceNo_color
             // 
-            this.textBox_mergeComment.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_mergeComment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_mergeComment.Location = new System.Drawing.Point(163, 475);
-            this.textBox_mergeComment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_mergeComment.MinimumSize = new System.Drawing.Size(220, 0);
-            this.textBox_mergeComment.Multiline = true;
-            this.textBox_mergeComment.Name = "textBox_mergeComment";
-            this.textBox_mergeComment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_mergeComment.Size = new System.Drawing.Size(444, 28);
-            this.textBox_mergeComment.TabIndex = 39;
-            this.textBox_mergeComment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.textBox_mergeComment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            this.label_invoiceNo_color.AutoSize = true;
+            this.label_invoiceNo_color.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_invoiceNo_color.Location = new System.Drawing.Point(151, 754);
+            this.label_invoiceNo_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label_invoiceNo_color.Name = "label_invoiceNo_color";
+            this.label_invoiceNo_color.Size = new System.Drawing.Size(4, 30);
+            this.label_invoiceNo_color.TabIndex = 78;
             // 
-            // textBox_binding
+            // textBox_invoiceNo
             // 
-            this.textBox_binding.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_binding.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_binding.Location = new System.Drawing.Point(163, 689);
-            this.textBox_binding.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_binding.MaxLength = 0;
-            this.textBox_binding.MinimumSize = new System.Drawing.Size(220, 0);
-            this.textBox_binding.Multiline = true;
-            this.textBox_binding.Name = "textBox_binding";
-            this.textBox_binding.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_binding.Size = new System.Drawing.Size(444, 28);
-            this.textBox_binding.TabIndex = 57;
-            this.textBox_binding.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.textBox_binding.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
-            // 
-            // checkedComboBox_state
-            // 
-            this.checkedComboBox_state.BackColor = System.Drawing.SystemColors.Window;
-            this.checkedComboBox_state.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.checkedComboBox_state.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_state.Location = new System.Drawing.Point(161, 55);
-            this.checkedComboBox_state.Margin = new System.Windows.Forms.Padding(2);
-            this.checkedComboBox_state.MinimumSize = new System.Drawing.Size(165, 0);
-            this.checkedComboBox_state.Name = "checkedComboBox_state";
-            this.checkedComboBox_state.Padding = new System.Windows.Forms.Padding(6);
-            this.checkedComboBox_state.ReadOnly = false;
-            this.checkedComboBox_state.Size = new System.Drawing.Size(448, 36);
-            this.checkedComboBox_state.TabIndex = 5;
-            this.checkedComboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
-            this.checkedComboBox_state.TextChanged += new System.EventHandler(this.checkedComboBox_state_TextChanged);
-            this.checkedComboBox_state.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.checkedComboBox_state.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
-            // 
-            // textBox_operations
-            // 
-            this.textBox_operations.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_operations.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_operations.Location = new System.Drawing.Point(163, 723);
-            this.textBox_operations.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_operations.MaxLength = 0;
-            this.textBox_operations.MinimumSize = new System.Drawing.Size(220, 0);
-            this.textBox_operations.Multiline = true;
-            this.textBox_operations.Name = "textBox_operations";
-            this.textBox_operations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_operations.Size = new System.Drawing.Size(444, 28);
-            this.textBox_operations.TabIndex = 60;
-            this.textBox_operations.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.textBox_operations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            this.textBox_invoiceNo.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_invoiceNo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_invoiceNo.Location = new System.Drawing.Point(163, 757);
+            this.textBox_invoiceNo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_invoiceNo.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_invoiceNo.Name = "textBox_invoiceNo";
+            this.textBox_invoiceNo.Size = new System.Drawing.Size(444, 24);
+            this.textBox_invoiceNo.TabIndex = 79;
             // 
             // EntityEditControl
             // 
@@ -1297,5 +1337,8 @@
         private System.Windows.Forms.Label label_uid_color;
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.Button button_clearUid;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Label label_invoiceNo_color;
+        private System.Windows.Forms.TextBox textBox_invoiceNo;
     }
 }

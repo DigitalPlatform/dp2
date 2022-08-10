@@ -15,6 +15,8 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Drawing;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -37,6 +39,10 @@ namespace dp2Circulation
 
         // 最近使用过的条码号文件名
         internal string m_strUsedBarcodeFilename = "";
+
+        // 最近使用过的 XML 文件名
+        internal string m_strUsedXmlFilename = "";
+
 
         /// <summary>
         /// 当前窗口查询的数据库类型，用于显示的名称形态
@@ -322,6 +328,649 @@ namespace dp2Circulation
 
             strText = ListViewUtil.GetItemText(item, nCol);
             return nCol;
+        }
+
+        string _element_list = "";
+
+        public int ImportFromXmlFile(string strFileName,
+    string strStyle,
+    out string strError)
+        {
+            strError = "";
+
+            SetStatusMessage("");   // 清除以前残留的显示
+
+            if (string.IsNullOrEmpty(strFileName) == true)
+            {
+                OpenFileDialog dlg = new OpenFileDialog();
+
+                dlg.Title = "请指定要打开的" + this.DbTypeCaption + "记录 XML 文件名";
+                dlg.FileName = this.m_strUsedRecPathFilename;
+                dlg.Filter = "XML文件 (*.xml)|*.xml|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+
+                if (dlg.ShowDialog() != DialogResult.OK)
+                    return 0;
+
+                this.m_strUsedXmlFilename = dlg.FileName;
+            }
+            else
+                this.m_strUsedXmlFilename = strFileName;
+
+            REDO_INPUT:
+            var element_list = InputDlg.GetInput(this,
+    "请指定要修改的元素名列表",
+    "要修改的元素名列表(空表示全部元素):",
+    _element_list);
+            if (element_list == null)
+                return 0;
+
+            if (string.IsNullOrEmpty(element_list) == false)
+            {
+                // 检查元素名
+                List<string> error_names = new List<string>();
+                var names = StringUtil.SplitList(element_list);
+                foreach (var name in names)
+                {
+                    if (Array.IndexOf(_ignore_names, name) != -1)
+                        error_names.Add(name);
+                }
+
+                if (error_names.Count > 0)
+                {
+                    strError = $"下列元素禁止修改 {StringUtil.MakePathList(error_names)}。请重新指定元素名";
+                    MessageBox.Show(this, strError);
+                    goto REDO_INPUT;
+                }
+            }
+
+            _element_list = element_list;
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导入记录 ...");
+            stop.BeginLoop();
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始" + this.DbTypeCaption + " XML 记录导入覆盖</div>");
+
+            LibraryChannel channel = this.GetChannel();
+
+            this.EnableControls(false);
+            try
+            {
+                // 导入的事项是没有序的，因此需要清除已有的排序标志
+                ListViewUtil.ClearSortColumns(this._listviewRecords);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+
+                if (this._listviewRecords.Items.Count > 0
+                    && StringUtil.IsInList("clear", strStyle) == true)
+                {
+                    DialogResult result = MessageBox.Show(this,
+                        "导入前是否要清除命中记录列表中的现有的 " + this._listviewRecords.Items.Count.ToString() + " 行?\r\n\r\n(如果不清除，则新导入的行将追加在已有行后面)\r\n(Yes 清除；No 不清除(追加)；Cancel 放弃导入)",
+                        this.DbType + "SearchForm",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Cancel)
+                        return 0;
+                    if (result == DialogResult.Yes)
+                    {
+                        ClearListViewItems();
+                    }
+                }
+
+                // recpath --> xml
+                Hashtable xml_table = new Hashtable();
+
+                this._listviewRecords.BeginUpdate();
+                try
+                {
+                    using (var stream = File.OpenRead(m_strUsedXmlFilename))
+                    using (XmlReader reader = XmlReader.Create(stream))
+                    {
+                        stop.SetProgressRange(0, stream.Length);
+
+                        // 定位到 collection 元素
+                        while (true)
+                        {
+                            bool bRet = reader.Read();
+                            if (bRet == false)
+                            {
+                                strError = $"文件 {m_strUsedXmlFilename} 没有根元素";
+                                goto ERROR1;
+                            }
+                            if (reader.NodeType == XmlNodeType.Element)
+                                break;
+                        }
+
+                        int j = 0;
+                        while (reader.Read())
+                        {
+                            bool display = (j % 1000) == 0;
+
+                            if (display)
+                                Application.DoEvents(); // 出让界面控制权
+
+                            if (stop != null && stop.State != 0)
+                            {
+                                MessageBox.Show(this, "用户中断");
+                                return 0;
+                            }
+
+                            if (reader.NodeType != XmlNodeType.Element)
+                                continue;
+
+                            string record_xml = reader.ReadOuterXml();
+                            XmlDocument dom = new XmlDocument();
+                            dom.LoadXml(record_xml);
+
+                            if (dom.DocumentElement == null)
+                                continue;
+
+                            string strRecPath = dom.DocumentElement.GetAttribute("path");
+                            if (string.IsNullOrEmpty(strRecPath))
+                            {
+                                strError = $"{dom.DocumentElement.Name} 元素缺乏 path 属性";
+                                goto ERROR1;
+                            }
+                            /*
+                            if (strRecPath == null)
+                                break;
+                            */
+
+                            if (display)
+                                stop.SetProgressValue(stream.Position);
+
+                            // 检查路径的正确性，检查数据库是否为实体库之一
+                            string strDbName = Global.GetDbName(strRecPath);
+                            if (string.IsNullOrEmpty(strDbName) == true)
+                            {
+                                strError = "'" + strRecPath + "' 不是合法的记录路径";
+                                goto ERROR1;
+                            }
+
+                            if (this.DbType == "item")
+                            {
+                                if (Program.MainForm.IsItemDbName(strDbName) == false)
+                                {
+                                    strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的实体库名。很可能所指定的文件不是实体库的记录路径文件";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (this.DbType == "comment")
+                            {
+                                if (Program.MainForm.IsCommentDbName(strDbName) == false)
+                                {
+                                    strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的评注库名。很可能所指定的文件不是评注库的记录路径文件";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (this.DbType == "order")
+                            {
+                                if (Program.MainForm.IsOrderDbName(strDbName) == false)
+                                {
+                                    strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的订购库名。很可能所指定的文件不是订购库的记录路径文件";
+                                    goto ERROR1;
+                                }
+                            }
+                            else if (this.DbType == "issue")
+                            {
+                                if (Program.MainForm.IsIssueDbName(strDbName) == false)
+                                {
+                                    strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的期库名。很可能所指定的文件不是期库的记录路径文件";
+                                    goto ERROR1;
+                                }
+                            }
+                            else
+                                throw new Exception("未知的DbType '" + this.DbType + "'");
+
+                            xml_table[strRecPath] = record_xml;
+
+                            ListViewItem item = new ListViewItem();
+                            item.Text = strRecPath;
+
+                            this._listviewRecords.Items.Add(item);
+
+                            items.Add(item);
+                            j++;
+                        }
+                    }
+                }
+                finally
+                {
+                    this._listviewRecords.EndUpdate();
+                }
+
+                // 刷新浏览行
+                int nRet = RefreshListViewLines(
+                channel,
+                items,
+                "",
+                false,
+                true,
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 2014/1/15
+                // 刷新书目摘要
+                nRet = FillBiblioSummaryColumn(
+                    channel,
+                    items,
+                    false,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 修改记录的 XML
+                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                stop?.SetProgressRange(0, items.Count);
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+                List<ListViewItem> changed_items = new List<ListViewItem>();
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+
+                    string old_xml = info.OldXml;
+                    string new_xml = xml_table[info.RecPath] as string;
+
+                    bool reloaded = false;
+                    // 如果通过记录路径找不到册记录，需要尝试用 refID 找一找
+                    if (string.IsNullOrEmpty(old_xml) && string.IsNullOrEmpty(new_xml) == false)
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到了
+                        nRet = TryLoadRecord(
+                            channel,
+                            new_xml,
+                            out string xml,
+                            out string item_recpath,
+                            out byte[] timestamp,
+                            out strError);
+                        if (nRet != 1)
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"(用 refID)重试装载记录 '{info.RecPath}' 失败: {strError}。跳过处理") + "</div>");
+                            goto CONTINUE;
+                        }
+                        old_xml = xml;
+                        info.OldXml = old_xml;
+                        ChangeInfoRecPath(this.m_biblioTable,
+info,
+item_recpath);
+                        info.Timestamp = timestamp;
+                        ListViewUtil.ChangeItemText(item.ListViewItem, 0, info.RecPath);
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode($"(用 refID)重试装载记录成功，记录路径被改变为 '{info.RecPath}'") + "</div>");
+                        reloaded = true;
+                    }
+
+                    if (string.IsNullOrEmpty(old_xml)
+                        || string.IsNullOrEmpty(new_xml))
+                    {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"记录中 old_xml 或 new_xml 为空，已跳过修改") + "</div>");
+                        goto CONTINUE;
+                    }
+
+                    XmlDocument old_dom = new XmlDocument();
+                    old_dom.LoadXml(old_xml);
+                    XmlDocument new_dom = new XmlDocument();
+                    new_dom.LoadXml(new_xml);
+
+                    if (reloaded == false)
+                    {
+                        // 对比 parent 元素不应该有变化
+                        string old_parent = DomUtil.GetElementText(old_dom.DocumentElement, "parent");
+                        string new_parent = DomUtil.GetElementText(new_dom.DocumentElement, "parent");
+
+                        // parent 元素发生了变化
+                        if (old_parent != new_parent)
+                        {
+                            // 尝试用 refID 重新装载记录
+                            {
+                                // return:
+                                //      -1  出错
+                                //      0   没有找到
+                                //      1   找到了
+                                nRet = TryLoadRecord(
+                                    channel,
+                                    new_xml,
+                                    out string xml,
+                                    out string item_recpath,
+                                    out byte[] timestamp,
+                                    out strError);
+                                if (nRet != 1)
+                                {
+                                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"(记录中 parent 元素发生了变动 '{old_parent}'-->'{new_parent}')(用 refID)重试装载记录 '{info.RecPath}' 失败: {strError}。跳过处理") + "</div>");
+                                    goto CONTINUE;
+                                }
+                                old_xml = xml;
+                                old_dom.LoadXml(old_xml);
+                                info.OldXml = old_xml;
+                                ChangeInfoRecPath(this.m_biblioTable,
+    info,
+    item_recpath);
+                                info.Timestamp = timestamp;
+                                ListViewUtil.ChangeItemText(item.ListViewItem, 0, info.RecPath);
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode($"(记录中 parent 元素发生了变动 '{old_parent}'-->'{new_parent}')(用 refID)重试装载记录成功，记录路径被改变为 '{info.RecPath}'") + "</div>");
+                                reloaded = true;
+                            }
+                        }
+                    }
+
+                    string changed_xml = ChangeElements(element_list,
+    old_xml,
+    new_xml,
+    "append_comment");
+                    if (changed_xml == old_xml)
+                    {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug warning'>&nbsp;&nbsp;&nbsp;&nbsp;" + HttpUtility.HtmlEncode("没有发生修改") + "</div>");
+                        goto CONTINUE;
+                    }
+
+                    info.NewXml = changed_xml;
+
+                    this.m_nChangedCount++;
+                    item.ListViewItem.BackColor = SystemColors.Info;
+                    item.ListViewItem.ForeColor = SystemColors.InfoText;
+
+                CONTINUE:
+                    i++;
+                    stop?.SetProgressValue(i);
+                }
+            }
+            catch(System.Xml.XPath.XPathException ex)
+            {
+                strError = $"元素名列表 '{element_list}' 不合法: {ex.Message}";
+                return -1;
+            }
+            catch(Exception ex)
+            {
+                strError = $"ImportFromXmlFile() 出现异常: {ExceptionUtil.GetDebugText(ex)}";
+                return -1;
+            }
+            finally
+            {
+                this.EnableControls(true);
+
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束" + this.DbTypeCaption + " XML 记录导入覆盖</div>");
+            }
+
+            DoViewComment(false);
+            return 1;
+        ERROR1:
+            return -1;
+            // MessageBox.Show(this, strError);
+        }
+
+        static void ChangeInfoRecPath(Hashtable table,
+            BiblioInfo info,
+            string new_recpath)
+        {
+            if (info.RecPath == new_recpath)
+                return;
+            if (table.ContainsKey(info.RecPath))
+                table.Remove(info.RecPath);
+
+            info.RecPath = new_recpath;
+            table[new_recpath] = info;
+        }
+
+        // parameters:
+        //      ref_xml 用于参考的 XML 记录
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到了
+        int TryLoadRecord(
+            LibraryChannel channel,
+            string ref_xml,
+            out string xml,
+            out string item_recpath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strError = "";
+            xml = "";
+            item_recpath = "";
+            timestamp = null;
+
+            XmlDocument item_dom = new XmlDocument();
+            item_dom.LoadXml(ref_xml);
+
+            string refID = DomUtil.GetElementText(item_dom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(refID))
+            {
+                strError = "参考记录中不存在 refID 元素";
+                return 0;
+            }
+
+            // 尝试用 refID 查找
+            long lRet = channel.GetItemInfo(null,
+                "item",
+                $"@refID:{refID}",
+                "",
+                "xml",
+                out xml,
+                out item_recpath,
+                out timestamp,
+                "",
+                out _,
+                out _,
+                out strError);
+            if (lRet == 0)
+            {
+                string barcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+
+                // 再尝试用 barcode 找一次
+                if (string.IsNullOrEmpty(barcode) == false)
+                {
+                    lRet = channel.GetItemInfo(null,
+        "item",
+        barcode,
+        "",
+        "xml",
+        out xml,
+        out item_recpath,
+        out timestamp,
+        "",
+        out _,
+        out _,
+        out strError);
+                    if (lRet == 0)
+                    {
+                        strError = $"用参考 ID '{refID}' 和册条码号 '{barcode}' 都没有找到记录";
+                        return 0;
+                    }
+                    if (lRet != 1)
+                    {
+                        strError = $"用参考 ID '{refID}' 没有找到记录，然后再用册条码号 '{barcode}' 查找时出错: {strError}";
+                        return -1;
+                    }
+                }
+                else
+                {
+                    strError = $"用参考 ID '{refID}' 没有找到记录";
+                    return 0;
+                }
+            }
+            if (lRet != 1)
+            {
+                Debug.Assert(string.IsNullOrEmpty(strError) == false);
+                return -1;
+            }
+            Debug.Assert(string.IsNullOrEmpty(xml) == false);
+            Debug.Assert(string.IsNullOrEmpty(item_recpath) == false);
+            return 1;
+        }
+
+        static string[] _ignore_names = new string[] {
+            "refID",
+            "parent",
+            "operations",
+            "checkInOutDate",
+            "borrowHistory",
+            "borrower",
+            "borrowDate",
+            "borrowPeriod",
+            "returningDate",
+            "oi",
+            "operator",
+        };
+
+        static List<string> GetElementNames(XmlDocument new_dom)
+        {
+            List<string> names = new List<string>();
+            var nodes = new_dom.DocumentElement.SelectNodes("*");
+            foreach (XmlElement node in nodes)
+            {
+                if (string.IsNullOrEmpty(node.Prefix) == false)
+                    continue;
+                if (Array.IndexOf(_ignore_names, node.Name) != -1)
+                    continue;
+                names.Add(node.Name);
+            }
+
+            return names;
+        }
+
+        // Exceptions:
+        //      可能会抛出异常。select() 时
+        static string ChangeElements(string element_list,
+            string old_xml,
+            string new_xml,
+            string style)
+        {
+            XmlDocument old_dom = new XmlDocument();
+            old_dom.LoadXml(old_xml);
+
+            XmlDocument new_dom = new XmlDocument();
+            new_dom.LoadXml(new_xml);
+
+            bool append_comment = StringUtil.IsInList("append_comment", style);
+
+            List<string> names = StringUtil.SplitList(element_list);
+            if (string.IsNullOrEmpty(element_list))
+            {
+                /*
+                var nodes = new_dom.DocumentElement.SelectNodes("*");
+                foreach (XmlElement node in nodes)
+                {
+                    if (string.IsNullOrEmpty(node.Prefix) == false)
+                        continue;
+                    if (Array.IndexOf(_ignore_names, node.Name) != -1)
+                        continue;
+                    names.Add(node.Name);
+                }
+                */
+                // 从两个 DOM 里面抽取元素名
+                names.AddRange(GetElementNames(new_dom));
+                names.AddRange(GetElementNames(old_dom));
+                StringUtil.RemoveDup(ref names, false);
+            }
+            else
+            {
+                // 检查元素名
+                List<string> error_names = new List<string>();
+                foreach (var name in names)
+                {
+                    if (Array.IndexOf(_ignore_names, name) != -1)
+                        error_names.Add(name);
+                }
+
+                if (error_names.Count > 0)
+                    throw new ArgumentException($"下列元素禁止修改 {StringUtil.MakePathList(error_names)}");
+            }
+
+            // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
+            foreach (string name in names)
+            {
+                /*
+                string strTextNew = DomUtil.GetElementText(domNew.DocumentElement,
+                    core_entity_element_names[i]);
+
+                DomUtil.SetElementText(domExist.DocumentElement,
+                    core_entity_element_names[i], strTextNew);
+                 * */
+                {
+                    XmlElement node_new = new_dom.DocumentElement.SelectSingleNode(name) as XmlElement;
+                    if (node_new != null)
+                    {
+                        // 看看 dprms:missing 属性是否存在
+                        if (node_new.GetAttributeNode("missing", DpNs.dprms) != null)
+                            continue;
+                    }
+                }
+
+                string strTextNew = DomUtil.GetElementOuterXml(new_dom.DocumentElement,
+                    name);
+                string strTextOld = DomUtil.GetElementOuterXml(old_dom.DocumentElement,
+                    name);
+                // 2022/8/9
+                if (IsEmpty(strTextNew) && IsEmpty(strTextOld))
+                    continue;
+                if (strTextNew == strTextOld)
+                    continue;
+                // 在 comment 元素中记载修改前的内容
+                if (append_comment)
+                {
+                    string old_content = DomUtil.GetElementInnerText(old_dom.DocumentElement, name);
+                    string new_content = DomUtil.GetElementInnerText(new_dom.DocumentElement, name);
+
+                    string old_comment = DomUtil.GetElementText(old_dom.DocumentElement, "comment");
+                    string new_comment = old_comment;
+                    if (string.IsNullOrEmpty(new_comment) == false)
+                        new_comment += "; ";
+                    new_comment += $"{DateTime.Now.ToString()} 修改 {name}:'{old_content}'--'{new_content}'";
+
+                    DomUtil.SetElementText(old_dom.DocumentElement, "comment", new_comment);
+                }
+                DomUtil.SetElementOuterXml(old_dom.DocumentElement,
+                    name, strTextNew);
+            }
+
+            return old_dom.OuterXml;
+        }
+
+        static bool IsEmpty(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return true;
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(xml);
+            if (dom.DocumentElement.HasAttributes == false
+                && string.IsNullOrEmpty(dom.DocumentElement.InnerXml.Trim()))
+                return true;
+            return false;
         }
 
         /// <summary>
