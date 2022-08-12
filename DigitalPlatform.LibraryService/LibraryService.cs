@@ -4759,6 +4759,7 @@ namespace dp2Library
                 // strLocationFilter = "海淀分馆"; // testing
                 if (string.IsNullOrEmpty(strLocationFilter) == false)
                 {
+                    /*
                     string strOperator = "AND";
                     if (strLocationFilter.StartsWith("-"))
                     {
@@ -4767,6 +4768,9 @@ namespace dp2Library
                     }
                     string strLocationQueryXml = "<item resultset='#" + strLocationFilter + "' />";
                     strQueryXml = $"<group>{strQueryXml}<operator value='{strOperator}'/>{strLocationQueryXml}</group>";    // !!!
+                    */
+                    var items = FilterItem.BuildList(strLocationFilter);
+                    strQueryXml = FilterItem.BuildQueryXml(strQueryXml, items);
                 }
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
@@ -4849,6 +4853,61 @@ namespace dp2Library
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strErrorText;
                 return result;
+            }
+        }
+
+        class FilterItem
+        {
+            public string Operator { get; set; }
+            public string ResultsetName { get; set; }
+
+            public static List<FilterItem> BuildList(string text)
+            {
+                List<FilterItem> results = new List<FilterItem>();
+                FilterItem current = null;
+                foreach(char ch in text)
+                {
+                    if (ch == '*' || ch == '-' || ch == '+')
+                    {
+                        string strOperator = "AND";
+                        if (ch == '*')
+                            strOperator = "AND";
+                        else if (ch == '-')
+                            strOperator = "SUB";
+                        else if (ch == '+')
+                            strOperator = "OR";
+
+                        current = new FilterItem { Operator = strOperator };
+                        results.Add(current);
+                    }
+                    else
+                    {
+                        if (current == null)
+                        {
+                            current = new FilterItem { Operator = "AND" };
+                            results.Add(current);
+                        }
+                        current.ResultsetName += ch;
+                    }
+                }
+
+                return results;
+            }
+
+            public static string BuildQueryXml(string strQueryXml, 
+                List<FilterItem> items)
+            {
+                StringBuilder text = new StringBuilder();
+                text.Append("<group>");
+                text.Append(strQueryXml);
+                foreach(var item in items)
+                {
+                    text.Append($"<operator value='{item.Operator}'/>");
+                    text.Append($"<item resultset='#{item.ResultsetName}' />");
+                }
+                text.Append("</group>");
+                // strQueryXml = $"<group>{strQueryXml}<operator value='{strOperator}'/>{strLocationQueryXml}</group>";    // !!!
+                return text.ToString();
             }
         }
 

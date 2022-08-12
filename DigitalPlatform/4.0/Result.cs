@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace DigitalPlatform
 {
+    // 已经被移动到 DigitalPlatform.Core.dll 中
+#if REMOVED
     [Serializable()]
     public class NormalResult
     {
@@ -42,4 +44,7 @@ namespace DigitalPlatform
         public string Text { get; set; }
 
     }
+
+
+#endif
 }

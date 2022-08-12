@@ -159,11 +159,12 @@ namespace DigitalPlatform.rms
         //      0   可用节点数为 0。等于没有任何可检索的必要
         //		1   成功
         public int Infix2RPN(XmlNode node,
-            out ArrayList output,
+            out List<XmlElement> output,
             out string strError)
         {
             strError = "";
-            output = new ArrayList();
+            // output = new ArrayList();
+            output = new List<XmlElement>();
             if (node == null)
             {
                 strError = "node 不能为 null\r\n";
@@ -180,6 +181,10 @@ namespace DigitalPlatform.rms
 
             foreach (XmlNode nodeChild in node.ChildNodes)
             {
+                // 2022/8/11
+                if (nodeChild.NodeType != XmlNodeType.Element)
+                    continue;
+
                 //用于其它用途的扩展节点，需要跳过
                 if (nodeChild.Name == "lang" || nodeChild.Name == "option")
                     continue;
@@ -191,7 +196,7 @@ namespace DigitalPlatform.rms
                 //操作数时，加到output.
                 if (nodeChild.Name != "operator")
                 {
-                    output.Add(nodeChild);
+                    output.Add(nodeChild as XmlElement);
                 }
                 else //操作符时
                 {
@@ -215,7 +220,7 @@ namespace DigitalPlatform.rms
                         while (stackOperator.Count != 0)
                         {
                             //首先从栈里pop出一个操作符
-                            XmlNode nodeTemp = (XmlNode)stackOperator.Pop();
+                            var nodeTemp = stackOperator.Pop() as XmlElement;
 
                             string strTemp = DomUtil.GetAttr(node, "value");
 
@@ -295,7 +300,7 @@ namespace DigitalPlatform.rms
                             }
 
                             //得到栈顶操作符(使用peek)，及优先级
-                            XmlNode nodeIn = (XmlNode)stackOperator.Peek();
+                            XmlElement nodeIn = stackOperator.Peek() as XmlElement;
                             string strOperatorIn = "";
                             if (nodeIn != null)
                                 strOperatorIn = DomUtil.GetAttr(nodeIn, "value");
@@ -317,7 +322,7 @@ namespace DigitalPlatform.rms
                             }
 
                             //其它从栈里pop，加到output里
-                            nodeIn = (XmlNode)stackOperator.Pop();
+                            nodeIn = stackOperator.Pop() as XmlElement;
                             output.Add(nodeIn);
                         }
                     }
@@ -328,7 +333,7 @@ namespace DigitalPlatform.rms
             //最后，将栈里剩下的操作符，从栈里pop，加到output里
             while (stackOperator.Count != 0)
             {
-                XmlNode nodeTemp = (XmlNode)stackOperator.Pop();
+                var  nodeTemp = stackOperator.Pop() as XmlElement;
 
                 //操作符为左括号，括号不匹配，出错，返回-1
                 string strOperator = "";
@@ -834,13 +839,12 @@ namespace DigitalPlatform.rms
                 }
 
                 //将正常顺序变成逆波兰表序
-                ArrayList rpn;
                 // return:
                 //		-1  出错 例如:括号不匹配;找不到某操作符的优先级
                 //      0   可用节点数为 0。等于没有任何可检索的必要
                 //		1   成功
                 int nRet = Infix2RPN(nodeRoot,
-                    out rpn,
+                    out List<XmlElement> rpn,
                     out strError);
                 if (nRet == -1)
                 {
@@ -919,7 +923,7 @@ namespace DigitalPlatform.rms
         public int ProceedRPN(
             SessionInfo sessioninfo,
             string strOutputStyle,
-            ArrayList rpn,
+            List<XmlElement> rpn,
             ref DpResultSet resultSet,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
@@ -971,10 +975,10 @@ namespace DigitalPlatform.rms
                 ReversePolishStack oReversePolandStack =
                     new ReversePolishStack();
 
-                //做循环
-                for (int i = 0; i < rpn.Count; i++)
+                // for (int i = 0; i < rpn.Count; i++)
+                foreach(XmlElement node in rpn)
                 {
-                    XmlElement node = (XmlElement)rpn[i];
+                    // XmlElement node = (XmlElement)rpn[i];
 
                     if (node.Name != "operator")  //操作数直接push到栈里
                     {
