@@ -44,14 +44,12 @@
             this.label10 = new System.Windows.Forms.Label();
             this.textBox_barcode = new System.Windows.Forms.TextBox();
             this.textBox_price = new System.Windows.Forms.TextBox();
-            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.textBox_borrower = new System.Windows.Forms.TextBox();
             this.textBox_borrowDate = new System.Windows.Forms.TextBox();
             this.textBox_borrowPeriod = new System.Windows.Forms.TextBox();
             this.textBox_recPath = new System.Windows.Forms.TextBox();
             this.textBox_registerNo = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
-            this.textBox_mergeComment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.textBox_batchNo = new System.Windows.Forms.TextBox();
@@ -94,11 +92,8 @@
             this.textBox_intact = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
             this.label_binding_color = new System.Windows.Forms.Label();
-            this.textBox_binding = new DigitalPlatform.CommonControl.AutoHeightTextBox();
-            this.checkedComboBox_state = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label22 = new System.Windows.Forms.Label();
             this.label_operations_color = new System.Windows.Forms.Label();
-            this.textBox_operations = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.label_bindingCost_color = new System.Windows.Forms.Label();
             this.textBox_bindingCost = new System.Windows.Forms.TextBox();
@@ -112,6 +107,11 @@
             this.label25 = new System.Windows.Forms.Label();
             this.label_invoiceNo_color = new System.Windows.Forms.Label();
             this.textBox_invoiceNo = new System.Windows.Forms.TextBox();
+            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.textBox_mergeComment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.textBox_binding = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.checkedComboBox_state = new DigitalPlatform.CommonControl.CheckedComboBox();
+            this.textBox_operations = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.tableLayoutPanel_main.SuspendLayout();
             this.contextMenuStrip_barcode.SuspendLayout();
             this.SuspendLayout();
@@ -415,21 +415,6 @@
             this.textBox_price.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_price.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
-            // textBox_comment
-            // 
-            this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_comment.Location = new System.Drawing.Point(163, 441);
-            this.textBox_comment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_comment.MinimumSize = new System.Drawing.Size(220, 0);
-            this.textBox_comment.Multiline = true;
-            this.textBox_comment.Name = "textBox_comment";
-            this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_comment.Size = new System.Drawing.Size(444, 28);
-            this.textBox_comment.TabIndex = 36;
-            this.textBox_comment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.textBox_comment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
-            // 
             // textBox_borrower
             // 
             this.textBox_borrower.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -510,21 +495,6 @@
             this.label11.TabIndex = 28;
             this.label11.Text = "册类型";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // textBox_mergeComment
-            // 
-            this.textBox_mergeComment.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_mergeComment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_mergeComment.Location = new System.Drawing.Point(163, 475);
-            this.textBox_mergeComment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_mergeComment.MinimumSize = new System.Drawing.Size(220, 0);
-            this.textBox_mergeComment.Multiline = true;
-            this.textBox_mergeComment.Name = "textBox_mergeComment";
-            this.textBox_mergeComment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_mergeComment.Size = new System.Drawing.Size(444, 28);
-            this.textBox_mergeComment.TabIndex = 39;
-            this.textBox_mergeComment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.textBox_mergeComment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
             // label12
             // 
@@ -1015,40 +985,6 @@
             this.label_binding_color.Size = new System.Drawing.Size(4, 34);
             this.label_binding_color.TabIndex = 56;
             // 
-            // textBox_binding
-            // 
-            this.textBox_binding.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_binding.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_binding.Location = new System.Drawing.Point(163, 689);
-            this.textBox_binding.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_binding.MaxLength = 0;
-            this.textBox_binding.MinimumSize = new System.Drawing.Size(220, 0);
-            this.textBox_binding.Multiline = true;
-            this.textBox_binding.Name = "textBox_binding";
-            this.textBox_binding.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_binding.Size = new System.Drawing.Size(444, 28);
-            this.textBox_binding.TabIndex = 57;
-            this.textBox_binding.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.textBox_binding.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
-            // 
-            // checkedComboBox_state
-            // 
-            this.checkedComboBox_state.BackColor = System.Drawing.SystemColors.Window;
-            this.checkedComboBox_state.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.checkedComboBox_state.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_state.Location = new System.Drawing.Point(161, 55);
-            this.checkedComboBox_state.Margin = new System.Windows.Forms.Padding(2);
-            this.checkedComboBox_state.MinimumSize = new System.Drawing.Size(165, 0);
-            this.checkedComboBox_state.Name = "checkedComboBox_state";
-            this.checkedComboBox_state.Padding = new System.Windows.Forms.Padding(6);
-            this.checkedComboBox_state.ReadOnly = false;
-            this.checkedComboBox_state.Size = new System.Drawing.Size(448, 36);
-            this.checkedComboBox_state.TabIndex = 5;
-            this.checkedComboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
-            this.checkedComboBox_state.TextChanged += new System.EventHandler(this.checkedComboBox_state_TextChanged);
-            this.checkedComboBox_state.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.checkedComboBox_state.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
-            // 
             // label22
             // 
             this.label22.AutoSize = true;
@@ -1070,22 +1006,6 @@
             this.label_operations_color.Name = "label_operations_color";
             this.label_operations_color.Size = new System.Drawing.Size(4, 34);
             this.label_operations_color.TabIndex = 59;
-            // 
-            // textBox_operations
-            // 
-            this.textBox_operations.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_operations.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_operations.Location = new System.Drawing.Point(163, 723);
-            this.textBox_operations.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.textBox_operations.MaxLength = 0;
-            this.textBox_operations.MinimumSize = new System.Drawing.Size(220, 0);
-            this.textBox_operations.Multiline = true;
-            this.textBox_operations.Name = "textBox_operations";
-            this.textBox_operations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_operations.Size = new System.Drawing.Size(444, 28);
-            this.textBox_operations.TabIndex = 60;
-            this.textBox_operations.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
-            this.textBox_operations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
             // label23
             // 
@@ -1234,6 +1154,86 @@
             this.textBox_invoiceNo.Name = "textBox_invoiceNo";
             this.textBox_invoiceNo.Size = new System.Drawing.Size(444, 24);
             this.textBox_invoiceNo.TabIndex = 79;
+            // 
+            // textBox_comment
+            // 
+            this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_comment.Location = new System.Drawing.Point(163, 441);
+            this.textBox_comment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_comment.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_comment.Multiline = true;
+            this.textBox_comment.Name = "textBox_comment";
+            this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_comment.Size = new System.Drawing.Size(444, 28);
+            this.textBox_comment.TabIndex = 36;
+            this.textBox_comment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.textBox_comment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            // 
+            // textBox_mergeComment
+            // 
+            this.textBox_mergeComment.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_mergeComment.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_mergeComment.Location = new System.Drawing.Point(163, 475);
+            this.textBox_mergeComment.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_mergeComment.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_mergeComment.Multiline = true;
+            this.textBox_mergeComment.Name = "textBox_mergeComment";
+            this.textBox_mergeComment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_mergeComment.Size = new System.Drawing.Size(444, 28);
+            this.textBox_mergeComment.TabIndex = 39;
+            this.textBox_mergeComment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.textBox_mergeComment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            // 
+            // textBox_binding
+            // 
+            this.textBox_binding.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_binding.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_binding.Location = new System.Drawing.Point(163, 689);
+            this.textBox_binding.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_binding.MaxLength = 0;
+            this.textBox_binding.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_binding.Multiline = true;
+            this.textBox_binding.Name = "textBox_binding";
+            this.textBox_binding.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_binding.Size = new System.Drawing.Size(444, 28);
+            this.textBox_binding.TabIndex = 57;
+            this.textBox_binding.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.textBox_binding.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            // 
+            // checkedComboBox_state
+            // 
+            this.checkedComboBox_state.BackColor = System.Drawing.SystemColors.Window;
+            this.checkedComboBox_state.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkedComboBox_state.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkedComboBox_state.Location = new System.Drawing.Point(161, 55);
+            this.checkedComboBox_state.Margin = new System.Windows.Forms.Padding(2);
+            this.checkedComboBox_state.MinimumSize = new System.Drawing.Size(165, 0);
+            this.checkedComboBox_state.Name = "checkedComboBox_state";
+            this.checkedComboBox_state.Padding = new System.Windows.Forms.Padding(6);
+            this.checkedComboBox_state.ReadOnly = false;
+            this.checkedComboBox_state.Size = new System.Drawing.Size(448, 36);
+            this.checkedComboBox_state.TabIndex = 5;
+            this.checkedComboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
+            this.checkedComboBox_state.TextChanged += new System.EventHandler(this.checkedComboBox_state_TextChanged);
+            this.checkedComboBox_state.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.checkedComboBox_state.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
+            // 
+            // textBox_operations
+            // 
+            this.textBox_operations.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_operations.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_operations.Location = new System.Drawing.Point(163, 723);
+            this.textBox_operations.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_operations.MaxLength = 0;
+            this.textBox_operations.MinimumSize = new System.Drawing.Size(220, 0);
+            this.textBox_operations.Multiline = true;
+            this.textBox_operations.Name = "textBox_operations";
+            this.textBox_operations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_operations.Size = new System.Drawing.Size(444, 28);
+            this.textBox_operations.TabIndex = 60;
+            this.textBox_operations.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
+            this.textBox_operations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
             // EntityEditControl
             // 

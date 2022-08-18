@@ -114,8 +114,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\DigitalPlatform.rms\bin\Debug\DigitalPlatform.rms.dll</HintPath>
     </Reference>
-    <Reference Include="DocumentFormat.OpenXml, Version=2.9.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
-      <HintPath>..\packages\DocumentFormat.OpenXml.2.9.1\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.17.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.2.17.1\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
@@ -2699,7 +2699,7 @@
     <EmbeddedResource Include="Statis\ReportForm.resx">
       <DependentUpon>ReportForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TestForm.resx">
+    <EmbeddedResource Include="Testing\TestForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>TestForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -2977,10 +2977,10 @@
     </Compile>
     <Compile Include="Statis\ReportWriter.cs" />
     <Compile Include="Statis\SQLiteUtil.cs" />
-    <Compile Include="TestForm.cs">
+    <Compile Include="Testing\TestForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TestForm.Designer.cs">
+    <Compile Include="Testing\TestForm.Designer.cs">
       <DependentUpon>TestForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Testing\Permunation.cs" />
@@ -3432,6 +3432,10 @@
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Typography\DigitalPlatform.Typography.csproj">
+      <Project>{30825159-df59-4a97-a2e9-a1cfb4b27475}</Project>
+      <Name>DigitalPlatform.Typography</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
       <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>

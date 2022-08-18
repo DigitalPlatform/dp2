@@ -34,6 +34,7 @@ using DigitalPlatform.AmazonInterface;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Core;
+using DigitalPlatform.Typography;
 
 namespace dp2Circulation
 {
@@ -1540,6 +1541,7 @@ ref bHideMessageBox);
                 controls.Add(this.textBox_login_password);
                 controls.Add(this.textBox_login_parameters);
 
+                controls.Add(this.textBox_typography_xml);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1557,6 +1559,7 @@ ref bHideMessageBox);
                 controls.Add(this.textBox_login_password);
                 controls.Add(this.textBox_login_parameters);
 
+                controls.Add(this.textBox_typography_xml);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -2013,6 +2016,13 @@ this,
             }
         }
 
-
+        private void button_typography_convertToWordML_Click(object sender, EventArgs e)
+        {
+            var fileName = Path.Combine(Program.MainForm.UserTempDir, "~xml");
+            var outputFileName = Path.Combine(Program.MainForm.UserTempDir, "~test.docx");
+            File.WriteAllText(fileName, this.textBox_typography_xml.Text, Encoding.UTF8);
+            TypoUtility.XmlToWord(fileName, outputFileName);
+            Process.Start(outputFileName);
+        }
     }
 }

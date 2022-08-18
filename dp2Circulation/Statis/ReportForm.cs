@@ -720,7 +720,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                             line.BiblioRecPath = strBiblioRecPath;
                             lines.Add(line);
 
-                            CONTINUE:
+                        CONTINUE:
                             i++;
                         }
 
@@ -2805,7 +2805,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
             }
 
             return 0;
-            FOUND:
+        FOUND:
             macro_table["%linecount%"] = tableDepartment.Count.ToString();
             macro_table["%daterange%"] = strDateRange;
 
@@ -4471,10 +4471,10 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
 
             string strLibraryCode = Global.GetLibraryCode(strLocation);
             // string strLocationLike = " operlogcircu.librarycode like '%," + strLibraryCode + ",%' "; // 不知何时用的这种方法。这种方法的问题是，如果一些图书中途被划拨给某个其他分馆，用这种方式就会导致 [全部] 的几个表统计出来的数量偏少。而用 item.location 判断就没有这个问题 
-            
+
             // 这是压制 [全部] 的做法
             string strLocationLike = " item.location like '" + strLocation + "%' "; // 2017/6/21 改回用这种方式。因为要统计洞庭湖校区的 2017 2 到 6 月的数据
-            
+
             // if (string.IsNullOrEmpty(Global.GetLocationRoom(strLocation)) == false)
             {
                 // 改为沿用以前的方法。会出现 [全部]
@@ -5764,7 +5764,7 @@ out strError);
             if (bChanged == true)
                 this._cfg.Save();
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -5816,7 +5816,7 @@ out strError);
 
             this._cfg.Save();
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -5871,7 +5871,7 @@ out strError);
 
             this._cfg.Save();
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -5933,7 +5933,7 @@ out strError);
 
             this._cfg.Save();
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -5981,7 +5981,7 @@ MessageBoxDefaultButton.Button2);
             if (this._cfg != null)
                 this._cfg.Save();
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -6340,7 +6340,10 @@ MessageBoxDefaultButton.Button2);
                         task_dom.DocumentElement.AppendChild(node);
 
                         DomUtil.SetAttr(node, "start_date", strFirstDate);  // "20060101"
-                        DomUtil.SetAttr(node, "end_date", strEndDate + ":0-" + (lCount - 1).ToString());
+                        if (lCount > 0)
+                            DomUtil.SetAttr(node, "end_date", strEndDate + ":0-" + (lCount - 1).ToString());
+                        else
+                            DomUtil.SetAttr(node, "end_date", strEndDate + ":0-");  // 2022/8/15
                     }
                 }
 
@@ -6392,7 +6395,11 @@ MessageBoxDefaultButton.Button2);
                         task_dom.DocumentElement.AppendChild(node);
 
                         DomUtil.SetAttr(node, "start_date", strFirstDate);  // "20060101"
-                        DomUtil.SetAttr(node, "end_date", strEndDate + ":0-" + (lCount - 1).ToString());
+                        // DomUtil.SetAttr(node, "end_date", strEndDate + ":0-" + (lCount - 1).ToString());
+                        if (lCount > 0)
+                            DomUtil.SetAttr(node, "end_date", strEndDate + ":0-" + (lCount - 1).ToString());
+                        else
+                            DomUtil.SetAttr(node, "end_date", strEndDate + ":0-");  // 2022/8/15
                     }
                 }
 
@@ -7002,7 +7009,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
             return;
-            ERROR1:
+        ERROR1:
             SetStartButtonStates();
             SetDailyReportButtonState();
             this.Invoke((Action)(() =>
@@ -7562,8 +7569,8 @@ MessageBoxDefaultButton.Button2);
                             this.GetErrorInfoForm().WriteHtml(strError + "\r\n");
                         }
 
-                        // lProcessCount++;
-                        CONTINUE:
+                    // lProcessCount++;
+                    CONTINUE:
                         // 便于循环外获得这些值
                         strLastItemDate = item.Date;
                         lLastItemIndex = item.Index + 1;
@@ -8043,7 +8050,7 @@ out strError);
 
                     string[] results = null;
                     byte[] timestamp = null;
-                    REDO:
+                REDO:
                     long lRet = Channel.GetBiblioInfos(
                         Progress,
                         "@path-list:" + StringUtil.MakePathList(recpaths),
@@ -8213,7 +8220,7 @@ out strError);
                             }
                         }
 
-                        CONTINUE:
+                    CONTINUE:
                         i++;
                     }
 
@@ -8714,7 +8721,7 @@ out strError);
 
                 return 0;
             }
-            TRY_DELETE:
+        TRY_DELETE:
             if (strAction == "delete")
             {
                 XmlNode node = null;
@@ -9388,7 +9395,7 @@ out strError);
                 goto ERROR1;
             this.Invoke((Action)(() => MessageBox.Show(this, "处理完成")));
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
         }
 
@@ -9523,7 +9530,7 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -9705,7 +9712,7 @@ Stack:
             }
 
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -10138,7 +10145,7 @@ MessageBoxDefaultButton.Button2);
             strTaskFileName = Path.Combine(GetBaseDirectory(), "dailyreport_task.xml");
             task_dom.Save(strTaskFileName); // 预先保存一次
 
-            DO_TASK:
+        DO_TASK:
 #if NO
             nRet = DoDailyReportTask(
                 ref task_dom,
@@ -10153,7 +10160,7 @@ MessageBoxDefaultButton.Button2);
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
             return;
-            ERROR1:
+        ERROR1:
             if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
                 task_dom.Save(strTaskFileName);
 
@@ -10579,7 +10586,7 @@ MessageBoxDefaultButton.Button1);
             strTaskFileName = Path.Combine(GetBaseDirectory(), "dailyreport_task.xml");
             task_dom.Save(strTaskFileName); // 预先保存一次
 
-            DO_TASK:
+        DO_TASK:
 #if NO
             nRet = DoDailyReportTask(
                 ref task_dom,
@@ -10594,7 +10601,7 @@ MessageBoxDefaultButton.Button1);
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
             return;
-            ERROR1:
+        ERROR1:
             if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
                 task_dom.Save(strTaskFileName);
 
@@ -10845,7 +10852,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.StatusBarMessage = "耗费时间 " + ProgressEstimate.Format(_estimate.delta_passed)
 ));
             return 1;
-            ERROR1:
+        ERROR1:
 #if NO
             {
                 string strError1 = "";
@@ -12922,7 +12929,7 @@ MessageBoxDefaultButton.Button1);
 "daily_report_end_date",
 "20130101");
 
-            REDO:
+        REDO:
             strLastDate = InputDlg.GetInput(
     this,
     "设置报表创建起点日期",
@@ -13159,13 +13166,13 @@ MessageBoxDefaultButton.Button1);
                     Program.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
             }));
             return;
-            NOT_FOUND:
+        NOT_FOUND:
             this.Invoke((Action)(() =>
             {
                 Program.MainForm.StatusBarMessage = strError;
             }));
             return;
-            ERROR1:
+        ERROR1:
             BeginUpdateUploadButtonText();
             this.Invoke((Action)(() =>
             {
@@ -13311,7 +13318,7 @@ MessageBoxDefaultButton.Button1);
             if (this.DeleteReportFileAfterUpload == true && nUploadCount > 0)
                 Program.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
             return;
-            ERROR1:
+        ERROR1:
             if (nUploadCount > 0)
             {
                 // SetUploadButtonState();
@@ -13440,7 +13447,7 @@ MessageBoxDefaultButton.Button1);
                             + Convert.ToString(fi.Length)
                             + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
                     int nRedoCount = 0;
-                    REDO:
+                REDO:
                     long lRet = channel.SaveResObject(
                         stop,
                         strResPath,
@@ -13478,7 +13485,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -13798,7 +13805,7 @@ MessageBoxDefaultButton.Button1);
                 MessageBox.Show(this, "成功转换文件 " + nCount.ToString() + " 个");
             }));
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);
@@ -13971,7 +13978,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = "导出成功。";
             return;
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() =>
             {
                 MessageBox.Show(this, strError);

@@ -2350,6 +2350,10 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 2022/8/15
+            if (sessioninfo.UserID == "public")
+                return 0;
+
             if (sessioninfo.Account != null
                 && sessioninfo.Account.IsPatron == true)
             {

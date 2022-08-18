@@ -323,6 +323,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateAssemblyBinding", "Up
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDp2kernel", "TestDp2kernel\TestDp2kernel.csproj", "{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Typography", "DigitalPlatform.Typography\DigitalPlatform.Typography.csproj", "{30825159-DF59-4A97-A2E9-A1CFB4B27475}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2766,6 +2768,24 @@ Global
 		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
 		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|x86.ActiveCfg = Debug|Any CPU
 		{9828E1EF-2207-4B0C-8053-3CC7E3EEFCC0}.Test|x86.Build.0 = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Debug|x86.Build.0 = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Release|x86.ActiveCfg = Release|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Release|x86.Build.0 = Release|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Test|x86.ActiveCfg = Debug|Any CPU
+		{30825159-DF59-4A97-A2E9-A1CFB4B27475}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,35 @@
+﻿
+<root>
+<styles>
+	<style name="New Style"
+	baseOn="Normal"
+	font="ascii:Lucida Console,hAnsi:...,eastAsia:...,cs:..."
+	size="..."
+	color="..."
+	style="italic,bold"/>
+</styles>
+
+<p style="New Style">一段文字</p>
+<p>first <style size="150">second</style> third</p>
+
+<table>
+	<tr>
+		<td>1</td>
+		<td>2</td>
+		<td>3</td>
+	</tr>
+
+	<tr>
+		<td>1</td>
+		<td>2</td>
+		<td>3</td>
+	</tr>
+
+</table>
+</root>
+
+1) p/@style 中应该允许直接使用匿名的 style 定义。或者说 p 元素某处允许直接嵌套 style 元素，这个 style 元素为这个 p 元素私用
+2) style 元素允许折叠为一个属性值字符串?
+
+p 元素之内的 style 元素，暗含类型 Paragraph
+文字之间的 style 元素，可以用 ref 属性引用一个全局的 style 元素
