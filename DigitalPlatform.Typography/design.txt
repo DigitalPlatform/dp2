@@ -1,13 +1,25 @@
 ﻿
 <root>
-<styles>
-	<style name="New Style"
-	baseOn="Normal"
-	font="ascii:Lucida Console,hAnsi:...,eastAsia:...,cs:..."
-	size="..."
-	color="..."
-	style="italic,bold"/>
-</styles>
+	<styles>
+		<style name="New Style"
+		baseOn="Normal"
+		font="ascii:Lucida Console,hAnsi:...,eastAsia:...,cs:..."
+		size="..."
+		color="..."
+		style="italic,bold"/>
+	</styles>
+	<columns columnCount="2" separator="true" space="36pt" equalWidth="true">
+		<column width="288pt" space="36pt"/>
+		<column width="144pt"/>
+	</columns>
+	<headers>
+		<header><p>page number: <pageNumber/></p>
+		</header>
+	</headers>
+	<footers>
+		<footer>footer
+		</footer>
+	</footers>
 
 <p style="New Style">一段文字</p>
 <p>first <style size="150">second</style> third</p>
@@ -33,3 +45,34 @@
 
 p 元素之内的 style 元素，暗含类型 Paragraph
 文字之间的 style 元素，可以用 ref 属性引用一个全局的 style 元素
+
+全局双栏和多栏
+
+Columns:
+https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.columns?view=openxml-2.8.1
+Section Properties:
+https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.sectionproperties?view=openxml-2.8.1
+
+http://officeopenxml.com/WPsectionCols.php
+A section can be divided into columns with the <w:cols> element.
+
+<w:sectPr>
+	<w:cols w:num="3" w:space="720"/>
+</w:sectPr>
+
+Note: If the columns are of equal width, then the columns are specified with attributes of <w:cols>. If the columns are not equal, then each column is specified as a child <w:col> element, as shown below.
+
+<w:sectPr>
+	<w:cols w:num="2" w:sep="1" w:space="720" w:equalWidth="0">
+		<w:col w:w="5760" w:space="720"/>
+		<w:col w:w="2880"/>
+	</w:cols>
+</w:sectPr>
+
+
+
+
+
+
+// https://docs.microsoft.com/en-us/office/open-xml/how-to-add-tables-to-word-processing-documents
+// https://docs.microsoft.com/en-us/office/open-xml/how-to-validate-a-word-processing-document?view=openxml-2.8.1

@@ -12,6 +12,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryClient;
+using dp2Circulation.ISO2709Statis;
 
 namespace dp2Circulation
 {
@@ -152,7 +153,7 @@ namespace dp2Circulation
                 "<全部>");
 
             // 方案名
-            this.textBox_projectName.Text = Program.MainForm.AppInfo.GetString(
+            this.comboBox_projectName.Text = Program.MainForm.AppInfo.GetString(
                 "bibliostatisform",
                 "projectname",
                 "");
@@ -216,7 +217,7 @@ namespace dp2Circulation
                 Program.MainForm.AppInfo.SetString(
                     "bibliostatisform",
                     "projectname",
-                    this.textBox_projectName.Text);
+                    this.comboBox_projectName.Text);
 
                 // 记录路径
                 Program.MainForm.AppInfo.SetString(
@@ -403,13 +404,25 @@ Stack:
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
 
-                nRet = PrepareScript(strProjectName,
+                if (strProjectName == "#输出书本式目录到docx")
+                {
+                    objStatis = new OutputDocxCatalog
+                    {
+                        BiblioStatisForm = this,
+                        ProjectDir = "",
+                        InstanceDir = this.InstanceDir,
+                    };
+                }
+                else
+                {
+                    nRet = PrepareScript(strProjectName,
                     strProjectLocate,
                     out this.objStatis,
                     out filter,
                     out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
 
                 if (strInitialParamString == "test_compile")
                     return 0;
@@ -474,7 +487,7 @@ Stack:
                     }
                 }
                 return 0;
-                ERROR1:
+            ERROR1:
                 return -1;
             }
             catch (Exception ex)
@@ -713,7 +726,7 @@ Stack:
                 filter.Assembly = assemblyFilter;
             }
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -814,7 +827,7 @@ Stack:
                     loader.Channel = Channel;
                     loader.Stop = stop;
                     loader.TextReader = sr;
-                    loader.Format = "xml";
+                    loader.Format = objStatis.BiblioFormat;    // "xml";
                     loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
 
                     loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -1256,7 +1269,7 @@ Stack:
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1307,35 +1320,40 @@ Stack:
 
             if (this.tabControl_main.SelectedTab == this.tabPage_selectProject)
             {
-                string strProjectName = this.textBox_projectName.Text;
+                string strProjectName = this.comboBox_projectName.Text;
 
                 if (String.IsNullOrEmpty(strProjectName) == true)
                 {
                     strError = "尚未指定方案名";
-                    this.textBox_projectName.Focus();
+                    this.comboBox_projectName.Focus();
                     goto ERROR1;
                 }
 
                 string strProjectLocate = "";
-                // 获得方案参数
-                // strProjectNamePath	方案名，或者路径
-                // return:
-                //		-1	error
-                //		0	not found project
-                //		1	found
-                int nRet = this.ScriptManager.GetProjectData(
+                int nRet = 0;
+
+                if (strProjectName.StartsWith("#") == false)
+                {
+                    // 获得方案参数
+                    // strProjectNamePath	方案名，或者路径
+                    // return:
+                    //		-1	error
+                    //		0	not found project
+                    //		1	found
+                    nRet = this.ScriptManager.GetProjectData(
                     strProjectName,
                     out strProjectLocate);
 
-                if (nRet == 0)
-                {
-                    strError = "方案 " + strProjectName + " 没有找到...";
-                    goto ERROR1;
-                }
-                if (nRet == -1)
-                {
-                    strError = "scriptManager.GetProjectData() error ...";
-                    goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "方案 " + strProjectName + " 没有找到...";
+                        goto ERROR1;
+                    }
+                    if (nRet == -1)
+                    {
+                        strError = "scriptManager.GetProjectData() error ...";
+                        goto ERROR1;
+                    }
                 }
 
                 // 切换到执行page
@@ -1375,7 +1393,7 @@ Stack:
             if (String.IsNullOrEmpty(strWarning) == false)
                 MessageBox.Show(this, "警告: \r\n" + strWarning);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1423,7 +1441,7 @@ Stack:
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.scriptManager = this.ScriptManager;
-            dlg.ProjectName = this.textBox_projectName.Text;
+            dlg.ProjectName = this.comboBox_projectName.Text;
             dlg.NoneProject = false;
 
             Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
@@ -1434,7 +1452,7 @@ Stack:
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            this.textBox_projectName.Text = dlg.ProjectName;
+            this.comboBox_projectName.Text = dlg.ProjectName;
         }
 
         private void radioButton_inputStyle_recPathFile_CheckedChanged(object sender, EventArgs e)
@@ -1661,30 +1679,35 @@ Stack:
             if (String.IsNullOrEmpty(strProjectName) == true)
             {
                 strError = "尚未指定方案名";
-                this.textBox_projectName.Focus();
+                this.comboBox_projectName.Focus();
                 goto ERROR1;
             }
 
             string strProjectLocate = "";
-            // 获得方案参数
-            // strProjectNamePath	方案名，或者路径
-            // return:
-            //		-1	error
-            //		0	not found project
-            //		1	found
-            int nRet = this.ScriptManager.GetProjectData(
+            int nRet = 0;
+
+            if (strProjectName.StartsWith("#") == false)
+            {
+                // 获得方案参数
+                // strProjectNamePath	方案名，或者路径
+                // return:
+                //		-1	error
+                //		0	not found project
+                //		1	found
+                nRet = this.ScriptManager.GetProjectData(
                 strProjectName,
                 out strProjectLocate);
 
-            if (nRet == 0)
-            {
-                strError = "方案 " + strProjectName + " 没有找到...";
-                goto ERROR1;
-            }
-            if (nRet == -1)
-            {
-                strError = "scriptManager.GetProjectData() error ...";
-                goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = "方案 " + strProjectName + " 没有找到...";
+                    goto ERROR1;
+                }
+                if (nRet == -1)
+                {
+                    strError = "scriptManager.GetProjectData() error ...";
+                    goto ERROR1;
+                }
             }
 
             // 切换到执行page
@@ -1693,7 +1716,6 @@ Stack:
             this.Running = true;
             try
             {
-
                 nRet = RunScript(strProjectName,
                     strProjectLocate,
                     strInitialParamString,
@@ -1714,7 +1736,7 @@ Stack:
 
             // MessageBox.Show(this, "统计完成。");
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1816,7 +1838,7 @@ Stack:
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
     }

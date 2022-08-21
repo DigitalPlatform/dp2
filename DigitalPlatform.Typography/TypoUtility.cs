@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
+using DocumentFormat.OpenXml.VariantTypes;
+using System.Collections.Generic;
 
 
 using DocumentFormat.OpenXml;
@@ -11,7 +13,8 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 using DigitalPlatform.Text;
-using DocumentFormat.OpenXml.VariantTypes;
+using DigitalPlatform.Xml;
+using System.Xml.Linq;
 
 namespace DigitalPlatform.Typography
 {
@@ -63,6 +66,163 @@ namespace DigitalPlatform.Typography
                     }
                 }
 #endif
+
+                var columns_node = dom.DocumentElement.SelectSingleNode("columns") as XmlElement;
+                if (columns_node != null)
+                    CreateColumns(doc, columns_node);
+
+                var headers_node = dom.DocumentElement.SelectSingleNode("headers") as XmlElement;
+                if (headers_node != null)
+                    CreateHeaders(doc, headers_node);
+
+                var footers_node = dom.DocumentElement.SelectSingleNode("footers") as XmlElement;
+                if (footers_node != null)
+                    CreateFooters(doc, footers_node);
+            }
+        }
+
+        // https://social.technet.microsoft.com/Forums/en-US/afbb713d-00b6-42d3-b045-2cc3aa5dd338/how-to-change-the-header-and-footer-in-the-section-breaks-next-page-using-openxml
+        static void CreateHeaders(WordprocessingDocument doc,
+    XmlElement headers_node)
+        {
+            SectionProperties sectPr = EnsureSectionProperty(doc);
+
+            HeaderPart headerPart2 = doc.MainDocumentPart.AddNewPart<HeaderPart>("rIdHeader");
+            var header_node = headers_node.SelectSingleNode("header");
+            if (header_node != null)
+            {
+                if (headerPart2.Header == null)
+                    headerPart2.Header = new Header();
+                CreateNodes(doc, headerPart2.Header, header_node.ChildNodes);
+            }
+
+            // GenerateHeaderPartContent(headerPart2);
+
+            sectPr.GetFirstChild<HeaderReference>()?.Remove();
+            HeaderReference headerReference1 = new HeaderReference()
+            {
+                Type = HeaderFooterValues.Default,
+                Id = "rIdHeader"
+            };
+            sectPr.Append(headerReference1);
+        }
+
+        /*
+        static void GenerateHeaderPartContent(HeaderPart hpart)
+        {
+            Header header1 = new Header();
+            Paragraph paragraph1 = new Paragraph();
+            ParagraphProperties paragraphProperties1 = new ParagraphProperties();
+            ParagraphStyleId paragraphStyleId1 = new ParagraphStyleId() { Val = "Header" };
+            paragraphProperties1.Append(paragraphStyleId1);
+            Run run1 = new Run();
+            Text text1 = new Text();
+            text1.Text = "";
+            run1.Append(text1);
+            paragraph1.Append(paragraphProperties1);
+            paragraph1.Append(run1);
+            header1.Append(paragraph1);
+            hpart.Header = header1;
+        }
+        */
+
+        static void CreateFooters(WordprocessingDocument doc,
+XmlElement footers_node)
+        {
+            SectionProperties sectPr = EnsureSectionProperty(doc);
+
+            var footerPart2 = doc.MainDocumentPart.AddNewPart<FooterPart>("rIdFooter");
+            var footer_node = footers_node.SelectSingleNode("footer");
+            if (footer_node != null)
+            {
+                if (footerPart2.Footer == null)
+                    footerPart2.Footer = new Footer();
+                CreateNodes(doc, footerPart2.Footer, footer_node.ChildNodes);
+            }
+
+            sectPr.GetFirstChild<FooterReference>()?.Remove();
+            FooterReference footerReference1 = new FooterReference()
+            {
+                Type = HeaderFooterValues.Default,
+                Id = "rIdFooter"
+            };
+            sectPr.Append(footerReference1);
+        }
+
+        static SectionProperties EnsureSectionProperty(WordprocessingDocument doc)
+        {
+            var sectPrs =
+doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
+            if (sectPrs.Count == 0)
+            {
+                return doc.MainDocumentPart.Document.Body.AppendChild<SectionProperties>(new SectionProperties());
+            }
+            else
+                return sectPrs[0];
+        }
+
+        // 创建全局 sectPr
+        static void CreateColumns(WordprocessingDocument doc,
+            XmlElement columns_node)
+        {
+            SectionProperties sectPr = EnsureSectionProperty(doc);
+            /*
+            var sectPrs =
+doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
+            if (sectPrs.Count == 0)
+            {
+                sectPr = doc.MainDocumentPart.Document.Body.AppendChild<SectionProperties>(new SectionProperties());
+            }
+            else
+                sectPr = sectPrs[0];
+            */
+
+            sectPr.RemoveAllChildren<Columns>();
+            var columns = sectPr.PrependChild<Columns>(new Columns());
+
+            {
+                var columnCount_attr = columns_node.GetAttribute("columnCount");
+                if (string.IsNullOrEmpty(columnCount_attr) == false)
+                    columns.ColumnCount = Convert.ToInt16(columnCount_attr);
+
+                var equalWidth_attr = columns_node.GetAttribute("equalWidth");
+                if (string.IsNullOrEmpty(equalWidth_attr) == false)
+                    columns.EqualWidth = DomUtil.IsBooleanTrue(equalWidth_attr);
+
+                var separator_attr = columns_node.GetAttribute("separator");
+                if (string.IsNullOrEmpty(separator_attr) == false)
+                    columns.Separator = DomUtil.IsBooleanTrue(separator_attr);
+
+                var space_attr = columns_node.GetAttribute("space");
+                if (string.IsNullOrEmpty(space_attr) == false)
+                {
+                    // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.columns.space?view=openxml-2.8.1
+                    // unit: twentieths of a point
+                    columns.Space = GetTwentieths(space_attr);
+                }
+            }
+
+            var column_nodes = columns_node.SelectNodes("column");
+            foreach (XmlElement column_node in column_nodes)
+            {
+                var column = new Column();
+                columns.AppendChild(column);
+
+                var width_attr = column_node.GetAttribute("width");
+                if (string.IsNullOrEmpty(width_attr) == false)
+                {
+                    // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.columns.space?view=openxml-2.8.1
+                    // unit: twentieths of a point
+                    column.Width = GetTwentieths(width_attr);
+                }
+
+                var space_attr = column_node.GetAttribute("space");
+                if (string.IsNullOrEmpty(space_attr) == false)
+                {
+                    // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.columns.space?view=openxml-2.8.1
+                    // unit: twentieths of a point
+                    column.Space = GetTwentieths(space_attr);
+                }
             }
         }
 
@@ -103,7 +263,7 @@ namespace DigitalPlatform.Typography
                 if (node.Name == "p")
                 {
                     CreateParagraph(doc,
-                        p == null ? body: p,
+                        p == null ? body : p,
                         node as XmlElement);
                     continue;
                 }
@@ -111,7 +271,7 @@ namespace DigitalPlatform.Typography
                 // table 元素
                 if (node.Name == "table")
                 {
-                    CreateTable(doc, 
+                    CreateTable(doc,
                         p == null ? body : p,
                         node as XmlElement);
                     continue;
@@ -310,6 +470,24 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                 pPr.ParagraphStyleId = new ParagraphStyleId() { Val = style_id };
             }
 
+            string alignment = paragraph.GetAttribute("alignment");
+            if (string.IsNullOrEmpty(alignment) == false)
+            {
+                if (p.Elements<ParagraphProperties>().Count() == 0)
+                {
+                    p.PrependChild<ParagraphProperties>(new ParagraphProperties());
+                }
+
+                ParagraphProperties pPr = p.Elements<ParagraphProperties>().First();
+                if (Enum.TryParse<JustificationValues>(alignment, true, out JustificationValues value) == false)
+                {
+                    throw new Exception($"alignment 属性值 '{alignment}' 不合法");
+                }
+                Justification objJustification =
+    new Justification() { Val = value };
+                pPr.Append(objJustification);
+            }
+
             // p 元素的下级节点
             CreateTextStream(doc, p, paragraph.ChildNodes);
 #if REMOVED
@@ -358,12 +536,14 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             XmlNodeList nodes,
             Style style = null)
         {
+            bool parent_is_paragraph = p is Paragraph;
+            Paragraph temp_paragraph = null;
             // p 元素的下级节点
             foreach (XmlNode child_node in nodes)
             {
                 if (child_node.NodeType == XmlNodeType.Text)
                 {
-                    Run run = p.AppendChild(new Run());
+                    Run run = CreateParagraphIfNeed().AppendChild(new Run());
                     run.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Text(child_node.Value));
 
                     if (style != null)
@@ -382,6 +562,48 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                     continue;
                 }
 
+                // p 元素
+                if (child_node.Name == "p")
+                {
+                    CreateParagraph(doc,
+                        p,
+                        child_node as XmlElement);
+                    temp_paragraph = null;  // 打断
+                    continue;
+                }
+
+                OpenXmlElement CreateParagraphIfNeed()
+                {
+                    if (p is Paragraph)
+                        return p;
+                    if (temp_paragraph != null)
+                        return temp_paragraph;
+                    temp_paragraph = p.AppendChild(new Paragraph());
+                    return temp_paragraph;
+                }
+
+                // TODO: 可以考虑和附近的一个 Run 合并?
+                if (child_node.Name == "pageNumber")
+                {
+                    Run run = CreateParagraphIfNeed().AppendChild(new Run());
+                    // run.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Text(child_node.Value));
+
+                    // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.pagenumber?view=openxml-2.8.1
+                    run.AppendChild<PageNumber>(new PageNumber());
+                    continue;
+                }
+
+                if (child_node.Name == "pageCount")
+                {
+                    // https://social.msdn.microsoft.com/Forums/office/en-US/5e89bb1d-543b-407b-8d9c-eb19f654c227/force-updating-numpages-field-using-c?forum=oxmlsdk
+                    SimpleField simpleField1 = new SimpleField()
+                    {
+                        Instruction = " NUMPAGES   \\* MERGEFORMAT "
+                    };
+                    CreateParagraphIfNeed().AppendChild(simpleField1);
+                    continue;
+                }
+
                 if (child_node.Name == "style")
                 {
                     EnsureStyles(doc);
@@ -390,7 +612,10 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             doc.MainDocumentPart.StyleDefinitionsPart;
                     part.Styles.Append(new_style);
 
-                    CreateTextStream(doc, p, child_node.ChildNodes, new_style);
+                    CreateTextStream(doc,
+                        p,
+                        child_node.ChildNodes,
+                        new_style);
                     /*
                     Run run = p.AppendChild(new Run());
                     run.AppendChild(new DocumentFormat.OpenXml.Wordprocessing.Text(child_node.Value));
@@ -572,6 +797,33 @@ out string error);
 
             throw new Exception($"未知的单位 '{unit}' ('{text}')");
         }
+
+        static string GetTwentieths(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            int nRet = StringUtil.ParseUnit(text,
+out string value,
+out string unit,
+out string error);
+            if (nRet == -1)
+                throw new Exception(error);
+
+            if (string.IsNullOrEmpty(unit) || unit == "pt")
+            {
+                var v = (int)(Convert.ToDouble(value) * 20D);
+                return v.ToString();
+            }
+
+            if (unit == "dxa")
+            {
+                return value;
+            }
+
+            throw new Exception($"未知的单位 '{unit}' ('{text}')");
+        }
+
 
         static FontSize GetFontSize(string text)
         {

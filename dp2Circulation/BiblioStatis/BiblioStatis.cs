@@ -48,6 +48,19 @@ namespace dp2Circulation
         /// </summary>
         public XmlDocument BiblioDom = null;    // Xml装入XmlDocument
 
+        string _biblioFormat = "xml";
+        public string BiblioFormat
+        {
+            get
+            {
+                return _biblioFormat;
+            }
+            set
+            {
+                _biblioFormat = value;
+            }
+        }
+
         string m_strXml = "";
         /// <summary>
         /// 当前正在处理的书目 XML 记录，字符串类型

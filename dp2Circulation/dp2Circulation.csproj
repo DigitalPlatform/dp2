@@ -385,6 +385,7 @@
     <Compile Include="ActivateForm.Designer.cs">
       <DependentUpon>ActivateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="BiblioStatis\OutputDocxCatalog.cs" />
     <Compile Include="Charging\ChargingTask.cs" />
     <Compile Include="Charging\ColorSummaryControl.cs">
       <SubType>UserControl</SubType>
