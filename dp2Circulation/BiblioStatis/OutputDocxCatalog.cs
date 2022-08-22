@@ -7,19 +7,35 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Diagnostics;
+using System.Data;
 
+using DocumentFormat.OpenXml.InkML;
+
+using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Typography;
-using System.Diagnostics;
 using DigitalPlatform.LibraryClient;
-using DigitalPlatform;
-using DocumentFormat.OpenXml.InkML;
-using System.Data;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
+    /*
+1.dp2 系统输出书本式目录，按照选定的书目记录来输出。
+2.同一书目信息的册显示在一条书目信息里。
+3.方案是处理dp2系统中册记录，不处理书目记录中的905字段。
+4.书本式目录输出信息包括“题名、责任者、出版者、出版地、出版时间、下挂册条码号、下挂册的索书号”。
+5.三列多行的格式，第一列显示序号，第二列显示册条码号，第三列显示图书信息及索书号。
+6.第二列需要显示同一书目信息下属所有册条码号。
+7.当同一书目下属册超过3册且册条码号是连续的情况，把册条码合并显示。例如：一条书目信息下有4册实体，021001，021002，021003，021004，显示成：021001-021004，“021001”“-”“021004”各占一行，一共占3行。
+8.当同一书目信息下属册条码号不连续的时候，直接显示所有册条码号。
+9.同一书目信息下属册的索书号不同时，只显示第一个册的索书号，其他不显示。
+10.索书号为单独一行，且与图书信息间隔略大。
+11.可以自定义序号，即打印时按照自定义的序号开始连续排序。
+12.书本式目录按照要求的格式输出到Word，在word 中排版成双栏效果。
+13.第三方系统的书目信息，需要将ISO2709格式文件先导入dp2系统，从dp2系统再导出书本式样式的信息到word。
+    * */
     public class OutputDocxCatalog : BiblioStatis
     {
         string _outputFileName;
@@ -93,13 +109,13 @@ alignment="center"/>
                 _writer.WriteStartElement("style");
                 _writer.WriteAttributeString("name", "biblio");
                 _writer.WriteAttributeString("font", "ascii:Times New Roman,eastAsia:宋体");
-                _writer.WriteAttributeString("size", "10pt");
+                _writer.WriteAttributeString("size", "9pt");
                 _writer.WriteEndElement();  // style
 
                 _writer.WriteStartElement("style");
                 _writer.WriteAttributeString("name", "barcode");
-                _writer.WriteAttributeString("font", "ascii:Courier");
-                _writer.WriteAttributeString("size", "7pt");
+                _writer.WriteAttributeString("font", "ascii:Times New Roman");
+                _writer.WriteAttributeString("size", "8pt");
                 _writer.WriteEndElement();  // style
 
                 _writer.WriteEndElement();  // styles
@@ -167,6 +183,7 @@ alignment="center"/>
             string accessNo = "";
             if (accessNos.Count > 0)
                 accessNo = accessNos[0];
+            accessNo = StringUtil.GetPlainTextCallNumber(accessNo);
 
             var barcodes = result.BarcodeList;
             for (int i = 0; i < barcodes.Count; i++)
@@ -174,6 +191,14 @@ alignment="center"/>
                 if (string.IsNullOrEmpty(barcodes[i]))
                     barcodes[i] = "(空)";
             }
+
+            // 归并连续的号码
+            barcodes.Sort((a, b) => {
+                if (a.Length != b.Length)
+                    return a.Length - b.Length; // 位数少的在前
+                return string.CompareOrdinal(a, b); // 同样位数的比较先后
+            });
+            barcodes = StringUtil.CompactNumbers(barcodes);
 
             bool first = _index == 0;
 
@@ -183,8 +208,8 @@ alignment="center"/>
             // 序号
             {
                 _writer.WriteStartElement("td");
-                if (first)
-                    _writer.WriteAttributeString("width", "20");
+                //if (first)
+                _writer.WriteAttributeString("width", "auto");    // "20"
                 {
                     _writer.WriteStartElement("p");
                     _writer.WriteAttributeString("style", "index");
@@ -194,40 +219,68 @@ alignment="center"/>
                 _writer.WriteEndElement();
             }
 
-            // 索取号
+            // 册条码号
             {
                 _writer.WriteStartElement("td");
-                if (first)
-                    _writer.WriteAttributeString("width", "60");
-                {
-                    _writer.WriteStartElement("p");
-                    _writer.WriteAttributeString("style", "accessNo");
-                    _writer.WriteString(accessNo);
-                    _writer.WriteEndElement();
-                }
-                _writer.WriteEndElement();
-            }
-
-            // 正文
-            {
-                _writer.WriteStartElement("td");
-                if (first)
-                    _writer.WriteAttributeString("width", "auto");
-
-                // 书目 ISBD
-                {
-                    _writer.WriteStartElement("p");
-                    _writer.WriteAttributeString("style", "biblio");
-                    _writer.WriteString(book_string);
-                    _writer.WriteEndElement();
-                }
+                //if (first)
+                _writer.WriteAttributeString("width", "auto");    // "50"
 
                 // 条码号
                 if (barcodes.Count > 0)
                 {
                     _writer.WriteStartElement("p");
                     _writer.WriteAttributeString("style", "barcode");
-                    _writer.WriteString(StringUtil.MakePathList(barcodes, "; "));
+                    _writer.WriteString(StringUtil.MakePathList(barcodes, " "));
+                    _writer.WriteEndElement();
+                }
+
+                _writer.WriteEndElement();
+            }
+
+            // 正文、索取号
+            {
+                _writer.WriteStartElement("td");
+                //if (first)
+                _writer.WriteAttributeString("width", "auto");
+
+                // 书目 ISBD
+                {
+                    _writer.WriteStartElement("p");
+                    _writer.WriteAttributeString("style", "biblio");
+                    _writer.WriteAttributeString("alignment", "both");
+
+                    _writer.WriteAttributeString("spacing", "after:3pt");
+
+                    _writer.WriteString(book_string);
+                    _writer.WriteEndElement();
+                }
+
+                // 索取号
+                if (string.IsNullOrEmpty(accessNo) == false)
+                {
+                    _writer.WriteStartElement("p");
+                    _writer.WriteAttributeString("style", "accessNo");
+                    _writer.WriteAttributeString("spacing", "after:3pt");
+
+#if REMOVED
+                    {
+                        /*
+                         * line1
+                         * <br/>
+                         * line2
+                         * */
+                        var lines = StringUtil.SplitList(accessNo, '/');
+                        int i = 0;
+                        foreach (string line in lines)
+                        {
+                            if (i > 0)
+                                _writer.WriteElementString("br", "");
+                            _writer.WriteString(line);
+                            i++;
+                        }
+                    }
+#endif
+                    _writer.WriteString(accessNo.Replace("/", " / "));
                     _writer.WriteEndElement();
                 }
                 _writer.WriteEndElement();
@@ -371,6 +424,8 @@ alignment="center"/>
                     e.ResultAction = "yes";
             }
         }
+
+        // 合并连续的号码
 
     }
 }

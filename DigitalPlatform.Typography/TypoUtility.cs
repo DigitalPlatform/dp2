@@ -15,6 +15,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using System.Xml.Linq;
+using System.Text;
 
 namespace DigitalPlatform.Typography
 {
@@ -451,16 +452,30 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             // Body body = doc.MainDocumentPart.Document.Body;
 
             Paragraph p = body.AppendChild(new Paragraph());
-            // p 元素的 style 属性
-            string style_name = paragraph.GetAttribute("style");
-            if (string.IsNullOrEmpty(style_name) == false)
+
+            ParagraphProperties EnsureProperty()
             {
                 if (p.Elements<ParagraphProperties>().Count() == 0)
                 {
                     p.PrependChild<ParagraphProperties>(new ParagraphProperties());
                 }
 
+                return p.Elements<ParagraphProperties>().First();
+            }
+
+            // p 元素的 style 属性
+            string style_name = paragraph.GetAttribute("style");
+            if (string.IsNullOrEmpty(style_name) == false)
+            {
+                /*
+                if (p.Elements<ParagraphProperties>().Count() == 0)
+                {
+                    p.PrependChild<ParagraphProperties>(new ParagraphProperties());
+                }
+
                 ParagraphProperties pPr = p.Elements<ParagraphProperties>().First();
+                */
+                var pPr = EnsureProperty();
 
                 // style name 找到 style id
                 var style_id = GetStyleIdFromStyleName(doc, style_name);
@@ -473,12 +488,8 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             string alignment = paragraph.GetAttribute("alignment");
             if (string.IsNullOrEmpty(alignment) == false)
             {
-                if (p.Elements<ParagraphProperties>().Count() == 0)
-                {
-                    p.PrependChild<ParagraphProperties>(new ParagraphProperties());
-                }
+                var pPr = EnsureProperty();
 
-                ParagraphProperties pPr = p.Elements<ParagraphProperties>().First();
                 if (Enum.TryParse<JustificationValues>(alignment, true, out JustificationValues value) == false)
                 {
                     throw new Exception($"alignment 属性值 '{alignment}' 不合法");
@@ -486,6 +497,13 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                 Justification objJustification =
     new Justification() { Val = value };
                 pPr.Append(objJustification);
+            }
+
+            string spacing = paragraph.GetAttribute("spacing");
+            if (string.IsNullOrEmpty(spacing) == false)
+            {
+                var pPr = EnsureProperty();
+                SetParagraphSpacing(pPr, spacing);
             }
 
             // p 元素的下级节点
@@ -526,6 +544,173 @@ doc.MainDocumentPart.StyleDefinitionsPart;
 #endif
 
             return p;
+        }
+
+        static void SetParagraphSpacing(ParagraphProperties pPr, string text)
+        {
+            /*
+<w:pPr>
+<w:spacing w:before="360" w:after="120" w:line="480" w:lineRule="auto" w:beforeAutospacing="0" w:afterAutospacing="0"/>
+</w:pPr>
+            */
+            /*
+After
+AfterAutoSpacing
+AfterLines
+Before
+BeforeAutoSpacing
+BeforeLines
+Line
+LineRule
+            * */
+            // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.spacingbetweenlines?view=openxml-2.8.1
+            var spacing = pPr.AppendChild<SpacingBetweenLines>(new SpacingBetweenLines());
+
+            {
+                // Specifies the spacing (in absolute units) that should be added after the last line of the paragraph.
+                var after = StringUtil.GetParameterByPrefix(text, "after");
+                if (string.IsNullOrEmpty(after) == false)
+                    spacing.After = GetTwentieths(after);
+            }
+
+            {
+                // Specifies the spacing (in absolute units) that should be added before the first line of the paragraph.
+                var before = StringUtil.GetParameterByPrefix(text, "before");
+                if (string.IsNullOrEmpty(before) == false)
+                    spacing.Before = GetTwentieths(before);
+            }
+
+            {
+                // Specifies the amount of vertical spacing between lines of text within the paragraph.
+                // Note: If the value of the lineRule attribute is atLeast or exactly, then the value of the lineRule attribute is interpreted as 240th of a point. If the value of line is auto, then the value of line is interpreted as 240th of a line.
+                var line = StringUtil.GetParameterByPrefix(text, "line");
+                if (string.IsNullOrEmpty(line) == false)
+                {
+                    var result = ParseLineParameter(line);
+                    spacing.Line = result.Line;
+                    spacing.LineRule = result.LineRule;
+                }
+            }
+
+            {
+                var afterAutoSpacing = StringUtil.GetParameterByPrefix(text, "afterAutoSpacing");
+                if (string.IsNullOrEmpty(afterAutoSpacing) == false)
+                    spacing.AfterAutoSpacing = DomUtil.IsBooleanTrue(afterAutoSpacing);
+            }
+
+            {
+                var beforeAutoSpacing = StringUtil.GetParameterByPrefix(text, "beforeAutoSpacing");
+                if (string.IsNullOrEmpty(beforeAutoSpacing) == false)
+                    spacing.BeforeAutoSpacing = DomUtil.IsBooleanTrue(beforeAutoSpacing);
+            }
+
+            {
+                var afterLines = StringUtil.GetParameterByPrefix(text, "afterLines");
+                if (string.IsNullOrEmpty(afterLines) == false)
+                    spacing.AfterLines = GetBeforeLines(afterLines);    // spacing.AfterLines: The value of this attribute is specified in one hundredths of a line.
+            }
+
+            {
+                var beforeLines = StringUtil.GetParameterByPrefix(text, "beforeLines");
+                if (string.IsNullOrEmpty(beforeLines) == false)
+                    spacing.BeforeLines = GetBeforeLines(beforeLines);
+            }
+        }
+
+        static int GetBeforeLines(string text)
+        {
+            return (int)(Convert.ToDouble(text) * 100D);
+        }
+
+        // 1.5unit
+        public static int ParseUnit(string strText,
+out string strValue,
+out string strUnit,
+out string strError)
+        {
+            strValue = "";
+            strUnit = "";
+            strError = "";
+
+            if (String.IsNullOrEmpty(strText) == true)
+            {
+                strError = "strText 值不应为空";
+                return -1;
+            }
+
+            strText = strText.Trim();
+
+            if (String.IsNullOrEmpty(strText) == true)
+            {
+                strError = "strText 值除去两端空格后不应为空";
+                return -1;
+            }
+
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach (char ch in strText)
+            {
+                if ((ch >= '0' && ch <= '9') || ch == '.')
+                {
+                    text.Append(ch);
+                }
+                else
+                {
+                    strUnit = strText.Substring(i).Trim();
+                    break;
+                }
+                i++;
+            }
+
+            strValue = text.ToString();
+            return 0;
+        }
+
+
+        class LineValue
+        {
+            public string Line { get; set; }
+            public LineSpacingRuleValues LineRule { get; set; }
+        }
+        static LineValue ParseLineParameter(string text)
+        {
+            int nRet = ParseUnit(text,
+out string value,
+out string unit,
+out string error);
+            if (nRet == -1)
+                throw new Exception(error);
+
+            if (string.IsNullOrEmpty(unit) || unit == "auto")
+            {
+                // then the value of the line attribute shall be interpreted as 240ths of a line
+                var v = (int)(Convert.ToDouble(value) * 240D);
+                return new LineValue
+                {
+                    Line = v.ToString(),
+                    LineRule = LineSpacingRuleValues.Auto,
+                };
+            }
+
+            if (unit == "atLeast" || unit == "exact")
+            {
+                // TODO: value 内容中应该允许带 pt 等单位
+
+                // If the value of this attribute is either atLeast or exactly, then the value of the line attribute shall be interpreted as twentieths of a point
+                var v = (int)(Convert.ToDouble(value) * 20D);
+
+                if (Enum.TryParse<LineSpacingRuleValues>(unit, true, out LineSpacingRuleValues rule) == false)
+                {
+                    throw new Exception($"line 属性值中的单位 '{unit}' 不合法");
+                }
+                return new LineValue
+                {
+                    Line = v.ToString(),
+                    LineRule = rule,
+                };
+            }
+
+            throw new Exception($"未知的单位 '{unit}' ('{text}')");
         }
 
         // parameters:
@@ -569,6 +754,14 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                         p,
                         child_node as XmlElement);
                     temp_paragraph = null;  // 打断
+                    continue;
+                }
+
+                if (child_node.Name == "br")
+                {
+                    Run run = CreateParagraphIfNeed().AppendChild(new Run());
+                    // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.break?view=openxml-2.8.1
+                    run.AppendChild(new Break());
                     continue;
                 }
 
@@ -759,7 +952,7 @@ td.ChildNodes);
                 || text == "auto")
                 return new TableCellWidth { Type = TableWidthUnitValues.Auto };
 
-            int nRet = StringUtil.ParseUnit(text,
+            int nRet = ParseUnit(text,
 out string value,
 out string unit,
 out string error);
@@ -803,7 +996,7 @@ out string error);
             if (string.IsNullOrEmpty(text))
                 return text;
 
-            int nRet = StringUtil.ParseUnit(text,
+            int nRet = ParseUnit(text,
 out string value,
 out string unit,
 out string error);
@@ -827,7 +1020,7 @@ out string error);
 
         static FontSize GetFontSize(string text)
         {
-            int nRet = StringUtil.ParseUnit(text,
+            int nRet = ParseUnit(text,
 out string value,
 out string unit,
 out string error);
