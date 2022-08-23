@@ -194,7 +194,9 @@ namespace DigitalPlatform.OPAC.Server
         public int OutofReservationThreshold = 10;  // 预约到书多少不取次后，被惩罚禁止预约
         public bool CanReserveOnshelf = true;   // 是否可以预约在架图书
 
+#if OPAC_SEARCH_LOG
         public SearchLog SearchLog = null;
+#endif
 
         // 构造函数
         public OpacApplication()
@@ -904,7 +906,7 @@ namespace DigitalPlatform.OPAC.Server
                 }
             }
 
-# if NO
+#if NO
             // 复制css文件
             nRet = CopyCssFiles(out strError);
             if (nRet == -1)
@@ -1019,7 +1021,7 @@ namespace DigitalPlatform.OPAC.Server
             return 1;
         }
 
-        #region 复制 CSS 文件
+#region 复制 CSS 文件
 
         int CopyCssFiles(out string strError)
         {
@@ -1239,7 +1241,7 @@ namespace DigitalPlatform.OPAC.Server
             return 0;
         }
 
-        #endregion
+#endregion
 
         // 缓存的from信息
         Hashtable m_fromTable = new Hashtable();
@@ -2425,6 +2427,7 @@ System.Text.Encoding.UTF8))
                 if (this.ChatRooms != null)
                     this.ChatRooms.Close();
 
+#if OPAC_SEARCH_LOG
                 // 2012/12/17
                 // 将内存中的检索日志对象写入数据库
                 if (this.SearchLog != null)
@@ -2432,6 +2435,7 @@ System.Text.Encoding.UTF8))
                     string strError = "";
                     this.SearchLog.Flush(out strError);
                 }
+#endif
 
                 if (this.ChannelPool != null)
                 {

@@ -733,6 +733,7 @@ namespace DigitalPlatform.OPAC.Web
                 sessioninfo.ReturnChannel(channel);
             }
 
+#if OPAC_SEARCH_LOG
             if (app.SearchLog != null)
             {
                 SearchLogItem log = new SearchLogItem();
@@ -744,6 +745,7 @@ namespace DigitalPlatform.OPAC.Web
                 log.RecPath = this.RecPath;
                 app.SearchLog.AddLogItem(log);
             }
+#endif
 
             string strMarc = "";
 

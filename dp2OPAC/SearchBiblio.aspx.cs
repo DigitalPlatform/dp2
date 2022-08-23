@@ -226,6 +226,7 @@ ref sessioninfo) == false)
                 app.SetFilterTask(strResultSetName, null);
 #endif
 
+#if OPAC_SEARCH_LOG
                 if (app.SearchLog != null)
                 {
                     SearchLogItem log = new SearchLogItem();
@@ -240,7 +241,7 @@ ref sessioninfo) == false)
                     log.Format = "searchcount";
                     app.SearchLog.AddLogItem(log);
                 }
-
+#endif
                 // not found
                 if (lRet == 0)
                 {
@@ -536,6 +537,7 @@ ref sessioninfo) == false)
             app.SetFilterTask(strResultSetName, null);
 #endif
 
+#if OPAC_SEARCH_LOG
             if (app.SearchLog != null)
             {
                 SearchLogItem log = new SearchLogItem();
@@ -546,7 +548,7 @@ ref sessioninfo) == false)
                 log.Format = "searchcount";
                 app.SearchLog.AddLogItem(log);
             }
-
+#endif
             // not found
             if (lRet == 0)
             {

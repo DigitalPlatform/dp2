@@ -452,6 +452,11 @@ Stack:
                     StatisEventArgs args = new StatisEventArgs();
                     args.ParamString = strInitialParamString;
                     objStatis.OnInitial(this, args);
+                    if (args.Continue == ContinueType.Error)
+                    {
+                        strError = args.ParamString;
+                        return -1;
+                    }
                     if (args.Continue == ContinueType.SkipAll)
                         goto END1;
                 }
@@ -462,6 +467,11 @@ Stack:
                 {
                     StatisEventArgs args = new StatisEventArgs();
                     objStatis.OnBegin(this, args);
+                    if (args.Continue == ContinueType.Error)
+                    {
+                        strError = args.ParamString;
+                        return -1;
+                    }
                     if (args.Continue == ContinueType.SkipAll)
                         goto END1;
                 }
@@ -1087,6 +1097,11 @@ Stack:
                             {
                                 strError = "处理书目记录 '" + strRecPath + "' 过程中出现异常:" + ex.Message;
                                 throw new Exception(strError, ex);
+                            }
+                            if (args.Continue == ContinueType.Error)
+                            {
+                                strError = args.ParamString;
+                                return -1;
                             }
                             if (args.Continue == ContinueType.SkipAll)
                                 return 1;

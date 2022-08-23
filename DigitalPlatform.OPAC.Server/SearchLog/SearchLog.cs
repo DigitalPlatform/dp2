@@ -5,10 +5,12 @@ using System.Text;
 using System.Threading;
 using System.Security.Cryptography;
 
+#if OPAC_SEARCH_LOG
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using MongoDB.Bson.Serialization.Attributes;
+
 using DigitalPlatform.Text;
 
 namespace DigitalPlatform.OPAC.Server
@@ -207,7 +209,7 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
-        #region 访问计数
+#region 访问计数
 
         string m_strHitCountDatabaseName = "";
         MongoCollection<HitCountItem> _hitCountCollection = null;
@@ -268,7 +270,7 @@ namespace DigitalPlatform.OPAC.Server
             return item.HitCount;
         }
 
-        #endregion
+#endregion
     }
 
     public class SearchLogItem
@@ -294,5 +296,7 @@ namespace DigitalPlatform.OPAC.Server
         public string URL { get; set; }  // 资源 URL
         public long HitCount { get; set; }   // 次数
     }
-
 }
+
+#endif
+

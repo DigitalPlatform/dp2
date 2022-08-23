@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,8 +8,6 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using System.Data;
-
-using DocumentFormat.OpenXml.InkML;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -62,6 +59,15 @@ namespace dp2Circulation
         {
             string strError = "";
 
+            if (InputSettings() == false)
+            {
+                e.Continue = ContinueType.Error;
+                e.ParamString = "取消";
+                return;
+            }
+
+            _index = _BiblioNoStart;
+
             _outputFileName = Path.Combine(Program.MainForm.UserTempDir, "~output_docx_catalog.xml");
             try
             {
@@ -94,28 +100,28 @@ alignment="center"/>
 
                 _writer.WriteStartElement("style");
                 _writer.WriteAttributeString("name", "index");
-                _writer.WriteAttributeString("font", "ascii:Times New Roman");
-                _writer.WriteAttributeString("size", "8pt");
+                _writer.WriteAttributeString("font", _NoFontName); // "ascii:Times New Roman"
+                _writer.WriteAttributeString("size", _NoFontSize); // "8pt"
                 _writer.WriteAttributeString("style", "bold");
                 _writer.WriteEndElement();  // style
 
                 _writer.WriteStartElement("style");
                 _writer.WriteAttributeString("name", "accessNo");
-                _writer.WriteAttributeString("font", "ascii:Times New Roman");
-                _writer.WriteAttributeString("size", "8pt");
+                _writer.WriteAttributeString("font", _AccessNoFontName); // "ascii:Times New Roman"
+                _writer.WriteAttributeString("size", _AccessNoFontSize); // "8pt"
                 _writer.WriteEndElement();  // style
 
 
                 _writer.WriteStartElement("style");
                 _writer.WriteAttributeString("name", "biblio");
-                _writer.WriteAttributeString("font", "ascii:Times New Roman,eastAsia:宋体");
-                _writer.WriteAttributeString("size", "9pt");
+                _writer.WriteAttributeString("font", _ContentFontName); // "ascii:Times New Roman,eastAsia:宋体"
+                _writer.WriteAttributeString("size", _ContentFontSize); // "9pt"
                 _writer.WriteEndElement();  // style
 
                 _writer.WriteStartElement("style");
                 _writer.WriteAttributeString("name", "barcode");
-                _writer.WriteAttributeString("font", "ascii:Times New Roman");
-                _writer.WriteAttributeString("size", "8pt");
+                _writer.WriteAttributeString("font", _BarcodeFontName); // "ascii:Times New Roman"
+                _writer.WriteAttributeString("size", _BarcodeFontSize); // "8pt"
                 _writer.WriteEndElement();  // style
 
                 _writer.WriteEndElement();  // styles
@@ -153,6 +159,15 @@ alignment="center"/>
                 _writer.WriteAttributeString("equalWidth", "true");
 
                 _writer.WriteEndElement();  // columns
+            }
+
+            /*
+	<settings pageNumberStart="100"/>
+            * */
+            {
+                _writer.WriteStartElement("settings");
+                _writer.WriteAttributeString("pageNumberStart", _PageNumberStart.ToString());
+                _writer.WriteEndElement();  // settings
             }
 
             _writer.WriteStartElement("table");
@@ -200,7 +215,7 @@ alignment="center"/>
             });
             barcodes = StringUtil.CompactNumbers(barcodes);
 
-            bool first = _index == 0;
+            bool first = _index == _BiblioNoStart;
 
             string book_string = BuildBookString(this.BiblioDom);
 
@@ -213,7 +228,7 @@ alignment="center"/>
                 {
                     _writer.WriteStartElement("p");
                     _writer.WriteAttributeString("style", "index");
-                    _writer.WriteString($"{++_index}");
+                    _writer.WriteString($"{_index++}");
                     _writer.WriteEndElement();
                 }
                 _writer.WriteEndElement();
@@ -230,7 +245,22 @@ alignment="center"/>
                 {
                     _writer.WriteStartElement("p");
                     _writer.WriteAttributeString("style", "barcode");
-                    _writer.WriteString(StringUtil.MakePathList(barcodes, " "));
+                    {
+                        /*
+                         * 0000001
+                         * <br/>
+                         * 0000002
+                         * */
+                        int i = 0;
+                        foreach (string line in barcodes)
+                        {
+                            if (i > 0)
+                                _writer.WriteElementString("br", "");
+                            _writer.WriteString(line);
+                            i++;
+                        }
+                    }
+                    // _writer.WriteString(StringUtil.MakePathList(barcodes, " "));
                     _writer.WriteEndElement();
                 }
 
@@ -309,6 +339,73 @@ alignment="center"/>
 
             TypoUtility.XmlToWord(_outputFileName, wordFileName);
             Process.Start(wordFileName);
+        }
+
+        int _BiblioNoStart = 1;
+        int _PageNumberStart = 1;
+        // 序号字体
+        string _NoFontName = "";
+        string _NoFontSize = "";
+        string _BarcodeFontName = "";
+        string _BarcodeFontSize = "";
+        string _ContentFontName = "";
+        string _ContentFontSize = "";
+        string _AccessNoFontName = "";
+        string _AccessNoFontSize = "";
+
+        bool InputSettings()
+        {
+            using (OutputDocxCatalogDialog dlg = new OutputDocxCatalogDialog())
+            {
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+    "OutputDocxCatalog",
+    "uiState",
+    "");
+
+                dlg.ShowDialog(this.BiblioStatisForm);
+
+                Program.MainForm.AppInfo.SetString(
+    "OutputDocxCatalog",
+    "uiState",
+    dlg.UiState);
+
+                if (dlg.DialogResult == DialogResult.Cancel)
+                    return false;
+
+                _BiblioNoStart = dlg.BiblioNoStart;
+                _PageNumberStart = dlg.PageNumberStart;
+                _NoFontName = dlg.NoFontName;
+                _NoFontSize = dlg.NoFontSize;
+                _BarcodeFontName = dlg.BarcodeFontName;
+                _BarcodeFontSize = dlg.BarcodeFontSize;
+                _ContentFontName = dlg.ContentFontName;
+                _ContentFontSize = dlg.ContentFontSize;
+                _AccessNoFontName = dlg.AccessNoFontName;
+                _AccessNoFontSize = dlg.AccessNoFontSize;
+
+                {
+                    if (string.IsNullOrEmpty(_NoFontName))
+                        _NoFontName = "ascii:Times New Roman";
+                    if (string.IsNullOrEmpty(_NoFontSize))
+                        _NoFontSize = "8pt";
+
+                    if (string.IsNullOrEmpty(_BarcodeFontName))
+                        _BarcodeFontName = "ascii:Times New Roman";
+                    if (string.IsNullOrEmpty(_BarcodeFontSize))
+                        _BarcodeFontSize = "8pt";
+
+                    if (string.IsNullOrEmpty(_ContentFontName))
+                        _ContentFontName = "ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman";
+                    if (string.IsNullOrEmpty(_ContentFontSize))
+                        _ContentFontSize = "9pt";
+
+                    if (string.IsNullOrEmpty(_AccessNoFontName))
+                        _AccessNoFontName = "ascii:Times New Roman,hAnsi:Times New Roman";
+                    if (string.IsNullOrEmpty(_AccessNoFontSize))
+                        _AccessNoFontSize = "8pt";
+                }
+                return true;
+            }
         }
 
         static string BuildBookString(XmlDocument table_dom)

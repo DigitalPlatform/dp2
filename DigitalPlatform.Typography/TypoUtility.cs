@@ -5,6 +5,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using DocumentFormat.OpenXml.VariantTypes;
 using System.Collections.Generic;
+using System.Xml.Linq;
+using System.Text;
 
 
 using DocumentFormat.OpenXml;
@@ -14,8 +16,6 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using System.Xml.Linq;
-using System.Text;
 
 namespace DigitalPlatform.Typography
 {
@@ -79,6 +79,10 @@ namespace DigitalPlatform.Typography
                 var footers_node = dom.DocumentElement.SelectSingleNode("footers") as XmlElement;
                 if (footers_node != null)
                     CreateFooters(doc, footers_node);
+
+                var settings_nodes = dom.DocumentElement.SelectSingleNode("settings") as XmlElement;
+                if (settings_nodes != null)
+                    CreateSettings(doc, settings_nodes);
             }
         }
 
@@ -162,10 +166,25 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
                 return sectPrs[0];
         }
 
-        // 创建全局 sectPr
+        static void CreateSettings(WordprocessingDocument doc,
+            XmlElement settings_node)
+        {
+            SectionProperties sectPr = EnsureSectionProperty(doc);
+
+            string pageNumberStart_attr = settings_node.GetAttribute("pageNumberStart");
+            if (string.IsNullOrEmpty(pageNumberStart_attr) == false)
+            {
+                var start = sectPr.AppendChild<PageNumberType>(new PageNumberType());
+                if (Int32.TryParse(pageNumberStart_attr, out int value) == false)
+                    throw new Exception($"属性 pageNumberStart 值 '{pageNumberStart_attr}' 不合法。应为一个整数");
+                start.Start = value;
+            }
+        }
+
         static void CreateColumns(WordprocessingDocument doc,
             XmlElement columns_node)
         {
+            // 创建全局 sectPr
             SectionProperties sectPr = EnsureSectionProperty(doc);
             /*
             var sectPrs =
@@ -177,6 +196,7 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
             else
                 sectPr = sectPrs[0];
             */
+
 
             sectPr.RemoveAllChildren<Columns>();
             var columns = sectPr.PrependChild<Columns>(new Columns());

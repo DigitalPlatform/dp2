@@ -54,7 +54,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>294</ApplicationRevision>
+    <ApplicationRevision>295</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -386,6 +386,12 @@
       <DependentUpon>ActivateForm.cs</DependentUpon>
     </Compile>
     <Compile Include="BiblioStatis\OutputDocxCatalog.cs" />
+    <Compile Include="BiblioStatis\OutputDocxCatalogDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BiblioStatis\OutputDocxCatalogDialog.Designer.cs">
+      <DependentUpon>OutputDocxCatalogDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Charging\ChargingTask.cs" />
     <Compile Include="Charging\ColorSummaryControl.cs">
       <SubType>UserControl</SubType>
@@ -1883,6 +1889,9 @@
     <EmbeddedResource Include="ActivateForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ActivateForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BiblioStatis\OutputDocxCatalogDialog.resx">
+      <DependentUpon>OutputDocxCatalogDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\ColorSummaryControl.resx">
       <DependentUpon>ColorSummaryControl.cs</DependentUpon>

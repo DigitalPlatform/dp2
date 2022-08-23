@@ -60,6 +60,7 @@ namespace DigitalPlatform.OPAC.Server
             int nRet = 0;
             string strError = "";
 
+#if OPAC_SEARCH_LOG
             // 2012/12/16
             // 将检索日志写入数据库
             if (this.App.SearchLog != null)
@@ -70,6 +71,7 @@ namespace DigitalPlatform.OPAC.Server
                     this.App.WriteErrorLog(strError);
                 }
             }
+#endif
 
             // 清除过期的 FilterTask 对象
             try

@@ -20,6 +20,8 @@
 		<footer>footer
 		</footer>
 	</footers>
+	<settings pageNumberStart="1">
+	</settings>
 
 <p style="New Style">一段文字</p>
 <p>first <style size="150">second</style> third</p>
