@@ -20,6 +20,10 @@
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <ContentSQLiteInteropFiles>true</ContentSQLiteInteropFiles>
+    <CopySQLiteInteropFiles>false</CopySQLiteInteropFiles>
+    <CleanSQLiteInteropFiles>false</CleanSQLiteInteropFiles>
+    <CollectSQLiteInteropFiles>false</CollectSQLiteInteropFiles>
     <PublishUrl>c:\publish\dp2libraryxe\v3_dev\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
@@ -38,7 +42,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>276</ApplicationRevision>
+    <ApplicationRevision>280</ApplicationRevision>
     <ApplicationVersion>3.1.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -232,13 +236,8 @@
       <DependentUpon>SelectSqlServerDialog.cs</DependentUpon>
     </Compile>
     <Content Include="deleted.txt" />
+    <Content Include="design.txt" />
     <Content Include="gsdll32.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x64\SQLite.Interop.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x86\SQLite.Interop.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="FirstRunDialog.resx">
@@ -494,19 +493,18 @@
     <PreBuildEvent>CD /D $(ProjectDir)
 
 $(ProjectDir)..\updateAssemblyBinding\bin\debug\updateAssemblyBinding.exe source:$(ProjectDir)..\dp2opac\web.config target:$(ProjectDir)web.config
-
 CALL copyopac.bat
-CALL copydata.bat
-
-CALL copyinterop.bat</PreBuildEvent>
+CALL copydata.bat</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>ECHO copy sqlite.interop.dll to x86 and x64 from bin\debug directory
-CD /D $(ProjectDir)
-MD x86
-xcopy $(TargetDir)x86 x86 /Y
-MD x64
-xcopy $(TargetDir)x64 x64 /Y</PostBuildEvent>
+    <PostBuildEvent>REM ECHO copy sqlite.interop.dll to x86 and x64 from bin\debug directory
+REM CD /D $(ProjectDir)
+REM MD x86
+REM xcopy $(TargetDir)x86 x86 /Y
+REM MD x64
+REM xcopy $(TargetDir)x64 x64 /Y
+
+</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
   <Import Project="..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />

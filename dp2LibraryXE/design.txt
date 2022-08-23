@@ -1,0 +1,13 @@
+﻿
+2022/8/23
+关于 SQLite.interop.dll 文件编译时自动拷贝到 bin\debug\x86 x64 目录：
+
+https://stackoverflow.com/questions/13028069/unable-to-load-dll-sqlite-interop-dll
+Add the following to your csproj on your "main"/root project
+
+<PropertyGroup> 
+    <ContentSQLiteInteropFiles>true</ContentSQLiteInteropFiles>
+    <CopySQLiteInteropFiles>false</CopySQLiteInteropFiles>
+    <CleanSQLiteInteropFiles>false</CleanSQLiteInteropFiles>
+    <CollectSQLiteInteropFiles>false</CollectSQLiteInteropFiles>
+</PropertyGroup>

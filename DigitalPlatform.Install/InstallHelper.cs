@@ -101,7 +101,15 @@ namespace DigitalPlatform.Install
                     && IndexOf(excludeFileNames, line) != -1)
                     continue;
                 string path = Path.Combine(strTargetDir, line);
-                File.Delete(path);
+                try
+                {
+                    File.Delete(path);
+                }
+                catch(DirectoryNotFoundException)   // 2022/8/23
+                {
+
+                }
+
                 proc_deleted?.Invoke(path);
             }
 

@@ -29,6 +29,7 @@ using DigitalPlatform.LibraryServer;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using System.Text;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace dp2LibraryXE
 {
@@ -460,6 +461,13 @@ FormWindowState.Normal);
                 catch
                 {
                 }
+            }
+            catch(Exception ex) // 2022/8/23
+            {
+                string error = $"Initialize() 出现异常: {ExceptionUtil.GetDebugText(ex)}";
+                WriteErrorLog(error);
+                MessageBox.Show(this, error);
+                // TODO: 在 Web 控件上显示一行红色的报错文字
             }
             finally
             {
