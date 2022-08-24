@@ -21,6 +21,7 @@ namespace DigitalPlatform.CirculationClient
             _max_retry = max_retry;
         }
 
+        // 最大重试次数。-1 表示不限制重试
         int _max_retry = 2;
         public int MaxRetry
         {
@@ -105,7 +106,7 @@ namespace DigitalPlatform.CirculationClient
                     if (result == DialogResult.OK)
                     {
                         _retry_count++;
-                        if (_retry_count >= _max_retry)
+                        if (_max_retry != -1 && _retry_count >= _max_retry)
                         {
                             result = DialogResult.Cancel;
                             _retry_count = 0;

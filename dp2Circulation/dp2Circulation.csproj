@@ -385,6 +385,12 @@
     <Compile Include="ActivateForm.Designer.cs">
       <DependentUpon>ActivateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="BiblioStatis\GetWordFontsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BiblioStatis\GetWordFontsDialog.Designer.cs">
+      <DependentUpon>GetWordFontsDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="BiblioStatis\OutputDocxCatalog.cs" />
     <Compile Include="BiblioStatis\OutputDocxCatalogDialog.cs">
       <SubType>Form</SubType>
@@ -1889,6 +1895,9 @@
     <EmbeddedResource Include="ActivateForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ActivateForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BiblioStatis\GetWordFontsDialog.resx">
+      <DependentUpon>GetWordFontsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="BiblioStatis\OutputDocxCatalogDialog.resx">
       <DependentUpon>OutputDocxCatalogDialog.cs</DependentUpon>

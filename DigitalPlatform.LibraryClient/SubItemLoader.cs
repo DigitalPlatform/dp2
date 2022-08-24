@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
+
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -51,6 +52,20 @@ namespace DigitalPlatform.LibraryClient
 
         public static long DefaultBatchSize = 100;
 
+        // 是否把“书目库下没有定义实体库”错误当作错误处理
+        bool _itemDbNotDefAsError = true;
+        public bool ItemDbNotDefAsError
+        {
+            get
+            {
+                return _itemDbNotDefAsError;
+            }
+            set
+            {
+                _itemDbNotDefAsError = value;
+            }
+        }
+
         public IEnumerator GetEnumerator()
         {
             string strError = "";
@@ -73,7 +88,7 @@ namespace DigitalPlatform.LibraryClient
                         throw new InterruptException("用户中断");
 
                     int nRedoCount = 0;
-                    REDO:
+                REDO:
                     EntityInfo[] entities = null;
 
                     long lRet = 0;
@@ -134,6 +149,11 @@ namespace DigitalPlatform.LibraryClient
                         if (this.Stop != null && this.Stop.State != 0)
                             throw new InterruptException("用户中断");
 
+                        if (this.Channel.ErrorCode == ErrorCode.ItemDbNotDef)
+                        {
+                            yield break;
+                        }
+
                         if (this.Prompt != null)
                         {
                             MessagePromptEventArgs e = new MessagePromptEventArgs();
@@ -146,8 +166,11 @@ namespace DigitalPlatform.LibraryClient
                                 goto REDO;
                             else
                             {
+                                /*
                                 // no 也是抛出异常。因为继续下一批代价太大
                                 throw new ChannelException(Channel.ErrorCode, strError);
+                                */
+                                yield break;    // 2022/8/24 跳过本批
                             }
                         }
                         else

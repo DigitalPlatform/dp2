@@ -13,6 +13,8 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryClient;
 using dp2Circulation.ISO2709Statis;
+using System.Speech.Synthesis;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -771,7 +773,6 @@ Stack:
 
             try
             {
-
                 if (this.InputStyle == BiblioStatisInputStyle.BatchNo)
                 {
                     nRet = SearchBiblioRecPath(
@@ -842,7 +843,6 @@ Stack:
 
                     loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                     loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
-
 
                     int nCount = 0;
                     int i = 0;
@@ -1125,8 +1125,12 @@ Stack:
             return 0;
         }
 
+        // PromptManager _prompt = new PromptManager(-1);
+
         void loader_Prompt(object sender, MessagePromptEventArgs e)
         {
+            // _prompt.Prompt(this, e);
+
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
             if (e.Actions == "yes,no,cancel")
             {

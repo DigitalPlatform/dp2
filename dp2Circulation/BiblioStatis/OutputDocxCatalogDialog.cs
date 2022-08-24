@@ -1,4 +1,6 @@
 ﻿using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
+using DocumentFormat.OpenXml.Drawing;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -45,11 +47,23 @@ namespace dp2Circulation
                 controls.Add(this.textBox_contentFontSize);
                 controls.Add(this.textBox_accessNoFontName);
                 controls.Add(this.textBox_accessNoFontSize);
+
+                controls.Add(new ControlWrapper(this.checkBox_title_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_edition_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_material_specific_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_publication_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_material_description_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_series_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_notes_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_resource_identifier_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_summary_field, false));
+
                 return GuiState.GetUiState(controls);
             }
             set
             {
                 List<object> controls = new List<object>();
+
                 controls.Add(this.numericUpDown_biblioNoStart);
                 controls.Add(this.numericUpDown_pageNumberStart);
                 controls.Add(this.textBox_noFontName);
@@ -60,10 +74,20 @@ namespace dp2Circulation
                 controls.Add(this.textBox_contentFontSize);
                 controls.Add(this.textBox_accessNoFontName);
                 controls.Add(this.textBox_accessNoFontSize);
+
+                controls.Add(new ControlWrapper(this.checkBox_title_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_edition_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_material_specific_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_publication_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_material_description_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_series_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_notes_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_resource_identifier_area, true));
+                controls.Add(new ControlWrapper(this.checkBox_summary_field, false));
+
                 GuiState.SetUiState(controls, value);
             }
         }
-
 
         public int BiblioNoStart
         {
@@ -189,6 +213,104 @@ namespace dp2Circulation
             {
                 this.textBox_accessNoFontSize.Text = value;
             }
+        }
+
+        // 注意，竖线间隔
+        public string AreaList
+        {
+            get
+            {
+                return GetAreaList();
+            }
+            set
+            {
+                ClearAllAreaCheckboxs();
+
+                var ons = StringUtil.SplitList(value, '|');
+                foreach(var name in ons)
+                {
+                    CheckOnByName(name, true);
+                }
+            }
+        }
+
+        string GetAreaList()
+        {
+            List<string> results = new List<string>();
+            foreach(Control control in this.tabPage_content.Controls)
+            {
+                if (!(control is CheckBox))
+                    continue;
+                CheckBox checkBox = (CheckBox)control;
+                if (checkBox.Checked == false)
+                    continue;
+                var caption = checkBox.Text;
+                if (caption.EndsWith("_area") == false && caption.EndsWith("_field") == false)
+                    continue;
+                var name = StringUtil.ParseTwoPart(caption, " ")[1];
+                if (name.EndsWith("_field"))
+                    name = name.Substring(0, name.Length - "_field".Length);
+                results.Add(name);
+            }
+
+            return String.Join("|", results.ToArray());
+        }
+
+        void ClearAllAreaCheckboxs()
+        {
+            foreach (Control control in this.tabPage_content.Controls)
+            {
+                if (!(control is CheckBox))
+                    continue;
+                CheckBox checkBox = (CheckBox)control;
+                var caption = checkBox.Text;
+                if (caption.EndsWith("_area") || caption.EndsWith("_field"))
+                    checkBox.Checked = false;
+            }
+        }
+
+        void CheckOnByName(string name, bool on)
+        {
+            foreach (Control control in this.tabPage_content.Controls)
+            {
+                if (!(control is CheckBox))
+                    continue;
+                CheckBox checkBox = (CheckBox)control;
+                var caption = checkBox.Text;
+                if (caption.EndsWith(" " + name))
+                {
+                    checkBox.Checked = on;
+                    return;
+                }
+            }
+
+            throw new Exception($"没有找到名字和 '{name}' 有关的 checkbox");
+        }
+
+        private void button_getNoFont_Click(object sender, EventArgs e)
+        {
+            using (GetWordFontsDialog dlg = new GetWordFontsDialog())
+            {
+                dlg.FontName = this.textBox_noFontName.Text;
+                if (dlg.ShowDialog(this) == DialogResult.Cancel)
+                    return;
+                this.textBox_noFontName.Text = dlg.FontName;
+            }
+        }
+
+        private void button_getBarcodeFont_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button_getContentFont_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button_getAccessNoFont_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -730,6 +730,7 @@ namespace DigitalPlatform.Marc
             // 获得方式
             // 8: resource_identifier_area
             // 8: Resource identifier and terms of availability area(e.g., ISBN, ISSN)
+            // 010 011 091
             if (StringUtil.IsInList("areas,resource_identifier_area", strStyle))
             {
                 MarcNodeList fields = record.select("field[@name='010' or @name='011' or @name='091']");
@@ -921,7 +922,8 @@ namespace DigitalPlatform.Marc
                         PrePostfix prefix = GetUnimarcPrePostfix(subfield);
                         if (prefix != null)
                         {
-                            string current = prefix.Prefix
+                            // ?? RemovePrefixChar
+                            string current = RemoveHead(prefix.Prefix)
                                 + RemovePrefixChar(subfield.Content, prefix.Prefix)
                                 + prefix.Postfix;
                             // 上次的末尾和这次的头部，只允许有一个空格。多余的空格要舍掉
@@ -946,6 +948,16 @@ namespace DigitalPlatform.Marc
             }
 
             return text.ToString().Trim();
+        }
+
+        // 去掉开头的 ` 符号
+        static string RemoveHead(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+            if (text.StartsWith("`"))
+                return text.Substring(1);
+            return text;
         }
 
         static void Process206def(MarcField field)
@@ -1017,7 +1029,7 @@ namespace DigitalPlatform.Marc
         // 去掉可能的前缀字符
         static string RemovePrefixChar(string strContent, string strPrefix)
         {
-            if (string.IsNullOrEmpty(strPrefix))
+            if (string.IsNullOrEmpty(strPrefix) || strPrefix.StartsWith("`"))
                 return strContent;
             strPrefix = strPrefix.Trim();
             if (string.IsNullOrEmpty(strPrefix))
@@ -1383,11 +1395,11 @@ namespace DigitalPlatform.Marc
             MarcField field = subfield.Parent as MarcField;
             string strClassification = "";
             if (field.Name == "690")
-                strClassification = "中图法分类号";
+                strClassification = "`中图法分类号";
             if (field.Name == "692")
-                strClassification = "科图法分类号";
+                strClassification = "`科图法分类号";
             if (field.Name == "694")
-                strClassification = "人大法分类号";
+                strClassification = "`人大法分类号";
 
             if (string.IsNullOrEmpty(strClassification) == false)
             {
@@ -1406,24 +1418,24 @@ namespace DigitalPlatform.Marc
             MarcField field = subfield.Parent as MarcField;
             string strClassification = "";
             if (field.Name == "300")
-                strClassification = "一般性附注";
+                strClassification = "`一般性附注";   // 2022/8/24 注：符号 ` 表示这是一个普通名称，不是 ISBD 标点符号。最终 ` 将会被去除。` 的作用主要是避免被当作 ISBD 符号使用(RemovePrefixChar()) 
             if (field.Name == "304")
-                strClassification = "题名责任说明附注";
+                strClassification = "`题名责任说明附注";
             if (field.Name == "312")
-                strClassification = "相关题名附注";
+                strClassification = "`相关题名附注";
             if (field.Name == "314")
-                strClassification = "知识责任附注";
+                strClassification = "`知识责任附注";
             if (field.Name == "320")
-                strClassification = "书目索引附注";
+                strClassification = "`书目索引附注";
             if (field.Name == "324")
-                strClassification = "复制品的原作附注";
+                strClassification = "`复制品的原作附注";
 
             if (field.Name == "326")
-                strClassification = "连续出版物出版频率附注";
+                strClassification = "`连续出版物出版频率附注";
             if (field.Name == "327")
-                strClassification = "内容附注(子目)"; // TODO 要添加序号
+                strClassification = "`内容附注(子目)"; // TODO 要添加序号
             if (field.Name == "330")
-                strClassification = "提要文摘";
+                strClassification = "`提要文摘";
 
             if (string.IsNullOrEmpty(strClassification) == false)
             {
@@ -1444,17 +1456,17 @@ namespace DigitalPlatform.Marc
             MarcField field = subfield.Parent as MarcField;
             string strTypeName = "";
             if (field.Name == "010")
-                strTypeName = "ISBN";
+                strTypeName = "`ISBN";
             if (field.Name == "011")
-                strTypeName = "ISSN";
+                strTypeName = "`ISSN";
             if (field.Name == "013")
-                strTypeName = "ISMN";
+                strTypeName = "`ISMN";
             if (field.Name == "015")
-                strTypeName = "ISRN";
+                strTypeName = "`ISRN";
             if (field.Name == "016")
-                strTypeName = "ISRC";
+                strTypeName = "`ISRC";
             if (field.Name == "091")
-                strTypeName = "统一书刊号";
+                strTypeName = "`统一书刊号";
 
             if (string.IsNullOrEmpty(strTypeName) == false)
             {
@@ -1468,10 +1480,10 @@ namespace DigitalPlatform.Marc
                         return new PrePostfix(" : ");
                     case "y":
                     case "Y":
-                        return new PrePostfix("(失效的)" + strTypeName + ":");
+                        return new PrePostfix("`(失效的)" + strTypeName + ":");
                     case "z":
                     case "Z":
-                        return new PrePostfix("(错误的)" + strTypeName + ":");
+                        return new PrePostfix("`(错误的)" + strTypeName + ":");
                 }
             }
 
@@ -1483,33 +1495,33 @@ namespace DigitalPlatform.Marc
             MarcField field = subfield.Parent as MarcField;
             string strTypeName = "";
             if (field.Name == "500")
-                strTypeName = "统一题名";
+                strTypeName = "`统一题名";
             if (field.Name == "501")
-                strTypeName = "作品集统一题名";
+                strTypeName = "`作品集统一题名";
             if (field.Name == "503")
-                strTypeName = "统一惯用标目";
+                strTypeName = "`统一惯用标目";
             if (field.Name == "512")
-                strTypeName = "封面题名";
+                strTypeName = "`封面题名";
             if (field.Name == "513")
-                strTypeName = "附加题名页题名";
+                strTypeName = "`附加题名页题名";
             if (field.Name == "514")
-                strTypeName = "卷端题名";
+                strTypeName = "`卷端题名";
             if (field.Name == "515")
-                strTypeName = "逐页题名";
+                strTypeName = "`逐页题名";
             if (field.Name == "516")
-                strTypeName = "书脊题名";
+                strTypeName = "`书脊题名";
             if (field.Name == "520")
-                strTypeName = "前题名";
+                strTypeName = "`前题名";
             if (field.Name == "530")
-                strTypeName = "识别题名";
+                strTypeName = "`识别题名";
             if (field.Name == "531")
-                strTypeName = "缩略题名";
+                strTypeName = "`缩略题名";
             if (field.Name == "532")
                 strTypeName = "完整题名";
             if (field.Name == "540")
-                strTypeName = "编目员补充的附加题名";
+                strTypeName = "`编目员补充的附加题名";
             if (field.Name == "541")
-                strTypeName = "编目员补充的翻译题名";
+                strTypeName = "`编目员补充的翻译题名";
 
             if (string.IsNullOrEmpty(strTypeName) == false)
             {
@@ -1536,35 +1548,35 @@ namespace DigitalPlatform.Marc
             MarcField field = subfield.Parent as MarcField;
             string strTypeName = "";
             if (field.Name == "700")
-                strTypeName = "个人名称(主要责任)";
+                strTypeName = "`个人名称(主要责任)";
             if (field.Name == "701")
-                strTypeName = "个人名称(等同责任)";
+                strTypeName = "`个人名称(等同责任)";
             if (field.Name == "702")
-                strTypeName = "个人名称(次要责任)";
+                strTypeName = "`个人名称(次要责任)";
             if (field.Name == "710")
-                strTypeName = "团体名称(主要责任)";
+                strTypeName = "`团体名称(主要责任)";
             if (field.Name == "711")
-                strTypeName = "团体名称(等同责任)";
+                strTypeName = "`团体名称(等同责任)";
             if (field.Name == "712")
-                strTypeName = "团体名称(次要责任)";
+                strTypeName = "`团体名称(次要责任)";
             if (field.Name == "720")
-                strTypeName = "家族名称(主要责任)";
+                strTypeName = "`家族名称(主要责任)";
             if (field.Name == "721")
-                strTypeName = "家族名称(等同责任)";
+                strTypeName = "`家族名称(等同责任)";
             if (field.Name == "722")
-                strTypeName = "家族名称(次要责任)";
+                strTypeName = "`家族名称(次要责任)";
 
             if (field.Name == "716")
-                strTypeName = "商标";
+                strTypeName = "`商标";
             if (field.Name == "730")
-                strTypeName = "名称(责任实体)";
+                strTypeName = "`名称(责任实体)";
 
             if (field.Name == "740")
-                strTypeName = "法律和宗教文本统一惯用标目(主要责任)";
+                strTypeName = "`法律和宗教文本统一惯用标目(主要责任)";
             if (field.Name == "741")
-                strTypeName = "法律和宗教文本统一惯用标目(等同责任)";
+                strTypeName = "`法律和宗教文本统一惯用标目(等同责任)";
             if (field.Name == "742")
-                strTypeName = "法律和宗教文本统一惯用标目(次要责任)";
+                strTypeName = "`法律和宗教文本统一惯用标目(次要责任)";
 
             if (string.IsNullOrEmpty(strTypeName) == false)
             {

@@ -9,13 +9,15 @@ using System.Xml;
 using System.Diagnostics;
 using System.Data;
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Typography;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -80,7 +82,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            this.BiblioFormat = "table";
+            this.BiblioFormat = $"table:{_areas}";
 
             _writer.Formatting = Formatting.Indented;
             _writer.Indentation = 4;
@@ -220,7 +222,7 @@ alignment="center"/>
 
             bool first = _index == _BiblioNoStart;
 
-            string book_string = BuildBookString(this.BiblioDom);
+            string book_string = BuildBookString(this.BiblioDom, StringUtil.SplitList(_areas, "|"));
 
             _writer.WriteStartElement("tr");
             // 序号
@@ -355,6 +357,7 @@ alignment="center"/>
         string _ContentFontSize = "";
         string _AccessNoFontName = "";
         string _AccessNoFontSize = "";
+        string _areas = "";
 
         bool InputSettings()
         {
@@ -385,6 +388,7 @@ alignment="center"/>
                 _ContentFontSize = dlg.ContentFontSize;
                 _AccessNoFontName = dlg.AccessNoFontName;
                 _AccessNoFontSize = dlg.AccessNoFontSize;
+                _areas = dlg.AreaList;
 
                 {
                     if (string.IsNullOrEmpty(_NoFontName))
@@ -411,7 +415,7 @@ alignment="center"/>
             }
         }
 
-        static string BuildBookString(XmlDocument table_dom)
+        static string BuildBookString(XmlDocument table_dom, List<string> field_list)
         {
             if (table_dom == null || table_dom.DocumentElement == null)
                 return null;
@@ -427,7 +431,8 @@ alignment="center"/>
                 string value = line.GetAttribute("value");
 
                 var types = StringUtil.SplitList(type);
-                var type_name = types.Find((s) => s.EndsWith("_area"));
+                // var type_name = types.Find((s) => s.EndsWith("_area"));
+                var type_name = types.Find((s) => field_list.IndexOf(s) != -1);
                 if (type_name == null)
                     continue;
 
@@ -450,12 +455,15 @@ alignment="center"/>
             var channel = this.BiblioStatisForm.GetChannel();
             try
             {
-                SubItemLoader loader = new SubItemLoader();
-                loader.BiblioRecPath = biblio_recpath;
-                loader.Channel = channel;
-                loader.Stop = null;
-                loader.DbType = "item";
-                loader.Format = "xml";
+                SubItemLoader loader = new SubItemLoader
+                {
+                    BiblioRecPath = biblio_recpath,
+                    Channel = channel,
+                    Stop = null,
+                    DbType = "item",
+                    Format = "xml",
+                    ItemDbNotDefAsError = false,
+                };
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -509,8 +517,13 @@ alignment="center"/>
             }
         }
 
+        PromptManager _prompt = new PromptManager(-1);
+
         void loader_Prompt(object sender, MessagePromptEventArgs e)
         {
+            _prompt.Prompt(this.BiblioStatisForm, e);
+
+            /*
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
             if (e.Actions == "yes,no,cancel")
             {
@@ -523,6 +536,7 @@ alignment="center"/>
                 else
                     e.ResultAction = "yes";
             }
+            */
         }
 
 #if OLD
