@@ -406,14 +406,23 @@ Stack:
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
 
-                if (strProjectName == "#输出书本式目录到docx")
+                if (strProjectName == "#输出书本式目录到docx"
+                    || strProjectName == "#输出书本式目录到docx(编译局)")
                 {
-                    objStatis = new OutputDocxCatalog
-                    {
-                        BiblioStatisForm = this,
-                        ProjectDir = "",
-                        InstanceDir = this.InstanceDir,
-                    };
+                    if (strProjectName == "#输出书本式目录到docx")
+                        objStatis = new OutputDocxCatalog
+                        {
+                            BiblioStatisForm = this,
+                            ProjectDir = "",
+                            InstanceDir = this.InstanceDir,
+                        };
+                    else if (strProjectName == "#输出书本式目录到docx(编译局)")
+                        objStatis = new ByjOutputDocxCatalog
+                        {
+                            BiblioStatisForm = this,
+                            ProjectDir = "",
+                            InstanceDir = this.InstanceDir,
+                        };
                 }
                 else
                 {

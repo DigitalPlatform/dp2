@@ -53,20 +53,21 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_number = new System.Windows.Forms.TabPage();
             this.tabPage_font = new System.Windows.Forms.TabPage();
-            this.tabPage_content = new System.Windows.Forms.TabPage();
-            this.checkBox_title_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_edition_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_material_specific_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_publication_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_material_description_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_series_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_notes_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_resource_identifier_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_summary_field = new System.Windows.Forms.CheckBox();
-            this.button_getNoFont = new System.Windows.Forms.Button();
-            this.button_getBarcodeFont = new System.Windows.Forms.Button();
-            this.button_getContentFont = new System.Windows.Forms.Button();
             this.button_getAccessNoFont = new System.Windows.Forms.Button();
+            this.button_getContentFont = new System.Windows.Forms.Button();
+            this.button_getBarcodeFont = new System.Windows.Forms.Button();
+            this.button_getNoFont = new System.Windows.Forms.Button();
+            this.tabPage_content = new System.Windows.Forms.TabPage();
+            this.checkBox_summary_field = new System.Windows.Forms.CheckBox();
+            this.checkBox_resource_identifier_area = new System.Windows.Forms.CheckBox();
+            this.checkBox_notes_area = new System.Windows.Forms.CheckBox();
+            this.checkBox_series_area = new System.Windows.Forms.CheckBox();
+            this.checkBox_material_description_area = new System.Windows.Forms.CheckBox();
+            this.checkBox_publication_area = new System.Windows.Forms.CheckBox();
+            this.checkBox_material_specific_area = new System.Windows.Forms.CheckBox();
+            this.checkBox_edition_area = new System.Windows.Forms.CheckBox();
+            this.checkBox_title_area = new System.Windows.Forms.CheckBox();
+            this.checkBox_boldTitleArea = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_pageNumberStart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_biblioNoStart)).BeginInit();
             this.tabControl1.SuspendLayout();
@@ -78,7 +79,7 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(418, 538);
+            this.button_OK.Location = new System.Drawing.Point(595, 524);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(118, 37);
             this.button_OK.TabIndex = 0;
@@ -90,7 +91,7 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(542, 538);
+            this.button_Cancel.Location = new System.Drawing.Point(719, 524);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(118, 37);
             this.button_Cancel.TabIndex = 1;
@@ -157,7 +158,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_noFontName.Location = new System.Drawing.Point(193, 22);
             this.textBox_noFontName.Name = "textBox_noFontName";
-            this.textBox_noFontName.Size = new System.Drawing.Size(364, 31);
+            this.textBox_noFontName.Size = new System.Drawing.Size(541, 31);
             this.textBox_noFontName.TabIndex = 7;
             // 
             // textBox_noFontSize
@@ -198,7 +199,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_barcodeFontName.Location = new System.Drawing.Point(193, 96);
             this.textBox_barcodeFontName.Name = "textBox_barcodeFontName";
-            this.textBox_barcodeFontName.Size = new System.Drawing.Size(364, 31);
+            this.textBox_barcodeFontName.Size = new System.Drawing.Size(541, 31);
             this.textBox_barcodeFontName.TabIndex = 11;
             // 
             // label6
@@ -232,7 +233,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_contentFontName.Location = new System.Drawing.Point(193, 170);
             this.textBox_contentFontName.Name = "textBox_contentFontName";
-            this.textBox_contentFontName.Size = new System.Drawing.Size(364, 31);
+            this.textBox_contentFontName.Size = new System.Drawing.Size(541, 31);
             this.textBox_contentFontName.TabIndex = 15;
             // 
             // label8
@@ -266,7 +267,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_accessNoFontName.Location = new System.Drawing.Point(193, 244);
             this.textBox_accessNoFontName.Name = "textBox_accessNoFontName";
-            this.textBox_accessNoFontName.Size = new System.Drawing.Size(364, 31);
+            this.textBox_accessNoFontName.Size = new System.Drawing.Size(541, 31);
             this.textBox_accessNoFontName.TabIndex = 19;
             // 
             // label10
@@ -289,7 +290,7 @@
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(648, 520);
+            this.tabControl1.Size = new System.Drawing.Size(825, 506);
             this.tabControl1.TabIndex = 22;
             // 
             // tabPage_number
@@ -301,13 +302,14 @@
             this.tabPage_number.Location = new System.Drawing.Point(4, 31);
             this.tabPage_number.Name = "tabPage_number";
             this.tabPage_number.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_number.Size = new System.Drawing.Size(572, 616);
+            this.tabPage_number.Size = new System.Drawing.Size(640, 485);
             this.tabPage_number.TabIndex = 0;
             this.tabPage_number.Text = "编号";
             this.tabPage_number.UseVisualStyleBackColor = true;
             // 
             // tabPage_font
             // 
+            this.tabPage_font.Controls.Add(this.checkBox_boldTitleArea);
             this.tabPage_font.Controls.Add(this.button_getAccessNoFont);
             this.tabPage_font.Controls.Add(this.button_getContentFont);
             this.tabPage_font.Controls.Add(this.button_getBarcodeFont);
@@ -331,10 +333,54 @@
             this.tabPage_font.Location = new System.Drawing.Point(4, 31);
             this.tabPage_font.Name = "tabPage_font";
             this.tabPage_font.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_font.Size = new System.Drawing.Size(640, 485);
+            this.tabPage_font.Size = new System.Drawing.Size(817, 471);
             this.tabPage_font.TabIndex = 1;
             this.tabPage_font.Text = "字体";
             this.tabPage_font.UseVisualStyleBackColor = true;
+            // 
+            // button_getAccessNoFont
+            // 
+            this.button_getAccessNoFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getAccessNoFont.Location = new System.Drawing.Point(736, 244);
+            this.button_getAccessNoFont.Name = "button_getAccessNoFont";
+            this.button_getAccessNoFont.Size = new System.Drawing.Size(58, 31);
+            this.button_getAccessNoFont.TabIndex = 25;
+            this.button_getAccessNoFont.Text = "...";
+            this.button_getAccessNoFont.UseVisualStyleBackColor = true;
+            this.button_getAccessNoFont.Click += new System.EventHandler(this.button_getAccessNoFont_Click);
+            // 
+            // button_getContentFont
+            // 
+            this.button_getContentFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getContentFont.Location = new System.Drawing.Point(736, 170);
+            this.button_getContentFont.Name = "button_getContentFont";
+            this.button_getContentFont.Size = new System.Drawing.Size(58, 31);
+            this.button_getContentFont.TabIndex = 24;
+            this.button_getContentFont.Text = "...";
+            this.button_getContentFont.UseVisualStyleBackColor = true;
+            this.button_getContentFont.Click += new System.EventHandler(this.button_getContentFont_Click);
+            // 
+            // button_getBarcodeFont
+            // 
+            this.button_getBarcodeFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getBarcodeFont.Location = new System.Drawing.Point(736, 96);
+            this.button_getBarcodeFont.Name = "button_getBarcodeFont";
+            this.button_getBarcodeFont.Size = new System.Drawing.Size(58, 31);
+            this.button_getBarcodeFont.TabIndex = 23;
+            this.button_getBarcodeFont.Text = "...";
+            this.button_getBarcodeFont.UseVisualStyleBackColor = true;
+            this.button_getBarcodeFont.Click += new System.EventHandler(this.button_getBarcodeFont_Click);
+            // 
+            // button_getNoFont
+            // 
+            this.button_getNoFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getNoFont.Location = new System.Drawing.Point(736, 22);
+            this.button_getNoFont.Name = "button_getNoFont";
+            this.button_getNoFont.Size = new System.Drawing.Size(58, 31);
+            this.button_getNoFont.TabIndex = 22;
+            this.button_getNoFont.Text = "...";
+            this.button_getNoFont.UseVisualStyleBackColor = true;
+            this.button_getNoFont.Click += new System.EventHandler(this.button_getNoFont_Click);
             // 
             // tabPage_content
             // 
@@ -349,90 +395,10 @@
             this.tabPage_content.Controls.Add(this.checkBox_title_area);
             this.tabPage_content.Location = new System.Drawing.Point(4, 31);
             this.tabPage_content.Name = "tabPage_content";
-            this.tabPage_content.Size = new System.Drawing.Size(640, 485);
+            this.tabPage_content.Size = new System.Drawing.Size(817, 471);
             this.tabPage_content.TabIndex = 2;
             this.tabPage_content.Text = "内容";
             this.tabPage_content.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_title_area
-            // 
-            this.checkBox_title_area.AutoSize = true;
-            this.checkBox_title_area.Location = new System.Drawing.Point(13, 48);
-            this.checkBox_title_area.Name = "checkBox_title_area";
-            this.checkBox_title_area.Size = new System.Drawing.Size(283, 25);
-            this.checkBox_title_area.TabIndex = 0;
-            this.checkBox_title_area.Text = "题名与责任者 title_area";
-            this.checkBox_title_area.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_edition_area
-            // 
-            this.checkBox_edition_area.AutoSize = true;
-            this.checkBox_edition_area.Location = new System.Drawing.Point(13, 79);
-            this.checkBox_edition_area.Name = "checkBox_edition_area";
-            this.checkBox_edition_area.Size = new System.Drawing.Size(221, 25);
-            this.checkBox_edition_area.TabIndex = 1;
-            this.checkBox_edition_area.Text = "版本 edition_area";
-            this.checkBox_edition_area.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_material_specific_area
-            // 
-            this.checkBox_material_specific_area.AutoSize = true;
-            this.checkBox_material_specific_area.Location = new System.Drawing.Point(13, 110);
-            this.checkBox_material_specific_area.Name = "checkBox_material_specific_area";
-            this.checkBox_material_specific_area.Size = new System.Drawing.Size(415, 25);
-            this.checkBox_material_specific_area.TabIndex = 2;
-            this.checkBox_material_specific_area.Text = "资料特殊细节 material_specific_area";
-            this.checkBox_material_specific_area.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_publication_area
-            // 
-            this.checkBox_publication_area.AutoSize = true;
-            this.checkBox_publication_area.Location = new System.Drawing.Point(13, 141);
-            this.checkBox_publication_area.Name = "checkBox_publication_area";
-            this.checkBox_publication_area.Size = new System.Drawing.Size(307, 25);
-            this.checkBox_publication_area.TabIndex = 3;
-            this.checkBox_publication_area.Text = "出版发行 publication_area";
-            this.checkBox_publication_area.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_material_description_area
-            // 
-            this.checkBox_material_description_area.AutoSize = true;
-            this.checkBox_material_description_area.Location = new System.Drawing.Point(13, 172);
-            this.checkBox_material_description_area.Name = "checkBox_material_description_area";
-            this.checkBox_material_description_area.Size = new System.Drawing.Size(406, 25);
-            this.checkBox_material_description_area.TabIndex = 4;
-            this.checkBox_material_description_area.Text = "载体形态 material_description_area";
-            this.checkBox_material_description_area.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_series_area
-            // 
-            this.checkBox_series_area.AutoSize = true;
-            this.checkBox_series_area.Location = new System.Drawing.Point(13, 203);
-            this.checkBox_series_area.Name = "checkBox_series_area";
-            this.checkBox_series_area.Size = new System.Drawing.Size(210, 25);
-            this.checkBox_series_area.TabIndex = 5;
-            this.checkBox_series_area.Text = "丛编 series_area";
-            this.checkBox_series_area.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_notes_area
-            // 
-            this.checkBox_notes_area.AutoSize = true;
-            this.checkBox_notes_area.Location = new System.Drawing.Point(13, 234);
-            this.checkBox_notes_area.Name = "checkBox_notes_area";
-            this.checkBox_notes_area.Size = new System.Drawing.Size(199, 25);
-            this.checkBox_notes_area.TabIndex = 6;
-            this.checkBox_notes_area.Text = "附注 notes_area";
-            this.checkBox_notes_area.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_resource_identifier_area
-            // 
-            this.checkBox_resource_identifier_area.AutoSize = true;
-            this.checkBox_resource_identifier_area.Location = new System.Drawing.Point(13, 265);
-            this.checkBox_resource_identifier_area.Name = "checkBox_resource_identifier_area";
-            this.checkBox_resource_identifier_area.Size = new System.Drawing.Size(395, 25);
-            this.checkBox_resource_identifier_area.TabIndex = 7;
-            this.checkBox_resource_identifier_area.Text = "获得方式 resource_identifier_area";
-            this.checkBox_resource_identifier_area.UseVisualStyleBackColor = true;
             // 
             // checkBox_summary_field
             // 
@@ -444,49 +410,95 @@
             this.checkBox_summary_field.Text = "内容提要 summary_field";
             this.checkBox_summary_field.UseVisualStyleBackColor = true;
             // 
-            // button_getNoFont
+            // checkBox_resource_identifier_area
             // 
-            this.button_getNoFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getNoFont.Location = new System.Drawing.Point(559, 22);
-            this.button_getNoFont.Name = "button_getNoFont";
-            this.button_getNoFont.Size = new System.Drawing.Size(58, 31);
-            this.button_getNoFont.TabIndex = 22;
-            this.button_getNoFont.Text = "...";
-            this.button_getNoFont.UseVisualStyleBackColor = true;
-            this.button_getNoFont.Click += new System.EventHandler(this.button_getNoFont_Click);
+            this.checkBox_resource_identifier_area.AutoSize = true;
+            this.checkBox_resource_identifier_area.Location = new System.Drawing.Point(13, 265);
+            this.checkBox_resource_identifier_area.Name = "checkBox_resource_identifier_area";
+            this.checkBox_resource_identifier_area.Size = new System.Drawing.Size(395, 25);
+            this.checkBox_resource_identifier_area.TabIndex = 7;
+            this.checkBox_resource_identifier_area.Text = "获得方式 resource_identifier_area";
+            this.checkBox_resource_identifier_area.UseVisualStyleBackColor = true;
             // 
-            // button_getBarcodeFont
+            // checkBox_notes_area
             // 
-            this.button_getBarcodeFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getBarcodeFont.Location = new System.Drawing.Point(559, 96);
-            this.button_getBarcodeFont.Name = "button_getBarcodeFont";
-            this.button_getBarcodeFont.Size = new System.Drawing.Size(58, 31);
-            this.button_getBarcodeFont.TabIndex = 23;
-            this.button_getBarcodeFont.Text = "...";
-            this.button_getBarcodeFont.UseVisualStyleBackColor = true;
-            this.button_getBarcodeFont.Click += new System.EventHandler(this.button_getBarcodeFont_Click);
+            this.checkBox_notes_area.AutoSize = true;
+            this.checkBox_notes_area.Location = new System.Drawing.Point(13, 234);
+            this.checkBox_notes_area.Name = "checkBox_notes_area";
+            this.checkBox_notes_area.Size = new System.Drawing.Size(199, 25);
+            this.checkBox_notes_area.TabIndex = 6;
+            this.checkBox_notes_area.Text = "附注 notes_area";
+            this.checkBox_notes_area.UseVisualStyleBackColor = true;
             // 
-            // button_getContentFont
+            // checkBox_series_area
             // 
-            this.button_getContentFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getContentFont.Location = new System.Drawing.Point(559, 170);
-            this.button_getContentFont.Name = "button_getContentFont";
-            this.button_getContentFont.Size = new System.Drawing.Size(58, 31);
-            this.button_getContentFont.TabIndex = 24;
-            this.button_getContentFont.Text = "...";
-            this.button_getContentFont.UseVisualStyleBackColor = true;
-            this.button_getContentFont.Click += new System.EventHandler(this.button_getContentFont_Click);
+            this.checkBox_series_area.AutoSize = true;
+            this.checkBox_series_area.Location = new System.Drawing.Point(13, 203);
+            this.checkBox_series_area.Name = "checkBox_series_area";
+            this.checkBox_series_area.Size = new System.Drawing.Size(210, 25);
+            this.checkBox_series_area.TabIndex = 5;
+            this.checkBox_series_area.Text = "丛编 series_area";
+            this.checkBox_series_area.UseVisualStyleBackColor = true;
             // 
-            // button_getAccessNoFont
+            // checkBox_material_description_area
             // 
-            this.button_getAccessNoFont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getAccessNoFont.Location = new System.Drawing.Point(559, 244);
-            this.button_getAccessNoFont.Name = "button_getAccessNoFont";
-            this.button_getAccessNoFont.Size = new System.Drawing.Size(58, 31);
-            this.button_getAccessNoFont.TabIndex = 25;
-            this.button_getAccessNoFont.Text = "...";
-            this.button_getAccessNoFont.UseVisualStyleBackColor = true;
-            this.button_getAccessNoFont.Click += new System.EventHandler(this.button_getAccessNoFont_Click);
+            this.checkBox_material_description_area.AutoSize = true;
+            this.checkBox_material_description_area.Location = new System.Drawing.Point(13, 172);
+            this.checkBox_material_description_area.Name = "checkBox_material_description_area";
+            this.checkBox_material_description_area.Size = new System.Drawing.Size(406, 25);
+            this.checkBox_material_description_area.TabIndex = 4;
+            this.checkBox_material_description_area.Text = "载体形态 material_description_area";
+            this.checkBox_material_description_area.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_publication_area
+            // 
+            this.checkBox_publication_area.AutoSize = true;
+            this.checkBox_publication_area.Location = new System.Drawing.Point(13, 141);
+            this.checkBox_publication_area.Name = "checkBox_publication_area";
+            this.checkBox_publication_area.Size = new System.Drawing.Size(307, 25);
+            this.checkBox_publication_area.TabIndex = 3;
+            this.checkBox_publication_area.Text = "出版发行 publication_area";
+            this.checkBox_publication_area.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_material_specific_area
+            // 
+            this.checkBox_material_specific_area.AutoSize = true;
+            this.checkBox_material_specific_area.Location = new System.Drawing.Point(13, 110);
+            this.checkBox_material_specific_area.Name = "checkBox_material_specific_area";
+            this.checkBox_material_specific_area.Size = new System.Drawing.Size(415, 25);
+            this.checkBox_material_specific_area.TabIndex = 2;
+            this.checkBox_material_specific_area.Text = "资料特殊细节 material_specific_area";
+            this.checkBox_material_specific_area.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_edition_area
+            // 
+            this.checkBox_edition_area.AutoSize = true;
+            this.checkBox_edition_area.Location = new System.Drawing.Point(13, 79);
+            this.checkBox_edition_area.Name = "checkBox_edition_area";
+            this.checkBox_edition_area.Size = new System.Drawing.Size(221, 25);
+            this.checkBox_edition_area.TabIndex = 1;
+            this.checkBox_edition_area.Text = "版本 edition_area";
+            this.checkBox_edition_area.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_title_area
+            // 
+            this.checkBox_title_area.AutoSize = true;
+            this.checkBox_title_area.Location = new System.Drawing.Point(13, 48);
+            this.checkBox_title_area.Name = "checkBox_title_area";
+            this.checkBox_title_area.Size = new System.Drawing.Size(283, 25);
+            this.checkBox_title_area.TabIndex = 0;
+            this.checkBox_title_area.Text = "题名与责任者 title_area";
+            this.checkBox_title_area.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_boldTitleArea
+            // 
+            this.checkBox_boldTitleArea.AutoSize = true;
+            this.checkBox_boldTitleArea.Location = new System.Drawing.Point(12, 350);
+            this.checkBox_boldTitleArea.Name = "checkBox_boldTitleArea";
+            this.checkBox_boldTitleArea.Size = new System.Drawing.Size(267, 25);
+            this.checkBox_boldTitleArea.TabIndex = 26;
+            this.checkBox_boldTitleArea.Text = "粗体显示题名与责任者项";
+            this.checkBox_boldTitleArea.UseVisualStyleBackColor = true;
             // 
             // OutputDocxCatalogDialog
             // 
@@ -494,7 +506,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(672, 587);
+            this.ClientSize = new System.Drawing.Size(849, 573);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -556,5 +568,6 @@
         private System.Windows.Forms.Button button_getAccessNoFont;
         private System.Windows.Forms.Button button_getContentFont;
         private System.Windows.Forms.Button button_getBarcodeFont;
+        private System.Windows.Forms.CheckBox checkBox_boldTitleArea;
     }
 }

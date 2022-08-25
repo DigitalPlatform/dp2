@@ -42,6 +42,18 @@ namespace dp2Circulation
 
         int _index = 0;
 
+        public int Index
+        {
+            get
+            {
+                return _index;
+            }
+            set
+            {
+                _index = value;
+            }
+        }
+
         XmlTextWriter _writer = null;
 
         public XmlTextWriter Writer
@@ -87,6 +99,15 @@ namespace dp2Circulation
             _writer.Formatting = Formatting.Indented;
             _writer.Indentation = 4;
 
+            OutputBegin();
+            return;
+        ERROR1:
+            e.Continue = ContinueType.Error;
+            e.ParamString = strError;
+        }
+
+        public virtual void OutputBegin()
+        {
             _writer.WriteStartDocument();
             _writer.WriteStartElement("dprms", "collection", DpNs.dprms);
 
@@ -175,11 +196,154 @@ alignment="center"/>
 
             _writer.WriteStartElement("table");
             _writer.WriteAttributeString("width", "100%");
+        }
 
-            return;
-        ERROR1:
-            e.Continue = ContinueType.Error;
-            e.ParamString = strError;
+        public virtual void OutputEnd()
+        {
+            if (_writer != null)
+            {
+                _writer.WriteEndElement();  // </table>
+
+                _writer.WriteEndElement();   // </collection>
+                _writer.WriteEndDocument();
+
+                _writer.Close();
+                _writer = null;
+            }
+        }
+
+        public virtual void OutputRecord(
+            string accessNo,
+            List<string> barcodes,
+            string book_string)
+        {
+
+            _writer.WriteStartElement("tr");
+            // 序号
+            {
+                _writer.WriteStartElement("td");
+                //if (first)
+                _writer.WriteAttributeString("width", "auto");    // "20"
+                {
+                    _writer.WriteStartElement("p");
+                    _writer.WriteAttributeString("style", "index");
+                    _writer.WriteString($"{_index++}");
+                    _writer.WriteEndElement();
+                }
+                _writer.WriteEndElement();
+            }
+
+            // 索取号和册条码号
+            {
+                _writer.WriteStartElement("td");
+                //if (first)
+                _writer.WriteAttributeString("width", "auto");    // "50"
+
+                // 索取号
+                if (string.IsNullOrEmpty(accessNo) == false)
+                {
+                    _writer.WriteStartElement("p");
+                    _writer.WriteAttributeString("style", "accessNo");
+
+                    {
+                        /*
+                         * line1
+                         * <br/>
+                         * line2
+                         * */
+                        var lines = StringUtil.SplitList(accessNo, '/');
+                        int i = 0;
+                        foreach (string line in lines)
+                        {
+                            if (i > 0)
+                                _writer.WriteElementString("br", "");
+                            _writer.WriteString(line);
+                            i++;
+                        }
+                    }
+
+                    // _writer.WriteString(accessNo.Replace("/", " / "));
+                    _writer.WriteEndElement();
+                }
+
+                // 条码号
+                if (barcodes.Count > 0)
+                {
+                    // barcodes = OutputDocxCatalog.CompactNumbersEx(barcodes);
+                    barcodes = StringUtil.CompactNumbers(barcodes);
+
+                    _writer.WriteStartElement("p");
+                    _writer.WriteAttributeString("style", "barcode");
+                    _writer.WriteAttributeString("spacing", "before:8pt,after:3pt");
+                    {
+                        /*
+                         * 0000001
+                         * <br/>
+                         * 0000002
+                         * */
+                        int i = 0;
+                        foreach (string line in barcodes)
+                        {
+                            if (i > 0)
+                                _writer.WriteElementString("br", "");
+                            _writer.WriteString(line);
+                            i++;
+                        }
+                    }
+                    // _writer.WriteString(StringUtil.MakePathList(barcodes, " "));
+                    _writer.WriteEndElement();
+                }
+
+                _writer.WriteEndElement();
+            }
+
+            // 正文
+            {
+                _writer.WriteStartElement("td");
+                //if (first)
+                _writer.WriteAttributeString("width", "auto");
+
+                /*
+                // 书目 ISBD
+                {
+                    _writer.WriteStartElement("p");
+                    _writer.WriteAttributeString("style", "biblio");
+                    _writer.WriteAttributeString("alignment", "both");
+
+                    _writer.WriteAttributeString("spacing", "after:3pt");
+
+                    _writer.WriteString(book_string);
+                    _writer.WriteEndElement();
+                }
+                */
+
+                // 书目 ISBD
+                OutputContentParagraph(book_string);
+
+                _writer.WriteEndElement();
+            }
+            _writer.WriteEndElement();  // </tr>
+        }
+
+        public virtual void OutputContentParagraph(string book_string)
+        {
+            // 书目 ISBD
+            {
+                _writer.WriteStartElement("p");
+                _writer.WriteAttributeString("style", "biblio");
+                _writer.WriteAttributeString("alignment", "both");
+
+                _writer.WriteAttributeString("spacing", "after:3pt");
+
+                {
+                    // 注意 book_string 是 InnerXml 形态
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml("<root />");
+                    dom.DocumentElement.InnerXml = book_string;
+                    dom.DocumentElement.WriteContentTo(_writer);
+                }
+                _writer.WriteEndElement();
+            }
         }
 
         public override void OnRecord(object sender, StatisEventArgs e)
@@ -217,110 +381,13 @@ alignment="center"/>
                     return a.Length - b.Length; // 位数少的在前
                 return string.CompareOrdinal(a, b); // 同样位数的比较先后
             });
-            // barcodes = OutputDocxCatalog.CompactNumbersEx(barcodes);
-            barcodes = CompactNumbersEx(barcodes);
 
             bool first = _index == _BiblioNoStart;
 
+            // 注意 book_string 是 InnerXml 形态
             string book_string = BuildBookString(this.BiblioDom, StringUtil.SplitList(_areas, "|"));
 
-            _writer.WriteStartElement("tr");
-            // 序号
-            {
-                _writer.WriteStartElement("td");
-                //if (first)
-                _writer.WriteAttributeString("width", "auto");    // "20"
-                {
-                    _writer.WriteStartElement("p");
-                    _writer.WriteAttributeString("style", "index");
-                    _writer.WriteString($"{_index++}");
-                    _writer.WriteEndElement();
-                }
-                _writer.WriteEndElement();
-            }
-
-            // 册条码号
-            {
-                _writer.WriteStartElement("td");
-                //if (first)
-                _writer.WriteAttributeString("width", "auto");    // "50"
-
-                // 条码号
-                if (barcodes.Count > 0)
-                {
-                    _writer.WriteStartElement("p");
-                    _writer.WriteAttributeString("style", "barcode");
-                    {
-                        /*
-                         * 0000001
-                         * <br/>
-                         * 0000002
-                         * */
-                        int i = 0;
-                        foreach (string line in barcodes)
-                        {
-                            if (i > 0)
-                                _writer.WriteElementString("br", "");
-                            _writer.WriteString(line);
-                            i++;
-                        }
-                    }
-                    // _writer.WriteString(StringUtil.MakePathList(barcodes, " "));
-                    _writer.WriteEndElement();
-                }
-
-                _writer.WriteEndElement();
-            }
-
-            // 正文、索取号
-            {
-                _writer.WriteStartElement("td");
-                //if (first)
-                _writer.WriteAttributeString("width", "auto");
-
-                // 书目 ISBD
-                {
-                    _writer.WriteStartElement("p");
-                    _writer.WriteAttributeString("style", "biblio");
-                    _writer.WriteAttributeString("alignment", "both");
-
-                    _writer.WriteAttributeString("spacing", "after:3pt");
-
-                    _writer.WriteString(book_string);
-                    _writer.WriteEndElement();
-                }
-
-                // 索取号
-                if (string.IsNullOrEmpty(accessNo) == false)
-                {
-                    _writer.WriteStartElement("p");
-                    _writer.WriteAttributeString("style", "accessNo");
-                    _writer.WriteAttributeString("spacing", "after:3pt");
-
-#if REMOVED
-                    {
-                        /*
-                         * line1
-                         * <br/>
-                         * line2
-                         * */
-                        var lines = StringUtil.SplitList(accessNo, '/');
-                        int i = 0;
-                        foreach (string line in lines)
-                        {
-                            if (i > 0)
-                                _writer.WriteElementString("br", "");
-                            _writer.WriteString(line);
-                            i++;
-                        }
-                    }
-#endif
-                    _writer.WriteString(accessNo.Replace("/", " / "));
-                    _writer.WriteEndElement();
-                }
-                _writer.WriteEndElement();
-            }
-            _writer.WriteEndElement();  // </tr>
+            OutputRecord(accessNo, barcodes, book_string);
             return;
         ERROR1:
             e.Continue = ContinueType.Error;
@@ -329,16 +396,7 @@ alignment="center"/>
 
         public override void OnEnd(object sender, StatisEventArgs e)
         {
-            if (_writer != null)
-            {
-                _writer.WriteEndElement();  // </table>
-
-                _writer.WriteEndElement();   // </collection>
-                _writer.WriteEndDocument();
-
-                _writer.Close();
-                _writer = null;
-            }
+            OutputEnd();
 
             string wordFileName = Path.Combine(Program.MainForm.UserTempDir, "~output_docx_catalog.docx");
 
@@ -357,7 +415,19 @@ alignment="center"/>
         string _ContentFontSize = "";
         string _AccessNoFontName = "";
         string _AccessNoFontSize = "";
+
+        bool _boldTitleArea = false;
+
         string _areas = "";
+
+        public string _defaultNoFontName = "ascii:Times New Roman";
+        public string _defaultNoFontSize = "8pt";
+        public string _defaultBarcodeFontName = "ascii:Times New Roman";
+        public string _defaultBarcodeFontSize = "7pt";
+        public string _defaultContentFontName = "ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman";
+        public string _defaultContentFontSize = "9pt";
+        public string _defaultAccessNoFontName = "ascii:Times New Roman,hAnsi:Times New Roman";
+        public string _defaultAccessNoFontSize = "8pt";
 
         bool InputSettings()
         {
@@ -388,39 +458,43 @@ alignment="center"/>
                 _ContentFontSize = dlg.ContentFontSize;
                 _AccessNoFontName = dlg.AccessNoFontName;
                 _AccessNoFontSize = dlg.AccessNoFontSize;
+                _boldTitleArea = dlg.BoldTitleArea;
                 _areas = dlg.AreaList;
 
                 {
                     if (string.IsNullOrEmpty(_NoFontName))
-                        _NoFontName = "ascii:Times New Roman";
+                        _NoFontName = _defaultNoFontName;
                     if (string.IsNullOrEmpty(_NoFontSize))
-                        _NoFontSize = "8pt";
+                        _NoFontSize = _defaultNoFontSize;
 
                     if (string.IsNullOrEmpty(_BarcodeFontName))
-                        _BarcodeFontName = "ascii:Times New Roman";
+                        _BarcodeFontName = _defaultBarcodeFontName;
                     if (string.IsNullOrEmpty(_BarcodeFontSize))
-                        _BarcodeFontSize = "8pt";
+                        _BarcodeFontSize = _defaultBarcodeFontSize;
 
                     if (string.IsNullOrEmpty(_ContentFontName))
-                        _ContentFontName = "ascii:Times New Roman,eastAsia:宋体,hAnsi:Times New Roman";
+                        _ContentFontName = _defaultContentFontName;
                     if (string.IsNullOrEmpty(_ContentFontSize))
-                        _ContentFontSize = "9pt";
+                        _ContentFontSize = _defaultContentFontSize;
 
                     if (string.IsNullOrEmpty(_AccessNoFontName))
-                        _AccessNoFontName = "ascii:Times New Roman,hAnsi:Times New Roman";
+                        _AccessNoFontName = _defaultAccessNoFontName;
                     if (string.IsNullOrEmpty(_AccessNoFontSize))
-                        _AccessNoFontSize = "8pt";
+                        _AccessNoFontSize = _defaultAccessNoFontSize;
                 }
                 return true;
             }
         }
 
-        static string BuildBookString(XmlDocument table_dom, List<string> field_list)
+        // “题名与责任者项”加粗的版本
+        // 返回 InnerXml
+        public virtual string BuildBookString(XmlDocument table_dom, List<string> field_list)
         {
             if (table_dom == null || table_dom.DocumentElement == null)
                 return null;
 
-            StringBuilder text = new StringBuilder();
+            XmlDocument output_dom = new XmlDocument();
+            output_dom.LoadXml("<root />");
 
             var line_nodes = table_dom.DocumentElement.SelectNodes("line");
             foreach (XmlElement line in line_nodes)
@@ -436,12 +510,30 @@ alignment="center"/>
                 if (type_name == null)
                     continue;
 
-                if (text.Length > 0)
-                    text.Append(". -- ");
-                text.Append(value);
+                if (output_dom.DocumentElement.ChildNodes.Count > 0)
+                    AppendTextNode(". -- ");
+
+                if (type_name == "title_area" && _boldTitleArea)
+                {
+                    var style_node = output_dom.CreateElement("style");
+                    output_dom.DocumentElement.AppendChild(style_node);
+
+                    style_node.SetAttribute("style", "bold");
+                    style_node.InnerText = value;
+                }
+                else
+                {
+                    AppendTextNode(value);
+                }
             }
 
-            return text.ToString();
+            void AppendTextNode(string text)
+            {
+                var text_node = output_dom.CreateTextNode(text);
+                output_dom.DocumentElement.AppendChild (text_node);
+            }
+
+            return output_dom.DocumentElement.InnerXml;
         }
 
         class LoadItemsResult : NormalResult
@@ -628,286 +720,6 @@ alignment="center"/>
         }
 #endif
 
-        public static List<string> CompactNumbersEx(List<string> source)
-        {
-            List<string> results = new List<string>();
-            int start = 0;
-            while (start < source.Count)
-            {
-                var break_pos = FindBreak(start);
-                Debug.Assert(break_pos > start);
-                if (break_pos <= start + 3) // 三个及以内
-                {
-                    for (int i = start; i < break_pos; i++)
-                    {
-                        results.Add(source[i]);
-                    }
-                }
-                else
-                {
-                    results.Add(source[start]);
-                    results.Add("-");
-                    results.Add(source[break_pos - 1]);
-                }
-                start = break_pos;
-
-            }
-            return results;
-
-            // 从指定位置开始，探测连续号码范围的断点位置。断点位置就是下一个不连续的开头位置
-            int FindBreak(int start_param)
-            {
-                string prev = source[start_param];
-                for (int i = start_param + 1; i < source.Count; i++)
-                {
-                    string current = source[i];
-                    // 给一个被字符引导的数字增加一个数量。
-                    // 例如 B019X + 1 变成 B020X
-                    int nRet = StringUtil.IncreaseNumber(prev,
-            1,
-            out string larger,
-            out string strError);
-                    if (nRet == -1)
-                        return i;   // TODO: 抛出异常
-                    if (current != larger)
-                        return i;
-                    prev = current;
-                }
-
-                return source.Count;
-            }
-
-        }
-
     }
 
-    [TestClass]
-    public class TestOutputDocxCatalog
-    {
-        [TestMethod]
-        public void Test_compactNumber_01()
-        {
-            List<string> source = new List<string>();
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(0, result.Count);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_02()
-        {
-            List<string> source = new List<string>() { "0000001" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("0000001", result[0]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_03()
-        {
-            // 只有两个号码的连续范围，合并后依然表达为两个独立号码
-            List<string> source = new List<string>() { "0000001",
-                "0000002" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(2, result.Count);
-            Assert.AreEqual("0000001", result[0]);
-            Assert.AreEqual("0000002", result[1]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_04()
-        {
-            List<string> source = new List<string>() {
-                "0000001",
-                "0000002",
-                "0000003",
-                "0000004",
-                "0000005",
-                "0000006",
-                "0000007",
-                "0000008",
-                "0000009",
-                "0000010" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("0000001", result[0]);
-            Assert.AreEqual("-", result[1]);
-            Assert.AreEqual("0000010", result[2]);
-
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_05()
-        {
-            List<string> source = new List<string>() {
-                "0000001",
-                "0000002",
-                "0000009",
-                "0000010" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(4, result.Count);
-            Assert.AreEqual("0000001", result[0]);
-            Assert.AreEqual("0000002", result[1]);
-            Assert.AreEqual("0000009", result[2]);
-            Assert.AreEqual("0000010", result[3]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_06()
-        {
-            List<string> source = new List<string>() {
-                "0000001",
-                "0000009",
-                "0000010" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("0000001", result[0]);
-            Assert.AreEqual("0000009", result[1]);
-            Assert.AreEqual("0000010", result[2]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_07()
-        {
-            List<string> source = new List<string>() {
-                "0000001",
-                "0000002",
-                "0000010" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("0000001", result[0]);
-            Assert.AreEqual("0000002", result[1]);
-            Assert.AreEqual("0000010", result[2]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_08()
-        {
-            List<string> source = new List<string>() {
-                "0000001",
-                "0000003",
-                "0000005" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("0000001", result[0]);
-            Assert.AreEqual("0000003", result[1]);
-            Assert.AreEqual("0000005", result[2]);
-        }
-
-        // 
-
-        [TestMethod]
-        public void Test_compactNumber_12()
-        {
-            List<string> source = new List<string>() { "B0000001" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("B0000001", result[0]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_13()
-        {
-            List<string> source = new List<string>() { "B0000001",
-                "B0000002" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(2, result.Count);
-            Assert.AreEqual("B0000001", result[0]);
-            Assert.AreEqual("B0000002", result[1]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_14()
-        {
-            List<string> source = new List<string>() {
-                "B0000001",
-                "B0000002",
-                "B0000003",
-                "B0000004",
-                "B0000005",
-                "B0000006",
-                "B0000007",
-                "B0000008",
-                "B0000009",
-                "B0000010" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("B0000001", result[0]);
-            Assert.AreEqual("-", result[1]);
-            Assert.AreEqual("B0000010", result[2]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_15()
-        {
-            List<string> source = new List<string>() {
-                "B0000001",
-                "B0000002",
-                "B0000009",
-                "B0000010" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(4, result.Count);
-            Assert.AreEqual("B0000001", result[0]);
-            Assert.AreEqual("B0000002", result[1]);
-            Assert.AreEqual("B0000009", result[2]);
-            Assert.AreEqual("B0000010", result[3]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_16()
-        {
-            List<string> source = new List<string>() {
-                "B0000001",
-                "B0000009",
-                "B0000010" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("B0000001", result[0]);
-            Assert.AreEqual("B0000009", result[1]);
-            Assert.AreEqual("B0000010", result[2]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_17()
-        {
-            List<string> source = new List<string>() {
-                "B0000001",
-                "B0000002",
-                "B0000010" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("B0000001", result[0]);
-            Assert.AreEqual("B0000002", result[1]);
-            Assert.AreEqual("B0000010", result[2]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_20()
-        {
-            List<string> source = new List<string>() {
-                "B0000001",
-                "B0000002",
-                "B0000003" };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("B0000001", result[0]);
-            Assert.AreEqual("B0000002", result[1]);
-            Assert.AreEqual("B0000003", result[2]);
-        }
-
-        [TestMethod]
-        public void Test_compactNumber_21()
-        {
-            List<string> source = new List<string>() {
-                "B0000001",
-                "B0000002",
-                "B0000003",
-                "B0000004"
-            };
-            var result = OutputDocxCatalog.CompactNumbersEx(source);
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("B0000001", result[0]);
-            Assert.AreEqual("-", result[1]);
-            Assert.AreEqual("B0000004", result[2]);
-        }
-    }
 }

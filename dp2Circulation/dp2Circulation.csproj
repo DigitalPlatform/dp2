@@ -54,7 +54,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>296</ApplicationRevision>
+    <ApplicationRevision>298</ApplicationRevision>
     <ApplicationVersion>3.8.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -385,6 +385,7 @@
     <Compile Include="ActivateForm.Designer.cs">
       <DependentUpon>ActivateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="BiblioStatis\ByjOutputDocxCatalog.cs" />
     <Compile Include="BiblioStatis\GetWordFontsDialog.cs">
       <SubType>Form</SubType>
     </Compile>

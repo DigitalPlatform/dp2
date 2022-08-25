@@ -283,7 +283,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_projectName.FormattingEnabled = true;
             this.comboBox_projectName.Items.AddRange(new object[] {
-            "#输出书本式目录到docx"});
+            "#输出书本式目录到docx","#输出书本式目录到docx(编译局)"});
             this.comboBox_projectName.Location = new System.Drawing.Point(150, 16);
             this.comboBox_projectName.Name = "comboBox_projectName";
             this.comboBox_projectName.Size = new System.Drawing.Size(402, 29);

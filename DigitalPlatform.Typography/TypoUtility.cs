@@ -446,6 +446,18 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                 styleRunProperties1.Append(GetFontSize(size));
             }
 
+#if REMOVED
+            // http://officeopenxml.com/WPtableProperties.php
+            var table_property_node = style_node.SelectSingleNode("tableProperties") as XmlElement;
+            if (table_property_node != null)
+            {
+                var table_properties = style.AppendChild<StyleTableProperties>(new StyleTableProperties());
+
+                var may_break_between_pages_attr = table_property_node.GetAttribute("mayBreakBetweenPages");
+                // table_properties.break
+            }
+#endif
+
             return style;
         }
 
@@ -524,6 +536,15 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             {
                 var pPr = EnsureProperty();
                 SetParagraphSpacing(pPr, spacing);
+            }
+
+            // 2022/8/25
+            string pageBreakBefore = paragraph.GetAttribute("pageBreakBefore");
+            if (string.IsNullOrEmpty(pageBreakBefore) == false)
+            {
+                var pPr = EnsureProperty();
+                var before = pPr.AppendChild<PageBreakBefore>(new PageBreakBefore());
+                before.Val = DomUtil.IsBooleanTrue(pageBreakBefore);
             }
 
             // p 元素的下级节点
@@ -914,6 +935,15 @@ out string error);
                 TableRow tr1 = new TableRow();
                 tbl.AppendChild(tr1);
 
+                var cantSplit_attr = tr.GetAttribute("cantSplit");
+                if (string.IsNullOrEmpty(cantSplit_attr) == false
+                    && DomUtil.IsBooleanTrue(cantSplit_attr))
+                {
+                    // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.cantsplit?view=openxml-2.8.1
+                    var trPr = tr1.AppendChild<TableRowProperties>(new TableRowProperties());
+                    trPr.AppendChild<CantSplit>(new CantSplit());
+                }
+
                 var tds = tr.SelectNodes("*[name()='th' or name()='td']");
                 foreach (XmlElement td in tds)
                 {
@@ -1067,7 +1097,7 @@ out string error);
             throw new Exception($"未知的单位 '{unit}' ('{text}')");
         }
 
-        #region Styles
+#region Styles
 
         // Apply a style to a paragraph.
         public static void ApplyStyleToParagraph(WordprocessingDocument doc,
@@ -1198,6 +1228,6 @@ out string error);
             return part;
         }
 
-        #endregion
+#endregion
     }
 }

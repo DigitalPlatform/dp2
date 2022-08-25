@@ -1,6 +1,4 @@
-﻿using DigitalPlatform.CommonControl;
-using DigitalPlatform.Text;
-using DocumentFormat.OpenXml.Drawing;
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,6 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
+using DocumentFormat.OpenXml.Drawing;
 
 namespace dp2Circulation
 {
@@ -48,6 +50,8 @@ namespace dp2Circulation
                 controls.Add(this.textBox_accessNoFontName);
                 controls.Add(this.textBox_accessNoFontSize);
 
+                controls.Add(new ControlWrapper(this.checkBox_boldTitleArea, true));
+
                 controls.Add(new ControlWrapper(this.checkBox_title_area, true));
                 controls.Add(new ControlWrapper(this.checkBox_edition_area, true));
                 controls.Add(new ControlWrapper(this.checkBox_material_specific_area, true));
@@ -74,6 +78,8 @@ namespace dp2Circulation
                 controls.Add(this.textBox_contentFontSize);
                 controls.Add(this.textBox_accessNoFontName);
                 controls.Add(this.textBox_accessNoFontSize);
+
+                controls.Add(new ControlWrapper(this.checkBox_boldTitleArea, true));
 
                 controls.Add(new ControlWrapper(this.checkBox_title_area, true));
                 controls.Add(new ControlWrapper(this.checkBox_edition_area, true));
@@ -212,6 +218,18 @@ namespace dp2Circulation
             set
             {
                 this.textBox_accessNoFontSize.Text = value;
+            }
+        }
+
+        public bool BoldTitleArea
+        {
+            get
+            {
+                return this.checkBox_boldTitleArea.Checked;
+            }
+            set
+            {
+                this.checkBox_boldTitleArea.Checked = value;
             }
         }
 
