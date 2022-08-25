@@ -14,12 +14,54 @@ namespace dp2Circulation
 {
     public class ByjOutputDocxCatalog : OutputDocxCatalog
     {
+        // 册条码号数量溢出的阈值 (> 它表示溢出)
+        const int _overflowThreshold = 10;
+
+        // 切分 barcodes 为基本和溢出两部分。切割要避免把范围(三行)切断
+        public static List<string> SplitOverflow(ref List<string> barcodes, int index)
+        {
+            if (barcodes.Count <= index)
+                return new List<string>();
+            List<string> results = new List<string>();
+            int start = 0;
+            if (barcodes[index] == "~")
+                start = index + 2;
+            else if (barcodes.Count > index - 1
+                && index - 2 >= 0
+                && barcodes[index - 1] == "~")
+                start = index - 2;
+            else
+                start = index;
+
+            for (int i = start; i < barcodes.Count; i++)
+            {
+                results.Add(barcodes[i]);
+            }
+            barcodes.RemoveRange(start, barcodes.Count - start);
+            return results;
+        }
+
         public override void OutputRecord(string accessNo,
     List<string> barcodes,
     string book_string)
         {
+            int barcodes_count = barcodes.Count;
+
+            barcodes = CompactNumbersEx(barcodes, "~");
+
+            var barcodes_has_overflow = barcodes.Count > _overflowThreshold;
+            List<string> overflow = new List<string>();
+            if (barcodes_has_overflow)
+            {
+                // 分开为两个集合
+                overflow = SplitOverflow(ref barcodes, _overflowThreshold);
+                // 尾部增加注释
+                barcodes.Add("(接右栏)");
+            }
+
             Writer.WriteStartElement("tr");
-            Writer.WriteAttributeString("cantSplit", "1");
+            if (barcodes_has_overflow == false)
+                Writer.WriteAttributeString("cantSplit", "1");
             // 序号
             {
                 Writer.WriteStartElement("td");
@@ -43,10 +85,9 @@ namespace dp2Circulation
                 // 条码号
                 if (barcodes.Count > 0)
                 {
-                    barcodes = CompactNumbersEx(barcodes, "~");
-
                     Writer.WriteStartElement("p");
                     Writer.WriteAttributeString("style", "barcode");
+
                     {
                         /*
                          * 0000001
@@ -62,6 +103,7 @@ namespace dp2Circulation
                             i++;
                         }
                     }
+
                     // Writer.WriteString(StringUtil.MakePathList(barcodes, " "));
                     Writer.WriteEndElement();
                 }
@@ -118,6 +160,34 @@ namespace dp2Circulation
                     Writer.WriteString(accessNo.Replace("/", " / "));
                     Writer.WriteEndElement();
                 }
+
+                // 溢出的条码号
+                if (overflow.Count > 0)
+                {
+                    Writer.WriteStartElement("p");
+                    Writer.WriteAttributeString("style", "barcode");
+                    Writer.WriteAttributeString("spacing", "after:3pt");
+#if REMOVED
+                    {
+                        /*
+                         * 0000001
+                         * <br/>
+                         * 0000002
+                         * */
+                        int i = 0;
+                        foreach (string line in overflow)
+                        {
+                            if (i > 0)
+                                Writer.WriteElementString("br", "");
+                            Writer.WriteString(line);
+                            i++;
+                        }
+                    }
+#endif
+                    Writer.WriteString(StringUtil.MakePathList(overflow, " "));
+                    Writer.WriteEndElement();
+                }
+
                 Writer.WriteEndElement();
             }
             Writer.WriteEndElement();  // </tr>
@@ -435,6 +505,207 @@ namespace dp2Circulation
             Assert.AreEqual("-", result[1]);
             Assert.AreEqual("B0000004", result[2]);
         }
+
+        [TestMethod]
+        public void Test_splitOverfow_01()
+        {
+            List<string> barcodes = new List<string>();
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes, 0);
+            Assert.AreEqual(0, overflows.Count);
+            Assert.AreEqual(0, barcodes.Count);
+        }
+
+        [TestMethod]
+        public void Test_splitOverfow_02()
+        {
+            List<string> barcodes = new List<string>();
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes, 1);
+            Assert.AreEqual(0, overflows.Count);
+            Assert.AreEqual(0, barcodes.Count);
+        }
+
+        [TestMethod]
+        public void Test_splitOverfow_03()
+        {
+            List<string> barcodes = new List<string>() {
+                "B0000001",
+            };
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes, 0);
+            Assert.AreEqual(1, overflows.Count);
+            Assert.AreEqual(0, barcodes.Count);
+            CompareStringList(
+                new List<string>() {
+                "B0000001",
+                },
+                overflows);
+        }
+
+        [TestMethod]
+        public void Test_splitOverfow_04()
+        {
+            List<string> barcodes = new List<string>() {
+                "B0000001",
+            };
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes, 1);
+            Assert.AreEqual(0, overflows.Count);
+            Assert.AreEqual(1, barcodes.Count);
+            CompareStringList(
+                new List<string>() {
+                "B0000001",
+                },
+                barcodes);
+        }
+
+        void CompareStringList(List<string> list1, List<string> list2)
+        {
+            Assert.AreEqual(list1.Count, list2.Count);
+            for (int i = 0; i < list1.Count; i++)
+            {
+                Assert.AreEqual(list1[i], list2[i]);
+            }
+        }
+
+        [TestMethod]
+        public void Test_splitOverfow_10()
+        {
+            List<string> barcodes = new List<string>() {
+                "B0000001",
+                "B0000002",
+                "~",
+                "B0000003",
+                "B0000004"
+            };
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes, 1);
+
+            Assert.AreEqual(4, overflows.Count);
+            CompareStringList(
+                new List<string>() {
+                "B0000002",
+                "~",
+                "B0000003",
+                "B0000004"
+                },
+                overflows);
+            Assert.AreEqual(1, barcodes.Count);
+            CompareStringList(
+    new List<string>() {
+                "B0000001",
+    },
+    barcodes);
+        }
+
+        [TestMethod]
+        public void Test_splitOverfow_11()
+        {
+            List<string> barcodes = new List<string>() {
+                "B0000001",
+                "B0000002",
+                "~",
+                "B0000003",
+                "B0000004"
+            };
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes,
+                2);
+            Assert.AreEqual(1, overflows.Count);
+            CompareStringList(
+    new List<string>() {
+                "B0000004",
+    },
+    overflows);
+            Assert.AreEqual(4, barcodes.Count);
+            CompareStringList(
+                new List<string>() {
+                "B0000001",
+                "B0000002",
+                "~",
+                "B0000003",
+                },
+                barcodes);
+        }
+
+        [TestMethod]
+        public void Test_splitOverfow_12()
+        {
+            List<string> barcodes = new List<string>() {
+                "B0000001",
+                "B0000002",
+                "~",
+                "B0000003", // <--
+                "B0000004"
+            };
+            // 注意，切割点从 B0000003 调整到 B0000002 位置
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes,
+                3);
+            CompareStringList(
+                new List<string>() {
+                "B0000002",
+                "~",
+                "B0000003",
+                "B0000004"
+                },
+                overflows);
+            CompareStringList(
+                new List<string>() {
+                "B0000001",
+                },
+                barcodes);
+        }
+
+        [TestMethod]
+        public void Test_splitOverfow_13()
+        {
+            List<string> barcodes = new List<string>() {
+                "B0000001",
+                "B0000002",
+                "~",
+                "B0000003", 
+                "B0000004", // <--
+            };
+
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes,
+                4);
+            CompareStringList(
+                new List<string>() {
+                "B0000004"
+                },
+                overflows);
+            CompareStringList(
+                new List<string>() {
+                "B0000001",
+                "B0000002",
+                "~",
+                "B0000003",
+                },
+                barcodes);
+
+        }
+
+        [TestMethod]
+        public void Test_splitOverfow_14()
+        {
+            List<string> barcodes = new List<string>() {
+                "B0000001",
+                "B0000002",
+                "~",
+                "B0000003",
+                "B0000004",
+                            // <--
+            };
+
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes,
+                5);
+            Assert.AreEqual(0, overflows.Count);
+            CompareStringList(
+                new List<string>() {
+                "B0000001",
+                "B0000002",
+                "~",
+                "B0000003",
+                "B0000004"
+                },
+                barcodes);
+        }
+
     }
 
 }
