@@ -9,6 +9,7 @@ using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -24,8 +25,9 @@ namespace dp2Circulation
                 return new List<string>();
             List<string> results = new List<string>();
             int start = 0;
-            if (barcodes[index] == "~")
-                start = index + 2;
+            if (index - 1 >= 0
+                && barcodes[index] == "~")
+                start = index - 1;  // index + 2;
             else if (barcodes.Count > index - 1
                 && index - 2 >= 0
                 && barcodes[index - 1] == "~")
@@ -39,6 +41,18 @@ namespace dp2Circulation
             }
             barcodes.RemoveRange(start, barcodes.Count - start);
             return results;
+        }
+
+        public override void OutputStyleElements()
+        {
+            base.OutputStyleElements();
+
+            // 定义一个 strike 样式，以节省 Word 文档中的样式总数
+            Writer.WriteStartElement("style");
+            Writer.WriteAttributeString("name", "strike");
+            Writer.WriteAttributeString("type", "character");
+            Writer.WriteAttributeString("style", "strike");
+            Writer.WriteEndElement();  // style
         }
 
         public override void OutputRecord(string accessNo,
@@ -88,6 +102,7 @@ namespace dp2Circulation
                     Writer.WriteStartElement("p");
                     Writer.WriteAttributeString("style", "barcode");
 
+#if OLD
                     {
                         /*
                          * 0000001
@@ -103,6 +118,8 @@ namespace dp2Circulation
                             i++;
                         }
                     }
+#endif
+                    WriteBarcodes(barcodes);
 
                     // Writer.WriteString(StringUtil.MakePathList(barcodes, " "));
                     Writer.WriteEndElement();
@@ -184,13 +201,83 @@ namespace dp2Circulation
                         }
                     }
 #endif
-                    Writer.WriteString(StringUtil.MakePathList(overflow, " "));
+                    // Writer.WriteString(StringUtil.MakePathList(overflow, " "));
+
+                    WriteOverflowBarcodes(overflow);
+
                     Writer.WriteEndElement();
                 }
 
                 Writer.WriteEndElement();
             }
             Writer.WriteEndElement();  // </tr>
+        }
+
+        void WriteBarcodes(List<string> barcodes)
+        {
+            int i = 0;
+            foreach (var barcode in barcodes)
+            {
+                if (i > 0)
+                    Writer.WriteElementString("br", "");
+
+                if (barcode.StartsWith("X")
+                || barcode.StartsWith("J")
+                || barcode.StartsWith("W"))
+                {
+                    Writer.WriteStartElement("style");
+                    Writer.WriteAttributeString("use", "strike");
+                    Writer.WriteString(barcode);
+                    Writer.WriteEndElement();
+                }
+                else
+                {
+                    Writer.WriteString(barcode);
+                }
+                i++;
+            }
+        }
+
+        void WriteOverflowBarcodes(List<string> barcodes)
+        {
+            int i = 0;
+            foreach (var barcode in barcodes)
+            {
+                if (barcode.StartsWith("X")
+                || barcode.StartsWith("J")
+                || barcode.StartsWith("W"))
+                {
+                    if (i > 0)
+                        Writer.WriteElementString("blk", "");
+                    Writer.WriteStartElement("style");
+                    Writer.WriteAttributeString("use", "strike");
+                    Writer.WriteString(barcode);
+                    Writer.WriteEndElement();
+                }
+                else
+                {
+                    if (i > 0)
+                        Writer.WriteString(" ");
+
+                    Writer.WriteString(barcode);
+                }
+                i++;
+            }
+        }
+
+        // 过滤册记录
+        // return:
+        //      true    要跳过输出
+        //      false   不跳过
+        public override bool FilterItem(XmlDocument itemdom)
+        {
+            string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(barcode)
+                /*|| barcode.StartsWith("X")
+                || barcode.StartsWith("J")
+                || barcode.StartsWith("W")*/)
+                return true;
+            return false;
         }
 
         /*
@@ -600,25 +687,24 @@ namespace dp2Circulation
             List<string> barcodes = new List<string>() {
                 "B0000001",
                 "B0000002",
-                "~",
+                "~",        // <-
                 "B0000003",
                 "B0000004"
             };
+            // 注意，往前调整切割点
             var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes,
                 2);
-            Assert.AreEqual(1, overflows.Count);
             CompareStringList(
     new List<string>() {
-                "B0000004",
-    },
-    overflows);
-            Assert.AreEqual(4, barcodes.Count);
-            CompareStringList(
-                new List<string>() {
-                "B0000001",
                 "B0000002",
                 "~",
                 "B0000003",
+                "B0000004",
+    },
+    overflows);
+            CompareStringList(
+                new List<string>() {
+                "B0000001",
                 },
                 barcodes);
         }
@@ -658,7 +744,7 @@ namespace dp2Circulation
                 "B0000001",
                 "B0000002",
                 "~",
-                "B0000003", 
+                "B0000003",
                 "B0000004", // <--
             };
 
@@ -704,6 +790,34 @@ namespace dp2Circulation
                 "B0000004"
                 },
                 barcodes);
+        }
+
+
+        [TestMethod]
+        public void Test_splitOverfow_15()
+        {
+            // 病态情况
+            List<string> barcodes = new List<string>() {
+                "~",        // <--
+                "B0000001",
+                "B0000002",
+                "B0000003",
+                "B0000004",
+
+            };
+
+            var overflows = ByjOutputDocxCatalog.SplitOverflow(ref barcodes,
+                0);
+            CompareStringList(
+                new List<string>() {
+                "~",
+                "B0000001",
+                "B0000002",
+                "B0000003",
+                "B0000004"
+                },
+                overflows);
+            Assert.AreEqual(0, barcodes.Count);
         }
 
     }

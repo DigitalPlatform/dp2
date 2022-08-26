@@ -113,43 +113,7 @@ namespace dp2Circulation
 
             // _writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
 
-            /*
-<styles>
-<style name="footer"
-alignment="center"/>
-</styles>
-* */
-            {
-                _writer.WriteStartElement("styles");
-
-                _writer.WriteStartElement("style");
-                _writer.WriteAttributeString("name", "index");
-                _writer.WriteAttributeString("font", _NoFontName); // "ascii:Times New Roman"
-                _writer.WriteAttributeString("size", _NoFontSize); // "8pt"
-                _writer.WriteAttributeString("style", "bold");
-                _writer.WriteEndElement();  // style
-
-                _writer.WriteStartElement("style");
-                _writer.WriteAttributeString("name", "accessNo");
-                _writer.WriteAttributeString("font", _AccessNoFontName); // "ascii:Times New Roman"
-                _writer.WriteAttributeString("size", _AccessNoFontSize); // "8pt"
-                _writer.WriteEndElement();  // style
-
-
-                _writer.WriteStartElement("style");
-                _writer.WriteAttributeString("name", "biblio");
-                _writer.WriteAttributeString("font", _ContentFontName); // "ascii:Times New Roman,eastAsia:宋体"
-                _writer.WriteAttributeString("size", _ContentFontSize); // "9pt"
-                _writer.WriteEndElement();  // style
-
-                _writer.WriteStartElement("style");
-                _writer.WriteAttributeString("name", "barcode");
-                _writer.WriteAttributeString("font", _BarcodeFontName); // "ascii:Times New Roman"
-                _writer.WriteAttributeString("size", _BarcodeFontSize); // "8pt"
-                _writer.WriteEndElement();  // style
-
-                _writer.WriteEndElement();  // styles
-            }
+            OutputStyles();
 
             /*
 	<footers>
@@ -196,6 +160,59 @@ alignment="center"/>
 
             _writer.WriteStartElement("table");
             _writer.WriteAttributeString("width", "100%");
+        }
+
+        public virtual void OutputStyles()
+        {
+            /*
+<styles>
+<style name="footer"
+alignment="center"/>
+</styles>
+* */
+            {
+                _writer.WriteStartElement("styles");
+
+                OutputStyleElements();
+
+                _writer.WriteEndElement();  // styles
+            }
+        }
+
+        public virtual void OutputStyleElements()
+        {
+            _writer.WriteStartElement("style");
+            _writer.WriteAttributeString("name", "index");
+            _writer.WriteAttributeString("font", _NoFontName); // "ascii:Times New Roman"
+            _writer.WriteAttributeString("size", _NoFontSize); // "8pt"
+            _writer.WriteAttributeString("style", "bold");
+            _writer.WriteEndElement();  // style
+
+            _writer.WriteStartElement("style");
+            _writer.WriteAttributeString("name", "accessNo");
+            _writer.WriteAttributeString("font", _AccessNoFontName); // "ascii:Times New Roman"
+            _writer.WriteAttributeString("size", _AccessNoFontSize); // "8pt"
+            _writer.WriteEndElement();  // style
+
+
+            _writer.WriteStartElement("style");
+            _writer.WriteAttributeString("name", "biblio");
+            _writer.WriteAttributeString("font", _ContentFontName); // "ascii:Times New Roman,eastAsia:宋体"
+            _writer.WriteAttributeString("size", _ContentFontSize); // "9pt"
+            _writer.WriteEndElement();  // style
+
+            _writer.WriteStartElement("style");
+            _writer.WriteAttributeString("name", "barcode");
+            _writer.WriteAttributeString("font", _BarcodeFontName); // "ascii:Times New Roman"
+            _writer.WriteAttributeString("size", _BarcodeFontSize); // "8pt"
+            _writer.WriteEndElement();  // style
+
+            // 定义一个 bold 样式，以节省 Word 文档中的样式总数
+            _writer.WriteStartElement("style");
+            _writer.WriteAttributeString("name", "bold");
+            _writer.WriteAttributeString("type", "character");
+            _writer.WriteAttributeString("style", "bold");
+            _writer.WriteEndElement();  // style
         }
 
         public virtual void OutputEnd()
@@ -493,6 +510,8 @@ alignment="center"/>
             if (table_dom == null || table_dom.DocumentElement == null)
                 return null;
 
+            char tail_char = (char)0;  // 前次处理的最后一个字符
+
             XmlDocument output_dom = new XmlDocument();
             output_dom.LoadXml("<root />");
 
@@ -501,8 +520,6 @@ alignment="center"/>
             {
                 // line @type @value @name
                 string type = line.GetAttribute("type");
-                string name = line.GetAttribute("name");
-                string value = line.GetAttribute("value");
 
                 var types = StringUtil.SplitList(type);
                 // var type_name = types.Find((s) => s.EndsWith("_area"));
@@ -510,27 +527,50 @@ alignment="center"/>
                 if (type_name == null)
                     continue;
 
+                string name = line.GetAttribute("name");
+                string value = line.GetAttribute("value");
+
+                // 2022/8/26
+                if (string.IsNullOrEmpty(value) == false)
+                    value = value.Replace("\n", "; ");
+
                 if (output_dom.DocumentElement.ChildNodes.Count > 0)
-                    AppendTextNode(". -- ");
+                {
+                    if (tail_char == '.')
+                        AppendTextNode(" -- ");
+                    else
+                        AppendTextNode(". -- ");
+
+                    tail_char = ' ';
+                }
 
                 if (type_name == "title_area" && _boldTitleArea)
                 {
                     var style_node = output_dom.CreateElement("style");
                     output_dom.DocumentElement.AppendChild(style_node);
 
-                    style_node.SetAttribute("style", "bold");
+                    style_node.SetAttribute("use", "bold");
                     style_node.InnerText = value;
                 }
                 else
                 {
                     AppendTextNode(value);
                 }
+
+                tail_char = GetTailChar(value);
             }
 
             void AppendTextNode(string text)
             {
                 var text_node = output_dom.CreateTextNode(text);
-                output_dom.DocumentElement.AppendChild (text_node);
+                output_dom.DocumentElement.AppendChild(text_node);
+            }
+
+            char GetTailChar(string text)
+            {
+                if (string.IsNullOrEmpty(text))
+                    return (char)0;
+                return text[text.Length - 1];
             }
 
             return output_dom.DocumentElement.InnerXml;
@@ -590,6 +630,11 @@ alignment="center"/>
                             ErrorInfo = $"册记录 {info.OldRecPath} XML 装入 XMLDOM 出现异常: {ex.Message}"
                         };
                     }
+
+                    // 过滤册记录
+                    if (FilterItem(dom) == true)
+                        continue;
+
                     string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
                     string accessNo = DomUtil.GetElementText(dom.DocumentElement, "accessNo");
                     barcodes.Add(barcode);
@@ -607,6 +652,27 @@ alignment="center"/>
             {
                 this.BiblioStatisForm.ReturnChannel(channel);
             }
+        }
+
+        // 过滤册记录
+        // return:
+        //      true    要跳过输出
+        //      false   不跳过
+        public virtual bool FilterItem(XmlDocument itemdom)
+        {
+            // 2022/8/26
+            // 跳过期刊合订后的单册记录
+            // 注意：并没有跳过现刊单册记录(也就是未装订的单册记录)
+            XmlNode nodeParentItem = itemdom.DocumentElement.SelectSingleNode("binding/bindingParent");
+            if (nodeParentItem != null)
+                return true;
+
+            // 跳过已经注销的册
+            string state = DomUtil.GetElementText(itemdom.DocumentElement, "state");
+            if (StringUtil.IsInList("注销,丢失,加工中", state))
+                return true;
+
+            return false;
         }
 
         PromptManager _prompt = new PromptManager(-1);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Web.UI.WebControls;
 using System.Xml;
 
 // using DigitalPlatform.Marc;
@@ -539,7 +540,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='200']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("题名与责任者", BuildUnimarcFields(fields), "title_area"));
+                    results.Add(new NameValueLine("题名与责任者", BuildUnimarcFields(fields, strStyle), "title_area"));
             }
 
             // 题名
@@ -547,7 +548,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='200']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("题名", BuildUnimarcFields(fields, "acdehi"), "title"));
+                    results.Add(new NameValueLine("题名", BuildUnimarcFields(fields, strStyle, "acdehi"), "title"));
             }
 
             // 作者
@@ -595,7 +596,7 @@ namespace DigitalPlatform.Marc
                 MarcNodeList fields = record.select("field[@name='701' or @name='702' or @name='711' or @name='712' or @name='700']");
                 if (fields.count > 0)
                     results.Add(new NameValueLine("责任者检索点",
-                        BuildUnimarcFields(fields),
+                        BuildUnimarcFields(fields, strStyle),
                         "author_accesspoint"));
             }
 
@@ -605,7 +606,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='205']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("版本项", BuildUnimarcFields(fields), "edition_area"));
+                    results.Add(new NameValueLine("版本项", BuildUnimarcFields(fields, strStyle), "edition_area"));
             }
 
             // 资料特殊细节
@@ -615,7 +616,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='206' or @name='207' or @name='208']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("资料特殊细节项", BuildUnimarcFields(fields), "material_specific_area"));
+                    results.Add(new NameValueLine("资料特殊细节项", BuildUnimarcFields(fields, strStyle), "material_specific_area"));
             }
 
             // 出版发行项
@@ -625,7 +626,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='210']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("出版发行项", BuildUnimarcFields(fields), "publication_area"));
+                    results.Add(new NameValueLine("出版发行项", BuildUnimarcFields(fields, strStyle), "publication_area"));
             }
 
             // 出版者
@@ -694,7 +695,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='215']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("载体形态项", BuildUnimarcFields(fields), "material_description_area"));
+                    results.Add(new NameValueLine("载体形态项", BuildUnimarcFields(fields, strStyle), "material_description_area"));
             }
 
             // 页数
@@ -703,7 +704,7 @@ namespace DigitalPlatform.Marc
                 MarcNodeList fields = record.select("field[@name='215']");
                 if (fields.count > 0)
                     results.Add(new NameValueLine("页数",
-                        BuildUnimarcFields(fields, "a").Trim().Trim(new char[] { ',' }),
+                        BuildUnimarcFields(fields, strStyle, "a").Trim().Trim(new char[] { ',' }),
                         "pages"));
             }
 
@@ -714,7 +715,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='225']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("丛编项", BuildUnimarcFields(fields), "series_area"));
+                    results.Add(new NameValueLine("丛编项", BuildUnimarcFields(fields, strStyle), "series_area"));
             }
 
             // 附注
@@ -724,7 +725,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='300' or @name='304' or @name='312' or @name='314'  or @name='320'  or @name='324'  or @name='326'  or @name='327']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("附注项", BuildUnimarcFields(fields), "notes_area,notes"));
+                    results.Add(new NameValueLine("附注项", BuildUnimarcFields(fields, strStyle), "notes_area,notes"));
             }
 
             // 获得方式
@@ -735,7 +736,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='010' or @name='011' or @name='091']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("获得方式项", BuildUnimarcFields(fields), "resource_identifier_area"));
+                    results.Add(new NameValueLine("获得方式项", BuildUnimarcFields(fields, strStyle), "resource_identifier_area"));
             }
 
             // ISBN
@@ -793,7 +794,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='330']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("提要文摘", BuildUnimarcFields(fields), "summary"));
+                    results.Add(new NameValueLine("提要文摘", BuildUnimarcFields(fields, strStyle), "summary"));
             }
 
             // 主题分析项
@@ -802,7 +803,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='600' or @name='601' or @name='606' or @name='610']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("主题分析", BuildUnimarcFields(fields), "subjects"));
+                    results.Add(new NameValueLine("主题分析", BuildUnimarcFields(fields, strStyle), "subjects"));
             }
 
             // 分类号
@@ -811,7 +812,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='690' or @name='692' or @name='694']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("分类号", BuildUnimarcFields(fields), "classes"));
+                    results.Add(new NameValueLine("分类号", BuildUnimarcFields(fields, strStyle), "classes"));
             }
 
             // 中图法分类号
@@ -864,7 +865,7 @@ namespace DigitalPlatform.Marc
             {
                 MarcNodeList fields = record.select("field[@name='500' or @name='501' or @name='503'  or @name='512' or @name='513' or @name='514' or @name='515' or @name='516' or @name='520' or @name='530' or @name='531' or @name='532' or @name='540' or @name='541']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("相关题名", BuildUnimarcFields(fields), "other_titles"));
+                    results.Add(new NameValueLine("相关题名", BuildUnimarcFields(fields, strStyle), "other_titles"));
             }
 
             // 数字资源
@@ -895,6 +896,7 @@ namespace DigitalPlatform.Marc
         // parameters:
         //      strSubfieldNameList 筛选的子字段名列表。如果为 null，表示不筛选
         static string BuildUnimarcFields(MarcNodeList fields,
+            string style,
             string strSubfieldNameList = null)
         {
             StringBuilder text = new StringBuilder();
@@ -919,7 +921,7 @@ namespace DigitalPlatform.Marc
                                 continue;
                         }
 
-                        PrePostfix prefix = GetUnimarcPrePostfix(subfield);
+                        PrePostfix prefix = GetUnimarcPrePostfix(subfield, style);
                         if (prefix != null)
                         {
                             // ?? RemovePrefixChar
@@ -1083,7 +1085,7 @@ namespace DigitalPlatform.Marc
         }
 
         // 获得一个 UNIMARC 子字段的(ISBD)前缀字符串
-        static PrePostfix GetUnimarcPrePostfix(MarcSubfield subfield)
+        static PrePostfix GetUnimarcPrePostfix(MarcSubfield subfield, string style)
         {
             MarcField field = subfield.Parent as MarcField;
             if (field.Name == "200")
@@ -1105,17 +1107,17 @@ namespace DigitalPlatform.Marc
                 return GetUnimarc_6xx_PrePostfix(subfield);
             if (field.Name == "690" || field.Name == "692"
     || field.Name == "694")
-                return GetUnimarc_69x_PrePostfix(subfield);
+                return GetUnimarc_69x_PrePostfix(subfield, style);
             if (field.Name == "300" || field.Name == "304"
 || field.Name == "312" || field.Name == "314" || field.Name == "320" || field.Name == "324"
 || field.Name == "326" || field.Name == "327" || field.Name == "330")
-                return GetUnimarc_3xx_PrePostfix(subfield);
+                return GetUnimarc_3xx_PrePostfix(subfield, style);
             if (StringUtil.IsInList(field.Name, "010,011,013,015,016,091"))
                 return GetUnimarc_0xx_PrePostfix(subfield);
             if (StringUtil.IsInList(field.Name, "500,501,503,512,513,514,515,516,520,530,531,532,540,541"))
-                return GetUnimarc_5xx_PrePostfix(subfield);
+                return GetUnimarc_5xx_PrePostfix(subfield, style);
             if (field.Name.StartsWith("7"))
-                return GetUnimarc_7xx_PrePostfix(subfield);
+                return GetUnimarc_7xx_PrePostfix(subfield, style);
 
             return new PrePostfix("?");
         }
@@ -1390,22 +1392,27 @@ namespace DigitalPlatform.Marc
             return null;
         }
 
-        static PrePostfix GetUnimarc_69x_PrePostfix(MarcSubfield subfield)
+        static PrePostfix GetUnimarc_69x_PrePostfix(MarcSubfield subfield, string style)
         {
             MarcField field = subfield.Parent as MarcField;
             string strClassification = "";
-            if (field.Name == "690")
-                strClassification = "`中图法分类号";
-            if (field.Name == "692")
-                strClassification = "`科图法分类号";
-            if (field.Name == "694")
-                strClassification = "`人大法分类号";
+            if (StringUtil.IsInList("detail_name", style))
+            {
+                if (field.Name == "690")
+                    strClassification = "`中图法分类号";
+                if (field.Name == "692")
+                    strClassification = "`科图法分类号";
+                if (field.Name == "694")
+                    strClassification = "`人大法分类号";
+            }
 
-            if (string.IsNullOrEmpty(strClassification) == false)
+            // if (string.IsNullOrEmpty(strClassification) == false)
             {
                 switch (subfield.Name)
                 {
                     case "a":
+                        if (string.IsNullOrEmpty(strClassification))
+                            return new PrePostfix("");
                         return new PrePostfix(strClassification + ": ");
                 }
             }
@@ -1413,38 +1420,43 @@ namespace DigitalPlatform.Marc
             return null;
         }
 
-        static PrePostfix GetUnimarc_3xx_PrePostfix(MarcSubfield subfield)
+        static PrePostfix GetUnimarc_3xx_PrePostfix(MarcSubfield subfield, string style)
         {
             MarcField field = subfield.Parent as MarcField;
             string strClassification = "";
-            if (field.Name == "300")
-                strClassification = "`一般性附注";   // 2022/8/24 注：符号 ` 表示这是一个普通名称，不是 ISBD 标点符号。最终 ` 将会被去除。` 的作用主要是避免被当作 ISBD 符号使用(RemovePrefixChar()) 
-            if (field.Name == "304")
-                strClassification = "`题名责任说明附注";
-            if (field.Name == "312")
-                strClassification = "`相关题名附注";
-            if (field.Name == "314")
-                strClassification = "`知识责任附注";
-            if (field.Name == "320")
-                strClassification = "`书目索引附注";
-            if (field.Name == "324")
-                strClassification = "`复制品的原作附注";
+            if (StringUtil.IsInList("detail_name", style))
+            {
+                if (field.Name == "300")
+                    strClassification = "`一般性附注";   // 2022/8/24 注：符号 ` 表示这是一个普通名称，不是 ISBD 标点符号。最终 ` 将会被去除。` 的作用主要是避免被当作 ISBD 符号使用(RemovePrefixChar()) 
+                if (field.Name == "304")
+                    strClassification = "`题名责任说明附注";
+                if (field.Name == "312")
+                    strClassification = "`相关题名附注";
+                if (field.Name == "314")
+                    strClassification = "`知识责任附注";
+                if (field.Name == "320")
+                    strClassification = "`书目索引附注";
+                if (field.Name == "324")
+                    strClassification = "`复制品的原作附注";
 
-            if (field.Name == "326")
-                strClassification = "`连续出版物出版频率附注";
-            if (field.Name == "327")
-                strClassification = "`内容附注(子目)"; // TODO 要添加序号
-            if (field.Name == "330")
-                strClassification = "`提要文摘";
+                if (field.Name == "326")
+                    strClassification = "`连续出版物出版频率附注";
+                if (field.Name == "327")
+                    strClassification = "`内容附注(子目)"; // TODO 要添加序号
+                if (field.Name == "330")
+                    strClassification = "`提要文摘";
+            }
 
-            if (string.IsNullOrEmpty(strClassification) == false)
+            // if (string.IsNullOrEmpty(strClassification) == false)
             {
                 switch (subfield.Name)
                 {
                     case "a":
-                        return new PrePostfix(strClassification + ": ");
+                        if (string.IsNullOrEmpty(strClassification))
+                            return new PrePostfix("", " ");
+                        return new PrePostfix(strClassification + ": ", " ");
                     case "b":
-                        return new PrePostfix(" (", ")");
+                        return new PrePostfix("(", ")");
                 }
             }
 
@@ -1490,44 +1502,49 @@ namespace DigitalPlatform.Marc
             return null;
         }
 
-        static PrePostfix GetUnimarc_5xx_PrePostfix(MarcSubfield subfield)
+        static PrePostfix GetUnimarc_5xx_PrePostfix(MarcSubfield subfield, string style)
         {
             MarcField field = subfield.Parent as MarcField;
             string strTypeName = "";
-            if (field.Name == "500")
-                strTypeName = "`统一题名";
-            if (field.Name == "501")
-                strTypeName = "`作品集统一题名";
-            if (field.Name == "503")
-                strTypeName = "`统一惯用标目";
-            if (field.Name == "512")
-                strTypeName = "`封面题名";
-            if (field.Name == "513")
-                strTypeName = "`附加题名页题名";
-            if (field.Name == "514")
-                strTypeName = "`卷端题名";
-            if (field.Name == "515")
-                strTypeName = "`逐页题名";
-            if (field.Name == "516")
-                strTypeName = "`书脊题名";
-            if (field.Name == "520")
-                strTypeName = "`前题名";
-            if (field.Name == "530")
-                strTypeName = "`识别题名";
-            if (field.Name == "531")
-                strTypeName = "`缩略题名";
-            if (field.Name == "532")
-                strTypeName = "完整题名";
-            if (field.Name == "540")
-                strTypeName = "`编目员补充的附加题名";
-            if (field.Name == "541")
-                strTypeName = "`编目员补充的翻译题名";
+            if (StringUtil.IsInList("detail_name", style))
+            {
+                if (field.Name == "500")
+                    strTypeName = "`统一题名";
+                if (field.Name == "501")
+                    strTypeName = "`作品集统一题名";
+                if (field.Name == "503")
+                    strTypeName = "`统一惯用标目";
+                if (field.Name == "512")
+                    strTypeName = "`封面题名";
+                if (field.Name == "513")
+                    strTypeName = "`附加题名页题名";
+                if (field.Name == "514")
+                    strTypeName = "`卷端题名";
+                if (field.Name == "515")
+                    strTypeName = "`逐页题名";
+                if (field.Name == "516")
+                    strTypeName = "`书脊题名";
+                if (field.Name == "520")
+                    strTypeName = "`前题名";
+                if (field.Name == "530")
+                    strTypeName = "`识别题名";
+                if (field.Name == "531")
+                    strTypeName = "`缩略题名";
+                if (field.Name == "532")
+                    strTypeName = "完整题名";
+                if (field.Name == "540")
+                    strTypeName = "`编目员补充的附加题名";
+                if (field.Name == "541")
+                    strTypeName = "`编目员补充的翻译题名";
+            }
 
-            if (string.IsNullOrEmpty(strTypeName) == false)
+            // if (string.IsNullOrEmpty(strTypeName) == false)
             {
                 switch (subfield.Name)
                 {
                     case "a":
+                        if (string.IsNullOrEmpty(strTypeName))
+                            return new PrePostfix("");
                         return new PrePostfix(strTypeName + ": ");
                 }
             }
@@ -1543,46 +1560,51 @@ namespace DigitalPlatform.Marc
             };
 
 
-        static PrePostfix GetUnimarc_7xx_PrePostfix(MarcSubfield subfield)
+        static PrePostfix GetUnimarc_7xx_PrePostfix(MarcSubfield subfield, string style)
         {
             MarcField field = subfield.Parent as MarcField;
             string strTypeName = "";
-            if (field.Name == "700")
-                strTypeName = "`个人名称(主要责任)";
-            if (field.Name == "701")
-                strTypeName = "`个人名称(等同责任)";
-            if (field.Name == "702")
-                strTypeName = "`个人名称(次要责任)";
-            if (field.Name == "710")
-                strTypeName = "`团体名称(主要责任)";
-            if (field.Name == "711")
-                strTypeName = "`团体名称(等同责任)";
-            if (field.Name == "712")
-                strTypeName = "`团体名称(次要责任)";
-            if (field.Name == "720")
-                strTypeName = "`家族名称(主要责任)";
-            if (field.Name == "721")
-                strTypeName = "`家族名称(等同责任)";
-            if (field.Name == "722")
-                strTypeName = "`家族名称(次要责任)";
+            if (StringUtil.IsInList("detail_name", style))
+            {
+                if (field.Name == "700")
+                    strTypeName = "`个人名称(主要责任)";
+                if (field.Name == "701")
+                    strTypeName = "`个人名称(等同责任)";
+                if (field.Name == "702")
+                    strTypeName = "`个人名称(次要责任)";
+                if (field.Name == "710")
+                    strTypeName = "`团体名称(主要责任)";
+                if (field.Name == "711")
+                    strTypeName = "`团体名称(等同责任)";
+                if (field.Name == "712")
+                    strTypeName = "`团体名称(次要责任)";
+                if (field.Name == "720")
+                    strTypeName = "`家族名称(主要责任)";
+                if (field.Name == "721")
+                    strTypeName = "`家族名称(等同责任)";
+                if (field.Name == "722")
+                    strTypeName = "`家族名称(次要责任)";
 
-            if (field.Name == "716")
-                strTypeName = "`商标";
-            if (field.Name == "730")
-                strTypeName = "`名称(责任实体)";
+                if (field.Name == "716")
+                    strTypeName = "`商标";
+                if (field.Name == "730")
+                    strTypeName = "`名称(责任实体)";
 
-            if (field.Name == "740")
-                strTypeName = "`法律和宗教文本统一惯用标目(主要责任)";
-            if (field.Name == "741")
-                strTypeName = "`法律和宗教文本统一惯用标目(等同责任)";
-            if (field.Name == "742")
-                strTypeName = "`法律和宗教文本统一惯用标目(次要责任)";
+                if (field.Name == "740")
+                    strTypeName = "`法律和宗教文本统一惯用标目(主要责任)";
+                if (field.Name == "741")
+                    strTypeName = "`法律和宗教文本统一惯用标目(等同责任)";
+                if (field.Name == "742")
+                    strTypeName = "`法律和宗教文本统一惯用标目(次要责任)";
+            }
 
-            if (string.IsNullOrEmpty(strTypeName) == false)
+            // if (string.IsNullOrEmpty(strTypeName) == false)
             {
                 switch (subfield.Name)
                 {
                     case "a":
+                        if (string.IsNullOrEmpty(strTypeName))
+                            return new PrePostfix("");
                         return new PrePostfix(strTypeName + ": ");
                     case "b":
                     case "c":

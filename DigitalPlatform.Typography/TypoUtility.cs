@@ -266,7 +266,9 @@ doc.MainDocumentPart.Document.Body.Elements<SectionProperties>().ToList();
                         body.AppendChild(p);
                     }
 
-                    p.AppendChild(new Run(new DocumentFormat.OpenXml.Wordprocessing.Text(node.Value)));
+                    var text = new DocumentFormat.OpenXml.Wordprocessing.Text(node.Value);
+                    // text.Space = SpaceProcessingModeValues.Preserve;
+                    p.AppendChild(new Run(text));
 
                     // body.AppendChild(new Paragraph(new Run(new DocumentFormat.OpenXml.Wordprocessing.Text(node.Value))));
                     // TableCell tc1 = new TableCell(new Paragraph(new Run(new DocumentFormat.OpenXml.Wordprocessing.Text(td.InnerText))));
@@ -329,7 +331,8 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             var style_nodes = styles.SelectNodes("style");
             foreach (XmlElement style_node in style_nodes)
             {
-                part.Styles.Append(CreateStyle(doc, style_node, null, StyleValues.Paragraph));
+                // part.Styles.Append(CreateStyle(doc, style_node, null, StyleValues.Paragraph));
+                CreateStyle(doc, style_node, null, StyleValues.Paragraph);
             }
 
             return part.Styles;
@@ -357,6 +360,23 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             Style base_style,
             StyleValues default_type)
         {
+            var use_attr = style_node.GetAttribute("use");
+            if (string.IsNullOrEmpty(use_attr) == false)
+            {
+                // 注意用了 use 属性后，就不允许再有其它属性了
+                if (style_node.Attributes.Count > 1)
+                    throw new Exception($"使用了 use 属性时，style 元素就不应出现其它属性: {style_node.OuterXml}");
+                var ref_style_node = style_node.SelectSingleNode($"//style[@name='{use_attr}']") as XmlElement;
+                if (ref_style_node == null)
+                    throw new Exception($"use 属性引用的名为 '{use_attr}' 的 style 元素没有找到");
+                var exist_style = GetStyleFromStyleName(doc,
+    use_attr,
+    default_type);
+                if (exist_style == null)
+                    throw new Exception($"use 属性引用的名为 '{use_attr}' 的(类型为 {default_type.ToString()}) style 对象在 Word 文档中没有找到");
+                return exist_style;
+            }
+
             StyleValues type = default_type;
             var stylename = style_node.GetAttribute("name");
             if (string.IsNullOrEmpty(stylename))
@@ -372,12 +392,12 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.style.basedon?view=openxml-2.8.1#documentformat-openxml-wordprocessing-style-basedon
             var baseOnName = style_node.GetAttribute("baseOn");
 
-            string baseOn = null;
+            string baseOn_style_id = null;
             // baseOn 属性优先于 base_style 参数
             if (string.IsNullOrEmpty(baseOnName) == false)
-                baseOn = GetStyleIdFromStyleName(doc, baseOnName);
+                baseOn_style_id = GetStyleIdFromStyleName(doc, baseOnName, type);
             else if (base_style != null)
-                baseOn = base_style.StyleId;
+                baseOn_style_id = base_style.StyleId;
 
             var styleid = NewStyleID();
 
@@ -389,12 +409,12 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             };
             StyleName styleName1 = new StyleName() { Val = stylename };
             style.Append(styleName1);
-            if (string.IsNullOrEmpty(baseOn) == false)
+            if (string.IsNullOrEmpty(baseOn_style_id) == false)
             {
-                BasedOn basedOn1 = new BasedOn() { Val = baseOn };
+                BasedOn basedOn1 = new BasedOn() { Val = baseOn_style_id };
                 style.Append(basedOn1);
             }
-            NextParagraphStyle nextParagraphStyle1 = new NextParagraphStyle() { Val = baseOn };
+            NextParagraphStyle nextParagraphStyle1 = new NextParagraphStyle() { Val = baseOn_style_id };
             style.Append(nextParagraphStyle1);
 
             StyleRunProperties styleRunProperties1 = new StyleRunProperties();
@@ -433,6 +453,10 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                 {
                     styleRunProperties1.Append(new Italic());
                 }
+                if (StringUtil.IsInList("strike", style_attr))
+                {
+                    styleRunProperties1.Append(new Strike { Val = true });
+                }
             }
 
             /*
@@ -458,6 +482,7 @@ doc.MainDocumentPart.StyleDefinitionsPart;
             }
 #endif
 
+            doc.MainDocumentPart.StyleDefinitionsPart.Styles.Append(style);
             return style;
         }
 
@@ -510,7 +535,7 @@ doc.MainDocumentPart.StyleDefinitionsPart;
                 var pPr = EnsureProperty();
 
                 // style name 找到 style id
-                var style_id = GetStyleIdFromStyleName(doc, style_name);
+                var style_id = GetStyleIdFromStyleName(doc, style_name, StyleValues.Paragraph);
                 if (style_id == null)
                     throw new Exception($"Style Name '{style_name}' not found");
 
@@ -806,6 +831,16 @@ out string error);
                     continue;
                 }
 
+                // 一个或者若干个空格字符
+                if (child_node.Name == "blk")
+                {
+                    // TODO: 增加 count 属性
+                    var text = new DocumentFormat.OpenXml.Wordprocessing.Text(" ");
+                    text.Space = SpaceProcessingModeValues.Preserve;
+                    CreateParagraphIfNeed().AppendChild(new Run(text));
+                    continue;
+                }
+
                 OpenXmlElement CreateParagraphIfNeed()
                 {
                     if (p is Paragraph)
@@ -842,10 +877,11 @@ out string error);
                 {
                     EnsureStyles(doc);
                     var new_style = CreateStyle(doc, child_node as XmlElement, style, StyleValues.Character);
+                    /*
                     StyleDefinitionsPart part =
             doc.MainDocumentPart.StyleDefinitionsPart;
                     part.Styles.Append(new_style);
-
+                    */
                     CreateTextStream(doc,
                         p,
                         child_node.ChildNodes,
@@ -1097,7 +1133,7 @@ out string error);
             throw new Exception($"未知的单位 '{unit}' ('{text}')");
         }
 
-#region Styles
+        #region Styles
 
         // Apply a style to a paragraph.
         public static void ApplyStyleToParagraph(WordprocessingDocument doc,
@@ -1128,7 +1164,7 @@ out string error);
                 if (IsStyleIdInDocument(doc, styleid) != true)
                 {
                     // No match on styleid, so let's try style name.
-                    string styleidFromName = GetStyleIdFromStyleName(doc, stylename);
+                    string styleidFromName = GetStyleIdFromStyleName(doc, stylename, StyleValues.Paragraph);
                     if (styleidFromName == null)
                     {
                         AddNewStyle(part, styleid, stylename);
@@ -1165,14 +1201,28 @@ out string error);
         }
 
         // Return styleid that matches the styleName, or null when there's no match.
-        public static string GetStyleIdFromStyleName(WordprocessingDocument doc, string styleName)
+        public static string GetStyleIdFromStyleName(WordprocessingDocument doc,
+            string styleName,
+            StyleValues style_type)
         {
             StyleDefinitionsPart stylePart = doc.MainDocumentPart.StyleDefinitionsPart;
             string styleId = stylePart.Styles.Descendants<StyleName>()
                 .Where(s => s.Val.Value.Equals(styleName) &&
-                    (((Style)s.Parent).Type == StyleValues.Paragraph))
+                    (((Style)s.Parent).Type == /*StyleValues.Paragraph*/style_type))
                 .Select(n => ((Style)n.Parent).StyleId).FirstOrDefault();
             return styleId;
+        }
+
+        public static Style GetStyleFromStyleName(WordprocessingDocument doc,
+    string styleName,
+    StyleValues style_type)
+        {
+            StyleDefinitionsPart stylePart = doc.MainDocumentPart.StyleDefinitionsPart;
+            var style = stylePart.Styles.Descendants<StyleName>()
+                .Where(s => s.Val.Value.Equals(styleName) &&
+                    (((Style)s.Parent).Type == /*StyleValues.Paragraph*/style_type))
+                .Select(n => ((Style)n.Parent)).FirstOrDefault();
+            return style;
         }
 
         // Create a new style with the specified styleid and stylename and add it to the specified
@@ -1228,6 +1278,6 @@ out string error);
             return part;
         }
 
-#endregion
+        #endregion
     }
 }

@@ -318,17 +318,35 @@ namespace dp2Circulation
 
         private void button_getBarcodeFont_Click(object sender, EventArgs e)
         {
-
+            using (GetWordFontsDialog dlg = new GetWordFontsDialog())
+            {
+                dlg.FontName = this.textBox_barcodeFontName.Text;
+                if (dlg.ShowDialog(this) == DialogResult.Cancel)
+                    return;
+                this.textBox_barcodeFontName.Text = dlg.FontName;
+            }
         }
 
         private void button_getContentFont_Click(object sender, EventArgs e)
         {
-
+            using (GetWordFontsDialog dlg = new GetWordFontsDialog())
+            {
+                dlg.FontName = this.textBox_contentFontName.Text;
+                if (dlg.ShowDialog(this) == DialogResult.Cancel)
+                    return;
+                this.textBox_contentFontName.Text = dlg.FontName;
+            }
         }
 
         private void button_getAccessNoFont_Click(object sender, EventArgs e)
         {
-
+            using (GetWordFontsDialog dlg = new GetWordFontsDialog())
+            {
+                dlg.FontName = this.textBox_accessNoFontName.Text;
+                if (dlg.ShowDialog(this) == DialogResult.Cancel)
+                    return;
+                this.textBox_accessNoFontName.Text = dlg.FontName;
+            }
         }
     }
 }
