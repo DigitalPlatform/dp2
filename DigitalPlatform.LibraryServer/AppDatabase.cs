@@ -8222,6 +8222,8 @@ out strError);
                         }
                     }
 
+                    bool new_keys_changed = false;
+
 #if NO
                 using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
                 {
@@ -8265,6 +8267,29 @@ out strError);
                             strExistContent = ConvertCrLf(sr.ReadToEnd());
                         }
 
+                        // 2022/8/31
+                        // 如果是 keys 配置文件，需要把新旧内容进行合并，保护具有 reserved 属性的元素
+                        if (strName == "keys")
+                        {
+                            nRet = MergeKeysCfg(strNewContent,
+    strExistContent,
+    out string strMergedContent,
+    out strError);
+                            if (nRet == -1)
+                            {
+                                strError = $"(为数据库 {strDatabaseName})合并新旧 keys 配置文件内容过程中出错: {strError}";
+                                return -1;
+                            }
+                            if (nRet == 1)
+                            {
+                                new_keys_changed = true;
+                                strNewContent = strMergedContent;
+                                // 记载到错误日志中
+                                this.WriteErrorLog($"刷新数据库 {strDatabaseName} 的 {strName} 配置文件内容的过程中，发现已有配置文件内容中有 reserved 属性代表的保留元素(见后)，这些保留元素被保护起来没有被刷新: \r\n{strError}");
+                            }
+                        }
+
+
                         // 比较本地的和服务器的有无区别，无区别就不要上载了
                         if (strExistContent == strNewContent)
                             continue;
@@ -8294,34 +8319,49 @@ out strError);
 #endif
 
                 DO_CREATE:
-                    using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
                     {
-                        new_stream.Seek(0, SeekOrigin.Begin);
-
-                        // 在服务器端创建对象
-                        // parameters:
-                        //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
-                        // return:
-                        //		-1	错误
-                        //		1	已经存在同名对象
-                        //		0	正常返回
-                        nRet = DatabaseUtility.NewServerSideObject(
-                            channel,
-                            strPath,
-                            "",
-                            new_stream,
-                            timestamp,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                        if (nRet == 1)
+                        Stream new_stream = null;
+                        if (new_keys_changed)
                         {
-                            strError = "NewServerSideObject()发现已经存在同名对象: " + strError;
-                            return -1;
+                            // 把 strNewContent 中的内容写入一个 MemoryStream
+                            XmlDocument temp = new XmlDocument();
+                            temp.LoadXml(strNewContent);
+                            new_stream = new MemoryStream();
+                            temp.Save(new_stream);
                         }
+                        else
+                            new_stream = new FileStream(strFullPath, FileMode.Open);
 
-                        if (strName.ToLower() == "keys")
-                            bKeysChanged = true;
+                        // using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
+                        using (new_stream)
+                        {
+                            new_stream.Seek(0, SeekOrigin.Begin);
+
+                            // 在服务器端创建对象
+                            // parameters:
+                            //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
+                            // return:
+                            //		-1	错误
+                            //		1	已经存在同名对象
+                            //		0	正常返回
+                            nRet = DatabaseUtility.NewServerSideObject(
+                                channel,
+                                strPath,
+                                "",
+                                new_stream,
+                                timestamp,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            if (nRet == 1)
+                            {
+                                strError = "NewServerSideObject()发现已经存在同名对象: " + strError;
+                                return -1;
+                            }
+
+                            if (strName.ToLower() == "keys")
+                                bKeysChanged = true;
+                        }
                     }
 
                     // 保存修改后的配置文件
@@ -8371,6 +8411,93 @@ out strError);
                     PathUtil.DeleteDirectory(strTempDir);
             }
         }
+
+        // 合并两个 keys 配置文件内容。合并算法会保留旧的内容中的 reserved 部分
+        // parameters:
+        //      new_keys    新的内容
+        //      old_keys    旧的内容
+        public static int MergeKeysCfg(string new_keys,
+            string old_keys,
+            out string merged_keys,
+            out string strError)
+        {
+            strError = "";
+            merged_keys = "";
+
+            // old_keys 中的 key 元素和 table 元素，有 reserved=true 属性的，要保护起来
+            // new_keys 里面不允许出现 reserved=true 的元素。也就是说默认安装包中的 keys 文件不许用 reserved=true
+            /*
+            // new_keys 中的 reserved 的 key 和 table 元素能覆盖 old_keys 中的同名的 reserved 特性的元素。
+            // key 元素的名字由 xpath 确定。table 元素的名字由 name 属性值确定
+            */
+
+            XmlDocument old_dom = new XmlDocument();
+            XmlDocument new_dom = new XmlDocument();
+            try
+            {
+                old_dom.LoadXml(string.IsNullOrEmpty(old_keys) ? "<root/>" : old_keys);
+            }
+            catch (Exception ex)
+            {
+                strError = $"old_keys 装入 XMLDOM 时出错: {ex.Message}";
+                return -1;
+            }
+
+            try
+            {
+                new_dom.LoadXml(string.IsNullOrEmpty(new_keys) ? "<root/>" : new_keys);
+            }
+            catch (Exception ex)
+            {
+                strError = $"new_keys 装入 XMLDOM 时出错: {ex.Message}";
+                return -1;
+            }
+
+            if (old_dom.DocumentElement == null)
+                old_dom.LoadXml("<root />");
+            if (new_dom.DocumentElement == null)
+                new_dom.LoadXml("<root />");
+
+            // 检查 new_keys 中是否具有 reserved 元素
+            var attrs = new_dom.DocumentElement.SelectNodes("*/@reserved");
+            if (attrs.Count > 0)
+            {
+                strError = $"发现 new_keys 中有 {attrs.Count} 个元素具有 reserved 属性，这是不允许的 (new_keys 中不允许使用 reserved 属性)";
+                return -1;
+            }
+
+            // 提取 old_keys 中的 reserved 元素
+            List<XmlElement> reserved_elements = new List<XmlElement>();
+            var nodes = old_dom.DocumentElement.SelectNodes("*");
+            foreach (XmlElement node in nodes)
+            {
+                if (node.HasAttribute("reserved") == false)
+                    continue;
+                var reserved = node.GetAttribute("reserved");
+                if (DomUtil.IsBooleanTrue(reserved))
+                    reserved_elements.Add(node);
+            }
+
+            if (reserved_elements.Count == 0)
+            {
+                merged_keys = new_keys;
+                return 0;   // new_keys 调用过程中没有发生修改
+            }
+
+            List<string> protected_contents = new List<string>();
+            // 往 new_keys 中插入保留的元素
+            foreach (XmlElement node in reserved_elements)
+            {
+                protected_contents.Add(node.OuterXml);
+                new_dom.DocumentElement.AppendChild(new_dom.ImportNode(node, true));
+            }
+
+            merged_keys = new_dom.OuterXml;
+            // 返回被保护的 XML 片段
+            strError = StringUtil.MakePathList(protected_contents, "\r\n");
+            return 1;   // new_keys 调用过程中发生了修改
+        }
+
 
         // 压缩一个目录到 .zip 文件
         // parameters:

@@ -11,21 +11,23 @@ using System.Web;
 using System.Reflection;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Linq;
 
 using Microsoft.CSharp;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 
 using DigitalPlatform;	// Stop类
+using DigitalPlatform.Core;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.rms.Client;
-using DigitalPlatform.Core;
 using DigitalPlatform.LibraryServer.Common;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Emit;
+using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -154,6 +156,32 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 2022/8/31
+        // 找到 script 元素
+        int GetScriptElement(out List<XmlElement> script_nodes,
+            out string strError)
+        {
+            script_nodes = new List<XmlElement>();
+            strError = "";
+
+            if (this.LibraryCfgDom == null)
+            {
+                strError = "LibraryCfgDom为空";
+                return -1;
+            }
+
+            // 找到<script>节点
+            // 必须在根下
+            var nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("script");
+
+            // <script>节点不存在
+            if (nodes.Count == 0)
+                return 0;
+
+            script_nodes = nodes.Cast<XmlElement>().ToList();
+            return 1;
+        }
+#if OLD
         // 找到 script 元素
         int GetScriptElement(out XmlElement nodeScript,
             out string strError)
@@ -177,6 +205,7 @@ namespace DigitalPlatform.LibraryServer
 
             return 1;
         }
+#endif
 
         // 初始化 Assembly 对象
         // return:
@@ -184,7 +213,7 @@ namespace DigitalPlatform.LibraryServer
         //		0	脚本代码没有找到
         //      1   成功
         int _initialLibraryHostAssembly(
-            XmlElement nodeScript,
+            List<XmlElement> script_nodes,
             Assembly existing_assembly,
             string strExistingMD5,
             out Assembly assembly,
@@ -217,17 +246,34 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             */
 
+#if OLD
             XmlNode firstNode = nodeScript.ChildNodes[0];
 
             //第一个儿子节点不是CDATA或者Text节点时
             if (firstNode.NodeType != XmlNodeType.CDATA
                 && firstNode.NodeType != XmlNodeType.Text)
                 return 0;
+#endif
+            if (script_nodes == null || script_nodes.Count == 0)
+                return 0;
+            StringBuilder text = new StringBuilder();
+            foreach (var node in script_nodes)
+            {
+                var strings = node.ChildNodes.Cast<XmlNode>()
+                    .Where(o => o.NodeType == XmlNodeType.CDATA || o.NodeType == XmlNodeType.Text)
+                    .Select(o => o.Value).ToList();
+                text.AppendLine(StringUtil.MakePathList(strings, "\r\n"));
+            }
+            string strCode = text.ToString();
+
+            // 没有发现 C# 代码文本
+            if (string.IsNullOrWhiteSpace(strCode))
+                return 0;
 
             //~~~~~~~~~~~~~~~~~~
             // 创建Assembly对象
             string[] saRef = null;
-            nRet = GetRefs(nodeScript,
+            nRet = GetRefs(script_nodes,
                  out saRef,
                  out strError);
             if (nRet == -1)
@@ -247,7 +293,9 @@ namespace DigitalPlatform.LibraryServer
             RemoveRefsProjectDirMacro(ref saRef,
                 this.BinDir);
 
+#if OLD
             string strCode = firstNode.Value;
+#endif
 
             if (string.IsNullOrEmpty(strCode) == true)
                 return 0;
@@ -286,7 +334,7 @@ namespace DigitalPlatform.LibraryServer
         //		0	脚本代码没有找到
         //      1   成功
         public int InitialLibraryHostAssembly(
-            XmlElement nodeScript,
+            List<XmlElement> script_nodes,
             out string strError)
         {
             strError = "";
@@ -310,11 +358,11 @@ namespace DigitalPlatform.LibraryServer
             string strMD5 = "";
             bool testing = false;
 
-            if (nodeScript == null)
+            if (script_nodes == null)
             {
                 // 2021/10/9
                 // 找到 script 元素
-                nRet = GetScriptElement(out nodeScript,
+                nRet = GetScriptElement(out script_nodes,
                     out strError);
             }
             else
@@ -330,7 +378,7 @@ namespace DigitalPlatform.LibraryServer
                 //		0	脚本代码没有找到
                 //      1   成功
                 nRet = _initialLibraryHostAssembly(
-                    nodeScript,
+                    script_nodes,
                     existing_assembly,
                     strExistingMD5,
                     out assembly,
@@ -367,6 +415,31 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return nRet;
+        }
+
+        // 从node节点得到refs字符串数组
+        // return:
+        //      -1  出错
+        //      0   成功
+        public static int GetRefs(List<XmlElement> script_nodes,
+            out string[] saRef,
+            out string strError)
+        {
+            saRef = null;
+            strError = "";
+
+            List<string> results = new List<string>();
+            foreach (var node in script_nodes)
+            {
+                var refs = node.SelectNodes("*//ref");
+                foreach (XmlElement ref_node in refs)
+                {
+                    results.Add(ref_node.InnerText);
+                }
+            }
+
+            saRef = results.ToArray();
+            return 0;
         }
 
         // 从node节点得到refs字符串数组
@@ -576,12 +649,12 @@ namespace DigitalPlatform.LibraryServer
                         {
                             if (codeIssue.Severity == DiagnosticSeverity.Error)
                             {
-                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: { codeIssue.Location.GetLineSpan()},Severity: { codeIssue.Severity}";
+                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: {codeIssue.Location.GetLineSpan()},Severity: {codeIssue.Severity}";
                                 errors.Add(issue);
                             }
                             else
                             {
-                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: { codeIssue.Location.GetLineSpan()},Severity: { codeIssue.Severity}";
+                                string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()},Location: {codeIssue.Location.GetLineSpan()},Severity: {codeIssue.Severity}";
                                 warnings.Add(issue);
                             }
                         }
@@ -2683,7 +2756,7 @@ strLibraryCode1,
 strRoom1);
                         if (item1 == null)
                         {
-                            strError = $"当前位置字段(currentLocation)中的馆藏地 '{strCurrentLocation}' 不合法: 馆代码 '{ strLibraryCode1 }' 没有定义馆藏地点 '{ strRoom1 }'(根据 <locationTypes> 定义)";
+                            strError = $"当前位置字段(currentLocation)中的馆藏地 '{strCurrentLocation}' 不合法: 馆代码 '{strLibraryCode1}' 没有定义馆藏地点 '{strRoom1}'(根据 <locationTypes> 定义)";
                             return 1;
                         }
                     }

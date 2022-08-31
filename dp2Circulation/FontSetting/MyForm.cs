@@ -952,7 +952,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             strError = "";
 
             // EnableControls(false);
-
+            // 2022/8/30
+            var channel = this.GetChannel();
 #if NO
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在验证条码号 " + strBarcode + "...");
@@ -964,7 +965,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             {
                 return Program.MainForm.VerifyBarcode(
                     stop,
-                    Channel,
+                    channel,
                     strLibraryCodeList,
                     strBarcode,
                     EnableControls,
@@ -978,7 +979,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 stop.Initial("");
 #endif
                 stop.Initial(strOldMessage);
-
+                this.ReturnChannel(channel);
                 // EnableControls(true);
             }
         }
@@ -1325,7 +1326,7 @@ out string strError)
 
             try
             {
-                long lRet = Channel.SetOneClassTailNumber(
+                long lRet = channel.SetOneClassTailNumber(
                     stop,
                     strAction,
                     strArrangeGroupName,

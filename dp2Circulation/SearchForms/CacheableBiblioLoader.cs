@@ -192,9 +192,15 @@ namespace dp2Circulation
                             info.RecPath = biblio.RecPath;
                         }
                         if (string.IsNullOrEmpty(biblio.Content) == true)
-                            info.Content = "{null}";    // 2013/11/18
+                        {
+                            // info.Content = "{null}";    // 2013/11/18
+                            info.Contents = new List<string> { "{null}" };
+                        }
                         else
-                            info.Content = biblio.Content;
+                        {
+                            // info.Content = biblio.Content;
+                            info.Contents = new List<string> { biblio.Content };
+                        }
                         info.Metadata = biblio.Metadata;
                         info.Timestamp = biblio.Timestamp;
                         if (tempTable.ContainsKey(strRecPath) == false)

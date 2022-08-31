@@ -82,7 +82,9 @@ namespace DigitalPlatform.LibraryClient
             int nContentIndex = format_list.Count;
             int nTimestampIndex = -1;
             int nMetadataIndex = -1;
-            format_list.Add(this.Format);
+            var origin_formats = StringUtil.SplitList(this.Format);
+            format_list.AddRange(origin_formats);
+            // format_list.Add(this.Format);
             // if ((this.GetBiblioInfoStyle & dp2Circulation.GetBiblioInfoStyle.Timestamp) != 0)
             if (this.GetBiblioInfoStyle.HasFlag(GetBiblioInfoStyle.Timestamp) == true)  // 新用法
             {
@@ -147,7 +149,7 @@ namespace DigitalPlatform.LibraryClient
                 if (batch.Count >= 100 ||
                     (bEOF == true && batch.Count > 0))
                 {
-                    REDO:
+                REDO:
                     string strCommand = "@path-list:" + StringUtil.MakePathList(batch);
 
                     // Channel.Timeout = new TimeSpan(0, 0, 5); 应该让调主设置这个值
@@ -239,7 +241,16 @@ namespace DigitalPlatform.LibraryClient
                         BiblioItem item = new BiblioItem();
                         item.RecPath = batch[i];
                         if (nContentIndex != -1)
-                            item.Content = results[i * format_list.Count + nContentIndex];
+                        {
+                            // 2022/8/29 允许多个 format 的 content
+                            List<string> contents = new List<string>();
+                            for (int k = 0; k < origin_formats.Count; k++)
+                            {
+                                contents.Add(results[i * format_list.Count + nContentIndex + k]);
+                            }
+                            item.Contents = contents;
+                            // item.Content = results[i * format_list.Count + nContentIndex];
+                        }
                         if (nTimestampIndex != -1)
                             item.Timestamp = ByteArray.GetTimeStampByteArray(results[i * format_list.Count + nTimestampIndex]);
                         if (nMetadataIndex != -1)
@@ -253,7 +264,7 @@ namespace DigitalPlatform.LibraryClient
 
                     }
 
-                    CONTINUE:
+                CONTINUE:
                     if (batch.Count > results.Length / format_list.Count)
                     {
                         // 有本次没有获取到的记录
@@ -279,10 +290,22 @@ namespace DigitalPlatform.LibraryClient
         /// 记录路径
         /// </summary>
         public string RecPath = "";
+
+        public List<string> Contents { get; set; }
+
         /// <summary>
         /// 记录内容
         /// </summary>
-        public string Content = "";
+        public string Content
+        {
+            get
+            {
+                if (Contents == null || Contents.Count == 0)
+                    return "";
+                return Contents[0];
+            }
+        }
+
         /// <summary>
         /// 时间戳
         /// </summary>

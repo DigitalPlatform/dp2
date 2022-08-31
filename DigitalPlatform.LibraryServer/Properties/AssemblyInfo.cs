@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.125.*")]
-[assembly: AssemblyFileVersion("3.125.0.0")]
+[assembly: AssemblyVersion("3.126.*")]
+[assembly: AssemblyFileVersion("3.126.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -335,4 +335,8 @@ ItemCanReturn()
 //							分馆之间互借的情形，工作人员查看它馆的册记录(被本馆读者借阅)的 borrower 元素能妥善显示，涉及到对 GetItemInfo() 和 GetEntities() API 的改进
 //							读者借阅它馆的图书，因为超期还书时生成的交费记录，交费操作可以由本馆工作人员操作，也可由它馆工作人员(图书所在馆)操作。工作人员一般能查看本馆图书相关的已交费记录(包括图书馆被本馆读者和它馆读者借阅产生的交费记录两种情形)
 //		3.125 (2022/8/9) 册记录中增加 invoiceNo(发票号)元素
+//		3.126 (2022/8/31) 数据库 keys 配置文件中允许为 key table 和 script 元素定义 reserved="true" 元素，表示当刷新检索点的时候，这些元素会被保护起来，不会发生丢失；
+//							但需要注意，dp2installer 默认安装包模板 keys 文件中不允许使用 reserved 属性。
+//						数据库 keys 配置文件中的 script 元素允许出现多个。连起来起作用。
+//						(library.xml 文件中的 script 元素也允许出现多个，但尚未测试完)
 

@@ -12140,7 +12140,7 @@ public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
                             //		0	脚本代码没有找到
                             //      1   成功
                             nRet = app.InitialLibraryHostAssembly(
-                                dom.DocumentElement,
+                                new List<XmlElement> { dom.DocumentElement },
                                 out strError);
                             if (nRet == -1)
                             {

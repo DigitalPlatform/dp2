@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 
-  <script>
-    <![CDATA[
+	<script>
+		<![CDATA[
 
 using System;
 using System.Xml;
@@ -11,7 +11,7 @@ using DigitalPlatform.rms;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-public class MyKeysHost : KeysHost
+public partial class MyKeysHost : KeysHost
 {
     // 2016/10/6
 	public void getParentIssue()
@@ -22,216 +22,216 @@ public class MyKeysHost : KeysHost
 }
 
 ]]><refs>
-      <ref>system.dll</ref>
-      <ref>system.xml.dll</ref>
-      <ref>%bindir%\digitalplatform.io.dll</ref>
-    </refs>
-  </script>
+			<ref>system.dll</ref>
+			<ref>system.xml.dll</ref>
+			<ref>%bindir%\digitalplatform.io.dll</ref>
+		</refs>
+	</script>
 
-  <key>
-    <xpath>*/publishTime</xpath>
-    <from>publishTime</from>
-    <table ref="publishTime" />
-  </key>
-  <table name="publishTime" id="2">
-    <caption lang="zh-CN">出版时间</caption>
-    <caption lang="en">publishTime</caption>
-  </table>
-  <key>
-    <xpath>*/issue</xpath>
-    <from>issue</from>
-    <table ref="issue" />
-  </key>
-  <table name="issue" id="3">
-    <caption lang="zh-CN">期号</caption>
-    <caption lang="en">issue</caption>
-  </table>
-  <key>
-    <xpath>*/zong</xpath>
-    <from>zong</from>
-    <table ref="zong" />
-  </key>
-  <table name="zong" id="4">
-    <caption lang="zh-CN">总期号</caption>
-    <caption lang="en">zong</caption>
-  </table>
-  <key>
-    <xpath>*/volume</xpath>
-    <from>volume</from>
-    <table ref="volume" />
-  </key>
-  <table name="volume" id="5">
-    <caption lang="zh-CN">卷号</caption>
-    <caption lang="en">Volume No</caption>
-  </table>
+	<key>
+		<xpath>*/publishTime</xpath>
+		<from>publishTime</from>
+		<table ref="publishTime" />
+	</key>
+	<table name="publishTime" id="2">
+		<caption lang="zh-CN">出版时间</caption>
+		<caption lang="en">publishTime</caption>
+	</table>
+	<key>
+		<xpath>*/issue</xpath>
+		<from>issue</from>
+		<table ref="issue" />
+	</key>
+	<table name="issue" id="3">
+		<caption lang="zh-CN">期号</caption>
+		<caption lang="en">issue</caption>
+	</table>
+	<key>
+		<xpath>*/zong</xpath>
+		<from>zong</from>
+		<table ref="zong" />
+	</key>
+	<table name="zong" id="4">
+		<caption lang="zh-CN">总期号</caption>
+		<caption lang="en">zong</caption>
+	</table>
+	<key>
+		<xpath>*/volume</xpath>
+		<from>volume</from>
+		<table ref="volume" />
+	</key>
+	<table name="volume" id="5">
+		<caption lang="zh-CN">卷号</caption>
+		<caption lang="en">Volume No</caption>
+	</table>
 
-  <key>
-    <xpath>*/orderInfo/*/distribute</xpath>
-    <from>itemrefid</from>
-    <table ref="itemrefid" />
-  </key>
-  <table name="itemrefid" id="6">
-    <convert>
-      <string style="distribute_refids,upper" />
-    </convert>
-    <convertquery>
-      <string style="upper" />
-    </convertquery>
-    <caption lang="zh-CN">册参考ID</caption>
-    <caption lang="en">Item RefID</caption>
-  </table>
+	<key>
+		<xpath>*/orderInfo/*/distribute</xpath>
+		<from>itemrefid</from>
+		<table ref="itemrefid" />
+	</key>
+	<table name="itemrefid" id="6">
+		<convert>
+			<string style="distribute_refids,upper" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">册参考ID</caption>
+		<caption lang="en">Item RefID</caption>
+	</table>
 
-  <key>
-    <xpath>*/batchNo</xpath>
-    <from>batchno</from>
-    <table ref="batchno" />
-  </key>
-  <table name="batchno" id="7">
-    <caption lang="zh-CN">批次号</caption>
-    <caption lang="en">Batch No</caption>
-  </table>
+	<key>
+		<xpath>*/batchNo</xpath>
+		<from>batchno</from>
+		<table ref="batchno" />
+	</key>
+	<table name="batchno" id="7">
+		<caption lang="zh-CN">批次号</caption>
+		<caption lang="en">Batch No</caption>
+	</table>
 
-  <key>
-    <xpath>*/refID</xpath>
-    <from>refID</from>
-    <table ref="refID" />
-  </key>
-  <table name="refID" id="8">
-    <caption lang="zh-CN">参考ID</caption>
-    <caption lang="en">Reference ID</caption>
-  </table>
+	<key>
+		<xpath>*/refID</xpath>
+		<from>refID</from>
+		<table ref="refID" />
+	</key>
+	<table name="refID" id="8">
+		<caption lang="zh-CN">参考ID</caption>
+		<caption lang="en">Reference ID</caption>
+	</table>
 
-  <key>
-    <xpath>*/parent</xpath>
-    <from>parent</from>
-    <table ref="parent" />
-  </key>
-  <table name="parent" id="1">
-    <caption lang="zh-CN">父记录</caption>
-    <caption lang="en">parent</caption>
-  </table>
+	<key>
+		<xpath>*/parent</xpath>
+		<from>parent</from>
+		<table ref="parent" />
+	</key>
+	<table name="parent" id="1">
+		<caption lang="zh-CN">父记录</caption>
+		<caption lang="en">parent</caption>
+	</table>
 
-  <key>
-    <xpath>*/state</xpath>
-    <from>state</from>
-    <table ref="state" />
-  </key>
-  <table name="state" id="9">
-    <convert>
-      <string style="split,upper"/>
-    </convert>
-    <convertquery>
-      <string style="upper" />
-    </convertquery>
-    <caption lang="zh-CN">状态</caption>
-    <caption lang="en">State</caption>
-  </table>
-  
-  <!-- 以下是为了内嵌的订购记录所建立的检索点 -->
+	<key>
+		<xpath>*/state</xpath>
+		<from>state</from>
+		<table ref="state" />
+	</key>
+	<table name="state" id="9">
+		<convert>
+			<string style="split,upper"/>
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">状态</caption>
+		<caption lang="en">State</caption>
+	</table>
 
-  <key>
-    <xpath>*/orderInfo/*/seller</xpath>
-    <from>seller</from>
-    <table ref="seller" />
-  </key>
-  <table name="seller" id="20">
-    <caption lang="zh-CN">书商</caption>
-    <caption lang="en">seller</caption>
-  </table>
+	<!-- 以下是为了内嵌的订购记录所建立的检索点 -->
 
-  <key>
-    <xpath>*/orderInfo/*/batchNo</xpath>
-    <from>orderbatchno</from>
-    <table ref="orderbatchno" />
-  </key>
-  <table name="orderbatchno" id="21">
-    <caption lang="zh-CN">订购批次号</caption>
-    <caption lang="en">Order Batch No</caption>
-  </table>
+	<key>
+		<xpath>*/orderInfo/*/seller</xpath>
+		<from>seller</from>
+		<table ref="seller" />
+	</key>
+	<table name="seller" id="20">
+		<caption lang="zh-CN">书商</caption>
+		<caption lang="en">seller</caption>
+	</table>
 
-  <key>
-    <xpath>*/orderInfo/*/orderTime</xpath>
-    <from>orderTime</from>
-    <table ref="orderTime" />
-  </key>
-  <table name="orderTime" id="22">
-    <convert>
-      <number style="rfc1123time" />
-    </convert>
-    <convertquery>
-      <number style="rfc1123time" />
-    </convertquery>
-    <caption lang="zh-CN">订购时间</caption>
-    <caption lang="en">Order Time</caption>
-  </table>
+	<key>
+		<xpath>*/orderInfo/*/batchNo</xpath>
+		<from>orderbatchno</from>
+		<table ref="orderbatchno" />
+	</key>
+	<table name="orderbatchno" id="21">
+		<caption lang="zh-CN">订购批次号</caption>
+		<caption lang="en">Order Batch No</caption>
+	</table>
 
-  <key>
-    <xpath>*/orderInfo/*/refID</xpath>
-    <from>OrderRefID</from>
-    <table ref="OrderRefID" />
-  </key>
-  <table name="OrderRefID" id="23">
-    <caption lang="zh-CN">订购参考ID</caption>
-    <caption lang="en">Order Reference ID</caption>
-  </table>
+	<key>
+		<xpath>*/orderInfo/*/orderTime</xpath>
+		<from>orderTime</from>
+		<table ref="orderTime" />
+	</key>
+	<table name="orderTime" id="22">
+		<convert>
+			<number style="rfc1123time" />
+		</convert>
+		<convertquery>
+			<number style="rfc1123time" />
+		</convertquery>
+		<caption lang="zh-CN">订购时间</caption>
+		<caption lang="en">Order Time</caption>
+	</table>
 
-  <key>
-    <xpath>*/orderInfo/*/orderID</xpath>
-    <from>orderid</from>
-    <table ref="orderid" />
-  </key>
-  <table name="orderid" id="24">
-    <convert>
-      <string style="upper"/>
-    </convert>
-    <convertquery>
-      <string style="upper" />
-    </convertquery>
-    <caption lang="zh-CN">订单号</caption>
-    <caption lang="en">Order ID</caption>
-  </table>
-  
-  <key>
-    <xpath scripting="on">getParentIssue</xpath>
-    <from>parentissue</from>
-    <table ref="parentissue" />
-  </key>
-  <table name="parentissue" id="30">
-    <convert>
-      <string style="" />
-    </convert>
-    <convertquery>
-      <string style="" />
-    </convertquery>
-    <caption lang="zh-CN">父记录+期号</caption>
-    <caption lang="en">Parent+Issue</caption>
-  </table>
+	<key>
+		<xpath>*/orderInfo/*/refID</xpath>
+		<from>OrderRefID</from>
+		<table ref="OrderRefID" />
+	</key>
+	<table name="OrderRefID" id="23">
+		<caption lang="zh-CN">订购参考ID</caption>
+		<caption lang="en">Order Reference ID</caption>
+	</table>
 
-  <!-- ******************配置非用字**************************************** -->
-  <stopword>
-    <stopwordTable name="title">
-      <separator>
-        <t>,</t>
-        <t>_</t>
-        <t>.</t>
-        <t>:</t>
-        <t>;</t>
-        <t>!</t>
-        <t>"</t>
-        <t>'</t>
-        <t>-</t>
-        <t>，</t>
-        <t>。</t>
-        <t>‘</t>
-        <t>’</t>
-        <t>“</t>
-        <t>”</t>
-        <t>—</t>
-      </separator>
-      <word>
-        <t>the</t>
-        <t>a</t>
-      </word>
-    </stopwordTable>
-  </stopword>
+	<key>
+		<xpath>*/orderInfo/*/orderID</xpath>
+		<from>orderid</from>
+		<table ref="orderid" />
+	</key>
+	<table name="orderid" id="24">
+		<convert>
+			<string style="upper"/>
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">订单号</caption>
+		<caption lang="en">Order ID</caption>
+	</table>
+
+	<key>
+		<xpath scripting="on">getParentIssue</xpath>
+		<from>parentissue</from>
+		<table ref="parentissue" />
+	</key>
+	<table name="parentissue" id="30">
+		<convert>
+			<string style="" />
+		</convert>
+		<convertquery>
+			<string style="" />
+		</convertquery>
+		<caption lang="zh-CN">父记录+期号</caption>
+		<caption lang="en">Parent+Issue</caption>
+	</table>
+
+	<!-- ******************配置非用字**************************************** -->
+	<stopword>
+		<stopwordTable name="title">
+			<separator>
+				<t>,</t>
+				<t>_</t>
+				<t>.</t>
+				<t>:</t>
+				<t>;</t>
+				<t>!</t>
+				<t>"</t>
+				<t>'</t>
+				<t>-</t>
+				<t>，</t>
+				<t>。</t>
+				<t>‘</t>
+				<t>’</t>
+				<t>“</t>
+				<t>”</t>
+				<t>—</t>
+			</separator>
+			<word>
+				<t>the</t>
+				<t>a</t>
+			</word>
+		</stopwordTable>
+	</stopword>
 </root>

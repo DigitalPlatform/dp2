@@ -1178,6 +1178,8 @@ ex);
         {
             strError = "";
 
+            string pattern = (this.m_strSqlDbName + "_%").Replace("_", "\\_");
+
             table_names = new List<string>();
             string strCommand = "";
             if (connection.SqlServerType == SqlServerType.MySql)
@@ -1215,7 +1217,8 @@ ex);
             }
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
-                strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + this.m_strSqlDbName.ToUpper() + "_%'";
+                // strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + this.m_strSqlDbName.ToUpper() + "_%'";
+                strCommand = $" SELECT table_name FROM user_tables WHERE table_name like '{pattern.ToUpper()}' ESCAPE '\\'";
 
 #if OLD_CODE
                 try
@@ -1243,6 +1246,15 @@ ex);
                     return -1;
                 }
 #endif
+            }
+            else if (IsPgsql()) // 2022/8/31
+            {
+                strCommand = $" SELECT tablename FROM pg_tables WHERE tablename like '{pattern}'";
+            }
+            else
+            {
+                strError = $"GetExistTableNames() 遇到了无法处理的数据库类型 {this.SqlServerType.ToString()}";
+                return -1;
             }
 
             // 通用

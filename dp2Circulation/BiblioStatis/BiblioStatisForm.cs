@@ -971,6 +971,9 @@ Stack:
                             continue;
                         }
 
+                        // 2022/8/29
+                        objStatis.Contents = item.Contents;
+
                         string strXml = item.Content;
 
                         if (string.IsNullOrEmpty(strXml))

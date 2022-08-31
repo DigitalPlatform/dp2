@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 using DigitalPlatform;
-using System.Diagnostics;
 
 namespace dp2LibraryXE
 {

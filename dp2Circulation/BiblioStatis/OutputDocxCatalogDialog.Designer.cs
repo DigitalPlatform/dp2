@@ -53,6 +53,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_number = new System.Windows.Forms.TabPage();
             this.tabPage_font = new System.Windows.Forms.TabPage();
+            this.checkBox_boldTitleArea = new System.Windows.Forms.CheckBox();
             this.button_getAccessNoFont = new System.Windows.Forms.Button();
             this.button_getContentFont = new System.Windows.Forms.Button();
             this.button_getBarcodeFont = new System.Windows.Forms.Button();
@@ -67,13 +68,21 @@
             this.checkBox_material_specific_area = new System.Windows.Forms.CheckBox();
             this.checkBox_edition_area = new System.Windows.Forms.CheckBox();
             this.checkBox_title_area = new System.Windows.Forms.CheckBox();
-            this.checkBox_boldTitleArea = new System.Windows.Forms.CheckBox();
+            this.tabPage_size = new System.Windows.Forms.TabPage();
+            this.textBox_size_rowSep = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.button_getPageNoFontName = new System.Windows.Forms.Button();
+            this.textBox_pageNoFontSize = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.textBox_pageNoFontName = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_pageNumberStart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_biblioNoStart)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage_number.SuspendLayout();
             this.tabPage_font.SuspendLayout();
             this.tabPage_content.SuspendLayout();
+            this.tabPage_size.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_OK
@@ -287,6 +296,7 @@
             this.tabControl1.Controls.Add(this.tabPage_number);
             this.tabControl1.Controls.Add(this.tabPage_font);
             this.tabControl1.Controls.Add(this.tabPage_content);
+            this.tabControl1.Controls.Add(this.tabPage_size);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -302,13 +312,18 @@
             this.tabPage_number.Location = new System.Drawing.Point(4, 31);
             this.tabPage_number.Name = "tabPage_number";
             this.tabPage_number.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_number.Size = new System.Drawing.Size(640, 485);
+            this.tabPage_number.Size = new System.Drawing.Size(817, 471);
             this.tabPage_number.TabIndex = 0;
             this.tabPage_number.Text = "编号";
             this.tabPage_number.UseVisualStyleBackColor = true;
             // 
             // tabPage_font
             // 
+            this.tabPage_font.Controls.Add(this.button_getPageNoFontName);
+            this.tabPage_font.Controls.Add(this.textBox_pageNoFontSize);
+            this.tabPage_font.Controls.Add(this.label12);
+            this.tabPage_font.Controls.Add(this.textBox_pageNoFontName);
+            this.tabPage_font.Controls.Add(this.label13);
             this.tabPage_font.Controls.Add(this.checkBox_boldTitleArea);
             this.tabPage_font.Controls.Add(this.button_getAccessNoFont);
             this.tabPage_font.Controls.Add(this.button_getContentFont);
@@ -337,6 +352,16 @@
             this.tabPage_font.TabIndex = 1;
             this.tabPage_font.Text = "字体";
             this.tabPage_font.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_boldTitleArea
+            // 
+            this.checkBox_boldTitleArea.AutoSize = true;
+            this.checkBox_boldTitleArea.Location = new System.Drawing.Point(12, 416);
+            this.checkBox_boldTitleArea.Name = "checkBox_boldTitleArea";
+            this.checkBox_boldTitleArea.Size = new System.Drawing.Size(267, 25);
+            this.checkBox_boldTitleArea.TabIndex = 26;
+            this.checkBox_boldTitleArea.Text = "粗体显示题名与责任者项";
+            this.checkBox_boldTitleArea.UseVisualStyleBackColor = true;
             // 
             // button_getAccessNoFont
             // 
@@ -490,15 +515,77 @@
             this.checkBox_title_area.Text = "题名与责任者 title_area";
             this.checkBox_title_area.UseVisualStyleBackColor = true;
             // 
-            // checkBox_boldTitleArea
+            // tabPage_size
             // 
-            this.checkBox_boldTitleArea.AutoSize = true;
-            this.checkBox_boldTitleArea.Location = new System.Drawing.Point(12, 350);
-            this.checkBox_boldTitleArea.Name = "checkBox_boldTitleArea";
-            this.checkBox_boldTitleArea.Size = new System.Drawing.Size(267, 25);
-            this.checkBox_boldTitleArea.TabIndex = 26;
-            this.checkBox_boldTitleArea.Text = "粗体显示题名与责任者项";
-            this.checkBox_boldTitleArea.UseVisualStyleBackColor = true;
+            this.tabPage_size.Controls.Add(this.textBox_size_rowSep);
+            this.tabPage_size.Controls.Add(this.label11);
+            this.tabPage_size.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_size.Name = "tabPage_size";
+            this.tabPage_size.Size = new System.Drawing.Size(817, 471);
+            this.tabPage_size.TabIndex = 3;
+            this.tabPage_size.Text = "尺寸";
+            this.tabPage_size.UseVisualStyleBackColor = true;
+            // 
+            // textBox_size_rowSep
+            // 
+            this.textBox_size_rowSep.Location = new System.Drawing.Point(195, 39);
+            this.textBox_size_rowSep.Name = "textBox_size_rowSep";
+            this.textBox_size_rowSep.Size = new System.Drawing.Size(192, 31);
+            this.textBox_size_rowSep.TabIndex = 23;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(10, 42);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(126, 21);
+            this.label11.TabIndex = 22;
+            this.label11.Text = "表格行间距:";
+            // 
+            // button_getPageNoFontName
+            // 
+            this.button_getPageNoFontName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getPageNoFontName.Location = new System.Drawing.Point(736, 329);
+            this.button_getPageNoFontName.Name = "button_getPageNoFontName";
+            this.button_getPageNoFontName.Size = new System.Drawing.Size(58, 31);
+            this.button_getPageNoFontName.TabIndex = 31;
+            this.button_getPageNoFontName.Text = "...";
+            this.button_getPageNoFontName.UseVisualStyleBackColor = true;
+            this.button_getPageNoFontName.Click += new System.EventHandler(this.button_getPageNoFontName_Click);
+            // 
+            // textBox_pageNoFontSize
+            // 
+            this.textBox_pageNoFontSize.Location = new System.Drawing.Point(193, 366);
+            this.textBox_pageNoFontSize.Name = "textBox_pageNoFontSize";
+            this.textBox_pageNoFontSize.Size = new System.Drawing.Size(192, 31);
+            this.textBox_pageNoFontSize.TabIndex = 30;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(8, 369);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(105, 21);
+            this.label12.TabIndex = 29;
+            this.label12.Text = "页码字号:";
+            // 
+            // textBox_pageNoFontName
+            // 
+            this.textBox_pageNoFontName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_pageNoFontName.Location = new System.Drawing.Point(193, 329);
+            this.textBox_pageNoFontName.Name = "textBox_pageNoFontName";
+            this.textBox_pageNoFontName.Size = new System.Drawing.Size(541, 31);
+            this.textBox_pageNoFontName.TabIndex = 28;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(8, 332);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(105, 21);
+            this.label13.TabIndex = 27;
+            this.label13.Text = "页码字体:";
             // 
             // OutputDocxCatalogDialog
             // 
@@ -523,6 +610,8 @@
             this.tabPage_font.PerformLayout();
             this.tabPage_content.ResumeLayout(false);
             this.tabPage_content.PerformLayout();
+            this.tabPage_size.ResumeLayout(false);
+            this.tabPage_size.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -569,5 +658,13 @@
         private System.Windows.Forms.Button button_getContentFont;
         private System.Windows.Forms.Button button_getBarcodeFont;
         private System.Windows.Forms.CheckBox checkBox_boldTitleArea;
+        private System.Windows.Forms.TabPage tabPage_size;
+        private System.Windows.Forms.TextBox textBox_size_rowSep;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Button button_getPageNoFontName;
+        private System.Windows.Forms.TextBox textBox_pageNoFontSize;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.TextBox textBox_pageNoFontName;
+        private System.Windows.Forms.Label label13;
     }
 }

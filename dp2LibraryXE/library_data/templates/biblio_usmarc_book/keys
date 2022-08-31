@@ -1,221 +1,221 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-    <nstable name="usmarc">
-        <item prefix="marc" url="http://www.loc.gov/MARC21/slim" />
-    </nstable>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='020']/marc:subfield[@code='a']</xpath>
-        <from>ISBN</from>
-        <table ref="ISBN" />
-    </key>
-    <table name="ISBN" id="1" type="isbn">
-        <convert>
-            <string style="#convertISBN,stopword" stopwordTable="title" />
-        </convert>
-        <convertquery>
-            <string style="#convertISBN,stopword" stopwordTable="title" />
-        </convertquery>
-        <caption lang="zh-CN">ISBN</caption>
-        <caption lang="en">ISBN</caption>
-    </table>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='245']/marc:subfield[@code='a']</xpath>
-        <from>title</from>
-        <table ref="title" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='240']/marc:subfield[@code='a']</xpath>
-        <from>title</from>
-        <table ref="title" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='246']/marc:subfield[@code='a']</xpath>
-        <from>title</from>
-        <table ref="title" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='130']/marc:subfield[@code='a']</xpath>
-        <from>title</from>
-        <table ref="title" />
-    </key>
-    <table name="title" id="2" type="title">
-        <convert>
-            <string style="upper,stopword,simplify" stopwordTable="title" />
-        </convert>
-        <convertquery>
-            <string style="upper,stopword,simplify" stopwordTable="title" />
-        </convertquery>
-        <caption lang="zh-CN">题名</caption>
-        <caption lang="en">Title</caption>
-    </table>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='600']/marc:subfield[@code='a']</xpath>
-        <from>Thesaurus</from>
-        <table ref="Thesaurus" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='610']/marc:subfield[@code='a']</xpath>
-        <from>Thesaurus</from>
-        <table ref="Thesaurus" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='611']/marc:subfield[@code='a']</xpath>
-        <from>Thesaurus</from>
-        <table ref="Thesaurus" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='630']/marc:subfield[@code='a']</xpath>
-        <from>Thesaurus</from>
-        <table ref="Thesaurus" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='650']/marc:subfield[@code='a']</xpath>
-        <from>Thesaurus</from>
-        <table ref="Thesaurus" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='651']/marc:subfield[@code='a']</xpath>
-        <from>Thesaurus</from>
-        <table ref="Thesaurus" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='653']/marc:subfield[@code='a']</xpath>
-        <from>Thesaurus</from>
-        <table ref="Thesaurus" />
-    </key>
-    <table name="Thesaurus" id="3" type="subject">
-        <convert>
-            <string style="upper,split,simplify" />
-        </convert>
-        <convertquery>
-            <string style="upper,simplify" />
-        </convertquery>
-        <caption lang="zh-CN">主题词</caption>
-        <caption lang="en">Thesaurus</caption>
-    </table>
+	<nstable name="usmarc">
+		<item prefix="marc" url="http://www.loc.gov/MARC21/slim" />
+	</nstable>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='020']/marc:subfield[@code='a']</xpath>
+		<from>ISBN</from>
+		<table ref="ISBN" />
+	</key>
+	<table name="ISBN" id="1" type="isbn">
+		<convert>
+			<string style="#convertISBN,stopword" stopwordTable="title" />
+		</convert>
+		<convertquery>
+			<string style="#convertISBN,stopword" stopwordTable="title" />
+		</convertquery>
+		<caption lang="zh-CN">ISBN</caption>
+		<caption lang="en">ISBN</caption>
+	</table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='245']/marc:subfield[@code='a']</xpath>
+		<from>title</from>
+		<table ref="title" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='240']/marc:subfield[@code='a']</xpath>
+		<from>title</from>
+		<table ref="title" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='246']/marc:subfield[@code='a']</xpath>
+		<from>title</from>
+		<table ref="title" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='130']/marc:subfield[@code='a']</xpath>
+		<from>title</from>
+		<table ref="title" />
+	</key>
+	<table name="title" id="2" type="title">
+		<convert>
+			<string style="upper,stopword,simplify" stopwordTable="title" />
+		</convert>
+		<convertquery>
+			<string style="upper,stopword,simplify" stopwordTable="title" />
+		</convertquery>
+		<caption lang="zh-CN">题名</caption>
+		<caption lang="en">Title</caption>
+	</table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='600']/marc:subfield[@code='a']</xpath>
+		<from>Thesaurus</from>
+		<table ref="Thesaurus" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='610']/marc:subfield[@code='a']</xpath>
+		<from>Thesaurus</from>
+		<table ref="Thesaurus" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='611']/marc:subfield[@code='a']</xpath>
+		<from>Thesaurus</from>
+		<table ref="Thesaurus" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='630']/marc:subfield[@code='a']</xpath>
+		<from>Thesaurus</from>
+		<table ref="Thesaurus" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='650']/marc:subfield[@code='a']</xpath>
+		<from>Thesaurus</from>
+		<table ref="Thesaurus" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='651']/marc:subfield[@code='a']</xpath>
+		<from>Thesaurus</from>
+		<table ref="Thesaurus" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='653']/marc:subfield[@code='a']</xpath>
+		<from>Thesaurus</from>
+		<table ref="Thesaurus" />
+	</key>
+	<table name="Thesaurus" id="3" type="subject">
+		<convert>
+			<string style="upper,split,simplify" />
+		</convert>
+		<convertquery>
+			<string style="upper,simplify" />
+		</convertquery>
+		<caption lang="zh-CN">主题词</caption>
+		<caption lang="en">Thesaurus</caption>
+	</table>
 
 
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='050']/marc:subfield[@code='a']</xpath>
-        <from>class</from>
-        <table ref="class" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='082']/marc:subfield[@code='a']</xpath>
-        <from>class</from>
-        <table ref="class" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='090']/marc:subfield[@code='a']</xpath>
-        <from>class</from>
-        <table ref="class" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='093']/marc:subfield[@code='a']</xpath>
-        <from>class</from>
-        <table ref="class" />
-    </key>
-    <table name="class" id="4" type="class">
-        <convert>
-            <string style="upper" />
-        </convert>
-        <convertquery>
-            <string style="upper" />
-        </convertquery>
-        <caption lang="zh-CN">分类号</caption>
-        <caption lang="en">Class number</caption>
-    </table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='050']/marc:subfield[@code='a']</xpath>
+		<from>class</from>
+		<table ref="class" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='082']/marc:subfield[@code='a']</xpath>
+		<from>class</from>
+		<table ref="class" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='090']/marc:subfield[@code='a']</xpath>
+		<from>class</from>
+		<table ref="class" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='093']/marc:subfield[@code='a']</xpath>
+		<from>class</from>
+		<table ref="class" />
+	</key>
+	<table name="class" id="4" type="class">
+		<convert>
+			<string style="upper" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">分类号</caption>
+		<caption lang="en">Class number</caption>
+	</table>
 
 
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='082']/marc:subfield[@code='a']</xpath>
-        <from>ddc</from>
-        <table ref="ddc" />
-    </key>
-    <table name="ddc" id="36" type="ddc,__class">
-        <convert>
-            <string style="upper" />
-        </convert>
-        <convertquery>
-            <string style="upper" />
-        </convertquery>
-        <caption lang="zh-CN">杜威十进制分类号</caption>
-        <caption lang="en">DDC Class number</caption>
-    </table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='082']/marc:subfield[@code='a']</xpath>
+		<from>ddc</from>
+		<table ref="ddc" />
+	</key>
+	<table name="ddc" id="36" type="ddc,__class">
+		<convert>
+			<string style="upper" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">杜威十进制分类号</caption>
+		<caption lang="en">DDC Class number</caption>
+	</table>
 
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='100']/marc:subfield[@code='a']</xpath>
-        <from>contributor</from>
-        <table ref="contributor" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='110']/marc:subfield[@code='a']</xpath>
-        <from>contributor</from>
-        <table ref="contributor" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='111']/marc:subfield[@code='a']</xpath>
-        <from>contributor</from>
-        <table ref="contributor" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='700']/marc:subfield[@code='a']</xpath>
-        <from>contributor</from>
-        <table ref="contributor" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='710']/marc:subfield[@code='a']</xpath>
-        <from>contributor</from>
-        <table ref="contributor" />
-    </key>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='711']/marc:subfield[@code='a']</xpath>
-        <from>contributor</from>
-        <table ref="contributor" />
-    </key>
-    <table name="contributor" id="5" type="contributor">
-        <convert>
-            <string style="upper,stopword,simplify" stopwordTable="title" />
-        </convert>
-        <convertquery>
-            <string style="upper,stopword,simplify" stopwordTable="title" />
-        </convertquery>
-        <caption lang="zh-CN">责任者</caption>
-        <caption lang="en">Contributor</caption>
-    </table>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='260']/marc:subfield[@code='b']</xpath>
-        <from>publisher</from>
-        <table ref="publisher" />
-    </key>
-    <table name="publisher" id="6" type="publisher">
-        <convert>
-            <string style="upper,stopword,simplify" stopwordTable="title" />
-        </convert>
-        <convertquery>
-            <string style="upper,stopword,simplify" stopwordTable="title" />
-        </convertquery>
-        <caption lang="zh-CN">出版发行者</caption>
-        <caption lang="en">Publisher</caption>
-    </table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='100']/marc:subfield[@code='a']</xpath>
+		<from>contributor</from>
+		<table ref="contributor" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='110']/marc:subfield[@code='a']</xpath>
+		<from>contributor</from>
+		<table ref="contributor" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='111']/marc:subfield[@code='a']</xpath>
+		<from>contributor</from>
+		<table ref="contributor" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='700']/marc:subfield[@code='a']</xpath>
+		<from>contributor</from>
+		<table ref="contributor" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='710']/marc:subfield[@code='a']</xpath>
+		<from>contributor</from>
+		<table ref="contributor" />
+	</key>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='711']/marc:subfield[@code='a']</xpath>
+		<from>contributor</from>
+		<table ref="contributor" />
+	</key>
+	<table name="contributor" id="5" type="contributor">
+		<convert>
+			<string style="upper,stopword,simplify" stopwordTable="title" />
+		</convert>
+		<convertquery>
+			<string style="upper,stopword,simplify" stopwordTable="title" />
+		</convertquery>
+		<caption lang="zh-CN">责任者</caption>
+		<caption lang="en">Contributor</caption>
+	</table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='260']/marc:subfield[@code='b']</xpath>
+		<from>publisher</from>
+		<table ref="publisher" />
+	</key>
+	<table name="publisher" id="6" type="publisher">
+		<convert>
+			<string style="upper,stopword,simplify" stopwordTable="title" />
+		</convert>
+		<convertquery>
+			<string style="upper,stopword,simplify" stopwordTable="title" />
+		</convertquery>
+		<caption lang="zh-CN">出版发行者</caption>
+		<caption lang="en">Publisher</caption>
+	</table>
 
-  <key>
-    <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='260']/marc:subfield[@code='c']</xpath>
-    <from>publishtime</from>
-    <table ref="publishtime" />
-  </key>
-  <table name="publishtime" id="9" type="publishtime">
-    <convert>
-      <number style="freetime" />
-    </convert>
-    <convertquery>
-      <number style="freetime"/>
-    </convertquery>
-    <caption lang="zh-CN">出版时间</caption>
-    <caption lang="en">Publish Time</caption>
-  </table>
-  
-  <!--
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='260']/marc:subfield[@code='c']</xpath>
+		<from>publishtime</from>
+		<table ref="publishtime" />
+	</key>
+	<table name="publishtime" id="9" type="publishtime">
+		<convert>
+			<number style="freetime" />
+		</convert>
+		<convertquery>
+			<number style="freetime"/>
+		</convertquery>
+		<caption lang="zh-CN">出版时间</caption>
+		<caption lang="en">Publish Time</caption>
+	</table>
+
+	<!--
     <key>
         <xpath nstable="usmarc">concat(//marc:record/marc:datafield[@tag='905']/marc:subfield[@code='d'],"/",//marc:record/marc:datafield[@tag='905']/marc:subfield[@code='e'])</xpath>
         <from>callnumber</from>
@@ -241,150 +241,134 @@
         <caption lang="en">Class of call number</caption>
     </table>
     -->
-  
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='a']</xpath>
-        <from>batchno</from>
-        <table ref="batchno" />
-    </key>
-    <table name="batchno" id="13" type="batchno">
-        <caption lang="zh-CN">批次号</caption>
-        <caption lang="en">Batch number</caption>
-    </table>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='t']</xpath>
-        <from>targetrecpath</from>
-        <table ref="targetrecpath" />
-    </key>
-    <table name="targetrecpath" id="14" type="targetrecpath">
-        <caption lang="zh-CN">目标记录路径</caption>
-        <caption lang="en">Target Record Path</caption>
-    </table>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='s']</xpath>
-        <from>state</from>
-        <table ref="state" />
-    </key>
-    <table name="state" id="15" type="state">
-        <convert>
-            <string style="upper,split" />
-        </convert>
-        <convertquery>
-            <string style="upper" />
-        </convertquery>
-        <caption lang="zh-CN">状态</caption>
-        <caption lang="en">State</caption>
-    </table>
-    <key>
-       <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='u']</xpath>
-        <from>operTime</from>
-        <table ref="operTime" />
-    </key>
-    <table name="operTime" id="16" type="opertime">
-        <convert>
-            <number style="utime" />
-        </convert>
-        <convertquery>
-            <number style="utime" />
-        </convertquery>
-        <caption lang="zh-CN">操作时间</caption>
-        <caption lang="en">OperTime</caption>
-    </table>
-    
-  <key>
-    <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='997']/marc:subfield[@code='a']</xpath>
-    <from>ukey</from>
-    <table ref="ukey" />
-  </key>
-  <table name="ukey" id="20" type="ukey">
-    <convert>
-      <string style="upper" />
-    </convert>
-    <convertquery>
-      <string style="upper" />
-    </convertquery>
-    <caption lang="zh-CN">查重键</caption>
-    <caption lang="en">Uniform Key</caption>
-  </table>
-  
-  <key>
-    <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='997']/marc:subfield[@code='h']</xpath>
-    <from>ucode</from>
-    <table ref="ucode" />
-  </key>
-  <table name="ucode" id="21" type="ucode">
-    <caption lang="zh-CN">查重码</caption>
-    <caption lang="en">Uniform Code</caption>
-  </table>
-    
-    <!-- ******************配置非用字**************************************** -->
-    <stopword>
-        <stopwordTable name="title">
-            <separator>
-                <t>,</t>
-                <t>_</t>
-                <t>
-                </t>
-                <t>.</t>
-                <t>:</t>
-                <t>;</t>
-                <t>!</t>
-                <t>"</t>
-                <t>'</t>
-                <t>-</t>
-                <t>，</t>
-                <t>。</t>
-                <t>‘</t>
-                <t>’</t>
-                <t>“</t>
-                <t>”</t>
-                <t>—</t>
-            </separator>
-            <word>
-                <t>THE</t>
-                <t>A</t>
-            </word>
-        </stopwordTable>
-    </stopword>
-    <script><![CDATA[
+
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='a']</xpath>
+		<from>batchno</from>
+		<table ref="batchno" />
+	</key>
+	<table name="batchno" id="13" type="batchno">
+		<caption lang="zh-CN">批次号</caption>
+		<caption lang="en">Batch number</caption>
+	</table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='t']</xpath>
+		<from>targetrecpath</from>
+		<table ref="targetrecpath" />
+	</key>
+	<table name="targetrecpath" id="14" type="targetrecpath">
+		<caption lang="zh-CN">目标记录路径</caption>
+		<caption lang="en">Target Record Path</caption>
+	</table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='s']</xpath>
+		<from>state</from>
+		<table ref="state" />
+	</key>
+	<table name="state" id="15" type="state">
+		<convert>
+			<string style="upper,split" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">状态</caption>
+		<caption lang="en">State</caption>
+	</table>
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='998']/marc:subfield[@code='u']</xpath>
+		<from>operTime</from>
+		<table ref="operTime" />
+	</key>
+	<table name="operTime" id="16" type="opertime">
+		<convert>
+			<number style="utime" />
+		</convert>
+		<convertquery>
+			<number style="utime" />
+		</convertquery>
+		<caption lang="zh-CN">操作时间</caption>
+		<caption lang="en">OperTime</caption>
+	</table>
+
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='997']/marc:subfield[@code='a']</xpath>
+		<from>ukey</from>
+		<table ref="ukey" />
+	</key>
+	<table name="ukey" id="20" type="ukey">
+		<convert>
+			<string style="upper" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">查重键</caption>
+		<caption lang="en">Uniform Key</caption>
+	</table>
+
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='997']/marc:subfield[@code='h']</xpath>
+		<from>ucode</from>
+		<table ref="ucode" />
+	</key>
+	<table name="ucode" id="21" type="ucode">
+		<caption lang="zh-CN">查重码</caption>
+		<caption lang="en">Uniform Code</caption>
+	</table>
+
+	<!-- ******************配置非用字**************************************** -->
+	<stopword>
+		<stopwordTable name="title">
+			<separator>
+				<t>,</t>
+				<t>_</t>
+				<t>
+				</t>
+				<t>.</t>
+				<t>:</t>
+				<t>;</t>
+				<t>!</t>
+				<t>"</t>
+				<t>'</t>
+				<t>-</t>
+				<t>，</t>
+				<t>。</t>
+				<t>‘</t>
+				<t>’</t>
+				<t>“</t>
+				<t>”</t>
+				<t>—</t>
+			</separator>
+			<word>
+				<t>THE</t>
+				<t>A</t>
+			</word>
+		</stopwordTable>
+	</stopword>
+	<script>
+		<![CDATA[
 
 using System;
-
 using System.Xml;
-
 using DigitalPlatform.rms;
-
 using DigitalPlatform.IO;
 
- 
-
-public class MyKeysHost : KeysHost
-
+public partial class MyKeysHost : KeysHost
 {
-
   public void convertISBN()
   {
        string isbn = this.InputString.Trim();
-
        isbn = isbn.Replace("-", "");   //去除ISBN中的"-"连接符号
-
        isbn = isbn.Replace("—", ""); //为稳妥，去除ISBN中的全角"—"连接符号
 
- 
-
             if (isbn.Length < 3)
-
             {
-
                 this.ResultString = isbn; //如果ISBN不足3位，原样输出
-
                 return;
-
             }
 
             string head = isbn.Substring(0, 3);       //获得新旧ISBN号的判断依据
-
- 
 
             if (head == "978" || head == "979")
             {
@@ -402,13 +386,17 @@ public class MyKeysHost : KeysHost
                     isbn = isbn.Substring(0, 9);                        
                 }
            }
-    
 
        this.ResultString = isbn;
 //     this.ResultStrings.Add(isbn);        //如果同时构造出多索引，采用添加函数
   }
-
 }
 
-]]><refs><ref>system.dll</ref><ref>system.xml.dll</ref><ref>%bindir%\digitalplatform.xml.dll</ref><ref>%bindir%\digitalplatform.io.dll</ref></refs></script>
+]]><refs>
+			<ref>system.dll</ref>
+			<ref>system.xml.dll</ref>
+			<ref>%bindir%\digitalplatform.xml.dll</ref>
+			<ref>%bindir%\digitalplatform.io.dll</ref>
+		</refs>
+	</script>
 </root>

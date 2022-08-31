@@ -16,6 +16,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using System.IO;
 
 namespace DigitalPlatform.Typography
 {
@@ -29,6 +30,22 @@ namespace DigitalPlatform.Typography
         public static void XmlToWord(string xmlFileName,
             string wordFileName)
         {
+            // 检查 wordFileName 是否可写
+            if (File.Exists(wordFileName))
+            {
+                try
+                {
+                    using (var file = File.Open(wordFileName, FileMode.Open, FileAccess.Write))
+                    {
+
+                    }
+                }
+                catch (IOException ex)
+                {
+                    throw new Exception($"文件 {wordFileName} 已经被占用。请关闭 Word 再重试一次");
+                }
+            }
+
             XmlDocument dom = new XmlDocument();
             dom.Load(xmlFileName);
 
@@ -851,6 +868,7 @@ out string error);
                     return temp_paragraph;
                 }
 
+                /*
                 // TODO: 可以考虑和附近的一个 Run 合并?
                 if (child_node.Name == "pageNumber")
                 {
@@ -859,6 +877,20 @@ out string error);
 
                     // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.pagenumber?view=openxml-2.8.1
                     run.AppendChild<PageNumber>(new PageNumber());
+                    continue;
+                }
+                */
+
+                if (child_node.Name == "pageNumber")
+                {
+                    /*
+<w:txbxContent><w:p><w:pPr><w:pStyle w:val="2"/></w:pPr><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE  \* MERGEFORMAT </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:txbxContent>
+                    * */
+                    SimpleField simpleField1 = new SimpleField()
+                    {
+                        Instruction = " PAGE   \\* MERGEFORMAT "
+                    };
+                    CreateParagraphIfNeed().AppendChild(simpleField1);
                     continue;
                 }
 
@@ -919,6 +951,27 @@ out string error);
             // Set the style and width for the table.
             TableProperties tableProp = new TableProperties();
             tbl.AppendChild(tableProp);
+
+            // table/@cellMargin 左 上 右 下
+            var cellMargin_attr = table.GetAttribute("cellMarginDefault");
+            if (string.IsNullOrEmpty(cellMargin_attr) == false)
+            {
+                string left = "", top = "", right = "", bottom = "";
+                var parts = StringUtil.SplitList(cellMargin_attr);
+                if (parts.Count > 0)
+                    left = parts[0];
+                if (parts.Count > 1)
+                    top = parts[1];
+                if (parts.Count > 2)
+                    right = parts[2];
+                if (parts.Count > 3)
+                    bottom = parts[3];
+                var cell_margin = tableProp.AppendChild<TableCellMarginDefault>(new TableCellMarginDefault());
+                cell_margin.StartMargin = GetStartMargin(left);
+                cell_margin.TopMargin = GetTopMargin(top);
+                cell_margin.EndMargin = GetEndMargin(right);
+                cell_margin.BottomMargin = GetBottomMargin(bottom);
+            }
 
             TableStyle tableStyle = new TableStyle() { Val = "TableGrid" };
             tableProp.Append(tableStyle);
@@ -1020,6 +1073,66 @@ td.ChildNodes);
             }
 
             return tbl;
+        }
+
+        static LeftMargin GetLeftMargin(string text)
+        {
+            var ref_obj = GetTableWidth(text);
+            return new LeftMargin
+            {
+                Type = ref_obj.Type,
+                Width = ref_obj.Width
+            };
+        }
+
+        static StartMargin GetStartMargin(string text)
+        {
+            var ref_obj = GetTableWidth(text);
+            return new StartMargin
+            {
+                Type = ref_obj.Type,
+                Width = ref_obj.Width
+            };
+        }
+
+        static TopMargin GetTopMargin(string text)
+        {
+            var ref_obj = GetTableWidth(text);
+            return new TopMargin
+            {
+                Type = ref_obj.Type,
+                Width = ref_obj.Width
+            };
+        }
+
+        static RightMargin GetRightMargin(string text)
+        {
+            var ref_obj = GetTableWidth(text);
+            return new RightMargin
+            {
+                Type = ref_obj.Type,
+                Width = ref_obj.Width
+            };
+        }
+
+        static EndMargin GetEndMargin(string text)
+        {
+            var ref_obj = GetTableWidth(text);
+            return new EndMargin
+            {
+                Type = ref_obj.Type,
+                Width = ref_obj.Width
+            };
+        }
+
+        static BottomMargin GetBottomMargin(string text)
+        {
+            var ref_obj = GetTableWidth(text);
+            return new BottomMargin
+            {
+                Type = ref_obj.Type,
+                Width = ref_obj.Width
+            };
         }
 
         static TableWidth GetTableWidth(string text)

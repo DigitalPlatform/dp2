@@ -11,18 +11,20 @@ using System.Reflection;
 //using System.CodeDom;
 //using System.CodeDom.Compiler;
 using System.Globalization;
+using System.Linq;
 
 using Microsoft.CSharp;
 using Microsoft.VisualBasic;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Emit;
+
 
 namespace DigitalPlatform.rms
 {
@@ -82,6 +84,10 @@ namespace DigitalPlatform.rms
 
 
             // 创建assembly
+            // return:
+            //		-1	出错
+            //		0	脚本代码没有找到
+            //      1   成功
             nRet = this.InitialAssembly(out strError);
             if (nRet == -1)
             {
@@ -98,7 +104,8 @@ namespace DigitalPlatform.rms
         // 初始化Assembly对象,被Initial调
         // return:
         //		-1	出错
-        //		0	成功
+        //		0	脚本代码没有找到
+        //      1   成功
         private int InitialAssembly(out string strError)
         {
             strError = "";
@@ -110,6 +117,7 @@ namespace DigitalPlatform.rms
                 return 0;
             }
 
+#if OLD
             // 找到<script>节点
             XmlNode nodeScript = this._dom.SelectSingleNode("//script");
 
@@ -135,12 +143,30 @@ namespace DigitalPlatform.rms
                 this.m_assembly = null;
                 return 0;
             }
+#endif
+            // 找到<script>节点
+            var script_nodes = this._dom.SelectNodes("//script").Cast<XmlElement>().ToList();
+            if (script_nodes.Count == 0)
+                return 0;
+
+            StringBuilder text = new StringBuilder();
+            foreach (XmlElement node in script_nodes)
+            {
+                var strings = node.ChildNodes.Cast<XmlNode>()
+                    .Where(o => o.NodeType == XmlNodeType.CDATA || o.NodeType == XmlNodeType.Text)
+                    .Select(o => o.Value).ToList();
+                text.AppendLine(StringUtil.MakePathList(strings, "\r\n"));
+            }
+            string strCode = text.ToString();
+            // 没有发现 C# 代码文本
+            if (string.IsNullOrWhiteSpace(strCode))
+                return 0;
 
             //~~~~~~~~~~~~~~~~~~
             // 创建Assembly对象
 
             string[] saRef = null;
-            nRet = GetRefs(nodeScript,
+            nRet = GetRefs(script_nodes,
                  out saRef,
                  out strError);
             if (nRet == -1)
@@ -161,9 +187,11 @@ namespace DigitalPlatform.rms
             RemoveRefsProjectDirMacro(ref saRef,
                 this.BinDir);
 
+#if OLD
             string strCode = firstNode.Value;
+#endif
 
-            if (strCode != "")
+            if (string.IsNullOrEmpty(strCode) == false)
             {
                 Assembly assembly = null;
                 string strWarning = "";
@@ -178,10 +206,33 @@ namespace DigitalPlatform.rms
                 this.m_assembly = assembly;
             }
 
-
-            return 0;
+            return 1;
         }
 
+        // 从node节点得到refs字符串数组
+        // return:
+        //      -1  出错
+        //      0   成功
+        public static int GetRefs(List<XmlElement> script_nodes,
+            out string[] saRef,
+            out string strError)
+        {
+            saRef = null;
+            strError = "";
+
+            List<string> results = new List<string>();
+            foreach (var node in script_nodes)
+            {
+                var refs = node.SelectNodes("*//ref");
+                foreach (XmlElement ref_node in refs)
+                {
+                    results.Add(ref_node.InnerText);
+                }
+            }
+
+            saRef = results.ToArray();
+            return 0;
+        }
 
 
         // 从node节点得到refs字符串数组
@@ -648,7 +699,7 @@ namespace DigitalPlatform.rms
 
                         m_exprCache[nodeXPath] = expr;
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         throw new Exception($"{ex.Message}。XPath='{strXPath}'", ex);
                     }
@@ -1311,9 +1362,7 @@ namespace DigitalPlatform.rms
         }
 
 
-        #region 加工字符串的静态函数
-
-
+#region 加工字符串的静态函数
 
         // 对数组类型的检索点进行加工
         // parameter:
@@ -1998,8 +2047,7 @@ namespace DigitalPlatform.rms
             }
         }
 
-
-        #endregion
+#endregion
 
     }
 

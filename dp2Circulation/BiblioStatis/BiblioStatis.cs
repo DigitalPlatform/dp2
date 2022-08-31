@@ -61,6 +61,9 @@ namespace dp2Circulation
             }
         }
 
+        // 2022/8/29
+        public List<string> Contents { get; set; }
+
         string m_strXml = "";
         /// <summary>
         /// 当前正在处理的书目 XML 记录，字符串类型

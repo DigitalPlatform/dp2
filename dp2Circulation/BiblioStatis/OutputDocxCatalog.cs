@@ -39,6 +39,7 @@ namespace dp2Circulation
     public class OutputDocxCatalog : BiblioStatis
     {
         string _outputFileName;
+        string _wordFileName;
 
         int _index = 0;
 
@@ -73,6 +74,25 @@ namespace dp2Circulation
         public override void OnBegin(object sender, StatisEventArgs e)
         {
             string strError = "";
+
+            _wordFileName = Path.Combine(Program.MainForm.UserTempDir, "~output_docx_catalog.docx");
+
+            if (File.Exists(_wordFileName))
+            {
+                // 检查 wordFileName 是否可写
+                try
+                {
+                    using (var file = File.Open(_wordFileName, FileMode.Open, FileAccess.Write))
+                    {
+
+                    }
+                }
+                catch (IOException ex)
+                {
+                    strError = ($"文件 {_wordFileName} 已经被 Word 打开并占用。请关闭 Word 再重试一次");
+                    goto ERROR1;
+                }
+            }
 
             if (InputSettings() == false)
             {
@@ -125,6 +145,7 @@ namespace dp2Circulation
                 _writer.WriteStartElement("footers");
                 _writer.WriteStartElement("footer");
                 _writer.WriteStartElement("p");
+                _writer.WriteAttributeString("style", "pageNo");
                 _writer.WriteAttributeString("alignment", "center");
                 _writer.WriteString("- ");
                 _writer.WriteElementString("pageNumber", "");
@@ -159,6 +180,7 @@ namespace dp2Circulation
             }
 
             _writer.WriteStartElement("table");
+            _writer.WriteAttributeString("cellMarginDefault", $"0,0,0,{_rowSep}");
             _writer.WriteAttributeString("width", "100%");
         }
 
@@ -206,6 +228,13 @@ alignment="center"/>
             _writer.WriteAttributeString("font", _BarcodeFontName); // "ascii:Times New Roman"
             _writer.WriteAttributeString("size", _BarcodeFontSize); // "8pt"
             _writer.WriteEndElement();  // style
+
+            _writer.WriteStartElement("style");
+            _writer.WriteAttributeString("name", "pageNo");
+            _writer.WriteAttributeString("font", _PageNoFontName);
+            _writer.WriteAttributeString("size", _PageNoFontSize);
+            _writer.WriteEndElement();  // style
+
 
             // 定义一个 bold 样式，以节省 Word 文档中的样式总数
             _writer.WriteStartElement("style");
@@ -291,7 +320,7 @@ alignment="center"/>
 
                     _writer.WriteStartElement("p");
                     _writer.WriteAttributeString("style", "barcode");
-                    _writer.WriteAttributeString("spacing", "before:8pt,after:3pt");
+                    _writer.WriteAttributeString("spacing", $"before:8pt"); // ,after:{_rowSep}
                     {
                         /*
                          * 0000001
@@ -350,7 +379,7 @@ alignment="center"/>
                 _writer.WriteAttributeString("style", "biblio");
                 _writer.WriteAttributeString("alignment", "both");
 
-                _writer.WriteAttributeString("spacing", "after:3pt");
+                // _writer.WriteAttributeString("spacing", $"after:{_rowSep}");
 
                 {
                     // 注意 book_string 是 InnerXml 形态
@@ -415,25 +444,35 @@ alignment="center"/>
         {
             OutputEnd();
 
-            string wordFileName = Path.Combine(Program.MainForm.UserTempDir, "~output_docx_catalog.docx");
+            TypoUtility.XmlToWord(_outputFileName, _wordFileName);
 
-            TypoUtility.XmlToWord(_outputFileName, wordFileName);
-            Process.Start(wordFileName);
+            try
+            {
+                Process.Start(_wordFileName);
+            }
+            catch
+            {
+                MessageBox.Show(this.BiblioStatisForm, $"文件 '{_wordFileName}' 创建成功");
+            }
         }
 
         int _BiblioNoStart = 1;
         int _PageNumberStart = 1;
         // 序号字体
-        string _NoFontName = "";
-        string _NoFontSize = "";
-        string _BarcodeFontName = "";
-        string _BarcodeFontSize = "";
-        string _ContentFontName = "";
-        string _ContentFontSize = "";
-        string _AccessNoFontName = "";
-        string _AccessNoFontSize = "";
+        public string _NoFontName = "";
+        public string _NoFontSize = "";
+        public string _BarcodeFontName = "";
+        public string _BarcodeFontSize = "";
+        public string _ContentFontName = "";
+        public string _ContentFontSize = "";
+        public string _AccessNoFontName = "";
+        public string _AccessNoFontSize = "";
+        public string _PageNoFontName = "";
+        public string _PageNoFontSize = "";
 
-        bool _boldTitleArea = false;
+        public bool _boldTitleArea = false;
+
+        public string _rowSep = "";
 
         string _areas = "";
 
@@ -445,6 +484,10 @@ alignment="center"/>
         public string _defaultContentFontSize = "9pt";
         public string _defaultAccessNoFontName = "ascii:Times New Roman,hAnsi:Times New Roman";
         public string _defaultAccessNoFontSize = "8pt";
+        public string _defaultPageNoFontName = "ascii:Times New Roman,hAnsi:Times New Roman";
+        public string _defaultPageNoFontSize = "8pt";
+
+        public string _defaultRowSep = "6pt";
 
         bool InputSettings()
         {
@@ -475,7 +518,10 @@ alignment="center"/>
                 _ContentFontSize = dlg.ContentFontSize;
                 _AccessNoFontName = dlg.AccessNoFontName;
                 _AccessNoFontSize = dlg.AccessNoFontSize;
+                _PageNoFontName = dlg.PageNoFontName;
+                _PageNoFontSize = dlg.PageNoFontSize;
                 _boldTitleArea = dlg.BoldTitleArea;
+                _rowSep = dlg.RowSep;
                 _areas = dlg.AreaList;
 
                 {
@@ -498,6 +544,14 @@ alignment="center"/>
                         _AccessNoFontName = _defaultAccessNoFontName;
                     if (string.IsNullOrEmpty(_AccessNoFontSize))
                         _AccessNoFontSize = _defaultAccessNoFontSize;
+
+                    if (string.IsNullOrEmpty(_PageNoFontName))
+                        _PageNoFontName = _defaultPageNoFontName;
+                    if (string.IsNullOrEmpty(_PageNoFontSize))
+                        _PageNoFontSize = _defaultPageNoFontSize;
+
+                    if (string.IsNullOrEmpty(_rowSep))
+                        _rowSep = _defaultRowSep;
                 }
                 return true;
             }
@@ -576,13 +630,7 @@ alignment="center"/>
             return output_dom.DocumentElement.InnerXml;
         }
 
-        class LoadItemsResult : NormalResult
-        {
-            public List<string> AccessNoList { get; set; }
-            public List<string> BarcodeList { get; set; }
-        }
-
-        LoadItemsResult LoadItems(string biblio_recpath)
+        public virtual LoadItemsResult LoadItems(string biblio_recpath)
         {
             var channel = this.BiblioStatisForm.GetChannel();
             try
@@ -786,6 +834,12 @@ alignment="center"/>
         }
 #endif
 
+    }
+
+    public class LoadItemsResult : NormalResult
+    {
+        public List<string> AccessNoList { get; set; }
+        public List<string> BarcodeList { get; set; }
     }
 
 }

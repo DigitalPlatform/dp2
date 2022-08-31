@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.Marc;
 
 namespace dp2Circulation
 {
@@ -17,6 +18,15 @@ namespace dp2Circulation
     {
         // 册条码号数量溢出的阈值 (> 它表示溢出)
         const int _overflowThreshold = 10;
+
+        public override void OnBegin(object sender, StatisEventArgs e)
+        {
+            base.OnBegin(sender, e);
+
+            this.BiblioFormat += ",xml";
+        }
+
+        public const string HYPHEN = "┉";   // ┉〜〰㇐
 
         // 切分 barcodes 为基本和溢出两部分。切割要避免把范围(三行)切断
         public static List<string> SplitOverflow(ref List<string> barcodes, int index)
@@ -26,11 +36,11 @@ namespace dp2Circulation
             List<string> results = new List<string>();
             int start = 0;
             if (index - 1 >= 0
-                && barcodes[index] == "~")
+                && barcodes[index] == HYPHEN)
                 start = index - 1;  // index + 2;
             else if (barcodes.Count > index - 1
                 && index - 2 >= 0
-                && barcodes[index - 1] == "~")
+                && barcodes[index - 1] == HYPHEN)
                 start = index - 2;
             else
                 start = index;
@@ -61,7 +71,7 @@ namespace dp2Circulation
         {
             int barcodes_count = barcodes.Count;
 
-            barcodes = CompactNumbersEx(barcodes, "~");
+            barcodes = CompactNumbersEx(barcodes, HYPHEN);
 
             var barcodes_has_overflow = barcodes.Count > _overflowThreshold;
             List<string> overflow = new List<string>();
@@ -154,7 +164,7 @@ namespace dp2Circulation
                 {
                     Writer.WriteStartElement("p");
                     Writer.WriteAttributeString("style", "accessNo");
-                    Writer.WriteAttributeString("spacing", "after:3pt");
+                    Writer.WriteAttributeString("spacing", $"before:3pt");
 
 #if REMOVED
                     {
@@ -183,7 +193,7 @@ namespace dp2Circulation
                 {
                     Writer.WriteStartElement("p");
                     Writer.WriteAttributeString("style", "barcode");
-                    Writer.WriteAttributeString("spacing", "after:3pt");
+                    Writer.WriteAttributeString("spacing", $"before:3pt");
 #if REMOVED
                     {
                         /*
@@ -213,6 +223,17 @@ namespace dp2Circulation
             Writer.WriteEndElement();  // </tr>
         }
 
+        static bool IsDeleteBarcode(string barcode)
+        {
+            // “GW、JH、XK、XB” 开头的不显示
+            if (barcode.StartsWith("GW")
+                || barcode.StartsWith("JH")
+                || barcode.StartsWith("XK")
+                || (barcode.StartsWith("W") && barcode.StartsWith("WS") == false && barcode.StartsWith("WK") == false && barcode.StartsWith("WB") == false)) // W 开头的删除，除了其中 WS WK WB 开头的以外
+                return true;
+            return false;
+        }
+
         void WriteBarcodes(List<string> barcodes)
         {
             int i = 0;
@@ -221,9 +242,7 @@ namespace dp2Circulation
                 if (i > 0)
                     Writer.WriteElementString("br", "");
 
-                if (barcode.StartsWith("X")
-                || barcode.StartsWith("J")
-                || barcode.StartsWith("W"))
+                if (IsDeleteBarcode(barcode))
                 {
                     Writer.WriteStartElement("style");
                     Writer.WriteAttributeString("use", "strike");
@@ -241,11 +260,10 @@ namespace dp2Circulation
         void WriteOverflowBarcodes(List<string> barcodes)
         {
             int i = 0;
+            string prev = "";
             foreach (var barcode in barcodes)
             {
-                if (barcode.StartsWith("X")
-                || barcode.StartsWith("J")
-                || barcode.StartsWith("W"))
+                if (IsDeleteBarcode(barcode))
                 {
                     if (i > 0)
                         Writer.WriteElementString("blk", "");
@@ -256,13 +274,47 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    if (i > 0)
+                    if (i > 0 && prev != HYPHEN && barcode != HYPHEN)
                         Writer.WriteString(" ");
 
                     Writer.WriteString(barcode);
                 }
                 i++;
+                prev = barcode;
             }
+        }
+
+
+        public override LoadItemsResult LoadItems(string biblio_recpath)
+        {
+            var result = base.LoadItems(biblio_recpath);
+
+            // 看书目记录中是否有 686 字段？有了字段，并且字段内容必须是 X 开头，才当作唯一的索取号返回
+            string biblio_xml = this.Contents[1];
+            int nRet = MarcUtil.Xml2Marc(biblio_xml,
+    true,
+    "",
+    out string marc_syntax,
+    out string marc,
+    out string error);
+            if (nRet == -1)
+            {
+                throw new Exception($"书目记录 XML 转换为 MARC 格式时出现异常: {error}");
+            }
+
+            if (marc_syntax == "unimarc")
+            {
+                MarcRecord record = new MarcRecord(marc);
+                var content = record.select("field[@name='686']/subfield[@name='a']").FirstContent;
+                if (string.IsNullOrEmpty(content) == false
+                    && content.StartsWith("X"))
+                {
+                    result.AccessNoList.AddRange(new List<string> { content });
+                    return result;
+                }
+            }
+
+            return result;
         }
 
         // 过滤册记录
@@ -272,6 +324,7 @@ namespace dp2Circulation
         public override bool FilterItem(XmlDocument itemdom)
         {
             string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+            // W 开头的删除，除了其中 WS WK WB 开头的以外
             if (string.IsNullOrEmpty(barcode)
                 /*|| barcode.StartsWith("X")
                 || barcode.StartsWith("J")
@@ -658,7 +711,7 @@ namespace dp2Circulation
             List<string> barcodes = new List<string>() {
                 "B0000001",
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003",
                 "B0000004"
             };
@@ -668,7 +721,7 @@ namespace dp2Circulation
             CompareStringList(
                 new List<string>() {
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003",
                 "B0000004"
                 },
@@ -687,7 +740,7 @@ namespace dp2Circulation
             List<string> barcodes = new List<string>() {
                 "B0000001",
                 "B0000002",
-                "~",        // <-
+                ByjOutputDocxCatalog.HYPHEN,        // <-
                 "B0000003",
                 "B0000004"
             };
@@ -697,7 +750,7 @@ namespace dp2Circulation
             CompareStringList(
     new List<string>() {
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003",
                 "B0000004",
     },
@@ -715,7 +768,7 @@ namespace dp2Circulation
             List<string> barcodes = new List<string>() {
                 "B0000001",
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003", // <--
                 "B0000004"
             };
@@ -725,7 +778,7 @@ namespace dp2Circulation
             CompareStringList(
                 new List<string>() {
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003",
                 "B0000004"
                 },
@@ -743,7 +796,7 @@ namespace dp2Circulation
             List<string> barcodes = new List<string>() {
                 "B0000001",
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003",
                 "B0000004", // <--
             };
@@ -759,7 +812,7 @@ namespace dp2Circulation
                 new List<string>() {
                 "B0000001",
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003",
                 },
                 barcodes);
@@ -772,7 +825,7 @@ namespace dp2Circulation
             List<string> barcodes = new List<string>() {
                 "B0000001",
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003",
                 "B0000004",
                             // <--
@@ -785,7 +838,7 @@ namespace dp2Circulation
                 new List<string>() {
                 "B0000001",
                 "B0000002",
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000003",
                 "B0000004"
                 },
@@ -798,7 +851,7 @@ namespace dp2Circulation
         {
             // 病态情况
             List<string> barcodes = new List<string>() {
-                "~",        // <--
+                ByjOutputDocxCatalog.HYPHEN,      // <--
                 "B0000001",
                 "B0000002",
                 "B0000003",
@@ -810,7 +863,7 @@ namespace dp2Circulation
                 0);
             CompareStringList(
                 new List<string>() {
-                "~",
+                ByjOutputDocxCatalog.HYPHEN,
                 "B0000001",
                 "B0000002",
                 "B0000003",

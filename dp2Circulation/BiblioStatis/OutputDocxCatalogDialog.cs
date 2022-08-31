@@ -62,6 +62,8 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_resource_identifier_area, true));
                 controls.Add(new ControlWrapper(this.checkBox_summary_field, false));
 
+                controls.Add(this.textBox_size_rowSep);
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -90,6 +92,8 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_notes_area, true));
                 controls.Add(new ControlWrapper(this.checkBox_resource_identifier_area, true));
                 controls.Add(new ControlWrapper(this.checkBox_summary_field, false));
+
+                controls.Add(this.textBox_size_rowSep);
 
                 GuiState.SetUiState(controls, value);
             }
@@ -221,6 +225,31 @@ namespace dp2Circulation
             }
         }
 
+        // 
+        public string PageNoFontName
+        {
+            get
+            {
+                return this.textBox_pageNoFontName.Text;
+            }
+            set
+            {
+                this.textBox_pageNoFontName.Text = value;
+            }
+        }
+
+        public string PageNoFontSize
+        {
+            get
+            {
+                return this.textBox_pageNoFontSize.Text;
+            }
+            set
+            {
+                this.textBox_pageNoFontSize.Text = value;
+            }
+        }
+
         public bool BoldTitleArea
         {
             get
@@ -230,6 +259,18 @@ namespace dp2Circulation
             set
             {
                 this.checkBox_boldTitleArea.Checked = value;
+            }
+        }
+
+        public string RowSep
+        {
+            get
+            {
+                return this.textBox_size_rowSep.Text;
+            }
+            set
+            {
+                this.textBox_size_rowSep.Text = value;
             }
         }
 
@@ -346,6 +387,17 @@ namespace dp2Circulation
                 if (dlg.ShowDialog(this) == DialogResult.Cancel)
                     return;
                 this.textBox_accessNoFontName.Text = dlg.FontName;
+            }
+        }
+
+        private void button_getPageNoFontName_Click(object sender, EventArgs e)
+        {
+            using (GetWordFontsDialog dlg = new GetWordFontsDialog())
+            {
+                dlg.FontName = this.textBox_pageNoFontName.Text;
+                if (dlg.ShowDialog(this) == DialogResult.Cancel)
+                    return;
+                this.textBox_pageNoFontName.Text = dlg.FontName;
             }
         }
     }
