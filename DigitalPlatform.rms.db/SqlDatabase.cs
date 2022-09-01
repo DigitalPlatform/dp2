@@ -1179,6 +1179,7 @@ ex);
             strError = "";
 
             string pattern = (this.m_strSqlDbName + "_%").Replace("_", "\\_");
+            // string records_name = this.m_strSqlDbName + "_records";
 
             table_names = new List<string>();
             string strCommand = "";
@@ -1793,6 +1794,7 @@ ex);
                     }
 
                     // 通用
+                    if (string.IsNullOrWhiteSpace(strCommand) == false)
                     {
                         using (var command = connection.NewCommand(""))
                         {
@@ -2137,7 +2139,7 @@ ex);
                         TableInfo tableInfo = aTableInfo[i];
 
                         strCommand += "\n" +
-                            $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[{ tableInfo.SqlTableName }]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
+                            $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[{tableInfo.SqlTableName}]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
                             $"drop table [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
                             $"CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
                             "(" + "\n" +
@@ -2177,7 +2179,6 @@ ex);
 
                 if (keysCfg != null)
                 {
-
                     List<TableInfo> aTableInfo = null;
                     nRet = keysCfg.GetTableInfosRemoveDup(
                         out aTableInfo,
@@ -2246,8 +2247,8 @@ ex);
                         TableInfo tableInfo = aTableInfo[i];
 
                         strCommand += "\n" +
-                            $"DROP TABLE IF EXISTS {db_prefix}{ tableInfo.SqlTableName} ;\n" +
-                            $"CREATE TABLE {db_prefix}{ tableInfo.SqlTableName }\n" +
+                            $"DROP TABLE IF EXISTS {db_prefix}{tableInfo.SqlTableName} ;\n" +
+                            $"CREATE TABLE {db_prefix}{tableInfo.SqlTableName}\n" +
                             "(" + "\n" +
                             "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystring的长度由配置文件定
                             "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
@@ -2322,7 +2323,7 @@ ex);
                         // int32 number(10)
                         // int64 number(19)
 
-                        strCommand += $" CREATE TABLE {db_prefix}{ tableInfo.SqlTableName } " + "\n" +
+                        strCommand += $" CREATE TABLE {db_prefix}{tableInfo.SqlTableName} " + "\n" +
                             "(" + "\n" +
                             "keystring nvarchar2 (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
                             "fromstring nvarchar2 (255) NULL ," + "\n" +
@@ -2383,8 +2384,8 @@ ex);
                         // TODO 要防止keys表名和records撞车
 
                         strCommand +=
-                            $"DROP TABLE IF EXISTS {db_prefix}{ tableInfo.SqlTableName } ;\n"
-                            + $" CREATE TABLE {db_prefix}{ tableInfo.SqlTableName } " + "\n" +
+                            $"DROP TABLE IF EXISTS {db_prefix}{tableInfo.SqlTableName} ;\n"
+                            + $" CREATE TABLE {db_prefix}{tableInfo.SqlTableName} " + "\n" +
                             "(" + "\n" +
                             "keystring varchar (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +
                             "fromstring varchar (255) NULL ," + "\n" +
@@ -2405,6 +2406,7 @@ ex);
         // 注：已经包含了创建SQL索引的语句
         // parameters:
         //      bClearAllKeyTables 是否顺便要删除所有keys表中的数据?
+        //      existing_tablename 当前数据库的所有表。注意，也包含 _records 表
         // return
         //		-1	出错
         //		0	成功
@@ -2417,6 +2419,9 @@ ex);
         {
             strCommand = "";
             strError = "";
+
+            if (existing_tablenames != null)
+                RemoveRecordsTableName(existing_tablenames);
 
             KeysCfg keysCfg = null;
             int nRet = this.GetKeysCfg(out keysCfg,
@@ -2446,10 +2451,10 @@ ex);
                         {
                             // 如果表已经存在，就先drop再创建
                             strCommand += "\n" +
-                                $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[{ tableInfo.SqlTableName }]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
-                                $"DROP TABLE {m_strSqlDbName}.[dbo].[{ tableInfo.SqlTableName }]" + "\n" +
+                                $"if exists (select * from {sysobjects} where id = object_id(N'[dbo].[{tableInfo.SqlTableName}]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
+                                $"DROP TABLE {m_strSqlDbName}.[dbo].[{tableInfo.SqlTableName}]" + "\n" +
                                 "\n" +
-                                $"CREATE TABLE {m_strSqlDbName}.[dbo].[{ tableInfo.SqlTableName }]" + "\n" +
+                                $"CREATE TABLE {m_strSqlDbName}.[dbo].[{tableInfo.SqlTableName}]" + "\n" +
                                 "(" + "\n" +
                                 "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystring的长度由配置文件定
                                 "[fromstring] [nvarchar] (255) NULL ," + "\n" +
@@ -2458,20 +2463,20 @@ ex);
                                 ")" + "\n" + "\n";
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " \n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEY_COL_LIST + " \n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " \n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEYNUM_COL_LIST + " \n";
                             // 2008/11/20 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) \n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} (idstring) \n";
                         }
                         else
                         {
                             // 表不存在才创建
                             strCommand += "\n" +
-                                $"if not exists (select * from {sysobjects} where id = object_id(N'[dbo].[{ tableInfo.SqlTableName }]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
+                                $"if not exists (select * from {sysobjects} where id = object_id(N'[dbo].[{tableInfo.SqlTableName}]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
                                 "BEGIN\n" +
-                                $"CREATE TABLE {m_strSqlDbName}.[dbo].[{ tableInfo.SqlTableName }]" + "\n" +
+                                $"CREATE TABLE {m_strSqlDbName}.[dbo].[{tableInfo.SqlTableName}]" + "\n" +
                                 "(" + "\n" +
                                 "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystring的长度由配置文件定
                                 "[fromstring] [nvarchar] (255) NULL ," + "\n" +
@@ -2480,13 +2485,29 @@ ex);
                                 ")" + "\n" + "\n";
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " \n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEY_COL_LIST + " \n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " \n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEYNUM_COL_LIST + " \n";
                             // 2008/11/20 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) \n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} (idstring) \n";
                             strCommand += "END\n";
+                        }
+
+                        // 顺便从已经存在的名字列表中移走
+                        if (existing_tablenames != null)
+                            RemoveFrom(existing_tablenames, tableInfo.SqlTableName);
+                    }
+
+                    // 2022/9/1
+                    // 剩下的就是多出来的，应该加以删除的表
+                    if (existing_tablenames != null
+                        && existing_tablenames.Count > 0)
+                    {
+                        foreach (var strTableName in existing_tablenames)
+                        {
+                            strCommand += $"\nif exists (select * from {sysobjects} where id = object_id(N'[dbo].[{strTableName}]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n"
+                                + $"DROP TABLE {m_strSqlDbName}.[dbo].[{strTableName}]\n";
                         }
                     }
                 }
@@ -2500,7 +2521,6 @@ ex);
 
                 if (keysCfg != null)
                 {
-
                     List<TableInfo> aTableInfo = null;
                     nRet = keysCfg.GetTableInfosRemoveDup(
                         out aTableInfo,
@@ -2552,6 +2572,21 @@ ex);
                             strCommand += " CREATE INDEX if not exists " + tableInfo.SqlTableName + "_idstring_index \n"
                                 + " ON " + tableInfo.SqlTableName + " (idstring) ;\n";
                         }
+
+                        // 顺便从已经存在的名字列表中移走
+                        if (existing_tablenames != null)
+                            RemoveFrom(existing_tablenames, tableInfo.SqlTableName);
+                    }
+
+                    // 2022/9/1
+                    // 剩下的就是多出来的，应该加以删除的表
+                    if (existing_tablenames != null
+                        && existing_tablenames.Count > 0)
+                    {
+                        foreach (var strTableName in existing_tablenames)
+                        {
+                            strCommand += $"DROP TABLE IF EXISTS {strTableName} ;\n";
+                        }
                     }
                 }
 
@@ -2580,8 +2615,8 @@ ex);
                         {
                             // 如果表已经存在，就先drop再创建
                             strCommand +=
-                                $"DROP TABLE if exists {db_prefix}`{ tableInfo.SqlTableName }` ;\n"
-                                + $"CREATE TABLE {db_prefix}`{ tableInfo.SqlTableName }` \n" +
+                                $"DROP TABLE if exists {db_prefix}`{tableInfo.SqlTableName}` ;\n"
+                                + $"CREATE TABLE {db_prefix}`{tableInfo.SqlTableName}` \n" +
                                 "(" + "\n" +
                                 "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystring的长度由配置文件定
                                 "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
@@ -2590,21 +2625,29 @@ ex);
                                 ")" + " ;\n";
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " ;\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEY_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " ;\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEYNUM_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) ;\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} (idstring) ;\n";
+
+                            // 顺便从已经存在的名字列表中移走
+                            if (existing_tablenames != null)
+                                RemoveFrom(existing_tablenames, tableInfo.SqlTableName.ToLower());
                         }
                         else
                         {
                             if (existing_tablenames != null
                                 && existing_tablenames.IndexOf(tableInfo.SqlTableName.ToLower()) != -1)
+                            {
+                                // 顺便从已经存在的名字列表中移走
+                                RemoveFrom(existing_tablenames, tableInfo.SqlTableName.ToLower());
                                 continue;
+                            }
 
                             // 表不存在才创建
                             strCommand +=
-                                $"CREATE TABLE if not exists {db_prefix}`{ tableInfo.SqlTableName }` \n" +
+                                $"CREATE TABLE if not exists {db_prefix}`{tableInfo.SqlTableName}` \n" +
                                 "(" + "\n" +
                                 "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystring的长度由配置文件定
                                 "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
@@ -2613,11 +2656,22 @@ ex);
                                 ")" + " ;\n";
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " ;\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEY_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " ;\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEYNUM_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) ;\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} (idstring) ;\n";
+                        }
+                    }
+
+                    // 2022/9/1
+                    // 剩下的就是多出来的，应该加以删除的表
+                    if (existing_tablenames != null
+                        && existing_tablenames.Count > 0)
+                    {
+                        foreach (var strTableName in existing_tablenames)
+                        {
+                            strCommand += $"DROP TABLE IF EXISTS {strTableName} ;\n";
                         }
                     }
                 }
@@ -2647,7 +2701,11 @@ ex);
 
                         if (existing_tablenames != null
     && existing_tablenames.IndexOf(strTableName) != -1)
+                        {
+                            // 顺便从已经存在的名字列表中移走
+                            RemoveFrom(existing_tablenames, strTableName);
                             continue;
+                        }
 
                         strCommand += // "IF NOT EXISTS ( SELECT table_name FROM user_tables WHERE table_name = '" + strTableName + "' ) " + 
                             "CREATE TABLE " + strTableName + " \n" +
@@ -2674,6 +2732,17 @@ ex);
                         strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ii")} \n"
                             + " ON " + strTableName + " (idstring) ;\n";
                     }
+
+                    // 2022/9/1
+                    // 剩下的就是多出来的，应该加以删除的表
+                    if (existing_tablenames != null
+                        && existing_tablenames.Count > 0)
+                    {
+                        foreach (var strTableName in existing_tablenames)
+                        {
+                            strCommand += $"DROP TABLE {strTableName} ;\n";
+                        }
+                    }
                 }
 
                 return 0;
@@ -2695,11 +2764,15 @@ ex);
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
-                        string strTableName = (db_prefix + tableInfo.SqlTableName).ToUpper();
+                        string strTableName = (db_prefix + tableInfo.SqlTableName).ToLower();
 
                         if (existing_tablenames != null
     && existing_tablenames.IndexOf(strTableName) != -1)
+                        {
+                            // 顺便从已经存在的名字列表中移走
+                            RemoveFrom(existing_tablenames, strTableName);
                             continue;
+                        }
 
                         strCommand += // "IF NOT EXISTS ( SELECT table_name FROM user_tables WHERE table_name = '" + strTableName + "' ) " + 
                             $"DROP TABLE IF EXISTS {strTableName} ;\n"
@@ -2727,12 +2800,51 @@ ex);
                         strCommand += $" CREATE INDEX {BuildIndexName(strTableName, "ii")} \n"
                             + " ON " + strTableName + " (idstring) ;\n";
                     }
+
+                    // 2022/9/1
+                    // 剩下的就是多出来的，应该加以删除的表
+                    if (existing_tablenames != null
+                        && existing_tablenames.Count > 0)
+                    {
+                        foreach (var strTableName in existing_tablenames)
+                        {
+                            strCommand += $"DROP TABLE IF EXISTS {strTableName} ;\n";
+                        }
+                    }
                 }
 
                 return 0;
             }
 
             return 0;
+        }
+
+        static void RemoveFrom(List<string> names, string name)
+        {
+            int i = 0;
+            foreach (var current in names)
+            {
+                if (current.ToLower() == name.ToLower())
+                {
+                    names.RemoveAt(i);
+                    return;
+                }
+                i++;
+            }
+        }
+
+        static void RemoveRecordsTableName(List<string> names)
+        {
+            int i = 0;
+            foreach (var current in names)
+            {
+                if (current.ToLower().EndsWith("_records"))
+                {
+                    names.RemoveAt(i);
+                    return;
+                }
+                i++;
+            }
         }
 
         // 建索引命令字符串
@@ -2805,12 +2917,12 @@ ex);
                                 TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                                 strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " \n";
+                                    + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEY_COL_LIST + " \n";
                                 strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " \n";
+                                    + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEYNUM_COL_LIST + " \n";
                                 // 2008/11/20 
                                 strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) \n";
+                                    + $" ON {db_prefix}{tableInfo.SqlTableName} (idstring) \n";
                             }
                         }
                         else if (strAction == "rebuild")
@@ -2820,11 +2932,11 @@ ex);
                                 TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                                 strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } REBUILD \n";
+                                    + $" ON {db_prefix}{tableInfo.SqlTableName} REBUILD \n";
                                 strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } REBUILD \n";
+                                    + $" ON {db_prefix}{tableInfo.SqlTableName} REBUILD \n";
                                 strCommand += " ALTER INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } REBUILD \n";
+                                    + $" ON {db_prefix}{tableInfo.SqlTableName} REBUILD \n";
                             }
                         }
                         else if (strAction == "rebuildall")
@@ -2834,7 +2946,7 @@ ex);
                                 TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                                 strCommand += " ALTER INDEX ALL \n"
-                                    + $" ON {db_prefix}{ tableInfo.SqlTableName } REBUILD \n";
+                                    + $" ON {db_prefix}{tableInfo.SqlTableName} REBUILD \n";
                             }
                         }
                     }
@@ -2919,11 +3031,11 @@ ex);
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEY_COL_LIST + " " + strAlgorithm + ";\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEY_COL_LIST + " " + strAlgorithm + ";\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } " + KEYNUM_COL_LIST + " " + strAlgorithm + ";\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} " + KEYNUM_COL_LIST + " " + strAlgorithm + ";\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } (idstring) " + strAlgorithm + ";\n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} (idstring) " + strAlgorithm + ";\n";
                         }
                     }
                 }
@@ -3090,12 +3202,12 @@ ex);
                             strCommand += " DROP INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
                                 + " ON " + tableInfo.SqlTableName + " \n";
                             */
-                            strCommand += $" DROP INDEX { tableInfo.SqlTableName }_keystring_index \n"
-    + $" ON {db_prefix}{ tableInfo.SqlTableName } \n";
-                            strCommand += $" DROP INDEX { tableInfo.SqlTableName }_keystringnum_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } \n";
-                            strCommand += $" DROP INDEX { tableInfo.SqlTableName }_idstring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } \n";
+                            strCommand += $" DROP INDEX {tableInfo.SqlTableName}_keystring_index \n"
+    + $" ON {db_prefix}{tableInfo.SqlTableName} \n";
+                            strCommand += $" DROP INDEX {tableInfo.SqlTableName}_keystringnum_index \n"
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} \n";
+                            strCommand += $" DROP INDEX {tableInfo.SqlTableName}_idstring_index \n"
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} \n";
 
                         }
                     }
@@ -3105,12 +3217,12 @@ ex);
                         {
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
-                            strCommand += $" ALTER INDEX { tableInfo.SqlTableName }_keystring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } DISABLE \n";
-                            strCommand += $" ALTER INDEX { tableInfo.SqlTableName }_keystringnum_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } DISABLE \n";
-                            strCommand += $" ALTER INDEX { tableInfo.SqlTableName }_idstring_index \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } DISABLE \n";
+                            strCommand += $" ALTER INDEX {tableInfo.SqlTableName}_keystring_index \n"
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} DISABLE \n";
+                            strCommand += $" ALTER INDEX {tableInfo.SqlTableName}_keystringnum_index \n"
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} DISABLE \n";
+                            strCommand += $" ALTER INDEX {tableInfo.SqlTableName}_idstring_index \n"
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} DISABLE \n";
                         }
                     }
                     else if (strAction == "disableall")
@@ -3120,7 +3232,7 @@ ex);
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                             strCommand += $" ALTER INDEX ALL \n"
-                                + $" ON {db_prefix}{ tableInfo.SqlTableName } DISABLE \n";
+                                + $" ON {db_prefix}{tableInfo.SqlTableName} DISABLE \n";
                         }
                     }
                 }
@@ -3183,12 +3295,12 @@ ex);
                     {
                         TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
-                        strCommand += $" DROP INDEX { tableInfo.SqlTableName }_keystring_index \n"
-                            + $" ON {db_prefix}{ tableInfo.SqlTableName } ;\n";
-                        strCommand += $" DROP INDEX { tableInfo.SqlTableName }_keystringnum_index \n"
-                            + $" ON {db_prefix}{ tableInfo.SqlTableName } ;\n";
-                        strCommand += $" DROP INDEX { tableInfo.SqlTableName }_idstring_index \n"
-                            + $" ON {db_prefix}{ tableInfo.SqlTableName } ;\n";
+                        strCommand += $" DROP INDEX {tableInfo.SqlTableName}_keystring_index \n"
+                            + $" ON {db_prefix}{tableInfo.SqlTableName} ;\n";
+                        strCommand += $" DROP INDEX {tableInfo.SqlTableName}_keystringnum_index \n"
+                            + $" ON {db_prefix}{tableInfo.SqlTableName} ;\n";
+                        strCommand += $" DROP INDEX {tableInfo.SqlTableName}_idstring_index \n"
+                            + $" ON {db_prefix}{tableInfo.SqlTableName} ;\n";
                     }
                 }
             }
@@ -12432,7 +12544,7 @@ trans);
                 catch (Exception ex)
                 {
 #if DEBUG
-                    strError = $"4 BulkCopy() 在给'{ this.GetCaption("zh-CN") }'库写入记录时出错,原因:\r\n{ExceptionUtil.GetDebugText(ex)}";
+                    strError = $"4 BulkCopy() 在给'{this.GetCaption("zh-CN")}'库写入记录时出错,原因:\r\n{ExceptionUtil.GetDebugText(ex)}";
 #else
                     strError = "4 BulkCopy() 在给'" + this.GetCaption("zh-CN") + "'库写入记录时出错,原因:" + ex.Message;
 #endif
@@ -13515,7 +13627,7 @@ trans);
                     catch (SqlException sqlEx)
                     {
 #if DEBUG
-                        strError = $"3 WriteXml() 在给'{ this.GetCaption("zh-CN")}'库写入记录'{ strID}'时出错,原因\r\n{ExceptionUtil.GetDebugText(sqlEx)}";
+                        strError = $"3 WriteXml() 在给'{this.GetCaption("zh-CN")}'库写入记录'{strID}'时出错,原因\r\n{ExceptionUtil.GetDebugText(sqlEx)}";
 #else
                         strError = "3 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时出错,原因:" + GetSqlErrors(sqlEx);
 #endif
@@ -13525,7 +13637,7 @@ trans);
                     catch (Exception ex)
                     {
 #if DEBUG
-                        strError = $"4 WriteXml() 在给'{ this.GetCaption("zh-CN") }'库写入记录'{ strID }'时出错,原因:\r\n{ExceptionUtil.GetDebugText(ex)}";
+                        strError = $"4 WriteXml() 在给'{this.GetCaption("zh-CN")}'库写入记录'{strID}'时出错,原因:\r\n{ExceptionUtil.GetDebugText(ex)}";
 #else
                         strError = "4 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时出错,原因:" + ex.Message;
 #endif
@@ -15194,7 +15306,7 @@ trans);
         {
             var source = new RangeList(range);
             var result = new RangeList();
-            foreach(var item in source)
+            foreach (var item in source)
             {
                 if (item.lStart >= length)
                     continue;
@@ -16473,7 +16585,7 @@ strID);
         +*/ $" UPDATE {db_prefix}records "
         + " set " + strImageFieldName + "=0x0 "
         + " where id='" + strID + "'\n"
-        + $" SELECT TEXTPTR({ strImageFieldName }) from {db_prefix}records"
+        + $" SELECT TEXTPTR({strImageFieldName}) from {db_prefix}records"
         + " where id='" + strID + "'\n";
 
                 // strCommand += " use master " + "\n";
@@ -17012,7 +17124,7 @@ strID);
                             */
 
                             //加keynum
-                            string strCommand = ($" INSERT INTO {db_prefix}{ strKeysTableName }"
+                            string strCommand = ($" INSERT INTO {db_prefix}{strKeysTableName}"
                                 + " (keystring,fromstring,idstring,keystringnum) "
                                 + " VALUES(@key1,"
                                 + "@from1,"
@@ -17897,7 +18009,7 @@ strID);
                             catch (Exception ex)
                             {
 #if DEBUG
-                                strError = $"处理记录路径为 '{ this.GetCaption("zh") }/{ strID}' 的子文件时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{ strCommand }";
+                                strError = $"处理记录路径为 '{this.GetCaption("zh")}/{strID}' 的子文件时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{strCommand}";
 #else
                                 strError = "处理记录路径为 '" + this.GetCaption("zh") + "/" + strID + "' 的子文件发生错误:" + ex.Message + ",sql命令:\r\n" + strCommand;
 #endif
@@ -17932,7 +18044,7 @@ strID);
                                 else
                                 {
 #if DEBUG
-                                    strError = $"处理记录路径为 '{ this.GetCaption("zh") }/{ strID}' 的子记录时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{ strCommand }";
+                                    strError = $"处理记录路径为 '{this.GetCaption("zh")}/{strID}' 的子记录时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{strCommand}";
 #else
                                     strError = "处理记录路径为 '" + this.GetCaption("zh") + "/" + strID + "' 的子记录时发生错误:" + ex.Message + ", SQL命令:\r\n" + strCommand;
 #endif
@@ -17942,7 +18054,7 @@ strID);
                             catch (Exception ex)
                             {
 #if DEBUG
-                                strError = $"处理记录路径为 '{ this.GetCaption("zh") }/{ strID}' 的子记录时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{ strCommand }";
+                                strError = $"处理记录路径为 '{this.GetCaption("zh")}/{strID}' 的子记录时发生错误:\r\n{ExceptionUtil.GetDebugText(ex)}\r\nSQL命令:\r\n{strCommand}";
 #else
                                 strError = "处理记录路径为 '" + this.GetCaption("zh") + "/" + strID + "' 的子记录时发生错误:" + ex.Message + ", SQL命令:\r\n" + strCommand;
 #endif
@@ -18780,7 +18892,7 @@ strID);
             string strRange = "";
 
             string strCommand = /*"use " + this.m_strSqlDbName + " "
-                +*/ $"select range from {db_prefix}records where id='{ strID }'";
+                +*/ $"select range from {db_prefix}records where id='{strID}'";
 
             // strCommand += " use master " + "\n";
 
@@ -21421,7 +21533,7 @@ strID);
                     catch (Exception ex)
                     {
 #if DEBUG
-                        strError = $"删除记录 { GetRecordPath(strRecordID) } 时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}";
+                        strError = $"删除记录 {GetRecordPath(strRecordID)} 时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}";
 #else
                         strError = "删除'" + this.GetCaption("zh-CN") + "'库中id为'" + strRecordID + "'的记录时出错,原因:" + ex.Message;
 #endif
@@ -21671,7 +21783,7 @@ strID);
                 }
                 catch (Exception ex)
                 {
-                    strError = $"RebuildRecordKeys() 重建和记录 '{GetRecordPath(strRecordID) }' 的相关的 keys 时出错，原因:" + ex.Message;
+                    strError = $"RebuildRecordKeys() 重建和记录 '{GetRecordPath(strRecordID)}' 的相关的 keys 时出错，原因:" + ex.Message;
                     return -1;
                 }
                 finally // 连接
@@ -21758,7 +21870,7 @@ strID);
             }
             if (StringUtil.IsPureNumber(left) == false)
             {
-                return $"ID 字符串 '{s}' 不合法: '{ left }' 必须是纯数字";
+                return $"ID 字符串 '{s}' 不合法: '{left}' 必须是纯数字";
             }
 
             return null;
@@ -21833,7 +21945,7 @@ strID);
                 {
                     TableInfo tableInfo = aTableInfo[i];
 
-                    string strCommand = $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
+                    string strCommand = $"DELETE FROM {db_prefix}{tableInfo.SqlTableName}"
                         + " WHERE idstring IN (" + strIdString + ")\r\n";
                     nDeletedCount += connection.Execute(strCommand,
 null,
@@ -21850,8 +21962,8 @@ m_nTimeOut);
                 {
                     TableInfo tableInfo = aTableInfo[i];
 
-                    strCommand += $"DELETE FROM {db_prefix}{ tableInfo.SqlTableName }"
-                        + $" WHERE idstring IN ({ strIdString }) {fenhao}\r\n";
+                    strCommand += $"DELETE FROM {db_prefix}{tableInfo.SqlTableName}"
+                        + $" WHERE idstring IN ({strIdString}) {fenhao}\r\n";
                 }
 
                 if (string.IsNullOrEmpty(strCommand) == false)
