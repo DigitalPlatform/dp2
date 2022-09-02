@@ -28,6 +28,7 @@ using MySqlConnector;
 using Dapper;
 using Npgsql;
 
+using System.Data.Entity.Core.Objects;
 using Ghostscript.NET.Rasterizer;
 
 using DigitalPlatform.ResultSet;
@@ -35,7 +36,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
-using System.Data.Entity.Core.Objects;
 
 namespace DigitalPlatform.rms
 {
@@ -1757,7 +1757,8 @@ ex);
                         if (nRet == -1)
                             return -1;
                     }
-                    else if (connection.IsOracle() || connection.IsPgsql())
+                    else if (connection.IsOracle() || connection.IsPgsql()
+                        || connection.IsSqlite() || connection.IsMsSqlServer())
                     {
                         List<string> table_names = null;
 
