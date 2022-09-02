@@ -1189,7 +1189,7 @@ ex);
                 // 2022/9/2
                 // https://www.tutorialgateway.org/get-table-names-from-sql-server-database/
                 // strCommand = $"use { this.m_strSqlDbName }\n SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES\n use master\n";
-                strCommand = $"use { this.m_strSqlDbName }\n SELECT name FROM FROM sys.objects WHERE type_desc = 'USER_TABLE'\n use master\n";
+                strCommand = $"use { this.m_strSqlDbName }\n SELECT name FROM sys.objects WHERE type_desc = 'USER_TABLE'\n use master\n";
             }
             else if (this.IsSqlite())
             {
@@ -1736,7 +1736,7 @@ ex);
                     if (connection.IsMySQL())
                     {
                         List<string> table_names = null;
-                        if (bClearAllKeyTables == false)
+                        // if (bClearAllKeyTables == false)
                         {
                             // 获取一个SQL数据库中已经存在的records和keys表名
                             nRet = GetExistTableNames(
@@ -2687,7 +2687,7 @@ ex);
                     {
                         foreach (var strTableName in existing_tablenames)
                         {
-                            strCommand += $"DROP TABLE IF EXISTS {strTableName} ;\n";
+                            strCommand += $"DROP TABLE IF EXISTS {db_prefix}`{strTableName}` ;\n";
                         }
                     }
                 }
