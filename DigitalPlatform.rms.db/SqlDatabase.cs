@@ -35,6 +35,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using System.Data.Entity.Core.Objects;
 
 namespace DigitalPlatform.rms
 {
@@ -1183,7 +1184,19 @@ ex);
 
             table_names = new List<string>();
             string strCommand = "";
-            if (connection.SqlServerType == SqlServerType.MySql)
+            if (this.IsMsSqlServer())
+            {
+                // 2022/9/2
+                // https://www.tutorialgateway.org/get-table-names-from-sql-server-database/
+                // strCommand = $"use { this.m_strSqlDbName }\n SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES\n use master\n";
+                strCommand = $"use { this.m_strSqlDbName }\n SELECT name FROM FROM sys.objects WHERE type_desc = 'USER_TABLE'\n use master\n";
+            }
+            else if (this.IsSqlite())
+            {
+                // 2022/9/2
+                strCommand = "SELECT name FROM sqlite_schema WHERE type = 'table'";
+            }
+            else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 // string strCommand = "use `" + this.m_strSqlDbName + "` ;\n";
 
@@ -1720,24 +1733,11 @@ ex);
                     string strCommand = "";
                     int nRet = 0;
 
-                    {
-                        // 刷新表定义
-                        nRet = this.GetRefreshTablesString(
-                            connection.SqlServerType,
-                            bClearAllKeyTables,
-                            null,
-                            out strCommand,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                    }
-
                     if (connection.IsMySQL())
                     {
+                        List<string> table_names = null;
                         if (bClearAllKeyTables == false)
                         {
-                            List<string> table_names = null;
-
                             // 获取一个SQL数据库中已经存在的records和keys表名
                             nRet = GetExistTableNames(
                                 connection,
@@ -1745,22 +1745,26 @@ ex);
                                 out strError);
                             if (nRet == -1)
                                 return -1;
-
-                            // 刷新表定义
-                            nRet = this.GetRefreshTablesString(
-                                connection.SqlServerType,
-                                bClearAllKeyTables,
-                                table_names,
-                                out strCommand,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
                         }
+
+                        // 刷新表定义
+                        nRet = this.GetRefreshTablesString(
+                            connection.SqlServerType,
+                            bClearAllKeyTables,
+                            table_names,
+                            out strCommand,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
                     }
                     else if (connection.IsOracle() || connection.IsPgsql())
                     {
-                        if (bClearAllKeyTables == true)
+                        List<string> table_names = null;
+
+                        if (bClearAllKeyTables == true
+                            && connection.IsOracle())
                         {
+                            // 对于 Oracle 类型，先删除所有 keys 表
                             nRet = DropAllTables(
                                 connection,
                                 this.m_strSqlDbName,
@@ -1771,8 +1775,6 @@ ex);
                         }
                         else
                         {
-                            List<string> table_names = null;
-
                             // 获取一个SQL数据库中已经存在的records和keys表名
                             nRet = GetExistTableNames(
                                 connection,
@@ -1780,17 +1782,30 @@ ex);
                                 out strError);
                             if (nRet == -1)
                                 return -1;
-
-                            // 刷新表定义
-                            nRet = this.GetRefreshTablesString(
-                                connection.SqlServerType,
-                                bClearAllKeyTables,
-                                table_names,
-                                out strCommand,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
                         }
+
+                        // 刷新表定义
+                        nRet = this.GetRefreshTablesString(
+                            connection.SqlServerType,
+                            bClearAllKeyTables,
+                            table_names,
+                            out strCommand,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                    else
+                    {
+                        // 其它类型的数据库：MS SQL Server/SQLite
+                        // 刷新表定义
+                        nRet = this.GetRefreshTablesString(
+                            connection.SqlServerType,
+                            bClearAllKeyTables,
+                            null,
+                            out strCommand,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
                     }
 
                     // 通用
@@ -2700,11 +2715,12 @@ ex);
                         string strTableName = (this.m_strSqlDbName + "_" + tableInfo.SqlTableName).ToUpper();
 
                         if (existing_tablenames != null
-    && existing_tablenames.IndexOf(strTableName) != -1)
+        && existing_tablenames.IndexOf(strTableName) != -1)
                         {
                             // 顺便从已经存在的名字列表中移走
                             RemoveFrom(existing_tablenames, strTableName);
-                            continue;
+                            if (bClearAllKeyTables == false)
+                                continue;
                         }
 
                         strCommand += // "IF NOT EXISTS ( SELECT table_name FROM user_tables WHERE table_name = '" + strTableName + "' ) " + 
@@ -2767,11 +2783,12 @@ ex);
                         string strTableName = (db_prefix + tableInfo.SqlTableName).ToLower();
 
                         if (existing_tablenames != null
-    && existing_tablenames.IndexOf(strTableName) != -1)
+        && existing_tablenames.IndexOf(strTableName) != -1)
                         {
                             // 顺便从已经存在的名字列表中移走
                             RemoveFrom(existing_tablenames, strTableName);
-                            continue;
+                            if (bClearAllKeyTables == false)
+                                continue;
                         }
 
                         strCommand += // "IF NOT EXISTS ( SELECT table_name FROM user_tables WHERE table_name = '" + strTableName + "' ) " + 
@@ -2838,7 +2855,8 @@ ex);
             int i = 0;
             foreach (var current in names)
             {
-                if (current.ToLower().EndsWith("_records"))
+                if (current.ToLower() == "records"
+                    || current.ToLower().EndsWith("_records"))
                 {
                     names.RemoveAt(i);
                     return;
@@ -3007,7 +3025,7 @@ ex);
                 if (StringUtil.IsInList("records", strIndexTypeList) == true)
                 {
                     strCommand += " CREATE INDEX records_id_index " + "\n"
-    + $" ON {db_prefix}records (id) " + strAlgorithm + ";\n";
+        + $" ON {db_prefix}records (id) " + strAlgorithm + ";\n";
                 }
 
                 if (StringUtil.IsInList("keys", strIndexTypeList) == true)
@@ -3203,7 +3221,7 @@ ex);
                                 + " ON " + tableInfo.SqlTableName + " \n";
                             */
                             strCommand += $" DROP INDEX {tableInfo.SqlTableName}_keystring_index \n"
-    + $" ON {db_prefix}{tableInfo.SqlTableName} \n";
+        + $" ON {db_prefix}{tableInfo.SqlTableName} \n";
                             strCommand += $" DROP INDEX {tableInfo.SqlTableName}_keystringnum_index \n"
                                 + $" ON {db_prefix}{tableInfo.SqlTableName} \n";
                             strCommand += $" DROP INDEX {tableInfo.SqlTableName}_idstring_index \n"
@@ -3481,10 +3499,10 @@ ex);
                         using (var command = connection.NewCommand(""))
                         {
                             int nRet = RunCommandNonQuery(command,
-strCommand,
-"删除 SQL 库",
-null,
-out strError);
+        strCommand,
+        "删除 SQL 库",
+        null,
+        out strError);
                             if (nRet == -1)
                                 return -1;
                         }
@@ -3952,31 +3970,31 @@ out strError);
                 // TODO 如果没有 order by 子句， rownum还可以简化
                 if (string.IsNullOrEmpty(strLimit) == false)
                     strCommand = "SELECT * from ( SELECT "
-+ " DISTINCT "
-+ (bOutputKeyID == false ? " id " : " id keystring, id, 'recid' fromstring ")
-+ $" FROM {db_prefix}records "
-+ strWhere
-+ " " + strOrderBy
-+ ") " + strLimit + "\n";
+        + " DISTINCT "
+        + (bOutputKeyID == false ? " id " : " id keystring, id, 'recid' fromstring ")
+        + $" FROM {db_prefix}records "
+        + strWhere
+        + " " + strOrderBy
+        + ") " + strLimit + "\n";
                 else
                     strCommand = "SELECT "
-+ " DISTINCT "
-+ (bOutputKeyID == false ? " id " : " id keystring, id, 'recid' fromstring ")
-+ $" FROM {db_prefix}records "
-+ strWhere
-+ " " + strOrderBy
-+ "\n";
+        + " DISTINCT "
+        + (bOutputKeyID == false ? " id " : " id keystring, id, 'recid' fromstring ")
+        + $" FROM {db_prefix}records "
+        + strWhere
+        + " " + strOrderBy
+        + "\n";
             }
 
             int nRet = ExecuteQueryFillResultSet(
-handle,
-strCommand,
-aSqlParameter,
-resultSet,
-searchItem.MaxCount,
-GetOutputStyle(strOutputStyle),
-true,
-out strError);
+        handle,
+        strCommand,
+        aSqlParameter,
+        resultSet,
+        searchItem.MaxCount,
+        GetOutputStyle(strOutputStyle),
+        true,
+        out strError);
             if (nRet == -1 || nRet == 0)
                 return nRet;
 #if NO
@@ -4080,14 +4098,14 @@ handle.CancelTokenSource.Token).Result;
         }
 
         int ExecuteQueryFillResultSet(
-    ChannelHandle handle,
-    string strCommand,
-    List<DbParameter> aSqlParameter,
-    DpResultSet resultSet,
-    int nMaxCount,
-    OutputStyle style,
-    bool bRecordTable,
-    out string strError)
+        ChannelHandle handle,
+        string strCommand,
+        List<DbParameter> aSqlParameter,
+        DpResultSet resultSet,
+        int nMaxCount,
+        OutputStyle style,
+        bool bRecordTable,
+        out string strError)
         {
             strError = "";
 
@@ -4096,7 +4114,7 @@ handle.CancelTokenSource.Token).Result;
             {
                 // 注意: SQLite 这里的连接字符串是和具体数据库关联的
                 connection = new Connection(this,
-    this.m_strConnString);
+        this.m_strConnString);
                 connection.TryOpen();
             }
             try
@@ -6130,7 +6148,7 @@ handle.CancelTokenSource.Token).Result;
                         ,
                         this.container.SqlServerType == SqlServerType.SQLite && this.FastMode == true ? ConnectionStyle.Global : ConnectionStyle.None
 #endif
-);
+        );
 
                     connection.TryOpen();
                     try
@@ -6221,7 +6239,7 @@ handle.CancelTokenSource.Token).Result;
                         ,
                         this.container.SqlServerType == SqlServerType.SQLite && this.FastMode == true ? ConnectionStyle.Global : ConnectionStyle.None
 #endif
-);
+        );
                     connection.TryOpen();
 
                     /*
@@ -6685,7 +6703,7 @@ handle.CancelTokenSource.Token).Result;
                 ,  // 因为中途不会中断，所以可以使用pooling
                 this.container.SqlServerType == SqlServerType.SQLite && this.FastMode == true ? ConnectionStyle.Global : ConnectionStyle.None
 #endif
-);
+        );
             connection.TryOpen();
             try
             {
@@ -7385,10 +7403,10 @@ handle.CancelTokenSource.Token).Result;
                         };
 
                     nRet = _getRowInfos(connection,
-    new List<string> { strID },
-    proc_readBytes,
-    out List<RecordRowInfo> row_infos,
-    out strError);
+        new List<string> { strID },
+        proc_readBytes,
+        out List<RecordRowInfo> row_infos,
+        out strError);
                     if (nRet == -1)
                         return -1;
 
@@ -7682,10 +7700,10 @@ handle.CancelTokenSource.Token).Result;
                         }
                         else
                             destBuffer = _readPgsqlPartImage(connection,
-    strDataFieldName,
-    strID,
-    lStart,
-    lOutputLength);
+        strDataFieldName,
+        strID,
+        lStart,
+        lOutputLength);
                     }
                     else
                     {
@@ -9461,10 +9479,10 @@ handle.CancelTokenSource.Token).Result;
 
             string strCommand = /*"use " + this.m_strSqlDbName + " "
                        +*/ $" READTEXT {db_prefix}records." + strDataFieldName
-   + " @text_ptr"
-   + " @offset"
-   + " @size"
-   + " HOLDLOCK";
+        + " @text_ptr"
+        + " @offset"
+        + " @size"
+        + " HOLDLOCK";
 
             // strCommand += " use master " + "\n";
 
@@ -10388,9 +10406,9 @@ handle.CancelTokenSource.Token).Result;
             + "\n";
                                 else
                                     strCommand =
-$" INSERT INTO {db_prefix}records(id, {range_field_name}, metadata, dptimestamp, filename) "
-+ " VALUES (@id1, @range1, @metadata1, @dptimestamp1, @filename1)"
-+ "\n"; // 注: 没有 data 字段
+        $" INSERT INTO {db_prefix}records(id, {range_field_name}, metadata, dptimestamp, filename) "
+        + " VALUES (@id1, @range1, @metadata1, @dptimestamp1, @filename1)"
+        + "\n"; // 注: 没有 data 字段
 
                                 parameters = new
                                 {
@@ -10406,8 +10424,8 @@ $" INSERT INTO {db_prefix}records(id, {range_field_name}, metadata, dptimestamp,
                             if (connection.IsOracle())
                                 strCommand = strCommand.Replace("@", ":");
                             int count = connection.Execute(strCommand,
-parameters,
-trans);
+        parameters,
+        trans);
 
 
 
@@ -10415,14 +10433,14 @@ trans);
 
                             /*
                             SQLiteParameter idParam =
-    command.Parameters.Add("@id" + i,
-    DbType.String);
+        command.Parameters.Add("@id" + i,
+        DbType.String);
                             idParam.Value = info.ID;
 
 
                             SQLiteParameter rangeParam =
-    command.Parameters.Add("@range" + i,
-    DbType.String);
+        command.Parameters.Add("@range" + i,
+        DbType.String);
                             rangeParam.Value = "#";
 
                             SQLiteParameter metadataParam =
@@ -10485,13 +10503,13 @@ trans);
                                     + " WHERE id=@id1 \n";
                                 else
                                     strCommand = $" UPDATE {db_prefix}records "
-    + " SET dptimestamp=@dptimestamp1,"
-    + " newdptimestamp=NULL,"
-    + " "
-    + $" {range_field_name}=@range1,"
-    + " filename=@filename1, newfilename=NULL,"
-    + " metadata=@metadata1 "
-    + " WHERE id=@id1 \n";  // 注: 没有 data 和 newdata 字段
+        + " SET dptimestamp=@dptimestamp1,"
+        + " newdptimestamp=NULL,"
+        + " "
+        + $" {range_field_name}=@range1,"
+        + " filename=@filename1, newfilename=NULL,"
+        + " metadata=@metadata1 "
+        + " WHERE id=@id1 \n";  // 注: 没有 data 和 newdata 字段
 
                                 parameters = new
                                 {
@@ -10506,8 +10524,8 @@ trans);
                             if (connection.IsOracle())
                                 strCommand = strCommand.Replace("@", ":");
                             int count = connection.Execute(strCommand,
-parameters,
-trans);
+        parameters,
+        trans);
 
 
 
@@ -11731,15 +11749,15 @@ trans);
                 else
                 {
                     strCommand = " SELECT "
-    + $" {range_field_name}," // 0 
-    + " dptimestamp,"   // 1
-    + " metadata, "  // 2
-    + " newdptimestamp,"   // 3
-    + " filename,"   // 4
-    + " newfilename,"   // 5
-    + " id"             // 6
-    + $" FROM {db_prefix}records "
-    + " WHERE id in (" + strIdString + ")\n";
+        + $" {range_field_name}," // 0 
+        + " dptimestamp,"   // 1
+        + " metadata, "  // 2
+        + " newdptimestamp,"   // 3
+        + " filename,"   // 4
+        + " newfilename,"   // 5
+        + " id"             // 6
+        + $" FROM {db_prefix}records "
+        + " WHERE id in (" + strIdString + ")\n";
                 }
 
                 if (connection.IsOracle())
@@ -14514,7 +14532,7 @@ trans);
             byte[] textptr = row_info.newdata_textptr;  // 数据指针
             long lCurrentLength = row_info.newdata_length;  // 数据体积长度
             string strCompleteTimestamp = row_info.TimestampString; // 上次完整写入时的时间戳
-            // string strCompleteTimestamp = row_info.GetCompleteTimestamp(); // 上次完整写入时的时间戳
+                                                                    // string strCompleteTimestamp = row_info.GetCompleteTimestamp(); // 上次完整写入时的时间戳
             string strCurrentTimestamp = row_info.NewTimestampString; // 本次的时间戳
             bool mix_mode = false;  // 是否为混合模式? 2022/7/5
 
@@ -14539,7 +14557,7 @@ trans);
 
             if (this.m_lObjectStartSize != -1 && lTotalLength >= this.m_lObjectStartSize
 #if !XML_WRITE_TO_FILE
- && (strID.Length > 10 || has_data_fields == false)   // 写入对象文件是只针对二进制对象，而不针对普通XML记录
+        && (strID.Length > 10 || has_data_fields == false)   // 写入对象文件是只针对二进制对象，而不针对普通XML记录
 #endif
                 && String.IsNullOrEmpty(strCurrentRange) == false
                 && strCurrentRange[0] == '#')
@@ -14553,9 +14571,9 @@ trans);
             }
             else if (this.m_lObjectStartSize != -1 && lTotalLength >= this.m_lObjectStartSize
 #if !XML_WRITE_TO_FILE
- && (strID.Length > 10 || has_data_fields == false)
+        && (strID.Length > 10 || has_data_fields == false)
 #endif
- && (string.IsNullOrEmpty(strCurrentRange) == true || strCurrentRange == "!"))
+        && (string.IsNullOrEmpty(strCurrentRange) == true || strCurrentRange == "!"))
             {
                 bObjectFile = true;
 
@@ -14879,10 +14897,10 @@ trans);
                         // 2022/5/5
                         // MsSqlServer 优化
                         if (lStartOfTarget == 0
-    && nStartOfBuffer == 0
-    && nNeedReadLength == lTotalLength
-    && bFull == true
-    && baSource.Length == lTotalLength)
+        && nStartOfBuffer == 0
+        && nNeedReadLength == lTotalLength
+        && bFull == true
+        && baSource.Length == lTotalLength)
                         {
                             direct_write_data = baSource;
                             lCurrentLength = baSource.Length;
@@ -14987,8 +15005,8 @@ trans);
                     StreamItem item = _streamCache.GetStream(strFileName,
                         FileMode.Open,
                         FileAccess.Read,
-    true   // lStartOfTarget > CACHE_SIZE
-    );
+        true   // lStartOfTarget > CACHE_SIZE
+        );
                     try
                     {
                         int length = (int)item.FileStream.Length;
@@ -15388,15 +15406,15 @@ trans);
                 if (item.lLength > lWholeLength)
                 {
                     strError = "唯一一个事项的长度 " + item.lLength.ToString() + " 居然大于整体长度 " + lWholeLength.ToString();
-                    return 2;	// 唯一一个事项的长度居然超过检测的长度，通常表明有输入参数错误
+                    return 2;   // 唯一一个事项的长度居然超过检测的长度，通常表明有输入参数错误
                 }
 
                 if (item.lStart == 0
                     && item.lLength == lWholeLength)
-                    return 1;	// 表示完全覆盖
+                    return 1;   // 表示完全覆盖
             }
 
-            return 0;	// 还有未覆盖的部分
+            return 0;   // 还有未覆盖的部分
         }
 
 #if NO
@@ -15546,7 +15564,7 @@ trans);
          *      2.2) 内容不完整
          *           dptimestamp=(dont change), newdptimestamp=@dptimestamp, range=@range,  filename=(dont change), newfilename=@filename, metadata=@metadata, data=null, newdata=null
 
-         
+
          * */
 
         // TODO: metadata 字符数较多，是否可以允许没有必要的时候不写入这个字段内容?
@@ -16108,8 +16126,8 @@ trans);
 
             {
                 strCommand = $" UPDATE {db_prefix}records SET "
-     + " metadata=@metadata "
-     + " WHERE id=@id";
+        + " metadata=@metadata "
+        + " WHERE id=@id";
                 if (connection.IsOracle())
                     strCommand = strCommand.Replace("@", ":");
 
@@ -16390,8 +16408,8 @@ trans);
 #if DEBUG
             // 获得当前 data 字段内容的长度
             long current_length = GetPgsqlDataLength(connection,
-    strImageFieldName,
-    strID);
+        strImageFieldName,
+        strID);
             if (lStartOfTarget > 0)
             {
                 if (current_length != lCurrentLength)
@@ -16418,19 +16436,19 @@ trans);
                     byte[] bytes = new byte[current_length];
                     string strCommand = $"UPDATE {db_prefix}records set {strImageFieldName} = overlay({strImageFieldName} placing @data from {start + 1}) where id = @id";
                     connection.Execute(strCommand,
-    new
-    {
-        id = strID,
-        data = bytes,
-    });
+        new
+        {
+            id = strID,
+            data = bytes,
+        });
                     delta -= this_length;
                     start += this_length;
                 }
 
 #if DEBUG
                 current_length = GetPgsqlDataLength(connection,
-strImageFieldName,
-strID);
+        strImageFieldName,
+        strID);
                 if (current_length != lStartOfTarget)
                 {
                     strError = "内部错误: current_length != lStartOfTarget";
@@ -16452,18 +16470,18 @@ strID);
                     strCommand = $"UPDATE {db_prefix}records set {strImageFieldName} = @data where id = @id";
 
                 int count = connection.Execute(strCommand,
-    new
-    {
-        id = strID,
-        data = target,
-    });
+        new
+        {
+            id = strID,
+            data = target,
+        });
                 lCurrentLength += target.Length;
             }
 
 #if DEBUG
             current_length = GetPgsqlDataLength(connection,
-strImageFieldName,
-strID);
+        strImageFieldName,
+        strID);
             if (current_length != lStartOfTarget + nNeedReadLength)
             {
                 strError = "内部错误: current_length != lStartOfTarget + nNeedReadLength";
@@ -16670,7 +16688,7 @@ strID);
 #if UPDATETEXT_WITHLOG
                     + " WITH LOG"
 #endif
- + " @inserted_data";   //不能加where语句
+        + " @inserted_data";   //不能加where语句
 
                 // strCommand += " use master " + "\n";
 
@@ -19807,15 +19825,15 @@ strID);
                             + (proc_readBytes == null ? "" : " newdata,")
                             + " TEXTPTR(newdata) as newdata_textptr,"  // 2
                             + " DataLength(newdata) as newdata_length,"   // 3
-    + " range," // 4
-    + " dptimestamp,"   // 5
-    + " metadata, "  // 6
-    + " newdptimestamp,"   // 7
-    + " filename,"   // 8
-    + " newfilename"   // 9
-    + $" FROM {db_prefix}records "
-    // + " WHERE id='" + strID + "'\n";
-    + " WHERE id=@id \n";
+        + " range," // 4
+        + " dptimestamp,"   // 5
+        + " metadata, "  // 6
+        + " newdptimestamp,"   // 7
+        + " filename,"   // 8
+        + " newfilename"   // 9
+        + $" FROM {db_prefix}records "
+        // + " WHERE id='" + strID + "'\n";
+        + " WHERE id=@id \n";
 
                         strCommand = "SET NOCOUNT OFF\n"
                             + strSelect
@@ -21744,10 +21762,10 @@ strID);
                             if (forcedeleteoldkeys == false)
                             {
                                 nRet = this.ModifyKeys(connection,
-    newKeys,
-    newKeys,    // 2022/2/15 故意先删除一次。这样可以有效避免 key row 重复创建多次
-    bFastMode,
-    out strError);
+        newKeys,
+        newKeys,    // 2022/2/15 故意先删除一次。这样可以有效避免 key row 重复创建多次
+        bFastMode,
+        out strError);
 
                             }
                             else
@@ -21948,9 +21966,9 @@ strID);
                     string strCommand = $"DELETE FROM {db_prefix}{tableInfo.SqlTableName}"
                         + " WHERE idstring IN (" + strIdString + ")\r\n";
                     nDeletedCount += connection.Execute(strCommand,
-null,
-null,
-m_nTimeOut);
+        null,
+        null,
+        m_nTimeOut);
                 }
 
                 return nDeletedCount;
@@ -21969,9 +21987,9 @@ m_nTimeOut);
                 if (string.IsNullOrEmpty(strCommand) == false)
                 {
                     nDeletedCount = connection.Execute(strCommand,
-null,
-null,
-m_nLongTimeout);
+        null,
+        null,
+        m_nLongTimeout);
                 }
 
                 return nDeletedCount;
@@ -22408,10 +22426,10 @@ m_nTimeOut);
                     else
                     {
                         nRet = GetFileNames(connection,
-new string[] { strID },
-bDeleteSubrecord,
-out filenames,
-out strError);
+        new string[] { strID },
+        bDeleteSubrecord,
+        out filenames,
+        out strError);
                         if (nRet == -1)
                             return -1;
                     }
