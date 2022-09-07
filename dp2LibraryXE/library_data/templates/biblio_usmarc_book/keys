@@ -94,24 +94,9 @@
 		<caption lang="en">Thesaurus</caption>
 	</table>
 
-
-	<key>
-		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='050']/marc:subfield[@code='a']</xpath>
-		<from>class</from>
-		<table ref="class" />
-	</key>
-	<key>
-		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='082']/marc:subfield[@code='a']</xpath>
-		<from>class</from>
-		<table ref="class" />
-	</key>
+	<!-- 暂不清楚 090 是什么字段 2022/9/7
 	<key>
 		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='090']/marc:subfield[@code='a']</xpath>
-		<from>class</from>
-		<table ref="class" />
-	</key>
-	<key>
-		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='093']/marc:subfield[@code='a']</xpath>
 		<from>class</from>
 		<table ref="class" />
 	</key>
@@ -125,7 +110,23 @@
 		<caption lang="zh-CN">分类号</caption>
 		<caption lang="en">Class number</caption>
 	</table>
+	-->
 
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='050']/marc:subfield[@code='a']</xpath>
+		<from>lccclass</from>
+		<table ref="lccclass" />
+	</key>
+	<table name="lccclass" id="4" type="lcc,__class">
+		<convert>
+			<string style="upper" />
+		</convert>
+		<convertquery>
+			<string style="upper" />
+		</convertquery>
+		<caption lang="zh-CN">国会图书馆分类号</caption>
+		<caption lang="en">llc number</caption>
+	</table>
 
 	<key>
 		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='082']/marc:subfield[@code='a']</xpath>
@@ -142,6 +143,23 @@
 		<caption lang="zh-CN">杜威十进制分类号</caption>
 		<caption lang="en">DDC Class number</caption>
 	</table>
+
+	<key>
+		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='093']/marc:subfield[@code='a']</xpath>
+		<from>class</from>
+		<table ref="class" />
+	</key>
+	<table name="class" id="37" type="clc,__class">
+		<convert>
+			<string style="upper,simplify" />
+		</convert>
+		<convertquery>
+			<string style="upper,simplify" />
+		</convertquery>
+		<caption lang="zh-CN">中图法分类号</caption>
+		<caption lang="en">clc number</caption>
+	</table>
+
 
 	<key>
 		<xpath nstable="usmarc">//marc:record/marc:datafield[@tag='100']/marc:subfield[@code='a']</xpath>

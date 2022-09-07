@@ -196,7 +196,7 @@ namespace dp2Circulation
                 FingerprintManager.SetError += PalmprintManager_SetError;
 #if NEWFINGER
                 // 2022/6/7
-                FingerprintManager.EnableSendkey(false);
+                // FingerprintManager.EnableSendkey(false);
 #endif
             }
 

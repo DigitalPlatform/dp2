@@ -14,6 +14,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Xml.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -8285,14 +8286,19 @@ out strError);
                                 new_keys_changed = true;
                                 strNewContent = strMergedContent;
                                 // 记载到错误日志中
-                                this.WriteErrorLog($"刷新数据库 {strDatabaseName} 的 {strName} 配置文件内容的过程中，发现已有配置文件内容中有 reserved 属性代表的保留元素(见后)，这些保留元素被保护起来没有被刷新: \r\n{strError}");
+                                this.WriteErrorLog($"刷新数据库 {strDatabaseName} 的 keys 配置文件内容的过程中，发现已有配置文件内容中有一些元素具有 reserved 属性，叫做保留元素(见后)，它们被保护起来了: \r\n{strError}");
                             }
                         }
 
 
                         // 比较本地的和服务器的有无区别，无区别就不要上载了
-                        if (strExistContent == strNewContent)
+                        // if (strExistContent == strNewContent)
+                        if (IsSame(strExistContent, strNewContent))
+                        {
+                            if (new_keys_changed)
+                                this.WriteErrorLog($"不过，配置文件 {strPath} 因为没有发生实质性修改，跳过了刷新");
                             continue;
+                        }
 
                         // 保存修改前的配置文件
                         if (string.IsNullOrEmpty(strTempDir) == false)
@@ -8359,6 +8365,8 @@ out strError);
                                 return -1;
                             }
 
+                            this.WriteErrorLog($"配置文件 {strPath} 被成功刷新");
+
                             if (strName.ToLower() == "keys")
                                 bKeysChanged = true;
                         }
@@ -8410,6 +8418,13 @@ out strError);
                 if (string.IsNullOrEmpty(strTempDir) == false)
                     PathUtil.DeleteDirectory(strTempDir);
             }
+        }
+
+        // 比较两个 XML 字符串是否等同
+        static bool IsSame(string xml1, string xml2)
+        {
+            return DomUtil.GetIndentXml(xml1) == DomUtil.GetIndentXml(xml2);
+            // return XNode.DeepEquals(XElement.Parse(xml1), XElement.Parse(xml2));
         }
 
         // 合并两个 keys 配置文件内容。合并算法会保留旧的内容中的 reserved 部分

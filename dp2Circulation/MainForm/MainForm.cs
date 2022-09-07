@@ -841,6 +841,13 @@ Stack:
                 }
             }
 
+#if NEWFINGER
+            {
+                FingerprintManager.EnableSendkey(true);
+                //this.Speak("退出前最后打开发送");
+            }
+#endif
+
             if (this.AppInfo != null)
             {
                 // 2019/7/12
@@ -7984,6 +7991,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
         {
             get
             {
+                if (this.AppInfo == null)
+                    return false;
                 return this.AppInfo.GetBoolean(
     "global",
     "disableSpeak",
@@ -9028,6 +9037,11 @@ Keys keyData)
             // fingerprint enableSendkey
             // this.Speak("activated");
             EnableFingerprintSendKey(true);
+#else
+            // 清除以前残留的未读出的消息
+            FingerprintManager.ClearMessage();
+            FingerprintManager.EnableSendkey(false);
+            //this.Speak("关闭发送");
 #endif
 
             // 激活 RfidManager
@@ -9054,6 +9068,7 @@ Keys keyData)
 
         private void MainForm_Deactivate(object sender, EventArgs e)
         {
+
             _isActivated = false;
 
             // 2021/11/2
@@ -9061,6 +9076,11 @@ Keys keyData)
             {
                 ((QuickChargingForm)this.ActiveMdiChild).SetInputFocusState(false);
             }
+
+#if NEWFINGER
+            FingerprintManager.EnableSendkey(true);
+            //this.Speak("打开发送");
+#endif
 
             // 休眠 RfidManager
             // SetRfidManagerPause(true);
@@ -9079,7 +9099,7 @@ Keys keyData)
 #endif
         }
 
-#region 消息过滤
+        #region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -9109,7 +9129,7 @@ Keys keyData)
 
 #endif
 
-#endregion
+        #endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名
@@ -10060,6 +10080,16 @@ out strError);
         void ClosePalmprintDialog()
         {
             _palmprintForm?.Close();
+        }
+
+        private void MainForm_Enter(object sender, EventArgs e)
+        {
+            Speak("Enter");
+        }
+
+        private void MainForm_Leave(object sender, EventArgs e)
+        {
+            Speak("Leave");
         }
     }
 

@@ -4393,8 +4393,11 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             lines.Add("set app \"dp2Site/dp2OPAC\" /applicationPool:dp2OPAC");
 
             // https://docs.microsoft.com/en-us/iis/configuration/system.webserver/defaultdocument/
+            // lines.Add("clear config \"dp2Site/dp2OPAC\" /section:defaultDocument");
+            lines.Add("set config \"dp2Site/dp2OPAC\" /section:defaultDocument /-files.[value='searchbiblio.aspx']");
             lines.Add("set config \"dp2Site/dp2OPAC\" /section:defaultDocument /enabled:true /+files.[value='searchbiblio.aspx']");
 
+            // clear config "dp2Site/dp2OPAC" /section:defaultDocument
 #if NO
             // 2019/3/22
             // https://blog.csdn.net/qingming7841/article/details/52314934
@@ -4589,7 +4592,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                     this.AppInfo.Save();
 
                     MessageBox.Show(this, strError);
-                    string install_url = "http://www.microsoft.com/zh-cn/download/details.aspx?id=34679";
+                    string install_url = "https://www.microsoft.com/en-us/download/details.aspx?id=48264";  // "http://www.microsoft.com/zh-cn/download/details.aspx?id=34679";
                     try
                     {
                         Process.Start(install_url);

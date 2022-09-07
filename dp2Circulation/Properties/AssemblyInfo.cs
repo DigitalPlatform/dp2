@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.67.*")]
-[assembly: AssemblyFileVersion("3.67.0.0")]
+[assembly: AssemblyVersion("3.68.*")]
+[assembly: AssemblyFileVersion("3.68.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -150,3 +150,4 @@ using System.Runtime.InteropServices;
 // 3.65 2022/5/20 系统管理窗的“内核”属性页，增加显示和管理 library.xml 中 fileShare 定义的共享文件夹的能力
 // 3.66 2022/8/5 日志窗增加输出册记录原始 XML 的功能；实体查询窗增加从册记录 XML 文件导入覆盖的功能
 // 3.67 2022/8/22 书目统计窗增加 “#输出书本式目录到docx” 内置统计方案。增加 DigitalPlatform.Typography 函数库
+// 3.68 2022/9/6 当 MainForm Activaed 和 Deactivated 时候，会自动关闭和打开掌纹掌纹发送。就是说，当 dp2circulation 主窗口处在后台的时候，它会让 fingerprintcenter 打开发送，这样让第三方(处在前台时)用到 fingerprintcenter 的应用可以得到发送的正条码号
