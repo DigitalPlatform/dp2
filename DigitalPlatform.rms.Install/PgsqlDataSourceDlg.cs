@@ -252,7 +252,7 @@ namespace DigitalPlatform.rms
         string AskAdminUserName(
             string title,
             string defaultUserName,
-            out string userName, 
+            out string userName,
             out string password)
         {
             if (string.IsNullOrEmpty(adminUserName))
@@ -296,6 +296,10 @@ namespace DigitalPlatform.rms
             return null;
         }
 
+        // return:
+        //      -1  出错
+        //      0   数据库不存在
+        //      1   数据库成功删除
         public static int DeleteDatabase(
 string strSqlServerName,
 string strDatabaseName,
@@ -339,30 +343,31 @@ out string strError)
                         if (ex.SqlState == "3D000")
                         {
                             strError = $"数据库 '{strDatabaseName}' 不存在";
-                            return -1;
+                            return 0;
                         }
-                        strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                        strError = $"删除数据库 {strDatabaseName} 出错: {ex.Message}";
                         return -1;
                     }
                     catch (NpgsqlException sqlEx)
                     {
-                        strError = $"删除数据库 {strDatabaseName} 出错: { sqlEx.Message }";
+                        strError = $"删除数据库 {strDatabaseName} 出错: {sqlEx.Message}";
                         int nError = (int)sqlEx.ErrorCode;
                         return -1;
                     }
                     catch (Exception ex)
                     {
-                        strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                        strError = $"删除数据库 {strDatabaseName} 出错: {ex.Message}";
                         return -1;
                     }
                 }
+
+                return 1;
             }
             catch (Exception ex)
             {
-                strError = $"删除数据库 {strDatabaseName} 出错: { ex.Message }";
+                strError = $"删除数据库 {strDatabaseName} 出错: {ex.Message}";
                 return -1;
             }
-            return 0;
         }
 
 
@@ -482,18 +487,18 @@ out string strError)
                         // 42710	duplicate_object
                         if (ex.SqlState == "42710")
                             return 0;
-                        strError = $"创建用户 {strSqlUserName} 出错: { ex.Message }";
+                        strError = $"创建用户 {strSqlUserName} 出错: {ex.Message}";
                         return -1;
                     }
                     catch (NpgsqlException sqlEx)
                     {
-                        strError = $"创建用户 {strSqlUserName} 出错: { sqlEx.Message }";
+                        strError = $"创建用户 {strSqlUserName} 出错: {sqlEx.Message}";
                         int nError = (int)sqlEx.ErrorCode;
                         return -1;
                     }
                     catch (Exception ex)
                     {
-                        strError = $"创建用户 {strSqlUserName} 出错: { ex.Message }";
+                        strError = $"创建用户 {strSqlUserName} 出错: {ex.Message}";
                         return -1;
                     }
                 }
@@ -507,6 +512,10 @@ out string strError)
         }
 
         // 删除用户
+        // return:
+        //      -1  出错
+        //      0   用户不存在
+        //      1   用户成功删除
         public static int DeleteUser(
 string strSqlServerName,
 string strSqlUserName,
@@ -550,20 +559,20 @@ out string strError)
                         if (ex.SqlState == "42704")
                         {
                             strError = $"用户 {strSqlUserName} 不存在";
-                            return -1;
+                            return 0;
                         }
-                        strError = $"删除用户 {strSqlUserName} 出错: { ex.Message }";
+                        strError = $"删除用户 {strSqlUserName} 出错: {ex.Message}";
                         return -1;
                     }
                     catch (NpgsqlException sqlEx)
                     {
-                        strError = $"删除用户 {strSqlUserName} 出错: { sqlEx.Message }";
+                        strError = $"删除用户 {strSqlUserName} 出错: {sqlEx.Message}";
                         int nError = (int)sqlEx.ErrorCode;
                         return -1;
                     }
                     catch (Exception ex)
                     {
-                        strError = $"删除用户 {strSqlUserName} 出错: { ex.Message }";
+                        strError = $"删除用户 {strSqlUserName} 出错: {ex.Message}";
                         return -1;
                     }
                 }
@@ -620,19 +629,19 @@ out string strError)
                         // 42P04	duplicate_database
                         if (ex.SqlState == "42P04")
                             return 0;
-                        strError = $"创建数据库 {strDatabaseName} 出错: { ex.Message }";
+                        strError = $"创建数据库 {strDatabaseName} 出错: {ex.Message}";
                         return -1;
                     }
                     catch (NpgsqlException sqlEx)
                     {
-                        strError = $"创建数据库 {strDatabaseName} 出错: { sqlEx.Message }";
+                        strError = $"创建数据库 {strDatabaseName} 出错: {sqlEx.Message}";
                         int nError = (int)sqlEx.ErrorCode;
                         return -1;
                     }
                     catch (Exception ex)
                     {
                         // strError = "连接 SQL 数据库出错： " + ex.Message + " 类型:" + ex.GetType().ToString();
-                        strError = $"创建数据库 {strDatabaseName} 出错: { ex.Message }";
+                        strError = $"创建数据库 {strDatabaseName} 出错: {ex.Message}";
                         return -1;
                     }
                 }
@@ -847,6 +856,10 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 // 删除 Pgsql 的数据库。这里数据库实际上是一个实例内的公共空间，不是 MS SQL Server 那种数据库概念
+                // return:
+                //      -1  出错
+                //      0   数据库不存在
+                //      1   数据库成功删除
                 int nRet = DeleteDatabase(
                     this.SqlServerName,
                     this.textBox_instanceName.Text,
@@ -859,8 +872,10 @@ MessageBoxDefaultButton.Button2);
     + strError);
                     return;
                 }
-
-                MessageBox.Show(this, $"数据库 '{this.InstanceName}' 删除成功");
+                if (nRet == 0)
+                    MessageBox.Show(this, $"数据库 '{this.InstanceName}' 不存在");
+                else
+                    MessageBox.Show(this, $"数据库 '{this.InstanceName}' 删除成功");
             }
             finally
             {
@@ -884,6 +899,11 @@ MessageBoxDefaultButton.Button2);
             this.button_OK.Enabled = false;
             try
             {
+                // 删除用户
+                // return:
+                //      -1  出错
+                //      0   用户不存在
+                //      1   用户成功删除
                 int nRet = DeleteUser(
                     this.SqlServerName,
                     this.KernelLoginName,
@@ -897,7 +917,10 @@ MessageBoxDefaultButton.Button2);
                     return;
                 }
 
-                MessageBox.Show(this, $"用户 '{this.KernelLoginName}' 删除成功");
+                if (nRet == 0)
+                    MessageBox.Show(this, $"用户 '{this.KernelLoginName}' 不存在");
+                else
+                    MessageBox.Show(this, $"用户 '{this.KernelLoginName}' 删除成功");
             }
             finally
             {

@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using System.Data.Sql;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform
 {
@@ -17,30 +18,36 @@ namespace DigitalPlatform
             InitializeComponent();
         }
 
-        private void SqlServerDlg_Load(object sender, EventArgs e)
+        private async void SqlServerDlg_Load(object sender, EventArgs e)
         {
-            // FillList();
-
-            this.BeginInvoke(new Delegate_FillList(FillList));
+            // this.BeginInvoke(new Delegate_FillList(FillList));
+            await FillList();
         }
 
         public delegate void Delegate_FillList();
 
-        void FillList()
+        async Task FillList()
         {
             EnableControls(false);
             this.listView_sqlServers.Items.Clear();
             ListViewItem item = new ListViewItem("正在获取SQL服务器信息 ...");
             this.listView_sqlServers.Items.Add(item);
 
+            Application.DoEvents();
             this.Update();
 
+            System.Data.DataTable table = null;
+
+            await Task.Factory.StartNew(() =>
+            {
+                SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
+                table = instance.GetDataSources();
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
             this.listView_sqlServers.Items.Clear();
-
-            SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
-
-            System.Data.DataTable table = instance.GetDataSources();
-
 
             foreach (System.Data.DataRow row in table.Rows)
             {

@@ -1004,6 +1004,10 @@ out strError);
             if (info.SqlServerType == "PostgreSQL")
             {
                 _owner = owner;
+                // return:
+                //      -1  出错
+                //      0   数据库不存在
+                //      1   数据库成功删除
                 nRet = PgsqlDataSourceDlg.DeleteDatabase(
 info.SqlServerName,
 info.DatabaseInstanceName,
@@ -1016,6 +1020,11 @@ out strError);
                 }
 
                 _owner = owner;
+                // 删除用户
+                // return:
+                //      -1  出错
+                //      0   用户不存在
+                //      1   用户成功删除
                 nRet = PgsqlDataSourceDlg.DeleteUser(
                     info.SqlServerName,
                     info.DatabaseLoginName,
@@ -3008,6 +3017,123 @@ MessageBoxDefaultButton.Button1);
 
             dom.Save(strFilename);
             return 0;
+        }
+
+        /*
+    <dbs instancename="dp2kernel_pgsql">
+        <database type="file,account" id="0" localdir="user_cfgs">
+            <property>
+                <logicname>
+                    <caption lang="zh-CN">用户</caption>
+                    <caption lang="en">account</caption>
+                </logicname>
+                <datasource>userdb</datasource>
+                <seed>1</seed>
+                <sqlserverdb />
+            </property>
+            <dir name="cfgs" localdir="cfgs">
+                <file name="keys" localname="keys.xml" />
+                <file name="browse" localname="browse.xml" />
+                <file name="template" localname="template.xml" />
+            </dir>
+        </database>
+        <database type="" id="1" localdir="dprms_1_cfgs" dbo="root">
+            <property>
+                <logicname>
+                    <caption lang="zh">中文图书</caption>
+                </logicname>
+                <datasource>
+                </datasource>
+                <seed>1</seed>
+                <sqlserverdb name="db_1" />
+            </property>
+            <dir name="cfgs" localdir="cfgs">
+                <file name="keys" localname="keys.xml" />
+                <file name="browse" localname="browse.xml" />
+                <file name="dp2catalog_marc_autogen.cs" localname="dp2catalog_marc_autogen.cs.xml" />
+                <file name="dp2catalog_marc_autogen.cs.ref" localname="dp2catalog_marc_autogen.cs.ref.xml" />
+                <file name="dp2circulation_marc_autogen.cs" localname="dp2circulation_marc_autogen.cs.xml" />
+                <file name="dp2circulation_marc_autogen.cs.hostversion" localname="dp2circulation_marc_autogen.cs.hostversion.xml" />
+                <file name="dp2circulation_marc_autogen.cs.ref" localname="dp2circulation_marc_autogen.cs.ref.xml" />
+                <file name="html.fltx" localname="html.fltx.xml" />
+                <file name="loan_biblio.fltx" localname="loan_biblio.fltx.xml" />
+                <file name="loan_biblio_text.fltx" localname="loan_biblio_text.fltx.xml" />
+                <file name="marcdef" localname="marcdef.xml" />
+                <file name="marcvaluelist" localname="marcvaluelist.xml" />
+                <file name="opac_biblio.fltx" localname="opac_biblio.fltx.xml" />
+                <file name="opac_detail.fltx" localname="opac_detail.fltx.xml" />
+                <file name="summary.fltx" localname="summary.fltx.xml" />
+                <file name="template" localname="template.xml" />
+            </dir>
+        </database>
+        * 
+         * */
+        // 删除 databases.xml 文件中的全部数据库元素和相关文件目录(account数据库除外)
+        public static int ClearDatabaseElements(string strDataDir,
+            out string strError)
+        {
+            strError = "";
+
+            string strFilename = Path.Combine(strDataDir, "databases.xml");
+            if (File.Exists(strFilename) == false)
+                return 0;
+            
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFilename);
+            }
+            catch (FileNotFoundException)
+            {
+                strError = "文件 " + strFilename + " 没有找到";
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                strError = "加载文件 " + strFilename + " 到 XMLDOM 时出错：" + ex.Message;
+                return -1;
+            }
+
+            var nodes = dom.DocumentElement.SelectNodes("dbs/database");
+            if (nodes.Count == 0)
+                return 0;
+            foreach(XmlElement database in nodes)
+            {
+                string type = database.GetAttribute("type");
+                if (StringUtil.IsInList("account", type))
+                    continue;
+                string localdir = database.GetAttribute("localdir");
+                DeleteLocalDir(strDataDir, localdir);
+
+                var sqlserverdb_name = database.SelectSingleNode("property/sqlserverdb/@name")?.Value;
+                if (string.IsNullOrEmpty(sqlserverdb_name) == false)
+                    DeleteObjectDir(strDataDir, sqlserverdb_name);
+
+                database.ParentNode.RemoveChild(database);
+            }
+
+            dom.Save(strFilename);
+            return 1;
+
+            void DeleteLocalDir(string data_dir, string local_dir)
+            {
+                if (string.IsNullOrEmpty(data_dir))
+                    return;
+                if (string.IsNullOrEmpty(local_dir))
+                    return;
+                string path = Path.Combine(data_dir, local_dir);
+                PathUtil.DeleteDirectory(path);
+            }
+
+            void DeleteObjectDir(string data_dir, string local_dir)
+            {
+                if (string.IsNullOrEmpty(data_dir))
+                    return;
+                if (string.IsNullOrEmpty(local_dir))
+                    return;
+                string path = Path.Combine(data_dir, "object", local_dir);
+                PathUtil.DeleteDirectory(path);
+            }
         }
     }
 }

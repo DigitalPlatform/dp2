@@ -2120,48 +2120,6 @@ strNewDefault);
                         return 0;
                 }
 
-                bool bVerifyBarcode = StringUtil.IsInList("verifybarcode", strStyle);
-
-                // 校验证条码号
-                if ((this.NeedVerifyBarcode == true || bVerifyBarcode)
-                    && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
-                {
-                    // 形式校验条码号
-                    // return:
-                    //      -2  服务器没有配置校验方法，无法校验
-                    //      -1  error
-                    //      0   不是合法的条码号
-                    //      1   是合法的读者证条码号
-                    //      2   是合法的册条码号
-                    nRet = VerifyBarcode(
-                        Program.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
-                        this.readerEditControl1.Barcode,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    // 输入的条码格式不合法
-                    if (nRet == 0)
-                    {
-                        strError = "您输入的证条码 " + this.readerEditControl1.Barcode + " 格式不正确(" + strError + ")。";
-                        goto ERROR1;
-                    }
-
-                    // 实际输入的是册条码号
-                    if (nRet == 2)
-                    {
-                        strError = "您输入的条码号 " + this.readerEditControl1.Barcode + " 是册条码号。请输入读者证条码号。";
-                        goto ERROR1;
-                    }
-
-                    // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
-                    if (nRet == -2
-                        && (this.NeedVerifyBarcode == true && bVerifyBarcode == false))
-                    {
-                        MessageBoxShow("警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
-                    }
-                }
-
                 // TODO: 保存时候的选项
 
                 // 当 this.readerEditControl1.RecPath 为空的时候，需要出现对话框，让用户可以选择目标库
@@ -2191,6 +2149,59 @@ strNewDefault);
                     if (ret == 0)
                         return 0;
                 }
+
+                bool bVerifyBarcode = StringUtil.IsInList("verifybarcode", strStyle);
+
+                // 校验证条码号
+                if ((this.NeedVerifyBarcode == true || bVerifyBarcode)
+                    && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
+                {
+                    nRet = DoVerifyPatronBarcode(strTargetRecPath,
+                        bVerifyBarcode,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+#if REMOVED
+                    var library_code = Program.MainForm.GetReaderDbLibraryCode(Global.GetDbName(strTargetRecPath));
+
+                    // 形式校验条码号
+                    // return:
+                    //      -2  服务器没有配置校验方法，无法校验
+                    //      -1  error
+                    //      0   不是合法的条码号
+                    //      1   是合法的读者证条码号
+                    //      2   是合法的册条码号
+                    nRet = VerifyBarcode(
+                        library_code,
+                        // Program.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
+                        this.readerEditControl1.Barcode,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 输入的条码格式不合法
+                    if (nRet == 0)
+                    {
+                        strError = "您输入的证条码 " + this.readerEditControl1.Barcode + " 格式不正确(" + strError + ")。";
+                        goto ERROR1;
+                    }
+
+                    // 实际输入的是册条码号
+                    if (nRet == 2)
+                    {
+                        strError = "您输入的条码号 " + this.readerEditControl1.Barcode + " 是册条码号。请输入读者证条码号。";
+                        goto ERROR1;
+                    }
+
+                    // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
+                    if (nRet == -2
+                        && (this.NeedVerifyBarcode == true && bVerifyBarcode == false))
+                    {
+                        MessageBoxShow("警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
+                    }
+#endif
+                }
+
 
                 LibraryChannel channel = this.GetChannel();
 
@@ -2512,6 +2523,56 @@ strNewDefault);
             return -1;
         }
 
+        int DoVerifyPatronBarcode(string strTargetRecPath,
+            bool bVerifyBarcode,
+            out string strError)
+        {
+            strError = "";
+
+            var library_code = Program.MainForm.GetReaderDbLibraryCode(Global.GetDbName(strTargetRecPath));
+            if (library_code == null)
+                library_code = Program.MainForm.FocusLibraryCode;
+
+            // 形式校验条码号
+            // return:
+            //      -2  服务器没有配置校验方法，无法校验
+            //      -1  error
+            //      0   不是合法的条码号
+            //      1   是合法的读者证条码号
+            //      2   是合法的册条码号
+            int nRet = VerifyBarcode(
+                library_code,
+                // Program.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
+                this.readerEditControl1.Barcode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            // 输入的条码格式不合法
+            if (nRet == 0)
+            {
+                strError = "您输入的证条码 " + this.readerEditControl1.Barcode + " 格式不正确(" + strError + ")。";
+                return -1;
+            }
+
+            // 实际输入的是册条码号
+            if (nRet == 2)
+            {
+                strError = "您输入的条码号 " + this.readerEditControl1.Barcode + " 是册条码号。请输入读者证条码号。";
+                return -1;
+            }
+
+            // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
+            if (nRet == -2
+                && (this.NeedVerifyBarcode == true && bVerifyBarcode == false))
+            {
+                MessageBoxShow("警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
+            }
+
+            return 0;
+        }
+
+        /*
         void MessageBoxShow(string text)
         {
             this.Invoke((Action)(() =>
@@ -2519,6 +2580,7 @@ strNewDefault);
                 MessageBox.Show(this, text);
             }));
         }
+        */
 
         // 另存
         private void toolStripButton_saveTo_Click(object sender, EventArgs e)
@@ -2704,10 +2766,32 @@ strNewDefault);
                 goto ERROR1;
             }
 
+            // 出现对话框，让用户可以选择目标库
+            ReaderSaveToDialog saveto_dlg = new ReaderSaveToDialog();
+            MainForm.SetControlFont(saveto_dlg, this.Font, false);
+            saveto_dlg.Text = "新增一条读者记录";
+            saveto_dlg.MessageText = "请选择要保存的目标记录位置\r\n(记录ID为 ? 表示追加保存到数据库末尾)";
+            // saveto_dlg.MainForm = Program.MainForm;
+            saveto_dlg.RecPath = this.readerEditControl1.RecPath;
+            saveto_dlg.RecID = "?";
+
+            Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
+            saveto_dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
+
+            if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
             // 校验证条码号
             if (this.NeedVerifyBarcode == true
                 && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
             {
+                nRet = DoVerifyPatronBarcode(saveto_dlg.RecPath,
+    false,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+#if REMOVED
                 // 形式校验条码号
                 // return:
                 //      -2  服务器没有配置校验方法，无法校验
@@ -2741,23 +2825,9 @@ strNewDefault);
                 if (nRet == -2)
                     MessageBox.Show(this, "警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
                  * */
+#endif
             }
 
-            // 出现对话框，让用户可以选择目标库
-            ReaderSaveToDialog saveto_dlg = new ReaderSaveToDialog();
-            MainForm.SetControlFont(saveto_dlg, this.Font, false);
-            saveto_dlg.Text = "新增一条读者记录";
-            saveto_dlg.MessageText = "请选择要保存的目标记录位置\r\n(记录ID为 ? 表示追加保存到数据库末尾)";
-            // saveto_dlg.MainForm = Program.MainForm;
-            saveto_dlg.RecPath = this.readerEditControl1.RecPath;
-            saveto_dlg.RecID = "?";
-
-            Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
-            saveto_dlg.ShowDialog(this);
-            Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
-
-            if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                return;
 
             bool bIdChanged = false;    // 目标路径是否发生了变化
 
@@ -3209,7 +3279,7 @@ strSavedXml);
         }
 
 #if NO
-        #region delete
+#region delete
 
         // 删除
         private void button_delete_Click(object sender, EventArgs e)
@@ -3680,7 +3750,7 @@ MessageBoxDefaultButton.Button2);
             dlg.ShowDialog(this);
         }
 
-        #endregion
+#endregion
 
 #endif
 
@@ -3718,6 +3788,12 @@ MessageBoxDefaultButton.Button2);
             if (this.NeedVerifyBarcode == true
                 && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
             {
+                nRet = DoVerifyPatronBarcode(this.readerEditControl1.RecPath,
+    false,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+#if REMOVED
                 // 形式校验条码号
                 // return:
                 //      -2  服务器没有配置校验方法，无法校验
@@ -3751,6 +3827,7 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -2)
                     MessageBox.Show(this, "警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
                  * */
+#endif
             }
 
             LibraryChannel channel = this.GetChannel();
@@ -4101,6 +4178,12 @@ MessageBoxDefaultButton.Button2);
             if (this.NeedVerifyBarcode == true
                 && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
             {
+                nRet = DoVerifyPatronBarcode(this.readerEditControl1.RecPath,
+                    false,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+#if REMOVED
                 // 形式校验条码号
                 // return:
                 //      -2  服务器没有配置校验方法，无法校验
@@ -4134,6 +4217,7 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -2)
                     MessageBox.Show(this, "警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
                  * */
+#endif
             }
 
             string strActionName = "押金交费";
@@ -5452,7 +5536,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-        #region 指纹登记功能
+#region 指纹登记功能
 
 #if !NEWFINGER
 
@@ -5755,9 +5839,9 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
-        #region 掌纹登记功能
+#region 掌纹登记功能
 
         // 局部更新掌纹信息高速缓存
         // return:
@@ -5920,7 +6004,7 @@ MessageBoxDefaultButton.Button2);
             return result;
         }
 
-        #endregion
+#endregion
 
         private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
@@ -7881,7 +7965,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-        #region 将 dt1000 读者 MARC 记录转换为 dp2 的 XML 格式
+#region 将 dt1000 读者 MARC 记录转换为 dp2 的 XML 格式
 
         public static int ConvertDt1000ReaderMarcToXml(MarcRecord record,
             string path,
@@ -9285,7 +9369,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-        #endregion
+#endregion
 
         private async void toolStripMenuItem_registerFaceByFile_Click(object sender, EventArgs e)
         {

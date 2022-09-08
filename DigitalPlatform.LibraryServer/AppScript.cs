@@ -2250,8 +2250,8 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
 
-                    string strLibraryCode = "";
-                    if (this.App.IsReaderDbName(strDbName, out strLibraryCode) == false)
+                    // string strLibraryCode = "";
+                    if (this.App.IsReaderDbName(strDbName, out string strLibraryCode) == false)
                     {
                         strError = "数据库名 '" + strDbName + "' 不是读者库。验证读者记录失败";
                         return -1;

@@ -242,6 +242,9 @@ namespace DigitalPlatform.rms
                 this.textBox_sqlPassword.Enabled = bEnable;
             }
 
+            this.radioButton_sqlAccount.Enabled = bEnable;
+            this.radioButton_SSPI.Enabled = bEnable;
+
             this.button_detect.Enabled = bEnable;
 
             this.button_OK.Enabled = bEnable;

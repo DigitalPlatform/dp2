@@ -2,10 +2,14 @@
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Data.SqlClient;
+using static System.Net.Mime.MediaTypeNames;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Install;
+using System.Runtime.Remoting.Activation;
 
 namespace DigitalPlatform.rms
 {
@@ -180,7 +184,6 @@ namespace DigitalPlatform.rms
 
                 if (nRet == 0 || nRet == 1)
                 {
-
                     // root用户信息
                     if (this.LineInfo.RootUserName == null
             || this.LineInfo.RootPassword == null
@@ -533,11 +536,15 @@ namespace DigitalPlatform.rms
             RefreshRootUserInfo();
         }
 
+        // 和 textBox_sqlDef 配套的 SQL Server 类型
+        string _currentSqlServerType = "";
+
         void RefreshSqlDef()
         {
             if (this.LineInfo == null)
             {
                 this.textBox_sqlDef.Text = "";
+                _currentSqlServerType = "";
                 return;
             }
 
@@ -550,9 +557,7 @@ namespace DigitalPlatform.rms
                     + "; SQL Login Password = " + new string('*', this.LineInfo.DatabaseLoginPassword.Length);
                 if (this.comboBox_sqlServerType.Text != "MS SQL Server")
                 {
-                    this.m_nDisableTextChange++;
-                    this.comboBox_sqlServerType.Text = "MS SQL Server";
-                    this.m_nDisableTextChange--;
+                    ChangeSqlServerType("MS SQL Server");
                 }
             }
             else if (this.LineInfo.SqlServerType == "SQLite"
@@ -562,9 +567,7 @@ namespace DigitalPlatform.rms
         + "; Database Prefix = " + this.LineInfo.DatabaseInstanceName;
                 if (this.comboBox_sqlServerType.Text != "SQLite")
                 {
-                    this.m_nDisableTextChange++;
-                    this.comboBox_sqlServerType.Text = "SQLite";
-                    this.m_nDisableTextChange--;
+                    ChangeSqlServerType("SQLite");
                 }
             }
             else if (this.LineInfo.SqlServerType == "MySQL Server")
@@ -576,9 +579,7 @@ namespace DigitalPlatform.rms
                     + "; SslMode = " + this.LineInfo.SslMode;
                 if (this.comboBox_sqlServerType.Text != "MySQL Server")
                 {
-                    this.m_nDisableTextChange++;
-                    this.comboBox_sqlServerType.Text = "MySQL Server";
-                    this.m_nDisableTextChange--;
+                    ChangeSqlServerType("MySQL Server");
                 }
             }
             else if (this.LineInfo.SqlServerType == "Oracle")
@@ -589,9 +590,7 @@ namespace DigitalPlatform.rms
                     + "; SQL Login Password = " + new string('*', this.LineInfo.DatabaseLoginPassword.Length);
                 if (this.comboBox_sqlServerType.Text != "Oracle")
                 {
-                    this.m_nDisableTextChange++;
-                    this.comboBox_sqlServerType.Text = "Oracle";
-                    this.m_nDisableTextChange--;
+                    ChangeSqlServerType("Oracle");
                 }
             }
             else if (this.LineInfo.SqlServerType == "PostgreSQL")
@@ -602,17 +601,21 @@ namespace DigitalPlatform.rms
                     + "; SQL Login Password = " + new string('*', this.LineInfo.DatabaseLoginPassword.Length);
                 if (this.comboBox_sqlServerType.Text != "PostgreSQL")
                 {
-                    this.m_nDisableTextChange++;
-                    this.comboBox_sqlServerType.Text = "PostgreSQL";
-                    this.m_nDisableTextChange--;
+                    ChangeSqlServerType("PostgreSQL");
                 }
             }
             else
             {
-                this.m_nDisableTextChange++;
-                this.comboBox_sqlServerType.Text = "MS SQL Server";
-                this.m_nDisableTextChange--;
+                ChangeSqlServerType("MS SQL Server");
             }
+        }
+
+        void ChangeSqlServerType(string type)
+        {
+            this.m_nDisableTextChange++;
+            this.comboBox_sqlServerType.Text = type;
+            this._currentSqlServerType = type;
+            this.m_nDisableTextChange--;
         }
 
         void RefreshRootUserInfo()
@@ -1102,13 +1105,38 @@ MessageBoxDefaultButton.Button1);
             LineInfo.CertificateSN = dlg.SN;
         }
 
+        // 用暂时抑制 comboBox_sqlServerType 改变后随动清除 textBox_sqlDef 的动作
         int m_nDisableTextChange = 0;
 
         private void comboBox_sqlServerType_TextChanged(object sender, EventArgs e)
         {
-            if (m_nDisableTextChange == 0)
-                this.textBox_sqlDef.Text = "";
+
         }
+
+
+        /*
+        void OnSqlServerTypeChanged(int nDisableTextChange)
+        {
+            this.Invoke((Action)(() =>
+            {
+                if (this.comboBox_sqlServerType.Text == "[清除]")
+                {
+                    Task.Run(() =>
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            this.comboBox_sqlServerType.Text = "";
+                        }));
+                    });
+                }
+
+                if (nDisableTextChange == 0)
+                {
+                    this.textBox_sqlDef.Text = "";
+                }
+            }));
+        }
+        */
 
         // 2021/9/15
         private void textBox_instanceName_Validating(object sender, System.ComponentModel.CancelEventArgs e)
@@ -1117,6 +1145,148 @@ MessageBoxDefaultButton.Button1);
             {
                 MessageBox.Show(this, $"实例名 '{this.textBox_instanceName.Text}' 中出现了非法字符");
                 e.Cancel = true;
+            }
+        }
+
+        private void comboBox_sqlServerType_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            if (this.comboBox_sqlServerType.Text == "[清除]")
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    try
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            this.comboBox_sqlServerType.Text = "";
+                        }));
+                    }
+                    catch
+                    {
+
+                    }
+                },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+            }
+
+            if (m_nDisableTextChange == 0)
+            {
+                if (string.IsNullOrEmpty(this.textBox_sqlDef.Text) == false)
+                {
+                    ClearExistingSqlConfigData(this.comboBox_sqlServerType.Text);
+                }
+            }
+
+            /*
+            int value = m_nDisableTextChange;
+            Task.Run(() =>
+            {
+                OnSqlServerTypeChanged(value);
+            });
+            */
+        }
+
+
+        // 清除已经配置好的当前 SQL 配置数据
+        bool ClearExistingSqlConfigData(string newSqlServerType)
+        {
+            if (string.IsNullOrEmpty(this.LoadedDataDir) == false)
+            {
+                DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(this,
+            $"(危险操作，请谨慎选择) 您决定修改数据里类型，从 {_currentSqlServerType} 改变到 {newSqlServerType} 。这会导致清除已经存在的 {_currentSqlServerType} 类型的 SQL 数据库和全部数据。请问确实要进行这样的修改操作么?\r\n\r\n警告: 数据库一旦清除，其中的数据会全部丢失，并无法还原。请谨慎操作",
+        "OneInstanceDialog",
+        MessageBoxButtons.OKCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    }));
+                if (result == DialogResult.Cancel)
+                {
+                    // 还原 combobox 值
+                    /*
+                    string value = _currentSqlServerType;
+                    Task.Factory.StartNew(() =>
+                    {
+                        try
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                this.comboBox_sqlServerType.Text = value;
+                            }));
+                        }
+                        catch
+                        {
+
+                        }
+                    },
+    default,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+                    */
+                    RestoreOldServerType();
+                    return false;
+                }
+
+                // 着手删除 SQL 库表
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
+                    //      1   成功删除
+                    int nRet = InstanceDialog.DeleteAllSqlDatabase(
+                        this,
+                        this.LoadedDataDir,
+                        out string strError);
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(this, strError);
+                        RestoreOldServerType();
+                        return false;
+                    }
+                }
+
+                // 将 databases.xml 中的数据库元素清除
+                {
+                    // 删除 databases.xml 文件中的全部数据库元素和相关文件目录(account数据库除外)
+                    int nRet = LineInfo.ClearDatabaseElements(this.LoadedDataDir,
+                        out string strError);
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(this, strError);
+                        RestoreOldServerType();
+                        return false;
+                    }
+                }
+            }
+
+            this.textBox_sqlDef.Text = "";
+            this.LineInfo = null;
+            return true;
+
+            void RestoreOldServerType()
+            {
+                // 还原 combobox 值
+                string value = _currentSqlServerType;
+                Task.Factory.StartNew(() =>
+                {
+                    try
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            this.comboBox_sqlServerType.Text = value;
+                        }));
+                    }
+                    catch
+                    {
+
+                    }
+                },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
             }
         }
 
