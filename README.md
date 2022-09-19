@@ -58,22 +58,8 @@ git pull
 
 注1：或者可用 `git submodule update --init --recursive`
 注2：如果 git pull 命令报错说 `You are not currently on a branch.`，可以用 `git pull origin master`
-
 以确保获得最新的 dp-library 代码。
 
-Git 命令执行以后，需要重新打开 dp2 Solution 变动才能生效
-
-4) 编译中若出现类似这样的报错：
-
-```
-13>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\Microsoft.Common.CurrentVersion.targets(3214,5): warning MSB3327: 无法在当前用户的 Windows 证书存储中找到代码签名证书。若要更正此问题，请禁用 ClickOnce 清单的签名或将证书安装到证书存储中。
-13>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\Microsoft.Common.CurrentVersion.targets(3214,5): error MSB3323: 在证书存储区中找不到清单签名证书。
-```
-
-需要将一些 .exe 的 Project (例如 dp2Catalog)的“签名”属性页中“为 ClickOnce 清单签名”这个 checkbox 清除选择。
-
-
-***
 第3步详细执行结果
 ```
 D:\code\dp2>git submodule init
@@ -119,3 +105,49 @@ Fast-forward
 
 D:\code\dp2\dp-library>
 ```
+
+如果在dp2代码中修改的dp-library中的代码，那么同步dp-library的代码会报错，如下
+```
+D:\code\chord\dp-library>git pull origin master
+remote: Enumerating objects: 17, done.
+remote: Counting objects: 100% (17/17), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 11 (delta 8), reused 11 (delta 8), pack-reused 0
+Unpacking objects: 100% (11/11), 1.08 KiB | 27.00 KiB/s, done.
+From https://github.com/DigitalPlatform/dp-library
+ * branch            master     -> FETCH_HEAD
+   7c720d9..aa89e52  master     -> origin/master
+error: Your local changes to the following files would be overwritten by merge:
+        DigitalPlatform.SIP/Request/PatronInformation_63.cs
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 7c720d9..aa89e52
+```
+此时可以先用git reset --hard放弃本地代码，再拉取dp-library。如下：
+```
+D:\code\chord\dp-library>git reset --hard
+HEAD is now at 7c720d9 修改提示
+
+D:\code\chord\dp-library>git pull origin master
+From https://github.com/DigitalPlatform/dp-library
+ * branch            master     -> FETCH_HEAD
+Updating 7c720d9..aa89e52
+Fast-forward
+ DigitalPlatform.SIP/Request/PatronInformation_63.cs          | 2 +-
+ DigitalPlatform.SIP/Response/PatronInformationResponse_64.cs | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+```
+ 
+
+Git 命令执行以后，需要重新打开 dp2 Solution 变动才能生效
+
+4) 编译中若出现类似这样的报错：
+
+```
+13>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\Microsoft.Common.CurrentVersion.targets(3214,5): warning MSB3327: 无法在当前用户的 Windows 证书存储中找到代码签名证书。若要更正此问题，请禁用 ClickOnce 清单的签名或将证书安装到证书存储中。
+13>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\Microsoft.Common.CurrentVersion.targets(3214,5): error MSB3323: 在证书存储区中找不到清单签名证书。
+```
+
+需要将一些 .exe 的 Project (例如 dp2Catalog)的“签名”属性页中“为 ClickOnce 清单签名”这个 checkbox 清除选择。
+
+
