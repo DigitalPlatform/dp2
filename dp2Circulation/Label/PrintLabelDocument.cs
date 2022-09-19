@@ -7,6 +7,8 @@ using System.IO;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Collections;
+using System.Web;
+using System.Xml;
 
 using ZXing;
 using ZXing.Common;
@@ -16,8 +18,7 @@ using ZXing.QrCode;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
-using System.Web;
-using System.Xml;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
@@ -1503,6 +1504,13 @@ namespace dp2Circulation
 
                                 if (StringUtil.IsInList("auto_fit", text_style) == true)
                                 {
+                                    DrawAutoFitText(g,
+    strText,
+    this_font,
+    brushText,
+    rect,
+    s_format);
+#if OLD
                                     float old_height = this_font.GetHeight(g);
                                     // 自动填充风格
                                     float auto_rect_height = 0;
@@ -1541,6 +1549,20 @@ namespace dp2Circulation
                     s_format);
                                         }
                                     }
+#endif
+                                }
+                                else if (StringUtil.IsInList("shupai", text_style) == true)
+                                {
+                                    string shupai_delta = StringUtil.GetParameterByPrefix(strLineStyle,
+"shupai_delta",
+":");
+                                    DrawShupaiText(g,
+                                        strText,
+                                        this_font,
+                                        brushText,
+                                        rect,
+                                        s_format,
+                                        shupai_delta);
                                 }
                                 else
                                 {
@@ -1601,7 +1623,125 @@ namespace dp2Circulation
 
                 g.Clip = old_clip;
             } // end of using clip
+        }
 
+        static void DrawAutoFitText(Graphics g,
+            string strText,
+            Font this_font,
+            Brush brushText,
+            RectangleF rect,
+            StringFormat s_format)
+        {
+            float old_height = this_font.GetHeight(g);
+            // 自动填充风格
+            float auto_rect_height = 0;
+            float auto_font_height = GetAutoFitTextHeight(
+            g,
+    this_font,
+    rect,
+    strText,
+    out auto_rect_height);
+            if (auto_font_height == 0)
+            {
+                // 普通风格
+                g.DrawString(strText,
+                    this_font,
+                    brushText,
+                    rect,
+                    s_format);
+            }
+            else
+            {
+                float delta = old_height - auto_rect_height;
+                RectangleF temp_rect = rect;
+                // 调整 rect
+                // temp_rect.Inflate(0, -delta);
+                temp_rect.Offset(0, delta / 2);
+
+                using (Font font = new Font(this_font.FontFamily,
+auto_font_height,   // auto_height,
+this_font.Style,
+GraphicsUnit.Pixel))
+                {
+                    g.DrawString(strText,
+font,
+brushText,
+temp_rect,
+s_format);
+                }
+            }
+        }
+
+        // parameters:
+        //      shupai_delta    (竖排)字间距调整。例如 -0.01 表示减少字高的 1%
+        static void DrawShupaiText(
+            Graphics g,
+            string text,
+            Font font,
+            Brush brush,
+            RectangleF rect,
+            StringFormat format,
+            string shupai_delta)
+        {
+            StringFormat f1 = new StringFormat(format);
+            f1.Alignment = StringAlignment.Center;
+
+            float delta_ratio = 0;
+            if (string.IsNullOrEmpty(shupai_delta) == false)
+            {
+                if (float.TryParse(shupai_delta, out delta_ratio) == false)
+                {
+                    // 显示一行表示报错的文字:
+                    string error = $"shupai_delta 值 '{shupai_delta}' 格式错误";
+                    DrawAutoFitText(g,
+error,
+font,
+brush,
+rect,
+format);
+                    return;
+                }
+                // delta_ratio = (float)Convert.ToDouble(shupai_delta);
+            }
+            else
+                delta_ratio = -0.2F;    // 默认值
+            var state = g.Save();
+            g.TranslateTransform(rect.X, rect.Y + rect.Height);
+            g.RotateTransform(270);
+            try
+            {
+                // 可以理解为竖着 output 每个字符
+                // var height = font.SizeInPoints;
+                // var height = GetHeight(font);
+                var basic_height = font.GetHeight(g);
+                var delta = (basic_height * delta_ratio);
+                var height = basic_height + delta;
+                float x = (rect.Height / 2);
+                float y = 0;
+                if (format.Alignment == StringAlignment.Near)
+                    y = 0;
+                else if (format.Alignment == StringAlignment.Center)
+                    y = (rect.Width - (height * text.Length)) / 2;
+                else if (format.Alignment == StringAlignment.Far)
+                    y = rect.Width - (height * text.Length);
+                else throw new Exception($"未知的 Alignment '{format.Alignment.ToString()}'");
+                y += delta / 2;
+                foreach (char ch in text)
+                {
+                    g.DrawString(new string(ch, 1), font, brush, x, y, f1);
+                    y += height;
+                }
+            }
+            finally
+            {
+                g.Restore(state);
+            }
+        }
+
+        static float GetHeight(Font font)
+        {
+            var ratio = (float)font.FontFamily.GetEmHeight(font.Style) / (float)font.SizeInPoints;
+            return (font.FontFamily.GetCellAscent(font.Style) + font.FontFamily.GetCellDescent(font.Style)) / ratio;
         }
 
         static void DrawLine(Graphics g,

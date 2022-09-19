@@ -41,6 +41,7 @@
             this.tabPage_page = new System.Windows.Forms.TabPage();
             this.checkBox_gridLine = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.rotateControl1 = new dp2Circulation.RotateControl();
             this.checkBox_landscape = new System.Windows.Forms.CheckBox();
             this.label_printInfoWarning = new System.Windows.Forms.Label();
             this.button_selectPrinter = new System.Windows.Forms.Button();
@@ -55,6 +56,7 @@
             this.textBox_pagePadding = new DigitalPlatform.CommonControl.UniverseNumberTextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPage_label = new System.Windows.Forms.TabPage();
+            this.checkBox_border = new System.Windows.Forms.CheckBox();
             this.button_setBarcodeFont = new System.Windows.Forms.Button();
             this.textBox_labelFont = new System.Windows.Forms.TextBox();
             this.button_labelFont = new System.Windows.Forms.Button();
@@ -84,8 +86,6 @@
             this.numericUpDown_sampleText_linesPerLabel = new System.Windows.Forms.NumericUpDown();
             this.label6 = new System.Windows.Forms.Label();
             this.textBox_sampleText = new DigitalPlatform.CommonControl.MyTextBox();
-            this.checkBox_border = new System.Windows.Forms.CheckBox();
-            this.rotateControl1 = new dp2Circulation.RotateControl();
             this.labelDesignControl1 = new dp2Circulation.LabelRenderControl();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -115,7 +115,7 @@
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
             this.splitContainer1.Margin = new System.Windows.Forms.Padding(0);
-            this.splitContainer1.MinimumSize = new System.Drawing.Size(75, 0);
+            this.splitContainer1.MinimumSize = new System.Drawing.Size(92, 0);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -125,9 +125,9 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.labelDesignControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(794, 466);
-            this.splitContainer1.SplitterDistance = 274;
-            this.splitContainer1.SplitterWidth = 6;
+            this.splitContainer1.Size = new System.Drawing.Size(970, 544);
+            this.splitContainer1.SplitterDistance = 334;
+            this.splitContainer1.SplitterWidth = 7;
             this.splitContainer1.TabIndex = 1;
             // 
             // tableLayoutPanel1
@@ -144,7 +144,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(274, 466);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(334, 544);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // flowLayoutPanel1
@@ -153,10 +153,10 @@
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel1.Controls.Add(this.panel1);
             this.flowLayoutPanel1.Controls.Add(this.panel2);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 400);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 467);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(266, 66);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(325, 77);
             this.flowLayoutPanel1.TabIndex = 5;
             // 
             // panel1
@@ -164,9 +164,9 @@
             this.panel1.Controls.Add(this.comboBox_currentUnit);
             this.panel1.Controls.Add(this.label5);
             this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 4);
+            this.panel1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 5);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(266, 30);
+            this.panel1.Size = new System.Drawing.Size(325, 35);
             this.panel1.TabIndex = 2;
             // 
             // comboBox_currentUnit
@@ -176,20 +176,20 @@
             this.comboBox_currentUnit.Items.AddRange(new object[] {
             "1/100 英寸",
             "毫米"});
-            this.comboBox_currentUnit.Location = new System.Drawing.Point(140, 0);
-            this.comboBox_currentUnit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox_currentUnit.Location = new System.Drawing.Point(171, 0);
+            this.comboBox_currentUnit.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.comboBox_currentUnit.Name = "comboBox_currentUnit";
-            this.comboBox_currentUnit.Size = new System.Drawing.Size(124, 26);
+            this.comboBox_currentUnit.Size = new System.Drawing.Size(151, 29);
             this.comboBox_currentUnit.TabIndex = 12;
             this.comboBox_currentUnit.SelectedIndexChanged += new System.EventHandler(this.comboBox_currentUnit_SelectedIndexChanged);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(24, 4);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(29, 5);
+            this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(116, 18);
+            this.label5.Size = new System.Drawing.Size(138, 21);
             this.label5.TabIndex = 11;
             this.label5.Text = "尺寸单位(&U):";
             // 
@@ -197,33 +197,33 @@
             // 
             this.panel2.Controls.Add(this.numericUpDown_decimalPlaces);
             this.panel2.Controls.Add(this.label7);
-            this.panel2.Location = new System.Drawing.Point(0, 34);
+            this.panel2.Location = new System.Drawing.Point(0, 40);
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(266, 32);
+            this.panel2.Size = new System.Drawing.Size(325, 37);
             this.panel2.TabIndex = 4;
             // 
             // numericUpDown_decimalPlaces
             // 
-            this.numericUpDown_decimalPlaces.Location = new System.Drawing.Point(140, 0);
-            this.numericUpDown_decimalPlaces.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_decimalPlaces.Location = new System.Drawing.Point(171, 0);
+            this.numericUpDown_decimalPlaces.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.numericUpDown_decimalPlaces.Maximum = new decimal(new int[] {
             10,
             0,
             0,
             0});
             this.numericUpDown_decimalPlaces.Name = "numericUpDown_decimalPlaces";
-            this.numericUpDown_decimalPlaces.Size = new System.Drawing.Size(126, 28);
+            this.numericUpDown_decimalPlaces.Size = new System.Drawing.Size(154, 31);
             this.numericUpDown_decimalPlaces.TabIndex = 13;
             this.numericUpDown_decimalPlaces.ValueChanged += new System.EventHandler(this.numericUpDown_decimalPlaces_ValueChanged);
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(24, 3);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Location = new System.Drawing.Point(29, 4);
+            this.label7.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(116, 18);
+            this.label7.Size = new System.Drawing.Size(138, 21);
             this.label7.TabIndex = 12;
             this.label7.Text = "小数位数(&D):";
             // 
@@ -237,10 +237,10 @@
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(0);
-            this.tabControl1.MinimumSize = new System.Drawing.Size(75, 0);
+            this.tabControl1.MinimumSize = new System.Drawing.Size(92, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(274, 400);
+            this.tabControl1.Size = new System.Drawing.Size(335, 467);
             this.tabControl1.TabIndex = 1;
             this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
@@ -263,11 +263,11 @@
             this.tabPage_page.Controls.Add(this.button_editPagePadding);
             this.tabPage_page.Controls.Add(this.textBox_pagePadding);
             this.tabPage_page.Controls.Add(this.label2);
-            this.tabPage_page.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_page.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_page.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_page.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tabPage_page.Name = "tabPage_page";
-            this.tabPage_page.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabPage_page.Size = new System.Drawing.Size(266, 368);
+            this.tabPage_page.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_page.Size = new System.Drawing.Size(327, 432);
             this.tabPage_page.TabIndex = 0;
             this.tabPage_page.Text = "页面";
             this.tabPage_page.UseVisualStyleBackColor = true;
@@ -278,10 +278,10 @@
             this.checkBox_gridLine.AutoSize = true;
             this.checkBox_gridLine.Checked = true;
             this.checkBox_gridLine.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_gridLine.Location = new System.Drawing.Point(16, 424);
-            this.checkBox_gridLine.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_gridLine.Location = new System.Drawing.Point(20, 495);
+            this.checkBox_gridLine.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.checkBox_gridLine.Name = "checkBox_gridLine";
-            this.checkBox_gridLine.Size = new System.Drawing.Size(151, 22);
+            this.checkBox_gridLine.Size = new System.Drawing.Size(174, 25);
             this.checkBox_gridLine.TabIndex = 16;
             this.checkBox_gridLine.Text = "显示调试线(&G)";
             this.checkBox_gridLine.UseVisualStyleBackColor = true;
@@ -290,20 +290,33 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(304, 72);
-            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Location = new System.Drawing.Point(372, 84);
+            this.label8.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(80, 18);
+            this.label8.Size = new System.Drawing.Size(96, 21);
             this.label8.TabIndex = 15;
             this.label8.Text = "旋转(&R):";
+            // 
+            // rotateControl1
+            // 
+            this.rotateControl1.AutoSize = true;
+            this.rotateControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.rotateControl1.Location = new System.Drawing.Point(376, 102);
+            this.rotateControl1.Margin = new System.Windows.Forms.Padding(0);
+            this.rotateControl1.Name = "rotateControl1";
+            this.rotateControl1.RotateDegree = 0;
+            this.rotateControl1.Size = new System.Drawing.Size(189, 93);
+            this.rotateControl1.TabIndex = 14;
+            this.rotateControl1.TabStop = false;
+            this.rotateControl1.OrentationChanged += new System.EventHandler(this.rotateControl1_OrentationChanged);
             // 
             // checkBox_landscape
             // 
             this.checkBox_landscape.AutoSize = true;
-            this.checkBox_landscape.Location = new System.Drawing.Point(204, 3);
-            this.checkBox_landscape.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_landscape.Location = new System.Drawing.Point(249, 4);
+            this.checkBox_landscape.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.checkBox_landscape.Name = "checkBox_landscape";
-            this.checkBox_landscape.Size = new System.Drawing.Size(97, 22);
+            this.checkBox_landscape.Size = new System.Drawing.Size(111, 25);
             this.checkBox_landscape.TabIndex = 12;
             this.checkBox_landscape.Text = "横向(&L)";
             this.checkBox_landscape.UseVisualStyleBackColor = true;
@@ -317,20 +330,20 @@
             this.label_printInfoWarning.AutoSize = true;
             this.label_printInfoWarning.BackColor = System.Drawing.Color.White;
             this.label_printInfoWarning.ForeColor = System.Drawing.Color.DarkRed;
-            this.label_printInfoWarning.Location = new System.Drawing.Point(44, 272);
-            this.label_printInfoWarning.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label_printInfoWarning.MaximumSize = new System.Drawing.Size(228, 0);
+            this.label_printInfoWarning.Location = new System.Drawing.Point(54, 317);
+            this.label_printInfoWarning.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label_printInfoWarning.MaximumSize = new System.Drawing.Size(279, 0);
             this.label_printInfoWarning.Name = "label_printInfoWarning";
-            this.label_printInfoWarning.Size = new System.Drawing.Size(0, 18);
+            this.label_printInfoWarning.Size = new System.Drawing.Size(0, 21);
             this.label_printInfoWarning.TabIndex = 11;
             // 
             // button_selectPrinter
             // 
             this.button_selectPrinter.Enabled = false;
-            this.button_selectPrinter.Location = new System.Drawing.Point(44, 196);
-            this.button_selectPrinter.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_selectPrinter.Location = new System.Drawing.Point(54, 229);
+            this.button_selectPrinter.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button_selectPrinter.Name = "button_selectPrinter";
-            this.button_selectPrinter.Size = new System.Drawing.Size(212, 34);
+            this.button_selectPrinter.Size = new System.Drawing.Size(259, 40);
             this.button_selectPrinter.TabIndex = 6;
             this.button_selectPrinter.Text = "选择打印机和纸张 ...";
             this.button_selectPrinter.UseVisualStyleBackColor = true;
@@ -341,10 +354,10 @@
             this.textBox_printerInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_printerInfo.Enabled = false;
-            this.textBox_printerInfo.Location = new System.Drawing.Point(44, 240);
-            this.textBox_printerInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_printerInfo.Location = new System.Drawing.Point(54, 280);
+            this.textBox_printerInfo.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_printerInfo.Name = "textBox_printerInfo";
-            this.textBox_printerInfo.Size = new System.Drawing.Size(2214, 28);
+            this.textBox_printerInfo.Size = new System.Drawing.Size(3055, 31);
             this.textBox_printerInfo.TabIndex = 7;
             this.textBox_printerInfo.DelayTextChanged += new System.EventHandler(this.textBox_printerInfo_DelayTextChanged);
             this.textBox_printerInfo.SizeChanged += new System.EventHandler(this.textBox_printerInfo_SizeChanged);
@@ -353,15 +366,15 @@
             // numericUpDown_pageHeight
             // 
             this.numericUpDown_pageHeight.CurrentUnit = System.Drawing.GraphicsUnit.Display;
-            this.numericUpDown_pageHeight.Location = new System.Drawing.Point(129, 110);
-            this.numericUpDown_pageHeight.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_pageHeight.Location = new System.Drawing.Point(158, 128);
+            this.numericUpDown_pageHeight.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.numericUpDown_pageHeight.Maximum = new decimal(new int[] {
             2000,
             0,
             0,
             0});
             this.numericUpDown_pageHeight.Name = "numericUpDown_pageHeight";
-            this.numericUpDown_pageHeight.Size = new System.Drawing.Size(126, 28);
+            this.numericUpDown_pageHeight.Size = new System.Drawing.Size(154, 31);
             this.numericUpDown_pageHeight.TabIndex = 4;
             this.numericUpDown_pageHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numericUpDown_pageHeight.UniverseValue = new decimal(new int[] {
@@ -374,20 +387,20 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(40, 72);
-            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Location = new System.Drawing.Point(49, 84);
+            this.label15.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(80, 18);
+            this.label15.Size = new System.Drawing.Size(94, 21);
             this.label15.TabIndex = 1;
             this.label15.Text = "页面宽度";
             // 
             // radioButton_byPaperSize
             // 
             this.radioButton_byPaperSize.AutoSize = true;
-            this.radioButton_byPaperSize.Location = new System.Drawing.Point(16, 164);
-            this.radioButton_byPaperSize.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.radioButton_byPaperSize.Location = new System.Drawing.Point(20, 191);
+            this.radioButton_byPaperSize.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.radioButton_byPaperSize.Name = "radioButton_byPaperSize";
-            this.radioButton_byPaperSize.Size = new System.Drawing.Size(213, 22);
+            this.radioButton_byPaperSize.Size = new System.Drawing.Size(245, 25);
             this.radioButton_byPaperSize.TabIndex = 5;
             this.radioButton_byPaperSize.Text = "根据纸张设定页面尺寸";
             this.radioButton_byPaperSize.UseVisualStyleBackColor = true;
@@ -396,10 +409,10 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(40, 112);
-            this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label14.Location = new System.Drawing.Point(49, 131);
+            this.label14.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(80, 18);
+            this.label14.Size = new System.Drawing.Size(94, 21);
             this.label14.TabIndex = 3;
             this.label14.Text = "页面高度";
             // 
@@ -407,10 +420,10 @@
             // 
             this.radioButton_byInput.AutoSize = true;
             this.radioButton_byInput.Checked = true;
-            this.radioButton_byInput.Location = new System.Drawing.Point(16, 27);
-            this.radioButton_byInput.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.radioButton_byInput.Location = new System.Drawing.Point(20, 31);
+            this.radioButton_byInput.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.radioButton_byInput.Name = "radioButton_byInput";
-            this.radioButton_byInput.Size = new System.Drawing.Size(177, 22);
+            this.radioButton_byInput.Size = new System.Drawing.Size(203, 25);
             this.radioButton_byInput.TabIndex = 0;
             this.radioButton_byInput.TabStop = true;
             this.radioButton_byInput.Text = "手动设定页面尺寸";
@@ -420,15 +433,15 @@
             // numericUpDown_pageWidth
             // 
             this.numericUpDown_pageWidth.CurrentUnit = System.Drawing.GraphicsUnit.Display;
-            this.numericUpDown_pageWidth.Location = new System.Drawing.Point(129, 69);
-            this.numericUpDown_pageWidth.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_pageWidth.Location = new System.Drawing.Point(158, 80);
+            this.numericUpDown_pageWidth.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.numericUpDown_pageWidth.Maximum = new decimal(new int[] {
             1000,
             0,
             0,
             0});
             this.numericUpDown_pageWidth.Name = "numericUpDown_pageWidth";
-            this.numericUpDown_pageWidth.Size = new System.Drawing.Size(126, 28);
+            this.numericUpDown_pageWidth.Size = new System.Drawing.Size(154, 31);
             this.numericUpDown_pageWidth.TabIndex = 2;
             this.numericUpDown_pageWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numericUpDown_pageWidth.UniverseValue = new decimal(new int[] {
@@ -440,10 +453,10 @@
             // 
             // button_editPagePadding
             // 
-            this.button_editPagePadding.Location = new System.Drawing.Point(184, 318);
-            this.button_editPagePadding.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_editPagePadding.Location = new System.Drawing.Point(225, 371);
+            this.button_editPagePadding.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button_editPagePadding.Name = "button_editPagePadding";
-            this.button_editPagePadding.Size = new System.Drawing.Size(70, 30);
+            this.button_editPagePadding.Size = new System.Drawing.Size(86, 35);
             this.button_editPagePadding.TabIndex = 10;
             this.button_editPagePadding.Text = "...";
             this.button_editPagePadding.UseVisualStyleBackColor = true;
@@ -452,10 +465,10 @@
             // textBox_pagePadding
             // 
             this.textBox_pagePadding.CurrentUnit = System.Drawing.GraphicsUnit.Display;
-            this.textBox_pagePadding.Location = new System.Drawing.Point(16, 348);
-            this.textBox_pagePadding.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_pagePadding.Location = new System.Drawing.Point(20, 406);
+            this.textBox_pagePadding.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_pagePadding.Name = "textBox_pagePadding";
-            this.textBox_pagePadding.Size = new System.Drawing.Size(236, 28);
+            this.textBox_pagePadding.Size = new System.Drawing.Size(288, 31);
             this.textBox_pagePadding.TabIndex = 9;
             this.textBox_pagePadding.UniverseText = "";
             this.textBox_pagePadding.TextChanged += new System.EventHandler(this.textBox_pagePadding_TextChanged);
@@ -463,10 +476,10 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 324);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(17, 378);
+            this.label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(80, 18);
+            this.label2.Size = new System.Drawing.Size(94, 21);
             this.label2.TabIndex = 8;
             this.label2.Text = "内容边距";
             // 
@@ -483,21 +496,33 @@
             this.tabPage_label.Controls.Add(this.textBox_labelPadding);
             this.tabPage_label.Controls.Add(this.numericUpDown_labelHeight);
             this.tabPage_label.Controls.Add(this.numericUpDown_labelWidth);
-            this.tabPage_label.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_label.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_label.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_label.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tabPage_label.Name = "tabPage_label";
-            this.tabPage_label.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabPage_label.Size = new System.Drawing.Size(266, 368);
+            this.tabPage_label.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tabPage_label.Size = new System.Drawing.Size(327, 432);
             this.tabPage_label.TabIndex = 1;
             this.tabPage_label.Text = "标签";
             this.tabPage_label.UseVisualStyleBackColor = true;
             // 
+            // checkBox_border
+            // 
+            this.checkBox_border.AutoSize = true;
+            this.checkBox_border.Location = new System.Drawing.Point(24, 396);
+            this.checkBox_border.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_border.Name = "checkBox_border";
+            this.checkBox_border.Size = new System.Drawing.Size(111, 25);
+            this.checkBox_border.TabIndex = 14;
+            this.checkBox_border.Text = "外框(&B)";
+            this.checkBox_border.UseVisualStyleBackColor = true;
+            this.checkBox_border.CheckedChanged += new System.EventHandler(this.checkBox_border_CheckedChanged);
+            // 
             // button_setBarcodeFont
             // 
-            this.button_setBarcodeFont.Location = new System.Drawing.Point(20, 294);
-            this.button_setBarcodeFont.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_setBarcodeFont.Location = new System.Drawing.Point(24, 343);
+            this.button_setBarcodeFont.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button_setBarcodeFont.Name = "button_setBarcodeFont";
-            this.button_setBarcodeFont.Size = new System.Drawing.Size(212, 34);
+            this.button_setBarcodeFont.Size = new System.Drawing.Size(259, 40);
             this.button_setBarcodeFont.TabIndex = 13;
             this.button_setBarcodeFont.Text = "设为条码字体";
             this.button_setBarcodeFont.UseVisualStyleBackColor = true;
@@ -505,19 +530,20 @@
             // 
             // textBox_labelFont
             // 
-            this.textBox_labelFont.Location = new System.Drawing.Point(20, 260);
-            this.textBox_labelFont.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_labelFont.Location = new System.Drawing.Point(24, 303);
+            this.textBox_labelFont.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_labelFont.Name = "textBox_labelFont";
-            this.textBox_labelFont.Size = new System.Drawing.Size(210, 28);
+            this.textBox_labelFont.Size = new System.Drawing.Size(256, 31);
             this.textBox_labelFont.TabIndex = 12;
             this.textBox_labelFont.TextChanged += new System.EventHandler(this.textBox_labelFont_TextChanged);
+            this.textBox_labelFont.Validating += new System.ComponentModel.CancelEventHandler(this.textBox_labelFont_Validating);
             // 
             // button_labelFont
             // 
-            this.button_labelFont.Location = new System.Drawing.Point(20, 222);
-            this.button_labelFont.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_labelFont.Location = new System.Drawing.Point(24, 259);
+            this.button_labelFont.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button_labelFont.Name = "button_labelFont";
-            this.button_labelFont.Size = new System.Drawing.Size(212, 34);
+            this.button_labelFont.Size = new System.Drawing.Size(259, 40);
             this.button_labelFont.TabIndex = 11;
             this.button_labelFont.Text = "标签字体 ...";
             this.button_labelFont.UseVisualStyleBackColor = true;
@@ -525,10 +551,10 @@
             // 
             // button_editLabelPadding
             // 
-            this.button_editLabelPadding.Location = new System.Drawing.Point(160, 129);
-            this.button_editLabelPadding.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_editLabelPadding.Location = new System.Drawing.Point(196, 150);
+            this.button_editLabelPadding.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.button_editLabelPadding.Name = "button_editLabelPadding";
-            this.button_editLabelPadding.Size = new System.Drawing.Size(70, 30);
+            this.button_editLabelPadding.Size = new System.Drawing.Size(86, 35);
             this.button_editLabelPadding.TabIndex = 10;
             this.button_editLabelPadding.Text = "...";
             this.button_editLabelPadding.UseVisualStyleBackColor = true;
@@ -537,40 +563,40 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 135);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(20, 158);
+            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(80, 18);
+            this.label1.Size = new System.Drawing.Size(94, 21);
             this.label1.TabIndex = 8;
             this.label1.Text = "内容边距";
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(16, 34);
-            this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label12.Location = new System.Drawing.Point(20, 40);
+            this.label12.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(80, 18);
+            this.label12.Size = new System.Drawing.Size(94, 21);
             this.label12.TabIndex = 0;
             this.label12.Text = "标签宽度";
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(16, 75);
-            this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label13.Location = new System.Drawing.Point(20, 88);
+            this.label13.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(80, 18);
+            this.label13.Size = new System.Drawing.Size(94, 21);
             this.label13.TabIndex = 2;
             this.label13.Text = "标签高度";
             // 
             // textBox_labelPadding
             // 
             this.textBox_labelPadding.CurrentUnit = System.Drawing.GraphicsUnit.Display;
-            this.textBox_labelPadding.Location = new System.Drawing.Point(20, 159);
-            this.textBox_labelPadding.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_labelPadding.Location = new System.Drawing.Point(24, 186);
+            this.textBox_labelPadding.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_labelPadding.Name = "textBox_labelPadding";
-            this.textBox_labelPadding.Size = new System.Drawing.Size(210, 28);
+            this.textBox_labelPadding.Size = new System.Drawing.Size(256, 31);
             this.textBox_labelPadding.TabIndex = 9;
             this.textBox_labelPadding.UniverseText = "";
             this.textBox_labelPadding.TextChanged += new System.EventHandler(this.textBox_labelPadding_TextChanged);
@@ -578,15 +604,15 @@
             // numericUpDown_labelHeight
             // 
             this.numericUpDown_labelHeight.CurrentUnit = System.Drawing.GraphicsUnit.Display;
-            this.numericUpDown_labelHeight.Location = new System.Drawing.Point(105, 72);
-            this.numericUpDown_labelHeight.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_labelHeight.Location = new System.Drawing.Point(128, 84);
+            this.numericUpDown_labelHeight.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.numericUpDown_labelHeight.Maximum = new decimal(new int[] {
             1000,
             0,
             0,
             0});
             this.numericUpDown_labelHeight.Name = "numericUpDown_labelHeight";
-            this.numericUpDown_labelHeight.Size = new System.Drawing.Size(126, 28);
+            this.numericUpDown_labelHeight.Size = new System.Drawing.Size(154, 31);
             this.numericUpDown_labelHeight.TabIndex = 3;
             this.numericUpDown_labelHeight.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numericUpDown_labelHeight.UniverseValue = new decimal(new int[] {
@@ -599,15 +625,15 @@
             // numericUpDown_labelWidth
             // 
             this.numericUpDown_labelWidth.CurrentUnit = System.Drawing.GraphicsUnit.Display;
-            this.numericUpDown_labelWidth.Location = new System.Drawing.Point(105, 32);
-            this.numericUpDown_labelWidth.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_labelWidth.Location = new System.Drawing.Point(128, 37);
+            this.numericUpDown_labelWidth.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.numericUpDown_labelWidth.Maximum = new decimal(new int[] {
             1000,
             0,
             0,
             0});
             this.numericUpDown_labelWidth.Name = "numericUpDown_labelWidth";
-            this.numericUpDown_labelWidth.Size = new System.Drawing.Size(126, 28);
+            this.numericUpDown_labelWidth.Size = new System.Drawing.Size(154, 31);
             this.numericUpDown_labelWidth.TabIndex = 1;
             this.numericUpDown_labelWidth.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numericUpDown_labelWidth.UniverseValue = new decimal(new int[] {
@@ -623,10 +649,10 @@
             this.tabPage_lineFormat.Controls.Add(this.numericUpDown_lineSep);
             this.tabPage_lineFormat.Controls.Add(this.listView_lineFormats);
             this.tabPage_lineFormat.Controls.Add(this.label3);
-            this.tabPage_lineFormat.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_lineFormat.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_lineFormat.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_lineFormat.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tabPage_lineFormat.Name = "tabPage_lineFormat";
-            this.tabPage_lineFormat.Size = new System.Drawing.Size(266, 368);
+            this.tabPage_lineFormat.Size = new System.Drawing.Size(327, 432);
             this.tabPage_lineFormat.TabIndex = 2;
             this.tabPage_lineFormat.Text = "行格式";
             this.tabPage_lineFormat.UseVisualStyleBackColor = true;
@@ -635,10 +661,10 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 291);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Location = new System.Drawing.Point(7, 336);
+            this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(62, 18);
+            this.label4.Size = new System.Drawing.Size(73, 21);
             this.label4.TabIndex = 2;
             this.label4.Text = "行间距";
             // 
@@ -646,8 +672,8 @@
             // 
             this.numericUpDown_lineSep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numericUpDown_lineSep.CurrentUnit = System.Drawing.GraphicsUnit.Display;
-            this.numericUpDown_lineSep.Location = new System.Drawing.Point(76, 288);
-            this.numericUpDown_lineSep.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_lineSep.Location = new System.Drawing.Point(93, 332);
+            this.numericUpDown_lineSep.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.numericUpDown_lineSep.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -659,7 +685,7 @@
             0,
             -2147483648});
             this.numericUpDown_lineSep.Name = "numericUpDown_lineSep";
-            this.numericUpDown_lineSep.Size = new System.Drawing.Size(126, 28);
+            this.numericUpDown_lineSep.Size = new System.Drawing.Size(154, 31);
             this.numericUpDown_lineSep.TabIndex = 3;
             this.numericUpDown_lineSep.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numericUpDown_lineSep.UniverseValue = new decimal(new int[] {
@@ -685,10 +711,10 @@
             this.columnHeader_style});
             this.listView_lineFormats.FullRowSelect = true;
             this.listView_lineFormats.HideSelection = false;
-            this.listView_lineFormats.Location = new System.Drawing.Point(9, 45);
-            this.listView_lineFormats.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView_lineFormats.Location = new System.Drawing.Point(11, 52);
+            this.listView_lineFormats.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.listView_lineFormats.Name = "listView_lineFormats";
-            this.listView_lineFormats.Size = new System.Drawing.Size(238, 232);
+            this.listView_lineFormats.Size = new System.Drawing.Size(290, 266);
             this.listView_lineFormats.TabIndex = 1;
             this.listView_lineFormats.UseCompatibleStateImageBehavior = false;
             this.listView_lineFormats.View = System.Windows.Forms.View.Details;
@@ -737,20 +763,20 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 21);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(7, 24);
+            this.label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(98, 18);
+            this.label3.Size = new System.Drawing.Size(117, 21);
             this.label3.TabIndex = 0;
             this.label3.Text = "行格式(&F):";
             // 
             // tabPage_xml
             // 
             this.tabPage_xml.Controls.Add(this.textBox_xml);
-            this.tabPage_xml.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_xml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_xml.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_xml.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tabPage_xml.Name = "tabPage_xml";
-            this.tabPage_xml.Size = new System.Drawing.Size(266, 368);
+            this.tabPage_xml.Size = new System.Drawing.Size(327, 432);
             this.tabPage_xml.TabIndex = 3;
             this.tabPage_xml.Text = "XML";
             this.tabPage_xml.UseVisualStyleBackColor = true;
@@ -763,11 +789,12 @@
             this.textBox_xml.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_xml.HideSelection = false;
             this.textBox_xml.Location = new System.Drawing.Point(0, 0);
+            this.textBox_xml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_xml.MaxLength = 0;
             this.textBox_xml.Multiline = true;
             this.textBox_xml.Name = "textBox_xml";
             this.textBox_xml.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_xml.Size = new System.Drawing.Size(266, 368);
+            this.textBox_xml.Size = new System.Drawing.Size(327, 432);
             this.textBox_xml.TabIndex = 3;
             this.textBox_xml.TextChanged += new System.EventHandler(this.textBox_xml_TextChanged);
             this.textBox_xml.Validating += new System.ComponentModel.CancelEventHandler(this.textBox_xml_Validating);
@@ -777,10 +804,10 @@
             this.tabPage_sampleLabelText.Controls.Add(this.numericUpDown_sampleText_linesPerLabel);
             this.tabPage_sampleLabelText.Controls.Add(this.label6);
             this.tabPage_sampleLabelText.Controls.Add(this.textBox_sampleText);
-            this.tabPage_sampleLabelText.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_sampleLabelText.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_sampleLabelText.Location = new System.Drawing.Point(4, 31);
+            this.tabPage_sampleLabelText.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tabPage_sampleLabelText.Name = "tabPage_sampleLabelText";
-            this.tabPage_sampleLabelText.Size = new System.Drawing.Size(266, 368);
+            this.tabPage_sampleLabelText.Size = new System.Drawing.Size(327, 432);
             this.tabPage_sampleLabelText.TabIndex = 4;
             this.tabPage_sampleLabelText.Text = "样例标签内容";
             this.tabPage_sampleLabelText.UseVisualStyleBackColor = true;
@@ -788,8 +815,8 @@
             // numericUpDown_sampleText_linesPerLabel
             // 
             this.numericUpDown_sampleText_linesPerLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.numericUpDown_sampleText_linesPerLabel.Location = new System.Drawing.Point(134, 316);
-            this.numericUpDown_sampleText_linesPerLabel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_sampleText_linesPerLabel.Location = new System.Drawing.Point(164, 365);
+            this.numericUpDown_sampleText_linesPerLabel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.numericUpDown_sampleText_linesPerLabel.Maximum = new decimal(new int[] {
             10,
             0,
@@ -801,7 +828,7 @@
             0,
             0});
             this.numericUpDown_sampleText_linesPerLabel.Name = "numericUpDown_sampleText_linesPerLabel";
-            this.numericUpDown_sampleText_linesPerLabel.Size = new System.Drawing.Size(100, 28);
+            this.numericUpDown_sampleText_linesPerLabel.Size = new System.Drawing.Size(122, 31);
             this.numericUpDown_sampleText_linesPerLabel.TabIndex = 2;
             this.numericUpDown_sampleText_linesPerLabel.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numericUpDown_sampleText_linesPerLabel.Value = new decimal(new int[] {
@@ -815,10 +842,10 @@
             // 
             this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(18, 322);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Location = new System.Drawing.Point(22, 372);
+            this.label6.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(80, 18);
+            this.label6.Size = new System.Drawing.Size(96, 21);
             this.label6.TabIndex = 1;
             this.label6.Text = "行数(&L):";
             // 
@@ -832,37 +859,14 @@
             this.textBox_sampleText.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_sampleText.HideSelection = false;
             this.textBox_sampleText.Location = new System.Drawing.Point(0, 0);
+            this.textBox_sampleText.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_sampleText.MaxLength = 0;
             this.textBox_sampleText.Multiline = true;
             this.textBox_sampleText.Name = "textBox_sampleText";
             this.textBox_sampleText.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_sampleText.Size = new System.Drawing.Size(262, 307);
+            this.textBox_sampleText.Size = new System.Drawing.Size(319, 354);
             this.textBox_sampleText.TabIndex = 0;
             this.textBox_sampleText.DelayTextChanged += new System.EventHandler(this.textBox_sampleText_DelayTextChanged);
-            // 
-            // checkBox_border
-            // 
-            this.checkBox_border.AutoSize = true;
-            this.checkBox_border.Location = new System.Drawing.Point(20, 339);
-            this.checkBox_border.Name = "checkBox_border";
-            this.checkBox_border.Size = new System.Drawing.Size(97, 22);
-            this.checkBox_border.TabIndex = 14;
-            this.checkBox_border.Text = "外框(&B)";
-            this.checkBox_border.UseVisualStyleBackColor = true;
-            this.checkBox_border.CheckedChanged += new System.EventHandler(this.checkBox_border_CheckedChanged);
-            // 
-            // rotateControl1
-            // 
-            this.rotateControl1.AutoSize = true;
-            this.rotateControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.rotateControl1.Location = new System.Drawing.Point(308, 87);
-            this.rotateControl1.Margin = new System.Windows.Forms.Padding(0);
-            this.rotateControl1.Name = "rotateControl1";
-            this.rotateControl1.RotateDegree = 0;
-            this.rotateControl1.Size = new System.Drawing.Size(154, 79);
-            this.rotateControl1.TabIndex = 14;
-            this.rotateControl1.TabStop = false;
-            this.rotateControl1.OrentationChanged += new System.EventHandler(this.rotateControl1_OrentationChanged);
             // 
             // labelDesignControl1
             // 
@@ -871,21 +875,21 @@
             this.labelDesignControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelDesignControl1.LabelParam = null;
             this.labelDesignControl1.Location = new System.Drawing.Point(0, 0);
-            this.labelDesignControl1.Margin = new System.Windows.Forms.Padding(4);
+            this.labelDesignControl1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.labelDesignControl1.Name = "labelDesignControl1";
             this.labelDesignControl1.PrintDocument = null;
             this.labelDesignControl1.PrintStyle = "TestingGrid";
-            this.labelDesignControl1.Size = new System.Drawing.Size(514, 466);
+            this.labelDesignControl1.Size = new System.Drawing.Size(629, 544);
             this.labelDesignControl1.TabIndex = 0;
             // 
             // LabelDefControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.Name = "LabelDefControl";
-            this.Size = new System.Drawing.Size(794, 466);
+            this.Size = new System.Drawing.Size(970, 544);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();

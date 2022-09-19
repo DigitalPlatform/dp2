@@ -1909,7 +1909,7 @@ MessageBoxDefaultButton.Button1);
         }
 
         const string pamcenter_base_version = "1.1.3";   // "1.0.14";
-        const string fingerprint_base_version = "2.3.0";
+        const string fingerprint_base_version = "2.3.1";
 
         public string CheckPalmCenterVersion()
         {

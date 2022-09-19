@@ -409,6 +409,7 @@ Stack:
                 if (strProjectName == "#输出书本式目录到docx"
                     || strProjectName == "#输出书本式目录到docx(编译局)")
                 {
+                    /*
                     if (strProjectName == "#输出书本式目录到docx")
                         objStatis = new OutputDocxCatalog
                         {
@@ -423,6 +424,9 @@ Stack:
                             ProjectDir = "",
                             InstanceDir = this.InstanceDir,
                         };
+                    */
+                    strError = "暂不能使用";
+                    return -1;
                 }
                 else
                 {

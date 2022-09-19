@@ -621,6 +621,7 @@ get_result.Result.AE_PersonalName_r);
                             Patron.SetParamValue(readerdom.DocumentElement, "当前还可借", get_result.Result.BZ_HoldItemsLimit_o);
                             Patron.SetParamValue(readerdom.DocumentElement, "可借总册数", get_result.Result.CB_ChargedItemsLimit_o);
 
+                            // TODO: 在借册可能一次返回不全。要和 get_result.Result.ChargedItemsCount_4 比较，看看是否获取完全了，如果不完全要继续获取直到完全。但有些 SIP Server 可能不支持按照偏移获取，要想办法判断这种情况(比如故意只获取一个，看看 SIP Server 是否能明白这个意图)
                             // 在借册
                             var root = readerdom.DocumentElement.AppendChild(readerdom.CreateElement("borrows")) as XmlElement;
                             var items = get_result.Result.AU_ChargedItems_o;

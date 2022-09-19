@@ -1929,6 +1929,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             FingerprintManager.Pause = false;
 
             // 单独线程执行，避免阻塞 OnActivated() 返回
+            /*
             _ = Task.Run(() =>
             {
                 try
@@ -1941,7 +1942,30 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 }
             });
+            */
+            EnableSendKey(false);
+            //SpeakSequence("前台");
             base.OnActivated(e);
+        }
+
+        static void EnableSendKey(bool enable)
+        {
+            // false 要慢; true 要快
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (enable == false)
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                    FingerprintManager.EnableSendkey(enable, "dp2ssl");
+                    // 注: 暂不进行 RfidCenter 的 SendKey 打开
+                    if (enable == false)
+                        RfidManager.EnableSendkey(enable);
+                }
+                catch
+                {
+                }
+            });
         }
 
         protected override void OnDeactivated(EventArgs e)
@@ -1953,7 +1977,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
             FingerprintManager.Pause = true;
 
-            // Speak("DeActivated");
+            EnableSendKey(true);    // 2022/9/9
+            //SpeakSequence("后台");
             base.OnDeactivated(e);
         }
 

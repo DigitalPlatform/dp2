@@ -157,8 +157,16 @@ namespace dp2Circulation
             {
                 string strText = BuildSampleLabelText();
 
+                /*
                 using (Stream stream = new MemoryStream(Encoding.Default.GetBytes(strText)))
                 using (StreamReader sr = new StreamReader(stream, Encoding.Default))
+                {
+                    string strError = "";
+                    this.labelDesignControl1.SetLabelFile(sr, out strError);
+                }
+                */
+                using (Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(strText)))
+                using (StreamReader sr = new StreamReader(stream, Encoding.UTF8))
                 {
                     string strError = "";
                     this.labelDesignControl1.SetLabelFile(sr, out strError);
@@ -703,7 +711,16 @@ namespace dp2Circulation
 
         private void textBox_labelFont_TextChanged(object sender, EventArgs e)
         {
-            this.labelDesignControl1.LabelParam = this.GetLabelParam();
+            try
+            {
+                this.labelDesignControl1.LabelParam = this.GetLabelParam();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, $"参数不正确: {ex.Message}。请重新调整参数");
+                return;
+            }
+
             _panelVersion++;
             SetChanged();
 
@@ -1512,8 +1529,8 @@ out strError);
             }
 #endif
             // 注：StreamReader 由 LabelDesignControl 负责释放
-            Stream stream = new MemoryStream(Encoding.Default.GetBytes(this.textBox_sampleText.Text));
-            StreamReader sr = new StreamReader(stream, Encoding.Default);
+            Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(this.textBox_sampleText.Text));
+            StreamReader sr = new StreamReader(stream, Encoding.UTF8);
             {
                 string strError = "";
                 this.labelDesignControl1.SetLabelFile(sr, out strError);
@@ -1630,6 +1647,20 @@ out strError);
             this.labelDesignControl1.Invalidate();
             _panelVersion++;
             SetChanged();
+        }
+
+        // 2022/9/19
+        private void textBox_labelFont_Validating(object sender, CancelEventArgs e)
+        {
+            try
+            {
+                var param = this.GetLabelParam();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"参数不正确: {ex.Message}。请重新调整参数");
+                e.Cancel = true;
+            }
         }
     }
 }

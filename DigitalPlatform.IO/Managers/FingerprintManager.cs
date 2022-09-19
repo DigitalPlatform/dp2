@@ -174,6 +174,20 @@ new SetErrorEventArgs
             token);
         }
 
+
+        // 2022/9/9
+        public static NormalResult EnableSendkey(bool enable,
+            string session_id)
+        {
+            string action;
+            if (enable)
+                action = "enableSendKey";
+            else
+                action = "disableSendKey";
+            return GetState($"{action},session:{session_id}");
+        }
+
+
         public static NormalResult EnableSendkey(bool enable)
         {
             try

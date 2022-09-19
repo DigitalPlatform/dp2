@@ -134,31 +134,42 @@ namespace FingerprintCenter
             return _enableSendKey(enable);
         }
 
-        public static NormalResult _enableSendKey(bool enable)
+        static int _sendKeySeed = 1;
+        private static readonly Object _syncRoot_sendKey = new Object(); // 2017/5/18
+
+
+        public static NormalResult _enableSendKey(bool enable,
+            string session_id = null)
         {
-            bool old_enable = false;
-            if (Program.MainForm != null)
+            lock (_syncRoot_sendKey)
             {
-                old_enable = Program.MainForm.SendKeyEnabled;
-                if (old_enable != enable)
-                    Program.MainForm.SendKeyEnabled = enable;
+                bool old_enable = false;
+                if (Program.MainForm != null)
+                {
+                    old_enable = Program.MainForm.SendKeyEnabled;
+                    if (old_enable != enable)
+                        Program.MainForm.SendKeyEnabled = enable;
+                    //else
+                    //    return new NormalResult();  // 优化，如果值没有变化则不显示操作历史
+                }
+
+                string message = "";
+                if (enable)
+                    message = "指纹发送打开";
                 else
-                    return new NormalResult();  // 优化，如果值没有变化则不显示操作历史
+                    message = "指纹发送关闭";
+
+                if (string.IsNullOrEmpty(session_id) == false)
+                    message += $"({session_id}) {_sendKeySeed++}";
+
+                Task.Run(() =>
+                {
+                    Program.MainForm?.OutputHistory(message, 0);
+                    Program.MainForm?.Speak(message);
+                });
+
+                return new NormalResult();
             }
-
-            string message = "";
-            if (enable)
-                message = "指纹发送打开";
-            else
-                message = "指纹发送关闭";
-
-            Task.Run(() =>
-            {
-                Program.MainForm?.OutputHistory(message, 0);
-                Program.MainForm?.Speak(message);
-            });
-
-            return new NormalResult();
         }
 
         #endregion
@@ -589,6 +600,18 @@ Exception rethrown at [0]:
                 return new NormalResult();
             }
 
+            // 2022/9/9
+            if (StringUtil.IsInList("enableSendKey", style))
+            {
+                var session_id = StringUtil.GetParameterByPrefix(style, "session");
+                return _enableSendKey(true, session_id);
+            }
+
+            if (StringUtil.IsInList("disableSendKey", style))
+            {
+                var session_id = StringUtil.GetParameterByPrefix(style, "session");
+                return _enableSendKey(false, session_id);
+            }
 
             if (ClientInfo.ErrorState == "normal")
                 return new NormalResult
@@ -597,6 +620,7 @@ Exception rethrown at [0]:
                     ErrorCode = ClientInfo.ErrorState,
                     ErrorInfo = ClientInfo.ErrorStateInfo
                 };
+
             return new NormalResult
             {
                 Value = -1,

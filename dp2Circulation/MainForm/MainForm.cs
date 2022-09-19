@@ -843,7 +843,8 @@ Stack:
 
 #if NEWFINGER
             {
-                FingerprintManager.EnableSendkey(true);
+                // false 要慢; true 要快
+                FingerprintManager.EnableSendkey(true, "dp2circulation");
                 //this.Speak("退出前最后打开发送");
             }
 #endif
@@ -9040,7 +9041,7 @@ Keys keyData)
 #else
             // 清除以前残留的未读出的消息
             FingerprintManager.ClearMessage();
-            FingerprintManager.EnableSendkey(false);
+            EnableFingerprintSendKey(false);
             //this.Speak("关闭发送");
 #endif
 
@@ -9049,6 +9050,23 @@ Keys keyData)
             SetRfidManagerPause(false);
 
             SetPalmManagerPause(false);
+        }
+
+        static void EnableFingerprintSendKey(bool enable)
+        {
+            // false 要慢; true 要快
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (enable == false)
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                    FingerprintManager.EnableSendkey(enable, "dp2circulation");
+                }
+                catch
+                {
+                }
+            });
         }
 
         void SetRfidManagerPause(bool pause)
@@ -9078,7 +9096,7 @@ Keys keyData)
             }
 
 #if NEWFINGER
-            FingerprintManager.EnableSendkey(true);
+            EnableFingerprintSendKey(true);
             //this.Speak("打开发送");
 #endif
 

@@ -1290,6 +1290,10 @@ TaskScheduler.Default);
             }
         }
 
+        private void checkBox_allowChangeSqlServerType_CheckedChanged(object sender, EventArgs e)
+        {
+            this.comboBox_sqlServerType.Enabled = this.checkBox_allowChangeSqlServerType.Checked;
+        }
     }
 
     public delegate void VerifyEventHandler(object sender,

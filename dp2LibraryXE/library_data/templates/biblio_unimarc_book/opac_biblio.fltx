@@ -3,7 +3,7 @@
     <using>
   <![CDATA[
 
-// CNMARC格式图书 OPAC 书目详细格式构造
+// CNMARC格式图书 OPAC 书目详细格式构造。用 dp2OPAC 书目详细页面的构造
 // (C)Copyright 2006-2015 数字平台(北京)软件有限责任公司
 
 // 修改历史:
@@ -15,6 +15,7 @@
 // 2016/12/27 StringUtil.IsHttpUrl()
 // 2017/12/20 改用带有模板功能的 ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container)
 // 2018/7/26 1) 将几个分类法根查检索锚点修改为具体的分类法检索途径。不过刚安装好的时候没有科图法和人大法的检索点，如果需要请专门去配置；2)  ScriptUtil.BuildObjectHtmlTable() 增加 "unimarc" 参数。
+// 2022/9/19 改进 3xx$a 重复时候的回行显示效果
 
 using System;
 using System.Collections.Generic;
@@ -473,56 +474,50 @@ using DigitalPlatform.Text;
         </field>
         <!-- 300 一般性附注 -->
         <field name="300">
-            <subfield name="a"><![CDATA[
+            <subfield name="a">
+			<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
+        Root.notes += this.Content + "\r\n";    // 子字段重复则换行
         ]]></subfield>
         </field>
         <!-- 题名责任说明附注 -->
         <field name="304">
-            <subfield name="a"><![CDATA[
+            <subfield name="a">
+			<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
+        Root.notes += this.Content + "\r\n";
         ]]></subfield>
         </field>
         <!-- 相关题名附注 -->
         <field name="312">
-            <subfield name="a"><![CDATA[
+            <subfield name="a">
+			<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
+        Root.notes += this.Content + "\r\n";
         ]]></subfield>
         </field>
         <!-- 知识责任附注 -->
         <field name="314">
-            <subfield name="a"><![CDATA[
+            <subfield name="a">
+			<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
+        Root.notes += this.Content + "\r\n";
         ]]></subfield>
         </field>
         <!-- 书目索引附注 -->
         <field name="320">
-            <subfield name="a"><![CDATA[
+            <subfield name="a">
+			<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
+        Root.notes += this.Content + "\r\n";
         ]]></subfield>
         </field>
         <!-- 复制品的原作附注 -->
         <field name="324">
-            <subfield name="a"><![CDATA[
+            <subfield name="a">
+			<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
+        Root.notes += this.Content + "\r\n";
         ]]></subfield>
         </field>
         <!-- 326 连续出版物出版频率附注 -->
@@ -1379,7 +1374,9 @@ using DigitalPlatform.Text;
       {
 		Host.ResultString += "<tr class='content'>";
 		Host.ResultString += "<td class='name' width='10%' nowrap>" + SS("附注") + "</td>";
-		Host.ResultString += "<td class='value' width='90%'>"+notes+"</td>";
+		Host.ResultString += "<td class='value' width='90%'>"
+		+notes.Trim(new char []{'\r','\n'}).Replace("\r\n","<br/>")
+		+"</td>";
 		Host.ResultString += "</tr>";
       }
       

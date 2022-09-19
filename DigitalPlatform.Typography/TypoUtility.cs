@@ -3,12 +3,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
-using DocumentFormat.OpenXml.VariantTypes;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Text;
+using System.IO;
 
 
+using DocumentFormat.OpenXml.VariantTypes;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.EMMA;
 using DocumentFormat.OpenXml.Packaging;
@@ -16,7 +17,6 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using System.IO;
 
 namespace DigitalPlatform.Typography
 {
@@ -952,7 +952,7 @@ out string error);
             TableProperties tableProp = new TableProperties();
             tbl.AppendChild(tableProp);
 
-            // table/@cellMargin 左 上 右 下
+            // table/@cellMarginDefault 左 上 右 下
             var cellMargin_attr = table.GetAttribute("cellMarginDefault");
             if (string.IsNullOrEmpty(cellMargin_attr) == false)
             {

@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <filter>
-    <using>
-  <![CDATA[
+	<using>
+		<![CDATA[
 
 
-// CNMARC格式图书 html 格式构造
+// CNMARC格式图书 html 格式构造。用于内务详细窗的 OPAC 属性页
 // (C)Copyright 2006-2014 数字平台(北京)软件有限责任公司
 // 编写人：谢涛
 
@@ -13,6 +13,7 @@
 // 2011/9/7 采用servermapped新体系结构
 // 2014/11/5 增加显示封面图片功能
 // 2016/12/27 StringUtil.IsHttpUrl()
+// 2022/9/17 改进 3xx$a 重复时候的回行显示效果
 
 using System;
 using System.Collections.Generic;
@@ -24,19 +25,20 @@ using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 
-]]></using>
-    <ref>system.dll</ref>
-    <ref>system.web.dll</ref>
-    <ref>system.windows.forms.dll</ref>
-    <def>
-  <![CDATA[
+]]>
+	</using>
+	<ref>system.dll</ref>
+	<ref>system.web.dll</ref>
+	<ref>system.windows.forms.dll</ref>
+	<def>
+		<![CDATA[
 
-			public string isbnandprice = "";	//获得方式项 010 011 091
-			string titleandauthor = "";	// 题名与责任者项 200
-			string edition = "";	// 版本项 205
-			string materialSpecific = "";	// 特殊细节项 207 208
-			string publication = "";	// 出版发行项 210
-			string s06 = "";	// 载体形态项 215
+    public string isbnandprice = "";	//获得方式项 010 011 091
+    string titleandauthor = "";	// 题名与责任者项 200
+    string edition = "";	// 版本项 205
+    string materialSpecific = "";	// 特殊细节项 207 208
+    string publication = "";	// 出版发行项 210
+    string s06 = "";	// 载体形态项 215
    string series = "";  //  丛编项 225
    string notes = "";   //  附注块 3XX
    string s09 = "";   //  出版频率附注 326
@@ -66,410 +68,428 @@ using DigitalPlatform.Text;
 
   string _imageUrl = "";
    
-		]]></def>
-    <record>
-        <def><![CDATA[
-		]]></def>
-        <begin><![CDATA[
+		]]>
+	</def>
+	<record>
+		<def>
+			<![CDATA[
+		]]>
+		</def>
+		<begin>
+			<![CDATA[
 			// MessageBox.Show("record data:" + this.Data);
-		]]></begin>
-        <!-- 010 ISBN号 -->
-        <field name="010">
-            <!-- 	国际标准书号(ISBN) -->
-            <subfield name="a"><![CDATA[
+		]]>
+		</begin>
+		<!-- 010 ISBN号 -->
+		<field name="010">
+			<!-- 	国际标准书号(ISBN) -->
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.isbnandprice += "<br/> "; // 前置"+"
         Root.isbnandprice += "ISBN ";
         Root.isbnandprice += this.Content;
-        ]]></subfield>
-            <!-- 装订信息 -->
-            <subfield name="b">
-        Root.isbnandprice += " (";	// 将装订信息用括号括住
-        Root.isbnandprice += this.Content;
-        Root.isbnandprice += " )";
-      </subfield>
-            <!-- 价格 -->
-            <subfield name="d">
-        Root.isbnandprice += " : ";
-        Root.isbnandprice += this.Content;
-      </subfield>
-            <!-- 错误的ISBN -->
-            <subfield name="z">
-        if (this.DupCount &gt; 1)
-        Root.isbnandprice += "; ";
-        Root.isbnandprice += "ISBN ";
-        Root.isbnandprice += this.Content;
-        Root.isbnandprice += " (错误)";
-      </subfield>
-        </field>
-        <!-- 	011 ISSN号 国际标准连续出版物 -->
-        <field name="011">
-            <!-- ISSN -->
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<!-- 装订信息 -->
+			<subfield name="b">
+				Root.isbnandprice += " (";	// 将装订信息用括号括住
+				Root.isbnandprice += this.Content;
+				Root.isbnandprice += " )";
+			</subfield>
+			<!-- 价格 -->
+			<subfield name="d">
+				Root.isbnandprice += " : ";
+				Root.isbnandprice += this.Content;
+			</subfield>
+			<!-- 错误的ISBN -->
+			<subfield name="z">
+				if (this.DupCount &gt; 1)
+				Root.isbnandprice += "; ";
+				Root.isbnandprice += "ISBN ";
+				Root.isbnandprice += this.Content;
+				Root.isbnandprice += " (错误)";
+			</subfield>
+		</field>
+		<!-- 	011 ISSN号 国际标准连续出版物 -->
+		<field name="011">
+			<!-- ISSN -->
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.isbnandprice += "<br/> "; // 前置"+"
         Root.isbnandprice += "ISSN ";
         Root.isbnandprice += this.Content;
-        ]]></subfield>
-            <!-- 限定说明 -->
-            <subfield name="b">
-        Root.isbnandprice += " (";
-        Root.isbnandprice += this.Content;
-        Root.isbnandprice += " )";
-      </subfield>
-            <!-- 价格 -->
-            <subfield name="d">
-        Root.isbnandprice += " : ";
-        Root.isbnandprice += this.Content;
-      </subfield>
-            <!-- 错误的ISSN -->
-            <subfield name="Y">
-        if (this.DupCount &gt; 1)
-        Root.isbnandprice += "; ";
-        Root.isbnandprice += "ISSN ";
-        Root.isbnandprice += this.Content;
-        Root.isbnandprice += " (失效)";
-      </subfield>
-            <!-- 错误的ISSN -->
-            <subfield name="Z">
-        if (this.DupCount &gt; 1)
-        Root.isbnandprice += "; ";
-        Root.isbnandprice += "ISSN ";
-        Root.isbnandprice += this.Content;
-        Root.isbnandprice += " (错误)";
-      </subfield>
-        </field>
-        <!-- 091 统一书刊号 -->
-        <field name="091">
-            <!-- 统一书刊号 -->
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<!-- 限定说明 -->
+			<subfield name="b">
+				Root.isbnandprice += " (";
+				Root.isbnandprice += this.Content;
+				Root.isbnandprice += " )";
+			</subfield>
+			<!-- 价格 -->
+			<subfield name="d">
+				Root.isbnandprice += " : ";
+				Root.isbnandprice += this.Content;
+			</subfield>
+			<!-- 错误的ISSN -->
+			<subfield name="Y">
+				if (this.DupCount &gt; 1)
+				Root.isbnandprice += "; ";
+				Root.isbnandprice += "ISSN ";
+				Root.isbnandprice += this.Content;
+				Root.isbnandprice += " (失效)";
+			</subfield>
+			<!-- 错误的ISSN -->
+			<subfield name="Z">
+				if (this.DupCount &gt; 1)
+				Root.isbnandprice += "; ";
+				Root.isbnandprice += "ISSN ";
+				Root.isbnandprice += this.Content;
+				Root.isbnandprice += " (错误)";
+			</subfield>
+		</field>
+		<!-- 091 统一书刊号 -->
+		<field name="091">
+			<!-- 统一书刊号 -->
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.isbnandprice += "<br/> "; // 前置"+"
         Root.isbnandprice += "统一书刊号 ";
         Root.isbnandprice += this.Content;
-        ]]></subfield>
-            <!-- 限定 -->
-            <subfield name="b">
-        Root.isbnandprice += " (";
-        Root.isbnandprice += this.Content;
-        Root.isbnandprice += " )";
-      </subfield>
-            <!-- 价格 -->
-            <subfield name="d">
-        Root.isbnandprice += " : ";
-        Root.isbnandprice += this.Content;
-      </subfield>
-            <!-- 错误的统一书刊号 -->
-            <subfield name="z">
-        if (this.DupCount &gt; 1)
-        Root.isbnandprice += "; ";
-        Root.isbnandprice += "统一书刊号 ";
-        Root.isbnandprice += this.Content;
-        Root.isbnandprice += " (错误)";
-      </subfield>
-        </field>
-        <!-- 200 题名与责任者 -->
-        <field name="200">
-            <subfield name="a">
-        if (this.DupCount &gt; 1)
-        {
-        if (this.PrevName == "f")	// 如果前面一个子字段是
-        Root.titleandauthor += ". ";
-        else
-        Root.titleandauthor += " ; ";
-        }
-        Root.titleandauthor += this.Content;
-      </subfield>
-            <subfield name="9">
-        // 题名拼音
-        Root.titlepinyin += this.Content;
-      </subfield>
-            <subfield name="b">
-        // 一般标志资料
-        Root.titleandauthor += " [";
-        Root.titleandauthor += this.Content;
-        Root.titleandauthor += "] ";
-      </subfield>
-            <subfield name="c">
-        // 另一著者的正题名
-        Root.titleandauthor += ". ";
-        Root.titleandauthor += this.Content;
-      </subfield>
-            <subfield name="d">
-        // 并列正题名
-        Root.titleandauthor += " = ";
-        Root.titleandauthor += this.Content;
-      </subfield>
-            <subfield name="e">
-        // 副题名
-        Root.titleandauthor += " : ";
-        Root.titleandauthor += this.Content;
-      </subfield>
-            <subfield name="f">
-        // 主要责任者说明
-        Root.titleandauthor += " / ";
-        Root.titleandauthor += this.Content;
-      </subfield>
-            <subfield name="g">
-        // 其它责任者说明`
-        Root.titleandauthor += " ; ";
-        Root.titleandauthor += this.Content;
-      </subfield>
-            <subfield name="h">
-        // 分册号
-        Root.titleandauthor += " . ";
-        Root.titleandauthor += this.Content;
-      </subfield>
-            <subfield name="i">
-        // 分册书名
-        if (this.PrevName == "h" || this.PrevName == "H")
-        Root.titleandauthor += " , ";
-        else
-        Root.titleandauthor += " . ";
-        Root.titleandauthor += this.Content;
-      </subfield>
-        </field>
-        <!-- 205 版本项 -->
-        <field name="205">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<!-- 限定 -->
+			<subfield name="b">
+				Root.isbnandprice += " (";
+				Root.isbnandprice += this.Content;
+				Root.isbnandprice += " )";
+			</subfield>
+			<!-- 价格 -->
+			<subfield name="d">
+				Root.isbnandprice += " : ";
+				Root.isbnandprice += this.Content;
+			</subfield>
+			<!-- 错误的统一书刊号 -->
+			<subfield name="z">
+				if (this.DupCount &gt; 1)
+				Root.isbnandprice += "; ";
+				Root.isbnandprice += "统一书刊号 ";
+				Root.isbnandprice += this.Content;
+				Root.isbnandprice += " (错误)";
+			</subfield>
+		</field>
+		<!-- 200 题名与责任者 -->
+		<field name="200">
+			<subfield name="a">
+				if (this.DupCount &gt; 1)
+				{
+				if (this.PrevName == "f")	// 如果前面一个子字段是
+				Root.titleandauthor += ". ";
+				else
+				Root.titleandauthor += " ; ";
+				}
+				Root.titleandauthor += this.Content;
+			</subfield>
+			<subfield name="9">
+				// 题名拼音
+				Root.titlepinyin += this.Content;
+			</subfield>
+			<subfield name="b">
+				// 一般标志资料
+				Root.titleandauthor += " [";
+				Root.titleandauthor += this.Content;
+				Root.titleandauthor += "] ";
+			</subfield>
+			<subfield name="c">
+				// 另一著者的正题名
+				Root.titleandauthor += ". ";
+				Root.titleandauthor += this.Content;
+			</subfield>
+			<subfield name="d">
+				// 并列正题名
+				Root.titleandauthor += " = ";
+				Root.titleandauthor += this.Content;
+			</subfield>
+			<subfield name="e">
+				// 副题名
+				Root.titleandauthor += " : ";
+				Root.titleandauthor += this.Content;
+			</subfield>
+			<subfield name="f">
+				// 主要责任者说明
+				Root.titleandauthor += " / ";
+				Root.titleandauthor += this.Content;
+			</subfield>
+			<subfield name="g">
+				// 其它责任者说明`
+				Root.titleandauthor += " ; ";
+				Root.titleandauthor += this.Content;
+			</subfield>
+			<subfield name="h">
+				// 分册号
+				Root.titleandauthor += " . ";
+				Root.titleandauthor += this.Content;
+			</subfield>
+			<subfield name="i">
+				// 分册书名
+				if (this.PrevName == "h" || this.PrevName == "H")
+				Root.titleandauthor += " , ";
+				else
+				Root.titleandauthor += " . ";
+				Root.titleandauthor += this.Content;
+			</subfield>
+		</field>
+		<!-- 205 版本项 -->
+		<field name="205">
+			<subfield name="a">
+				<![CDATA[
         // 版本说明
         if (this.Parent.DupCount > 1)
         Root.edition += "<br/> "; // 前置"+"
         Root.edition += this.Content;
-        ]]></subfield>
-            <subfield name="b">
-        // 版次和附加版本
-        Root.edition += ", ";
-        Root.edition += this.Content;
-      </subfield>
-            <subfield name="d">
-        // 并列版本
-        Root.edition += " = ";
-        Root.edition += this.Content;
-      </subfield>
-            <subfield name="f">
-        // 版本责任
-        Root.edition = " / ";
-        Root.edition += this.Content;
-      </subfield>
-            <subfield name="g">
-        // 次要责任
-        Root.edition += " ; ";
-        Root.edition += this.Content;
-      </subfield>
-        </field>
-        <!-- 207 特殊细节项: 连续出版物卷期编号 -->
-        <field name="207">
-            <subfield name="a">
-        // 年代和卷期
-        if (this.DupCount &gt; 1)
-        {
-        Root.materialSpecific += "; ";	// $a 重复时，前置" ; "
-        Root.materialSpecific += this.Content;
-        }
-      </subfield>
-        </field>
-        <!-- 208 特殊细节项: 音乐乐谱 -->
-        <field name="208">
-            <subfield name="a">
-        // 乐谱特别说明
-        Root.materialSpecific += this.Content;
-      </subfield>
-            <subfield name="d">
-        // 并列乐谱特别说明
-        Root.materialSpecific += " = ";  // 前置" = "
-        Root.materialSpecific += this.Content;
-      </subfield>
-        </field>
-        <!-- 210 出版发行项 -->
-        <field name="210">
-            <def>
-        int quote = 0;
-      </def>
-            <subfield name="a">
-        // 出版发行地
-        if (this.DupCount &gt; 1)	// 本子字段多次出现用";"分开
-        Root.publication += "; ";	// 重复前置" ; "
+        ]]>
+			</subfield>
+			<subfield name="b">
+				// 版次和附加版本
+				Root.edition += ", ";
+				Root.edition += this.Content;
+			</subfield>
+			<subfield name="d">
+				// 并列版本
+				Root.edition += " = ";
+				Root.edition += this.Content;
+			</subfield>
+			<subfield name="f">
+				// 版本责任
+				Root.edition = " / ";
+				Root.edition += this.Content;
+			</subfield>
+			<subfield name="g">
+				// 次要责任
+				Root.edition += " ; ";
+				Root.edition += this.Content;
+			</subfield>
+		</field>
+		<!-- 207 特殊细节项: 连续出版物卷期编号 -->
+		<field name="207">
+			<subfield name="a">
+				// 年代和卷期
+				if (this.DupCount &gt; 1)
+				{
+				Root.materialSpecific += "; ";	// $a 重复时，前置" ; "
+				Root.materialSpecific += this.Content;
+				}
+			</subfield>
+		</field>
+		<!-- 208 特殊细节项: 音乐乐谱 -->
+		<field name="208">
+			<subfield name="a">
+				// 乐谱特别说明
+				Root.materialSpecific += this.Content;
+			</subfield>
+			<subfield name="d">
+				// 并列乐谱特别说明
+				Root.materialSpecific += " = ";  // 前置" = "
+				Root.materialSpecific += this.Content;
+			</subfield>
+		</field>
+		<!-- 210 出版发行项 -->
+		<field name="210">
+			<def>
+				int quote = 0;
+			</def>
+			<subfield name="a">
+				// 出版发行地
+				if (this.DupCount &gt; 1)	// 本子字段多次出现用";"分开
+				Root.publication += "; ";	// 重复前置" ; "
 
-        Root.publication += this.Content;
-      </subfield>
-            <subfield name="c">
-        // 出版、发行者
-        Root.publication += " : ";	// 前置" : "
-        Root.publication += this.Content;
-      </subfield>
-            <subfield name="d">
-        // 出版、发行日期
-        Root.publication += ", ";	// 前置" : "
-        Root.publication += this.Content;
-      </subfield>
-            <!-- 用"()"将e、g、h子字段内容扩起来，用局部变量quote=1标记使用了前括号"(" -->
-            <subfield name="e">
-        // 制作地
-        Root.publication += " (";	// 前置" ("
-        Root.publication += this.Content;
-        Parent.quote = 1;	// 标记使用了前括号"("
-      </subfield>
-            <subfield name="g">
-        // 制作者名称
-        Root.publication += " : ";	// 前置" : "
-        Root.publication += this.Content;
-      </subfield>
-            <subfield name="h">
-        // 制作日期
-        Root.publication += ", ";	// 前置", "
-        Root.publication += this.Content;
-      </subfield>
-            <end>
-        if (quote==1)	// 如果使用了前括号"(" (quote==1)
-        Root.publication += ")";	// 加上")"
-      </end>
-        </field>
-        <!-- 215 载体形态项 -->
-        <field name="215">
-            <subfield name="a"><![CDATA[
+				Root.publication += this.Content;
+			</subfield>
+			<subfield name="c">
+				// 出版、发行者
+				Root.publication += " : ";	// 前置" : "
+				Root.publication += this.Content;
+			</subfield>
+			<subfield name="d">
+				// 出版、发行日期
+				Root.publication += ", ";	// 前置" : "
+				Root.publication += this.Content;
+			</subfield>
+			<!-- 用"()"将e、g、h子字段内容扩起来，用局部变量quote=1标记使用了前括号"(" -->
+			<subfield name="e">
+				// 制作地
+				Root.publication += " (";	// 前置" ("
+				Root.publication += this.Content;
+				Parent.quote = 1;	// 标记使用了前括号"("
+			</subfield>
+			<subfield name="g">
+				// 制作者名称
+				Root.publication += " : ";	// 前置" : "
+				Root.publication += this.Content;
+			</subfield>
+			<subfield name="h">
+				// 制作日期
+				Root.publication += ", ";	// 前置", "
+				Root.publication += this.Content;
+			</subfield>
+			<end>
+				if (quote==1)	// 如果使用了前括号"(" (quote==1)
+				Root.publication += ")";	// 加上")"
+			</end>
+		</field>
+		<!-- 215 载体形态项 -->
+		<field name="215">
+			<subfield name="a">
+				<![CDATA[
         // 资料标志、数量
         if (this.Parent.DupCount > 1)
         Root.s06 += "<br/> "; // 前置"+"
         if (this.DupCount > 1)
         Root.s06 += "; "; // 前置";"
         Root.s06 += this.Content;
-        ]]></subfield>
-            <subfield name="c">
-        // 其它细节
-        Root.s06 += " : ";	// 前置" : "
-        Root.s06 += this.Content;
-      </subfield>
-            <subfield name="d">
-        // 尺寸
-        Root.s06 += " ; ";	// 前置" ; "
-        Root.s06 += this.Content;
-      </subfield>
-            <subfield name="e">
-        // 附件
-        Root.s06 += " + ";	// 前置"+ "
-        Root.s06 += this.Content;
-      </subfield>
-        </field>
-        <!-- 225 丛编项 -->
-        <field name="225">
-            <def>
-        string temp = "";
-      </def>
-            <subfield name="a">
-        // 丛编题名
-        Parent.temp += this.Content;
-      </subfield>
-            <subfield name="d">
-        // 并列丛编题名
-        Parent.temp += " = ";	// 前置" = "
-        Parent.temp += this.Content;
-      </subfield>
-            <subfield name="e">
-        // 其它题名信息
-        Parent.temp += " : ";	// 前置" : "
-        Parent.temp += this.Content;
-      </subfield>
-            <subfield name="f">
-        // 责任说明
-        Parent.temp += " / ";	// 前置" / "
-        Parent.temp += this.Content;
-      </subfield>
-            <subfield name="h">
-        // 分丛编号
-        Parent.temp += ". ";	// 前置". "
-        Parent.temp += this.Content;
-      </subfield>
-            <subfield name="i">
-        // 分丛编名称
-        if (this.PrevName == "h" || this.PrevName == "H")
-        Parent.temp += " , ";	// 如果前面一个子字段是h、H前置" , "
-        else
-        Parent.temp += ". ";	// 前置". "
-        Parent.temp += this.Content;
-      </subfield>
-            <subfield name="v">
-        // 卷册标志
-        Parent.temp += " ; ";	// 前置" ; "
-        Parent.temp += this.Content;
-      </subfield>
-            <subfield name="x">
-        // 丛编的ISSN
-        Parent.temp += ", ";	// 前置", "
-        Parent.temp += this.Content;
-      </subfield>
-            <end>
-        // 并列题名语种
-        temp = "(" + temp;	// 丛编内容用括号括起来
-        temp += ")";
-        if (this.DupCount &gt; 1)	// 如果字段重复出现用" "将内容分开
-        Root.series += "; ";
-        Root.series += temp;
-      </end>
-        </field>
-        <!-- 300 一般性附注 -->
-        <field name="300">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="c">
+				// 其它细节
+				Root.s06 += " : ";	// 前置" : "
+				Root.s06 += this.Content;
+			</subfield>
+			<subfield name="d">
+				// 尺寸
+				Root.s06 += " ; ";	// 前置" ; "
+				Root.s06 += this.Content;
+			</subfield>
+			<subfield name="e">
+				// 附件
+				Root.s06 += " + ";	// 前置"+ "
+				Root.s06 += this.Content;
+			</subfield>
+		</field>
+		<!-- 225 丛编项 -->
+		<field name="225">
+			<def>
+				string temp = "";
+			</def>
+			<subfield name="a">
+				// 丛编题名
+				Parent.temp += this.Content;
+			</subfield>
+			<subfield name="d">
+				// 并列丛编题名
+				Parent.temp += " = ";	// 前置" = "
+				Parent.temp += this.Content;
+			</subfield>
+			<subfield name="e">
+				// 其它题名信息
+				Parent.temp += " : ";	// 前置" : "
+				Parent.temp += this.Content;
+			</subfield>
+			<subfield name="f">
+				// 责任说明
+				Parent.temp += " / ";	// 前置" / "
+				Parent.temp += this.Content;
+			</subfield>
+			<subfield name="h">
+				// 分丛编号
+				Parent.temp += ". ";	// 前置". "
+				Parent.temp += this.Content;
+			</subfield>
+			<subfield name="i">
+				// 分丛编名称
+				if (this.PrevName == "h" || this.PrevName == "H")
+				Parent.temp += " , ";	// 如果前面一个子字段是h、H前置" , "
+				else
+				Parent.temp += ". ";	// 前置". "
+				Parent.temp += this.Content;
+			</subfield>
+			<subfield name="v">
+				// 卷册标志
+				Parent.temp += " ; ";	// 前置" ; "
+				Parent.temp += this.Content;
+			</subfield>
+			<subfield name="x">
+				// 丛编的ISSN
+				Parent.temp += ", ";	// 前置", "
+				Parent.temp += this.Content;
+			</subfield>
+			<end>
+				// 并列题名语种
+				temp = "(" + temp;	// 丛编内容用括号括起来
+				temp += ")";
+				if (this.DupCount &gt; 1)	// 如果字段重复出现用" "将内容分开
+				Root.series += "; ";
+				Root.series += temp;
+			</end>
+		</field>
+		<!-- 300 一般性附注 -->
+		<field name="300">
+			<subfield name="a">
+				<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 题名责任说明附注 -->
-        <field name="304">
-            <subfield name="a"><![CDATA[
+        Root.notes += this.Content + "\r\n";    // 子字段重复则换行
+        ]]>
+			</subfield>
+		</field>
+		<!-- 题名责任说明附注 -->
+		<field name="304">
+			<subfield name="a">
+				<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 相关题名附注 -->
-        <field name="312">
-            <subfield name="a"><![CDATA[
+        Root.notes += this.Content + "\r\n";
+        ]]>
+			</subfield>
+		</field>
+		<!-- 相关题名附注 -->
+		<field name="312">
+			<subfield name="a">
+				<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 知识责任附注 -->
-        <field name="314">
-            <subfield name="a"><![CDATA[
+        Root.notes += this.Content + "\r\n";
+        ]]>
+			</subfield>
+		</field>
+		<!-- 知识责任附注 -->
+		<field name="314">
+			<subfield name="a">
+				<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 书目索引附注 -->
-        <field name="320">
-            <subfield name="a"><![CDATA[
+        Root.notes += this.Content + "\r\n";
+        ]]>
+			</subfield>
+		</field>
+		<!-- 书目索引附注 -->
+		<field name="320">
+			<subfield name="a">
+				<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 复制品的原作附注 -->
-        <field name="324">
-            <subfield name="a"><![CDATA[
+        Root.notes += this.Content + "\r\n";
+        ]]>
+			</subfield>
+		</field>
+		<!-- 复制品的原作附注 -->
+		<field name="324">
+			<subfield name="a">
+				<![CDATA[
         // 附注内容
-        if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
-        Root.notes += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 326 连续出版物出版频率附注 -->
-        <field name="326">
-            <subfield name="a"><![CDATA[
+        Root.notes += this.Content + "\r\n";
+        ]]>
+			</subfield>
+		</field>
+		<!-- 326 连续出版物出版频率附注 -->
+		<field name="326">
+			<subfield name="a">
+				<![CDATA[
         // 附注内容
         if (this.Parent.DupCount > 1)
         Root.s09 += "<br/> ";	// 字段重复则换行
         Root.s09 += this.Content;
-        ]]></subfield>
-            <subfield name="b"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="b">
+				<![CDATA[
 
 				// 出版周期的日期
 				Root.s09 += "(";
@@ -477,11 +497,13 @@ using DigitalPlatform.Text;
 				if (Root.s09.Length > 0 && Root.s09[Root.s09.Length-1] == '-') // 如果字符串s09的最后一个字符是'-'
 					Root.s09 += "  ";	// 则，在s09后加上"  "
 				Root.s09 += ")";
-        		]]></subfield>
-        </field>
-        <!-- 327 内容附注(子目) -->
-        <field name="327">
-            <subfield name="a"><![CDATA[
+        		]]>
+			</subfield>
+		</field>
+		<!-- 327 内容附注(子目) -->
+		<field name="327">
+			<subfield name="a">
+				<![CDATA[
         // 文献内容附注
         if (this.Parent.DupCount > 1)
         Root.s10 += "<br/> ";	// 字段重复则换行
@@ -491,316 +513,356 @@ using DigitalPlatform.Text;
         s = " " +Convert.ToString(Root.number5)+ " ";	// 在内容附注前显示序号
         Root.s10 += s;
         Root.s10 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 330 提要文摘 -->
-        <field name="330">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 330 提要文摘 -->
+		<field name="330">
+			<subfield name="a">
+				<![CDATA[
         // 文献提要
         if (this.Parent.DupCount > 1)
         Root.s11 += "<br/> ";	// 字段重复则换行
         Root.s11 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 4** 款目连接项 -->
-        <field name="4\d{2}">
-            <subfield name="a">
-        Root.s20 += this.Content;
-      </subfield>
-        </field>
-        <!-- 500 统一题名，增加根查锚点 -->
-        <field name="500">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 4** 款目连接项 -->
+		<field name="4\d{2}">
+			<subfield name="a">
+				Root.s20 += this.Content;
+			</subfield>
+		</field>
+		<!-- 500 统一题名，增加根查锚点 -->
+		<field name="500">
+			<subfield name="a">
+				<![CDATA[
         // 统一题名
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/> ";	// 字段重复则换行
         Root.s21 += "统一题名: ";	// 前置"统一题名: "
         Root.s21 += this.Content;        
-        ]]></subfield>
-        </field>
-        <!-- 501 作品集统一题名 -->
-        <field name="501">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 501 作品集统一题名 -->
+		<field name="501">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/> ";	// 字段重复则换行
         Root.s21 += " 作品集统一题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 503 统一惯用标目 -->
-        <field name="503">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 503 统一惯用标目 -->
+		<field name="503">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/> ";	// 字段重复则换行
         Root.s21 += " 统一惯用标目: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 512 封面题名 -->
-        <field name="512">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 512 封面题名 -->
+		<field name="512">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/> ";	// 字段重复则换行
         Root.s21 += " 封面题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 513 附加题名页题名 -->
-        <field name="513">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 513 附加题名页题名 -->
+		<field name="513">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/> ";	// 字段重复则换行
         Root.s21 += " 附加题名页题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 514 卷端题名 -->
-        <field name="514">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 514 卷端题名 -->
+		<field name="514">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/> ";	// 字段重复则换行
         Root.s21 += " 卷端题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 515 逐页题名 -->
-        <field name="515">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 515 逐页题名 -->
+		<field name="515">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/> ";	// 字段重复则换行
         Root.s21 += " 逐页题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 516 书脊题名 -->
-        <field name="516">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 516 书脊题名 -->
+		<field name="516">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/> ";	// 字段重复则换行
         Root.s21 += " 书脊题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 520 前题名 -->
-        <field name="520">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 520 前题名 -->
+		<field name="520">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/>";	// 字段重复则换行
         Root.s21 += " 前题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 530 识别题名 -->
-        <field name="530">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 530 识别题名 -->
+		<field name="530">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/>";	// 字段重复则换行
         Root.s21 += " 识别题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 531 缩略题名 -->
-        <field name="531">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 531 缩略题名 -->
+		<field name="531">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/>";	// 字段重复则换行
         Root.s21 += " 缩略题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 532 完整题名 -->
-        <field name="532">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 532 完整题名 -->
+		<field name="532">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/>";	// 字段重复则换行
         Root.s21 += " 完整题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 540 编目员补充的附加题名 -->
-        <field name="540">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 540 编目员补充的附加题名 -->
+		<field name="540">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/>";	// 字段重复则换行
         Root.s21 += " 编目员补充的附加题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 541 编目员补充的翻译题名 -->
-        <field name="541">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 541 编目员补充的翻译题名 -->
+		<field name="541">
+			<subfield name="a">
+				<![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s21 += "<br/>";	// 字段重复则换行
         Root.s21 += " 编目员补充的翻译题名: ";
         Root.s21 += this.Content;
-        ]]></subfield>
-        </field>
-        <!--主题分析项，增加根查锚点-->
-        <!-- 600 个人名称主题 -->
-        <field name="600">
-            <def>
-        string s="";
-      </def>
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!--主题分析项，增加根查锚点-->
+		<!-- 600 个人名称主题 -->
+		<field name="600">
+			<def>
+				string s="";
+			</def>
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Parent.s.Length > 0)
         Parent.s += "; ";	// 字段重复则前置"; "
         Parent.s += this.Content;
-        ]]></subfield>
-            <subfield name="b">
-        // 名称的其余部分
-        Parent.s += "--";	// 前置"--"
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
+        ]]>
+			</subfield>
+			<subfield name="b">
+				// 名称的其余部分
+				Parent.s += "--";	// 前置"--"
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
 
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="f">
-        // 年代
-        Parent.s += "--";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="j">
-        // 形式复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="x">
-        // 学科主题复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="y">
-        // 地区复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="z">
-        // 年代复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <end>
-        Root.s22 += s;
-      </end>
-        </field>
-        <!-- 601 团体名称主题 -->
-        <field name="601">
-            <def>
-        string s = "";
-      </def>
-            <subfield name="a"><![CDATA[
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="f">
+				// 年代
+				Parent.s += "--";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="j">
+				// 形式复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="x">
+				// 学科主题复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="y">
+				// 地区复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="z">
+				// 年代复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<end>
+				Root.s22 += s;
+			</end>
+		</field>
+		<!-- 601 团体名称主题 -->
+		<field name="601">
+			<def>
+				string s = "";
+			</def>
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Parent.s.Length > 0)
         Parent.s += "; ";	// 字段重复则前置"; "
         Parent.s += this.Content;
-        ]]></subfield>
-            <subfield name="j">
-        // 形式复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="x">
-        // 学科主题复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="y">
-        // 地区复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="z">
-        // 年代复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <end>
-        Root.s22 += s;
-      </end>
-        </field>
-        <!-- 606 普通主题 -->
-        <field name="606">
-            <def>
-        string s = "";
-      </def>
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="j">
+				// 形式复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="x">
+				// 学科主题复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="y">
+				// 地区复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="z">
+				// 年代复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<end>
+				Root.s22 += s;
+			</end>
+		</field>
+		<!-- 606 普通主题 -->
+		<field name="606">
+			<def>
+				string s = "";
+			</def>
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Parent.s.Length > 0)
         Parent.s += "; ";	// 字段重复则前置"; "
         Parent.s += this.Content;
-        ]]></subfield>
-            <subfield name="j">
-        // 形式复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="x">
-        // 学科主题复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="y">
-        // 地区复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <subfield name="z">
-        // 年代复分
-        Parent.s += "-";
-        if (this.DupCount &gt; 1)
-        Parent.s += "; ";	// 前置"; "
-        Parent.s += this.Content;
-      </subfield>
-            <end>
-        Root.s22 += s;
-      </end>
-        </field>
-        <!-- 610 非控制主题词 -->
-        <field name="610">
-            <def>
-        string s = "";
-      </def>
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="j">
+				// 形式复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="x">
+				// 学科主题复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="y">
+				// 地区复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<subfield name="z">
+				// 年代复分
+				Parent.s += "-";
+				if (this.DupCount &gt; 1)
+				Parent.s += "; ";	// 前置"; "
+				Parent.s += this.Content;
+			</subfield>
+			<end>
+				Root.s22 += s;
+			</end>
+		</field>
+		<!-- 610 非控制主题词 -->
+		<field name="610">
+			<def>
+				string s = "";
+			</def>
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Parent.s.Length > 0)
         Parent.s += "; ";	// 字段重复则前置"; "
         Parent.s += this.Content;
-        ]]></subfield>
-            <end>
-        Root.s22 += s;
-      </end>
-        </field>
-        <!-- 690 中图法分类号 -->
-        <field name="690">
-            <def>
-        string stemp;
-      </def>
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<end>
+				Root.s22 += s;
+			</end>
+		</field>
+		<!-- 690 中图法分类号 -->
+		<field name="690">
+			<def>
+				string stemp;
+			</def>
+			<subfield name="a">
+				<![CDATA[
 	// 分类号
 	if (this.Parent.DupCount <= 1)
         {
@@ -813,14 +875,16 @@ using DigitalPlatform.Text;
 	// 增加中图分类法的根查询锚点
         Parent.stemp += this.Content;
 	Root.s23 += Parent.stemp;
-	]]></subfield>
-        </field>
-        <!-- 692 科图法分类号 -->
-        <field name="692">
-            <def>
-        string stemp;
-      </def>
-            <subfield name="a"><![CDATA[
+	]]>
+			</subfield>
+		</field>
+		<!-- 692 科图法分类号 -->
+		<field name="692">
+			<def>
+				string stemp;
+			</def>
+			<subfield name="a">
+				<![CDATA[
 				// 分类号
 				if (this.Parent.DupCount <= 1)
         {	// 如果692字段首次出现
@@ -832,14 +896,16 @@ using DigitalPlatform.Text;
 				// 增加科图分类法的根查询锚点
         Parent.stemp += this.Content;
 				Root.s23 += Parent.stemp;
-		]]></subfield>
-        </field>
-        <!-- 694 人大法分类号 -->
-        <field name="694">
-            <def>
-        string stemp;
-      </def>
-            <subfield name="a"><![CDATA[
+		]]>
+			</subfield>
+		</field>
+		<!-- 694 人大法分类号 -->
+		<field name="694">
+			<def>
+				string stemp;
+			</def>
+			<subfield name="a">
+				<![CDATA[
 				// 分类号
 				if (this.Parent.DupCount <= 1)
         {	// 如果694字段首次出现
@@ -851,176 +917,192 @@ using DigitalPlatform.Text;
 				// 增加人大分类法的根查询锚点
         Parent.stemp += this.Content;
 				Root.s23 += Parent.stemp;
-		]]></subfield>
-        </field>
-        <!-- 700 人名-主要责任者 -->
-        <field name="700">
-            <subfield name="a"><![CDATA[
+		]]>
+			</subfield>
+		</field>
+		<!-- 700 人名-主要责任者 -->
+		<field name="700">
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
 
         Root.s24 += this.Content;
-        ]]></subfield>
-            <subfield name="b">
-        // 名称的其它部分
-        Root.s24 += ", ";	// 前置", "
-        Root.s24 += this.Content;
-      </subfield>
-            <subfield name="f">
-        // 年代
-        Root.s24 += " ";	// 前置" "
-        Root.s24 += this.Content;
-      </subfield>
-        </field>
-        <!-- 701 人名-等同责任者 -->
-        <field name="701">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="b">
+				// 名称的其它部分
+				Root.s24 += ", ";	// 前置", "
+				Root.s24 += this.Content;
+			</subfield>
+			<subfield name="f">
+				// 年代
+				Root.s24 += " ";	// 前置" "
+				Root.s24 += this.Content;
+			</subfield>
+		</field>
+		<!-- 701 人名-等同责任者 -->
+		<field name="701">
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
         Root.s24 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 702 人名-次要责任者 -->
-        <field name="702">
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 702 人名-次要责任者 -->
+		<field name="702">
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
         Root.s24 += this.Content;
-        ]]></subfield>
-        </field>
-        <!-- 710 团体名称-主要责任者 -->
-        <field name="710">
-            <def>
-        string s241 = "";
-      </def>
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+		</field>
+		<!-- 710 团体名称-主要责任者 -->
+		<field name="710">
+			<def>
+				string s241 = "";
+			</def>
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
         Root.s24 += this.Content;
-        ]]></subfield>
-            <subfield name="d">
-        // 会议届次
-        if (this.DupCount &gt; 1)
-        Parent.s241 += "; ";	// 前置"; "
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <subfield name="e">
-        // 会议地址
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <subfield name="f">
-        // 会议日期
-        if (Parent.s241.Length &gt; 0)
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <end>
-        if (s241.Length &gt; 0)	// 将$d,$e,$f子字段用括号括住
-        {
-        Root.s24 += " (";
-        Root.s24 += s241;
-        Root.s24 += ") ";
-        s241 = "";	// 清空变量s241
-        }
-      </end>
-        </field>
-        <!-- 711 团体名称-等同责任者 -->
-        <field name="711">
-            <def>
-        string s241 = "";
-      </def>
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="d">
+				// 会议届次
+				if (this.DupCount &gt; 1)
+				Parent.s241 += "; ";	// 前置"; "
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<subfield name="e">
+				// 会议地址
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<subfield name="f">
+				// 会议日期
+				if (Parent.s241.Length &gt; 0)
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<end>
+				if (s241.Length &gt; 0)	// 将$d,$e,$f子字段用括号括住
+				{
+				Root.s24 += " (";
+				Root.s24 += s241;
+				Root.s24 += ") ";
+				s241 = "";	// 清空变量s241
+				}
+			</end>
+		</field>
+		<!-- 711 团体名称-等同责任者 -->
+		<field name="711">
+			<def>
+				string s241 = "";
+			</def>
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
         Root.s24 += this.Content;
-        ]]></subfield>
-            <subfield name="d">
-        // 会议届次
-        if (this.DupCount &gt; 1)
-        Parent.s241 += "; ";	// 前置"; "
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <subfield name="e">
-        // 会议地址
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <subfield name="f">
-        // 会议日期
-        if (Parent.s241.Length &gt; 0)
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <end>
-        if (s241.Length &gt; 0)	// 将$d,$e,$f子字段用括号括住
-        {
-        Root.s24 += " (";
-        Root.s24 += s241;
-        Root.s24 += ") ";
-        s241 = "";	// 清空变量s241
-        }
-      </end>
-        </field>
-        <!-- 712 团体名称-次要责任者 -->
-        <field name="712">
-            <def>
-        string s241 = "";
-      </def>
-            <subfield name="a"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="d">
+				// 会议届次
+				if (this.DupCount &gt; 1)
+				Parent.s241 += "; ";	// 前置"; "
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<subfield name="e">
+				// 会议地址
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<subfield name="f">
+				// 会议日期
+				if (Parent.s241.Length &gt; 0)
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<end>
+				if (s241.Length &gt; 0)	// 将$d,$e,$f子字段用括号括住
+				{
+				Root.s24 += " (";
+				Root.s24 += s241;
+				Root.s24 += ") ";
+				s241 = "";	// 清空变量s241
+				}
+			</end>
+		</field>
+		<!-- 712 团体名称-次要责任者 -->
+		<field name="712">
+			<def>
+				string s241 = "";
+			</def>
+			<subfield name="a">
+				<![CDATA[
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
         Root.s24 += this.Content;
-        ]]></subfield>
-            <subfield name="d">
-        // 会议届次
-        if (this.DupCount &gt; 1)
-        Parent.s241 += "; ";	// 前置"; "
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <subfield name="e">
-        // 会议地址
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <subfield name="f">
-        // 会议日期
-        if (Parent.s241.Length &gt; 0)
-        Parent.s241 += " : ";	// 前置" : "
-        Parent.s241 += this.Content;
-      </subfield>
-            <end>
-        if (s241.Length &gt; 0)	// 将$d,$e,$f子字段用括号括住
-        {
-        Root.s24 += " (";
-        Root.s24 += s241;
-        Root.s24 += ") ";
-        s241 = "";	// 清空变量s241
-        }
-      </end>
-        </field>
-        <!-- 显示多媒体信息 -->
-        <field name="856">
-            <def>
-        string urlTemp;
-      </def>
-            <subfield name="*"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="d">
+				// 会议届次
+				if (this.DupCount &gt; 1)
+				Parent.s241 += "; ";	// 前置"; "
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<subfield name="e">
+				// 会议地址
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<subfield name="f">
+				// 会议日期
+				if (Parent.s241.Length &gt; 0)
+				Parent.s241 += " : ";	// 前置" : "
+				Parent.s241 += this.Content;
+			</subfield>
+			<end>
+				if (s241.Length &gt; 0)	// 将$d,$e,$f子字段用括号括住
+				{
+				Root.s24 += " (";
+				Root.s24 += s241;
+				Root.s24 += ") ";
+				s241 = "";	// 清空变量s241
+				}
+			</end>
+		</field>
+		<!-- 显示多媒体信息 -->
+		<field name="856">
+			<def>
+				string urlTemp;
+			</def>
+			<subfield name="*">
+				<![CDATA[
         // 提示信息
         if (this.Parent.DupCount > 1)
         Root.s856 += "<br/>";
         Root.s856 += this.Content;
         Root.s856 += " ";
-        ]]></subfield>
-            <subfield name="u"><![CDATA[
+        ]]>
+			</subfield>
+			<subfield name="u">
+				<![CDATA[
         // 多媒体文件的URL
         if (this.DupCount > 1)
         {	
@@ -1041,82 +1123,84 @@ using DigitalPlatform.Text;
         Parent.urlTemp += "</a>";        
         Parent.urlTemp += " ";        
         }
-        ]]></subfield>
-            <end>
-        Root.s856 += urlTemp;
-      </end>
-        </field>
-        <!-- 905 馆藏信息 -->
-        <field name="905">
-            <subfield name="b">
-        // 登录号
-        if (this.DupCount &gt; 1)
-        Root.s27 += "; ";	// 重复时前置" ; "
-        Root.s27 += this.Content;
-      </subfield>
-            <subfield name="c">
-        // 排架区分号
-        Root.s25 += this.Content;
-      </subfield>
-            <subfield name="d">
-        // 分类号
-        if (this.PrevName == "c")
-        Root.s25 += " / ";	// 前面为$c时前置" / "
-        if (this.DupCount &gt; 1)
-        Root.s25 += "; ";	// 重复时前置" ; "
-        Root.s25 += this.Content;
-      </subfield>
-            <subfield name="e">
-        // 书词/种次号
-        if (this.DupCount &gt; 1)
-        Root.s25 += "; ";	// 重复时前置" ; "
-        Root.s25 += " / \r\n";	// 前置" / \r\n"
-        Root.s25 += this.Content;
-      </subfield>
-            <subfield name="s">
-        // 书词/种次号
-        if (this.Content.Length &gt; 0)
-        Root.s25 = "";
-        if (this.DupCount &gt; 1)
-        Root.s25 += "; ";	// 重复时前置" ; "
-        Root.s25 += this.Content;
-      </subfield>
-            <subfield name="v">
-        // 入藏卷期
-        if (Root.serials != 0)	//如果是期刊
-        {
-        if (Root.s28.Length &gt; 0)
-        Root.s28 += "; ";	// 本字段重复时前置" ; "
-        Root.s28 += this.Content;
-        }
-        else	//			# 不为期刊
-        {
-        Root.s25 += " / \r\n";	// 前置" / \r\n"
-        Root.s25 += this.Content;
-        }
-      </subfield>
-            <subfield name="y">
-        // 年代范围
-        if (Root.serials != 0)	//		# 如果为期刊
-        {
-        Root.s28 += " (";	// 使用括号
-        Root.s28 += this.Content;
-        Root.s28 += ") ";
-        }
-        else
-        {
-        Root.s25 += " / \r\n";	// 前置" / \r\n"
-        Root.s25 += this.Content;
-        }
-      </subfield>
-        </field>
-        <end>
-          <![CDATA[
+        ]]>
+			</subfield>
+			<end>
+				Root.s856 += urlTemp;
+			</end>
+		</field>
+		<!-- 905 馆藏信息 -->
+		<field name="905">
+			<subfield name="b">
+				// 登录号
+				if (this.DupCount &gt; 1)
+				Root.s27 += "; ";	// 重复时前置" ; "
+				Root.s27 += this.Content;
+			</subfield>
+			<subfield name="c">
+				// 排架区分号
+				Root.s25 += this.Content;
+			</subfield>
+			<subfield name="d">
+				// 分类号
+				if (this.PrevName == "c")
+				Root.s25 += " / ";	// 前面为$c时前置" / "
+				if (this.DupCount &gt; 1)
+				Root.s25 += "; ";	// 重复时前置" ; "
+				Root.s25 += this.Content;
+			</subfield>
+			<subfield name="e">
+				// 书词/种次号
+				if (this.DupCount &gt; 1)
+				Root.s25 += "; ";	// 重复时前置" ; "
+				Root.s25 += " / \r\n";	// 前置" / \r\n"
+				Root.s25 += this.Content;
+			</subfield>
+			<subfield name="s">
+				// 书词/种次号
+				if (this.Content.Length &gt; 0)
+				Root.s25 = "";
+				if (this.DupCount &gt; 1)
+				Root.s25 += "; ";	// 重复时前置" ; "
+				Root.s25 += this.Content;
+			</subfield>
+			<subfield name="v">
+				// 入藏卷期
+				if (Root.serials != 0)	//如果是期刊
+				{
+				if (Root.s28.Length &gt; 0)
+				Root.s28 += "; ";	// 本字段重复时前置" ; "
+				Root.s28 += this.Content;
+				}
+				else	//			# 不为期刊
+				{
+				Root.s25 += " / \r\n";	// 前置" / \r\n"
+				Root.s25 += this.Content;
+				}
+			</subfield>
+			<subfield name="y">
+				// 年代范围
+				if (Root.serials != 0)	//		# 如果为期刊
+				{
+				Root.s28 += " (";	// 使用括号
+				Root.s28 += this.Content;
+				Root.s28 += ") ";
+				}
+				else
+				{
+				Root.s25 += " / \r\n";	// 前置" / \r\n"
+				Root.s25 += this.Content;
+				}
+			</subfield>
+		</field>
+		<end>
+			<![CDATA[
               Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
-		]]></end>
-    </record>
-    <end>
-        <![CDATA[
+		]]>
+		</end>
+	</record>
+	<end>
+		<![CDATA[
 		  string strLink = "<LINK href='%mappeddir%\\styles\\biblio.css' type='text/css' rel='stylesheet'>"
         + "<link href=\"%mappeddir%/jquery-ui-1.8.7/css/jquery-ui-1.8.7.css\" rel=\"stylesheet\" type=\"text/css\" />"
         + "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-1.4.4.min.js\"></script>"
@@ -1225,7 +1309,9 @@ using DigitalPlatform.Text;
       {
           Host.ResultString += "<tr class='content'>";
 			    Host.ResultString += "<td class='name' width='10%' nowrap>附注</td>";
-			    Host.ResultString += "<td class='value' width='90%'>"+notes+"</td>";
+			    Host.ResultString += "<td class='value' width='90%'>"
+				+notes.Trim(new char []{'\r','\n'}).Replace("\r\n","<br/>")
+				+"</td>";
 			    Host.ResultString += "</tr>";
       }
       
@@ -1323,5 +1409,6 @@ using DigitalPlatform.Text;
       Host.ResultString += "</td></tr></table>";
   
 		  Host.ResultString += "</body></html>";      
-		]]></end>
+		]]>
+	</end>
 </filter>
