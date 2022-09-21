@@ -34,6 +34,8 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace dp2Circulation
 {
@@ -49,7 +51,7 @@ namespace dp2Circulation
 
         Commander commander = null;
 
-        const int WM_NEXT_RECORD = API.WM_USER + 200;
+        const int WM_NEXT_RECORD = API.WM_USER + 200;   // 当前读者记录向后翻页(同读者库内下一个 ID 的读者记录)
         const int WM_PREV_RECORD = API.WM_USER + 201;
         const int WM_LOAD_RECORD = API.WM_USER + 202;
         const int WM_DELETE_RECORD = API.WM_USER + 203;
@@ -65,6 +67,9 @@ namespace dp2Circulation
         const int WM_FOREGIFT = API.WM_USER + 210;
         const int WM_RETURN_FOREGIFT = API.WM_USER + 211;
         const int WM_SET_FOCUS = API.WM_USER + 212;
+
+        const int WM_NEXT_RECORD_RESULTSET = API.WM_USER + 213; // 在命中结果集中向后翻页
+        const int WM_PREV_RECORD_RESULTSET = API.WM_USER + 214;
 
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
@@ -2433,7 +2438,7 @@ strNewDefault);
                             if (lRet > 1)
                             {
                                 // strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，注意这是一个严重错误，请系统管理员尽快排除。";
-                                strError = $"路径 '{strSavedPath}' 命中记录 { lRet.ToString() } 条，注意这是一个严重错误，请系统管理员尽快排除。";
+                                strError = $"路径 '{strSavedPath}' 命中记录 {lRet.ToString()} 条，注意这是一个严重错误，请系统管理员尽快排除。";
                                 strError = "保存记录已经成功，但在刷新HTML显示的时候发生错误: " + strError;
                                 // Global.SetHtmlString(this.webBrowser_readerInfo, strError);
                                 this.m_webExternalHost.SetTextString(strError);
@@ -3279,7 +3284,7 @@ strSavedXml);
         }
 
 #if NO
-#region delete
+        #region delete
 
         // 删除
         private void button_delete_Click(object sender, EventArgs e)
@@ -3750,7 +3755,7 @@ MessageBoxDefaultButton.Button2);
             dlg.ShowDialog(this);
         }
 
-#endregion
+        #endregion
 
 #endif
 
@@ -3885,23 +3890,27 @@ MessageBoxDefaultButton.Button2);
         // 前一条读者记录
         private void toolStripButton_prev_Click(object sender, EventArgs e)
         {
+            bool resultSet = !(Control.ModifierKeys == Keys.Control);
+
             EnableToolStrip(false);
 
             this.m_webExternalHost.StopPrevious();
             this.webBrowser_readerInfo.Stop();
 
-            this.commander.AddMessage(WM_PREV_RECORD);
+            this.commander.AddMessage(resultSet ? WM_PREV_RECORD_RESULTSET : WM_PREV_RECORD);
         }
 
         // 后一条读者记录
         private void toolStripButton_next_Click(object sender, EventArgs e)
         {
+            bool resultSet = !(Control.ModifierKeys == Keys.Control);
+
             EnableToolStrip(false);
 
             this.m_webExternalHost.StopPrevious();
             this.webBrowser_readerInfo.Stop();
 
-            this.commander.AddMessage(WM_NEXT_RECORD);
+            this.commander.AddMessage(resultSet ? WM_NEXT_RECORD_RESULTSET : WM_NEXT_RECORD);
         }
 
         /// <summary>
@@ -3952,7 +3961,10 @@ MessageBoxDefaultButton.Button2);
                         EnableToolStrip(true);
                     }
                     return;
+                case WM_PREV_RECORD:
                 case WM_NEXT_RECORD:
+                case WM_PREV_RECORD_RESULTSET:
+                case WM_NEXT_RECORD_RESULTSET:
                     EnableToolStrip(false);
                     try
                     {
@@ -3971,12 +3983,26 @@ MessageBoxDefaultButton.Button2);
 
                         Debug.Assert(this.m_webExternalHost.ChannelInUse == false, "启动前发现通道还未释放");
                          * */
+                        string direction = (msg == WM_NEXT_RECORD || msg == WM_NEXT_RECORD_RESULTSET? "next" : "prev");
+                        bool resultSet = (msg == WM_PREV_RECORD_RESULTSET || msg == WM_NEXT_RECORD_RESULTSET);
 
                         if (this.m_webExternalHost.CanCallNew(
                             this.commander,
                             m.Msg) == true)
                         {
-                            LoadRecordByRecPath(this.readerEditControl1.RecPath, "next");
+                            if (resultSet)
+                            {
+                                string strRecPath = GetPrevNextRecPath(direction);
+                                if (string.IsNullOrEmpty(strRecPath))
+                                {
+                                    this.ShowMessage(direction == "next" ? "无法向后翻动" : "无法向前翻动", "yellow", true);
+                                    return;
+                                }
+                                this.ClearMessage();
+                                LoadRecordByRecPath(strRecPath, "");
+                            }
+                            else
+                                LoadRecordByRecPath(this.readerEditControl1.RecPath, direction);
                         }
                     }
                     finally
@@ -3984,7 +4010,7 @@ MessageBoxDefaultButton.Button2);
                         EnableToolStrip(true);
                     }
                     return;
-
+#if REMOVED
                 case WM_PREV_RECORD:
                     EnableToolStrip(false);
                     try
@@ -4001,6 +4027,7 @@ MessageBoxDefaultButton.Button2);
                         EnableToolStrip(true);
                     }
                     return;
+#endif
                 case WM_HIRE:
                     EnableToolStrip(false);
                     try
@@ -9527,7 +9554,26 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             MessageBox.Show(this, strError);
             return;
-
         }
+
+        string GetPrevNextRecPath(string strStyle)
+        {
+            var form = Program.MainForm.GetTopChildWindow<ReaderSearchForm>();
+            if (form == null)
+                return "";
+
+            // REDO:
+            ListViewItem item = ReaderSearchForm.MoveSelectedItem(form.ListViewRecords, strStyle);
+            if (item == null)
+                return "";
+            string text = ListViewUtil.GetItemText(item, 0);
+            /*
+            // 遇到 Z39.50 命令行，要跳过去
+            if (ReaderSearchForm.IsCmdLine(text))
+                goto REDO;
+            */
+            return text;
+        }
+
     }
 }

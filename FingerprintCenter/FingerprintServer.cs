@@ -165,7 +165,9 @@ namespace FingerprintCenter
                 Task.Run(() =>
                 {
                     Program.MainForm?.OutputHistory(message, 0);
-                    Program.MainForm?.Speak(message);
+                    if (Program.MainForm != null
+                        && Program.MainForm.SpeakWhenSendKeyStateChange)
+                        Program.MainForm?.Speak(message);
                 });
 
                 return new NormalResult();

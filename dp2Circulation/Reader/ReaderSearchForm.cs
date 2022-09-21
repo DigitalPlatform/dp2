@@ -8859,6 +8859,38 @@ out strError);
         }
 #endif
 
+        // 前移或后移 Selection Item
+        public static ListViewItem MoveSelectedItem(
+            ListView list,
+            string strStyle)
+        {
+            if (list.Items.Count == 0)
+                return null;
+            ListViewItem item = null;
+            if (list.SelectedItems.Count == 0)
+            {
+                item = list.Items[0];
+                item.Selected = true;
+                item.EnsureVisible();
+                return item;
+            }
+
+            item = list.SelectedItems[0];
+            if (list.SelectedItems.Count > 1)
+                ListViewUtil.SelectLine(item, true);
+
+            bool bRet = ListViewUtil.MoveSelectedUpDown(
+                list,
+                strStyle == "prev" ? true : false);
+            if (bRet == false)
+                return null;
+
+            var result = list.SelectedItems[0];
+            result.EnsureVisible();
+
+            return result;
+        }
+
     }
 
     /// <summary>

@@ -112,6 +112,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.checkBox_speakWhenSendKeyStateChange = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -155,65 +156,65 @@
             this.toolStripSeparator3,
             this.ToolStripMenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(72, 33);
+            this.MenuItem_file.Size = new System.Drawing.Size(72, 32);
             this.MenuItem_file.Text = "文件";
             // 
             // ToolStripMenuItem_start
             // 
             this.ToolStripMenuItem_start.Name = "ToolStripMenuItem_start";
-            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(297, 40);
+            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_start.Text = "启动(&S)";
             this.ToolStripMenuItem_start.Click += new System.EventHandler(this.ToolStripMenuItem_start_Click);
             // 
             // ToolStripMenuItem_reopen
             // 
             this.ToolStripMenuItem_reopen.Name = "ToolStripMenuItem_reopen";
-            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(297, 40);
+            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
             this.ToolStripMenuItem_reopen.Click += new System.EventHandler(this.ToolStripMenuItem_reopen_Click);
             // 
             // MenuItem_refresh
             // 
             this.MenuItem_refresh.Name = "MenuItem_refresh";
-            this.MenuItem_refresh.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_refresh.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_refresh.Text = "刷新指纹信息";
             this.MenuItem_refresh.Click += new System.EventHandler(this.MenuItem_refresh_Click);
             // 
             // MenuItem_clearFingerprintCacheFile
             // 
             this.MenuItem_clearFingerprintCacheFile.Name = "MenuItem_clearFingerprintCacheFile";
-            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_clearFingerprintCacheFile.Text = "删除本地缓存文件";
             this.MenuItem_clearFingerprintCacheFile.Click += new System.EventHandler(this.MenuItem_clearFingerprintCacheFile_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(294, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(312, 6);
             // 
             // MenuItem_closeSendKey
             // 
             this.MenuItem_closeSendKey.Name = "MenuItem_closeSendKey";
-            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_closeSendKey.Text = "关闭发送";
             this.MenuItem_closeSendKey.Click += new System.EventHandler(this.MenuItem_closeSendKey_Click);
             // 
             // MenuItem_openSendKey
             // 
             this.MenuItem_openSendKey.Name = "MenuItem_openSendKey";
-            this.MenuItem_openSendKey.Size = new System.Drawing.Size(297, 40);
+            this.MenuItem_openSendKey.Size = new System.Drawing.Size(315, 40);
             this.MenuItem_openSendKey.Text = "打开发送";
             this.MenuItem_openSendKey.Click += new System.EventHandler(this.MenuItem_openSendKey_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(294, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(312, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(297, 40);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(315, 40);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -229,7 +230,7 @@
             this.ToolStripMenuItem_showUsbInfo,
             this.ToolStripMenuItem_startWatchUsbChange});
             this.MenuItem_testing.Name = "MenuItem_testing";
-            this.MenuItem_testing.Size = new System.Drawing.Size(72, 33);
+            this.MenuItem_testing.Size = new System.Drawing.Size(72, 32);
             this.MenuItem_testing.Text = "测试";
             // 
             // MenuItem_lightWhite
@@ -304,7 +305,7 @@
             this.MenuItem_manual,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(72, 33);
+            this.MenuItem_help.Size = new System.Drawing.Size(72, 32);
             this.MenuItem_help.Text = "帮助";
             // 
             // MenuItem_openUserFolder
@@ -562,6 +563,7 @@
             // tabPage_cfg
             // 
             this.tabPage_cfg.AutoScroll = true;
+            this.tabPage_cfg.Controls.Add(this.checkBox_speakWhenSendKeyStateChange);
             this.tabPage_cfg.Controls.Add(this.checkBox_allow_changeRecognitionQuality);
             this.tabPage_cfg.Controls.Add(this.checkBox_allow_changeRegisterQuality);
             this.tabPage_cfg.Controls.Add(this.checkBox_allow_changeThreshold);
@@ -851,7 +853,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(867, 35);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(837, 35);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
@@ -879,7 +881,7 @@
             this.toolStripButton_cfg_setHongnibaServer});
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
-            this.toolStrip_server.Size = new System.Drawing.Size(867, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(837, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -919,6 +921,17 @@
             this.notifyIcon1.Text = "dp2-指纹中心";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
+            // 
+            // checkBox_speakWhenSendKeyStateChange
+            // 
+            this.checkBox_speakWhenSendKeyStateChange.AutoSize = true;
+            this.checkBox_speakWhenSendKeyStateChange.Location = new System.Drawing.Point(18, 720);
+            this.checkBox_speakWhenSendKeyStateChange.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
+            this.checkBox_speakWhenSendKeyStateChange.Name = "checkBox_speakWhenSendKeyStateChange";
+            this.checkBox_speakWhenSendKeyStateChange.Size = new System.Drawing.Size(358, 32);
+            this.checkBox_speakWhenSendKeyStateChange.TabIndex = 28;
+            this.checkBox_speakWhenSendKeyStateChange.Text = "当发送状态改变时进行语音提示(&E)";
+            this.checkBox_speakWhenSendKeyStateChange.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -1046,6 +1059,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openProgramFolder;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_checkUpdate;
+        private System.Windows.Forms.CheckBox checkBox_speakWhenSendKeyStateChange;
     }
 }
 

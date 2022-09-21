@@ -125,7 +125,8 @@ namespace FingerprintCenter
                     this.comboBox_deviceList,
                     this.textBox_cfg_shreshold,
                     this.textBox_cfg_registerQualityThreshold,
-                    this.textBox_cfg_recognitionQualityThreshold
+                    this.textBox_cfg_recognitionQualityThreshold,
+                    new ControlWrapper(this.checkBox_speakWhenSendKeyStateChange, false),
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -145,7 +146,8 @@ namespace FingerprintCenter
                     this.comboBox_deviceList,
                     this.textBox_cfg_shreshold,
                     this.textBox_cfg_registerQualityThreshold,
-                    this.textBox_cfg_recognitionQualityThreshold
+                    this.textBox_cfg_recognitionQualityThreshold,
+                    new ControlWrapper(this.checkBox_speakWhenSendKeyStateChange, false),
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -981,6 +983,22 @@ _cancel.Token,
                 }
                 else
                     return this.checkBox_speak.Checked;
+            }
+        }
+
+        public bool SpeakWhenSendKeyStateChange
+        {
+            get
+            {
+                if (this.InvokeRequired)
+                {
+                    return (bool)this.Invoke(new Func<bool>(() =>
+                    {
+                        return this.checkBox_speakWhenSendKeyStateChange.Checked;
+                    }));
+                }
+                else
+                    return this.checkBox_speakWhenSendKeyStateChange.Checked;
             }
         }
 
