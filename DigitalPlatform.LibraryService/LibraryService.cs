@@ -5606,7 +5606,7 @@ namespace dp2Library
         // parameters:
         //      strItemDbType   2015/1/30
         //      strBarcode  册条码号。特殊情况下，可以使用"@path:"引导的册记录路径(只需要库名和id两个部分)作为检索入口。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
-        //      strResultType   指定需要在strResult参数中返回的数据格式。为"xml" "html"之一。
+        //      strResultType   指定需要在strResult参数中返回的数据格式。为"xml" "html" "uii"之一。
         //                      如果为空，则表示strResult参数中不返回任何数据。无论这个参数为什么值，strItemRecPath中都回返回册记录路径(如果命中了的话)
         //      strItemRecPath  返回册记录路径。可能为逗号间隔的列表，包含多个路径
         //      strBiblioType   指定需要在strBiblio参数中返回的数据格式。为"xml" "html"之一。
@@ -7283,7 +7283,19 @@ namespace dp2Library
                     goto ERROR1;
                 }
 
-
+                string strParentID = DomUtil.GetElementText(item_dom.DocumentElement,
+    "parent");
+                // 2022/9/23
+                if (strParentID == "[none]")
+                    return 1;
+                if (String.IsNullOrEmpty(strParentID) == true)
+                {
+#if NO
+                    strError = "记录 " + strIssueRecPath + " 中没有<parent>元素值，因此无法定位其从属的书目记录";
+                    goto ERROR1;
+#endif
+                    strParentID = "?";
+                }
 #if NO
                     // 根据期库名, 找到对应的书目库名
                     // return:
@@ -7308,16 +7320,6 @@ namespace dp2Library
                 if (nRet == -1 || nRet == 0)
                     goto ERROR1;
 
-                string strParentID = DomUtil.GetElementText(item_dom.DocumentElement,
-                    "parent");
-                if (String.IsNullOrEmpty(strParentID) == true)
-                {
-#if NO
-                    strError = "记录 " + strIssueRecPath + " 中没有<parent>元素值，因此无法定位其从属的书目记录";
-                    goto ERROR1;
-#endif
-                    strParentID = "?";
-                }
                 string strBiblioRecPath = strBiblioDbName + "/" + strParentID;
                 strOutputBiblioRecPath = strBiblioRecPath;
             }

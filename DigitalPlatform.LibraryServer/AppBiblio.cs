@@ -4725,8 +4725,12 @@ nsmgr);
             }
             else
             {
-                strError = "strBiblioType参数值必须为\"xml\" \"iso2709\" \"marcquery\"之一";
-                goto ERROR1;
+                if (string.IsNullOrEmpty(strBiblio) == false
+                    && strAction != "delete")
+                {
+                    strError = "strBiblioType参数值必须为\"xml\" \"iso2709\" \"marcquery\"之一";
+                    goto ERROR1;
+                }
             }
 
             {

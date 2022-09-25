@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -26,36 +27,77 @@ namespace DigitalPlatform.IO
 
             Task.Run(async () =>
             {
-                while (token.IsCancellationRequested == false)
+                try
                 {
-
-                    foreach (ProcessInfo info in process_infos)
+                    while (token.IsCancellationRequested == false)
                     {
-                        if (token.IsCancellationRequested)
+                        foreach (ProcessInfo info in process_infos)
+                        {
+                            if (token.IsCancellationRequested)
+                                return;
+
+                            // 观察上一次启动的 Process 是否结束
+                            if (info.Process != null)
+                            {
+                                var ret = info.Process.WaitForExit(0);
+                                if (ret == false)
+                                {
+                                    // Proccess 尚未结束
+                                    continue;
+                                }
+
+                                // Process 已经结束
+                                info.DisposeProcess();
+                            }
+
+                            if (HasModuleStarted(info.MutexName) == true)
+                                continue;
+
+                            try
+                            {
+                                // 启动
+                                // 注意这个过程可能会因为被杀毒软件拦截而变得很长
+                                var process = StartModule(info.ShortcutPath,
+                                    "minimize");
+                                info.Process = process;
+                                if (process != null)
+                                    writeLog?.Invoke(info, "进程被重新启动");
+                            }
+                            catch (Exception ex)
+                            {
+                                writeLog?.Invoke(info, $"StartModule() {info.ShortcutPath} 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                            }
+                        }
+
+                        // 延时
+                        try
+                        {
+                            await Task.Delay(// TimeSpan.FromMilliseconds(1000), 
+                                wait_time,
+                                token);
+                        }
+                        catch
+                        {
                             return;
-
-                        if (HasModuleStarted(info.MutexName) == true)
-                            continue;
-
-                        // 启动
-                        var ret = StartModule(info.ShortcutPath, "minimize");
-                        if (ret == true)
-                            writeLog?.Invoke(info, "进程被重新启动");
-                    }
-
-                    // 延时
-                    try
-                    {
-                        await Task.Delay(// TimeSpan.FromMilliseconds(1000), 
-                            wait_time,
-                            token);
-                    }
-                    catch
-                    {
-                        return;
+                        }
                     }
                 }
+                finally
+                {
+                    Dispose();
+                }
             });
+
+            void Dispose()
+            {
+                foreach (var info in process_infos)
+                {
+                    if (info.Process != null)
+                    {
+                        info.DisposeProcess();
+                    }
+                }
+            }
         }
 
         // 判断一个 URL 是否为 ipc 协议
@@ -99,7 +141,7 @@ namespace DigitalPlatform.IO
             }
         }
 
-        public static bool StartModule(
+        public static Process StartModule(
             string shortcut_path,
             string arguments)
         {
@@ -109,11 +151,17 @@ namespace DigitalPlatform.IO
                     );
 
             if (File.Exists(strShortcutFilePath) == false)
-                return false;
+                return null;
+
+            // testing
+            // strShortcutFilePath = "notepad";
+            // arguments = "";
 
             // https://stackoverflow.com/questions/558344/clickonce-appref-ms-argument
-            Process.Start(strShortcutFilePath, arguments);
-            return true;
+            var info = new ProcessStartInfo(strShortcutFilePath, arguments);
+            var process = Process.Start(info);
+            process.EnableRaisingEvents = true;
+            return process;
         }
 
     }
@@ -128,5 +176,17 @@ namespace DigitalPlatform.IO
 
         // Mutex 名
         public string MutexName { get; set; }
+
+        // 2022/9/24
+        public Process Process { get; set; }
+
+        public void DisposeProcess()
+        {
+            if (Process != null)
+            {
+                Process.Dispose();
+                Process = null;
+            }
+        }
     }
 }

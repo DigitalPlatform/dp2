@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.128.*")]
-[assembly: AssemblyFileVersion("3.128.0.0")]
+[assembly: AssemblyVersion("3.129.*")]
+[assembly: AssemblyFileVersion("3.129.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -341,4 +341,5 @@ ItemCanReturn()
 //						(library.xml 文件中的 script 元素也允许出现多个，但尚未测试完)
 //		3.127 (2022/9/1) dp2kernel RefreshDB() 刷新数据库定义的时候，如果遇到 keys 表减少的情况，会删除无用的 keys 表
 //		3.128 (2022/9/14) dp2installer 中 dp2kernel 实例对话框中增加了直接切换 SQL 数据库底层的功能
+//		3.129 (2022/9/23) dp2library GetItemInfo() API 改进了获取 uii 的子功能，允许前端提供一条模拟的册记录来计算 uii。前端提供的这条册记录中 parent 元素内容应该为 "[none]"
 
