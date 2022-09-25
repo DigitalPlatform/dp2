@@ -446,7 +446,65 @@ namespace dp2Circulation
                 return;
             }
 
+            // 较早创建 AppInfo
+            this.AppInfo = new NewApplicationInfo(ClientInfo.Config);   // 2022/1/24
+
             SetTitle();
+
+            {
+                if (ApplicationDeployment.IsNetworkDeployed == true)
+                {
+                    // MessageBox.Show(this, "network");
+                    DataDir = Application.LocalUserAppDataPath;
+                }
+                else
+                {
+                    // MessageBox.Show(this, "no network");
+                    // DataDir = Environment.CurrentDirectory;
+
+                    // 2015/8/5
+                    this.DataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                }
+            }
+
+            // 设置窗口尺寸状态
+            if (AppInfo != null)
+            {
+                // 首次运行，尽量利用“微软雅黑”字体
+                if (this.IsFirstRun == true)
+                {
+                    SetFirstDefaultFont();
+                }
+
+                MainForm.SetControlFont(this, this.DefaultFont);
+
+                // 2020/8/14
+                if (Control.ModifierKeys == Keys.Control)
+                {
+                    // 不首次设置主窗口大小位置。主要是为了特殊情况下恢复窗口可见
+                }
+                else
+                {
+                    AppInfo.LoadFormStates(this,
+                        "mainformstate",
+                        FormWindowState.Maximized);
+                }
+
+                // 程序一启动就把这些参数设置为初始状态
+                this.DisplayScriptErrorDialog = false;
+
+
+#if NEWFINGER
+                if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false
+                    && this.IsFingerprint())
+                    this.MenuItem_displayPalmprintDialog.Text = "指纹窗";
+#endif
+
+                OpenBackgroundForm();
+
+                InitialFixedPanel();
+            }
+
 
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);

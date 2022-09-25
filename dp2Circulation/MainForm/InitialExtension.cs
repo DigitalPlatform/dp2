@@ -1224,23 +1224,11 @@ MessageBoxDefaultButton.Button1);
             }
 #endif
 
-            if (ApplicationDeployment.IsNetworkDeployed == true)
-            {
-                // MessageBox.Show(this, "network");
-                DataDir = Application.LocalUserAppDataPath;
-            }
-            else
-            {
-                // MessageBox.Show(this, "no network");
-                // DataDir = Environment.CurrentDirectory;
 
-                // 2015/8/5
-                this.DataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            }
 
             this.MenuItem_upgradeFromDisk.Visible = !ApplicationDeployment.IsNetworkDeployed;
 
-            OpenBackgroundForm();
+            // OpenBackgroundForm();
 
             if (GetUserDiskFreeSpace(out string strDriveName) < 1024 * 1024 * 10)
             {
@@ -1276,7 +1264,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 // this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2circulation.xml"));
-                this.AppInfo = new NewApplicationInfo(ClientInfo.Config);   // 2022/1/24
+                // this.AppInfo = new NewApplicationInfo(ClientInfo.Config);   // 2022/1/24
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
                 PathUtil.TryCreateDir(this.UserTempDir);
@@ -1483,41 +1471,6 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-            // 设置窗口尺寸状态
-            if (AppInfo != null)
-            {
-                // 首次运行，尽量利用“微软雅黑”字体
-                if (this.IsFirstRun == true)
-                {
-                    SetFirstDefaultFont();
-                }
-
-                MainForm.SetControlFont(this, this.DefaultFont);
-
-                // 2020/8/14
-                if (Control.ModifierKeys == Keys.Control)
-                {
-                    // 不首次设置主窗口大小位置。主要是为了特殊情况下恢复窗口可见
-                }
-                else
-                {
-                    AppInfo.LoadFormStates(this,
-                        "mainformstate",
-                        FormWindowState.Maximized);
-                }
-
-                // 程序一启动就把这些参数设置为初始状态
-                this.DisplayScriptErrorDialog = false;
-
-
-#if NEWFINGER
-                if (string.IsNullOrEmpty(this.PalmprintReaderUrl) == false
-                    && this.IsFingerprint())
-                    this.MenuItem_displayPalmprintDialog.Text = "指纹窗";
-#endif
-            }
-
-            InitialFixedPanel();
 
             // 2021/11/1
             if (this.AppInfo.GetBoolean("palmprint", "palmprintDialogVisible", false))
@@ -2389,6 +2342,8 @@ MessageBoxDefaultButton.Button1);
 
                 m_backgroundForm = new BackgroundForm();
                 m_backgroundForm.MdiParent = this;
+                m_backgroundForm.Dock = DockStyle.Fill;
+
                 m_backgroundForm.Show();
             }
 
