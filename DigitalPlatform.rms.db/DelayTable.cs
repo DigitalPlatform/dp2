@@ -146,34 +146,17 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
-            // 确保 keys 里面的事项是排序过的。如果没有排序，本函数也能工作，只是效率略低
-            DelayTable table = null;
-            KeyCollection part_keys = new KeyCollection();
-
-            // TODO: 如果 keys 集合为空，那么 table 是否可能为 null?
-            foreach (KeyItem item in keys)
+            try
             {
-                if (table == null)
-                {
-                    table = GetTable(strDatabaseName, item.SqlTableName);
-                    if (string.IsNullOrEmpty(table.FileName) == true)
-                    {
-                        string strFilename = getfilename(strDatabaseName, item.SqlTableName);
-                        int nRet = table.Create(strFilename, out strError);
-                        if (nRet == -1)
-                            return -1;
-                    }
-                }
-                else
-                {
-                    if (table.TableName != item.SqlTableName)
-                    {
-                        if (part_keys.Count > 0)
-                        {
-                            table.Write(part_keys);
-                            part_keys.Clear();
-                        }
+                // 确保 keys 里面的事项是排序过的。如果没有排序，本函数也能工作，只是效率略低
+                DelayTable table = null;
+                KeyCollection part_keys = new KeyCollection();
 
+                // TODO: 如果 keys 集合为空，那么 table 是否可能为 null?
+                foreach (KeyItem item in keys)
+                {
+                    if (table == null)
+                    {
                         table = GetTable(strDatabaseName, item.SqlTableName);
                         if (string.IsNullOrEmpty(table.FileName) == true)
                         {
@@ -183,19 +166,45 @@ namespace DigitalPlatform.rms
                                 return -1;
                         }
                     }
+                    else
+                    {
+                        if (table.TableName != item.SqlTableName)
+                        {
+                            if (part_keys.Count > 0)
+                            {
+                                table.Write(part_keys);
+                                part_keys.Clear();
+                            }
+
+                            table = GetTable(strDatabaseName, item.SqlTableName);
+                            if (string.IsNullOrEmpty(table.FileName) == true)
+                            {
+                                string strFilename = getfilename(strDatabaseName, item.SqlTableName);
+                                int nRet = table.Create(strFilename, out strError);
+                                if (nRet == -1)
+                                    return -1;
+                            }
+                        }
+                    }
+
+                    part_keys.Add(item);
                 }
 
-                part_keys.Add(item);
-            }
+                if (part_keys.Count > 0)
+                {
+                    Debug.Assert(table != null, "");
+                    table.Write(part_keys);
+                    part_keys.Clear();
+                }
 
-            if (part_keys.Count > 0)
+                return 0;
+            }
+            catch(Exception ex)
             {
-                Debug.Assert(table != null, "");
-                table.Write(part_keys);
-                part_keys.Clear();
+                // 2022/9/27
+                strError = $"DlayTableCollection::Write() 出现异常: {ExceptionUtil.GetDebugText(ex)}";
+                return -1;
             }
-
-            return 0;
         }
     }
 

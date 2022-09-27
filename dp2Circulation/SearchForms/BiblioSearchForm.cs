@@ -1459,14 +1459,14 @@ Keys keyData)
                     if (multiline/*query_words.Count > 1*/)
                     {
                         stop?.SetProgressValue(word_index);
-                        stop?.SetMessage($"正在检索 '{ query_word }' ({word_index + 1}/{query_words.Count})...");
+                        stop?.SetMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_words.Count})...");
 
-                        this.ShowMessage($"正在检索 '{ query_word }' ({word_index + 1}/{query_words.Count})...");
+                        this.ShowMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_words.Count})...");
                     }
                     else
                     {
-                        stop?.SetMessage($"正在检索 '{ query_word }' ...");
-                        this.ShowMessage($"正在检索 '{ query_word }' ...");
+                        stop?.SetMessage($"正在检索 '{query_word}' ...");
+                        this.ShowMessage($"正在检索 '{query_word}' ...");
                     }
 
                     word_index++;
@@ -8514,7 +8514,7 @@ Keys keyData)
                 delete_style = "noeventlog";
 
             DialogResult result = MessageBox.Show(this,
-        $"确实要从数据库中删除所选定的 { this.listView_records.SelectedItems.Count.ToString() } 个书目记录?\r\n\r\n{(string.IsNullOrEmpty(delete_style) == false ? "style:" + delete_style : "")}\r\n\r\n(警告：书目记录被删除后，无法恢复。如果删除书目记录，则其下属的册、期、订购、评注记录和对象资源会一并删除)\r\n\r\n(OK 删除；Cancel 取消)",
+        $"确实要从数据库中删除所选定的 {this.listView_records.SelectedItems.Count.ToString()} 个书目记录?\r\n\r\n{(string.IsNullOrEmpty(delete_style) == false ? "style:" + delete_style : "")}\r\n\r\n(警告：书目记录被删除后，无法恢复。如果删除书目记录，则其下属的册、期、订购、评注记录和对象资源会一并删除)\r\n\r\n(OK 删除；Cancel 取消)",
         "BiblioSearchForm",
         MessageBoxButtons.OKCancel,
         MessageBoxIcon.Question,
@@ -12620,6 +12620,144 @@ message,
             i++;
         }
 
+        // 200
+        // 200$a
+        // 200$a$(1)
+        // 200$a$(1,2)
+        // (1,2)
+        // 200$(1,2)
+
+        static void ParsePosition(string text,
+            out string field_name,
+            out string subfield_name,
+            out string char_range)
+        {
+            field_name = "";
+            subfield_name = "";
+            char_range = "";
+            var parameters = text.Split(new char[] { '$' });
+            foreach(string s in parameters)
+            {
+                if (s.StartsWith("("))
+                {
+                    if (string.IsNullOrEmpty(char_range) == false)
+                        throw new Exception($"'{text}' 格式错误，圆括号部分('{s}')重复出现");
+                    char_range = StringUtil.Unquote(s, "()");
+                }
+                else if (s.Length == 1)
+                {
+                    if (string.IsNullOrEmpty(subfield_name) == false)
+                        throw new Exception($"'{text}' 格式错误，子字段名部分('{s}')重复出现");
+
+                    subfield_name = s;
+                }
+                else if (s.Length == 3)
+                {
+                    if (string.IsNullOrEmpty(field_name) == false)
+                        throw new Exception($"'{text}' 格式错误，字段名部分('{s}')重复出现");
+
+                    field_name = s;
+                }
+                else
+                    throw new Exception($"'{s}' 格式错误，应为 3 字符或 1 字符或圆括号括住的文字");
+            }
+        }
+
+        static string BuildContains(string words, string char_range)
+        {
+            string content = "@content";
+            if (string.IsNullOrEmpty(char_range) == false)
+            {
+                var ranges = char_range.Split(new char[] { ',' });
+                if (ranges.Length == 1)
+                {
+                    content = $"substring(@content, {ranges[0]})";
+                }
+                else if (ranges.Length == 2)
+                {
+                    content = $"substring(@content, {ranges[0]}, {ranges[1]})";
+                }
+                else
+                    throw new Exception($"'{char_range}' 不合法。应该是 '-' 间隔的最多两个部分");
+            }
+
+            List<string> results = new List<string>();
+            var parameters = words.Split(new char[] { '|' });
+            foreach (var word in parameters)
+            {
+                results.Add($"contains({content}, '{word}')");
+            }
+            return "(" + StringUtil.MakePathList(results, " or ") + ")";
+        }
+
+        static string BuildNames(string words, string positions)
+        {
+            List<string> results = new List<string>();
+            var parameters = positions.Split(new char[] { '|' });
+            foreach (var position in parameters)
+            {
+                ParsePosition(position,
+                    out string field_name,
+                    out string subfield_name,
+                    out string char_range);
+                if (string.IsNullOrEmpty(field_name) == false
+                    && string.IsNullOrEmpty(subfield_name) == true)
+                {
+                    // *** 字段名不为空，子字段名为空
+                    var contains = BuildContains(words, char_range);
+                    results.Add($"field[@name='{position}' and {contains}]");
+                    results.Add($"field[@name='{position}']/subfield[{contains}]");
+                }
+                else if (string.IsNullOrEmpty(field_name) == true
+    && string.IsNullOrEmpty(subfield_name) == false)
+                {
+                    // *** 字段名为空，子字段名不为空
+                    var contains = BuildContains(words, char_range);
+                    results.Add($"field/subfield[@name='{subfield_name}' and {contains}]");
+                }
+                else if (string.IsNullOrEmpty(field_name) == true
+    && string.IsNullOrEmpty(subfield_name) == true)
+                {
+                    // *** 字段名为空，子字段名为空
+                    var contains = BuildContains(words, char_range);
+                    results.Add($"field[{contains}]");
+                    results.Add($"field/subfield[{contains}]");
+                }
+                else if (string.IsNullOrEmpty(field_name) == false
+                    && string.IsNullOrEmpty(subfield_name) == false)
+                {
+                    // *** 字段名和子字段名都不为空
+                    var contains = BuildContains(words, char_range);
+                    // 子字段内容中包含一个指定的子串
+                    results.Add($"field[@name='{field_name}']/subfield[@name='{subfield_name}' and {contains}]");
+                }
+                else
+                    throw new Exception($"参数2 '{position}' 格式不正确，出现了意外的情况(field_name='{field_name}', subfield_name='{subfield_name}', char_range='{char_range}')");
+            }
+            return StringUtil.MakePathList(results, " | ");
+        }
+
+        // xpath:field[(@name='200' or @name='300') and (contains(@content, '中学')  or  contains(@content, '大水') )  ]
+        // | field[@name='200']/subfield[(@name='a' or @name='b') and contains(@content, '中学')]
+        public static string BuildXPath(params string[] parameters)
+        {
+            if (parameters.Length == 1)
+            {
+                // 字段内容中包含一个指定的子串
+                // (contains(@content, '中学') or contains(@content, '大水') )
+                return $"field[{BuildContains(parameters[0], null)}]";
+            }
+            else if (parameters.Length == 2)
+            {
+                string word = parameters[0];
+                string position = parameters[1];
+                return BuildNames(word, position);
+            }
+            else
+                throw new Exception($"不支持参数数量 {parameters.Length}");
+        }
+
+#if OLD
         // 根据输入到 textbox 中的用户态命令，构造 XPath
         public static string BuildXPath(params string[] parameters)
         {
@@ -12639,7 +12777,7 @@ message,
                 }
                 else if (position.Length == 5)
                 {
-                    // 子段内容中包含一个指定的子串
+                    // 子字段内容中包含一个指定的子串
                     string field_name = position.Substring(0, 3);
                     string subfield_name = position[4].ToString();
                     return $"field[@name='{field_name}']/subfield[@name='{subfield_name}' and contains(@content, '{parameters[0]}')]";
@@ -12650,7 +12788,7 @@ message,
             else
                 throw new Exception($"不支持参数数量 {parameters.Length}");
         }
-
+#endif
         // 筛选
         private void ToolStripMenuItem_filterRecords_Click(object sender, EventArgs e)
         {
@@ -12660,8 +12798,16 @@ message,
             {
                 int nBiblioCount = 0;
                 string query_string = this.textBox_queryWord.Text;
-                var parameters = query_string.Split(new char[] { ' ' });
-                var xpath = BuildXPath(parameters);
+                string xpath = "";
+                if (query_string.StartsWith("xpath:"))
+                {
+                    xpath = query_string.Substring("xpath:".Length);
+                }
+                else
+                {
+                    var parameters = query_string.Split(new char[] { ' ' });
+                    xpath = BuildXPath(parameters);
+                }
 
                 var items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.Items)
