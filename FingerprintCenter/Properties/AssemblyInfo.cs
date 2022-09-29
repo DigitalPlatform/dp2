@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 // 方法是按如下所示使用“*”: :
-[assembly: AssemblyVersion("2.3.1")]
-[assembly: AssemblyFileVersion("2.3.1.0")]
+[assembly: AssemblyVersion("2.3.2")]
+[assembly: AssemblyFileVersion("2.3.2.0")]
 
 // V1.1 2019/2/21 第二个版本
 // V1.2 2019/4/12 采用最新 dp-library submodule 的版本
@@ -49,4 +49,5 @@ using System.Runtime.InteropServices;
 //              指纹登记过程中会向前端发送各种文字过程消息。
 //      2.3.1   解决 _enableSendKey() 中一处短路的 bug
 //              GetState() API 中增加 enableSendKey 和 disableSendKey 子功能
+//      2.3.2   fingerprintcenter 识别后的语音改为“很好 P0000009”或者“很好 P0000009 警告：指纹发送状态关闭”
 

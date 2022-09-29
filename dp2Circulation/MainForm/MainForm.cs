@@ -9136,7 +9136,9 @@ Keys keyData)
         void SetPalmManagerPause(bool pause)
         {
             if (pause == false)
+            {
                 ClearPalmMessage();
+            }
 
             FingerprintManager.Pause = pause;
             this.toolStripStatusLabel_palm.Text = pause || string.IsNullOrEmpty(FingerprintManager.Url) ? "" : Program.MainForm.GetPalmName();

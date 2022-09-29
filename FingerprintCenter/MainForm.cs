@@ -127,6 +127,7 @@ namespace FingerprintCenter
                     this.textBox_cfg_registerQualityThreshold,
                     this.textBox_cfg_recognitionQualityThreshold,
                     new ControlWrapper(this.checkBox_speakWhenSendKeyStateChange, false),
+                    new ControlWrapper(this.checkBox_speakDetailed, true),
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -148,6 +149,7 @@ namespace FingerprintCenter
                     this.textBox_cfg_registerQualityThreshold,
                     this.textBox_cfg_recognitionQualityThreshold,
                     new ControlWrapper(this.checkBox_speakWhenSendKeyStateChange, false),
+                    new ControlWrapper(this.checkBox_speakDetailed, true),
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -652,14 +654,25 @@ _cancel.Token,
                 }
                 else
                 {
-                    Speak("很好");
+                    if (SpeakDetailed)
+                    {
+                        if (this.SendKeyEnabled)
+                            Speak($"很好 {e.Text}");
+                        else
+                            Speak($"很好 {e.Text} 警告: 指纹发送状态关闭");
+                    }
+                    else
+                        Speak($"很好");
 
                     DisplayText($"很好\r\n图像质量: {e.Quality}");
 
                     // TODO: 显示文字中包含 e.Text?
 
                     if (this.SendKeyEnabled)
+                    {
                         SendKeys.SendWait(e.Text + "\r");
+                        e.KeySend = true;
+                    }
                 }
             }));
         }
@@ -1002,6 +1015,21 @@ _cancel.Token,
             }
         }
 
+        public bool SpeakDetailed
+        {
+            get
+            {
+                if (this.InvokeRequired)
+                {
+                    return (bool)this.Invoke(new Func<bool>(() =>
+                    {
+                        return this.checkBox_speakDetailed.Checked;
+                    }));
+                }
+                else
+                    return this.checkBox_speakDetailed.Checked;
+            }
+        }
         void EnableControls(bool bEnable)
         {
             this.Invoke((Action)(() =>

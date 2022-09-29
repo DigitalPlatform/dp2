@@ -4896,6 +4896,24 @@ out strError);
 
             LibraryApplication app = this;
 
+            // 在借册最大限额。常用于限制团体借书证最大借书数量
+            string chargedLimit = StringUtil.GetParameterByPrefix(strStyle, "chargedLimit");
+            if (string.IsNullOrEmpty(chargedLimit) == false)
+            {
+                if (Int32.TryParse(chargedLimit, out int limit) == false)
+                {
+                    strError = $"strStyle 中的 chargedLimit 子参数 '{chargedLimit}' 不合法，应为一个整数";
+                    return -1;
+                }
+
+                var nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+                if (nodes.Count >= limit)
+                {
+                    strError = $"当前在借的册数({nodes.Count})达到或超过限额 {limit}，借书操作被拒绝";
+                    return 0;
+                }
+            }
+
             if (StringUtil.IsInList("pauseBorrowing", this.OverdueStyle) == true)
             {
                 /* 这一段已经移动到本函数外面去做了，因为涉及到对readerdom的修改问题

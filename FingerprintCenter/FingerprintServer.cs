@@ -95,6 +95,11 @@ namespace FingerprintCenter
 
         private static void FingerPrint_Captured(object sender, DigitalPlatform.CirculationClient.CapturedEventArgs e)
         {
+            // 2022/9/29
+            // 如果稍早已经发送过 Key 了，则这里不用储存
+            if (e.KeySend == true)
+                return;
+
             lock (_syncRoot_messages)
             {
                 // Program.MainForm.OutputHistory("captured");

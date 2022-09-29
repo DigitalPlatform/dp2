@@ -118,6 +118,10 @@ namespace DigitalPlatform.CirculationClient
         // 2021/10/28
         // 图像数据。指纹、掌纹等的图像
         public byte[] ImageData { get; set; }
+
+        // 2022/9/29
+        // SendKey 是否已经发送过了
+        public bool KeySend { get; set; }
     }
 
     public delegate void ImageReadyEventHandler(object sender,
