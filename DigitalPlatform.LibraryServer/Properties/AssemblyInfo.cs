@@ -343,4 +343,5 @@ ItemCanReturn()
 //		3.128 (2022/9/14) dp2installer 中 dp2kernel 实例对话框中增加了直接切换 SQL 数据库底层的功能
 //		3.129 (2022/9/23) dp2library GetItemInfo() API 改进了获取 uii 的子功能，允许前端提供一条模拟的册记录来计算 uii。前端提供的这条册记录中 parent 元素内容应该为 "[none]"
 //		3.130 (2022/9/29) dp2library Borrow() API 的 strStyle 参数可以使用 chargedLimit:xx 限定最大在借册
+//						BiblioSummaryCache 中更新书目摘要 mongodb 库记录时增加了记录锁，确保相同记录路径的并发修改发生时不会出现 MongoDB.Driver.MongoWriteException: A write operation resulted in an error. E11000 duplicate key error collection: hnbpg_bibliosummary.summary index: BiblioRecPath_1 dup key: { : "图书总库/xxxx" }
 

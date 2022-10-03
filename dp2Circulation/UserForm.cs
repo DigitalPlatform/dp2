@@ -861,7 +861,11 @@ password);
                 if (File.Exists(strRightsCfgFileName) == true)
                     dlg.CfgFileName += "," + strRightsCfgFileName;
             }
+
+            Program.MainForm.AppInfo.LinkFormState(dlg, "UserForm_userRightsDlg_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString("UserForm", "userRightsDlg_uiState", "");
             dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.SetString("UserForm", "userRightsDlg_uiState", dlg.UiState);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;

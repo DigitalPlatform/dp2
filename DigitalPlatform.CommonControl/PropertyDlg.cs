@@ -4,11 +4,12 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Xml;
+using System.Text;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.Text;
 using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CommonControl
@@ -106,9 +107,9 @@ namespace DigitalPlatform.CommonControl
             // label_property
             // 
             this.label_property.AutoSize = true;
-            this.label_property.Location = new System.Drawing.Point(-2, 4);
+            this.label_property.Location = new System.Drawing.Point(-4, 7);
             this.label_property.Name = "label_property";
-            this.label_property.Size = new System.Drawing.Size(41, 12);
+            this.label_property.Size = new System.Drawing.Size(75, 21);
             this.label_property.TabIndex = 1;
             this.label_property.Text = "值(&V):";
             this.label_property.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -118,12 +119,12 @@ namespace DigitalPlatform.CommonControl
             this.textBox_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_property.Location = new System.Drawing.Point(0, 18);
+            this.textBox_property.Location = new System.Drawing.Point(0, 31);
             this.textBox_property.MaxLength = 0;
             this.textBox_property.Multiline = true;
             this.textBox_property.Name = "textBox_property";
             this.textBox_property.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_property.Size = new System.Drawing.Size(586, 81);
+            this.textBox_property.Size = new System.Drawing.Size(795, 118);
             this.textBox_property.TabIndex = 2;
             this.textBox_property.TextChanged += new System.EventHandler(this.textBox_property_TextChanged);
             // 
@@ -131,9 +132,9 @@ namespace DigitalPlatform.CommonControl
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.AutoSize = true;
-            this.button_Cancel.Location = new System.Drawing.Point(535, 373);
+            this.button_Cancel.Location = new System.Drawing.Point(697, 538);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(60, 22);
+            this.button_Cancel.Size = new System.Drawing.Size(114, 53);
             this.button_Cancel.TabIndex = 4;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
@@ -142,9 +143,9 @@ namespace DigitalPlatform.CommonControl
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.AutoSize = true;
-            this.button_OK.Location = new System.Drawing.Point(471, 373);
+            this.button_OK.Location = new System.Drawing.Point(580, 538);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(60, 22);
+            this.button_OK.Size = new System.Drawing.Size(114, 53);
             this.button_OK.TabIndex = 3;
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
@@ -159,7 +160,7 @@ namespace DigitalPlatform.CommonControl
             this.listView_property.HideSelection = false;
             this.listView_property.Location = new System.Drawing.Point(0, 0);
             this.listView_property.Name = "listView_property";
-            this.listView_property.Size = new System.Drawing.Size(586, 207);
+            this.listView_property.Size = new System.Drawing.Size(795, 296);
             this.listView_property.TabIndex = 0;
             this.listView_property.UseCompatibleStateImageBehavior = false;
             this.listView_property.View = System.Windows.Forms.View.Details;
@@ -183,9 +184,9 @@ namespace DigitalPlatform.CommonControl
             // 
             this.button_checkAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_checkAll.AutoSize = true;
-            this.button_checkAll.Location = new System.Drawing.Point(0, 212);
+            this.button_checkAll.Location = new System.Drawing.Point(0, 302);
             this.button_checkAll.Name = "button_checkAll";
-            this.button_checkAll.Size = new System.Drawing.Size(68, 22);
+            this.button_checkAll.Size = new System.Drawing.Size(138, 40);
             this.button_checkAll.TabIndex = 5;
             this.button_checkAll.Text = "全选(&A)";
             this.button_checkAll.Click += new System.EventHandler(this.button_checkAll_Click);
@@ -194,9 +195,9 @@ namespace DigitalPlatform.CommonControl
             // 
             this.button_uncheckAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_uncheckAll.AutoSize = true;
-            this.button_uncheckAll.Location = new System.Drawing.Point(73, 212);
+            this.button_uncheckAll.Location = new System.Drawing.Point(144, 302);
             this.button_uncheckAll.Name = "button_uncheckAll";
-            this.button_uncheckAll.Size = new System.Drawing.Size(66, 22);
+            this.button_uncheckAll.Size = new System.Drawing.Size(124, 40);
             this.button_uncheckAll.TabIndex = 6;
             this.button_uncheckAll.Text = "清除(&C)";
             this.button_uncheckAll.Click += new System.EventHandler(this.button_uncheckAll_Click);
@@ -206,7 +207,7 @@ namespace DigitalPlatform.CommonControl
             this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer_main.Location = new System.Drawing.Point(9, 10);
+            this.splitContainer_main.Location = new System.Drawing.Point(16, 17);
             this.splitContainer_main.Name = "splitContainer_main";
             this.splitContainer_main.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -217,34 +218,35 @@ namespace DigitalPlatform.CommonControl
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.panel_down);
-            this.splitContainer_main.Size = new System.Drawing.Size(586, 341);
-            this.splitContainer_main.SplitterDistance = 234;
+            this.splitContainer_main.Size = new System.Drawing.Size(795, 499);
+            this.splitContainer_main.SplitterDistance = 342;
             this.splitContainer_main.SplitterWidth = 8;
             this.splitContainer_main.TabIndex = 7;
             // 
             // panel_up
             // 
-            this.panel_up.Controls.Add(this.toolStrip1);
             this.panel_up.Controls.Add(this.listView_property);
             this.panel_up.Controls.Add(this.button_uncheckAll);
             this.panel_up.Controls.Add(this.button_checkAll);
             this.panel_up.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_up.Location = new System.Drawing.Point(0, 0);
             this.panel_up.Name = "panel_up";
-            this.panel_up.Size = new System.Drawing.Size(586, 234);
+            this.panel_up.Size = new System.Drawing.Size(795, 342);
             this.panel_up.TabIndex = 0;
             // 
             // toolStrip1
             // 
             this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButton_quickSet});
-            this.toolStrip1.Location = new System.Drawing.Point(505, 209);
+            this.toolStrip1.Location = new System.Drawing.Point(16, 538);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(81, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(192, 38);
             this.toolStrip1.TabIndex = 7;
             this.toolStrip1.Text = "toolStrip1";
+            this.toolStrip1.Visible = false;
             // 
             // toolStripDropDownButton_quickSet
             // 
@@ -252,7 +254,7 @@ namespace DigitalPlatform.CommonControl
             this.toolStripDropDownButton_quickSet.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_quickSet.Image")));
             this.toolStripDropDownButton_quickSet.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_quickSet.Name = "toolStripDropDownButton_quickSet";
-            this.toolStripDropDownButton_quickSet.Size = new System.Drawing.Size(69, 22);
+            this.toolStripDropDownButton_quickSet.Size = new System.Drawing.Size(117, 32);
             this.toolStripDropDownButton_quickSet.Text = "快速设定";
             // 
             // panel_down
@@ -262,13 +264,14 @@ namespace DigitalPlatform.CommonControl
             this.panel_down.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_down.Location = new System.Drawing.Point(0, 0);
             this.panel_down.Name = "panel_down";
-            this.panel_down.Size = new System.Drawing.Size(586, 99);
+            this.panel_down.Size = new System.Drawing.Size(795, 149);
             this.panel_down.TabIndex = 0;
             // 
             // PropertyDlg
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-            this.ClientSize = new System.Drawing.Size(604, 404);
+            this.AutoScaleBaseSize = new System.Drawing.Size(11, 24);
+            this.ClientSize = new System.Drawing.Size(827, 607);
+            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.splitContainer_main);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -313,8 +316,16 @@ namespace DigitalPlatform.CommonControl
 
         public void SetListViewTitle(ListView listView)
         {
-            listView.Columns.Add("属性值", 200, HorizontalAlignment.Left);
-            listView.Columns.Add("说明", 900, HorizontalAlignment.Left);
+            if (listView.Columns.Count == 0)
+            {
+                listView.Columns.Add("属性值", 300, HorizontalAlignment.Left);
+                listView.Columns.Add("说明", 900, HorizontalAlignment.Left);
+            }
+            else if (listView.Columns.Count >= 2)
+            {
+                listView.Columns[0].Text = "属性值";
+                listView.Columns[1].Text = "说明";
+            }
         }
 
         // 一个事项的附加数据
@@ -364,12 +375,10 @@ namespace DigitalPlatform.CommonControl
                 }
 
                 string strComment = "";
-
                 if (nodeComment != null)
                 {
                     strComment = DomUtil.GetNodeText(nodeComment);
                 }
-
 
                 ListViewItem item = new ListViewItem(strName, 0);
                 item.SubItems.Add(strComment);
@@ -395,8 +404,7 @@ namespace DigitalPlatform.CommonControl
             {
                 // 找到事项名字
                 string strLang = DomUtil.GetAttr(node, "lang");
-
-                if (strLang == "")
+                if (string.IsNullOrEmpty(strLang))
                     continue;
 
 #if NO
@@ -415,7 +423,6 @@ namespace DigitalPlatform.CommonControl
 #endif
                 if (_langNameList.IndexOf(strLang) == -1)
                     _langNameList.Add(strLang);
-
             }
 
             return 0;
@@ -513,8 +520,9 @@ namespace DigitalPlatform.CommonControl
                 // _propertyNameList[j] = listView_property.Items[j].Text;
 
                 // _propertyNameList.Add(item.Text);
-
-                _propertyNameTable[item.Text.ToLower()] = item;
+                string itemText = item.Text.ToLower();
+                string pureName = GetPureName(itemText);
+                _propertyNameTable[pureName] = item;
 
                 // 2017/4/20
                 // 别名也要加入 hashtable
@@ -524,7 +532,12 @@ namespace DigitalPlatform.CommonControl
                     foreach (string alias in info.AliasList)
                     {
                         if (string.IsNullOrEmpty(alias) == false)
+                        {
+                            // 别名中不允许包含冒号
+                            Debug.Assert(alias.IndexOf(":") == -1);
+
                             _propertyNameTable[alias.ToLower()] = item;
+                        }
                     }
                 }
             }
@@ -585,12 +598,12 @@ namespace DigitalPlatform.CommonControl
         }
 #endif
         // 是否为已经定义的属性名
-        bool IsDefinedPropertyName(string strName)
+        bool IsDefinedPropertyName(string strPureName)
         {
             if (this._propertyNameTable == null)
                 return false;
 
-            return _propertyNameTable.ContainsKey(strName.ToLower());
+            return _propertyNameTable.ContainsKey(strPureName.ToLower());
         }
 
         // 获得一个列表中属于当前没有定义的属性名
@@ -607,7 +620,9 @@ namespace DigitalPlatform.CommonControl
                 if (string.IsNullOrEmpty(strName))
                     continue;
 
-                if (IsDefinedPropertyName(strName) == true)
+                string pureName = GetPureName(strName);
+
+                if (IsDefinedPropertyName(pureName) == true)
                     continue;
 
                 aResult.Add(strName);
@@ -626,16 +641,44 @@ namespace DigitalPlatform.CommonControl
             {
                 // string strName = aName[i];
                 string strName = s.Trim();
-                if (strName == "")
+                if (string.IsNullOrEmpty(strName))
                     continue;
 
-                if (IsDefinedPropertyName(strName) == false)
+                string pureName = GetPureName(strName);
+
+                if (IsDefinedPropertyName(pureName) == false)
                     continue;
 
                 aResult.Add(strName);
             }
 
             return aResult;
+        }
+
+        // 获得 : 左边的部分
+        public static string GetPureName(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+
+            // 去掉":?????"部分
+            int nRet = strText.IndexOf(":", 0);
+            if (nRet != -1)
+                return strText.Substring(0, nRet).Trim();
+
+            return strText;
+        }
+
+        // 获得 : 右边的部分
+        public static string GetParameter(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+            int nRet = strText.IndexOf(":", 0);
+            if (nRet == -1)
+                return "";
+
+            return strText.Substring(nRet + 1).Trim();
         }
 
         int _skipItemChecked = 0;   // 2016/3/26
@@ -683,32 +726,39 @@ namespace DigitalPlatform.CommonControl
 
         void ChangeColor()
         {
-            for (int i = 0; i < this.listView_property.Items.Count; i++)
+            // for (int i = 0; i < this.listView_property.Items.Count; i++)
+            foreach(ListViewItem item in this.listView_property.Items)
             {
-                if (this.listView_property.Items[i].Checked == false)
+                if (item.Checked == false)
                 {
-                    this.listView_property.Items[i].ForeColor = SystemColors.WindowText;
-                    this.listView_property.Items[i].BackColor = SystemColors.Window;
+                    item.ForeColor = SystemColors.WindowText;
+                    item.BackColor = SystemColors.Window;
                 }
                 else
                 {
-                    this.listView_property.Items[i].ForeColor = SystemColors.MenuText;
-                    this.listView_property.Items[i].BackColor = SystemColors.Menu;
+                    item.ForeColor = SystemColors.MenuText;
+                    item.BackColor = SystemColors.Menu;
                 }
             }
         }
 
+        // parameters:
+        //      list    注意 list 的元素可能为 xxx:xxx 形态
         bool FindNameInList(string strItemName, List<string> aDefined)
         {
-            for (int k = 0; k < aDefined.Count; k++)
+            // for (int k = 0; k < aDefined.Count; k++)
+            foreach (var defined in aDefined)
             {
-                if (String.Compare(strItemName, (string)aDefined[k], true) == 0)
+                string definedPureName = GetPureName(defined);
+                if (String.Compare(strItemName, definedPureName, true) == 0)
                     return true;
             }
 
             return false;
         }
 
+        // parameters:
+        //      list    注意 list 的元素可能为 xxx:xxx 形态
         bool FindNamesInList(List<string> names, List<string> list)
         {
             foreach (string name in names)
@@ -720,21 +770,26 @@ namespace DigitalPlatform.CommonControl
             return false;
         }
 
+#if DEBUG
+        // 验证 alias 列表的合法性
+        void VerifyAliasList(List<string> list)
+        {
+            foreach (var s in list)
+            {
+                Debug.Assert(s.IndexOf(":") == -1);
+            }
+        }
+#endif
+
         private void textBox_property_TextChanged(object sender, System.EventArgs e)
         {
-            //bool bChanged = false;
             // 提取已定义的部分
             List<string> aDefined = GetDefinedPropertyNames(textBox_property.Text);
 
             // check
             foreach (string strName in aDefined)
             {
-                // string strName = (string)aDefined[i];
-
-                //bool bRet = 
                 CheckItem(strName, true);
-                //if (bRet == true)
-                //	bChanged = true;
             }
 
             // uncheck
@@ -745,19 +800,13 @@ namespace DigitalPlatform.CommonControl
                 if (info != null)
                     alias_list = info.AliasList;
 
-                alias_list.Insert(0, item.Text);
+                alias_list.Insert(0, GetPureName(item.Text));
 
-#if NO
-                bool bFound = false;
-                for (int k = 0; k < aDefined.Count; k++)
-                {
-                    if (String.Compare(strItemName, (string)aDefined[k], true) == 0)
-                    {
-                        bFound = true;	// 属于需要on的事项
-                        break;
-                    }
-                }
+#if DEBUG
+                // 检查 alias_list
+                VerifyAliasList(alias_list);
 #endif
+
                 bool bFound = FindNamesInList(alias_list, aDefined);
 
                 // 属于需要off的事项
@@ -766,11 +815,8 @@ namespace DigitalPlatform.CommonControl
                     if (item.Checked == false)
                         continue;
                     item.Checked = false;
-                    //bChanged = true;
                 }
-
             }
-
         }
 
 #if NO
@@ -794,18 +840,29 @@ namespace DigitalPlatform.CommonControl
         }
 #endif
 
+        // 勾选或去掉勾选一个事项。有可能会改变事项 .Text
+        // 注: strName 可能为 xxx:xxx 形态
         // 2016/3/26 优化速度
         bool CheckItem(string strName, bool bChecked)
         {
-            ListViewItem item = (ListViewItem)_propertyNameTable[strName.ToLower()];
+            string pureName = GetPureName(strName);
+
+            ListViewItem item = (ListViewItem)_propertyNameTable[pureName.ToLower()];
             if (item == null)
-                return false;	// 没有找到事项
+                return false;   // 没有找到事项
+
+            // 2022/10/3 连参数部分也兑现显示
+            if (item.Text != strName)
+                item.Text = strName;
 
             if (item.Checked == bChecked)
-                return false;	// 没有改变状态
+            {
+                return false;   // 没有改变状态
+            }
             else
             {
                 _skipItemChecked++;
+
                 item.Checked = bChecked;
                 _skipItemChecked--;
                 return true;	// 改变了状态
@@ -896,10 +953,125 @@ namespace DigitalPlatform.CommonControl
                     menuItemSub.Enabled = false;
                     menuItemSub.Checked = true;
                 }
-
             }
 
+            menuItem = new MenuItem("输入子参数(&S)");
+            menuItem.Click += MenuItem_inputSubParameter_Click;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("清除子参数(&C)");
+            menuItem.Click += MenuItem_clearSubParameter_Click;
+            contextMenu.MenuItems.Add(menuItem);
+
             contextMenu.Show(listView_property, new Point(e.X, e.Y));
+        }
+
+        // 输入子参数
+        private void MenuItem_inputSubParameter_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.listView_property.SelectedItems.Count == 0)
+            {
+                strError = $"尚未选择事项。请选择一个事项进行输入";
+                goto ERROR1;
+            }
+
+            if (this.listView_property.SelectedItems.Count > 1)
+            {
+                strError = $"不支持同时针对多个事项输入子参数。请重新选择一个事项进行输入";
+                goto ERROR1;
+            }
+
+            var item = this.listView_property.SelectedItems[0];
+
+            string pureName = GetPureName(item.Text);
+            string old_parameter = GetParameter(item.Text);
+        REDO_INPUT:
+            string new_parameter = InputDlg.GetInput(this,
+                $"输入 '{pureName}' 的子参数",
+                $"请输入 '{pureName}' 的子参数:",
+                old_parameter,
+                this.Font);
+            if (new_parameter == null)
+                return;
+
+            if (new_parameter.IndexOfAny(new char[] { ':', ',' }) != -1)
+            {
+                MessageBox.Show(this, $"子参数内容 '{new_parameter}' 不合法。不允许包含冒号和逗号。请重新输入");
+                old_parameter = new_parameter;
+                goto REDO_INPUT;
+            }
+
+            if (item.Checked)
+            {
+                if (string.IsNullOrEmpty(new_parameter))
+                    this.textBox_property.Text = RemoveSubParameter(this.textBox_property.Text, pureName);
+                else
+                    this.textBox_property.Text = StringUtil.SetParameterByPrefix(this.textBox_property.Text,
+                        pureName,
+                        ":",
+                        new_parameter);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(new_parameter))
+                    item.Text = pureName;
+                else
+                    item.Text = pureName + ":" + new_parameter;
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_clearSubParameter_Click(object sender, EventArgs e)
+        {
+            List<string> changed_names = new List<string>();
+            foreach (ListViewItem item in this.listView_property.SelectedItems)
+            {
+                string strParameter = GetParameter(item.Text);
+                if (string.IsNullOrEmpty(strParameter) == false)
+                {
+                    if (item.Checked == false)
+                        item.Text = GetPureName(item.Text); // 只修改 ListViewItem 的显示
+                    else
+                        changed_names.Add(GetPureName(item.Text));  // 直接修改属性，这样 ListViewItem 自然会改变显示
+                }
+            }
+
+            if (changed_names.Count > 0)
+            {
+                string value = this.textBox_property.Text;
+                foreach (var name in changed_names)
+                {
+                    value = RemoveSubParameter(value, name);
+                }
+                this.textBox_property.Text = value;
+            }
+        }
+
+        // 删除子参数
+        public static string RemoveSubParameter(string strList,
+    string strPrefix,
+    string strDelimiter = ":")
+        {
+            if (string.IsNullOrEmpty(strList) == true)
+                strList = "";
+
+            List<string> results = new List<string>();
+            string[] list = strList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in list)
+            {
+                if (s.StartsWith(strPrefix + strDelimiter) == true
+                    || s == strPrefix)
+                {
+                    results.Add(strPrefix);
+                }
+                else
+                    results.Add(s);
+            }
+
+            return StringUtil.MakePathList(results, ",");
         }
 
         // 选择了语言
@@ -917,7 +1089,6 @@ namespace DigitalPlatform.CommonControl
                 textBox_property.Text = strSave;
                 textBox_property_TextChanged(null, null);
             }
-
         }
 
         private void button_checkAll_Click(object sender, System.EventArgs e)
@@ -926,7 +1097,6 @@ namespace DigitalPlatform.CommonControl
             {
                 this.listView_property.Items[i].Checked = true;
             }
-
         }
 
         private void button_uncheckAll_Click(object sender, System.EventArgs e)
@@ -986,6 +1156,22 @@ namespace DigitalPlatform.CommonControl
                 textBox_property.Text = StringUtil.MergeList(textBox_property.Text, strValue, false);
             else
                 textBox_property.Text = strValue;
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_property);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_property);
+                GuiState.SetUiState(controls, value);
+            }
         }
     }
 }

@@ -102,7 +102,7 @@ namespace DigitalPlatform.LibraryServer
             if (commands.Count > 0)
             {
                 ClearBiblioSummaryDb();
-                foreach(XmlElement command in commands)
+                foreach (XmlElement command in commands)
                 {
                     command.ParentNode.RemoveChild(command);
                 }
@@ -124,6 +124,13 @@ namespace DigitalPlatform.LibraryServer
                 return this._summaryCollection;
             }
         }
+
+        // 书目摘要 锁。用于控制写入书目摘要的过程，避免出现异常:
+        // Type: MongoDB.Driver.MongoWriteException
+        // Message: A write operation resulted in an error.
+        //  E11000 duplicate key error collection: hnbpg_bibliosummary.summary index: BiblioRecPath_1 dup key: { : "图书总库/207228" }
+        public RecordLockCollection _summary_locks = new RecordLockCollection();
+
 
         // 设置书目摘要
         public void SetBiblioSummary(string strBiblioRecPath, string strSummary, string strImageFragment)
@@ -147,11 +154,19 @@ namespace DigitalPlatform.LibraryServer
                 .Set(_ => _.Summary, strSummary)
                 .Set(_ => _.ImageFragment, strImageFragment);
 
-            collection.UpdateOne(
-                o => o.BiblioRecPath == strBiblioRecPath,
-                updateDef,
-                new UpdateOptions { IsUpsert = true });
-
+            // 2022/9/30
+            this._summary_locks.LockForWrite(strBiblioRecPath);
+            try
+            {
+                collection.UpdateOne(
+                    o => o.BiblioRecPath == strBiblioRecPath,
+                    updateDef,
+                    new UpdateOptions { IsUpsert = true });
+            }
+            finally
+            {
+                this._summary_locks.UnlockForWrite(strBiblioRecPath);
+            }
         }
 
         // 删除书目摘要
