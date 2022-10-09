@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.73.*")]
-[assembly: AssemblyFileVersion("3.73.0.0")]
+[assembly: AssemblyVersion("3.74.*")]
+[assembly: AssemblyFileVersion("3.74.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -156,3 +156,4 @@ using System.Runtime.InteropServices;
 // 3.71 2022/9/25 ProcessManager 优化了启动进程的过程，增加了对 Proccess Exit 的检查，避免 Process 缓慢启动的中途发生重复启动
 // 3.72 2022/9/26 优化 dp2circulation 启动时候首次显示 MainForm 的过程，避免出现闪烁
 // 3.73 2022/9/27 书目查询窗实现“筛选”功能
+// 3.74 2022/10/9 为宿主类 DetailHost 增加 MergeLines() 虚函数，方便定制索取号创建规则

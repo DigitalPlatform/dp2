@@ -191,10 +191,15 @@ namespace DigitalPlatform.LibraryServer
                 throw new ArgumentException("strFunction 参数值中不允许包含字符 '|'。应改用逗号");
 
             List<string> results = new List<string>();
+#if USE_OBJECTRIGHTS
             if (StringUtil.IsInList("objectRights", strFunction) == true)
                 results.Add("+下载权限");
             else
                 results.Add("-下载权限");
+#else
+            results.Add("(恒有下载权限)");
+#endif
+
 
             if (StringUtil.IsInList("pdfPreview", strFunction) == true)
                 results.Add("+PDF预览");
@@ -7429,7 +7434,7 @@ out strError);
             // not found
             if (lRet == 0)
             {
-                strError = $"{strFrom} '{ strDisplayName }' 没有找到";
+                strError = $"{strFrom} '{strDisplayName}' 没有找到";
                 return 0;
             }
 
@@ -15635,7 +15640,7 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     if (StringUtil.IsInList("backup,managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 { strResPath } 被拒绝。不具备 backup 或 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 backup 或 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -15643,25 +15648,25 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     if (StringUtil.IsInList("managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 { strResPath } 被拒绝。不具备 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 managedatabase 权限";
                         return 0;
                     }
                 }
                 else if (string.Compare(strFirstLevel, "log", true) == 0)
                 {
-                    strError = $"{strActionName}文件 { strResPath } 被拒绝。特殊目录不允许进行{strActionName}";
+                    strError = $"{strActionName}文件 {strResPath} 被拒绝。特殊目录不允许进行{strActionName}";
                     return 0;
                 }
                 else if (string.Compare(strFirstLevel, "operlog", true) == 0)
                 {
-                    strError = $"{strActionName}文件 { strResPath } 被拒绝。特殊目录不允许进行{strActionName}";
+                    strError = $"{strActionName}文件 {strResPath} 被拒绝。特殊目录不允许进行{strActionName}";
                     return 0;
                 }
                 else if (string.Compare(strFirstLevel, "upload", true) == 0)
                 {
                     if (StringUtil.IsInList("upload,managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 { strResPath } 被拒绝。不具备 upload 或 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 upload 或 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -15675,7 +15680,7 @@ strLibraryCode);    // 读者所在的馆代码
                     }
                     if (StringUtil.IsInList("managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件 { strResPath } 被拒绝。不具备 managedatabase 权限";
+                        strError = $"{strActionName}文件 {strResPath} 被拒绝。不具备 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -15687,7 +15692,7 @@ strLibraryCode);    // 读者所在的馆代码
                     */
                     if (StringUtil.IsInList("managedatabase", strRights) == false)
                     {
-                        strError = $"{strActionName}文件或目录 { strResPath } 被拒绝。不具备 managedatabase 权限";
+                        strError = $"{strActionName}文件或目录 {strResPath} 被拒绝。不具备 managedatabase 权限";
                         return 0;
                     }
                 }
@@ -16020,7 +16025,7 @@ strLibraryCode);    // 读者所在的馆代码
         // 根据逻辑名称找到对应的起始物理目录
         // parameters:
         //      strPath [in]逻辑路径
-        //              [out]吃掉第一部分后余下的逻辑路径
+        //              [out]吃掉第一部分后余下的逻辑路径。注意，只有当返回值为 1 时 strPath 才会发生改变，-1 和 0 时不会改变
         //      strStartDir 起点物理路径。也就是被吃掉的第一部分对应的物理路径
         // return:
         //      -1  出错
@@ -16062,6 +16067,7 @@ strLibraryCode);    // 读者所在的馆代码
             if (is_read == false && is_write == false)
                 throw new ArgumentException($"未知的 strAction '{strAction}'");
 
+            string strSavePath = strPath;
             string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
 
             var nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("fileShare/directory");
@@ -16102,10 +16108,12 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                     }
 
+                    strPath = strSavePath;  // 2022/10/8
                     return 0;
                 }
             }
 
+            strPath = strSavePath;  // 2022/10/8
             return 0;
         }
 
@@ -16309,9 +16317,11 @@ strLibraryCode);    // 读者所在的馆代码
                         if (nRet == 0)
                             goto ALLOW_ACCESS;   // TODO: 此时是否允许访问?
 
+#if USE_OBJECTRIGHTS
                         // 2018/9/15
                         if (StringUtil.IsInList("objectRights", this.Function) == false)
                             goto ALLOW_ACCESS;   // 如果 dp2library 没有许可 objectRights 功能，是允许任何访问者来获取的。即，不限制任何下载权限
+#endif
 
                         if (string.IsNullOrEmpty(strObjectRights) == true)
                             goto ALLOW_ACCESS;   // 没有定义 rights 的对象是允许任何访问者来获取的
@@ -16443,7 +16453,7 @@ strLibraryCode);    // 读者所在的馆代码
         //      strOperation   要查询的操作。为 download preview write 之一。默认 download
         //      strObjectRights 对象权限定义。原始定义
         //              简单用法: user1,user2   代表 user1 和 user2 同时具备所有操作(例如 download 和 preview 等)权限
-        //              详尽用法: download:user1,user2;preview:user3,user4
+        //              详尽用法: download:user1,user2;preview:user3,user4 (注意，分号分隔段落。逗号只是冒号右侧内的部分)
         public static bool CanGet(string strOperation,
             string strGroupOrLevels,
             string strObjectRights)

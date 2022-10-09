@@ -588,7 +588,11 @@ namespace DigitalPlatform.LibraryServer
                         //      0   成功
                         //      1   有部分字段被修改或滤除
                         nRet = FilterBiblioByFieldNameList(
+#if USE_OBJECTRIGHTS
                             StringUtil.IsInList("objectRights", this.Function) == true ? sessioninfo.Rights : null,
+#else
+                            sessioninfo.Rights,
+#endif
                             strAccessParameters,
                             ref strBiblioXml,
                             out strError);

@@ -4274,12 +4274,18 @@ chi	中文	如果是中文，则为空。
                 }
 
                 // 最后设置完整的索取类号
+                /*
                 func_setText(RemoveSpecialChars(
                     ((strHeadLine != null ? strHeadLine + "/" : "")
                         + strClass +
                         (string.IsNullOrEmpty(strQufenhao) == false ?
                         "/" + strQufenhao : "")
                         )));
+                */
+                // 2022/10/9
+                func_setText(RemoveSpecialChars(MergeLines(strHeadLine,
+                    strClass,
+                    strQufenhao)));
 
 #if NO
                 // 最后设置完整的索取类号
@@ -4344,6 +4350,20 @@ chi	中文	如果是中文，则为空。
             ERROR1:
             e.ErrorInfo = strError;
             return -1;
+        }
+
+        // 2022/10/9
+        // 最后一步，把三行合成为一个字符串
+        public virtual string MergeLines(string strHeadLine,
+            string strClass,
+            string strQufenhao)
+        {
+            // 最后设置完整的索取类号
+            return ((strHeadLine != null ? strHeadLine + "/" : "")
+                    + strClass +
+                    (string.IsNullOrEmpty(strQufenhao) == false ?
+                    "/" + strQufenhao : "")
+                    );
         }
 
         delegate void Delegate_setText(string strText);

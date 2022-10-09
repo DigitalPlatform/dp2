@@ -29,6 +29,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
+using dp2Circulation.Reader;
 
 namespace dp2Circulation
 {
@@ -3063,7 +3064,18 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
             // 按下 Ctrl 键，表示没有 face 元素的读者记录也尽量创建 face 元素(否则只会修改已经有 face 元素的读者记录)
-            var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+            // var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+
+            RebuildFaceFeatureDialog dlg = new RebuildFaceFeatureDialog();
+            dlg.Font = this.Font;
+
+            Program.MainForm.AppInfo.LinkFormState(dlg, "readerSearchForm_rebuildFace_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString("readerSearchForm", "rebuildFace_ui_state", "");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.SetString("readerSearchForm", "rebuildFace_ui_state", dlg.UiState);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return;
 
             string version = "";
 
@@ -3076,7 +3088,8 @@ MessageBoxDefaultButton.Button1);
                     // 检查是否具有人脸特征
                     if (face == null)
                     {
-                        if (control == false)
+                        // if (control == false)
+                        if (dlg.OnlyRebuildExistingFaceElement == true)
                         {
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode("没有 face 元素") + "</div>");
                             return false;
@@ -3133,13 +3146,24 @@ MessageBoxDefaultButton.Button1);
                         await stream.ReadAsync(bytes, 0, bytes.Length);
                     }
 
-                    GetFeatureStringResult feature_result = await ReadFeatureString(bytes, "", "");
+                    string style = "";
+                    if (dlg.SearchDup)
+                        style = "searchDup";
+
+                    GetFeatureStringResult feature_result = await ReadFeatureString(bytes, "", style);
                     if (feature_result.Value == -1)
                     {
                         if (feature_result.ErrorCode == "getFeatureFail")
                         {
                             // 无法提取特征的情况，输出报错信息到操作历史，然后继续循环
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"无法提取人脸特征 {feature_result.ErrorInfo}") + "</div>");
+                            return false;
+                        }
+
+                        if (feature_result.ErrorCode == "alreadyExist")
+                        {
+                            // 人脸特征已经存在的情况，输出报错信息到操作历史，然后继续循环
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"{feature_result.ErrorInfo}。放弃重建人脸特征") + "</div>");
                             return false;
                         }
                         throw new Exception(feature_result.ErrorInfo);

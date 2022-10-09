@@ -208,7 +208,7 @@ namespace dp2Circulation
             if (int.TryParse(strLength, out nLength) == true)
             {
                 if (this.comboBox_fieldValue.Text.Length != nLength)
-                    return "值 '"+this.comboBox_fieldValue.Text+"' 的字符数应为 " + nLength;
+                    return "值 '" + this.comboBox_fieldValue.Text + "' 的字符数应为 " + nLength;
             }
 
             return null;
@@ -222,7 +222,7 @@ namespace dp2Circulation
 
             if (this.CfgDom != null)
             {
-                FillFieldNameList(this.Lang, 
+                FillFieldNameList(this.Lang,
                     this.CfgDom,
                     this.UsedFieldNames,
                     this.comboBox_fieldName);
@@ -356,7 +356,7 @@ namespace dp2Circulation
             if (strFieldName[0] == '{' || strFieldName[0] == '<')
             {
                 string strElement = Unquote(strFieldName);
-                cfg_node = cfg_dom.DocumentElement.SelectSingleNode("action[@element='"+strElement+"']") as XmlElement;
+                cfg_node = cfg_dom.DocumentElement.SelectSingleNode("action[@element='" + strElement + "']") as XmlElement;
                 if (cfg_node == null)
                 {
                     strError = "元素名 '" + strFieldName + "' 在配置文件中没有定义";
@@ -388,7 +388,7 @@ namespace dp2Circulation
 
         internal static void FillFieldNameList(
             string strLang,
-            XmlDocument cfg_dom, 
+            XmlDocument cfg_dom,
             List<string> used_fieldnames,
             ComboBox combobox)
         {
@@ -758,8 +758,15 @@ namespace dp2Circulation
             }
 
             if (StringUtil.IsInList("patron", strStyle) == true)
-                filenames.Add(Path.Combine(this.DataDir, "userrightsdef.xml"));
-
+            {
+                string filename1 = Path.Combine(Program.MainForm.UserDir, "patronrights.xml");
+                string filename2 = Path.Combine(this.DataDir, "userrightsdef.xml");
+                if (File.Exists(filename1))
+                    filenames.Add(filename1);
+                else
+                    filenames.Add(filename2);
+                // filenames.Add(Path.Combine(this.DataDir, "userrightsdef.xml"));
+            }
             string strInput = combobox.Text;
             StringUtil.RemoveFromInList("<增、减>", true, ref strInput);
             StringUtil.RemoveFromInList("<不改变>", true, ref strInput);

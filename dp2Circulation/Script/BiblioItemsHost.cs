@@ -9,11 +9,11 @@ using System.Text;
 using System.Windows.Forms;
 using System.Collections;
 
+using DigitalPlatform;
+using DigitalPlatform.GUI;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
-using DigitalPlatform;
-using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;

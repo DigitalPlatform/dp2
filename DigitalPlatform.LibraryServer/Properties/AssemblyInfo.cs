@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.130.*")]
-[assembly: AssemblyFileVersion("3.130.0.0")]
+[assembly: AssemblyVersion("3.131.*")]
+[assembly: AssemblyFileVersion("3.131.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -344,4 +344,6 @@ ItemCanReturn()
 //		3.129 (2022/9/23) dp2library GetItemInfo() API 改进了获取 uii 的子功能，允许前端提供一条模拟的册记录来计算 uii。前端提供的这条册记录中 parent 元素内容应该为 "[none]"
 //		3.130 (2022/9/29) dp2library Borrow() API 的 strStyle 参数可以使用 chargedLimit:xx 限定最大在借册
 //						BiblioSummaryCache 中更新书目摘要 mongodb 库记录时增加了记录锁，确保相同记录路径的并发修改发生时不会出现 MongoDB.Driver.MongoWriteException: A write operation resulted in an error. E11000 duplicate key error collection: hnbpg_bibliosummary.summary index: BiblioRecPath_1 dup key: { : "图书总库/xxxx" }
+//		3.131 (2022/10/8) 856 字段内的权限和对象 file/@rights 内的权限不再需要序列号
+//						修正物理文件下载共享文件夹功能带来的权限判断 bug
 

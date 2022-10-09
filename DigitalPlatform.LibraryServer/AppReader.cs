@@ -11,6 +11,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Messaging;
 
 using Newtonsoft.Json;
 
@@ -26,7 +27,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
-using System.Messaging;
 
 namespace DigitalPlatform.LibraryServer
 {

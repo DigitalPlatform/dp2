@@ -6442,7 +6442,7 @@ MessageBoxDefaultButton.Button1);
 
         private void readerEditControl1_EditRights(object sender, EventArgs e)
         {
-            DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
+            PropertyDlg dlg = new PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
             string strPatronRightsCfgFileName = Path.Combine(Program.MainForm.UserDir, "patronrights.xml");

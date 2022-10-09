@@ -7009,12 +7009,15 @@ handle.CancelTokenSource.Token).Result;
                             strDataFieldName,
                             id);
                         // 先把整个对象文件写入一个对象文件
-                        using (source)
+                        if (source != null) // 2022/10/8
                         {
-                            using (FileStream output = File.Create(strTempFileName))
+                            using (source)
                             {
-                                source.Seek(0, SeekOrigin.Begin);
-                                StreamUtil.DumpStream(source, output);
+                                using (FileStream output = File.Create(strTempFileName))
+                                {
+                                    source.Seek(0, SeekOrigin.Begin);
+                                    StreamUtil.DumpStream(source, output);
+                                }
                             }
                         }
 
@@ -7145,6 +7148,7 @@ handle.CancelTokenSource.Token).Result;
                     {
                         int nTotalPage = 0;
                         string strTempFileName = this.container.GetTempFileName("pgi");
+
                         using (GhostscriptRasterizer rasterizer = new GhostscriptRasterizer())
                         {
                             rasterizer.Open(strPdfFileName, DatabaseCollection.gvi, false);

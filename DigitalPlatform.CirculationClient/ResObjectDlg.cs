@@ -247,6 +247,19 @@ namespace DigitalPlatform.CirculationClient
             dlg.Text = "对象的权限";
             dlg.PropertyString = this.textBox_rights.Text;
             dlg.CfgFileName = RightsCfgFileName;
+            dlg.TextEditChanged += (s, e1) => {
+                var text = dlg.TextEdit.Text;
+                if (text.Contains(":"))
+                {
+                    dlg.ListView.Enabled = false;
+                    dlg.EnableButtons(false);
+                }
+                else
+                {
+                    dlg.ListView.Enabled = true;
+                    dlg.EnableButtons(true);
+                }
+            };
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)

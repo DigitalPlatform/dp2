@@ -1,11 +1,12 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.Script;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.Script;
 
 namespace dp2Circulation
 {
@@ -66,6 +67,7 @@ namespace dp2Circulation
         {
             get;
         }
+
         string MarcSyntax
         {
             get;
@@ -84,5 +86,4 @@ namespace dp2Circulation
             get;
         }
     }
-
 }

@@ -92,16 +92,16 @@ namespace DigitalPlatform.CommonControl
             this.button_uncheckAll = new System.Windows.Forms.Button();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.panel_up = new System.Windows.Forms.Panel();
+            this.panel_down = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton_quickSet = new System.Windows.Forms.ToolStripDropDownButton();
-            this.panel_down = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
             this.splitContainer_main.SuspendLayout();
             this.panel_up.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
             this.panel_down.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label_property
@@ -116,8 +116,8 @@ namespace DigitalPlatform.CommonControl
             // 
             // textBox_property
             // 
-            this.textBox_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_property.Location = new System.Drawing.Point(0, 31);
             this.textBox_property.MaxLength = 0;
@@ -152,8 +152,8 @@ namespace DigitalPlatform.CommonControl
             // 
             // listView_property
             // 
-            this.listView_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.listView_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_property.CheckBoxes = true;
             this.listView_property.FullRowSelect = true;
@@ -204,8 +204,8 @@ namespace DigitalPlatform.CommonControl
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(16, 17);
             this.splitContainer_main.Name = "splitContainer_main";
@@ -225,6 +225,7 @@ namespace DigitalPlatform.CommonControl
             // 
             // panel_up
             // 
+            this.panel_up.Controls.Add(this.toolStrip1);
             this.panel_up.Controls.Add(this.listView_property);
             this.panel_up.Controls.Add(this.button_uncheckAll);
             this.panel_up.Controls.Add(this.button_checkAll);
@@ -233,29 +234,6 @@ namespace DigitalPlatform.CommonControl
             this.panel_up.Name = "panel_up";
             this.panel_up.Size = new System.Drawing.Size(795, 342);
             this.panel_up.TabIndex = 0;
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripDropDownButton_quickSet});
-            this.toolStrip1.Location = new System.Drawing.Point(16, 538);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(192, 38);
-            this.toolStrip1.TabIndex = 7;
-            this.toolStrip1.Text = "toolStrip1";
-            this.toolStrip1.Visible = false;
-            // 
-            // toolStripDropDownButton_quickSet
-            // 
-            this.toolStripDropDownButton_quickSet.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripDropDownButton_quickSet.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_quickSet.Image")));
-            this.toolStripDropDownButton_quickSet.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton_quickSet.Name = "toolStripDropDownButton_quickSet";
-            this.toolStripDropDownButton_quickSet.Size = new System.Drawing.Size(117, 32);
-            this.toolStripDropDownButton_quickSet.Text = "快速设定";
             // 
             // panel_down
             // 
@@ -267,11 +245,32 @@ namespace DigitalPlatform.CommonControl
             this.panel_down.Size = new System.Drawing.Size(795, 149);
             this.panel_down.TabIndex = 0;
             // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripDropDownButton_quickSet});
+            this.toolStrip1.Location = new System.Drawing.Point(603, 292);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(192, 44);
+            this.toolStrip1.TabIndex = 7;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripDropDownButton_quickSet
+            // 
+            this.toolStripDropDownButton_quickSet.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton_quickSet.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_quickSet.Image")));
+            this.toolStripDropDownButton_quickSet.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_quickSet.Name = "toolStripDropDownButton_quickSet";
+            this.toolStripDropDownButton_quickSet.Size = new System.Drawing.Size(117, 38);
+            this.toolStripDropDownButton_quickSet.Text = "快速设定";
+            // 
             // PropertyDlg
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(11, 24);
             this.ClientSize = new System.Drawing.Size(827, 607);
-            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.splitContainer_main);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -286,10 +285,10 @@ namespace DigitalPlatform.CommonControl
             this.splitContainer_main.ResumeLayout(false);
             this.panel_up.ResumeLayout(false);
             this.panel_up.PerformLayout();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
             this.panel_down.ResumeLayout(false);
             this.panel_down.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -670,13 +669,17 @@ namespace DigitalPlatform.CommonControl
         }
 
         // 获得 : 右边的部分
+        // return:
+        //      null    冒号和右边部分不存在
+        //      ""      冒号存在，冒号右边部分不存在
+        //      其它      子参数部分
         public static string GetParameter(string strText)
         {
             if (string.IsNullOrEmpty(strText))
                 return "";
             int nRet = strText.IndexOf(":", 0);
             if (nRet == -1)
-                return "";
+                return null;
 
             return strText.Substring(nRet + 1).Trim();
         }
@@ -727,7 +730,7 @@ namespace DigitalPlatform.CommonControl
         void ChangeColor()
         {
             // for (int i = 0; i < this.listView_property.Items.Count; i++)
-            foreach(ListViewItem item in this.listView_property.Items)
+            foreach (ListViewItem item in this.listView_property.Items)
             {
                 if (item.Checked == false)
                 {
@@ -817,6 +820,8 @@ namespace DigitalPlatform.CommonControl
                     item.Checked = false;
                 }
             }
+
+            TriggerTextEditChanged(this.textBox_property);
         }
 
 #if NO
@@ -897,6 +902,12 @@ namespace DigitalPlatform.CommonControl
 
         private void button_OK_Click(object sender, System.EventArgs e)
         {
+            var errors = VerifyDupRights(textBox_property.Text);
+            if (errors.Count > 0)
+            {
+                MessageDlg.Show(this, StringUtil.MakePathList(errors, "\r\n"), "权限定义错误");
+                return;
+            }
             PropertyString = textBox_property.Text;
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -986,7 +997,9 @@ namespace DigitalPlatform.CommonControl
 
             string pureName = GetPureName(item.Text);
             string old_parameter = GetParameter(item.Text);
-        REDO_INPUT:
+            if (old_parameter == null)
+                old_parameter = "";
+            REDO_INPUT:
             string new_parameter = InputDlg.GetInput(this,
                 $"输入 '{pureName}' 的子参数",
                 $"请输入 '{pureName}' 的子参数:",
@@ -1030,7 +1043,7 @@ namespace DigitalPlatform.CommonControl
             foreach (ListViewItem item in this.listView_property.SelectedItems)
             {
                 string strParameter = GetParameter(item.Text);
-                if (string.IsNullOrEmpty(strParameter) == false)
+                if (strParameter != null)
                 {
                     if (item.Checked == false)
                         item.Text = GetPureName(item.Text); // 只修改 ListViewItem 的显示
@@ -1173,5 +1186,61 @@ namespace DigitalPlatform.CommonControl
                 GuiState.SetUiState(controls, value);
             }
         }
+
+        // 校验是否发生了权限重复
+        public static List<string> VerifyDupRights(string text)
+        {
+            List<string> results = new List<string>();
+            if (string.IsNullOrEmpty(text))
+                return results;
+            var parts = text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string part = parts[i];
+                string left1 = GetPureName(part);
+                for (int j = i + 1; j < parts.Length; j++)
+                {
+                    string current = parts[j];
+                    var left2 = GetPureName(current);
+                    if (left1 == left2)
+                        results.Add($"'{part}'(位置 {i+1}) 和 '{current}'(位置 {j + 1}) 发生重复");
+                }
+            }
+
+            return results;
+        }
+
+        // textbox 内文本发生改变
+        public EventHandler TextEditChanged { get; set; }
+
+        void TriggerTextEditChanged(object sender)
+        {
+            TextEditChanged?.Invoke(sender, new EventArgs());
+        }
+
+        public TextBox TextEdit
+        {
+            get
+            {
+                return this.textBox_property;
+            }
+        }
+
+        public ListView ListView
+        {
+            get
+            {
+                return this.listView_property;
+            }
+        }
+
+        public void EnableButtons(bool enable)
+        {
+            this.button_checkAll.Enabled = enable;
+            this.button_uncheckAll.Enabled = enable;
+            this.toolStrip1.Enabled = enable;
+        }
     }
+
+
 }

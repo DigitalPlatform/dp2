@@ -3599,7 +3599,11 @@ namespace dp2Library
                 //      0   成功
                 //      1   有部分字段被修改或滤除
                 int nRet = LibraryApplication.FilterBiblioByFieldNameList(
+#if USE_OBJECTRIGHTS
                     StringUtil.IsInList("objectRights", app.Function) == true ? sessioninfo.Rights : null,
+#else
+                    sessioninfo.Rights,
+#endif
                     strAccessParameters,
                     ref xml,
                     out string strError);
@@ -8654,7 +8658,7 @@ namespace dp2Library
                     // locateParam.Add(strOrderDbName);
                     // locateParam.Add(strParentID);
                     locateParam.Add(strIndex);
-#endif              
+#endif
                     List<string> PathList = null;
 
                     List<string> locateParam = null;
