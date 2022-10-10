@@ -6300,8 +6300,6 @@ MessageBoxDefaultButton.Button2);
             strError = "";
             host = null;
 
-            string strContent = "";
-            Encoding encoding;
             // 能自动识别文件内容的编码方式的读入文本文件内容模块
             // parameters:
             //      lMaxLength  装入的最大长度。如果超过，则超过的部分不装入。如果为-1，表示不限制装入长度
@@ -6312,8 +6310,8 @@ MessageBoxDefaultButton.Button2);
             //      2   读入的内容不是全部
             int nRet = FileUtil.ReadTextFileContent(strCsFileName,
                 -1,
-                out strContent,
-                out encoding,
+                out string strContent,
+                out Encoding encoding,
                 out strError);
             if (nRet == -1)
                 return -1;

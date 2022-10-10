@@ -198,7 +198,10 @@ namespace DigitalPlatform
                 using (var stream = new MemoryStream())
                 {
                     EmitResult compilationResult = compilation.Emit(stream);
-
+                    /*
+                    EmitOptions options = new EmitOptions().WithDebugInformationFormat(DebugInformationFormat.Embedded);
+                    EmitResult compilationResult = compilation.Emit(stream, null, null, null, null, options);
+                    */
                     List<string> errors = new List<string>();
                     List<string> warnings = new List<string>();
 

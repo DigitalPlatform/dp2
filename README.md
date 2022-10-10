@@ -39,7 +39,7 @@ QQ群:
 
 ## 如何编译
 
-1) 应使用 Visual Studio 2017 或 2019
+1) 应使用 Visual Studio 2019 或 2022
 
 2) 确保安装过 .NET Core SDK 2.6 以上版本
 
