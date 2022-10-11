@@ -63,6 +63,9 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_summary_field, false));
 
                 controls.Add(this.textBox_size_rowSep);
+                controls.Add(this.textBox_size_firstColumnWidth);
+                controls.Add(this.textBox_size_secondColumnWidth);
+                controls.Add(this.textBox_size_thirdColumnWidth);
 
                 return GuiState.GetUiState(controls);
             }
@@ -94,6 +97,9 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_summary_field, false));
 
                 controls.Add(this.textBox_size_rowSep);
+                controls.Add(this.textBox_size_firstColumnWidth);
+                controls.Add(this.textBox_size_secondColumnWidth);
+                controls.Add(this.textBox_size_thirdColumnWidth);
 
                 GuiState.SetUiState(controls, value);
             }
@@ -271,6 +277,42 @@ namespace dp2Circulation
             set
             {
                 this.textBox_size_rowSep.Text = value;
+            }
+        }
+
+        public string FirstColumnWidth
+        {
+            get
+            {
+                return this.textBox_size_firstColumnWidth.Text;
+            }
+            set
+            {
+                this.textBox_size_firstColumnWidth.Text = value;
+            }
+        }
+
+        public string SecondColumnWidth
+        {
+            get
+            {
+                return this.textBox_size_secondColumnWidth.Text;
+            }
+            set
+            {
+                this.textBox_size_secondColumnWidth.Text = value;
+            }
+        }
+
+        public string ThirdColumnWidth
+        {
+            get
+            {
+                return this.textBox_size_thirdColumnWidth.Text;
+            }
+            set
+            {
+                this.textBox_size_thirdColumnWidth.Text = value;
             }
         }
 

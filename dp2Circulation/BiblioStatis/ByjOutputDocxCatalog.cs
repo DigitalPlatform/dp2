@@ -65,6 +65,8 @@ namespace dp2Circulation
             Writer.WriteEndElement();  // style
         }
 
+        // bool first = true;
+
         public override void OutputRecord(string accessNo,
     List<string> barcodes,
     string book_string)
@@ -89,8 +91,16 @@ namespace dp2Circulation
             // 序号
             {
                 Writer.WriteStartElement("td");
+                if (string.IsNullOrEmpty(_firstColumnWidth))
+                    Writer.WriteAttributeString("style", "noWrap");
+
+                /*
+                if (first)
+                Writer.WriteAttributeString("gridWidth", string.IsNullOrEmpty(_firstColumnWidth) ? "auto" : _firstColumnWidth);    // "20"
+                */
+
                 //if (first)
-                Writer.WriteAttributeString("width", "auto");    // "20"
+                Writer.WriteAttributeString("width", string.IsNullOrEmpty(_firstColumnWidth) ? "auto" : _firstColumnWidth);    // "20"
                 {
                     Writer.WriteStartElement("p");
                     Writer.WriteAttributeString("style", "index");
@@ -103,8 +113,16 @@ namespace dp2Circulation
             // 册条码号
             {
                 Writer.WriteStartElement("td");
+                if (string.IsNullOrEmpty(_secondColumnWidth))
+                    Writer.WriteAttributeString("style", "noWrap");
+
+                /*
+                if (first)
+                Writer.WriteAttributeString("gridWidth", string.IsNullOrEmpty(_secondColumnWidth) ? "auto" : _secondColumnWidth);    // "50"
+                */
+
                 //if (first)
-                Writer.WriteAttributeString("width", "auto");    // "50"
+                Writer.WriteAttributeString("width", string.IsNullOrEmpty(_secondColumnWidth) ? "auto" : _secondColumnWidth);    // "50"
 
                 // 条码号
                 if (barcodes.Count > 0)
@@ -141,8 +159,14 @@ namespace dp2Circulation
             // 正文、索取号
             {
                 Writer.WriteStartElement("td");
+
+                /*
+                if (first)
+                Writer.WriteAttributeString("gridWidth", string.IsNullOrEmpty(_thirdColumnWidth) ? "auto" : _thirdColumnWidth);
+                */
+
                 //if (first)
-                Writer.WriteAttributeString("width", "auto");
+                Writer.WriteAttributeString("width", string.IsNullOrEmpty(_thirdColumnWidth) ? "auto" : _thirdColumnWidth);
 
                 /*
                 // 书目 ISBD
@@ -221,6 +245,10 @@ namespace dp2Circulation
                 Writer.WriteEndElement();
             }
             Writer.WriteEndElement();  // </tr>
+
+            /*
+            first = false;
+            */
         }
 
         static bool IsDeleteBarcode(string barcode)

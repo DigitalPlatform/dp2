@@ -182,6 +182,12 @@ namespace dp2Circulation
             _writer.WriteStartElement("table");
             _writer.WriteAttributeString("cellMarginDefault", $"0,0,0,{_rowSep}");
             _writer.WriteAttributeString("width", "100%");
+
+            // 只要有一个列宽度定义了，就采用 fixed 方式 table layout
+            if (string.IsNullOrEmpty(_firstColumnWidth) == false
+                || string.IsNullOrEmpty(_secondColumnWidth) == false
+                || string.IsNullOrEmpty(_thirdColumnWidth) == false)
+                _writer.WriteAttributeString("layout", "fixed");
         }
 
         public virtual void OutputStyles()
@@ -268,8 +274,9 @@ alignment="center"/>
             // 序号
             {
                 _writer.WriteStartElement("td");
+
                 //if (first)
-                _writer.WriteAttributeString("width", "auto");    // "20"
+                _writer.WriteAttributeString("width", string.IsNullOrEmpty(_firstColumnWidth) ? "auto" : _firstColumnWidth);    // "20"
                 {
                     _writer.WriteStartElement("p");
                     _writer.WriteAttributeString("style", "index");
@@ -282,8 +289,9 @@ alignment="center"/>
             // 索取号和册条码号
             {
                 _writer.WriteStartElement("td");
+
                 //if (first)
-                _writer.WriteAttributeString("width", "auto");    // "50"
+                _writer.WriteAttributeString("width", string.IsNullOrEmpty(_secondColumnWidth) ? "auto" : _secondColumnWidth);    // "50"
 
                 // 索取号
                 if (string.IsNullOrEmpty(accessNo) == false)
@@ -347,7 +355,7 @@ alignment="center"/>
             {
                 _writer.WriteStartElement("td");
                 //if (first)
-                _writer.WriteAttributeString("width", "auto");
+                _writer.WriteAttributeString("width", string.IsNullOrEmpty(_thirdColumnWidth) ? "auto" : _thirdColumnWidth);
 
                 /*
                 // 书目 ISBD
@@ -473,6 +481,9 @@ alignment="center"/>
         public bool _boldTitleArea = false;
 
         public string _rowSep = "";
+        public string _firstColumnWidth = "";
+        public string _secondColumnWidth = "";
+        public string _thirdColumnWidth = "";
 
         string _areas = "";
 
@@ -522,6 +533,9 @@ alignment="center"/>
                 _PageNoFontSize = dlg.PageNoFontSize;
                 _boldTitleArea = dlg.BoldTitleArea;
                 _rowSep = dlg.RowSep;
+                _firstColumnWidth = dlg.FirstColumnWidth;
+                _secondColumnWidth = dlg.SecondColumnWidth;
+                _thirdColumnWidth = dlg.ThirdColumnWidth;
                 _areas = dlg.AreaList;
 
                 {

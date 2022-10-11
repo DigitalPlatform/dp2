@@ -53,6 +53,11 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_number = new System.Windows.Forms.TabPage();
             this.tabPage_font = new System.Windows.Forms.TabPage();
+            this.button_getPageNoFontName = new System.Windows.Forms.Button();
+            this.textBox_pageNoFontSize = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.textBox_pageNoFontName = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
             this.checkBox_boldTitleArea = new System.Windows.Forms.CheckBox();
             this.button_getAccessNoFont = new System.Windows.Forms.Button();
             this.button_getContentFont = new System.Windows.Forms.Button();
@@ -71,11 +76,12 @@
             this.tabPage_size = new System.Windows.Forms.TabPage();
             this.textBox_size_rowSep = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
-            this.button_getPageNoFontName = new System.Windows.Forms.Button();
-            this.textBox_pageNoFontSize = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.textBox_pageNoFontName = new System.Windows.Forms.TextBox();
-            this.label13 = new System.Windows.Forms.Label();
+            this.textBox_size_firstColumnWidth = new System.Windows.Forms.TextBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.textBox_size_secondColumnWidth = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.textBox_size_thirdColumnWidth = new System.Windows.Forms.TextBox();
+            this.label16 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_pageNumberStart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_biblioNoStart)).BeginInit();
             this.tabControl1.SuspendLayout();
@@ -111,6 +117,11 @@
             // numericUpDown_pageNumberStart
             // 
             this.numericUpDown_pageNumberStart.Location = new System.Drawing.Point(191, 63);
+            this.numericUpDown_pageNumberStart.Maximum = new decimal(new int[] {
+            99999999,
+            0,
+            0,
+            0});
             this.numericUpDown_pageNumberStart.Name = "numericUpDown_pageNumberStart";
             this.numericUpDown_pageNumberStart.Size = new System.Drawing.Size(177, 31);
             this.numericUpDown_pageNumberStart.TabIndex = 2;
@@ -142,6 +153,11 @@
             // numericUpDown_biblioNoStart
             // 
             this.numericUpDown_biblioNoStart.Location = new System.Drawing.Point(191, 17);
+            this.numericUpDown_biblioNoStart.Maximum = new decimal(new int[] {
+            99999999,
+            0,
+            0,
+            0});
             this.numericUpDown_biblioNoStart.Name = "numericUpDown_biblioNoStart";
             this.numericUpDown_biblioNoStart.Size = new System.Drawing.Size(177, 31);
             this.numericUpDown_biblioNoStart.TabIndex = 5;
@@ -353,6 +369,51 @@
             this.tabPage_font.Text = "字体";
             this.tabPage_font.UseVisualStyleBackColor = true;
             // 
+            // button_getPageNoFontName
+            // 
+            this.button_getPageNoFontName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getPageNoFontName.Location = new System.Drawing.Point(736, 329);
+            this.button_getPageNoFontName.Name = "button_getPageNoFontName";
+            this.button_getPageNoFontName.Size = new System.Drawing.Size(58, 31);
+            this.button_getPageNoFontName.TabIndex = 31;
+            this.button_getPageNoFontName.Text = "...";
+            this.button_getPageNoFontName.UseVisualStyleBackColor = true;
+            this.button_getPageNoFontName.Click += new System.EventHandler(this.button_getPageNoFontName_Click);
+            // 
+            // textBox_pageNoFontSize
+            // 
+            this.textBox_pageNoFontSize.Location = new System.Drawing.Point(193, 366);
+            this.textBox_pageNoFontSize.Name = "textBox_pageNoFontSize";
+            this.textBox_pageNoFontSize.Size = new System.Drawing.Size(192, 31);
+            this.textBox_pageNoFontSize.TabIndex = 30;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(8, 369);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(105, 21);
+            this.label12.TabIndex = 29;
+            this.label12.Text = "页码字号:";
+            // 
+            // textBox_pageNoFontName
+            // 
+            this.textBox_pageNoFontName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_pageNoFontName.Location = new System.Drawing.Point(193, 329);
+            this.textBox_pageNoFontName.Name = "textBox_pageNoFontName";
+            this.textBox_pageNoFontName.Size = new System.Drawing.Size(541, 31);
+            this.textBox_pageNoFontName.TabIndex = 28;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(8, 332);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(105, 21);
+            this.label13.TabIndex = 27;
+            this.label13.Text = "页码字体:";
+            // 
             // checkBox_boldTitleArea
             // 
             this.checkBox_boldTitleArea.AutoSize = true;
@@ -517,6 +578,12 @@
             // 
             // tabPage_size
             // 
+            this.tabPage_size.Controls.Add(this.textBox_size_thirdColumnWidth);
+            this.tabPage_size.Controls.Add(this.label16);
+            this.tabPage_size.Controls.Add(this.textBox_size_secondColumnWidth);
+            this.tabPage_size.Controls.Add(this.label15);
+            this.tabPage_size.Controls.Add(this.textBox_size_firstColumnWidth);
+            this.tabPage_size.Controls.Add(this.label14);
             this.tabPage_size.Controls.Add(this.textBox_size_rowSep);
             this.tabPage_size.Controls.Add(this.label11);
             this.tabPage_size.Location = new System.Drawing.Point(4, 31);
@@ -542,50 +609,53 @@
             this.label11.TabIndex = 22;
             this.label11.Text = "表格行间距:";
             // 
-            // button_getPageNoFontName
+            // textBox_size_firstColumnWidth
             // 
-            this.button_getPageNoFontName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getPageNoFontName.Location = new System.Drawing.Point(736, 329);
-            this.button_getPageNoFontName.Name = "button_getPageNoFontName";
-            this.button_getPageNoFontName.Size = new System.Drawing.Size(58, 31);
-            this.button_getPageNoFontName.TabIndex = 31;
-            this.button_getPageNoFontName.Text = "...";
-            this.button_getPageNoFontName.UseVisualStyleBackColor = true;
-            this.button_getPageNoFontName.Click += new System.EventHandler(this.button_getPageNoFontName_Click);
+            this.textBox_size_firstColumnWidth.Location = new System.Drawing.Point(195, 110);
+            this.textBox_size_firstColumnWidth.Name = "textBox_size_firstColumnWidth";
+            this.textBox_size_firstColumnWidth.Size = new System.Drawing.Size(192, 31);
+            this.textBox_size_firstColumnWidth.TabIndex = 25;
             // 
-            // textBox_pageNoFontSize
+            // label14
             // 
-            this.textBox_pageNoFontSize.Location = new System.Drawing.Point(193, 366);
-            this.textBox_pageNoFontSize.Name = "textBox_pageNoFontSize";
-            this.textBox_pageNoFontSize.Size = new System.Drawing.Size(192, 31);
-            this.textBox_pageNoFontSize.TabIndex = 30;
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(10, 113);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(126, 21);
+            this.label14.TabIndex = 24;
+            this.label14.Text = "第一列宽度:";
             // 
-            // label12
+            // textBox_size_secondColumnWidth
             // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(8, 369);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(105, 21);
-            this.label12.TabIndex = 29;
-            this.label12.Text = "页码字号:";
+            this.textBox_size_secondColumnWidth.Location = new System.Drawing.Point(195, 147);
+            this.textBox_size_secondColumnWidth.Name = "textBox_size_secondColumnWidth";
+            this.textBox_size_secondColumnWidth.Size = new System.Drawing.Size(192, 31);
+            this.textBox_size_secondColumnWidth.TabIndex = 27;
             // 
-            // textBox_pageNoFontName
+            // label15
             // 
-            this.textBox_pageNoFontName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_pageNoFontName.Location = new System.Drawing.Point(193, 329);
-            this.textBox_pageNoFontName.Name = "textBox_pageNoFontName";
-            this.textBox_pageNoFontName.Size = new System.Drawing.Size(541, 31);
-            this.textBox_pageNoFontName.TabIndex = 28;
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(10, 150);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(126, 21);
+            this.label15.TabIndex = 26;
+            this.label15.Text = "第二列宽度:";
             // 
-            // label13
+            // textBox_size_thirdColumnWidth
             // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(8, 332);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(105, 21);
-            this.label13.TabIndex = 27;
-            this.label13.Text = "页码字体:";
+            this.textBox_size_thirdColumnWidth.Location = new System.Drawing.Point(195, 184);
+            this.textBox_size_thirdColumnWidth.Name = "textBox_size_thirdColumnWidth";
+            this.textBox_size_thirdColumnWidth.Size = new System.Drawing.Size(192, 31);
+            this.textBox_size_thirdColumnWidth.TabIndex = 29;
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(10, 187);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(126, 21);
+            this.label16.TabIndex = 28;
+            this.label16.Text = "第三列宽度:";
             // 
             // OutputDocxCatalogDialog
             // 
@@ -666,5 +736,11 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox textBox_pageNoFontName;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.TextBox textBox_size_thirdColumnWidth;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.TextBox textBox_size_secondColumnWidth;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.TextBox textBox_size_firstColumnWidth;
+        private System.Windows.Forms.Label label14;
     }
 }

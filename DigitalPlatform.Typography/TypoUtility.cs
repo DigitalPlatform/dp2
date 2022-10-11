@@ -995,6 +995,25 @@ out string error);
             tableProp.Append(tableStyle, tableWidth);
             */
 
+            // 2022/10/11
+            // table 的 layout 属性
+            {
+                // https://www.docx4java.org/forums/docx-java-f6/setting-column-width-of-a-table-and-fix-this-t1819.html
+                var layout = table.GetAttribute("layout");
+                if (string.IsNullOrEmpty(layout) == false)
+                {
+                    var tbl_layout = new TableLayout();
+                    if (layout == "fixed")
+                        tbl_layout.Type = TableLayoutValues.Fixed;
+                    else if (layout == "autofit")
+                        tbl_layout.Type = TableLayoutValues.Autofit;
+                    else
+                        throw new Exception($"table/@layout 属性值 '{layout}' 不合法。应为 'fixed' 'autofit' 之一");
+                    
+                    tableProp.Append(tbl_layout);
+                }
+            }
+
             // 选择第一个 tr
             var headers = table.SelectNodes("tr[1]/*[name()='th' or name()='td']");
             if (headers.Count > 0)
@@ -1010,11 +1029,42 @@ out string error);
                     // https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.gridcolumn?view=openxml-2.8.1
                     tg.AppendChild(column);
 
-                    /*
-                    var width = header.GetAttribute("width");
+                    var width = header.GetAttribute("gridWidth");
                     if (string.IsNullOrEmpty(width) == false)
-                        column.Width = width;
-                    */
+                        column.Width = GetTwentieths(width);
+
+                    string GetTwentieths(string text)
+                    {
+                        if (string.IsNullOrEmpty(text))
+                            return text;
+
+                        int nRet = ParseUnit(text,
+            out string value,
+            out string unit,
+            out string error);
+                        if (nRet == -1)
+                            throw new Exception(error);
+
+                        if (string.IsNullOrEmpty(unit) || unit == "pt")
+                        {
+                            var v = (int)(Convert.ToDouble(value) * 20D);
+                            return v.ToString();
+                        }
+
+                        // 2022/10/11
+                        if (unit == "cm")
+                        {
+                            var v = (int)((Convert.ToDouble(value) * 72D * 20D) / 2.54D);
+                            return v.ToString();
+                        }
+
+                        if (unit == "dxa")
+                        {
+                            return value;
+                        }
+
+                        throw new Exception($"{header.Name}/@gridWidth 属性值 '{text}' 中出现未知的单位 '{unit}'");
+                    }
                 }
             }
 
@@ -1039,13 +1089,35 @@ out string error);
                     TableCell tc1 = new TableCell();
                     tr1.Append(tc1);
 
+                    TableCellProperties EnsureProperty()
+                    {
+                        if (tc1.Elements<TableCellProperties>().Count() == 0)
+                        {
+                            tc1.PrependChild<TableCellProperties>(new TableCellProperties());
+                        }
+
+                        return tc1.Elements<TableCellProperties>().First();
+                    }
+
                     var width = td.GetAttribute("width");
                     if (string.IsNullOrEmpty(width) == false)
                     {
                         // Specify the width property of the table cell.
                         // Dxa:  Width in Twentieths of a Point. 二十分之一点
+                        /*
                         tc1.Append(new TableCellProperties(
                             GetTableCellWidth(width)));
+                        */
+                        var prop = EnsureProperty();
+                        prop.AppendChild(GetTableCellWidth(width));
+                    }
+
+                    // 2022/10/11
+                    var style = td.GetAttribute("style");
+                    if (StringUtil.IsInList("noWrap", style))
+                    {
+                        var prop = EnsureProperty();
+                        prop.AppendChild(new NoWrap());
                     }
 
                     // 检查 td 下级是否有 p 元素
@@ -1168,6 +1240,17 @@ out string error);
                 };
             }
 
+            // 2022/10/11
+            if (unit == "cm")
+            {
+                var v = (int)((Convert.ToDouble(value) * 72D * 20D) / 2.54D);
+                return new TableCellWidth
+                {
+                    Type = TableWidthUnitValues.Dxa,
+                    Width = v.ToString()
+                };
+            }
+
             if (unit == "dxa")
             {
                 return new TableCellWidth
@@ -1208,6 +1291,13 @@ out string error);
                 return v.ToString();
             }
 
+            // 2022/10/11
+            if (unit == "cm")
+            {
+                var v = (int)((Convert.ToDouble(value) * 72D * 20D) / 2.54D);
+                return v.ToString();
+            }
+
             if (unit == "dxa")
             {
                 return value;
@@ -1229,6 +1319,17 @@ out string error);
             if (string.IsNullOrEmpty(unit) || unit == "pt")
             {
                 var v = (int)(Convert.ToDouble(value) * 2D);
+                return new FontSize
+                {
+                    Val = v.ToString()
+                };
+            }
+
+            // 2022/10/11
+            // TODO: 注意测试
+            if (unit == "cm")
+            {
+                var v = (int)((Convert.ToDouble(value) * 72D * 2D) / 2.54D);
                 return new FontSize
                 {
                     Val = v.ToString()
