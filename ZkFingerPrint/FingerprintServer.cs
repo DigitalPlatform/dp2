@@ -955,5 +955,16 @@ Exception rethrown at [0]:
         }
 
         #endregion
+
+        // 获得一副图像。
+        // parameters:
+        //      strStyle    风格。
+        //                  camera，或者默认，从摄像头抓取一副图像
+        //                  patron:xxx  读者头像。xxx 为证条码号
+        public GetImageResult GetImage(string strStyle)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

@@ -257,6 +257,7 @@ namespace dp2Circulation
             if (barcode.StartsWith("GW")
                 || barcode.StartsWith("JH")
                 || barcode.StartsWith("XK")
+                || barcode.StartsWith("XB")
                 || (barcode.StartsWith("W") && barcode.StartsWith("WS") == false && barcode.StartsWith("WK") == false && barcode.StartsWith("WB") == false)) // W 开头的删除，除了其中 WS WK WB 开头的以外
                 return true;
             return false;
@@ -267,18 +268,23 @@ namespace dp2Circulation
             int i = 0;
             foreach (var barcode in barcodes)
             {
-                if (i > 0)
-                    Writer.WriteElementString("br", "");
-
                 if (IsDeleteBarcode(barcode))
                 {
+#if DISPLAY_DELETE_BARCODE
+                    if (i > 0)
+                        Writer.WriteElementString("br", "");
+
                     Writer.WriteStartElement("style");
                     Writer.WriteAttributeString("use", "strike");
                     Writer.WriteString(barcode);
                     Writer.WriteEndElement();
+#endif
                 }
                 else
                 {
+                    if (i > 0)
+                        Writer.WriteElementString("br", "");
+
                     Writer.WriteString(barcode);
                 }
                 i++;
@@ -293,12 +299,14 @@ namespace dp2Circulation
             {
                 if (IsDeleteBarcode(barcode))
                 {
+#if DISPLAY_DELETE_BARCODE
                     if (i > 0)
                         Writer.WriteElementString("blk", "");
                     Writer.WriteStartElement("style");
                     Writer.WriteAttributeString("use", "strike");
                     Writer.WriteString(barcode);
                     Writer.WriteEndElement();
+#endif
                 }
                 else
                 {

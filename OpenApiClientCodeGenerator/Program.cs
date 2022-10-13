@@ -73,7 +73,7 @@ namespace OpenApiClientCodeGenerator
 
                 System.Net.WebClient wclient = new System.Net.WebClient();
 
-                var document = await OpenApiDocument.FromJsonAsync(wclient.DownloadString(url));
+                var document = await OpenApiDocument.FromJsonAsync(wclient.DownloadString(swaggerUrl));
 
                 wclient.Dispose();
 

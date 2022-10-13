@@ -3818,7 +3818,8 @@ nsmgr);
                     continue;
 
                 // 对象是否允许被获取?
-                if (CanGet("download", strUserRights, strObjectRights) == false)
+                if (CanGet("download", strUserRights, strObjectRights) == false
+                    && CanGet("preview", strUserRights, strObjectRights) == false /*2022/10/13*/)
                 {
                     field.Content += strMaskChar;
                     nCount++;
@@ -3867,7 +3868,8 @@ nsmgr);
                     continue;
 
                 // 对象是否允许被获取?
-                if (CanGet("download", strUserRights, strObjectRights) == false)
+                if (CanGet("download", strUserRights, strObjectRights) == false
+                    && CanGet("preview", strUserRights, strObjectRights) == false/*2022/10/13*/)
                     delete_fields.Add(field);
             }
 

@@ -908,5 +908,37 @@ else
                 Assert.AreEqual("entity", result.Type);
             }
         }
+
+        [TestMethod]
+        public void Test_sample_02()
+        {
+            string xml = @"
+        <collection>
+           <validator location=',*' >
+               <patron>
+                   <CMIS />
+                   <range value='P000001-P999999' />
+               </patron>
+<entity>
+	<range value='T000000-T999999'/>
+	<range value='Y0000000-Y9999999'/>
+	<range value='TOO00000-TOO99999'/>
+	<range value='TOOOO0000-TOOOO9999'/>
+	<range value='T0000000-T9999999'/>
+	<range value='I0000000-I9999999'/>
+	<range value='00000000-99999999'/>
+	<range value='X25707-X99999'/>
+</entity>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("海淀分馆", "70009293");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+        }
     }
 }
