@@ -6640,7 +6640,12 @@ dlg.UiState);
         {
             strError = "";
 
+            var new_timeout = TimeSpan.FromSeconds(30);
+
             LibraryChannel channel = this.GetChannel();
+            var old_timeout = channel.Timeout;
+            if (old_timeout < new_timeout)
+                channel.Timeout = new_timeout;
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -6687,7 +6692,10 @@ dlg.UiState);
                         out baTimestamp,
                         out strError);
                     if (lRet == -1)
+                    {
+                        // TODO: 如果遇到 timeout 出错可以考虑重做一次
                         return -1;
+                    }
 
                     if (lRet == 0)
                         return -1;
@@ -6755,6 +6763,7 @@ dlg.UiState);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
             }
         }

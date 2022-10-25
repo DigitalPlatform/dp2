@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.131.*")]
-[assembly: AssemblyFileVersion("3.131.0.0")]
+[assembly: AssemblyVersion("3.132.*")]
+[assembly: AssemblyFileVersion("3.132.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -346,4 +346,5 @@ ItemCanReturn()
 //						BiblioSummaryCache 中更新书目摘要 mongodb 库记录时增加了记录锁，确保相同记录路径的并发修改发生时不会出现 MongoDB.Driver.MongoWriteException: A write operation resulted in an error. E11000 duplicate key error collection: hnbpg_bibliosummary.summary index: BiblioRecPath_1 dup key: { : "图书总库/xxxx" }
 //		3.131 (2022/10/8) 856 字段内的权限和对象 file/@rights 内的权限不再需要序列号
 //						修正物理文件下载共享文件夹功能带来的权限判断 bug
+//		3.132 (2022/10/25) Return() API 的子功能 DoTransfer() 中，当修改了册记录 location 元素时，会自动连带清空 shelfNo 元素和 currentLocation 元素
 

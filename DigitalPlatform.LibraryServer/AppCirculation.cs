@@ -8857,6 +8857,13 @@ start_time_1,
                     DomUtil.SetElementText(new_itemdom.DocumentElement,
                         "location", strNewLocation);    // TODO: 注意保留 #reservation 部分
                     changed = true;
+
+                    // 2022/10/25
+                    // 顺带清空 shelfNo 和 currentLocation
+                    DomUtil.SetElementText(new_itemdom.DocumentElement,
+                        "shelfNo", "");
+                    DomUtil.SetElementText(new_itemdom.DocumentElement,
+                        "currentLocation", "");
                 }
             }
 
@@ -16749,6 +16756,9 @@ sessioninfo.ExpandLibraryCodeList);
             if (string.IsNullOrEmpty(strAccountLocation) == false)
             {
                 bool warning = true;
+
+                // 2022/10/25
+                strAccountLocation = strAccountLocation.Replace("[空]", "").Replace("[Empty]", "");
 
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "currentLocation",

@@ -32,6 +32,7 @@
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_source = new System.Windows.Forms.TabPage();
             this.tabPage_selectTarget = new System.Windows.Forms.TabPage();
+            this.checkBox_overwriteByG01 = new System.Windows.Forms.CheckBox();
             this.textBox_importRange = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox_targetDbName = new DigitalPlatform.CommonControl.TabComboBox();
@@ -41,7 +42,8 @@
             this.webBrowser1_running = new System.Windows.Forms.WebBrowser();
             this.tabPage_print = new System.Windows.Forms.TabPage();
             this.button_print = new System.Windows.Forms.Button();
-            this.checkBox_overwriteByG01 = new System.Windows.Forms.CheckBox();
+            this.textBox_batchNo = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_selectTarget.SuspendLayout();
             this.tabPage_runImport.SuspendLayout();
@@ -88,6 +90,8 @@
             // 
             // tabPage_selectTarget
             // 
+            this.tabPage_selectTarget.Controls.Add(this.textBox_batchNo);
+            this.tabPage_selectTarget.Controls.Add(this.label2);
             this.tabPage_selectTarget.Controls.Add(this.checkBox_overwriteByG01);
             this.tabPage_selectTarget.Controls.Add(this.textBox_importRange);
             this.tabPage_selectTarget.Controls.Add(this.label1);
@@ -101,6 +105,17 @@
             this.tabPage_selectTarget.TabIndex = 1;
             this.tabPage_selectTarget.Text = " 选定目标";
             this.tabPage_selectTarget.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_overwriteByG01
+            // 
+            this.checkBox_overwriteByG01.AutoSize = true;
+            this.checkBox_overwriteByG01.Location = new System.Drawing.Point(220, 58);
+            this.checkBox_overwriteByG01.Name = "checkBox_overwriteByG01";
+            this.checkBox_overwriteByG01.Size = new System.Drawing.Size(355, 25);
+            this.checkBox_overwriteByG01.TabIndex = 4;
+            this.checkBox_overwriteByG01.Text = "按照 -01 字段覆盖回原书目库(&O)";
+            this.checkBox_overwriteByG01.UseVisualStyleBackColor = true;
+            this.checkBox_overwriteByG01.CheckedChanged += new System.EventHandler(this.checkBox_overwriteByG01_CheckedChanged);
             // 
             // textBox_importRange
             // 
@@ -198,16 +213,23 @@
             this.button_print.Text = "打印统计结果(&P)";
             this.button_print.UseVisualStyleBackColor = true;
             // 
-            // checkBox_overwriteByG01
+            // textBox_batchNo
             // 
-            this.checkBox_overwriteByG01.AutoSize = true;
-            this.checkBox_overwriteByG01.Location = new System.Drawing.Point(220, 58);
-            this.checkBox_overwriteByG01.Name = "checkBox_overwriteByG01";
-            this.checkBox_overwriteByG01.Size = new System.Drawing.Size(355, 25);
-            this.checkBox_overwriteByG01.TabIndex = 4;
-            this.checkBox_overwriteByG01.Text = "按照 -01 字段覆盖回原书目库(&O)";
-            this.checkBox_overwriteByG01.UseVisualStyleBackColor = true;
-            this.checkBox_overwriteByG01.CheckedChanged += new System.EventHandler(this.checkBox_overwriteByG01_CheckedChanged);
+            this.textBox_batchNo.Location = new System.Drawing.Point(220, 173);
+            this.textBox_batchNo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.textBox_batchNo.Name = "textBox_batchNo";
+            this.textBox_batchNo.Size = new System.Drawing.Size(334, 31);
+            this.textBox_batchNo.TabIndex = 6;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(11, 177);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(159, 21);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "编目批次号(&B):";
             // 
             // ImportMarcForm
             // 
@@ -247,5 +269,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox_importRange;
         private System.Windows.Forms.CheckBox checkBox_overwriteByG01;
+        private System.Windows.Forms.TextBox textBox_batchNo;
+        private System.Windows.Forms.Label label2;
     }
 }

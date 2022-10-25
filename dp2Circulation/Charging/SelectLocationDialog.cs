@@ -126,24 +126,36 @@ namespace dp2Circulation
         // 校验馆藏地字符串的合法性
         public static string VerifyLocation(
             IEnumerable<string> values,
-            string location)
+            string location_param)
         {
-            if (location.IndexOfAny(new char[] { ' ' }) != -1)
-                return $"馆藏地 '{location}' 不合法。不应包含空格";
+            if (location_param.IndexOfAny(new char[] { ' ' }) != -1)
+                return $"馆藏地 '{location_param}' 不合法。不应包含空格";
 
-            if (values.Contains(location))
+            if (values.Contains(location_param))
                 return null;
+
+            string location = location_param;
+#if REMOVED
+            if (location.Contains("|"))
+            {
+                var parts = StringUtil.ParseTwoPart(location, "|");
+                location = parts[0];
+                string shelfNo = parts[1];
+                // TODO: 验证一下 shelfNo
+            }
+#endif
+
             if (location.Contains(":"))
             {
                 var parts = StringUtil.ParseTwoPart(location, ":");
-                string left = parts[0];
+                location = parts[0];
                 string right = parts[1];
                 if (string.IsNullOrEmpty(right))
-                    return $"馆藏地 '{location}' 不合法。冒号右侧不应为空";
-                if (values.Cast<string>().Contains(left))
-                    return null;
+                    return $"馆藏地 '{location_param}' 不合法。冒号右侧不应为空";
             }
 
+            if (values.Cast<string>().Contains(location))
+                return null;
             return $"馆藏地 '{location}' 不合法";
         }
     }

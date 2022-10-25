@@ -239,6 +239,12 @@ this.checkBox_overwriteByG01.Checked);
                 range.Sort();
             }
 
+            // 编目批次号
+            string batchNo = (string)this.Invoke(new Func<string>(() =>
+            {
+                return this.textBox_batchNo.Text;
+            }));
+
             Stream file = null;
 
             try
@@ -368,6 +374,21 @@ this.checkBox_overwriteByG01.Checked);
                     {
                         MarcRecord temp = new MarcRecord(strMARC);
                         MarcQuery.ToParallel(temp);
+                        strMARC = temp.Text;
+                    }
+
+                    // 2022/10/25
+                    if (string.IsNullOrEmpty(batchNo) == false)
+                    {
+                        MarcRecord temp = new MarcRecord(strMARC);
+                        if (batchNo == "[清除]")
+                        {
+                            temp.select("field[@name='998']/subfield[@name='a']").detach();
+                        }
+                        else
+                        {
+                            temp.setFirstSubfield("998", "a", batchNo);
+                        }
                         strMARC = temp.Text;
                     }
 

@@ -319,6 +319,8 @@ namespace DigitalPlatform.rms
         public const int PGSQL_OBJECTSTART_SIZE = 100 * 1024;
         internal override void Close()
         {
+            base.Close();   // 2022/10/17
+
             this.CloseInternal();
         }
 
@@ -350,6 +352,10 @@ namespace DigitalPlatform.rms
                     m_db_lock.ReleaseWriterLock();
             }
 #endif
+
+            // 2022/10/17
+            this._streamCache.ClearAll();
+            this._pageCache.ClearAll();
         }
 
         // 异常：可能会抛出异常

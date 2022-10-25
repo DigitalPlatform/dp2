@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.74.*")]
-[assembly: AssemblyFileVersion("3.74.0.0")]
+[assembly: AssemblyVersion("3.75.*")]
+[assembly: AssemblyFileVersion("3.75.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -157,3 +157,5 @@ using System.Runtime.InteropServices;
 // 3.72 2022/9/26 优化 dp2circulation 启动时候首次显示 MainForm 的过程，避免出现闪烁
 // 3.73 2022/9/27 书目查询窗实现“筛选”功能
 // 3.74 2022/10/9 为宿主类 DetailHost 增加 MergeLines() 虚函数，方便定制索取号创建规则
+// 3.75 2022/10/25 典藏移交窗修改册记录 location 元素的时候，增加了自动清空 shelfNo 和 currentLocation 元素的能力
+//              导入 MARC 窗增加了“编目批次号”textbox。特殊地，若输入"[清除]"的效果是在导入前删除书目记录的 998$a 子字段

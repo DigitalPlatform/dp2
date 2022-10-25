@@ -71,7 +71,13 @@ namespace dp2Circulation
     List<string> barcodes,
     string book_string)
         {
-            int barcodes_count = barcodes.Count;
+            // int barcodes_count = barcodes.Count;
+
+#if !DISPLAY_DELETE_BARCODE
+            // 2022/10/14
+            // 过滤掉不该显示的册条码号
+            barcodes = barcodes.Where(o => IsDeleteBarcode(o) == false).ToList();
+#endif
 
             barcodes = CompactNumbersEx(barcodes, HYPHEN);
 
@@ -270,7 +276,6 @@ namespace dp2Circulation
             {
                 if (IsDeleteBarcode(barcode))
                 {
-#if DISPLAY_DELETE_BARCODE
                     if (i > 0)
                         Writer.WriteElementString("br", "");
 
@@ -278,7 +283,6 @@ namespace dp2Circulation
                     Writer.WriteAttributeString("use", "strike");
                     Writer.WriteString(barcode);
                     Writer.WriteEndElement();
-#endif
                 }
                 else
                 {
@@ -299,14 +303,12 @@ namespace dp2Circulation
             {
                 if (IsDeleteBarcode(barcode))
                 {
-#if DISPLAY_DELETE_BARCODE
                     if (i > 0)
                         Writer.WriteElementString("blk", "");
                     Writer.WriteStartElement("style");
                     Writer.WriteAttributeString("use", "strike");
                     Writer.WriteString(barcode);
                     Writer.WriteEndElement();
-#endif
                 }
                 else
                 {

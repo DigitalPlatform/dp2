@@ -183,7 +183,7 @@ namespace dp2Catalog
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "在处理" + strFrom + "字符串 '" + strWord + "' 过程中出错: " + strError;
+                        strError = "在处理 ISBN 字符串 '" + strWord + "' 过程中出错: " + strError;
                         return -1;
                     }
 
@@ -215,7 +215,7 @@ namespace dp2Catalog
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "在处理" + strFrom + "字符串 '" + strWord + "' 过程中出错: " + strError;
+                        strError = "在处理 ISSN 字符串 '" + strWord + "' 过程中出错: " + strError;
                         return -1;
                     }
 

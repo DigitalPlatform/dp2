@@ -6256,9 +6256,21 @@ MessageBoxDefaultButton.Button2);
                     DomUtil.SetElementText(dom.DocumentElement,
                         "state", ListViewUtil.GetItemText(item, COLUMN_STATE));
 
-                    // 馆藏地点 2014/9/3
-                    DomUtil.SetElementText(dom.DocumentElement,
-                        "location", ListViewUtil.GetItemText(item, COLUMN_LOCATION));
+                    // 馆藏地点
+                    string old_location = DomUtil.GetElementText(dom.DocumentElement, "location");
+                    string new_location = ListViewUtil.GetItemText(item, COLUMN_LOCATION);
+                    if (old_location != new_location)
+                    {
+                        DomUtil.SetElementText(dom.DocumentElement,
+                            "location", new_location);
+                        // 2022/10/25
+                        // 顺带清空 shelfNo
+                        DomUtil.SetElementText(dom.DocumentElement,
+                            "shelfNo", "");
+                        // 顺带清空 currentLocation
+                        DomUtil.SetElementText(dom.DocumentElement,
+                            "currentLocation", "");
+                    }
 
                     // TODO: 还要保存<operations>元素
 

@@ -2479,8 +2479,10 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 List<string> parameters = new List<string>();
                 if (string.IsNullOrEmpty(strParameters) == false)
                     parameters.Add(strParameters);
+
                 parameters.Add($"location:{this._targetLocation}");
                 parameters.Add($"batchNo:{this.BatchNo}");
+
                 task.Parameters = StringUtil.MakePathList(parameters);
             }
 
