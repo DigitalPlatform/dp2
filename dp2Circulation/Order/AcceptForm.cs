@@ -5090,20 +5090,22 @@ Keys keyData)
 
         private void button_defaultEntityFields_Click(object sender, EventArgs e)
         {
-            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.DisplayStyle = "quick_entity";
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+            using (EntityFormOptionDlg dlg = new EntityFormOptionDlg())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.DisplayStyle = "quick_entity";
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
 
-            if (dlg.DialogResult == DialogResult.Cancel)
-                return;
+                if (dlg.DialogResult == DialogResult.Cancel)
+                    return;
 
-            // 批次号可能被对话框修改，需要刷新
-            //this.tabComboBox_prepare_batchNo.Text = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
-            //    "batchNo");
+                // 批次号可能被对话框修改，需要刷新
+                //this.tabComboBox_prepare_batchNo.Text = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+                //    "batchNo");
 
-            SetCheckBoxEnable();
+                SetCheckBoxEnable();
+            }
         }
 
         private void tabComboBox_prepare_batchNo_Leave(object sender, EventArgs e)

@@ -102,9 +102,9 @@ namespace DigitalPlatform.LibraryServer
                 debug_info.Append("著者字符串 '" + strAuthorParam + "' 经去除非用字、将阿拉伯和罗马数字转换为汉字数字后，为 '" + strAuthor + "'。\r\n");
             }
 
-            string strComfirmPinyin = "";	// 用于在多选中进行确认的拼音
+            string strComfirmPinyin = "";   // 用于在多选中进行确认的拼音
 
-            REDOSEARCH:
+        REDOSEARCH:
             List<string> parts = new List<string>();
             {
                 string strPart = strAuthor;
@@ -256,7 +256,7 @@ namespace DigitalPlatform.LibraryServer
                 //strRecID = ResPath.GetRecordId((string)aPath[0]);
                 strPath = (string)aPath[nIndex];
 
-                ALREADYSELECTED:
+            ALREADYSELECTED:
 
                 if (bOutputDebugInfo == true)
                 {
@@ -976,7 +976,7 @@ namespace DigitalPlatform.LibraryServer
         static void BuildAsk(
             string strHanzi,
             string strPinyin,
-            out string strAskText, 
+            out string strAskText,
             out string strAskXml)
         {
             strAskText = "汉字 '" + strHanzi + "' 的拼音如下: \r\n---\r\n"
@@ -1694,7 +1694,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-#endregion
+        #endregion
 
         // return:
         //      -1  出错
@@ -1946,7 +1946,7 @@ out string strError)
             return 0;
         }
 
-#region 加拼音有关的下级函数
+        #region 加拼音有关的下级函数
 
         static string BuildHanzi(XmlNode nodeWord)
         {
@@ -2372,7 +2372,7 @@ out string strError)
                         bChanged = true;
                     }
 
-                    DO_SAVE:
+                DO_SAVE:
                     if (bChanged == true)
                     {
                         byte[] output_timestamp = null;
@@ -2575,7 +2575,7 @@ out string strError)
             return results;
         }
 
-#endregion
+        #endregion
 
         public static Question GetQuestion(List<Question> questions, int index)
         {

@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.75.*")]
-[assembly: AssemblyFileVersion("3.75.0.0")]
+[assembly: AssemblyVersion("3.76.*")]
+[assembly: AssemblyFileVersion("3.76.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -159,3 +159,4 @@ using System.Runtime.InteropServices;
 // 3.74 2022/10/9 为宿主类 DetailHost 增加 MergeLines() 虚函数，方便定制索取号创建规则
 // 3.75 2022/10/25 典藏移交窗修改册记录 location 元素的时候，增加了自动清空 shelfNo 和 currentLocation 元素的能力
 //              导入 MARC 窗增加了“编目批次号”textbox。特殊地，若输入"[清除]"的效果是在导入前删除书目记录的 998$a 子字段
+// 3.76 2022/10/27 读者编辑器里面的 email 字段改为 readonly 状态，右侧增加一个“编辑”按钮，可以点此按钮在编辑对话框里面进行编辑。目前 email 和 weixinid 是合法的子参数名

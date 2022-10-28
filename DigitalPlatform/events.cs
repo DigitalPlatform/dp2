@@ -119,6 +119,21 @@ namespace DigitalPlatform
         public ContextMenu ContextMenu = null;  // [in]
     }
 
+    // 2022/10/28
+    public delegate void VerifyEditEventHandler(object sender,
+VerifyEditEventArgs e);
+
+    public class VerifyEditEventArgs : EventArgs
+    {
+        public Control EditControl { get; set; } // [in]
+
+        public string EditName { get; set; }    // [in]
+
+        public string Text { get; set; }    // [in]
+
+        public string ErrorInfo { get; set; }   // [out]
+    }
+
     public class LockException : Exception
     {
         /// <summary>

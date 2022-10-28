@@ -757,12 +757,14 @@ namespace dp2Circulation
 
         private void toolStripButton_option_Click(object sender, EventArgs e)
         {
-            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            // dlg.MainForm = Program.MainForm;
-            dlg.DisplayStyle = "normal_entity";
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+            using (EntityFormOptionDlg dlg = new EntityFormOptionDlg())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                // dlg.MainForm = Program.MainForm;
+                dlg.DisplayStyle = "normal_entity";
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+            }
         }
 
         public string NextAction

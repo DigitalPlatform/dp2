@@ -7388,11 +7388,13 @@ out strError);
 
         private void button_option_Click(object sender, EventArgs e)
         {
-            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            // dlg.MainForm = Program.MainForm;
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+            using (EntityFormOptionDlg dlg = new EntityFormOptionDlg())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                // dlg.MainForm = Program.MainForm;
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+            }
         }
 
         // 清除书目、期、册、采购、对象信息窗口
@@ -12258,11 +12260,13 @@ out strError);
 
         private void toolStripButton_option_Click(object sender, EventArgs e)
         {
-            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            // dlg.MainForm = Program.MainForm;
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+            using (EntityFormOptionDlg dlg = new EntityFormOptionDlg())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                // dlg.MainForm = Program.MainForm;
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+            }
         }
 
         private void toolStripButton_clear_Click(object sender, EventArgs e)

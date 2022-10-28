@@ -473,6 +473,8 @@ namespace dp2Circulation
         /// </summary>
         public EntityEditControl()
         {
+            base.InitializeComponent();
+
             InitializeComponent();
 
             base._tableLayoutPanel_main = this.tableLayoutPanel_main;

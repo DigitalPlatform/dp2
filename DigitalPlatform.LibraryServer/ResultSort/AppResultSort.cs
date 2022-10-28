@@ -34,18 +34,24 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // parameters:
+        //      strSection  用于进一步区分结果集不同特性的名字(2022/10/27)
         public string GetMemorySetFilePath(SessionInfo sessioninfo,
-            string strResultSetName)
+            string strResultSetName,
+            string strSection = null)
         {
             if (string.IsNullOrEmpty(strResultSetName))
                 strResultSetName = "default";
 
+            if (string.IsNullOrEmpty(strSection) == false)
+                strResultSetName = strResultSetName + "_" + strSection;
+
             // 全局结果集
             if (strResultSetName.StartsWith("#"))
-                return Path.Combine(this.TempDir, "~grs_" + strResultSetName);
+                return Path.Combine(this.TempDir, $"~grs_{strResultSetName}");
 
             return Path.Combine(sessioninfo.TempDir,
-"sort_" + strResultSetName);
+$"sort_{strResultSetName}");
         }
 
         public bool RemoveMemorySet(string name)
@@ -68,7 +74,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (_memorySets.Count > MAX_MEMORYSET_COUNT)
                     throw new OutofMemorySetException($"当前本地结果集总数超过 {MAX_MEMORYSET_COUNT}，无法创建新的结果集");
-                
+
                 value = new MemorySet { FilePath = name };
                 _memorySets[name] = value;
                 return value;
@@ -229,7 +235,7 @@ public static bool IsSessionMemorySetFilePath(
                 {
                     memorySet = GetMemorySet(filePath);
                 }
-                catch(OutOfMemoryException ex)
+                catch (OutOfMemoryException ex)
                 {
                     this.WriteErrorLog(ex.Message);
                     // 尝试清除休眠五分钟以上的本地全局结果集

@@ -12,6 +12,7 @@ using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
+using Accord.IO;
 
 namespace dp2Circulation
 {
@@ -59,8 +60,12 @@ namespace dp2Circulation
 
         internal Color ColorChanged = Color.Yellow; // 表示内容改变过的颜色
         internal Color ColorDifference = Color.Blue; // 表示内容有差异的颜色
-
+        private ToolTip toolTip1;
+        private IContainer components;
         internal string m_strParentId = "";
+
+        // 2022/10/28
+        public event VerifyEditEventHandler VerifyContent = null;
 
         /// <summary>
         /// 获得值列表
@@ -872,22 +877,56 @@ namespace dp2Circulation
 
         void control_TextChanged(object sender, EventArgs e)
         {
+            Control control = sender as Control;
+
+            /*
             if (m_bInInitial == true)
                 return;
+            */
 
-            // this.label_barcode_color.BackColor = this.ColorChanged;
-            Control control = sender as Control;
-            EditLineState state = GetLineState(control);
+            EditLineState state = TryGetLineState(control, out Exception ex);
 
             if (state == null)
-                state = new EditLineState();
-
-            if (state.Changed == false)
             {
-                state.Changed = true;
-                SetLineState(control, state);
+                if (ex != null)
+                    return;
+                state = new EditLineState();
             }
-            this.Changed = true;
+
+            string old_state = state.ToString();
+
+            // 触发内容校验
+            if (this.VerifyContent != null)
+            {
+                var args = new VerifyEditEventArgs
+                {
+                    EditControl = control,
+                    EditName = GetControlName(control),
+                    Text = control.Text,
+                };
+                this.VerifyContent?.Invoke(control, args);
+                state.VerifyInfo = args.ErrorInfo;
+                state.VerifyFail = string.IsNullOrEmpty(args.ErrorInfo) == false;
+            }
+
+            if (m_bInInitial == false)
+            {
+                if (state.Changed == false)
+                {
+                    state.Changed = true;
+                    // SetLineState(control, state);
+                }
+                this.Changed = true;
+            }
+
+            if (state.ToString() != old_state)
+                SetLineState(control, state);
+        }
+
+        public static string GetControlName(Control control)
+        {
+            string name = control.Tag as string;
+            return name;
         }
 
         /// <summary>
@@ -898,11 +937,21 @@ namespace dp2Circulation
             /// <summary>
             /// 是否发生过修改
             /// </summary>
-            public bool Changed = false;
+            public bool Changed { get; set; }
             /// <summary>
             /// 是否处在输入焦点状态
             /// </summary>
-            public bool Active = false;
+            public bool Active { get; set; }
+
+            // 2022/10/28
+            // 内容是否错误
+            public bool VerifyFail { get; set; }
+            public string VerifyInfo { get; set; }
+
+            public override string ToString()
+            {
+                return $"Changed={Changed},Active={Active},VerifyFail={VerifyFail},VerifyInfo={VerifyInfo}";
+            }
         }
 
         void SetLineState(Control control, EditLineState newState)
@@ -922,6 +971,9 @@ namespace dp2Circulation
             color.Tag = newState;
             ResetColor(color, edit);
         }
+
+        public Color VerifyFailBackColor = Color.Red;
+        public Color VerifyFailBackColorDark = Color.DarkRed;
 
         // 正在编辑的 edit 的背景颜色
         public Color FocusedEditBackColor = Color.FromArgb(200, 200, 255);
@@ -974,11 +1026,18 @@ namespace dp2Circulation
                 return;
             }
 
+            {
+                SetToolTip(color, newState.VerifyInfo);
+            }
+
             if (newState.Active == true)
             {
                 if (this.ContainsFocus == true)
                 {
-                    color.BackColor = SystemColors.Highlight;
+                    if (newState.VerifyFail == true)
+                        color.BackColor = this.VerifyFailBackColor;
+                    else
+                        color.BackColor = SystemColors.Highlight;
                     Color focus_color = this.FocusedEditBackColor;
                     if (edit != null && edit.BackColor != focus_color)
                     {
@@ -990,7 +1049,10 @@ namespace dp2Circulation
                 {
                     if (this.m_bHideSelection == false)
                     {
-                        color.BackColor = ControlPaint.Dark(SystemColors.Highlight);
+                        if (newState.VerifyFail == true)
+                            color.BackColor = this.VerifyFailBackColorDark;
+                        else
+                            color.BackColor = ControlPaint.Dark(SystemColors.Highlight);
                         Color focus_color = ControlPaint.Light(this.FocusedEditBackColor);
                         if (edit != null && edit.BackColor != focus_color)
                         {
@@ -1000,6 +1062,7 @@ namespace dp2Circulation
                     }
                 }
             }
+
 
 #if NO
             // 恢复原来的颜色
@@ -1024,10 +1087,15 @@ namespace dp2Circulation
                     edit.BackColor = _editBackColor;
             }
 
-            if (newState.Changed == true)
-                color.BackColor = this.ColorChanged;
+            if (newState.VerifyFail == true)
+                color.BackColor = this.VerifyFailBackColorDark;
             else
-                color.BackColor = this._tableLayoutPanel_main.BackColor;
+            {
+                if (newState.Changed == true)
+                    color.BackColor = this.ColorChanged;
+                else
+                    color.BackColor = this._tableLayoutPanel_main.BackColor;
+            }
         }
 
         // 刷新所有行的颜色
@@ -1046,6 +1114,20 @@ namespace dp2Circulation
         EditLineState GetLineState(Control control)
         {
             return GetLineState(this._tableLayoutPanel_main.GetCellPosition(control).Row);
+        }
+
+        EditLineState TryGetLineState(Control control, out Exception ex)
+        {
+            ex = null;
+            try
+            {
+                return GetLineState(this._tableLayoutPanel_main.GetCellPosition(control).Row);
+            }
+            catch (ArgumentException e)
+            {
+                ex = e;
+                return null;
+            }
         }
 
         EditLineState GetLineState(int nRowNumber)
@@ -1263,7 +1345,22 @@ namespace dp2Circulation
             return -1;
         }
 
+        public void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.SuspendLayout();
+            // 
+            // ItemEditControlBase
+            // 
+            this.Name = "ItemEditControlBase";
+            this.ResumeLayout(false);
+        }
 
+        public void SetToolTip(Control control, string text)
+        {
+            this.toolTip1?.SetToolTip(control, text);
+        }
     }
 
     public class EditLine

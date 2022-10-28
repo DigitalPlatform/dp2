@@ -2,9 +2,12 @@
 <root>
 	<script>
 		<![CDATA[
-
+		// 修改历史:
+		// 2022/10/28 为 email 字段使用 convertEmail 脚本函数
+		
 using System;
 using System.Xml;
+using System.Collections.Generic;
 
 using DigitalPlatform.rms;
 using DigitalPlatform.IO;
@@ -40,6 +43,32 @@ public partial class MyKeysHost : KeysHost
 		}
 
 		this.ResultString = strName + "|" + strBirthdate;
+	}
+	
+	// 2022/10/28
+	public void convertEmail()
+	{
+       string email = this.InputString.Trim();
+       this.ResultString = AddDefaultName(email, "email");
+	}
+	
+	// 2022/10/28
+	public static string AddDefaultName(
+		string text,
+		string default_name)
+	{
+            List<string> results = new List<string>();
+            var segments = text.Split(',');
+            foreach (string s in segments)
+            {
+                if (string.IsNullOrEmpty(s) == false
+                    && s.Contains(":") == false)
+                    results.Add($"{default_name}:{s}");
+                else
+                    results.Add(s);
+            }
+
+            return string.Join(",", results.ToArray());
 	}
 }
 
@@ -149,10 +178,10 @@ public partial class MyKeysHost : KeysHost
 	</key>
 	<table name="email" id="7">
 		<convert>
-			<string style="upper,split" />
+			<string style="#convertEmail,upper,split" />
 		</convert>
 		<convertquery>
-			<string style="upper" />
+			<string style="#convertEmail,upper" />
 		</convertquery>
 		<caption lang="zh-CN">Email</caption>
 		<caption lang="en">Email</caption>

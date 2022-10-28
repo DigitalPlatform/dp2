@@ -87,6 +87,7 @@
             this.toolStripDropDownButton_otherFunc = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_saveTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripMenuItem_loadBlankRecord = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_notifyRecall = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_notifyOverdue = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_createRfidCard = new System.Windows.Forms.ToolStripMenuItem();
@@ -108,7 +109,6 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.toolStripMenuItem_notifyRecall = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -191,6 +191,7 @@
             this.readerEditControl1.GetLibraryCode += new dp2Circulation.GetLibraryCodeEventHandler(this.readerEditControl1_GetLibraryCode);
             this.readerEditControl1.CreatePinyin += new System.EventHandler(this.readerEditControl1_CreatePinyin);
             this.readerEditControl1.EditRights += new System.EventHandler(this.readerEditControl1_EditRights);
+            this.readerEditControl1.EditEmail += new System.EventHandler(this.readerEditControl1_EditEmail);
             // 
             // webBrowser_readerInfo
             // 
@@ -727,6 +728,13 @@
             this.toolStripMenuItem_loadBlankRecord.Text = "装载空白记录";
             this.toolStripMenuItem_loadBlankRecord.Visible = false;
             // 
+            // toolStripMenuItem_notifyRecall
+            // 
+            this.toolStripMenuItem_notifyRecall.Name = "toolStripMenuItem_notifyRecall";
+            this.toolStripMenuItem_notifyRecall.Size = new System.Drawing.Size(443, 40);
+            this.toolStripMenuItem_notifyRecall.Text = "立即发出召回通知 ...";
+            this.toolStripMenuItem_notifyRecall.Click += new System.EventHandler(this.toolStripMenuItem_notifyRecall_Click);
+            // 
             // toolStripMenuItem_notifyOverdue
             // 
             this.toolStripMenuItem_notifyOverdue.Name = "toolStripMenuItem_notifyOverdue";
@@ -826,7 +834,7 @@
             this.toolStripButton_option.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_option.Image")));
             this.toolStripButton_option.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_option.Name = "toolStripButton_option";
-            this.toolStripButton_option.Size = new System.Drawing.Size(82, 32);
+            this.toolStripButton_option.Size = new System.Drawing.Size(86, 32);
             this.toolStripButton_option.Text = "选项";
             this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
             // 
@@ -893,13 +901,6 @@
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(1118, 500);
             this.tableLayoutPanel_main.TabIndex = 6;
-            // 
-            // toolStripMenuItem_notifyRecall
-            // 
-            this.toolStripMenuItem_notifyRecall.Name = "toolStripMenuItem_notifyRecall";
-            this.toolStripMenuItem_notifyRecall.Size = new System.Drawing.Size(443, 40);
-            this.toolStripMenuItem_notifyRecall.Text = "立即发出召回通知 ...";
-            this.toolStripMenuItem_notifyRecall.Click += new System.EventHandler(this.toolStripMenuItem_notifyRecall_Click);
             // 
             // ReaderInfoForm
             // 

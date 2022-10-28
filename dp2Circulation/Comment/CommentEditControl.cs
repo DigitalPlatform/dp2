@@ -50,6 +50,8 @@ namespace dp2Circulation
 
         public CommentEditControl()
         {
+            base.InitializeComponent();
+
             InitializeComponent();
 
             base._tableLayoutPanel_main = this.tableLayoutPanel_main;

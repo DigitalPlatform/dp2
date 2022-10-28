@@ -4712,12 +4712,14 @@ MessageBoxDefaultButton.Button1);
 
         private void button_settings_entityDefault_Click(object sender, EventArgs e)
         {
-            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            // dlg.MainForm = Program.MainForm;
-            dlg.DisplayStyle = "quick_entity";
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+            using (EntityFormOptionDlg dlg = new EntityFormOptionDlg())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                // dlg.MainForm = Program.MainForm;
+                dlg.DisplayStyle = "quick_entity";
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+            }
         }
 
         private void easyMarcControl1_Enter(object sender, EventArgs e)

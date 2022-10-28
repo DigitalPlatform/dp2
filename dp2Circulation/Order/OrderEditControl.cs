@@ -48,6 +48,8 @@ namespace dp2Circulation
 
         public OrderEditControl()
         {
+            base.InitializeComponent();
+
             InitializeComponent();
 
             base._tableLayoutPanel_main = this.tableLayoutPanel_main;

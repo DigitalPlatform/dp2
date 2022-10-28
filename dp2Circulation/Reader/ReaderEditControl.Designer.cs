@@ -49,7 +49,7 @@ namespace dp2Circulation
             this.label_tel = new System.Windows.Forms.Label();
             this.textBox_tel = new System.Windows.Forms.TextBox();
             this.label_email = new System.Windows.Forms.Label();
-            this.textBox_email = new System.Windows.Forms.TextBox();
+            this.textBox_email = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_barcode = new System.Windows.Forms.Label();
             this.flowLayoutPanel_barcodeAction = new System.Windows.Forms.FlowLayoutPanel();
             this.button_verifyBarcode = new System.Windows.Forms.Button();
@@ -114,6 +114,7 @@ namespace dp2Circulation
             this.label_refID = new System.Windows.Forms.Label();
             this.label_refID_color = new System.Windows.Forms.Label();
             this.textBox_refID = new System.Windows.Forms.TextBox();
+            this.button_editEmail = new System.Windows.Forms.Button();
             this.tableLayoutPanel_main.SuspendLayout();
             this.flowLayoutPanel_barcodeAction.SuspendLayout();
             this.SuspendLayout();
@@ -209,6 +210,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Controls.Add(this.label_refID, 0, 30);
             this.tableLayoutPanel_main.Controls.Add(this.label_refID_color, 1, 30);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_refID, 2, 30);
+            this.tableLayoutPanel_main.Controls.Add(this.button_editEmail, 3, 20);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(11, 10, 11, 105);
@@ -478,7 +480,7 @@ namespace dp2Circulation
             this.label_email.Location = new System.Drawing.Point(13, 820);
             this.label_email.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_email.Name = "label_email";
-            this.label_email.Size = new System.Drawing.Size(159, 34);
+            this.label_email.Size = new System.Drawing.Size(159, 54);
             this.label_email.TabIndex = 53;
             this.label_email.Text = "Emailµÿ÷∑(&E):";
             this.label_email.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -491,8 +493,10 @@ namespace dp2Circulation
             this.textBox_email.Location = new System.Drawing.Point(199, 825);
             this.textBox_email.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_email.MinimumSize = new System.Drawing.Size(183, 0);
+            this.textBox_email.Multiline = true;
             this.textBox_email.Name = "textBox_email";
-            this.textBox_email.Size = new System.Drawing.Size(269, 24);
+            this.textBox_email.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_email.Size = new System.Drawing.Size(269, 44);
             this.textBox_email.TabIndex = 55;
             // 
             // label_barcode
@@ -548,7 +552,7 @@ namespace dp2Circulation
             // 
             this.label_recPath.AutoSize = true;
             this.label_recPath.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_recPath.Location = new System.Drawing.Point(13, 1018);
+            this.label_recPath.Location = new System.Drawing.Point(13, 1038);
             this.label_recPath.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_recPath.Name = "label_recPath";
             this.label_recPath.Size = new System.Drawing.Size(159, 34);
@@ -560,7 +564,7 @@ namespace dp2Circulation
             // 
             this.textBox_recPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_recPath.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_recPath.Location = new System.Drawing.Point(199, 1023);
+            this.textBox_recPath.Location = new System.Drawing.Point(199, 1043);
             this.textBox_recPath.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_recPath.MinimumSize = new System.Drawing.Size(183, 0);
             this.textBox_recPath.Name = "textBox_recPath";
@@ -721,14 +725,14 @@ namespace dp2Circulation
             this.label_email_color.Location = new System.Drawing.Point(182, 820);
             this.label_email_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_email_color.Name = "label_email_color";
-            this.label_email_color.Size = new System.Drawing.Size(7, 34);
+            this.label_email_color.Size = new System.Drawing.Size(7, 54);
             this.label_email_color.TabIndex = 54;
             // 
             // label_recPath_color
             // 
             this.label_recPath_color.AutoSize = true;
             this.label_recPath_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_recPath_color.Location = new System.Drawing.Point(182, 1018);
+            this.label_recPath_color.Location = new System.Drawing.Point(182, 1038);
             this.label_recPath_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_recPath_color.Name = "label_recPath_color";
             this.label_recPath_color.Size = new System.Drawing.Size(7, 34);
@@ -1047,7 +1051,7 @@ namespace dp2Circulation
             // 
             this.label_personalLibrary.AutoSize = true;
             this.label_personalLibrary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_personalLibrary.Location = new System.Drawing.Point(13, 946);
+            this.label_personalLibrary.Location = new System.Drawing.Point(13, 966);
             this.label_personalLibrary.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_personalLibrary.Name = "label_personalLibrary";
             this.label_personalLibrary.Size = new System.Drawing.Size(159, 34);
@@ -1059,7 +1063,7 @@ namespace dp2Circulation
             // 
             this.label_rights.AutoSize = true;
             this.label_rights.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_rights.Location = new System.Drawing.Point(13, 854);
+            this.label_rights.Location = new System.Drawing.Point(13, 874);
             this.label_rights.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_rights.Name = "label_rights";
             this.label_rights.Size = new System.Drawing.Size(159, 54);
@@ -1071,7 +1075,7 @@ namespace dp2Circulation
             // 
             this.label_rights_color.AutoSize = true;
             this.label_rights_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_rights_color.Location = new System.Drawing.Point(182, 854);
+            this.label_rights_color.Location = new System.Drawing.Point(182, 874);
             this.label_rights_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_rights_color.Name = "label_rights_color";
             this.label_rights_color.Size = new System.Drawing.Size(7, 54);
@@ -1081,7 +1085,7 @@ namespace dp2Circulation
             // 
             this.label_personalLibrary_color.AutoSize = true;
             this.label_personalLibrary_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_personalLibrary_color.Location = new System.Drawing.Point(182, 946);
+            this.label_personalLibrary_color.Location = new System.Drawing.Point(182, 966);
             this.label_personalLibrary_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_personalLibrary_color.Name = "label_personalLibrary_color";
             this.label_personalLibrary_color.Size = new System.Drawing.Size(7, 34);
@@ -1093,7 +1097,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_rights.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_rights.Location = new System.Drawing.Point(199, 859);
+            this.textBox_rights.Location = new System.Drawing.Point(199, 879);
             this.textBox_rights.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_rights.MinimumSize = new System.Drawing.Size(183, 0);
             this.textBox_rights.Multiline = true;
@@ -1107,7 +1111,7 @@ namespace dp2Circulation
             this.textBox_personalLibrary.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_personalLibrary.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_personalLibrary.Location = new System.Drawing.Point(199, 951);
+            this.textBox_personalLibrary.Location = new System.Drawing.Point(199, 971);
             this.textBox_personalLibrary.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_personalLibrary.MinimumSize = new System.Drawing.Size(183, 0);
             this.textBox_personalLibrary.Name = "textBox_personalLibrary";
@@ -1119,7 +1123,7 @@ namespace dp2Circulation
             this.button_editRights.AutoSize = true;
             this.button_editRights.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.button_editRights.Font = new System.Drawing.Font("ÀŒÃÂ", 9F);
-            this.button_editRights.Location = new System.Drawing.Point(474, 854);
+            this.button_editRights.Location = new System.Drawing.Point(474, 874);
             this.button_editRights.Margin = new System.Windows.Forms.Padding(0);
             this.button_editRights.Name = "button_editRights";
             this.button_editRights.Size = new System.Drawing.Size(120, 40);
@@ -1134,7 +1138,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_friends.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_friends.Location = new System.Drawing.Point(199, 985);
+            this.textBox_friends.Location = new System.Drawing.Point(199, 1005);
             this.textBox_friends.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_friends.MinimumSize = new System.Drawing.Size(183, 0);
             this.textBox_friends.Multiline = true;
@@ -1147,7 +1151,7 @@ namespace dp2Circulation
             // 
             this.label_friends_color.AutoSize = true;
             this.label_friends_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_friends_color.Location = new System.Drawing.Point(182, 980);
+            this.label_friends_color.Location = new System.Drawing.Point(182, 1000);
             this.label_friends_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_friends_color.Name = "label_friends_color";
             this.label_friends_color.Size = new System.Drawing.Size(7, 38);
@@ -1157,7 +1161,7 @@ namespace dp2Circulation
             // 
             this.label_friends.AutoSize = true;
             this.label_friends.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_friends.Location = new System.Drawing.Point(13, 980);
+            this.label_friends.Location = new System.Drawing.Point(13, 1000);
             this.label_friends.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_friends.Name = "label_friends";
             this.label_friends.Size = new System.Drawing.Size(159, 38);
@@ -1171,7 +1175,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_access.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_access.Location = new System.Drawing.Point(199, 913);
+            this.textBox_access.Location = new System.Drawing.Point(199, 933);
             this.textBox_access.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.textBox_access.MinimumSize = new System.Drawing.Size(183, 0);
             this.textBox_access.Multiline = true;
@@ -1184,7 +1188,7 @@ namespace dp2Circulation
             // 
             this.label_access_color.AutoSize = true;
             this.label_access_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_access_color.Location = new System.Drawing.Point(182, 908);
+            this.label_access_color.Location = new System.Drawing.Point(182, 928);
             this.label_access_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_access_color.Name = "label_access_color";
             this.label_access_color.Size = new System.Drawing.Size(7, 38);
@@ -1194,7 +1198,7 @@ namespace dp2Circulation
             // 
             this.label_access.AutoSize = true;
             this.label_access.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_access.Location = new System.Drawing.Point(13, 908);
+            this.label_access.Location = new System.Drawing.Point(13, 928);
             this.label_access.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_access.Name = "label_access";
             this.label_access.Size = new System.Drawing.Size(159, 38);
@@ -1206,7 +1210,7 @@ namespace dp2Circulation
             // 
             this.label_refID.AutoSize = true;
             this.label_refID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_refID.Location = new System.Drawing.Point(13, 1052);
+            this.label_refID.Location = new System.Drawing.Point(13, 1072);
             this.label_refID.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_refID.Name = "label_refID";
             this.label_refID.Size = new System.Drawing.Size(159, 35);
@@ -1218,7 +1222,7 @@ namespace dp2Circulation
             // 
             this.label_refID_color.AutoSize = true;
             this.label_refID_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_refID_color.Location = new System.Drawing.Point(182, 1052);
+            this.label_refID_color.Location = new System.Drawing.Point(182, 1072);
             this.label_refID_color.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_refID_color.Name = "label_refID_color";
             this.label_refID_color.Size = new System.Drawing.Size(7, 35);
@@ -1228,12 +1232,26 @@ namespace dp2Circulation
             // 
             this.textBox_refID.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_refID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_refID.Location = new System.Drawing.Point(197, 1056);
+            this.textBox_refID.Location = new System.Drawing.Point(197, 1076);
             this.textBox_refID.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_refID.MinimumSize = new System.Drawing.Size(220, 0);
             this.textBox_refID.Name = "textBox_refID";
             this.textBox_refID.Size = new System.Drawing.Size(273, 24);
             this.textBox_refID.TabIndex = 80;
+            // 
+            // button_editEmail
+            // 
+            this.button_editEmail.AutoSize = true;
+            this.button_editEmail.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.button_editEmail.Font = new System.Drawing.Font("ÀŒÃÂ", 9F);
+            this.button_editEmail.Location = new System.Drawing.Point(474, 820);
+            this.button_editEmail.Margin = new System.Windows.Forms.Padding(0);
+            this.button_editEmail.Name = "button_editEmail";
+            this.button_editEmail.Size = new System.Drawing.Size(120, 40);
+            this.button_editEmail.TabIndex = 83;
+            this.button_editEmail.Text = "±‡º≠(&E)";
+            this.button_editEmail.UseVisualStyleBackColor = false;
+            this.button_editEmail.Click += new System.EventHandler(this.button_editEmail_Click);
             // 
             // ReaderEditControl
             // 
@@ -1275,7 +1293,7 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label_tel;
         private System.Windows.Forms.TextBox textBox_tel;
         private System.Windows.Forms.Label label_email;
-        private System.Windows.Forms.TextBox textBox_email;
+        private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_email;
         private System.Windows.Forms.Label label_barcode;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel_barcodeAction;
         private System.Windows.Forms.Button button_verifyBarcode;
@@ -1340,5 +1358,6 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_refID;
         private System.Windows.Forms.Label label_refID;
         private System.Windows.Forms.Label label_refID_color;
+        private System.Windows.Forms.Button button_editEmail;
     }
 }

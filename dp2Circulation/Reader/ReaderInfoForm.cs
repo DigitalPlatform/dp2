@@ -36,6 +36,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
 using DocumentFormat.OpenXml.Bibliography;
+using dp2Circulation.Reader;
 
 namespace dp2Circulation
 {
@@ -145,7 +146,7 @@ namespace dp2Circulation
             // this.readerEditControl1.SetEditable("name", "name");
 
             this.readerEditControl1.GetValueTable += new GetValueTableEventHandler(readerEditControl1_GetValueTable);
-
+            this.readerEditControl1.VerifyContent += ReaderEditControl1_VerifyContent;
             this.readerEditControl1.Initializing = false;   // 如果没有此句，一开始在空模板上修改就不会变色
 
             //
@@ -218,6 +219,18 @@ namespace dp2Circulation
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
 
             this.Channel = null;    // testing 2022/6/14
+        }
+
+        private void ReaderEditControl1_VerifyContent(object sender, VerifyEditEventArgs e)
+        {
+            if (e.EditName == "email")
+            {
+                var errors = PropertyTableDialog.VerifyString(
+    "email,weixinid",
+    e.Text);
+                if (errors.Count > 0)
+                    e.ErrorInfo = StringUtil.MakePathList(errors, "; ");
+            }
         }
 
         void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)
@@ -453,6 +466,7 @@ namespace dp2Circulation
             }
 
             this.readerEditControl1.GetValueTable -= new GetValueTableEventHandler(readerEditControl1_GetValueTable);
+            this.readerEditControl1.VerifyContent -= ReaderEditControl1_VerifyContent;
 
 #if NO
             MainForm.AppInfo.SaveMdiChildFormStates(this,
@@ -3983,7 +3997,7 @@ MessageBoxDefaultButton.Button2);
 
                         Debug.Assert(this.m_webExternalHost.ChannelInUse == false, "启动前发现通道还未释放");
                          * */
-                        string direction = (msg == WM_NEXT_RECORD || msg == WM_NEXT_RECORD_RESULTSET? "next" : "prev");
+                        string direction = (msg == WM_NEXT_RECORD || msg == WM_NEXT_RECORD_RESULTSET ? "next" : "prev");
                         bool resultSet = (msg == WM_PREV_RECORD_RESULTSET || msg == WM_NEXT_RECORD_RESULTSET);
 
                         if (this.m_webExternalHost.CanCallNew(
@@ -5563,7 +5577,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-#region 指纹登记功能
+        #region 指纹登记功能
 
 #if !NEWFINGER
 
@@ -5866,9 +5880,9 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-#endregion
+        #endregion
 
-#region 掌纹登记功能
+        #region 掌纹登记功能
 
         // 局部更新掌纹信息高速缓存
         // return:
@@ -6031,7 +6045,7 @@ MessageBoxDefaultButton.Button2);
             return result;
         }
 
-#endregion
+        #endregion
 
         private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
@@ -7992,7 +8006,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-#region 将 dt1000 读者 MARC 记录转换为 dp2 的 XML 格式
+        #region 将 dt1000 读者 MARC 记录转换为 dp2 的 XML 格式
 
         public static int ConvertDt1000ReaderMarcToXml(MarcRecord record,
             string path,
@@ -9396,7 +9410,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-#endregion
+        #endregion
 
         private async void toolStripMenuItem_registerFaceByFile_Click(object sender, EventArgs e)
         {
@@ -9575,5 +9589,24 @@ MessageBoxDefaultButton.Button1);
             return text;
         }
 
+        private void readerEditControl1_EditEmail(object sender, EventArgs e)
+        {
+            using (PropertyTableDialog dlg = new PropertyTableDialog())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.Text = "当前读者的 Email 等";
+                dlg.PropertyNameList = new List<string> {
+                    "email",
+                    "weixinid", 
+                    "" // 空字符串表示允许默认参数名。那么此处默认 email (第一个元素)
+                };
+                dlg.PropertyString = this.readerEditControl1.Email;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult != DialogResult.OK)
+                    return;
+                this.readerEditControl1.Email = dlg.PropertyString;
+            }
+        }
     }
 }

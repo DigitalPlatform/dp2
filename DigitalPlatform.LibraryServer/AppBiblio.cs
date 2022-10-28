@@ -5489,7 +5489,10 @@ out strError);
                         out _,
                         out strError);
                     if (nRet == -1)
+                    {
+                        strError = $"针对书目记录进行自动查重时出错: {strError}";
                         goto ERROR1;
+                    }
                     if (nRet > 0)
                     {
                         strOutputBiblioRecPath = strError;

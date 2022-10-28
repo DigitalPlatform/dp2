@@ -1843,9 +1843,9 @@ MessageBoxDefaultButton.Button2);
                 if (bNeedAccessNo == true)
                 {
                     if (string.IsNullOrEmpty(edit.AccessNo) == true)
-                        conditions.Add("尚未创建索取号");
+                        conditions.Add("尚未创建索取号。请在索取号文本框内键入 Ctrl+A 尝试创建索取号");
                     else if (edit.AccessNo == "@accessNo")
-                        conditions.Add("尚未创建索取号 (宏 @accessNo 尚未兑现)");
+                        conditions.Add("尚未创建索取号 (宏 @accessNo 尚未兑现)。请在索取号文本框内键入 Ctrl+A 尝试创建索取号");
                 }
 
 

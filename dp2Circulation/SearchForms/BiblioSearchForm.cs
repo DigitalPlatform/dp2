@@ -12807,6 +12807,11 @@ message,
                 {
                     var parameters = query_string.Split(new char[] { ' ' });
                     xpath = BuildXPath(parameters);
+
+                    // 按住 Ctrl 键使用这个功能，会先显示实际用到的 XPath 式子
+                    var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+                    if (control)
+                        MessageDlg.Show(this, $"xpath:{xpath}", "筛选");
                 }
 
                 var items = new List<ListViewItem>();

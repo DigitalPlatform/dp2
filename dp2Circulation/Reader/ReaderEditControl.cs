@@ -37,6 +37,12 @@ namespace dp2Circulation
         /// </summary>
         public event EventHandler EditRights = null;
 
+        // 2022/10/27
+        /// <summary>
+        /// 编辑 Email 的事件
+        /// </summary>
+        public event EventHandler EditEmail = null;
+
 #if NO
         /// <summary>
         /// 获得值列表
@@ -714,6 +720,8 @@ namespace dp2Circulation
         /// </summary>
         public ReaderEditControl()
         {
+            base.InitializeComponent();
+
             InitializeComponent();
 
             base._tableLayoutPanel_main = this.tableLayoutPanel_main;
@@ -979,7 +987,6 @@ namespace dp2Circulation
             {
                 this.Initializing = false;
             }
-
         }
 
 #if NO
@@ -1223,7 +1230,7 @@ namespace dp2Circulation
                         continue;
 
                     // 任何情形下，refID 要设置为 readonly 状态
-                    if (name == "refID")
+                    if (name == "refID" || name == "email")
                     {
                         SetReadOnly(child, true);
                         continue;
@@ -1335,6 +1342,7 @@ namespace dp2Circulation
             {
                 this.textBox_recPath.ReadOnly = true;
                 this.textBox_refID.ReadOnly = true;
+                this.textBox_email.ReadOnly = true; // 2022/10/27
 
                 // 2007/6/15
                 this.dateControl_hireExpireDate.Enabled = false;
@@ -1355,6 +1363,8 @@ namespace dp2Circulation
                 // 2007/6/15
                 this.dateControl_hireExpireDate.Enabled = false;
                 this.comboBox_hirePeriod.Enabled = false;
+
+                this.textBox_email.ReadOnly = true; // 2022/10/27
 
                 this.textBox_recPath.ReadOnly = true;
                 this.textBox_refID.ReadOnly = true;
@@ -2025,6 +2035,11 @@ namespace dp2Circulation
                 return false;
             return (names.Count == 1
     && names[0] == "[all]");
+        }
+
+        private void button_editEmail_Click(object sender, EventArgs e)
+        {
+            this.EditEmail?.Invoke(this, new EventArgs());
         }
     }
     // 

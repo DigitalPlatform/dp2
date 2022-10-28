@@ -216,6 +216,8 @@ namespace dp2Circulation
 
         public IssueEditControl()
         {
+            base.InitializeComponent();
+
             InitializeComponent();
 
             base._tableLayoutPanel_main = this.tableLayoutPanel_main;

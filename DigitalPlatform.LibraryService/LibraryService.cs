@@ -3167,6 +3167,7 @@ namespace dp2Library
         //      lStart  要获取的开始位置。从0开始计数
         //      lCount  要获取的个数
         //      strBrowseInfoStyle  所返回的SearchResult中包含哪些信息。为逗号分隔的字符串列表值，取值可为 id/cols 之一。例如，"id,cols"表示同时获取id和浏览信息各列，而"id"表示仅取得id列。
+        //                  sort 子参数，表示 dp2library 本地排序的特性
         //      strLang 语言代码。一般为"zh"
         //      searchresults   返回包含记录信息的SearchResult对象数组
         // rights:
@@ -3208,9 +3209,11 @@ namespace dp2Library
                 if (sort_cols != null)
                 {
                     // dp2library 本地排序结果集
+                    // 在 filePath 里面引入排序列定义成分。这样(不但和结果集名字有关，而且)不同的排序列参数对应不同的文件
                     string filePath = app.GetMemorySetFilePath(
                         sessioninfo,
-                        strResultSetName);
+                        strResultSetName,
+                        sort_cols.Replace("|","_"));    // 注: sort_cols 形如 "-1|0|1|2"
 
                     BeginSearch();  // 如果创建本地结果集的时间太长，前端可以用 Stop() API 中断
                     channel.Idle += new IdleEventHandler(channel_IdleEvent);
