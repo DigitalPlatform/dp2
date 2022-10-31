@@ -721,18 +721,22 @@ namespace DigitalPlatform.GUI
             }
         }
 
-        // 2022/5/10
-        public static string InvokeGetItemText(ListViewItem item,
+        // 2022/10/29
+        // 安全版本
+        public static string GetItemText(ListViewItem item,
             int col)
         {
+            if (item.ListView != null && item.ListView.InvokeRequired)
             return (string)item.ListView.Invoke((Func<string>)(() =>
             {
-                return GetItemText(item, col);
+                return _getItemText(item, col);
             }));
+
+            return _getItemText(item, col);
         }
 
         // 获得一个单元的值
-        public static string GetItemText(ListViewItem item,
+        static string _getItemText(ListViewItem item,
             int col)
         {
             if (col == 0)

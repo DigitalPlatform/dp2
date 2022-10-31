@@ -58,9 +58,9 @@ namespace dp2Circulation
 
             this.listView_message.Items.Clear();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在装入消息 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在装入消息 ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -125,9 +125,9 @@ namespace dp2Circulation
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             return 0;
@@ -148,7 +148,10 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.comboBox_box.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.comboBox_box.Enabled = bEnable;
+            }));
         }
 
     }

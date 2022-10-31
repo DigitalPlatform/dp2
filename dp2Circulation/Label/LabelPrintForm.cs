@@ -534,9 +534,9 @@ out string strError);
                 }
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取册记录和创建标签文件 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取册记录和创建标签文件 ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -549,7 +549,7 @@ out string strError);
                 DialogResult result = System.Windows.Forms.DialogResult.No;
 #endif
 
-                stop.SetProgressRange(0, this.listView_records.Items.Count);
+                _stop.SetProgressRange(0, this.listView_records.Items.Count);
 
                 for (int i = 0; i < this.listView_records.Items.Count; i++)
                 {
@@ -568,7 +568,7 @@ out string strError);
 
                     // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                     long lRet = Channel.GetItemInfo(
-                        stop,
+                        _stop,
                         strAccessPoint,
                         "xml",   // strResultType
                         out strResult,
@@ -746,18 +746,18 @@ out string strError);
                     nLabelCount++;
 
                     //CONTINUE:
-                    stop.SetProgressValue(i);
+                    _stop.SetProgressValue(i);
                 } // end of for
             }
             finally
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
-                stop.HideProgress();
+                _stop.HideProgress();
 
                 if (sw != null)
                     sw.Close();
@@ -2524,9 +2524,9 @@ out string strError);
                 goto ERROR1;
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在导入条码号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在导入条码号 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -2550,7 +2550,7 @@ out string strError);
                     }
                 }
 
-                stop.SetProgressRange(0, sr.BaseStream.Length);
+                _stop.SetProgressRange(0, sr.BaseStream.Length);
 
                 List<ListViewItem> items = new List<ListViewItem>();
 
@@ -2558,9 +2558,9 @@ out string strError);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                         {
                             MessageBox.Show(this, "用户中断");
                             return;
@@ -2569,7 +2569,7 @@ out string strError);
 
                     string strBarcode = sr.ReadLine();
 
-                    stop.SetProgressValue(sr.BaseStream.Position);
+                    _stop.SetProgressValue(sr.BaseStream.Position);
 
 
                     if (strBarcode == null)
@@ -2614,10 +2614,10 @@ out string strError);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 if (sr != null)
                     sr.Close();
@@ -2630,16 +2630,23 @@ out string strError);
         // 从记录路径文件中导入
         void menu_importFromRecPathFile_Click(object sender, EventArgs e)
         {
-            string strError = "";
+            _ = Task.Factory.StartNew(() =>
+            {
+                string strError = "";
 
-            int nRet = ImportFromRecPathFile(null,
-                "clear",
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-            return;
+                int nRet = ImportFromRecPathFile(null,
+                    "clear",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                return;
             ERROR1:
-            MessageBox.Show(this, strError);
+                MessageBox.Show(this, strError);
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
         }
 
 #if NO

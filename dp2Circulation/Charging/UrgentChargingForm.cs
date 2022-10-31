@@ -595,16 +595,19 @@ this.InfoDlgOpacity,
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_itemBarcode.Enabled = bEnable;
-            this.textBox_readerBarcode.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.textBox_itemBarcode.Enabled = bEnable;
+                this.textBox_readerBarcode.Enabled = bEnable;
 
-            this.button_itemAction.Enabled = bEnable;
-            this.button_loadReader.Enabled = bEnable;
+                this.button_itemAction.Enabled = bEnable;
+                this.button_loadReader.Enabled = bEnable;
+            }));
         }
 
         private void UrgentChargingForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.toolButton_amerce.Enabled = false;
             /*
@@ -663,9 +666,9 @@ this.InfoDlgOpacity,
 
             int nLineCount = 0;
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在初始化浏览器组件 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在初始化浏览器组件 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -696,7 +699,7 @@ this.InfoDlgOpacity,
                             goto ERROR1;
 
                         long lRet = this.Channel.UrgentRecover(
-                            stop,
+                            _stop,
                             strXml,
                             out strError);
                         if (lRet == -1)
@@ -737,9 +740,9 @@ this.InfoDlgOpacity,
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             Global.WriteHtml(this.webBrowser_operationInfo,

@@ -443,6 +443,8 @@ namespace DigitalPlatform.LibraryServer.Reporting
             if (list == null)
                 throw new ArgumentException("list 参数值不应为 null", "list");
 
+            if (sub == list)
+                return true;
             if (list.StartsWith(sub + ","))
                 return true;
             if (list.EndsWith("," + "sub"))

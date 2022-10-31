@@ -288,7 +288,7 @@ namespace dp2Circulation
                 this,
                 "", // 目前不分图书和期刊。 TODO: 其实将来可以把pubtype列表定为3态，其中一个是“书+刊”
                 this.DbType,    // "item",
-                this.stop,
+                this._stop,
                 this.Channel);
         }
 
@@ -554,13 +554,16 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.button_getProjectName.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.button_getProjectName.Enabled = bEnable;
 
-            // this.checkBox_departmentTable.Enabled = bEnable;
+                // this.checkBox_departmentTable.Enabled = bEnable;
 
-            this.button_next.Enabled = bEnable;
+                this.button_next.Enabled = bEnable;
 
-            this.button_projectManage.Enabled = bEnable;
+                this.button_projectManage.Enabled = bEnable;
+            }));
         }
 
         // TODO: OnEnd()有可能抛出异常，要能够截获和处理
@@ -574,9 +577,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在执行脚本 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在执行脚本 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -694,9 +697,9 @@ namespace dp2Circulation
                 if (objStatis != null)
                     objStatis.FreeResources();
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.AssemblyMain = null;
 
@@ -1052,9 +1055,9 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (_stop != null)
                         {
-                            if (stop.State != 0)
+                            if (_stop.State != 0)
                             {
                                 DialogResult result = MessageBox.Show(this,
                                     "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
@@ -1071,7 +1074,7 @@ namespace dp2Circulation
                                 if (result == DialogResult.No)
                                     return 0;   // 假装loop正常结束
 
-                                stop.Continue(); // 继续循环
+                                _stop.Continue(); // 继续循环
                             }
                         }
 
@@ -1086,7 +1089,7 @@ namespace dp2Circulation
 
                         OutputDebugInfo("处理行" + (i + 1).ToString() + " '" + strRecPathOrBarcode + "'");
 
-                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个" + this.DbTypeCaption + "记录，" + strAccessPointName + "为 " + strRecPathOrBarcode);
+                        _stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个" + this.DbTypeCaption + "记录，" + strAccessPointName + "为 " + strRecPathOrBarcode);
                         this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
                         // 获得册记录
@@ -1118,7 +1121,7 @@ namespace dp2Circulation
                         {
                             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                             lRet = Channel.GetItemInfo(
-                                stop,
+                                _stop,
                                 strAccessPoint,
                                 "xml", // strResultType,
                                 out strResult,
@@ -1133,7 +1136,7 @@ namespace dp2Circulation
                         {
                             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                             lRet = Channel.GetOrderInfo(
-                                stop,
+                                _stop,
                                 strAccessPoint,
                                 "xml", // strResultType,
                                 out strResult,
@@ -1148,7 +1151,7 @@ namespace dp2Circulation
                         {
                             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                             lRet = Channel.GetIssueInfo(
-                                stop,
+                                _stop,
                                 strAccessPoint,
                                 "xml", // strResultType,
                                 out strResult,
@@ -1163,7 +1166,7 @@ namespace dp2Circulation
                         {
                             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                             lRet = Channel.GetCommentInfo(
-                                stop,
+                                _stop,
                                 strAccessPoint,
                                 "xml", // strResultType,
                                 out strResult,
@@ -1347,7 +1350,7 @@ namespace dp2Circulation
                         if (this.DbType == "item")
                         {
                             // TODO: 是否应该用__id更合适？因为一些记录没有册条码号
-                            lRet = Channel.SearchItem(stop,
+                            lRet = Channel.SearchItem(_stop,
                                 this.comboBox_inputItemDbName.Text,
                                  "",
                                  -1,
@@ -1361,7 +1364,7 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "order")
                         {
-                            lRet = Channel.SearchOrder(stop,
+                            lRet = Channel.SearchOrder(_stop,
                                 this.comboBox_inputItemDbName.Text,
                                  "",
                                  -1,
@@ -1375,7 +1378,7 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "issue")
                         {
-                            lRet = Channel.SearchIssue(stop,
+                            lRet = Channel.SearchIssue(_stop,
                                 this.comboBox_inputItemDbName.Text,
                                  "",
                                  -1,
@@ -1389,7 +1392,7 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "comment")
                         {
-                            lRet = Channel.SearchComment(stop,
+                            lRet = Channel.SearchComment(_stop,
                                 this.comboBox_inputItemDbName.Text,
                                  "",
                                  -1,
@@ -1409,7 +1412,7 @@ namespace dp2Circulation
                         // 指定批次号。特定库。
                         if (this.DbType == "item")
                         {
-                            lRet = Channel.SearchItem(stop,
+                            lRet = Channel.SearchItem(_stop,
                                     this.comboBox_inputItemDbName.Text,
                                     strBatchNo,
                                     -1,
@@ -1423,7 +1426,7 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "order")
                         {
-                            lRet = Channel.SearchOrder(stop,
+                            lRet = Channel.SearchOrder(_stop,
                                     this.comboBox_inputItemDbName.Text,
                                     strBatchNo,
                                     -1,
@@ -1437,7 +1440,7 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "issue")
                         {
-                            lRet = Channel.SearchIssue(stop,
+                            lRet = Channel.SearchIssue(_stop,
                                     this.comboBox_inputItemDbName.Text,
                                     strBatchNo,
                                     -1,
@@ -1451,7 +1454,7 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "comment")
                         {
-                            lRet = Channel.SearchComment(stop,
+                            lRet = Channel.SearchComment(_stop,
                                     this.comboBox_inputItemDbName.Text,
                                     strBatchNo,
                                     -1,
@@ -1480,9 +1483,9 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (_stop != null)
                         {
-                            if (stop.State != 0)
+                            if (_stop.State != 0)
                             {
                                 strError = "用户中断";
                                 goto ERROR1;
@@ -1491,7 +1494,7 @@ namespace dp2Circulation
 
 
                         lRet = Channel.GetSearchResult(
-                            stop,
+                            _stop,
                             null,   // strResultSetName
                             lStart,
                             lCount,
@@ -1523,7 +1526,7 @@ namespace dp2Circulation
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;

@@ -359,25 +359,28 @@ false);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.comboBox_source_type.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.comboBox_source_type.Enabled = bEnable;
 
-            SetInputPanelEnabled(bEnable);
+                SetInputPanelEnabled(bEnable);
 
-            /*
-            this.checkBox_timeRange_usePublishTime.Enabled = bEnable;
-            this.checkBox_timeRange_useOrderTime.Enabled = bEnable;
-            this.checkBox_timeRange_none.Enabled = bEnable;
-            this.comboBox_timeRange_afterOrder.Enabled = bEnable;
-            this.textBox_timeRange.Enabled = bEnable;
-            this.comboBox_timeRange_quickSet.Enabled = bEnable;
-             * */
-            SetInputPanelEnabled(bEnable);
+                /*
+                this.checkBox_timeRange_usePublishTime.Enabled = bEnable;
+                this.checkBox_timeRange_useOrderTime.Enabled = bEnable;
+                this.checkBox_timeRange_none.Enabled = bEnable;
+                this.comboBox_timeRange_afterOrder.Enabled = bEnable;
+                this.textBox_timeRange.Enabled = bEnable;
+                this.comboBox_timeRange_quickSet.Enabled = bEnable;
+                 * */
+                SetInputPanelEnabled(bEnable);
 
-            this.button_next.Enabled = bEnable;
+                this.button_next.Enabled = bEnable;
 
-            this.button_print.Enabled = bEnable;
+                this.button_print.Enabled = bEnable;
 
-            this.button_printOption.Enabled = bEnable;
+                this.button_printOption.Enabled = bEnable;
+            }));
         }
 
         public void SetBiblioRecPaths(List<string> recpaths)
@@ -493,7 +496,7 @@ false);
                 EntityInfo[] orders = null;
 
                 long lRet = Channel.GetOrders(
-                    stop,
+                    _stop,
                     strBiblioRecPath,
                     lStart,
                     lCount,
@@ -553,7 +556,7 @@ false);
             {
                 long lRet = 0;
 
-                lRet = Channel.SearchOrder(stop,
+                lRet = Channel.SearchOrder(_stop,
                      this.comboBox_inputOrderDbName.Text,
                      "",
                      -1,    // nPerMax
@@ -578,9 +581,9 @@ false);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -588,7 +591,7 @@ false);
                     }
 
                     lRet = Channel.GetSearchResult(
-                        stop,
+                        _stop,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -618,7 +621,7 @@ false);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                    _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -785,7 +788,7 @@ false);
                 // 不指定批次号，意味着特定库全部条码
                 if (String.IsNullOrEmpty(strBatchNo) == true)
                 {
-                    lRet = Channel.SearchBiblio(stop,
+                    lRet = Channel.SearchBiblio(_stop,
                          this.comboBox_inputBiblioDbName.Text,
                          "",
                          -1,    // nPerMax
@@ -804,7 +807,7 @@ false);
                 else
                 {
                     // 指定批次号。特定库。
-                    lRet = Channel.SearchBiblio(stop,
+                    lRet = Channel.SearchBiblio(_stop,
                          this.comboBox_inputBiblioDbName.Text,
                          strBatchNo,
                          -1,    // nPerMax
@@ -834,9 +837,9 @@ false);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -845,7 +848,7 @@ false);
 
 
                     lRet = Channel.GetSearchResult(
-                        stop,
+                        _stop,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -878,7 +881,7 @@ false);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                    _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -1215,9 +1218,9 @@ false);
             // string strInputFileName = "";   // 外部指定的输入文件，为条码号文件或者记录路径文件格式
             string strAccessPointName = "";
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在检索 ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -1270,13 +1273,13 @@ false);
                 {
                     issue_host = new IssueHost();
                     issue_host.Channel = this.Channel;
-                    issue_host.Stop = this.stop;
+                    issue_host.Stop = this._stop;
                 }
                 else
                 {
                     order_host = new BookHost();
                     order_host.Channel = this.Channel;
-                    order_host.Stop = this.stop;
+                    order_host.Stop = this._stop;
                 }
 
                 /*
@@ -1285,7 +1288,7 @@ false);
                 this.progressBar_records.Value = 0;
                  * */
 
-                stop.SetProgressRange(0, sr.BaseStream.Length);
+                _stop.SetProgressRange(0, sr.BaseStream.Length);
 
                 try
                 {
@@ -1295,9 +1298,9 @@ false);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (_stop != null)
                         {
-                            if (stop.State != 0)
+                            if (_stop.State != 0)
                             {
                                 DialogResult result = MessageBox.Show(this,
                                     "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
@@ -1314,7 +1317,7 @@ false);
                                 if (result == DialogResult.No)
                                     return 0;   // 假装loop正常结束
 
-                                stop.Continue(); // 继续循环
+                                _stop.Continue(); // 继续循环
                             }
                         }
 
@@ -1367,9 +1370,9 @@ false);
                             }
                         }
 
-                        stop.SetMessage("正在获取第 " + (nRecord + 1).ToString() + " 个订购记录，" + strAccessPointName + "为 " + strOrderRecPath);
+                        _stop.SetMessage("正在获取第 " + (nRecord + 1).ToString() + " 个订购记录，" + strAccessPointName + "为 " + strOrderRecPath);
 
-                        stop.SetProgressValue(sr.BaseStream.Position);
+                        _stop.SetProgressValue(sr.BaseStream.Position);
                         // this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
                         // 获得书目记录
@@ -1521,10 +1524,10 @@ false);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 if (string.IsNullOrEmpty(strTempRecPathFilename) == false)
                     File.Delete(strTempRecPathFilename);
@@ -1623,7 +1626,7 @@ false);
                         Debug.Assert(String.IsNullOrEmpty(strOrderRecPath) == false, "strRecPath值不能为空");
 
                         lRet = Channel.GetBiblioInfos(
-                            stop,
+                            _stop,
                             issue_host.BiblioRecPath, // strOrderRecPath,
                             "",
                             formats,
@@ -1801,7 +1804,7 @@ false);
                         Debug.Assert(String.IsNullOrEmpty(book_host.BiblioRecPath) == false, "book_host.BiblioRecPath值不能为空");
 
                         lRet = Channel.GetBiblioInfos(
-                            stop,
+                            _stop,
                             book_host.BiblioRecPath,    // strOrderRecPath,
                             "",
                             formats,
@@ -2062,9 +2065,9 @@ false);
 
             try
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在检索 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在检索 ...");
+                _stop.BeginLoop();
 
                 EnableControls(false);
 
@@ -2076,7 +2079,7 @@ false);
                     // 不指定批次号，意味着特定库全部条码
                     if (String.IsNullOrEmpty(strBatchNo) == true)
                     {
-                        lRet = Channel.SearchBiblio(stop,
+                        lRet = Channel.SearchBiblio(_stop,
                              strDbNameList,
                              "",
                              -1,    // nPerMax
@@ -2095,7 +2098,7 @@ false);
                     else
                     {
                         // 指定批次号。特定库。
-                        lRet = Channel.SearchBiblio(stop,
+                        lRet = Channel.SearchBiblio(_stop,
                              strDbNameList,
                              strBatchNo,
                              -1,    // nPerMax
@@ -2125,9 +2128,9 @@ false);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (_stop != null)
                         {
-                            if (stop.State != 0)
+                            if (_stop.State != 0)
                             {
                                 strError = "用户中断";
                                 goto ERROR1;
@@ -2136,7 +2139,7 @@ false);
 
 
                         lRet = Channel.GetSearchResult(
-                            stop,
+                            _stop,
                             null,   // strResultSetName
                             lStart,
                             lCount,
@@ -2166,7 +2169,7 @@ false);
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
@@ -2177,9 +2180,9 @@ false);
                 {
                     EnableControls(true);
 
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
             }
             finally
@@ -3362,7 +3365,7 @@ false);
 
         private void PrintClaimForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
         }
 
         private void button_printOption_Click(object sender, EventArgs e)

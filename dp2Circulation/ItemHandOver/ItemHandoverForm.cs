@@ -436,29 +436,32 @@ this.splitContainer_inAndOutof,
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            // load page
-            this.comboBox_load_type.Enabled = this.ScanMode == true ? false : bEnable;
-            this.button_load_loadFromBatchNo.Enabled = this.ScanMode == true ? false : bEnable;
-            this.button_load_loadFromBarcodeFile.Enabled = this.ScanMode == true ? false : bEnable;
-            this.button_load_loadFromRecPathFile.Enabled = this.ScanMode == true ? false : bEnable;
-            this.button_load_scanBarcode.Enabled = this.ScanMode == true ? false : bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                // load page
+                this.comboBox_load_type.Enabled = this.ScanMode == true ? false : bEnable;
+                this.button_load_loadFromBatchNo.Enabled = this.ScanMode == true ? false : bEnable;
+                this.button_load_loadFromBarcodeFile.Enabled = this.ScanMode == true ? false : bEnable;
+                this.button_load_loadFromRecPathFile.Enabled = this.ScanMode == true ? false : bEnable;
+                this.button_load_scanBarcode.Enabled = this.ScanMode == true ? false : bEnable;
 
-            // next button
-            if (bEnable == true)
-                SetNextButtonEnable();
-            else
-                this.button_next.Enabled = false;
+                // next button
+                if (bEnable == true)
+                    SetNextButtonEnable();
+                else
+                    this.button_next.Enabled = false;
 
-            // verify page
-            this.textBox_verify_itemBarcode.Enabled = bEnable;
-            this.button_verify_load.Enabled = bEnable;
-            // this.checkBox_verify_autoUppercaseBarcode.Enabled = bEnable;
+                // verify page
+                this.textBox_verify_itemBarcode.Enabled = bEnable;
+                this.button_verify_load.Enabled = bEnable;
+                // this.checkBox_verify_autoUppercaseBarcode.Enabled = bEnable;
 
-            // print page
-            this.button_print_option.Enabled = bEnable;
-            this.button_print_printCheckedList.Enabled = bEnable;
+                // print page
+                this.button_print_option.Enabled = bEnable;
+                this.button_print_printCheckedList.Enabled = bEnable;
 
-            this.button_print_printNormalList.Enabled = bEnable;
+                this.button_print_printNormalList.Enabled = bEnable;
+            }));
         }
 
         /// <summary>
@@ -798,7 +801,7 @@ this.splitContainer_inAndOutof,
             // 集中获取全部册记录信息
             for (; ; )
             {
-                if (stop != null && stop.State != 0)
+                if (_stop != null && _stop.State != 0)
                 {
                     strError = "用户中断1";
                     return -1;
@@ -810,7 +813,7 @@ this.splitContainer_inAndOutof,
                 lines.CopyTo(paths);
             REDO_GETRECORDS:
                 long lRet = channel.GetBrowseRecords(
-                    this.stop,
+                    this._stop,
                     paths,
                     "id,xml,timestamp", // 注意，包含了 timestamp
                     out searchresults,
@@ -827,8 +830,8 @@ this.splitContainer_inAndOutof,
         MessageBoxDefaultButton.Button1);
                         if (temp_result == DialogResult.Retry)
                         {
-                            if (this.stop != null)
-                                this.stop.Continue();
+                            if (this._stop != null)
+                                this._stop.Continue();
 
                             goto REDO_GETRECORDS;
                         }
@@ -868,9 +871,9 @@ this.splitContainer_inAndOutof,
             {
                 for (int i = 0; i < infos.Count; i++)
                 {
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                         {
                             strError = "用户中断1";
                             return -1;
@@ -2014,11 +2017,11 @@ this.splitContainer_inAndOutof,
 
                 LibraryChannel channel = this.GetChannel();
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在装载册 "
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在装载册 "
                     + this.textBox_verify_itemBarcode.Text
                     + " ...");
-                stop.BeginLoop();
+                _stop.BeginLoop();
 
                 try
                 {
@@ -2052,9 +2055,9 @@ this.splitContainer_inAndOutof,
                 }
                 finally
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
 
                     this.ReturnChannel(channel);
 
@@ -2747,8 +2750,8 @@ MessageBoxDefaultButton.Button2);
 
                 if (sheet != null && column_max_chars.Count > 0)
                 {
-                    if (stop != null)
-                        stop.SetMessage("正在调整列宽度 ...");
+                    if (_stop != null)
+                        _stop.SetMessage("正在调整列宽度 ...");
                     Application.DoEvents();
 
                     PrintOrderForm.AdjectColumnWidth(sheet, column_max_chars);
@@ -3824,7 +3827,7 @@ strContent);
                     this,
                     this.comboBox_load_type.Text,
                     "item",
-                    this.stop,
+                    this._stop,
                     channel);
             }
             finally
@@ -4952,7 +4955,7 @@ MessageBoxDefaultButton.Button2);
         private void ItemHandoverForm_Activated(object sender, EventArgs e)
         {
             // 2009/8/13
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
         }
 
@@ -4981,18 +4984,18 @@ MessageBoxDefaultButton.Button2);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行转移 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行转移 ...");
+            _stop.BeginLoop();
 
             try
             {
-                stop.SetProgressRange(0, this.listView_in.Items.Count);
-                stop.SetProgressValue(0);
+                _stop.SetProgressRange(0, this.listView_in.Items.Count);
+                _stop.SetProgressValue(0);
 
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断1";
                         return 1;
@@ -5054,15 +5057,15 @@ MessageBoxDefaultButton.Button2);
                     nMovedCount++;
                     item.Selected = true;
 
-                    stop.SetProgressValue(i + 1);
+                    _stop.SetProgressValue(i + 1);
                 }
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -5177,7 +5180,7 @@ MessageBoxDefaultButton.Button2);
             byte[] timestamp = null;
 
             long lRet = channel.GetBiblioInfos(
-                stop,
+                _stop,
                 strSourceBiblioRecPath,
                 "",
                 formats,
@@ -5231,7 +5234,7 @@ MessageBoxDefaultButton.Button2);
             byte[] target_timestamp = null;
 
             lRet = channel.GetBiblioInfos(
-                stop,
+                _stop,
                 strTargetBiblioRecPath,
                 "",
                 formats,
@@ -5385,7 +5388,7 @@ MessageBoxDefaultButton.Button2);
             byte[] baNewTimestamp = null;
             string strOutputPath = "";
             lRet = channel.SetBiblioInfo(
-                stop,
+                _stop,
                 "change",
                 strTargetBiblioRecPath,
                 "xml",
@@ -5539,7 +5542,7 @@ MessageBoxDefaultButton.Button2);
             Debug.Assert(String.IsNullOrEmpty(strSourceBiblioRecPath) == false, "strSourceBiblioRecPath值不能为空");
 
             long lRet = channel.GetBiblioInfos(
-                stop,
+                _stop,
                 strSourceBiblioRecPath,
                 "",
                 formats,
@@ -5587,7 +5590,7 @@ MessageBoxDefaultButton.Button2);
             byte[] baNewTimestamp = null;
             string strOutputBiblio = "";
             lRet = channel.CopyBiblioInfo(
-                stop,
+                _stop,
                 "onlycopybiblio",   // 只复制书目记录，不复制下属的实体记录等
                 strSourceBiblioRecPath,
                 "xml",
@@ -5660,7 +5663,7 @@ MessageBoxDefaultButton.Button2);
 
             // TODO: 以后看情况可以删除源书目记录?
             lRet = channel.SetBiblioInfo(
-                stop,
+                _stop,
                 "change",
                 strSourceBiblioRecPath,
                 "xml",
@@ -5924,7 +5927,7 @@ MessageBoxDefaultButton.Button2);
             EntityInfo[] errorinfos = null;
 
             lRet = channel.SetEntities(
-                stop,
+                _stop,
                 strTargetBiblioRecPath,
                 entities,
                 out errorinfos,
@@ -6187,9 +6190,9 @@ MessageBoxDefaultButton.Button2);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存实体记录 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存实体记录 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -6197,7 +6200,7 @@ MessageBoxDefaultButton.Button2);
                 List<EntityInfo> entity_list = new List<EntityInfo>();
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断1";
                         return 1;
@@ -6320,9 +6323,9 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -6346,7 +6349,7 @@ MessageBoxDefaultButton.Button2);
 
             EntityInfo[] errorinfos = null;
             long lRet = channel.SetEntities(
-                stop,
+                _stop,
                 strBiblioRecPath,
                 entities,
                 out errorinfos,
@@ -6515,9 +6518,9 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在通知推荐订购的读者 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在通知推荐订购的读者 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -6549,7 +6552,7 @@ MessageBoxDefaultButton.Button2);
 
                 foreach (string strBiblioRecPath in biblio_table.Keys)
                 {
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断1";
                         return 1;
@@ -6562,7 +6565,7 @@ MessageBoxDefaultButton.Button2);
                     byte[] baNewTimestamp = null;
                     string strOutputPath = "";
                     long lRet = channel.SetBiblioInfo(
-                        stop,
+                        _stop,
                         "notifynewbook",
                         strBiblioRecPath,
                         StringUtil.MakePathList(biblio.LibrayCodeList),
@@ -6583,9 +6586,9 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -7119,7 +7122,7 @@ MessageBoxDefaultButton.Button2);
                 return -1;
             }
 
-            if (stop != null && stop.State == 0)    // 0 表示正在处理
+            if (_stop != null && _stop.State == 0)    // 0 表示正在处理
             {
                 strError = "目前有长操作正在进行，无法进行还书的操作";
                 return -1;
@@ -7130,10 +7133,10 @@ MessageBoxDefaultButton.Button2);
             int nCount = 0;
             List<ListViewItem> oper_items = new List<ListViewItem>();
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行" + strOperName + "操作 ...");
-            stop.BeginLoop();
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行" + strOperName + "操作 ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
             try
@@ -7148,14 +7151,14 @@ MessageBoxDefaultButton.Button2);
 
                 form.SmartFuncState = FuncState.Return;
 
-                stop.SetProgressRange(0, items.Count);
+                _stop.SetProgressRange(0, items.Count);
 
                 int i = 0;
                 foreach (ListViewItem item in items)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
@@ -7180,7 +7183,7 @@ MessageBoxDefaultButton.Button2);
                         return -1;
                     }
 
-                    stop.SetProgressValue(++i);
+                    _stop.SetProgressValue(++i);
 
                     nCount++;
                     oper_items.Add(item);
@@ -7190,11 +7193,11 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
             }

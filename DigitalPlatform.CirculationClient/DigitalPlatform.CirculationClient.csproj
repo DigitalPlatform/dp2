@@ -161,6 +161,9 @@
     <Compile Include="BioBase.cs" />
     <Compile Include="BioUtil.cs" />
     <Compile Include="CfgCache.cs" />
+    <Compile Include="ClientForm\ClientFormBase.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ClientInfo.cs" />
     <Compile Include="dp2ResStream.cs" />
     <Compile Include="dp2ResTree.cs">

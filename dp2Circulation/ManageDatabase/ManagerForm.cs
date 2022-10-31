@@ -148,9 +148,9 @@ namespace dp2Circulation
 
             List<string> lines = new List<string>();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取 MD5 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取 MD5 ...");
+            _stop.BeginLoop();
 
             var channel = this.GetChannel();
 
@@ -170,7 +170,7 @@ namespace dp2Circulation
                     //      1   文件找到
                     int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                         channel,
-                        stop,   // this.Stop,
+                        _stop,   // this.Stop,
                         filepath,
                         prompt,
                         new System.Threading.CancellationToken(),
@@ -192,9 +192,9 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
                 this.ClearMessage();
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             this.Invoke((Action)(() =>
@@ -782,9 +782,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在清除所有数据库内数据 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在清除所有数据库内数据 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -794,7 +794,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ClearAllDbs(
-                    stop,
+                    _stop,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -803,9 +803,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -821,13 +821,16 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            // this.button_clearAllDbs.Enabled = bEnable;
-            this.toolStrip_databases.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                // this.button_clearAllDbs.Enabled = bEnable;
+                this.toolStrip_databases.Enabled = bEnable;
+            }));
         }
 
         private void ManagerForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
@@ -952,9 +955,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取全部数据库名 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取全部数据库名 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -963,7 +966,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    stop,
+                    _stop,
                     "getinfo",
                     "",
                     "",
@@ -978,9 +981,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -1112,9 +1115,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在创建数据库 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在创建数据库 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -1124,7 +1127,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    stop,
+                    _stop,
                     bRecreate == false ? "create" : "recreate",
                     "",
                     strDatabaseInfo,
@@ -1139,9 +1142,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -1168,9 +1171,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在删除数据库 " + strDatabaseNames + "...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在删除数据库 " + strDatabaseNames + "...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -1180,7 +1183,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    stop,
+                    _stop,
                     "delete",
                     strDatabaseNames,
                     "",
@@ -1195,9 +1198,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -1228,9 +1231,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在刷新数据库 " + strDatabaseNames + " 的定义...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在刷新数据库 " + strDatabaseNames + " 的定义...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -1240,7 +1243,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    stop,
+                    _stop,
                     "refresh",
                     strDatabaseNames,
                     strDatabaseInfo,
@@ -1255,9 +1258,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -1284,9 +1287,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在初始化数据库 " + strDatabaseNames + "...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在初始化数据库 " + strDatabaseNames + "...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -1296,7 +1299,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    stop,
+                    _stop,
                     "initialize",
                     strDatabaseNames,
                     "",
@@ -1311,9 +1314,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -1342,9 +1345,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在修改数据库 " + strDatabaseNames + "...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在修改数据库 " + strDatabaseNames + "...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -1354,7 +1357,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    stop,
+                    _stop,
                     "change",
                     strDatabaseNames,
                     strDatabaseInfo,
@@ -1369,9 +1372,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -3011,9 +3014,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取全部 OPAC 数据库定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取全部 OPAC 数据库定义 ...");
+            _stop.BeginLoop();
 
             // this.Update();
             // Program.MainForm.Update();
@@ -3023,7 +3026,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "opac",
                     "databases",
                     out strOutputInfo,
@@ -3036,9 +3039,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -3055,9 +3058,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在设置全部OPAC数据库定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在设置全部OPAC数据库定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -3067,7 +3070,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    stop,
+                    _stop,
                     "opac",
                     "databases",
                     strDatabaseDef,
@@ -3080,9 +3083,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -3109,9 +3112,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取数据库 " + strDbName + " 的定义...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取数据库 " + strDbName + " 的定义...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -3121,7 +3124,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "database_def",
                     strDbName,
                     out strOutputInfo,
@@ -3134,9 +3137,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -4185,9 +4188,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取全部OPAC记录显示格式定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取全部OPAC记录显示格式定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -4197,7 +4200,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "opac",
                     "browseformats",
                     out strOutputInfo,
@@ -4210,9 +4213,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -4229,9 +4232,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在设置全部OPAC记录显示格式定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在设置全部OPAC记录显示格式定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -4241,7 +4244,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    stop,
+                    _stop,
                     "opac",
                     "browseformats",
                     strDatabaseDef,
@@ -4254,9 +4257,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -5427,9 +5430,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取<locationTypes>配置 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取<locationTypes>配置 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -5439,7 +5442,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "locationTypes",
                     out strOutputInfo,
@@ -5452,9 +5455,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -5470,9 +5473,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在设置<locationTypes>定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在设置<locationTypes>定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -5482,7 +5485,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "locationTypes",
                     strLocationDef,
@@ -5495,9 +5498,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -6210,9 +6213,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取值列表定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取值列表定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -6222,7 +6225,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "valueTables",
                     out strValueTableXml,
@@ -6235,9 +6238,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -6256,9 +6259,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存值列表定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存值列表定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -6268,7 +6271,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "valueTables",
                     strValueTableXml,
@@ -6285,9 +6288,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -6482,9 +6485,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取条码校验规则定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取条码校验规则定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -6494,7 +6497,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "barcodeValidation",
                     out strXml,
@@ -6507,9 +6510,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -6535,9 +6538,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存条码校验规则定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存条码校验规则定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -6547,7 +6550,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "barcodeValidation",
                     strXml,
@@ -6561,9 +6564,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -6659,9 +6662,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取脚本定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取脚本定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -6671,7 +6674,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "script",
                     out strScriptXml,
@@ -6684,9 +6687,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -6705,9 +6708,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存脚本定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存脚本定义 ...");
+            _stop.BeginLoop();
 
             //this.Update();
             //Program.MainForm.Update();
@@ -6717,7 +6720,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "script",
                     strScriptXml,
@@ -6731,9 +6734,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -9574,29 +9577,35 @@ namespace dp2Circulation
 
         private void kernelResTree1_GetChannel(object sender, DigitalPlatform.LibraryClient.GetChannelEventArgs e)
         {
+            /*
             e.Channel = Program.MainForm.GetChannel();
             if (e.BeginLoop == true)
             {
                 this.ShowMessage("正在访问服务器 ...");
-                stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.OnStop += new StopEventHandler(this.DoStop);
                 // stop.Initial(" ...");
-                stop.BeginLoop();
+                _stop.BeginLoop();
             }
+            */
+            OnGetChannel(sender, e);
         }
 
         private void kernelResTree1_ReturnChannel(object sender, DigitalPlatform.LibraryClient.ReturnChannelEventArgs e)
         {
+            /*
             Program.MainForm.ReturnChannel(e.Channel);
             if (e.EndLoop == true)
             {
-                if (stop != null)
+                if (_stop != null)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
                 this.ClearMessage();
             }
+            */
+            OnReturnChannel(sender, e);
         }
 
         private void toolStripButton_barcodeValidation_refresh_Click(object sender, EventArgs e)

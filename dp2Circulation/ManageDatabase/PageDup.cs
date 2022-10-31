@@ -243,9 +243,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取查重定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取查重定义 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -255,7 +255,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "dup",
                     out strDupXml,
@@ -268,9 +268,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -289,9 +289,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存查重定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存查重定义 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -301,7 +301,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "dup",
                     strDupXml,
@@ -315,9 +315,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }

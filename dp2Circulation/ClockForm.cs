@@ -118,9 +118,9 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在设置服务器当前时钟为 "+this.RFC1123TimeString+" ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在设置服务器当前时钟为 "+this.RFC1123TimeString+" ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
 
@@ -137,7 +137,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                 long lRet = channel.SetClock(
-                    stop,
+                    _stop,
                     this.RFC1123TimeString,
                     out strError);
                 if (lRet == -1)
@@ -150,9 +150,9 @@ MessageBoxDefaultButton.Button2);
 
                 this.EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
             }
@@ -173,9 +173,9 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得服务器当前时钟 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得服务器当前时钟 ...");
+            _stop.BeginLoop();
 
             if (bChangeEnableState == true)
                 this.EnableControls(false);
@@ -190,7 +190,7 @@ MessageBoxDefaultButton.Button2);
 
                 string strTime = "";
                 long lRet = channel.GetClock(
-                    stop,
+                    _stop,
                     out strTime,
                     out strError);
                 if (lRet == -1)
@@ -207,9 +207,9 @@ MessageBoxDefaultButton.Button2);
                 if (bChangeEnableState == true)
                     this.EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
             }
@@ -246,9 +246,9 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在将服务器时钟复原为硬件时钟 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在将服务器时钟复原为硬件时钟 ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
 
@@ -265,7 +265,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                 long lRet = channel.SetClock(
-                    stop,
+                    _stop,
                     null,
                     out strError);
                 if (lRet == -1)
@@ -278,9 +278,9 @@ MessageBoxDefaultButton.Button2);
 
                 this.EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
             }
@@ -355,7 +355,7 @@ MessageBoxDefaultButton.Button2);
 
         private void ClockForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
@@ -391,25 +391,28 @@ MessageBoxDefaultButton.Button2);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            if (this.checkBox_autoGetServerTime.Checked == false)
-                this.dateTimePicker1.Enabled = bEnable;
-            else
-                this.dateTimePicker1.Enabled = false;
-
-            this.button_get.Enabled = bEnable;
-
-            if (this.checkBox_autoGetServerTime.Checked == false)
+            this.TryInvoke((Action)(() =>
             {
-                this.button_set.Enabled = bEnable;
-                this.button_reset.Enabled = bEnable;
-            }
-            else
-            {
-                this.button_set.Enabled = false;
-                this.button_reset.Enabled = false;
-            }
+                if (this.checkBox_autoGetServerTime.Checked == false)
+                    this.dateTimePicker1.Enabled = bEnable;
+                else
+                    this.dateTimePicker1.Enabled = false;
 
-            this.textBox_time.Enabled = bEnable;
+                this.button_get.Enabled = bEnable;
+
+                if (this.checkBox_autoGetServerTime.Checked == false)
+                {
+                    this.button_set.Enabled = bEnable;
+                    this.button_reset.Enabled = bEnable;
+                }
+                else
+                {
+                    this.button_set.Enabled = false;
+                    this.button_reset.Enabled = false;
+                }
+
+                this.textBox_time.Enabled = bEnable;
+            }));
         }
 
         private void timer1_Tick(object sender, EventArgs e)

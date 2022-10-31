@@ -362,6 +362,8 @@ namespace dp2Circulation
             FormClientInfo.MainForm = this;
 
             InitializeComponent();
+            // 2022/10/29
+            Looping.Initialize(stopManager);
 
             FormClientInfo.CommunityModeChanged += (s, e) =>
             {
@@ -2381,7 +2383,7 @@ false);
             }
         }
 
-#endregion
+        #endregion
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
@@ -4100,7 +4102,7 @@ Stack:
             return -1;
         }
 
-#region EnsureXXXForm ...
+        #region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4388,7 +4390,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-#endregion
+        #endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -6009,7 +6011,13 @@ out strError);
         {
             get
             {
-                return toolStripStatusLabel_main.Text;
+                if (this.InvokeRequired)
+                    return (string)this.Invoke((Func<string>)(() =>
+                    {
+                        return toolStripStatusLabel_main.Text;
+                    }));
+                else
+                    return toolStripStatusLabel_main.Text;
             }
             set
             {
@@ -8195,7 +8203,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-#region 序列号机制
+        #region 序列号机制
 
         bool _testMode = false;
 
@@ -8548,7 +8556,7 @@ Keys keyData)
 
 #endif
 
-#endregion
+        #endregion
 
 #if REMOVED
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
@@ -8677,7 +8685,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-#region servers.xml
+        #region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -9018,7 +9026,7 @@ Keys keyData)
             return null;
         }
 
-#endregion // servers.xml
+        #endregion // servers.xml
 
 #if !NEWFINGER
         void EnableFingerprintSendKey(bool enable)

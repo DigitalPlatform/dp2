@@ -22,6 +22,7 @@ namespace dp2Circulation
 
         public BiblioInfo BiblioInfo = null;
 
+        // TODO: 可以考虑用 CancellationToken 来代替。在宿主 Form 关闭的时候终止操作
         public Stop Stop = null;
 
         public string HTML

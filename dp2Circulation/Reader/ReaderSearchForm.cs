@@ -30,6 +30,8 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
 using dp2Circulation.Reader;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace dp2Circulation
 {
@@ -77,6 +79,8 @@ namespace dp2Circulation
         /// </summary>
         public ReaderSearchForm()
         {
+            this.UseLooping = true; // 2022/10/29
+
             this.DbType = "patron";
 
             InitializeComponent();
@@ -107,7 +111,10 @@ namespace dp2Circulation
         // 在状态行显示文字信息
         internal override void SetStatusMessage(string strMessage)
         {
-            this.label_message.Text = strMessage;
+            this.Invoke((Action)(() =>
+            {
+                this.label_message.Text = strMessage;
+            }));
         }
 
 
@@ -455,9 +462,12 @@ namespace dp2Circulation
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 '" + this.textBox_queryWord.Text + "'...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在检索 '" + this.textBox_queryWord.Text + "'...");
 
             EnableControls(false);
             try
@@ -489,7 +499,7 @@ namespace dp2Circulation
                     }
                 }
 
-                long lRet = channel.SearchReader(stop,
+                long lRet = channel.SearchReader(looping.stop,
                     this.comboBox_readerDbName.Text,
                     this.textBox_queryWord.Text,
                     this.MaxSearchResultCount, // -1,
@@ -506,7 +516,7 @@ namespace dp2Circulation
 
                 this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条读者记录";
 
-                stop.SetProgressRange(0, lHitCount);
+                looping.stop.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -519,7 +529,7 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条读者记录，已装入 " + lStart.ToString() + " 条，用户中断...";
                         MessageBox.Show(this, "用户中断");
@@ -533,7 +543,7 @@ namespace dp2Circulation
 
 
                     lRet = channel.GetSearchResult(
-                        stop,
+                        looping.stop,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -577,11 +587,11 @@ namespace dp2Circulation
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
-                    stop.SetProgressValue(lStart);
+                    looping.stop.SetProgressValue(lStart);
                 }
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
@@ -591,10 +601,13 @@ namespace dp2Circulation
             {
                 EnableControls(true);
 
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -636,7 +649,7 @@ namespace dp2Circulation
             string strOutputRecPath = "";
             // 获得读者记录
             long lRet = channel.GetReaderInfo(
-stop,
+null,   // looping.stop,
 "@path:" + strRecPath,
 "xml",
 out results,
@@ -682,7 +695,7 @@ out strError);
             string strExistingXml = "";
             string strSavedXml = "";
             long lRet = channel.SetReaderInfo(
-stop,
+null, // looping.stop,
 StringUtil.IsInList("force", strStyle) ? "changereaderbarcode" : "change",
 strRecPath,
 info.NewXml,
@@ -936,21 +949,22 @@ out strError);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.toolStrip_search.Enabled = bEnable;
-            this.comboBox_readerDbName.Enabled = bEnable;
-            this.comboBox_from.Enabled = bEnable;
-            this.comboBox_matchStyle.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.toolStrip_search.Enabled = bEnable;
+                this.comboBox_readerDbName.Enabled = bEnable;
+                this.comboBox_from.Enabled = bEnable;
+                this.comboBox_matchStyle.Enabled = bEnable;
 
-            if (this.comboBox_matchStyle.Text == "空值")
-                this.textBox_queryWord.Enabled = false;
-            else
-                this.textBox_queryWord.Enabled = bEnable;
+                if (this.comboBox_matchStyle.Text == "空值")
+                    this.textBox_queryWord.Enabled = false;
+                else
+                    this.textBox_queryWord.Enabled = bEnable;
+            }));
         }
 
         private void ReaderSearchForm_Activated(object sender, EventArgs e)
         {
-            // Program.MainForm.stopManager.Active(this.stop);
-
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             // Program.MainForm.MenuItem_font.Enabled = false;
         }
@@ -1146,8 +1160,8 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            bool bLooping = (stop != null && stop.State == 0);    // 0 表示正在处理
-
+            // bool bLooping = (stop != null && stop.State == 0);    // 0 表示正在处理
+            bool bLooping = HasLooping();    // TODO: 需要重构
             {
                 menuItem = new MenuItem("功能(&F)");
                 contextMenu.MenuItems.Add(menuItem);
@@ -1458,7 +1472,7 @@ out strError);
             var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
             DialogResult result = MessageBox.Show(this,
-$"确实要从数据库中{(control ? "强制" : "")}删除所选定的 { this.listView_records.SelectedItems.Count.ToString() } 个读者记录?\r\n\r\n(警告：读者记录被删除后，无法恢复)\r\n\r\n(OK 删除；Cancel 取消)",
+$"确实要从数据库中{(control ? "强制" : "")}删除所选定的 {this.listView_records.SelectedItems.Count.ToString()} 个读者记录?\r\n\r\n(警告：读者记录被删除后，无法恢复)\r\n\r\n(OK 删除；Cancel 取消)",
 "ReaderSearchForm",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
@@ -1477,19 +1491,22 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在删除读者记录 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在删除读者记录 ...", "halfstop");
 
             this.EnableControls(false);
             this.listView_records.Enabled = false;
             try
             {
-                stop.SetProgressRange(0, items.Count);
+                looping.stop.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "已中断";
                         goto ERROR1;
@@ -1502,10 +1519,10 @@ MessageBoxDefaultButton.Button2);
                     byte[] baTimestamp = null;
                     string strOutputPath = "";
 
-                    stop.SetMessage("正在删除读者记录 " + strRecPath);
+                    looping.stop.SetMessage("正在删除读者记录 " + strRecPath);
 
                     long lRet = channel.GetReaderInfo(
-                        stop,
+                        looping.stop,
                         "@path:" + strRecPath,
                         "",
                         out results,
@@ -1536,7 +1553,7 @@ MessageBoxDefaultButton.Button2);
 
                     // channel.Timeout = new TimeSpan(0, 5, 0);
                     lRet = channel.SetReaderInfo(
-                        stop,
+                        looping.stop,
                         control ? "forcedelete" : "delete",
                         strRecPath,
                         "", // strNewXml
@@ -1553,18 +1570,22 @@ MessageBoxDefaultButton.Button2);
 
                     nDeleteCount++;
 
-                    stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     this.listView_records.Items.Remove(item);
                 }
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
+
 
                 this.ReturnChannel(channel);
 
@@ -1594,16 +1615,19 @@ MessageBoxDefaultButton.Button2);
             {
                 items.Add(item);
             }
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导出选定的事项到 Excel 文件 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在导出选定的事项到 Excel 文件 ...", "halfstop");
 
             this.EnableControls(false);
             try
             {
                 int nRet = ClosedXmlUtil.ExportToExcel(
-                    stop,
+                    looping.stop,
                     items,
                     out strError);
                 if (nRet == -1)
@@ -1611,11 +1635,14 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
 
                 this.EnableControls(true);
             }
@@ -1648,18 +1675,21 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在校验读者记录 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在校验读者记录 ...", "halfstop");
 
             this.EnableControls(false);
 
             this.listView_records.Enabled = false;
             try
             {
-                if (stop != null)
-                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.stop != null)
+                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -1671,7 +1701,7 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    stop,
+                    looping.stop,
                     items,
                     this.m_biblioTable)
                 {
@@ -1686,14 +1716,13 @@ MessageBoxDefaultButton.Button2);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null
-                        && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -1783,7 +1812,7 @@ MessageBoxDefaultButton.Button2);
                         // <para>1   是合法的读者证条码号</para>
                         // <para>2   是合法的册条码号</para>
                         nRet = Program.MainForm.VerifyBarcode(
-        this.stop,
+        looping.stop,
         channel,
         strLibraryCode,
         strBarcode,
@@ -1829,11 +1858,15 @@ MessageBoxDefaultButton.Button2);
             {
                 this.listView_records.Enabled = true;
 
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
+
 
                 this.EnableControls(true);
 
@@ -2109,19 +2142,20 @@ MessageBoxDefaultButton.Button2);
                 barcodes.Add(item.SubItems[1].Text);
             }
 
-            // return:
-            //      -1  出错
-            //      0   用户中断
-            //      1   成功
-            int nRet = this.ExportChargingHistoryToItemSearchForm(barcodes,
-                out strError);
-            if (nRet != 1)
-                goto ERROR1;
-
-            // MessageBox.Show(this, "导出完成");
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+            _ = Task.Factory.StartNew(() =>
+            {
+                // return:
+                //      -1  出错
+                //      0   用户中断
+                //      1   成功
+                int nRet = this.ExportChargingHistoryToItemSearchForm(barcodes,
+                    out strError);
+                if (nRet != 1)
+                    MessageBoxShow(strError);
+            },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
         }
 
         // 修改宏定义
@@ -2300,9 +2334,12 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导入条码号 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在导入条码号 ...");
 
             try
             {
@@ -2325,7 +2362,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-                stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
 
                 List<ListViewItem> items = new List<ListViewItem>();
 
@@ -2333,18 +2370,15 @@ MessageBoxDefaultButton.Button2);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (looping.Stopped)
                     {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                        MessageBox.Show(this, "用户中断");
+                        return;
                     }
 
                     string strBarcode = sr.ReadLine();
 
-                    stop.SetProgressValue(sr.BaseStream.Position);
+                    looping.stop.SetProgressValue(sr.BaseStream.Position);
 
 
                     if (strBarcode == null)
@@ -2379,10 +2413,14 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+                */
+                EndLoop(looping);
+
 
                 this.ReturnChannel(channel);
 
@@ -2518,7 +2556,7 @@ MessageBoxDefaultButton.Button2);
 
                 string[] results = null;
                 long lRet = channel.GetReaderInfo(
-                    stop,
+                    null, // looping.stop,
                     strBarcode,
                     "",
                     out results,
@@ -2570,17 +2608,20 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导入记录路径 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在导入记录路径 ...", "halfstop");
 
             this.EnableControls(false);
             try
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
                 ListViewUtil.ClearSortColumns(this.listView_records);
-                stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
 
 
                 if (this.listView_records.Items.Count > 0)
@@ -2604,18 +2645,15 @@ MessageBoxDefaultButton.Button2);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (looping.Stopped)
                     {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                        MessageBox.Show(this, "用户中断");
+                        return;
                     }
 
                     string strRecPath = sr.ReadLine();
 
-                    stop.SetProgressValue(sr.BaseStream.Position);
+                    looping.stop.SetProgressValue(sr.BaseStream.Position);
 
                     if (strRecPath == null)
                         break;
@@ -2680,11 +2718,15 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
+
 
                 this.EnableControls(true);
 
@@ -3741,10 +3783,13 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("移动读者记录 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "移动读者记录 ...", "halfstop");
 
             EnableControls(false);
             this.listView_records.Enabled = false;
@@ -3752,14 +3797,14 @@ MessageBoxDefaultButton.Button1);
             int nCount = 0;
             try
             {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         MessageBox.Show(this, "用户中断");
                         return;
@@ -3775,11 +3820,11 @@ MessageBoxDefaultButton.Button1);
 
                     string strTargetRecPath = saveto_dlg.RecPath;
 
-                    stop.SetMessage("正在移动读者记录 '" + strCurrentRecPath + "' ...");
+                    looping.stop.SetMessage("正在移动读者记录 '" + strCurrentRecPath + "' ...");
 
                     byte[] target_timestamp = null;
                     long lRet = channel.MoveReaderInfo(
-        stop,
+        looping.stop,
         strCurrentRecPath,
         ref strTargetRecPath,
         out target_timestamp,
@@ -3791,7 +3836,7 @@ MessageBoxDefaultButton.Button1);
 
                     item.Text = strTargetRecPath;   // 刷新浏览行的记录路径部分
 
-                    stop.SetProgressValue(++i);
+                    looping.stop.SetProgressValue(++i);
                     nCount++;
                 }
             }
@@ -3800,11 +3845,15 @@ MessageBoxDefaultButton.Button1);
                 EnableControls(true);
                 this.listView_records.Enabled = true;
 
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
+
 
                 this.ReturnChannel(channel);
             }
@@ -3852,26 +3901,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
-            /*
             // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要保存的 XML 文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            // dlg.FileName = this.ExportBarcodeFilename;
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "读者记录 XML 文件 (*.xml)|*.xml|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-            {
-                return;
-                //strError = "放弃操作";
-                //return 0;
-            }
-            */
             var dlg = new OpenPatronXmlFileDialog();
             MainForm.SetControlFont(dlg, this.Font);
             dlg.CreateMode = true;
@@ -3931,6 +3961,8 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
+            var looping = BeginLoop(this.DoStop, "正在导出读者记录到 XML 文件 ...");
+
             string strOutputFileName = dlg.FileName;
             int count = 0;
             try
@@ -3978,7 +4010,7 @@ MessageBoxDefaultButton.Button2);
 
                             REDO_WRITEOBJECTS:
                             // 将记录中的对象资源写入外部文件
-                            nRet = BiblioSearchForm.WriteObjectFiles(stop,
+                            nRet = BiblioSearchForm.WriteObjectFiles(looping.stop,
                     channel,
                     strRecPath,
                     ref dom,
@@ -3987,7 +4019,7 @@ MessageBoxDefaultButton.Button2);
                     out strError);
                             if (nRet == -1)
                             {
-                                if (stop != null && stop.State != 0)
+                                if (looping.Stopped)
                                     return false;
 
                                 DialogResult temp_result = MessageBox.Show(this,
@@ -4023,8 +4055,12 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
-                if (stop != null)
-                    stop.SetMessage("");
+                /*
+                if (looping.stop != null)
+                    looping.stop.SetMessage("");
+                */
+                EndLoop(looping);
+
                 // Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束导出读者 XML 记录</div>");
                 this.ClearMessage();
             }
@@ -4251,10 +4287,13 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在通知读者 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在通知读者 ...", "halfstop");
 
             this.EnableControls(false);
             this.listView_records.Enabled = false;
@@ -4262,13 +4301,13 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 int i = 0;
-                if (stop != null)
-                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.stop != null)
+                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "已中断";
                         goto ERROR1;
@@ -4276,10 +4315,10 @@ MessageBoxDefaultButton.Button2);
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
 
-                    stop.SetMessage("正在通知读者 " + strRecPath);
+                    looping.stop.SetMessage("正在通知读者 " + strRecPath);
 
                     long lRet = channel.SetReaderInfo(
-stop,
+looping.stop,
 strAction,
 strRecPath,
 style, // strNewXml,
@@ -4295,16 +4334,20 @@ out strError);
                         goto ERROR1;
 
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"{strRecPath} {strError}") + "</div>");
-                    stop.SetProgressValue(i++);
+                    looping.stop.SetProgressValue(i++);
                 }
             }
             finally
             {
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
+
 
                 this.listView_records.Enabled = true;
                 this.EnableControls(true);
@@ -5122,12 +5165,12 @@ out strError);
             // List<DigitalPlatform.LibraryClient.localhost.Record> records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
             LibraryChannel channel = this.GetChannel();
-
+            var looping = BeginLoop(this.DoStop, "正在装入指纹数据 ...");
             try
             {
                 for (; ; )
                 {
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断1";
                         return -1;
@@ -5139,7 +5182,7 @@ out strError);
                     lines.CopyTo(paths);
                 REDO_GETRECORDS:
                     long lRet = channel.GetBrowseRecords(
-                        this.stop,
+                        looping.stop,
                         paths,
                         "id,cols,format:cfgs/browse_fingerprint",
                         out searchresults,
@@ -5170,6 +5213,8 @@ out strError);
             }
             finally
             {
+                EndLoop(looping);
+
                 this.ReturnChannel(channel);
             }
         }
@@ -5184,12 +5229,13 @@ out strError);
             readerdbnames = new List<string>();
             // int nRet = 0;
 
+            var looping = BeginLoop(this.DoStop, "正在获得读者库名字 ...");
             LibraryChannel channel = this.GetChannel();
             try
             {
                 // 确保登录一次
                 string strValue = "";
-                long lRet = channel.GetSystemParameter(stop,
+                long lRet = channel.GetSystemParameter(looping.stop,
         "system",
         "readerDbGroup",
         out strValue,
@@ -5244,6 +5290,7 @@ out strError);
             finally
             {
                 this.ReturnChannel(channel);
+                EndLoop(looping);
             }
         }
 
@@ -5705,18 +5752,21 @@ out strFingerprint);
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在针对读者记录执行 C# 脚本 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在针对读者记录执行 C# 脚本 ...", "halfstop");
 
             this.EnableControls(false);
 
             this.listView_records.Enabled = false;
             try
             {
-                if (stop != null)
-                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.stop != null)
+                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 host.CodeFileName = this.m_strUsedMarcQueryFilename;
                 {
@@ -5747,7 +5797,7 @@ out strFingerprint);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    stop,
+                    looping.stop,
                     items,
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
@@ -5760,14 +5810,13 @@ out strFingerprint);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null
-                        && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -5836,11 +5885,15 @@ out strFingerprint);
 
                 this.listView_records.Enabled = true;
 
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
+
 
                 this.EnableControls(true);
 
@@ -6190,7 +6243,12 @@ dlg.UiState);
 
                     if (dlg.ExportChargingHistory)
                     {
+                        var new_timeout = TimeSpan.FromSeconds(30);
+
                         LibraryChannel channel = Program.MainForm.GetChannel();
+                        var old_timeout = channel.Timeout;
+                        if (old_timeout < new_timeout)
+                            channel.Timeout = new_timeout;
                         try
                         {
                             ChargingHistoryLoader history_loader = new ChargingHistoryLoader();
@@ -6225,6 +6283,7 @@ dlg.UiState);
                         }
                         finally
                         {
+                            channel.Timeout = old_timeout;
                             Program.MainForm.ReturnChannel(channel);
                         }
                     }
@@ -6304,29 +6363,40 @@ dlg.UiState);
             strError = "";
             //int nRet = 0;
 
-            ItemSearchForm form = Program.MainForm.OpenItemSearchForm("item");
-            form.Enabled = false;
+
+            var new_timeout = TimeSpan.FromSeconds(30);
 
             LibraryChannel channel = this.GetChannel();
+            var old_timeout = channel.Timeout;
+            if (old_timeout < new_timeout)
+                channel.Timeout = new_timeout;
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("导出读者借阅历史 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "导出读者借阅历史 ...", "halfstop");
 
+            this.ShowMessage("正在导出读者借阅历史 ...");
             EnableControls(false);
-            this.listView_records.Enabled = false;
+            this.Invoke((Action)(() =>
+            {
+                this.listView_records.Enabled = false;
+            }));
+
             try
             {
-                if (stop != null)
-                    stop.SetProgressRange(0, reader_barcodes.Count);
+                if (looping.stop != null)
+                    looping.stop.SetProgressRange(0, reader_barcodes.Count);
 
                 int nReaderIndex = 0;
                 foreach (string strBarcode in reader_barcodes)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return 0;
@@ -6339,11 +6409,11 @@ dlg.UiState);
                     byte[] baTimestamp = null;
                     string strOutputRecPath = "";
 
-                    stop.SetMessage("正在处理读者记录 " + strBarcode + " ...");
+                    looping.stop.SetMessage("正在处理读者记录 " + strBarcode + " ...");
 
                     string[] results = null;
                     long lRet = channel.GetReaderInfo(
-                        stop,
+                        looping.stop,
                         strBarcode,
                         "advancexml",
                         out results,
@@ -6383,7 +6453,7 @@ dlg.UiState);
                     {
                         ChargingHistoryLoader history_loader = new ChargingHistoryLoader();
                         history_loader.Channel = channel;
-                        history_loader.Stop = this.stop;
+                        history_loader.Stop = looping.stop;
                         history_loader.PatronBarcode = strBarcode;
                         history_loader.TimeRange = "~"; // strTimeRange;
                         history_loader.Actions = "return,lost";
@@ -6391,10 +6461,18 @@ dlg.UiState);
 
                         ItemBarcodeLoader barcode_loader = new ItemBarcodeLoader();
                         barcode_loader.Channel = channel;
-                        barcode_loader.Stop = this.stop;
+                        barcode_loader.Stop = looping.stop;
+
+                        if (looping.Stopped)
+                        {
+                            strError = "用户中断";
+                            return 0;
+                        }
 
                         // 输出借阅历史表格
-                        int nRet = OutputBorrowHistory(form,
+                        int nRet = OutputBorrowHistory(
+                            looping,
+                            // form,
                             dom,
                 history_loader,
                 barcode_loader,
@@ -6409,32 +6487,41 @@ dlg.UiState);
                     }
 
                     nReaderIndex++;
-                    if (stop != null)
-                        stop.SetProgressValue(nReaderIndex);
+                    if (looping.stop != null)
+                        looping.stop.SetProgressValue(nReaderIndex);
                 }
             }
             finally
             {
                 EnableControls(true);
-                this.listView_records.Enabled = true;
+                this.ClearMessage();
+                this.Invoke((Action)(() =>
+                {
+                    this.listView_records.Enabled = true;
+                }));
 
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
 
+
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
-                form.Enabled = true;
             }
             return 1;
         }
 
         // 将一个读者的操作历史输出到实体查询窗
         // parameters:
-        static int OutputBorrowHistory(
-            ItemSearchForm form,
+        int OutputBorrowHistory(
+            Looping looping,
+            // ItemSearchForm form,
             XmlDocument reader_dom,
             ChargingHistoryLoader history_loader,
             ItemBarcodeLoader barcode_loader,
@@ -6448,9 +6535,21 @@ dlg.UiState);
                 return -1;
             }
 
+            string readerBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
+                "barcode");
+
+            looping?.stop.SetMessage($"正在导出读者 {readerBarcode} 的借阅历史 ...");
+
             List<string> barcodes = new List<string>();
+            int i = 0;
             foreach (ChargingItemWrapper wrapper in history_loader)
             {
+                if (looping.Stopped)
+                {
+                    strError = "用户中断";
+                    return -1;
+                }
+
                 ChargingItem item = wrapper.Item;
 
                 string strItemBarcode = item.ItemBarcode;
@@ -6460,9 +6559,14 @@ dlg.UiState);
                 string strBorrowPeriod = GetDisplayTimePeriodString(rel == null ? "" : rel.Period);
                 string strReturnDate = item.OperTime;
 #endif
+                if ((i % 100) == 0)
+                    looping?.stop.SetMessage($"正在导出读者 {readerBarcode} 的借阅历史 {strItemBarcode} ...");
 
                 barcodes.Add(strItemBarcode);
+                i++;
             }
+
+            looping?.stop.SetMessage($"正在将读者 {readerBarcode} 的借阅历史册条码号转换为记录路径 ...");
 
             string strTempFileName = Program.MainForm.GetTempFileName("exphis");
             try
@@ -6481,20 +6585,63 @@ dlg.UiState);
                     }
                 }
 
-                if (nCount > 0)
+                if (looping.Stopped)
                 {
-                    int nRet = form.ImportFromRecPathFile(strTempFileName,
-                        "",
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
+                    strError = "用户中断";
+                    return -1;
                 }
 
+                if (nCount > 0)
+                {
+                    ItemSearchForm form = null;
+                    this.Invoke((Action)(() =>
+                    {
+                        form = Program.MainForm.OpenItemSearchForm("item");
+                    }));
+                    // 临时文件划归实体查询窗管理
+                    string fileName = form.MemoryTempFileName(strTempFileName);
+                    strTempFileName = null;
+
+                    // 启动一个新的线程
+                    _ = Task.Factory.StartNew(() =>
+                    {
+
+                        /*
+                        // 实体查询窗中途被关闭时，结束当前函数
+                        form.FormClosed += (s, e) =>
+                        {
+                            looping?.stop?.DoStop(s);
+                            // form = null;
+                        };
+                        */
+                        form?.ShowMessage("等待装载读者借阅历史册 ...");
+                        form?.EnableControls(false);
+
+                        form.ShowMessage("正在装载读者借阅历史册 ...");
+                        try
+                        {
+                            int nRet = form.ImportFromRecPathFile(fileName,
+                                "",
+                                out string error);
+                            if (nRet == -1)
+                                form.MessageBoxShow(error);
+                        }
+                        finally
+                        {
+                            form?.EnableControls(true);
+                            form?.ClearMessage();
+                        }
+                    },
+                    default,
+                    TaskCreationOptions.LongRunning,
+                    TaskScheduler.Default);
+                }
                 return 0;
             }
             finally
             {
-                File.Delete(strTempFileName);
+                if (string.IsNullOrEmpty(strTempFileName) == false)
+                    File.Delete(strTempFileName);
             }
         }
 
@@ -6531,18 +6678,21 @@ dlg.UiState);
 
             LibraryChannel channel = this.GetChannel();
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在处理读者记录 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在处理读者记录 ...", "halfstop");
 
             this.EnableControls(false);
 
             this.listView_records.Enabled = false;
             try
             {
-                if (stop != null)
-                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.stop != null)
+                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -6554,7 +6704,7 @@ dlg.UiState);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    stop,
+                    looping.stop,
                     items,
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
@@ -6567,13 +6717,13 @@ dlg.UiState);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -6614,11 +6764,14 @@ dlg.UiState);
             {
                 this.listView_records.Enabled = true;
 
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
 
                 this.EnableControls(true);
 
@@ -6647,25 +6800,28 @@ dlg.UiState);
             if (old_timeout < new_timeout)
                 channel.Timeout = new_timeout;
 
+            /*
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在处理读者记录 ...");
             stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在处理读者记录 ...", "halfstop");
 
             EnableControls(false);
             this.listView_records.Enabled = false;
 
             try
             {
-                if (stop != null)
-                    stop.SetProgressRange(0, reader_barcodes.Count);
+                if (looping.stop != null)
+                    looping.stop.SetProgressRange(0, reader_barcodes.Count);
 
                 int nReaderIndex = 0;
                 foreach (string strBarcode in reader_barcodes)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
@@ -6678,11 +6834,11 @@ dlg.UiState);
                     byte[] baTimestamp = null;
                     string strOutputRecPath = "";
 
-                    stop.SetMessage("正在处理读者记录 " + strBarcode + " ...");
+                    looping.stop.SetMessage("正在处理读者记录 " + strBarcode + " ...");
 
                     string[] results = null;
                     long lRet = channel.GetReaderInfo(
-                        stop,
+                        looping.stop,
                         strBarcode,
                         string.IsNullOrEmpty(strGetReaderInfoStyle) ?
                         "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary"
@@ -6735,8 +6891,8 @@ dlg.UiState);
                     }
 
                     nReaderIndex++;
-                    if (stop != null)
-                        stop.SetProgressValue(nReaderIndex);
+                    if (looping.stop != null)
+                        looping.stop.SetProgressValue(nReaderIndex);
                 }
 
                 return nReaderIndex;    // 实际处理的读者记录数
@@ -6757,11 +6913,14 @@ dlg.UiState);
                 EnableControls(true);
                 this.listView_records.Enabled = true;
 
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -6847,10 +7006,11 @@ dlg.UiState);
             bool ok = false;
             strLocalFilePath = Path.Combine(Program.MainForm.UserTempDir, "~cp_" + Guid.NewGuid().ToString());
             LibraryChannel channel = this.GetChannel();
+            var looping = BeginLoop(this.DoStop, "正在下载图片 ...");
             try
             {
                 int nRet = GetCardPhotoFile(channel,
-stop,
+looping.stop,
 strObjectPath,
 strLocalFilePath,
 out strError);
@@ -6865,6 +7025,7 @@ out strError);
             }
             finally
             {
+                EndLoop(looping);
                 this.ReturnChannel(channel);
                 if (ok == false)
                     File.Delete(strLocalFilePath);
@@ -7655,6 +7816,7 @@ dlg.UiState);
             string strOutputFileName = dlg.FileName;
 
             XLWorkbook doc = null;
+            var looping = BeginLoop(this.DoStop, "正在导出读者详情 ...");
             try
             {
                 // 提前保存一下，如果此时文件扩展名不正确，就能当时抛出异常
@@ -7667,6 +7829,7 @@ dlg.UiState);
 
                 File.Delete(strOutputFileName);
                 doc = new XLWorkbook(XLEventTracking.Disabled);
+                EndLoop(looping);
             }
             catch (Exception ex)
             {
@@ -7763,7 +7926,7 @@ dlg.UiState);
                             {
                                 ChargingHistoryLoader history_loader = new ChargingHistoryLoader();
                                 history_loader.Channel = channel;
-                                history_loader.Stop = this.stop;
+                                history_loader.Stop = looping.stop;
                                 history_loader.PatronBarcode = strBarcode;
                                 history_loader.TimeRange = strTimeRange;
                                 history_loader.Actions = "return,lost";
@@ -7771,7 +7934,7 @@ dlg.UiState);
 
                                 CacheableBiblioLoader summary_loader = new CacheableBiblioLoader();
                                 summary_loader.Channel = channel;
-                                summary_loader.Stop = this.stop;
+                                summary_loader.Stop = looping.stop;
                                 summary_loader.Format = "summary";
                                 summary_loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                                 // summary_loader.RecPaths = biblio_recpaths;
@@ -7811,8 +7974,8 @@ dlg.UiState);
                 }
 
                 {
-                    if (stop != null)
-                        stop.SetMessage("正在调整列宽度 ...");
+                    if (looping.stop != null)
+                        looping.stop.SetMessage("正在调整列宽度 ...");
                     Application.DoEvents();
 
                     //double char_width = GetAverageCharPixelWidth(list);
@@ -7856,8 +8019,8 @@ dlg.UiState);
             }
             finally
             {
-                if (stop != null)
-                    stop.SetMessage("");
+                if (looping.stop != null)
+                    looping.stop.SetMessage("");
 
                 if (doc != null)
                 {
@@ -8375,7 +8538,8 @@ ref nRowIndex,
 XLColor.DarkGreen,
 2,
 7);
-
+            string readerBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
+                "barcode");
 
             List<IXLCell> cells = new List<IXLCell>();
 
@@ -8423,6 +8587,9 @@ XLColor.DarkGreen,
                 //string strIsOverdue = borrow.GetAttribute("isOverdue");
                 //bool bIsOverdue = DomUtil.IsBooleanTrue(strIsOverdue, false);
                 //string strOverdueInfo = borrow.GetAttribute("overdueInfo1");
+
+                if (history_loader.Stop != null)
+                    history_loader.Stop.SetMessage($"装载读者 {readerBarcode} 的借阅历史 {strItemBarcode} {strBorrowDate} {strBorrowPeriod} {strReturnDate} ...");
 
                 string strSummary = "";
 #if NO
@@ -8494,6 +8661,9 @@ XLColor.DarkGreen,
             int i = 0;
             foreach (BiblioItem biblio in summary_loader)
             {
+                if (summary_loader.Stop != null)
+                    summary_loader.Stop.SetMessage($"装载读者 {readerBarcode} 借阅历史中 {biblio.RecPath} 的书目摘要 ...");
+
                 Point point = points[i];
                 int nColIndex = point.X;
                 // 统计最大字符数

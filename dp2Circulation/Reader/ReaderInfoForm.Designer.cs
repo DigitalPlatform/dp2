@@ -50,7 +50,8 @@
             this.textBox_pqr = new System.Windows.Forms.TextBox();
             this.pictureBox_qrCode = new System.Windows.Forms.PictureBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSplitButton_delete = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_forceDelete = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_loadFromIdcard = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_loadBlank = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton_loadBlank = new System.Windows.Forms.ToolStripDropDownButton();
@@ -192,6 +193,7 @@
             this.readerEditControl1.CreatePinyin += new System.EventHandler(this.readerEditControl1_CreatePinyin);
             this.readerEditControl1.EditRights += new System.EventHandler(this.readerEditControl1_EditRights);
             this.readerEditControl1.EditEmail += new System.EventHandler(this.readerEditControl1_EditEmail);
+            this.readerEditControl1.EditCardNumber += new System.EventHandler(this.readerEditControl1_EditCardNumber);
             // 
             // webBrowser_readerInfo
             // 
@@ -343,7 +345,7 @@
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton_delete,
+            this.toolStripSplitButton_delete,
             this.toolStripButton_loadFromIdcard,
             this.toolStripButton_loadBlank,
             this.toolStripDropDownButton_loadBlank,
@@ -374,14 +376,23 @@
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripButton_delete
+            // toolStripSplitButton_delete
             // 
-            this.toolStripButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_delete.Image")));
-            this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_delete.Name = "toolStripButton_delete";
-            this.toolStripButton_delete.Size = new System.Drawing.Size(82, 32);
-            this.toolStripButton_delete.Text = "删除";
-            this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
+            this.toolStripSplitButton_delete.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_forceDelete});
+            this.toolStripSplitButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_delete.Image")));
+            this.toolStripSplitButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton_delete.Name = "toolStripSplitButton_delete";
+            this.toolStripSplitButton_delete.Size = new System.Drawing.Size(102, 32);
+            this.toolStripSplitButton_delete.Text = "删除";
+            this.toolStripSplitButton_delete.ButtonClick += new System.EventHandler(this.toolStripSplitButton_delete_ButtonClick);
+            // 
+            // ToolStripMenuItem_forceDelete
+            // 
+            this.ToolStripMenuItem_forceDelete.Name = "ToolStripMenuItem_forceDelete";
+            this.ToolStripMenuItem_forceDelete.Size = new System.Drawing.Size(213, 40);
+            this.ToolStripMenuItem_forceDelete.Text = "强制删除";
+            this.ToolStripMenuItem_forceDelete.Click += new System.EventHandler(this.ToolStripMenuItem_forceDelete_Click);
             // 
             // toolStripButton_loadFromIdcard
             // 
@@ -956,7 +967,6 @@
         private System.Windows.Forms.WebBrowser webBrowser_xml;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton toolStripButton_saveTo;
-        private System.Windows.Forms.ToolStripButton toolStripButton_delete;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
@@ -1021,5 +1031,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_registerFaceByFile;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_notifyOverdue;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_notifyRecall;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_delete;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_forceDelete;
     }
 }

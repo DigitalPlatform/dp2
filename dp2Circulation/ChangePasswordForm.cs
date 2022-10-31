@@ -118,9 +118,9 @@ namespace dp2Circulation
 
             bool bOldPasswordEnabled = this.textBox_reader_oldPassword.Enabled;
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在修改读者密码 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在修改读者密码 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -134,7 +134,7 @@ namespace dp2Circulation
                 //      0   旧密码不正确
                 //      1   旧密码正确,已修改为新密码
                 lRet = Channel.ChangeReaderPassword(
-                    stop,
+                    _stop,
                     this.textBox_reader_barcode.Text,
                     bOldPasswordEnabled == false ? null : this.textBox_reader_oldPassword.Text,
                     this.textBox_reader_newPassword.Text,
@@ -148,9 +148,9 @@ namespace dp2Circulation
             {
                 this.EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             MessageBox.Show(this, "读者密码修改成功。");
@@ -172,30 +172,32 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.button_reader_changePassword.Enabled = bEnable;
-            this.textBox_reader_barcode.Enabled = bEnable;
-            this.textBox_reader_newPassword.Enabled = bEnable;
-            this.textBox_reader_confirmNewPassword.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.button_reader_changePassword.Enabled = bEnable;
+                this.textBox_reader_barcode.Enabled = bEnable;
+                this.textBox_reader_newPassword.Enabled = bEnable;
+                this.textBox_reader_confirmNewPassword.Enabled = bEnable;
 
-            bool bReader = Program.MainForm.AppInfo.GetBoolean(
-    "default_account",
-    "isreader",
-    false);
-            if (bReader == false)
-                this.textBox_reader_oldPassword.Enabled = false;
-            else
-                this.textBox_reader_oldPassword.Enabled = bEnable;
+                bool bReader = Program.MainForm.AppInfo.GetBoolean(
+        "default_account",
+        "isreader",
+        false);
+                if (bReader == false)
+                    this.textBox_reader_oldPassword.Enabled = false;
+                else
+                    this.textBox_reader_oldPassword.Enabled = bEnable;
 
-            this.button_worker_changePassword.Enabled = bEnable;
-            this.textBox_worker_userName.Enabled = bEnable;
-            if (this.checkBox_worker_force.Checked == true)
-                this.textBox_worker_oldPassword.Enabled = false;
-            else
-                this.textBox_worker_oldPassword.Enabled = bEnable;
-            this.textBox_worker_newPassword.Enabled = bEnable;
-            this.textBox_worker_confirmNewPassword.Enabled = bEnable;
-            this.checkBox_worker_force.Enabled = bEnable;
-
+                this.button_worker_changePassword.Enabled = bEnable;
+                this.textBox_worker_userName.Enabled = bEnable;
+                if (this.checkBox_worker_force.Checked == true)
+                    this.textBox_worker_oldPassword.Enabled = false;
+                else
+                    this.textBox_worker_oldPassword.Enabled = bEnable;
+                this.textBox_worker_newPassword.Enabled = bEnable;
+                this.textBox_worker_confirmNewPassword.Enabled = bEnable;
+                this.checkBox_worker_force.Enabled = bEnable;
+            }));
         }
 
         private void button_worker_changePassword_Click(object sender, EventArgs e)
@@ -216,9 +218,9 @@ namespace dp2Circulation
                 return;
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在修改工作人员密码 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在修改工作人员密码 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -265,7 +267,7 @@ namespace dp2Circulation
                         //      -1  出错
                         //      0   成功
                         lRet = Channel.ChangeUserPassword(
-                            stop,
+                            _stop,
                             this.textBox_worker_userName.Text,
                             this.textBox_worker_oldPassword.Text,
                             this.textBox_worker_newPassword.Text,
@@ -288,7 +290,7 @@ namespace dp2Circulation
                     info.Password = this.textBox_worker_newPassword.Text;
                     // 当action为"resetpassword"时，则info.ResetPassword状态不起作用，无论怎样都要修改密码。resetpassword并不修改其他信息，也就是说info中除了Password/UserName以外其他成员的值无效。
                     lRet = Channel.SetUser(
-                        stop,
+                        _stop,
                         "resetpassword",
                         info,
                         out strError);
@@ -303,9 +305,9 @@ namespace dp2Circulation
             {
                 this.EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             MessageBox.Show(this, "工作人员 '" + this.textBox_worker_userName.Text + "' 密码修改成功。");

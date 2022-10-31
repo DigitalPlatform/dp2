@@ -14,6 +14,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
+using System.Diagnostics;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -60,6 +61,47 @@ namespace DigitalPlatform.CirculationClient
             this.ImageList = imageList_resIcon;
         }
 
+        // 包装后的版本。CallReturnChannel(channel, looping) 配套
+        LibraryChannel CallGetChannel(out Looping looping)
+        {
+            return CallGetChannel("beginLoop", out looping);
+        }
+
+        // 包装后的版本。CallReturnChannel(channel) 配套
+        LibraryChannel CallGetChannel()
+        {
+            return CallGetChannel("", out _);
+        }
+
+        LibraryChannel CallGetChannel(string style,
+            out Looping looping)
+        {
+            looping = null;
+            if (this.GetChannel == null)
+                return null;
+            GetChannelEventArgs e = new GetChannelEventArgs();
+            e.Style = style;
+            this.GetChannel(this, e);
+            if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                throw new Exception(e.ErrorInfo);
+            Debug.Assert(e.Looping != null);
+            looping = e.Looping;
+            return e.Channel;
+        }
+
+        void CallReturnChannel(LibraryChannel channel, Looping looping = null)
+        {
+            Debug.Assert(channel != null);
+            if (this.ReturnChannel == null)
+                return;
+            ReturnChannelEventArgs e = new ReturnChannelEventArgs();
+            e.Channel = channel;
+            e.Looping = looping;
+            this.ReturnChannel(this, e);
+        }
+
+        /*
+
         LibraryChannel CallGetChannel(bool bBeginLoop)
         {
             if (this.GetChannel == null)
@@ -81,6 +123,7 @@ namespace DigitalPlatform.CirculationClient
             e.EndLoop = bEndLoop;
             this.ReturnChannel(this, e);
         }
+        */
 
         static string GetNodePath(TreeNode node)
         {
@@ -251,11 +294,12 @@ namespace DigitalPlatform.CirculationClient
             LibraryChannel channel = null;
             TimeSpan old_timeout = new TimeSpan(0);
 
+            Looping looping = null;
             if (channel_param != null)
                 channel = channel_param;
             else
             {
-                channel = this.CallGetChannel(true);
+                channel = this.CallGetChannel(out looping);
 
                 old_timeout = channel.Timeout;
                 channel.Timeout = new TimeSpan(0, 5, 0);
@@ -392,7 +436,7 @@ namespace DigitalPlatform.CirculationClient
                 {
                     channel.Timeout = old_timeout;
 
-                    this.CallReturnChannel(channel, true);
+                    this.CallReturnChannel(channel, looping);
                 }
 
                 if (restoreLoading)
@@ -1167,7 +1211,7 @@ MessageBoxDefaultButton.Button2);
             LibraryChannel channel = null;
             TimeSpan old_timeout = new TimeSpan(0);
 
-            channel = this.CallGetChannel(true);
+            channel = this.CallGetChannel(out Looping looping);
 
             old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 5, 0);
@@ -1243,7 +1287,7 @@ MessageBoxDefaultButton.Button2);
             {
                 channel.Timeout = old_timeout;
 
-                this.CallReturnChannel(channel, true);
+                this.CallReturnChannel(channel, looping);
             }
 
             // 刷新显示
@@ -1316,7 +1360,7 @@ MessageBoxDefaultButton.Button2);
             LibraryChannel channel = null;
             TimeSpan old_timeout = new TimeSpan(0);
 
-            channel = this.CallGetChannel(true);
+            channel = this.CallGetChannel(out Looping looping);
 
             old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 5, 0);
@@ -1369,7 +1413,7 @@ MessageBoxDefaultButton.Button2);
             {
                 channel.Timeout = old_timeout;
 
-                this.CallReturnChannel(channel, true);
+                this.CallReturnChannel(channel, looping);
             }
             return;
         ERROR1:

@@ -90,9 +90,9 @@ namespace dp2Circulation
             this.tabControl_input.SelectedTab = this.tabPage_paths;
 
             this.EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("");
+            _stop.BeginLoop();
             this.Update();
             Program.MainForm.Update();
 
@@ -102,10 +102,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.EnableControls(true);
             }
@@ -118,9 +118,9 @@ namespace dp2Circulation
             this.textBox_recpathFile.Text = strFileName;
 
             this.EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("");
+            _stop.BeginLoop();
             this.Update();
             Program.MainForm.Update();
             try
@@ -129,10 +129,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.EnableControls(true);
             }
@@ -141,9 +141,9 @@ namespace dp2Circulation
         private void button_begin_Click(object sender, EventArgs e)
         {
             this.EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("");
+            _stop.BeginLoop();
             this.Update();
             Program.MainForm.Update();
 
@@ -161,10 +161,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.EnableControls(true);
             }
@@ -253,16 +253,16 @@ MessageBoxDefaultButton.Button1);
 
             DateTime now = DateTime.Now;
 
-            stop.SetProgressRange(0, this.textBox_paths.Lines.Length);
+            _stop.SetProgressRange(0, this.textBox_paths.Lines.Length);
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 开始批处理修改书目记录</div>");
             for (int i = 0; i < this.textBox_paths.Lines.Length; i++)
             {
                 Application.DoEvents();
-                if (stop != null)
+                if (_stop != null)
                 {
-                    if (stop.State != 0)
+                    if (_stop.State != 0)
                     {
                         strError = "用户中断1";
                         goto ERROR1;
@@ -286,7 +286,7 @@ MessageBoxDefaultButton.Button1);
                 nCount++;
                 if (nRet == 1)
                     nChangedCount++;
-                stop.SetProgressValue(i + 1);
+                _stop.SetProgressValue(i + 1);
             }
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
@@ -349,7 +349,7 @@ MessageBoxDefaultButton.Button1);
 
                 DateTime now = DateTime.Now;
 
-                stop.SetProgressRange(0, sr.BaseStream.Length);
+                _stop.SetProgressRange(0, sr.BaseStream.Length);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 开始批处理修改书目记录</div>");
@@ -357,9 +357,9 @@ MessageBoxDefaultButton.Button1);
                 for (; ; )
                 {
                     Application.DoEvents();
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                         {
                             strError = "用户中断2";
                             goto ERROR1;
@@ -395,7 +395,7 @@ MessageBoxDefaultButton.Button1);
                     nCount++;
                     if (nRet == 1)
                         nChangedCount++;
-                    stop.SetProgressValue(sr.BaseStream.Position);
+                    _stop.SetProgressValue(sr.BaseStream.Position);
                 }
             }
 
@@ -415,12 +415,15 @@ MessageBoxDefaultButton.Button1);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_paths.Enabled = bEnable;
-            this.textBox_recpathFile.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.textBox_paths.Enabled = bEnable;
+                this.textBox_recpathFile.Enabled = bEnable;
 
-            this.button_begin.Enabled = bEnable;
-            this.button_changeParam.Enabled = bEnable;
-            this.button_file_getRecpathFilename.Enabled = bEnable;
+                this.button_begin.Enabled = bEnable;
+                this.button_changeParam.Enabled = bEnable;
+                this.button_file_getRecpathFilename.Enabled = bEnable;
+            }));
         }
 
         // return:
@@ -434,7 +437,7 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             int nRet = 0;
 
-            stop.SetMessage("正在处理 " + strBiblioRecPath + " ...");
+            _stop.SetMessage("正在处理 " + strBiblioRecPath + " ...");
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"=== {strBiblioRecPath} ===") + "</div>");
 
@@ -444,7 +447,7 @@ MessageBoxDefaultButton.Button1);
             string[] results = null;
             byte[] timestamp = null;
             long lRet = Channel.GetBiblioInfos(
-                stop,
+                _stop,
                 strBiblioRecPath,
                 "",
                 formats,
@@ -604,7 +607,7 @@ MessageBoxDefaultButton.Button1);
             byte[] baNewTimestamp = null;
             string strOutputPath = "";
             lRet = Channel.SetBiblioInfo(
-    stop,
+    _stop,
     "change",
     strBiblioRecPath,
     "xml",

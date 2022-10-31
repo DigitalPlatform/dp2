@@ -102,9 +102,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得全部日历 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得全部日历 ...");
+            _stop.BeginLoop();
 
             var channel = this.GetChannel();
 
@@ -118,7 +118,7 @@ namespace dp2Circulation
                     CalenderInfo[] infos = null;
 
                     long lRet = channel.GetCalendar(
-                        stop,
+                        _stop,
                         (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0 ? "list" : "get"), // "list",
                         "",
                         nStart,
@@ -167,9 +167,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -309,9 +309,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存日历 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存日历 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -348,7 +348,7 @@ namespace dp2Circulation
                     }
 
                     long lRet = channel.SetCalendar(
-                        stop,
+                        _stop,
                         strAction,
                         info,
                         out strError);
@@ -384,9 +384,9 @@ namespace dp2Circulation
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }

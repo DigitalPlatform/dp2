@@ -288,9 +288,9 @@ MessageBoxDefaultButton.Button2);
 
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在初始化浏览器组件 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在初始化浏览器组件 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -307,12 +307,12 @@ MessageBoxDefaultButton.Button2);
 
                 int nRedoCount = 0;
             REDO:
-                stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                _stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                 string[] results = null;
 
                 long lRet = Channel.GetReaderInfo(
-                    stop,
+                    _stop,
                     strBarcode,
                     "xml,html",
                     out results,
@@ -442,9 +442,9 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             return 1;
@@ -483,16 +483,19 @@ MessageBoxDefaultButton.Button2);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_readerBarcode.Enabled = bEnable;
-            this.textBox_operator.Enabled = bEnable;
-            this.textBox_comment.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.textBox_readerBarcode.Enabled = bEnable;
+                this.textBox_operator.Enabled = bEnable;
+                this.textBox_comment.Enabled = bEnable;
 
-            this.comboBox_operation.Enabled = bEnable;
-            this.tabControl_readerInfo.Enabled = bEnable;
+                this.comboBox_operation.Enabled = bEnable;
+                this.tabControl_readerInfo.Enabled = bEnable;
 
-            // 2008/10/28
-            this.button_save.Enabled = bEnable;
-            this.button_load.Enabled = bEnable;
+                // 2008/10/28
+                this.button_save.Enabled = bEnable;
+                this.button_load.Enabled = bEnable;
+            }));
         }
 
         private void textBox_readerBarcode_Enter(object sender, EventArgs e)
@@ -601,9 +604,9 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存读者记录 " + this.ReaderBarcode + " ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存读者记录 " + this.ReaderBarcode + " ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -618,7 +621,7 @@ MessageBoxDefaultButton.Button2);
 
                 // changestate操作需要"setreaderinfo"和"changereaderstate"之一权限。
                 long lRet = Channel.SetReaderInfo(
-                    stop,
+                    _stop,
                     "changestate",   // "change",
                     this.RecPath,
                     strXml,
@@ -704,9 +707,9 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             MessageBox.Show(this, "保存成功");
@@ -738,7 +741,7 @@ MessageBoxDefaultButton.Button2);
 
         private void ReaderManageForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;

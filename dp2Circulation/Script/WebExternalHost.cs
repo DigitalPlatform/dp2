@@ -703,7 +703,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 {
                 }
             }
-
         }
 
         static void BuildQrCodeImage(

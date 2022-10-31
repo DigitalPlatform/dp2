@@ -107,21 +107,24 @@ namespace dp2Circulation
 
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_patronXmlFileName.Enabled = bEnable;
-            this.comboBox_appendMode.Enabled = bEnable;
-            this.comboBox_targetDbName.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.textBox_patronXmlFileName.Enabled = bEnable;
+                this.comboBox_appendMode.Enabled = bEnable;
+                this.comboBox_targetDbName.Enabled = bEnable;
 
-            this.checkBox_refreshRefID.Enabled = bEnable;
-            this.checkBox_restoreMode.Enabled = bEnable;
-            this.checkBox_autoPostfix.Enabled = bEnable;
+                this.checkBox_refreshRefID.Enabled = bEnable;
+                this.checkBox_restoreMode.Enabled = bEnable;
+                this.checkBox_autoPostfix.Enabled = bEnable;
 
-            // 2021/12/19
-            this.checkBox_object.Enabled = bEnable;
-            this.textBox_objectDirectoryName.Enabled = bEnable;
-            this.button_getObjectDirectoryName.Enabled = bEnable;
+                // 2021/12/19
+                this.checkBox_object.Enabled = bEnable;
+                this.textBox_objectDirectoryName.Enabled = bEnable;
+                this.button_getObjectDirectoryName.Enabled = bEnable;
 
-            this.button_begin.Enabled = bEnable;
-            this.button_stop.Enabled = !bEnable;
+                this.button_begin.Enabled = bEnable;
+                this.button_stop.Enabled = !bEnable;
+            }));
         }
 
         private void button_begin_Click(object sender, EventArgs e)
@@ -138,7 +141,7 @@ namespace dp2Circulation
             ProcessInfo info = new ProcessInfo();
             {
                 info.Channel = this.GetChannel();
-                info.stop = stop;
+                info.stop = _stop;
                 info.TargetDbName = this.comboBox_targetDbName.Text;
                 info.AppendMode = this.comboBox_appendMode.Text;
                 info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
@@ -196,10 +199,10 @@ namespace dp2Circulation
 
             OutputText($"{DateTime.Now.ToString()} 开始导入读者 XML 记录", 0);
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在导入读者 XML 记录");
-            stop.BeginLoop();
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在导入读者 XML 记录");
+            _stop.BeginLoop();
 
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
@@ -212,8 +215,8 @@ namespace dp2Circulation
     FileAccess.Read))
                 using (XmlTextReader reader = new XmlTextReader(file))
                 {
-                    if (stop != null)
-                        stop.SetProgressRange(0, file.Length);
+                    if (_stop != null)
+                        _stop.SetProgressRange(0, file.Length);
 
                     bool bRet = false;
 
@@ -232,7 +235,7 @@ namespace dp2Circulation
 
                     for (; ; )
                     {
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -253,8 +256,8 @@ namespace dp2Circulation
 
                         DoRecord(reader, info);
 
-                        if (stop != null)
-                            stop.SetProgressValue(file.Position);
+                        if (_stop != null)
+                            _stop.SetProgressValue(file.Position);
 
                         info.PatronRecCount++;
                     }
@@ -269,11 +272,11 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
 
                 info.Channel.Timeout = old_timeout;
                 this.ReturnChannel(info.Channel);
@@ -490,7 +493,7 @@ EnableControls(false)
 
         REDO:
             long lRet = info.Channel.SetReaderInfo(
-    stop,
+    _stop,
     strAction,
     strTargetRecPath,
     root.OuterXml,

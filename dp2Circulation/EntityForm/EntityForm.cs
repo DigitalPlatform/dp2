@@ -746,7 +746,7 @@ namespace dp2Circulation
                 this.binaryResControl1.ReturnChannel += binaryResControl1_ReturnChannel;
 
                 //this.binaryResControl1.Channel = this.Channel;
-                this.binaryResControl1.Stop = this.Progress;
+                // this.binaryResControl1.Stop = this.Progress;
 
                 this.binaryResControl1.RightsCfgFileName = Path.Combine(Program.MainForm.UserDir, "objectrights.xml");
 
@@ -982,16 +982,16 @@ true);
 
         void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)
         {
-            this.stop.EndLoop();
-            this.stop.OnStop -= new StopEventHandler(this.DoStop);
+            this._stop.EndLoop();
+            this._stop.OnStop -= new StopEventHandler(this.DoStop);
             this.ReturnChannel(e.Channel);
         }
 
         void binaryResControl1_GetChannel(object sender, GetChannelEventArgs e)
         {
             e.Channel = this.GetChannel();
-            this.stop.OnStop += new StopEventHandler(this.DoStop);
-            this.stop.BeginLoop();
+            this._stop.OnStop += new StopEventHandler(this.DoStop);
+            this._stop.BeginLoop();
         }
 
         void entityControl1_ShowMessage(object sender, ShowMessageEventArgs e)
@@ -3843,6 +3843,7 @@ out string strErrorCode)
             if (strXml != null)
             {
                 nRet = this.binaryResControl1.LoadObject(
+                    this._stop,
                     channel,
                     strOutputBiblioRecPath,    // 2008/11/2 changed
                     strXml,
@@ -4462,7 +4463,7 @@ out string strErrorCode)
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.Invoke((Action)(() =>
+            this.TryInvoke((Action)(() =>
             {
                 this.textBox_queryWord.Enabled = bEnable;
 
@@ -5030,6 +5031,7 @@ out string strErrorCode)
                     //		-1	error
                     //		>=0 实际上载的资源对象数
                     nRet = this.binaryResControl1.Save(
+                        this._stop,
                         channel,
                         Program.MainForm.ServerVersion,
                         out strError);
@@ -5646,9 +5648,9 @@ out string strErrorCode)
 
             _zsearcher.InSearching = true;
             this.EnableControls(false);
-            stop.OnStop += OnZ3950LoadStop;
-            stop.Initial("正在装载 Z39.50 检索内容 ...");
-            stop.BeginLoop();
+            _stop.OnStop += OnZ3950LoadStop;
+            _stop.Initial("正在装载 Z39.50 检索内容 ...");
+            _stop.BeginLoop();
             try
             {
                 ListViewItem item = this.browseWindow.RecordsList.SelectedItems[0];
@@ -5665,7 +5667,7 @@ out string strErrorCode)
                     if (_zsearcher.InSearching == false)
                         break;
 
-                    stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
+                    _stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
 
                     var present_result = await Z3950Searcher.FetchRecords(channel,
                         all ? 100 : 10);
@@ -5691,10 +5693,10 @@ out string strErrorCode)
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= OnZ3950LoadStop;
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= OnZ3950LoadStop;
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.EnableControls(true);
                 _zsearcher.InSearching = false;
@@ -6343,10 +6345,10 @@ out strError);
          * */
         void browseWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (stop != null && stop.State == 0 && e.CloseReason == CloseReason.UserClosing)    // 0 表示正在处理
+            if (_stop != null && _stop.State == 0 && e.CloseReason == CloseReason.UserClosing)    // 0 表示正在处理
             {
                 // 如果是在检索中途关闭小窗口，则需要先设置 stop 为停止状态，不能直接关闭小窗口
-                stop.DoStop();
+                _stop.DoStop();
                 e.Cancel = true;
                 // 通知检索循环结束后关闭小窗口
                 _willCloseBrowseWindow = true;
@@ -6393,7 +6395,7 @@ out strError);
                 Debug.Assert(info != null, "");
 
                 bool is_z3950 = info.RecPath.IndexOf("@") != -1;
-                if (this.stop.IsInLoop == true
+                if (this._stop.IsInLoop == true
                     && is_z3950 == false)
                 {
                     this.AddToPendingList(info.RecPath, "");
@@ -6420,7 +6422,7 @@ out strError);
 
             string strBiblioRecPath = e.Paths[0];
 
-            if (this.stop.IsInLoop == true)
+            if (this._stop.IsInLoop == true)
             {
                 this.AddToPendingList(strBiblioRecPath, "");
                 return;
@@ -14428,7 +14430,7 @@ out strError);
                 byte[] timestamp = null;
 
                 long lRet = channel.GetBiblioInfos(
-                    stop,
+                    _stop,
                     this.BiblioRecPath,
                     "",
                     formats.ToArray(),

@@ -385,8 +385,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6550.17227, Culture=neutral,
     /// </summary>
     public class GetChannelEventArgs : EventArgs
     {
-        public bool BeginLoop = false;  // [in]
+        // public bool BeginLoop = false;  // [in]
+        public string Style = null; // [in] beginLoop 表示需要调用 BeginLoop，并返回 Looping
         public LibraryChannel Channel = null;   // [out]
+        public Looping Looping = null;  // [out]
         public string ErrorInfo = "";   // [out]
     }
 
@@ -404,7 +406,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6550.17227, Culture=neutral,
     public class ReturnChannelEventArgs : EventArgs
     {
         public LibraryChannel Channel = null;   // [in]
-        public bool EndLoop = false;    // [in]
+        public Looping Looping = null;  // [in]
+        // public bool EndLoop = false;    // [in]
     }
 
 }

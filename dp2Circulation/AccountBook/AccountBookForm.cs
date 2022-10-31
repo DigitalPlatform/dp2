@@ -390,42 +390,42 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            // load page
-            this.button_load_loadFromBatchNo.Enabled = bEnable;
-            this.button_load_loadFromRecPathFile.Enabled = bEnable;
-            this.button_load_loadFromBarcodeFile.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                // load page
+                this.button_load_loadFromBatchNo.Enabled = bEnable;
+                this.button_load_loadFromRecPathFile.Enabled = bEnable;
+                this.button_load_loadFromBarcodeFile.Enabled = bEnable;
 
-            this.checkBox_load_fillBiblioSummary.Enabled = bEnable;
-            this.checkBox_load_fillOrderInfo.Enabled = bEnable;
+                this.checkBox_load_fillBiblioSummary.Enabled = bEnable;
+                this.checkBox_load_fillOrderInfo.Enabled = bEnable;
 
-            this.comboBox_load_type.Enabled = bEnable;
+                this.comboBox_load_type.Enabled = bEnable;
 
-            // next button
-            if (bEnable == true)
-                SetNextButtonEnable();
-            else
-                this.button_next.Enabled = false;
+                // next button
+                if (bEnable == true)
+                    SetNextButtonEnable();
+                else
+                    this.button_next.Enabled = false;
 
-            // sort page
-            this.comboBox_sort_sortStyle.Enabled = bEnable;
+                // sort page
+                this.comboBox_sort_sortStyle.Enabled = bEnable;
 
-            // print page
-            this.button_print_optionHTML.Enabled = bEnable;
-            this.button_print_optionText.Enabled = bEnable;
-            this.button_print_optionWordXml.Enabled = bEnable;
+                // print page
+                this.button_print_optionHTML.Enabled = bEnable;
+                this.button_print_optionText.Enabled = bEnable;
+                this.button_print_optionWordXml.Enabled = bEnable;
 
-            this.button_print_outputTextFile.Enabled = bEnable;
-            this.button_print_printNormalList.Enabled = bEnable;
-            this.button_print_outputWordXmlFile.Enabled = bEnable;
+                this.button_print_outputTextFile.Enabled = bEnable;
+                this.button_print_printNormalList.Enabled = bEnable;
+                this.button_print_outputWordXmlFile.Enabled = bEnable;
 
-            this.button_print_outputExcelFile.Enabled = bEnable;
+                this.button_print_outputExcelFile.Enabled = bEnable;
 
-            this.button_print_runScript.Enabled = bEnable;
-            this.button_print_createNewScriptFile.Enabled = bEnable;
-
+                this.button_print_runScript.Enabled = bEnable;
+                this.button_print_createNewScriptFile.Enabled = bEnable;
+            }));
         }
-
-
 
         // 检查路径所从属书目库是否为图书/期刊库？
         // return:
@@ -497,7 +497,7 @@ namespace dp2Circulation
             {
                 Application.DoEvents();
 
-                if (stop != null && stop.State != 0)
+                if (_stop != null && _stop.State != 0)
                 {
                     strError = "用户中断1";
                     return -1;
@@ -509,7 +509,7 @@ namespace dp2Circulation
                 lines.CopyTo(paths);
             REDO_GETRECORDS:
                 long lRet = channel.GetBrowseRecords(
-                    this.stop,
+                    this._stop,
                     paths,
                     "id,xml",
                     out searchresults,
@@ -524,8 +524,8 @@ namespace dp2Circulation
     MessageBoxDefaultButton.Button1);
                     if (temp_result == DialogResult.Retry)
                     {
-                        if (this.stop != null)
-                            this.stop.Continue();
+                        if (this._stop != null)
+                            this._stop.Continue();
 
                         goto REDO_GETRECORDS;
                     }
@@ -562,7 +562,7 @@ namespace dp2Circulation
             {
                 for (int i = 0; i < infos.Count; i++)
                 {
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断1";
                         return -1;
@@ -663,7 +663,7 @@ namespace dp2Circulation
             if (this.comboBox_load_type.Text == "图书")
             {
                 strRecordName = "订购记录";
-                lRet = channel.GetOrderInfo(stop,
+                lRet = channel.GetOrderInfo(_stop,
                      "@item-refid-list:" + StringUtil.MakePathList(refids),
                      "get-path-list",
                      out strResult,
@@ -677,7 +677,7 @@ namespace dp2Circulation
             else
             {
                 strRecordName = "期记录";
-                lRet = channel.GetIssueInfo(stop,
+                lRet = channel.GetIssueInfo(_stop,
                      "@item-refid-list:" + StringUtil.MakePathList(refids),
                      "get-path-list",
                      out strResult,
@@ -743,7 +743,7 @@ namespace dp2Circulation
                 // 集中获取全部册记录信息
                 for (; ; )
                 {
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断1";
                         return -1;
@@ -755,7 +755,7 @@ namespace dp2Circulation
                     lines.CopyTo(paths);
                 REDO_GETRECORDS:
                     lRet = channel.GetBrowseRecords(
-                        this.stop,
+                        this._stop,
                         paths,
                         "id,xml",
                         out searchresults,
@@ -770,8 +770,8 @@ namespace dp2Circulation
         MessageBoxDefaultButton.Button1);
                         if (temp_result == DialogResult.Retry)
                         {
-                            if (this.stop != null)
-                                this.stop.Continue();
+                            if (this._stop != null)
+                                this._stop.Continue();
 
                             goto REDO_GETRECORDS;
                         }
@@ -3097,9 +3097,9 @@ namespace dp2Circulation
         {
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在构造财产帐 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在构造财产帐 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -3124,10 +3124,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 EnableControls(true);
             }
@@ -4277,15 +4277,15 @@ strTotalPrice);
                 sw,
                 sheet);
 
-            stop.SetProgressValue(0);
-            stop.SetProgressRange(0, items.Count);
+            _stop.SetProgressValue(0);
+            _stop.SetProgressRange(0, items.Count);
 
             // 表格行循环
             for (int i = 0; i < items.Count; i++)
             {
                 Application.DoEvents();	// 出让界面控制权
 
-                if (stop != null && stop.State != 0)
+                if (_stop != null && _stop.State != 0)
                 {
                     strError = "用户中断";
                     return -1;
@@ -4299,7 +4299,7 @@ strTotalPrice);
                     sheet,
                     this.TextTruncate);
 
-                stop.SetProgressValue(i + 1);
+                _stop.SetProgressValue(i + 1);
             }
 
             return 0;
@@ -4916,14 +4916,14 @@ strTotalPrice);
                         return -1;
                 }
 
-                stop.SetProgressRange(0, nTablePageCount);
+                _stop.SetProgressRange(0, nTablePageCount);
 
                 // 表格页循环
                 for (int i = 0; i < nTablePageCount; i++)
                 {
                     Application.DoEvents();
 
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
@@ -4955,7 +4955,7 @@ strTotalPrice);
                         strFileName,
                         true);
 
-                    stop.SetProgressValue(i + 1);
+                    _stop.SetProgressValue(i + 1);
                 }
 
                 return 0;
@@ -6333,7 +6333,7 @@ new MarcRecord(strMARC));
                     this,
                     this.comboBox_load_type.Text,
                     "item",
-                    this.stop,
+                    this._stop,
                     channel);
             }
             finally
@@ -7148,9 +7148,9 @@ MessageBoxDefaultButton.Button1);
             }
 
             EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在构造财产帐 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在构造财产帐 ...");
+            _stop.BeginLoop();
 
             // 创建文件
             StreamWriter sw = new StreamWriter(this.ExportTextFilename,
@@ -7191,7 +7191,7 @@ MessageBoxDefaultButton.Button1);
                 Program.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportTextFilename;
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"输出到文本文件过程出现异常: {ex.Message}";
                 goto ERROR1;
@@ -7201,10 +7201,10 @@ MessageBoxDefaultButton.Button1);
                 if (sw != null)
                     sw.Close();
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 EnableControls(true);
             }
@@ -7527,7 +7527,7 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"输出到 WordML 过程出现异常: {ex.Message}";
                 goto ERROR1;
@@ -7546,7 +7546,7 @@ MessageBoxDefaultButton.Button1);
         private void AccountBookForm_Activated(object sender, EventArgs e)
         {
             // 2009/8/13 
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
         }
 
         string m_strUsedScriptFilename = "";
@@ -7579,10 +7579,10 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在针对浏览行 C# 脚本 ...");
-            stop.BeginLoop();
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在针对浏览行 C# 脚本 ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
 
@@ -7603,8 +7603,8 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
-                if (stop != null)
-                    stop.SetProgressRange(0, this.listView_in.Items.Count);
+                if (_stop != null)
+                    _stop.SetProgressRange(0, this.listView_in.Items.Count);
 
                 {
                     host.AccountBookForm = this;
@@ -7625,14 +7625,14 @@ MessageBoxDefaultButton.Button1);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null
-                        && stop.State != 0)
+                    if (_stop != null
+                        && _stop.State != 0)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    stop.SetProgressValue(i);
+                    _stop.SetProgressValue(i);
 
 
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode((i + 1).ToString()) + "</div>");
@@ -7673,11 +7673,11 @@ MessageBoxDefaultButton.Button1);
 
                 this.listView_in.Enabled = true;
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
 
@@ -7895,9 +7895,9 @@ MessageBoxDefaultButton.Button1);
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在构造财产帐 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在构造财产帐 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -7939,17 +7939,17 @@ MessageBoxDefaultButton.Button1);
 
                 Program.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功输出到文件 " + this.ExportExcelFilename;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = $"输出到 Excel 文件过程出现异常: {ex.Message}";
                 goto ERROR1;
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 EnableControls(true);
             }

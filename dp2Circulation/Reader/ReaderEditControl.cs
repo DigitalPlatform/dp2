@@ -43,6 +43,12 @@ namespace dp2Circulation
         /// </summary>
         public event EventHandler EditEmail = null;
 
+        // 2022/10/28
+        /// <summary>
+        /// 编辑证号的事件
+        /// </summary>
+        public event EventHandler EditCardNumber = null;
+
 #if NO
         /// <summary>
         /// 获得值列表
@@ -2040,6 +2046,11 @@ namespace dp2Circulation
         private void button_editEmail_Click(object sender, EventArgs e)
         {
             this.EditEmail?.Invoke(this, new EventArgs());
+        }
+
+        private void button_editCardNumber_Click(object sender, EventArgs e)
+        {
+            this.EditCardNumber?.Invoke(this, new EventArgs());
         }
     }
     // 

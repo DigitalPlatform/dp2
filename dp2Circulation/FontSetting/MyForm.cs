@@ -33,9 +33,55 @@ namespace dp2Circulation
     /// <summary>
     /// 通用的 MDI 子窗口基类。提供了通讯通道和窗口尺寸维持等通用设施
     /// </summary>
-    public class MyForm : Form, IMdiWindow
+    public class MyForm : Form, IMdiWindow, ILoopingHost
     {
-        System.Threading.CancellationTokenSource _cancel = new System.Threading.CancellationTokenSource();
+        #region test
+        /// <summary>
+        /// 通讯通道
+        /// </summary>
+        public LibraryChannel Channel = new LibraryChannel();
+
+        public DigitalPlatform.Stop _stop = null;
+
+        /// <summary>
+        /// 进度条和停止按钮
+        /// </summary>
+        public Stop Progress
+        {
+            get
+            {
+                return this._stop;
+            }
+        }
+
+        public int _processing = 0;   // 是否正在进行处理中
+
+        public string FormName
+        {
+            get
+            {
+                return this.GetType().ToString();
+            }
+        }
+
+        public string FormCaption
+        {
+            get
+            {
+                return this.GetType().Name;
+            }
+        }
+
+        /// <summary>
+        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
+        /// </summary>
+        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
+        public virtual void EnableControls(bool bEnable)
+        {
+            throw new Exception("尚未实现 EnableControls() ");
+        }
+
+        public System.Threading.CancellationTokenSource _cancel = new System.Threading.CancellationTokenSource();
 
         public System.Threading.CancellationToken CancelToken
         {
@@ -67,10 +113,10 @@ namespace dp2Circulation
                     this.Channel.Dispose();
 
                 // 2017/4/24
-                if (stop != null) // 脱离关联
+                if (_stop != null) // 脱离关联
                 {
-                    stop.Unregister();	// 和容器关联
-                    stop = null;
+                    _stop.Unregister();	// 和容器关联
+                    _stop = null;
                 }
 
                 CloseFloatingMessage();
@@ -79,7 +125,7 @@ namespace dp2Circulation
             base.Dispose(disposing);
         }
 
-        internal FloatingMessageForm _floatingMessage = null;
+        public FloatingMessageForm _floatingMessage = null;
 
         public FloatingMessageForm FloatingMessageForm
         {
@@ -93,16 +139,13 @@ namespace dp2Circulation
             }
         }
 
-        /// <summary>
-        /// 供 ShowDialog(?) 使用的窗口对象
-        /// </summary>
-        public IWin32Window SafeWindow
+        public void CloseFloatingMessage()
         {
-            get
+            if (_floatingMessage != null)
             {
-                if (this.Visible == false)
-                    return Program.MainForm;
-                return this;
+                _floatingMessage.Close();
+                _floatingMessage.Dispose();
+                _floatingMessage = null;
             }
         }
 
@@ -128,6 +171,266 @@ namespace dp2Circulation
         /// 界面语言
         /// </summary>
         public string Lang = "zh";
+
+
+        internal Timer _timer = null;
+
+        public virtual void OnSelectedIndexChanged()
+        {
+        }
+
+        public void TriggerSelectedIndexChanged()
+        {
+            if (this._timer == null)
+            {
+                this._timer = new Timer();
+                this._timer.Interval = 500;
+                this._timer.Tick += new EventHandler(_timer_Tick);
+            }
+            this._timer.Start();
+        }
+
+        void _timer_Tick(object sender, EventArgs e)
+        {
+            this._timer.Stop();
+            OnSelectedIndexChanged();
+        }
+
+        public void ShowMessageBox(string strText)
+        {
+            if (this.IsHandleCreated)
+                this.Invoke((Action)(() =>
+                {
+                    try
+                    {
+                        MessageBox.Show(this, strText);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+
+                    }
+                }));
+        }
+
+        public void MessageBoxShow(string strText)
+        {
+            if (this.IsHandleCreated)
+                this.Invoke((Action)(() =>
+                {
+                    try
+                    {
+                        MessageBox.Show(this, strText);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+
+                    }
+                }));
+        }
+
+        // 用于确保在界面线程调用
+        public void TryInvoke(Action method)
+        {
+            if (this.InvokeRequired)
+                this.Invoke((Action)(method));
+            else
+                method.Invoke();
+        }
+
+        #region looping
+
+#if REMOVED
+        bool _isActive = false;
+
+        protected override void OnActivated(EventArgs e)
+        {
+            _isActive = true;
+            base.OnActivated(e);
+        }
+
+
+        protected override void OnDeactivate(EventArgs e)
+        {
+            base.OnDeactivate(e);
+            _isActive = false;
+        }
+#endif
+
+#if OLD
+        List<Looping> _loopings = new List<Looping>();
+        object _syncRoot_loopings = new object();
+
+        public Looping BeginLoop(StopEventHandler handler,
+            string text,
+            string style = null)
+        {
+            var looping = new Looping(handler, text/*, _isActive*/);
+            lock (_syncRoot_loopings)
+            {
+                _loopings.Add(looping);
+            }
+
+            // 2022/10/29
+            if (style != null)
+            {
+                if (StringUtil.IsInList("halfstop", style) == true)
+                    looping.stop.Style = StopStyle.EnableHalfStop;
+            }
+
+            return looping;
+        }
+
+        public void EndLoop(Looping looping)
+        {
+            lock (_syncRoot_loopings)
+            {
+                _loopings.Remove(looping);
+            }
+            looping.Dispose();
+        }
+
+        public bool HasLooping()
+        {
+            lock (_syncRoot_loopings)
+            {
+                foreach (var looping in _loopings)
+                {
+                    if (looping.stop != null && looping.stop.State == 0)
+                        return true;
+                }
+                return false;
+            }
+        }
+
+        public Looping TopLooping
+        {
+            get
+            {
+                lock (_syncRoot_loopings)
+                {
+                    if (_loopings.Count == 0)
+                        return null;
+                    return (_loopings[_loopings.Count - 1]);
+                }
+            }
+        }
+
+#endif
+
+        // 三种动作: GetChannel() BeginLoop() 和 EnableControl()
+        // parameters:
+        //          style 可以有如下子参数:
+        //              disableControl
+        //              timeout:hh:mm:ss 确保超时参数在 hh:mm:ss 以长
+        // https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0
+        // [ws][-]{ d | [d.]hh:mm[:ss[.ff]] }[ws]
+        public Looping Looping(
+            out LibraryChannel channel,
+            string text = "",
+            string style = null)
+        {
+            var controlDisabled = StringUtil.IsInList("disableControl", style);
+            var timeout_string = StringUtil.GetParameterByPrefix(style, "timeout");
+
+            channel = this.GetChannel();
+
+            var old_timeout = channel.Timeout;
+            bool timeout_changed = false;
+            if (string.IsNullOrEmpty(timeout_string) == false)
+            {
+                var new_timeout = TimeSpan.Parse(timeout_string);
+                if (new_timeout > old_timeout)
+                {
+                    channel.Timeout = new_timeout;
+                    timeout_changed = true;
+                }
+            }
+
+            var looping = _loopingHost.BeginLoop(this.DoStop, text, style);
+
+            if (controlDisabled)
+                this.EnableControls(false);
+
+            var channel_param = channel;
+            looping.Closed = () =>
+            {
+                if (controlDisabled)
+                    this.EnableControls(true);
+                if (timeout_changed)
+                    channel_param.Timeout = old_timeout;
+                this.ReturnChannel(channel_param);
+            };
+
+            return looping;
+        }
+
+        // 两种动作: BeginLoop() 和 EnableControl()
+        public Looping Looping(string text,
+            string style = null)
+        {
+            var controlDisabled = StringUtil.IsInList("disableControl", style);
+
+            var looping = _loopingHost.BeginLoop(this.DoStop, text, style);
+
+            if (controlDisabled)
+                this.EnableControls(false);
+
+            looping.Closed = () =>
+            {
+                if (controlDisabled)
+                    this.EnableControls(true);
+            };
+
+            return looping;
+        }
+
+
+        LoopingHost _loopingHost = new LoopingHost();
+
+        public Looping BeginLoop(StopEventHandler handler,
+string text,
+string style = null)
+        {
+            return _loopingHost.BeginLoop(handler, text, style);
+        }
+
+        public void EndLoop(Looping looping)
+        {
+            _loopingHost.EndLoop(looping);
+        }
+
+        public bool HasLooping()
+        {
+            return _loopingHost.HasLooping();
+        }
+
+        public Looping TopLooping
+        {
+            get
+            {
+                return _loopingHost.TopLooping;
+            }
+        }
+
+        #endregion
+
+        #endregion // of test
+
+
+        /// <summary>
+        /// 供 ShowDialog(?) 使用的窗口对象
+        /// </summary>
+        public IWin32Window SafeWindow
+        {
+            get
+            {
+                if (this.Visible == false)
+                    return Program.MainForm;
+                return this;
+            }
+        }
+
+
 
 #if NO
         MainForm m_mainForm = null;
@@ -165,68 +468,6 @@ namespace dp2Circulation
             }
         }
 
-        internal DigitalPlatform.Stop stop = null;
-
-        /// <summary>
-        /// 进度条和停止按钮
-        /// </summary>
-        public Stop Progress
-        {
-            get
-            {
-                return this.stop;
-            }
-        }
-
-        internal int _processing = 0;   // 是否正在进行处理中
-
-        string FormName
-        {
-            get
-            {
-                return this.GetType().ToString();
-            }
-        }
-
-        internal string FormCaption
-        {
-            get
-            {
-                return this.GetType().Name;
-            }
-        }
-
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public virtual void EnableControls(bool bEnable)
-        {
-            throw new Exception("尚未实现 EnableControls() ");
-        }
-
-        internal Timer _timer = null;
-
-        public virtual void OnSelectedIndexChanged()
-        {
-        }
-
-        public void TriggerSelectedIndexChanged()
-        {
-            if (this._timer == null)
-            {
-                this._timer = new Timer();
-                this._timer.Interval = 500;
-                this._timer.Tick += new EventHandler(_timer_Tick);
-            }
-            this._timer.Start();
-        }
-
-        void _timer_Tick(object sender, EventArgs e)
-        {
-            this._timer.Stop();
-            OnSelectedIndexChanged();
-        }
 
         /// <summary>
         /// 窗口 Load 时被触发
@@ -250,8 +491,8 @@ namespace dp2Circulation
             this.Channel.Idle -= Channel_Idle;
             this.Channel.Idle += Channel_Idle;
 
-            stop = new DigitalPlatform.Stop();
-            stop.Register(Program.MainForm?.stopManager, true);	// 和容器关联
+            _stop = new DigitalPlatform.Stop();
+            _stop.Register(Program.MainForm?.stopManager, true);	// 和容器关联
 
             {
                 _floatingMessage = new FloatingMessageForm(this, true);
@@ -298,12 +539,24 @@ namespace dp2Circulation
         /// <param name="e">事件参数</param>
         public virtual void OnMyFormClosing(FormClosingEventArgs e)
         {
-            if ((stop != null && stop.State == 0)    // 0 表示正在处理
-                || this._processing > 0)
+            if (UseLooping)
             {
-                MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                e.Cancel = true;
-                return;
+                if (HasLooping() || _processing > 0)
+                {
+                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。或等待长时操作完成");
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            else
+            {
+                if ((_stop != null && _stop.State == 0)    // 0 表示正在处理
+                    || this._processing > 0)
+                {
+                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
+                    e.Cancel = true;
+                    return;
+                }
             }
         }
 
@@ -332,10 +585,10 @@ namespace dp2Circulation
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
             }
 
-            if (stop != null) // 脱离关联
+            if (_stop != null) // 脱离关联
             {
-                stop.Unregister();	// 和容器关联
-                stop = null;
+                _stop.Unregister();	// 和容器关联
+                _stop = null;
             }
 
             // 原来
@@ -353,17 +606,10 @@ namespace dp2Circulation
             if (this.WindowState != Program.MainForm.MdiWindowState)
                 this.WindowState = Program.MainForm.MdiWindowState;
              * */
+            DeleteAllTempFiles();
         }
 
-        public void CloseFloatingMessage()
-        {
-            if (_floatingMessage != null)
-            {
-                _floatingMessage.Close();
-                _floatingMessage.Dispose();
-                _floatingMessage = null;
-            }
-        }
+
 
         void MainForm_Move(object sender, EventArgs e)
         {
@@ -551,11 +797,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         #region 旧风格的 Channel
 
         /// <summary>
-        /// 通讯通道
-        /// </summary>
-        public LibraryChannel Channel = new LibraryChannel();
-
-        /// <summary>
         /// 通讯通道登录前被触发
         /// </summary>
         /// <param name="sender">调用者</param>
@@ -603,11 +844,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             string strMessage = "")
         {
             if (StringUtil.IsInList("halfstop", strStyle) == true)
-                stop.Style = StopStyle.EnableHalfStop;
+                _stop.Style = StopStyle.EnableHalfStop;
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial(strMessage);
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial(strMessage);
+            _stop.BeginLoop();
         }
 
         /// <summary>
@@ -615,11 +856,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// </summary>
         public void EndLoop()
         {
-            stop.EndLoop();
-            stop.OnStop -= new StopEventHandler(this.DoStop);
-            stop.Initial("");
-            stop.HideProgress();
-            stop.Style = StopStyle.None;
+            _stop.EndLoop();
+            _stop.OnStop -= new StopEventHandler(this.DoStop);
+            _stop.Initial("");
+            _stop.HideProgress();
+            _stop.Style = StopStyle.None;
         }
 
         /// <summary>
@@ -630,9 +871,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         {
             Application.DoEvents();	// 出让界面控制权
 
-            if (this.stop != null)
+            if (this._stop != null)
             {
-                if (stop.State != 0)
+                if (_stop.State != 0)
                     return true;
             }
 
@@ -645,7 +886,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// <param name="strMessage">要显示的字符串</param>
         public void SetProgressMessage(string strMessage)
         {
-            stop.SetMessage(strMessage);
+            _stop.SetMessage(strMessage);
         }
 
         /// <summary>
@@ -771,7 +1012,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                         this.FormName,
                         "default_font_color",
                         strFontColor);
-
                 }
             }
         }
@@ -895,6 +1135,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 this.OnMyFormClosing(e);
         }
 
+        // 是否使用了新的 Looping 风格
+        public bool UseLooping { get; set; }
+
         /// <summary>
         /// Form 激活事件
         /// </summary>
@@ -907,8 +1150,15 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
 
             if (Program.MainForm != null)
             {
-                // if (this.stop != null)
-                Program.MainForm?.stopManager?.Active(this.stop);
+                if (UseLooping) // 新的 Looping 风格
+                {
+                    // 2022/10/29
+                    Program.MainForm.stopManager?.Active(this.TopLooping?.stop);
+                }
+                else
+                {
+                    Program.MainForm?.stopManager?.Active(this._stop);
+                }
 
                 Program.MainForm.MenuItem_font.Enabled = true;
                 Program.MainForm.MenuItem_restoreDefaultFont.Enabled = true;
@@ -917,12 +1167,15 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             base.OnActivated(e);
         }
 
-#if NO
+        /*
+        bool _isActive = false;
+
         protected override void OnDeactivate(EventArgs e)
         {
+            _isActive = false;
             base.OnDeactivate(e);
         }
-#endif
+        */
 
         // 形式校验条码号
         // return:
@@ -959,12 +1212,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             stop.Initial("正在验证条码号 " + strBarcode + "...");
             stop.BeginLoop();
 #endif
-            string strOldMessage = stop.Initial("正在验证条码号 " + strBarcode + "...");
+            string strOldMessage = _stop.Initial("正在验证条码号 " + strBarcode + "...");
 
             try
             {
                 return Program.MainForm.VerifyBarcode(
-                    stop,
+                    _stop,
                     channel,
                     strLibraryCodeList,
                     strBarcode,
@@ -978,7 +1231,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 #endif
-                stop.Initial(strOldMessage);
+                _stop.Initial(strOldMessage);
                 this.ReturnChannel(channel);
                 // EnableControls(true);
             }
@@ -1327,7 +1580,7 @@ out string strError)
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    stop,
+                    _stop,
                     strAction,
                     strArrangeGroupName,
                     strClass,
@@ -1416,7 +1669,7 @@ out string strError)
             out string strError)
         {
             long lRet = channel.GetBiblioInfo(
-                stop,
+                _stop,
                 strBiblioRecPath,
                 strBiblioXml,
                 strPartName,    // 包含'@'符号
@@ -1447,7 +1700,7 @@ out string strError)
             out string strError)
         {
             long lRet = channel.GetBiblioSummary(
-                stop,
+                _stop,
                 strItemBarcode,
                 strConfirmItemRecPath,
                 strBiblioRecPathExclude,
@@ -1482,7 +1735,7 @@ out string strError)
             try
             {
                 long lRet = channel.GetBiblioSummary(
-                    stop,
+                    _stop,
                     strItemBarcode,
                     strConfirmItemRecPath,
                     strBiblioRecPathExclude,
@@ -1598,9 +1851,9 @@ out string strError)
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取可用的查重方案名 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取可用的查重方案名 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -1610,7 +1863,7 @@ out string strError)
                 string strBiblioDbName = null;
 
                 long lRet = channel.ListDupProjectInfos(
-                    stop,
+                    _stop,
                     strBiblioDbName,
                     out dpis,
                     out strError);
@@ -1627,9 +1880,9 @@ out string strError)
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -2335,21 +2588,7 @@ out string strError)
             e.ErrorInfo = strError;
         }
 
-        public void ShowMessageBox(string strText)
-        {
-            if (this.IsHandleCreated)
-                this.Invoke((Action)(() =>
-                {
-                    try
-                    {
-                        MessageBox.Show(this, strText);
-                    }
-                    catch (ObjectDisposedException)
-                    {
 
-                    }
-                }));
-        }
 
         #region RFID 有关功能
 
@@ -3055,9 +3294,9 @@ out string strError)
             }
         }
 
-#endregion
+        #endregion
 
-#region 其他 API
+        #region 其他 API
 
         // 获得馆藏地列表
         public int GetLocationList(
@@ -3072,7 +3311,7 @@ out string strError)
             try
             {
                 long lRet = channel.GetSystemParameter(
-stop,
+_stop,
 "circulation",
 "locationTypes",
 out strOutputInfo,
@@ -3156,7 +3395,7 @@ out strError);
                 string[] results = null;
                 byte[] baNewTimestamp = null;
                 long lRet = channel.GetBiblioInfos(
-                    stop,
+                    _stop,
                     strRecPath,
                     "",
                     new string[] { strFormat },   // formats
@@ -3221,7 +3460,7 @@ out strError);
             }
         }
 
-#endregion
+        #endregion
 
 #if NO
         protected override bool ProcessDialogKey(
@@ -3346,20 +3585,80 @@ Keys keyData)
 
         internal ErrorTable _errorTable = null;
 
-        public void MessageBoxShow(string strText)
-        {
-            if (this.IsHandleCreated)
-                this.Invoke((Action)(() =>
-                {
-                    try
-                    {
-                        MessageBox.Show(this, strText);
-                    }
-                    catch (ObjectDisposedException)
-                    {
+        #region 临时文件集合
 
-                    }
-                }));
+        private static readonly Object _syncRootOfTempFilenames = new Object();
+
+        List<string> _tempfilenames = new List<string>();
+
+        public string MemoryTempFileName(string tempFileName)
+        {
+            lock (_syncRootOfTempFilenames)
+            {
+                _tempfilenames.Add(tempFileName);
+            }
+
+            return tempFileName;
+        }
+
+        string GetTempFileName()
+        {
+            string strTempFilePath = Path.Combine(Program.MainForm.UserTempDir, "~res_" + Guid.NewGuid().ToString());
+
+            lock (_syncRootOfTempFilenames)
+            {
+                _tempfilenames.Add(strTempFilePath);
+            }
+
+            return strTempFilePath;
+        }
+
+        void DeleteAllTempFiles()
+        {
+            List<string> filenames = new List<string>();
+            lock (_syncRootOfTempFilenames)
+            {
+                filenames.AddRange(this._tempfilenames);
+                this._tempfilenames.Clear();
+            }
+
+            foreach (string filename in filenames)
+            {
+                try
+                {
+                    File.Delete(filename);
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        #endregion
+
+
+        public void OnReturnChannel(object sender, ReturnChannelEventArgs e)
+        {
+            if (e.Looping != null)
+                EndLoop(e.Looping);
+
+            /*
+            this._stop.EndLoop();
+            this._stop.OnStop -= new StopEventHandler(this.DoStop);
+            */
+            this.ReturnChannel(e.Channel);
+        }
+
+        public void OnGetChannel(object sender, GetChannelEventArgs e)
+        {
+            e.Channel = this.GetChannel();
+            /*
+            this._stop.OnStop += new StopEventHandler(this.DoStop);
+            this._stop.BeginLoop();
+            */
+            Debug.Assert(e.Looping == null);
+            if (StringUtil.IsInList("beginLoop", e.Style))
+                e.Looping = BeginLoop(this.DoStop, "");
         }
     }
 

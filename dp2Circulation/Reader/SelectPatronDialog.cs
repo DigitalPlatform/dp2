@@ -71,8 +71,8 @@ namespace dp2Circulation
 (object)this.toolStripLabel_message,
 (object)null);
 
-            stop = new DigitalPlatform.Stop();
-            stop.Register(this._stopManager, true);	// 和容器关联
+            _stop = new DigitalPlatform.Stop();
+            _stop.Register(this._stopManager, true);	// 和容器关联
 
             FillRecPath();
 
@@ -106,10 +106,10 @@ namespace dp2Circulation
             if (this.m_webExternalHost_patron != null)
                 this.m_webExternalHost_patron.Destroy();
 
-            if (stop != null) // 脱离关联
+            if (_stop != null) // 脱离关联
             {
-                stop.Unregister();	// 和容器关联
-                stop = null;
+                _stop.Unregister();	// 和容器关联
+                _stop = null;
             }
         }
 
@@ -221,14 +221,17 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.listView_items.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.listView_items.Enabled = bEnable;
 
-            if (this.listView_items.SelectedItems.Count == 0)
-                this.button_OK.Enabled = false;
-            else
-                this.button_OK.Enabled = bEnable;
+                if (this.listView_items.SelectedItems.Count == 0)
+                    this.button_OK.Enabled = false;
+                else
+                    this.button_OK.Enabled = bEnable;
 
-            this.button_Cancel.Enabled = bEnable;
+                this.button_Cancel.Enabled = bEnable;
+            }));
         }
 
         class ItemInfo
@@ -390,9 +393,9 @@ namespace dp2Circulation
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取路径为 '" + strRecPath + "' 的读者记录 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取路径为 '" + strRecPath + "' 的读者记录 ...");
+            _stop.BeginLoop();
 
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
@@ -401,7 +404,7 @@ namespace dp2Circulation
             {
                 string[] results = null;
                 long lRet = channel.GetReaderInfo(
-                    stop,
+                    _stop,
                     "@path:" + strRecPath,
                     strFormatList,  // "xml,html",
                     out results,
@@ -428,9 +431,9 @@ namespace dp2Circulation
             {
                 this.Cursor = oldCursor;
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
             }

@@ -262,14 +262,14 @@ namespace dp2Circulation
 
             if (bPrepareLoop)
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在填充书目摘要 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在填充书目摘要 ...");
+                _stop.BeginLoop();
             }
 
             try
             {
-                stop.SetProgressRange(0, items.Count);
+                _stop.SetProgressRange(0, items.Count);
 
                 List<string> biblio_recpaths = new List<string>();  // 尺寸可能比 items 数组小，没有包含里面不具有 parent id 列的事项
                 // List<int> colindex_list = new List<int>();  // 存储每个 item 对应的 parent id colindex。数组大小等于 items 数组大小
@@ -281,7 +281,7 @@ namespace dp2Circulation
 
                 CacheableBiblioLoader loader = new CacheableBiblioLoader();
                 loader.Channel = channel;   //  this.Channel;
-                loader.Stop = this.stop;
+                loader.Stop = this._stop;
                 loader.Format = "summary";
                 loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                 loader.RecPaths = biblio_recpaths;
@@ -293,18 +293,18 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null
-                        && stop.State != 0)
+                    if (_stop != null
+                        && _stop.State != 0)
                     {
                         strError = "用户中断";
                         return 0;
                     }
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
-                    if (stop != null && bDisplayMessage == true)
+                    if (_stop != null && bDisplayMessage == true)
                     {
-                        stop.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
-                        stop.SetProgressValue(lStartIndex + i);
+                        _stop.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
+                        _stop.SetProgressValue(lStartIndex + i);
                     }
 
                     try
@@ -333,7 +333,7 @@ namespace dp2Circulation
                         1,
                         biblio.Content);
                     i++;
-                    stop.SetProgressValue(i);
+                    _stop.SetProgressValue(i);
                 }
 
                 return 1;
@@ -347,10 +347,10 @@ namespace dp2Circulation
             {
                 if (bPrepareLoop)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-                    stop.HideProgress();
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+                    _stop.HideProgress();
                 }
             }
         }
@@ -599,10 +599,10 @@ namespace dp2Circulation
             List<string> changed_biblio_recpaths = new List<string>();
             Hashtable relation_table = new Hashtable(); // 书目记录路径 --> List<ListViewItem>
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存书目记录 ...");
-            stop.BeginLoop();
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存书目记录 ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
             this.listView_records.Enabled = false;
@@ -611,7 +611,7 @@ namespace dp2Circulation
                 // 创建书目记录和册事项的对照关系。注意这是针对全部行的，不仅仅是已经选择的行。因为删除操作可能会涉及到没有选择的行的 index 列内容刷新显示
                 foreach (ListViewItem item in this.listView_records.Items)
                 {
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "已中断";
                         return -1;
@@ -634,7 +634,7 @@ namespace dp2Circulation
 
                 foreach (ListViewItem item in items)
                 {
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "已中断";
                         return -1;
@@ -718,7 +718,7 @@ namespace dp2Circulation
                 }
 
                 // TODO: 如果要优化算法的话，可以建立书目记录和浏览行之间的联系，在书目记录保存成功后才修改 line_info.NewField 和刷新浏览行显示。这样的好处是，一旦中途出错，还有干净重新保存的可能
-                stop.SetProgressRange(0, changed_biblio_recpaths.Count);
+                _stop.SetProgressRange(0, changed_biblio_recpaths.Count);
                 int i = 0;
                 foreach(string strBiblioRecPath in changed_biblio_recpaths)
                 {
@@ -746,12 +746,12 @@ namespace dp2Circulation
 
                     string strOutputPath = "";
 
-                    stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
+                    _stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
                     byte[] baNewTimestamp = null;
 
                     long lRet = Channel.SetBiblioInfo(
-                        stop,
+                        _stop,
                         "change",
                         strBiblioRecPath,
                         "xml",
@@ -780,7 +780,7 @@ namespace dp2Circulation
                             string[] results = null;
                             // byte[] baTimestamp = null;
                             lRet = Channel.GetBiblioInfos(
-                                stop,
+                                _stop,
                                 strBiblioRecPath,
                                 "",
                                 new string[] { "xml" },   // formats
@@ -825,7 +825,7 @@ MessageBoxDefaultButton.Button1);
                         string[] results = null;
                         // byte[] baTimestamp = null;
                         lRet = Channel.GetBiblioInfos(
-                            stop,
+                            _stop,
                             strBiblioRecPath,
                             "",
                             new string[] { "xml" },   // formats
@@ -856,17 +856,17 @@ MessageBoxDefaultButton.Button1);
 
                     nSavedCount++;
                 CONTINUE:
-                    stop.SetProgressValue(i);
+                    _stop.SetProgressValue(i);
                     i++;
                 }
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
                 this.listView_records.Enabled = true;
@@ -1152,10 +1152,10 @@ dlg.UiState);
             // TODO: 检查一下，看看是否一项修改动作都没有
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改 856 字段</div>");
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("快速修改 856 字段 ...");
-            stop.BeginLoop();
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("快速修改 856 字段 ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
             this.listView_records.Enabled = false;
@@ -1164,7 +1164,7 @@ dlg.UiState);
             int nChangedCount = 0;
             try
             {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                _stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -1204,14 +1204,14 @@ dlg.UiState);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null
-                        && stop.State != 0)
+                    if (_stop != null
+                        && _stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    stop.SetProgressValue(i);
+                    _stop.SetProgressValue(i);
 
                     LineInfo info = (LineInfo)item.Tag;
                     if (info == null)
@@ -1312,11 +1312,11 @@ dlg.UiState);
                 EnableControls(true);
                 this.listView_records.Enabled = true;
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改 856 字段</div>");
             }

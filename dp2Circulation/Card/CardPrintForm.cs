@@ -165,8 +165,8 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
-            stop.BeginLoop();
+            _stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
+            _stop.BeginLoop();
 
             this.EnableControls(false);
             /*
@@ -282,10 +282,10 @@ namespace dp2Circulation
                  * */
                 this.EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new DigitalPlatform.StopEventHandler(stop_OnStop);
+                _stop.EndLoop();
+                _stop.OnStop -= new DigitalPlatform.StopEventHandler(stop_OnStop);
 
-                this.stop.HideProgress();
+                this._stop.HideProgress();
             }
 
             this.EndPrint();
@@ -317,8 +317,8 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
-            stop.BeginLoop(); 
+            _stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
+            _stop.BeginLoop(); 
             this.EnableControls(false);
             this.estimate.StartEstimate();
             try
@@ -404,10 +404,10 @@ namespace dp2Circulation
             finally
             {
                 this.EnableControls(true);
-                stop.EndLoop();
-                stop.OnStop -= new DigitalPlatform.StopEventHandler(stop_OnStop);
+                _stop.EndLoop();
+                _stop.OnStop -= new DigitalPlatform.StopEventHandler(stop_OnStop);
 
-                this.stop.HideProgress();
+                this._stop.HideProgress();
 
             }
 
@@ -472,7 +472,7 @@ namespace dp2Circulation
             {
                 this.estimate.SetRange(e.Start, e.End);
 
-                this.stop.SetProgressRange(e.Start, e.End);
+                this._stop.SetProgressRange(e.Start, e.End);
 
                 this.progressBar_records.Minimum = (int)e.Start;
                 this.progressBar_records.Maximum = (int)e.End;
@@ -480,9 +480,9 @@ namespace dp2Circulation
             else
             {
                 if ((this.m_lCount++ % 10) == 1)
-                    this.stop.SetMessage("剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(e.Value)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
+                    this._stop.SetMessage("剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(e.Value)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
 
-                this.stop.SetProgressValue(e.Value);
+                this._stop.SetProgressValue(e.Value);
                 // this.stop.SetMessage(e.Value.ToString() + " - " + (((double)e.Value / (double)e.End) * 100).ToString() + "%");
 
                 this.progressBar_records.Value = (int)e.Value;
@@ -512,16 +512,19 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_cardFile_cardFilename.Enabled = bEnable;
-            this.button_cardFile_findCardFilename.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.textBox_cardFile_cardFilename.Enabled = bEnable;
+                this.button_cardFile_findCardFilename.Enabled = bEnable;
 
-            this.button_print.Enabled = bEnable;
-            this.button_printPreview.Enabled = bEnable;
+                this.button_print.Enabled = bEnable;
+                this.button_printPreview.Enabled = bEnable;
 
-            this.checkBox_testingGrid.Enabled = bEnable;
-            this.checkBox_cardFile_indent.Enabled = bEnable;
+                this.checkBox_testingGrid.Enabled = bEnable;
+                this.checkBox_cardFile_indent.Enabled = bEnable;
 
-            this.Update();
+                this.Update();
+            }));
         }
 
         // 在窗口打开前TestingGrid是否设置过

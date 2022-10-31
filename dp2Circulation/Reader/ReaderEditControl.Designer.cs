@@ -49,7 +49,6 @@ namespace dp2Circulation
             this.label_tel = new System.Windows.Forms.Label();
             this.textBox_tel = new System.Windows.Forms.TextBox();
             this.label_email = new System.Windows.Forms.Label();
-            this.textBox_email = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_barcode = new System.Windows.Forms.Label();
             this.flowLayoutPanel_barcodeAction = new System.Windows.Forms.FlowLayoutPanel();
             this.button_verifyBarcode = new System.Windows.Forms.Button();
@@ -72,17 +71,13 @@ namespace dp2Circulation
             this.label_tel_color = new System.Windows.Forms.Label();
             this.label_email_color = new System.Windows.Forms.Label();
             this.label_recPath_color = new System.Windows.Forms.Label();
-            this.dateControl_dateOfBirth = new DigitalPlatform.CommonControl.DateControl();
-            this.dateControl_expireDate = new DigitalPlatform.CommonControl.DateControl();
             this.label_comment = new System.Windows.Forms.Label();
-            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_comment_color = new System.Windows.Forms.Label();
             this.label_hirePeriod = new System.Windows.Forms.Label();
             this.label_hireExpireDate = new System.Windows.Forms.Label();
             this.comboBox_hirePeriod = new System.Windows.Forms.ComboBox();
             this.label_hirePeriod_color = new System.Windows.Forms.Label();
             this.label_hireExpireDate_color = new System.Windows.Forms.Label();
-            this.dateControl_hireExpireDate = new DigitalPlatform.CommonControl.DateControl();
             this.label_cardNumber = new System.Windows.Forms.Label();
             this.label_cardNumber_color = new System.Windows.Forms.Label();
             this.textBox_cardNumber = new System.Windows.Forms.TextBox();
@@ -93,7 +88,6 @@ namespace dp2Circulation
             this.textBox_post = new System.Windows.Forms.TextBox();
             this.label_post_color = new System.Windows.Forms.Label();
             this.label_post = new System.Windows.Forms.Label();
-            this.dateControl_createDate = new DigitalPlatform.CommonControl.DateControl();
             this.label_namePinyin = new System.Windows.Forms.Label();
             this.label_namePinyin_color = new System.Windows.Forms.Label();
             this.textBox_namePinyin = new System.Windows.Forms.TextBox();
@@ -102,19 +96,26 @@ namespace dp2Circulation
             this.label_rights = new System.Windows.Forms.Label();
             this.label_rights_color = new System.Windows.Forms.Label();
             this.label_personalLibrary_color = new System.Windows.Forms.Label();
-            this.textBox_rights = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.textBox_personalLibrary = new System.Windows.Forms.TextBox();
             this.button_editRights = new System.Windows.Forms.Button();
-            this.textBox_friends = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_friends_color = new System.Windows.Forms.Label();
             this.label_friends = new System.Windows.Forms.Label();
-            this.textBox_access = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_access_color = new System.Windows.Forms.Label();
             this.label_access = new System.Windows.Forms.Label();
             this.label_refID = new System.Windows.Forms.Label();
             this.label_refID_color = new System.Windows.Forms.Label();
             this.textBox_refID = new System.Windows.Forms.TextBox();
             this.button_editEmail = new System.Windows.Forms.Button();
+            this.button_editCardNumber = new System.Windows.Forms.Button();
+            this.textBox_email = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.dateControl_dateOfBirth = new DigitalPlatform.CommonControl.DateControl();
+            this.dateControl_expireDate = new DigitalPlatform.CommonControl.DateControl();
+            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.dateControl_hireExpireDate = new DigitalPlatform.CommonControl.DateControl();
+            this.dateControl_createDate = new DigitalPlatform.CommonControl.DateControl();
+            this.textBox_rights = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.textBox_friends = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.textBox_access = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.tableLayoutPanel_main.SuspendLayout();
             this.flowLayoutPanel_barcodeAction.SuspendLayout();
             this.SuspendLayout();
@@ -211,6 +212,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Controls.Add(this.label_refID_color, 1, 30);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_refID, 2, 30);
             this.tableLayoutPanel_main.Controls.Add(this.button_editEmail, 3, 20);
+            this.tableLayoutPanel_main.Controls.Add(this.button_editCardNumber, 3, 1);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(11, 10, 11, 105);
@@ -485,20 +487,6 @@ namespace dp2Circulation
             this.label_email.Text = "Email地址(&E):";
             this.label_email.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // textBox_email
-            // 
-            this.textBox_email.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_email.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_email.Location = new System.Drawing.Point(199, 825);
-            this.textBox_email.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.textBox_email.MinimumSize = new System.Drawing.Size(183, 0);
-            this.textBox_email.Multiline = true;
-            this.textBox_email.Name = "textBox_email";
-            this.textBox_email.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_email.Size = new System.Drawing.Size(269, 44);
-            this.textBox_email.TabIndex = 55;
-            // 
             // label_barcode
             // 
             this.label_barcode.AutoSize = true;
@@ -738,34 +726,6 @@ namespace dp2Circulation
             this.label_recPath_color.Size = new System.Drawing.Size(7, 34);
             this.label_recPath_color.TabIndex = 57;
             // 
-            // dateControl_dateOfBirth
-            // 
-            this.dateControl_dateOfBirth.BackColor = System.Drawing.SystemColors.Window;
-            this.dateControl_dateOfBirth.Caption = "出生日期";
-            this.dateControl_dateOfBirth.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.dateControl_dateOfBirth.Location = new System.Drawing.Point(195, 616);
-            this.dateControl_dateOfBirth.Margin = new System.Windows.Forms.Padding(2);
-            this.dateControl_dateOfBirth.MinimumSize = new System.Drawing.Size(183, 0);
-            this.dateControl_dateOfBirth.Name = "dateControl_dateOfBirth";
-            this.dateControl_dateOfBirth.Padding = new System.Windows.Forms.Padding(4);
-            this.dateControl_dateOfBirth.Size = new System.Drawing.Size(183, 32);
-            this.dateControl_dateOfBirth.TabIndex = 39;
-            this.dateControl_dateOfBirth.Value = new System.DateTime(((long)(0)));
-            // 
-            // dateControl_expireDate
-            // 
-            this.dateControl_expireDate.BackColor = System.Drawing.SystemColors.Window;
-            this.dateControl_expireDate.Caption = "失效日期";
-            this.dateControl_expireDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.dateControl_expireDate.Location = new System.Drawing.Point(195, 228);
-            this.dateControl_expireDate.Margin = new System.Windows.Forms.Padding(2);
-            this.dateControl_expireDate.MinimumSize = new System.Drawing.Size(183, 0);
-            this.dateControl_expireDate.Name = "dateControl_expireDate";
-            this.dateControl_expireDate.Padding = new System.Windows.Forms.Padding(4);
-            this.dateControl_expireDate.Size = new System.Drawing.Size(183, 32);
-            this.dateControl_expireDate.TabIndex = 14;
-            this.dateControl_expireDate.Value = new System.DateTime(((long)(0)));
-            // 
             // label_comment
             // 
             this.label_comment.AutoSize = true;
@@ -777,19 +737,6 @@ namespace dp2Circulation
             this.label_comment.TabIndex = 18;
             this.label_comment.Text = "注释(&C):";
             this.label_comment.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // textBox_comment
-            // 
-            this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_comment.Location = new System.Drawing.Point(197, 303);
-            this.textBox_comment.Margin = new System.Windows.Forms.Padding(4);
-            this.textBox_comment.MinimumSize = new System.Drawing.Size(183, 0);
-            this.textBox_comment.Multiline = true;
-            this.textBox_comment.Name = "textBox_comment";
-            this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_comment.Size = new System.Drawing.Size(273, 30);
-            this.textBox_comment.TabIndex = 20;
             // 
             // label_comment_color
             // 
@@ -856,21 +803,6 @@ namespace dp2Circulation
             this.label_hireExpireDate_color.Name = "label_hireExpireDate_color";
             this.label_hireExpireDate_color.Size = new System.Drawing.Size(7, 36);
             this.label_hireExpireDate_color.TabIndex = 25;
-            // 
-            // dateControl_hireExpireDate
-            // 
-            this.dateControl_hireExpireDate.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.dateControl_hireExpireDate.BackColor = System.Drawing.SystemColors.Window;
-            this.dateControl_hireExpireDate.Caption = "租金失效期";
-            this.dateControl_hireExpireDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.dateControl_hireExpireDate.Location = new System.Drawing.Point(195, 376);
-            this.dateControl_hireExpireDate.Margin = new System.Windows.Forms.Padding(2);
-            this.dateControl_hireExpireDate.MinimumSize = new System.Drawing.Size(183, 0);
-            this.dateControl_hireExpireDate.Name = "dateControl_hireExpireDate";
-            this.dateControl_hireExpireDate.Padding = new System.Windows.Forms.Padding(4);
-            this.dateControl_hireExpireDate.Size = new System.Drawing.Size(183, 32);
-            this.dateControl_hireExpireDate.TabIndex = 26;
-            this.dateControl_hireExpireDate.Value = new System.DateTime(((long)(0)));
             // 
             // label_cardNumber
             // 
@@ -985,20 +917,6 @@ namespace dp2Circulation
             this.label_post.Text = "职务(&P):";
             this.label_post.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // dateControl_createDate
-            // 
-            this.dateControl_createDate.BackColor = System.Drawing.SystemColors.Window;
-            this.dateControl_createDate.Caption = "发证日期";
-            this.dateControl_createDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.dateControl_createDate.Location = new System.Drawing.Point(195, 192);
-            this.dateControl_createDate.Margin = new System.Windows.Forms.Padding(2);
-            this.dateControl_createDate.MinimumSize = new System.Drawing.Size(183, 0);
-            this.dateControl_createDate.Name = "dateControl_createDate";
-            this.dateControl_createDate.Padding = new System.Windows.Forms.Padding(4);
-            this.dateControl_createDate.Size = new System.Drawing.Size(183, 32);
-            this.dateControl_createDate.TabIndex = 62;
-            this.dateControl_createDate.Value = new System.DateTime(((long)(0)));
-            // 
             // label_namePinyin
             // 
             this.label_namePinyin.AutoSize = true;
@@ -1091,21 +1009,6 @@ namespace dp2Circulation
             this.label_personalLibrary_color.Size = new System.Drawing.Size(7, 34);
             this.label_personalLibrary_color.TabIndex = 70;
             // 
-            // textBox_rights
-            // 
-            this.textBox_rights.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_rights.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_rights.Location = new System.Drawing.Point(199, 879);
-            this.textBox_rights.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.textBox_rights.MinimumSize = new System.Drawing.Size(183, 0);
-            this.textBox_rights.Multiline = true;
-            this.textBox_rights.Name = "textBox_rights";
-            this.textBox_rights.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_rights.Size = new System.Drawing.Size(269, 44);
-            this.textBox_rights.TabIndex = 71;
-            // 
             // textBox_personalLibrary
             // 
             this.textBox_personalLibrary.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -1128,24 +1031,9 @@ namespace dp2Circulation
             this.button_editRights.Name = "button_editRights";
             this.button_editRights.Size = new System.Drawing.Size(120, 40);
             this.button_editRights.TabIndex = 73;
-            this.button_editRights.Text = "编辑(&R)";
+            this.button_editRights.Text = "...";
             this.button_editRights.UseVisualStyleBackColor = false;
             this.button_editRights.Click += new System.EventHandler(this.button_editRights_Click);
-            // 
-            // textBox_friends
-            // 
-            this.textBox_friends.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_friends.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_friends.Location = new System.Drawing.Point(199, 1005);
-            this.textBox_friends.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.textBox_friends.MinimumSize = new System.Drawing.Size(183, 0);
-            this.textBox_friends.Multiline = true;
-            this.textBox_friends.Name = "textBox_friends";
-            this.textBox_friends.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_friends.Size = new System.Drawing.Size(269, 28);
-            this.textBox_friends.TabIndex = 74;
             // 
             // label_friends_color
             // 
@@ -1168,21 +1056,6 @@ namespace dp2Circulation
             this.label_friends.TabIndex = 76;
             this.label_friends.Text = "好友(&F):";
             this.label_friends.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // textBox_access
-            // 
-            this.textBox_access.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_access.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_access.Location = new System.Drawing.Point(199, 933);
-            this.textBox_access.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.textBox_access.MinimumSize = new System.Drawing.Size(183, 0);
-            this.textBox_access.Multiline = true;
-            this.textBox_access.Name = "textBox_access";
-            this.textBox_access.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_access.Size = new System.Drawing.Size(269, 28);
-            this.textBox_access.TabIndex = 77;
             // 
             // label_access_color
             // 
@@ -1249,9 +1122,152 @@ namespace dp2Circulation
             this.button_editEmail.Name = "button_editEmail";
             this.button_editEmail.Size = new System.Drawing.Size(120, 40);
             this.button_editEmail.TabIndex = 83;
-            this.button_editEmail.Text = "编辑(&E)";
+            this.button_editEmail.Text = "...";
             this.button_editEmail.UseVisualStyleBackColor = false;
             this.button_editEmail.Click += new System.EventHandler(this.button_editEmail_Click);
+            // 
+            // button_editCardNumber
+            // 
+            this.button_editCardNumber.AutoSize = true;
+            this.button_editCardNumber.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.button_editCardNumber.Font = new System.Drawing.Font("宋体", 9F);
+            this.button_editCardNumber.Location = new System.Drawing.Point(474, 117);
+            this.button_editCardNumber.Margin = new System.Windows.Forms.Padding(0);
+            this.button_editCardNumber.Name = "button_editCardNumber";
+            this.button_editCardNumber.Size = new System.Drawing.Size(120, 31);
+            this.button_editCardNumber.TabIndex = 84;
+            this.button_editCardNumber.Text = "...";
+            this.button_editCardNumber.UseVisualStyleBackColor = false;
+            this.button_editCardNumber.Click += new System.EventHandler(this.button_editCardNumber_Click);
+            // 
+            // textBox_email
+            // 
+            this.textBox_email.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_email.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_email.Location = new System.Drawing.Point(199, 825);
+            this.textBox_email.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.textBox_email.MinimumSize = new System.Drawing.Size(183, 0);
+            this.textBox_email.Multiline = true;
+            this.textBox_email.Name = "textBox_email";
+            this.textBox_email.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_email.Size = new System.Drawing.Size(269, 44);
+            this.textBox_email.TabIndex = 55;
+            // 
+            // dateControl_dateOfBirth
+            // 
+            this.dateControl_dateOfBirth.BackColor = System.Drawing.SystemColors.Window;
+            this.dateControl_dateOfBirth.Caption = "出生日期";
+            this.dateControl_dateOfBirth.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.dateControl_dateOfBirth.Location = new System.Drawing.Point(195, 616);
+            this.dateControl_dateOfBirth.Margin = new System.Windows.Forms.Padding(2);
+            this.dateControl_dateOfBirth.MinimumSize = new System.Drawing.Size(183, 0);
+            this.dateControl_dateOfBirth.Name = "dateControl_dateOfBirth";
+            this.dateControl_dateOfBirth.Padding = new System.Windows.Forms.Padding(4);
+            this.dateControl_dateOfBirth.Size = new System.Drawing.Size(183, 32);
+            this.dateControl_dateOfBirth.TabIndex = 39;
+            this.dateControl_dateOfBirth.Value = new System.DateTime(((long)(0)));
+            // 
+            // dateControl_expireDate
+            // 
+            this.dateControl_expireDate.BackColor = System.Drawing.SystemColors.Window;
+            this.dateControl_expireDate.Caption = "失效日期";
+            this.dateControl_expireDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.dateControl_expireDate.Location = new System.Drawing.Point(195, 228);
+            this.dateControl_expireDate.Margin = new System.Windows.Forms.Padding(2);
+            this.dateControl_expireDate.MinimumSize = new System.Drawing.Size(183, 0);
+            this.dateControl_expireDate.Name = "dateControl_expireDate";
+            this.dateControl_expireDate.Padding = new System.Windows.Forms.Padding(4);
+            this.dateControl_expireDate.Size = new System.Drawing.Size(183, 32);
+            this.dateControl_expireDate.TabIndex = 14;
+            this.dateControl_expireDate.Value = new System.DateTime(((long)(0)));
+            // 
+            // textBox_comment
+            // 
+            this.textBox_comment.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_comment.Location = new System.Drawing.Point(197, 303);
+            this.textBox_comment.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_comment.MinimumSize = new System.Drawing.Size(183, 0);
+            this.textBox_comment.Multiline = true;
+            this.textBox_comment.Name = "textBox_comment";
+            this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_comment.Size = new System.Drawing.Size(273, 30);
+            this.textBox_comment.TabIndex = 20;
+            // 
+            // dateControl_hireExpireDate
+            // 
+            this.dateControl_hireExpireDate.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.dateControl_hireExpireDate.BackColor = System.Drawing.SystemColors.Window;
+            this.dateControl_hireExpireDate.Caption = "租金失效期";
+            this.dateControl_hireExpireDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.dateControl_hireExpireDate.Location = new System.Drawing.Point(195, 376);
+            this.dateControl_hireExpireDate.Margin = new System.Windows.Forms.Padding(2);
+            this.dateControl_hireExpireDate.MinimumSize = new System.Drawing.Size(183, 0);
+            this.dateControl_hireExpireDate.Name = "dateControl_hireExpireDate";
+            this.dateControl_hireExpireDate.Padding = new System.Windows.Forms.Padding(4);
+            this.dateControl_hireExpireDate.Size = new System.Drawing.Size(183, 32);
+            this.dateControl_hireExpireDate.TabIndex = 26;
+            this.dateControl_hireExpireDate.Value = new System.DateTime(((long)(0)));
+            // 
+            // dateControl_createDate
+            // 
+            this.dateControl_createDate.BackColor = System.Drawing.SystemColors.Window;
+            this.dateControl_createDate.Caption = "发证日期";
+            this.dateControl_createDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.dateControl_createDate.Location = new System.Drawing.Point(195, 192);
+            this.dateControl_createDate.Margin = new System.Windows.Forms.Padding(2);
+            this.dateControl_createDate.MinimumSize = new System.Drawing.Size(183, 0);
+            this.dateControl_createDate.Name = "dateControl_createDate";
+            this.dateControl_createDate.Padding = new System.Windows.Forms.Padding(4);
+            this.dateControl_createDate.Size = new System.Drawing.Size(183, 32);
+            this.dateControl_createDate.TabIndex = 62;
+            this.dateControl_createDate.Value = new System.DateTime(((long)(0)));
+            // 
+            // textBox_rights
+            // 
+            this.textBox_rights.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_rights.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_rights.Location = new System.Drawing.Point(199, 879);
+            this.textBox_rights.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.textBox_rights.MinimumSize = new System.Drawing.Size(183, 0);
+            this.textBox_rights.Multiline = true;
+            this.textBox_rights.Name = "textBox_rights";
+            this.textBox_rights.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_rights.Size = new System.Drawing.Size(269, 44);
+            this.textBox_rights.TabIndex = 71;
+            // 
+            // textBox_friends
+            // 
+            this.textBox_friends.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_friends.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_friends.Location = new System.Drawing.Point(199, 1005);
+            this.textBox_friends.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.textBox_friends.MinimumSize = new System.Drawing.Size(183, 0);
+            this.textBox_friends.Multiline = true;
+            this.textBox_friends.Name = "textBox_friends";
+            this.textBox_friends.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_friends.Size = new System.Drawing.Size(269, 28);
+            this.textBox_friends.TabIndex = 74;
+            // 
+            // textBox_access
+            // 
+            this.textBox_access.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_access.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_access.Location = new System.Drawing.Point(199, 933);
+            this.textBox_access.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.textBox_access.MinimumSize = new System.Drawing.Size(183, 0);
+            this.textBox_access.Multiline = true;
+            this.textBox_access.Name = "textBox_access";
+            this.textBox_access.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_access.Size = new System.Drawing.Size(269, 28);
+            this.textBox_access.TabIndex = 77;
             // 
             // ReaderEditControl
             // 
@@ -1359,5 +1375,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label_refID;
         private System.Windows.Forms.Label label_refID_color;
         private System.Windows.Forms.Button button_editEmail;
+        private System.Windows.Forms.Button button_editCardNumber;
     }
 }

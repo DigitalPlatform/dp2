@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -353,7 +354,7 @@ Stack:
         {
             if (this.TagInfo == null)
                 return false;
-            TagList.SetTagInfoEAS(this.TagInfo, enable);
+            RfidTagList.SetTagInfoEAS(this.TagInfo, enable);
             return true;
         }
 

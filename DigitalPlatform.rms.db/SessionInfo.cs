@@ -658,8 +658,16 @@ out strError);
                         }
 #endif
                         if (nRet == -1)
-                            return -1;
-                        if (nRet == 0)
+                        {
+                            // return -1;
+                            // 2022/10/29
+                            record.RecordBody = new RecordBody();
+                            if (record.RecordBody.Result == null)
+                                record.RecordBody.Result = new Result();
+                            record.RecordBody.Result.ErrorCode = ErrorCodeValue.CommonError;
+                            record.RecordBody.Result.ErrorString = strError;
+                        }
+                        else if (nRet == 0)
                         {
                             record.RecordBody = new RecordBody();
                             if (record.RecordBody.Result == null)
@@ -1181,7 +1189,6 @@ out strError);
                         strError = "ParsePath() (strPath='" + strPath + "') error, info.Database == null";
                         return -1;
                     }
-                    string[] cols;
                     // return:
                     //      -1  出错
                     //      0   记录没有找到
@@ -1192,7 +1199,7 @@ out strError);
                         "",
                         //0,
                         strStyle,   // TODO: 可以考虑削减 titles:type1|type2 以外的其他子参数
-                        out cols,
+                        out string [] cols,
                         out strError);
 #if NO
                     if (nRet == -1)
@@ -1205,8 +1212,16 @@ out strError);
                     }
 #endif
                     if (nRet == -1)
-                        return -1;
-                    if (nRet == 0)
+                    {
+                        // return -1;
+                        // 2022/10/29
+                        record.RecordBody = new RecordBody();
+                        if (record.RecordBody.Result == null)
+                            record.RecordBody.Result = new Result();
+                        record.RecordBody.Result.ErrorCode = ErrorCodeValue.CommonError;
+                        record.RecordBody.Result.ErrorString = strError;
+                    }
+                    else if (nRet == 0)
                     {
                         record.RecordBody = new RecordBody();
                         if (record.RecordBody.Result == null)

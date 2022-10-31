@@ -107,17 +107,20 @@ strStringTable);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            // this.tabControl_main.Enabled = bEnable;
-            EnableTabPage(this.tabPage_source, bEnable);
-            EnableTabPage(this.tabPage_convert, bEnable);
-            EnableTabPage(this.tabPage_target, bEnable);
-            // tabPage_run 不要禁止
+            this.TryInvoke((Action)(() =>
+            {
+                // this.tabControl_main.Enabled = bEnable;
+                EnableTabPage(this.tabPage_source, bEnable);
+                EnableTabPage(this.tabPage_convert, bEnable);
+                EnableTabPage(this.tabPage_target, bEnable);
+                // tabPage_run 不要禁止
 
-            // next button
-            if (bEnable == true)
-                SetNextButtonEnable();
-            else
-                this.button_next.Enabled = false;
+                // next button
+                if (bEnable == true)
+                    SetNextButtonEnable();
+                else
+                    this.button_next.Enabled = false;
+            }));
         }
 
         void SetNextButtonEnable()
@@ -245,7 +248,7 @@ strStringTable);
             ProcessInfo info = new ProcessInfo();
             {
                 info.Channel = this.GetChannel();
-                info.stop = stop;
+                info.stop = _stop;
 
                 info.TargetBiblioDbName = (string)this.Invoke(new Func<string>(() =>
                 {
@@ -429,10 +432,10 @@ Program.MainForm.ActivateFixPage("history")
 
             WriteText(strText + "\r\n");
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial(strText);
-            stop.BeginLoop();
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial(strText);
+            _stop.BeginLoop();
 
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
@@ -454,8 +457,8 @@ Program.MainForm.ActivateFixPage("history")
     FileAccess.Read))
                 using (XmlTextReader reader = new XmlTextReader(file))
                 {
-                    if (stop != null)
-                        stop.SetProgressRange(0, file.Length);
+                    if (_stop != null)
+                        _stop.SetProgressRange(0, file.Length);
 
                     // 到根元素
                     while (true)
@@ -472,7 +475,7 @@ Program.MainForm.ActivateFixPage("history")
 
                     for (; ; )
                     {
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -493,8 +496,8 @@ Program.MainForm.ActivateFixPage("history")
 
                         DoRecord(reader, info);
 
-                        if (stop != null)
-                            stop.SetProgressValue(file.Position);
+                        if (_stop != null)
+                            _stop.SetProgressValue(file.Position);
 
                         info.BiblioRecCount++;
                     }
@@ -532,11 +535,11 @@ Program.MainForm.ActivateFixPage("history")
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
 
                 info.Channel.Timeout = old_timeout;
                 this.ReturnChannel(info.Channel);

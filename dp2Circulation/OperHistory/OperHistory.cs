@@ -1772,6 +1772,7 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",   // 2016/10/24
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",   // 2022/10/29
 									Environment.CurrentDirectory + "\\dp2circulation.exe"
             };
 

@@ -192,9 +192,9 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取种次号定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取种次号定义 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -204,7 +204,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "zhongcihao",
                     out strZhongcihaoXml,
@@ -217,9 +217,9 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -238,9 +238,9 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存种次号定义 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存种次号定义 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -250,7 +250,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    stop,
+                    _stop,
                     "circulation",
                     "zhongcihao",
                     strZhongcihaoXml,
@@ -264,9 +264,9 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }

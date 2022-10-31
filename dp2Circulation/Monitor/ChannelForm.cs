@@ -120,9 +120,9 @@ namespace dp2Circulation
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得服务器通道信息 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得服务器通道信息 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -136,7 +136,7 @@ namespace dp2Circulation
                     ChannelInfo[] contents = null;
 
                     long lRet = channel.GetChannelInfo(
-                        this.stop,
+                        this._stop,
                         strQuery,
                         strStyle,
                         nStart,
@@ -207,9 +207,9 @@ namespace dp2Circulation
             {
                 this.listView_channel.EndUpdate();
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -240,9 +240,9 @@ namespace dp2Circulation
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在关闭指定的通道 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在关闭指定的通道 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -285,7 +285,7 @@ namespace dp2Circulation
 
                     ChannelInfo[] results = null;
                     long lRet = channel.ManageChannel(
-this.stop,
+this._stop,
 "close",
 "",
 requests,
@@ -298,9 +298,9 @@ out strError);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -356,7 +356,10 @@ out strError);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.toolStrip_channel.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.toolStrip_channel.Enabled = bEnable;
+            }));
         }
 
         QueryState _queryState = new QueryState();

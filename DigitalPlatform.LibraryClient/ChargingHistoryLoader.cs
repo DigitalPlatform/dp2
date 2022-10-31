@@ -17,6 +17,7 @@ namespace DigitalPlatform.LibraryClient
         public long Start = 0;
         public long Length = -1;
 
+        // 注: SearchCharging() API 需要较长的 channel 超时参数，比如 30 秒
         public LibraryChannel Channel
         {
             get;
@@ -60,6 +61,7 @@ namespace DigitalPlatform.LibraryClient
             {
                 string strError = "";
                 ChargingItemWrapper[] temp_results = null;
+                // 注: SearchCharging() API 需要较长的 channel 超时参数，比如 30 秒
                 long lRet = this.Channel.SearchCharging(
                     this.Stop,
                     this.PatronBarcode,

@@ -8,15 +8,16 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Xml;
 using System.IO;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.Operations;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
-using DigitalPlatform.Core;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -348,7 +349,7 @@ namespace dp2Circulation
 
             ItemPropertyTask task = new ItemPropertyTask();
             task.BiblioInfo = info;
-            task.Stop = this.stop;
+            task.Stop = null;   //  this._stop;
             task.DbType = this.DbType;
 
             Program.MainForm.PropertyTaskList.AddTask(task, true);
@@ -637,6 +638,45 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
+        // 包装后的版本
+        public int RefreshListViewLines(
+    LibraryChannel channel_param,
+    List<ListViewItem> items_param,
+    string strFormat,
+    bool bBeginLoop,
+    bool bClearRestColumns,
+    out string strError)
+        {
+            if (bBeginLoop)
+            {
+                var looping = BeginLoop(this.DoStop, "正在刷新浏览行 ...", "halfstop");
+                this.EnableControls(false);
+                try
+                {
+                    return RefreshListViewLines(
+    channel_param,
+    items_param,
+    strFormat,
+    looping.stop,
+    bClearRestColumns,
+    out strError);
+                }
+                finally
+                {
+                    this.EnableControls(true);
+                    EndLoop(looping);
+                }
+            }
+
+            return RefreshListViewLines(
+    channel_param,
+    items_param,
+    strFormat,
+    null,
+    bClearRestColumns,
+    out strError);
+        }
+
         // TODO: 检查是否有脚本调用过没有 channel_param 参数的版本
         /// <summary>
         /// 刷新浏览行
@@ -644,7 +684,7 @@ namespace dp2Circulation
         /// <param name="channel_param">通讯通道。可以为空</param>
         /// <param name="items_param">要刷新的 ListViewItem 集合</param>
         /// <param name="strFormat">浏览格式。供调用 GetSearchResult() 时 strStyle 参数之用 </param>
-        /// <param name="bBeginLoop">是否要调用 stop.BeginLoop() </param>
+        /// <param name="stop">Stop 对象</param>
         /// <param name="bClearRestColumns">是否清除右侧多余的列内容</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
@@ -652,7 +692,8 @@ namespace dp2Circulation
             LibraryChannel channel_param,
             List<ListViewItem> items_param,
             string strFormat,
-            bool bBeginLoop,
+            // bool bBeginLoop,
+            Stop stop,
             bool bClearRestColumns,
             out string strError)
         {
@@ -661,15 +702,21 @@ namespace dp2Circulation
             if (items_param.Count == 0)
                 return 0;
 
-            if (stop != null && bBeginLoop == true)
+#if REMOVED
+            Looping looping = null;
+            if (/*_stop != null && */bBeginLoop == true)
             {
-                stop.Style = StopStyle.EnableHalfStop;
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在刷新浏览行 ...");
-                stop.BeginLoop();
+                /*
+                _stop.Style = StopStyle.EnableHalfStop;
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在刷新浏览行 ...");
+                _stop.BeginLoop();
+                */
+                looping = BeginLoop(this.DoStop, "正在刷新浏览行 ...", "halfstop");
 
                 this.EnableControls(false);
             }
+#endif
 
             LibraryChannel channel = channel_param;
             if (channel == null)
@@ -725,9 +772,12 @@ namespace dp2Circulation
 
                     ListViewItem item = items[i];
 
-                    // TODO: 注意保护好事项的背景色?
-                    // TODO: 注意处理好 record.RecordBody.Result 带有出错信息的情形
-                    RefreshOneLine(item, record.Cols, bClearRestColumns);
+                    this.Invoke((Action)(() =>
+                    {
+                        // TODO: 注意保护好事项的背景色?
+                        // TODO: 注意处理好 record.RecordBody.Result 带有出错信息的情形
+                        RefreshOneLine(item, record.Cols, bClearRestColumns);
+                    }));
 
                     i++;
                 }
@@ -736,7 +786,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "SearchFormBase RefreshListViewLines() {6BB2AEC9-B53F-4745-A655-AA9B286554B8} exception: " + ExceptionUtil.GetAutoText(ex);
+                strError = "SearchFormBase RefreshListViewLines() {6BB2AEC9-B53F-4745-A655-AA9B286554B8} exception: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
             finally
@@ -744,16 +794,21 @@ namespace dp2Circulation
                 if (channel_param == null)
                     this.ReturnChannel(channel);
 
-                if (stop != null && bBeginLoop == true)
+#if REMOVED
+                if (/*_stop != null && */bBeginLoop == true)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-                    stop.HideProgress();
-                    stop.Style = StopStyle.None;
+                    /*
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+                    _stop.HideProgress();
+                    _stop.Style = StopStyle.None;
+                    */
+                    EndLoop(looping);
 
                     this.EnableControls(true);
                 }
+#endif
             }
         }
 
@@ -844,8 +899,11 @@ namespace dp2Circulation
             {
                 info.NewXml = "";
 
-                item.BackColor = SystemColors.Window;
-                item.ForeColor = SystemColors.WindowText;
+                this.Invoke((Action)(() =>
+                {
+                    item.BackColor = SystemColors.Window;
+                    item.ForeColor = SystemColors.WindowText;
+                }));
 
                 this.m_nChangedCount--;
                 Debug.Assert(this.m_nChangedCount >= 0, "");
@@ -1068,15 +1126,19 @@ namespace dp2Circulation
 
             bool dont_enablecontrol = StringUtil.IsInList("dont_enablecontrol", strStyle);
 
+            Looping looping = null;
             if (dont_enablecontrol == false)
             {
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-+ " 开始保存</div>");
+    + " 开始保存</div>");
 
-                stop.Style = StopStyle.EnableHalfStop;
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在保存" + this.DbTypeCaption + "记录 ...");
-                stop.BeginLoop();
+                /*
+                _stop.Style = StopStyle.EnableHalfStop;
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在保存" + this.DbTypeCaption + "记录 ...");
+                _stop.BeginLoop();
+                */
+                looping = BeginLoop(this.DoStop, "正在保存" + this.DbTypeCaption + "记录 ...", "halfstop");
 
                 this.EnableControls(false);
             }
@@ -1090,11 +1152,11 @@ namespace dp2Circulation
                 try
                 {
                     if (dont_enablecontrol == false)
-                        stop.SetProgressRange(0, items.Count);
+                        looping?.stop.SetProgressRange(0, items.Count);
 
                     for (int i = 0; i < items.Count; i++)
                     {
-                        if (stop != null && stop.State != 0)
+                        if (looping != null && looping.stop.State != 0)
                         {
                             strError = "已中断";
                             return -1;
@@ -1105,7 +1167,7 @@ namespace dp2Circulation
                         if (string.IsNullOrEmpty(strRecPath) == true)
                         {
                             if (dont_enablecontrol == false)
-                                stop.SetProgressValue(i);
+                                looping?.stop.SetProgressValue(i);
                             goto CONTINUE;
                         }
 
@@ -1118,7 +1180,7 @@ namespace dp2Circulation
 
                         // string strOutputPath = "";
 
-                        stop.SetMessage("正在保存" + this.DbTypeCaption + "记录 " + strRecPath);
+                        looping?.stop.SetMessage("正在保存" + this.DbTypeCaption + "记录 " + strRecPath);
 
                         // ErrorCodeValue kernel_errorcode;
 
@@ -1136,24 +1198,6 @@ namespace dp2Circulation
                             strStyle,
                             out baNewTimestamp,
                             out strError);
-#if NO
-                    string strExistingXml = "";
-                    string strSavedXml = "";
-                    // string strSavedPath = "";
-                    long lRet = Channel.SetReaderInfo(
-    stop,
-    "change",
-    strRecPath,
-    info.NewXml,
-    info.OldXml,
-    info.Timestamp,
-    out strExistingXml,
-    out strSavedXml,
-    out strOutputPath,
-    out baNewTimestamp,
-    out kernel_errorcode,
-    out strError);
-#endif
                         if (nRet == -1)
                         {
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + strError) + "</div>");
@@ -1257,7 +1301,7 @@ namespace dp2Circulation
 
                     CONTINUE:
                         if (dont_enablecontrol == false)
-                            stop.SetProgressValue(i);
+                            looping?.stop.SetProgressValue(i);
                     }
                 }
                 finally
@@ -1269,11 +1313,14 @@ namespace dp2Circulation
                     {
                         this.EnableControls(true);
 
-                        stop.EndLoop();
-                        stop.OnStop -= new StopEventHandler(this.DoStop);
-                        stop.Initial("");
-                        stop.HideProgress();
-                        stop.Style = StopStyle.None;
+                        /*
+                        _stop.EndLoop();
+                        _stop.OnStop -= new StopEventHandler(this.DoStop);
+                        _stop.Initial("");
+                        _stop.HideProgress();
+                        _stop.Style = StopStyle.None;
+                        */
+                        EndLoop(looping);
 
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
     + " 结束保存</div>");
@@ -1415,10 +1462,13 @@ namespace dp2Circulation
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改" + this.DbTypeCaption + "记录</div>");
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial($"快速修改{this.DbTypeCaption}记录 ...");
-            stop.BeginLoop();
+            /*
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial($"快速修改{this.DbTypeCaption}记录 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, $"快速修改{this.DbTypeCaption}记录 ...", "halfstop");
 
             LibraryChannel channel = this.GetChannel();
 
@@ -1429,7 +1479,7 @@ namespace dp2Circulation
             int nChangedCount = 0;
             try
             {
-                stop.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
+                looping.stop.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this._listviewRecords.SelectedItems)
@@ -1466,7 +1516,7 @@ namespace dp2Circulation
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    stop,
+                    looping.stop,
                     items,
                     this.m_biblioTable)
                 {
@@ -1483,13 +1533,13 @@ namespace dp2Circulation
                     {
                         // Application.DoEvents(); // 出让界面控制权
 
-                        if (stop != null && stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             return new NormalResult { Value = -1, ErrorInfo = strError };
                         }
 
-                        stop.SetProgressValue(i);
+                        looping.stop.SetProgressValue(i);
 
                         BiblioInfo info = item.BiblioInfo;
 
@@ -1525,22 +1575,6 @@ namespace dp2Circulation
                         }
 
                         var changed = callback(info.RecPath, dom, now).GetAwaiter().GetResult();
-#if NO
-                    // 修改一个订购记录 XmlDocument
-                    // return:
-                    //      -1  出错
-                    //      0   没有实质性修改
-                    //      1   发生了修改
-                    nRet = ModifyItemRecord(
-                        cfg_dom,
-                        actions,
-                        ref dom,
-                        now,
-                        out string strDebugInfo,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-#endif
 
                         // Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
 
@@ -1585,11 +1619,14 @@ namespace dp2Circulation
 
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改" + this.DbTypeCaption + "记录</div>");
             }
@@ -1608,7 +1645,6 @@ namespace dp2Circulation
                 ErrorInfo = strError
             };
         }
-
 
         // 快速修改记录
         // return:
@@ -1642,9 +1678,9 @@ namespace dp2Circulation
                 // dlg.MainForm = Program.MainForm;
 
                 dlg.UiState = Program.MainForm.AppInfo.GetString(
-this.DbType + "search_form",
-"ChangeItemActionDialog_uiState",
-"");
+    this.DbType + "search_form",
+    "ChangeItemActionDialog_uiState",
+    "");
 
                 Program.MainForm.AppInfo.LinkFormState(dlg, this.DbType + "searchform_quickchangedialog_state");
                 dlg.ShowDialog(this);
@@ -1652,9 +1688,9 @@ this.DbType + "search_form",
 
 
                 Program.MainForm.AppInfo.SetString(
-this.DbType + "search_form",
-"ChangeItemActionDialog_uiState",
-dlg.UiState);
+    this.DbType + "search_form",
+    "ChangeItemActionDialog_uiState",
+    dlg.UiState);
 
 
                 if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -1669,10 +1705,13 @@ dlg.UiState);
             // TODO: 检查一下，看看是否一项修改动作都没有
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改" + this.DbTypeCaption + "记录</div>");
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("快速修改" + this.DbTypeCaption + "记录 ...");
-            stop.BeginLoop();
+            /*
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("快速修改" + this.DbTypeCaption + "记录 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "快速修改" + this.DbTypeCaption + "记录 ...", "halfstop");
 
             LibraryChannel channel = this.GetChannel();
 
@@ -1683,7 +1722,7 @@ dlg.UiState);
             int nChangedCount = 0;
             try
             {
-                stop.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
+                looping.stop.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this._listviewRecords.SelectedItems)
@@ -1720,7 +1759,7 @@ dlg.UiState);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    stop,
+                    looping.stop,
                     items,
                     this.m_biblioTable)
                 {
@@ -1733,15 +1772,15 @@ dlg.UiState);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    Application.DoEvents(); // 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -1822,11 +1861,14 @@ dlg.UiState);
 
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
+                */
+                EndLoop(looping);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改" + this.DbTypeCaption + "记录</div>");
             }
@@ -1851,21 +1893,6 @@ dlg.UiState);
                     e.ResultAction = "yes";
             }
         }
-
-#if NO
-        void dlg_GetValueTable(object sender, GetValueTableEventArgs e)
-        {
-            string strError = "";
-            string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
-                e.DbName,
-                out values,
-                out strError);
-            if (nRet == -1)
-                MessageBox.Show(this, strError);
-            e.values = values;
-        }
-#endif
 
         // 修改一个事项记录 XmlDocument
         // return:
@@ -1962,11 +1989,11 @@ dlg.UiState);
 
                         ParseElementName(strElementName, out string strElement, out string strAttrName);
                         ChangeField(ref dom,
-strElement,
-strAttrName,
+    strElement,
+    strAttrName,
     strFieldValue,  // action.FieldValue,
-ref debug,
-ref bChanged);
+    ref debug,
+    ref bChanged);
                     }
                 }
                 else
@@ -2188,8 +2215,5 @@ ref bChanged);
 
             return StringUtil.CompareSinglePrice(strNewPrice1, strNewPrice2);
         }
-
-
-
     }
 }

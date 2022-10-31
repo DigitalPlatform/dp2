@@ -130,7 +130,7 @@ namespace dp2Catalog
             this.binaryResControl1.ContentChanged += new ContentChangedEventHandler(binaryResControl1_ContentChanged);
 
             // this.binaryResControl1.Channel = null;
-            this.binaryResControl1.Stop = this.stop;
+            // this.binaryResControl1.Stop = this.stop;
 
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
         }
@@ -508,7 +508,6 @@ namespace dp2Catalog
 
             this.CurrentRecord = null;
 
-
             byte[] baTimestamp = null;
             string strSavePath = "";
             string strOutStyle = "";
@@ -609,6 +608,7 @@ namespace dp2Catalog
                     {
                         // this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
                         nRet = this.binaryResControl1.LoadObject(
+                            null,   // TODO: BeginLoop 获得 looping
 #if OLD_CHANNEL
                             dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
 #endif
@@ -827,6 +827,7 @@ channel,
                 {
                     // this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
                     nRet = this.binaryResControl1.LoadObject(
+                            null,   // TODO: BeginLoop 获得 looping
 #if OLD_CHANNEL
                     dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
 #endif
@@ -1348,6 +1349,7 @@ channel,
                         //		-1	error
                         //		>=0 实际上载的资源对象数
                         nRet = this.binaryResControl1.Save(
+                            null,   // TODO: BeginLoop 获得 looping
 #if OLD_CHANNEL
                         dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
 #endif

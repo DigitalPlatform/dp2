@@ -344,11 +344,14 @@ this.checkBox_returnSearchDetail.Checked);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.button_search.Enabled = bEnable;
-            // this.button_stop.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.button_search.Enabled = bEnable;
+                // this.button_stop.Enabled = bEnable;
 
-            this.comboBox_projectName.Enabled = bEnable;
-            this.textBox_recordPath.Enabled = bEnable;
+                this.comboBox_projectName.Enabled = bEnable;
+                this.textBox_recordPath.Enabled = bEnable;
+            }));
         }
 
 
@@ -386,9 +389,9 @@ this.checkBox_returnSearchDetail.Checked);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行查重 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行查重 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -406,7 +409,7 @@ this.checkBox_returnSearchDetail.Checked);
                     strBrowseStyle += ",detail";
 
                 long lRet = channel.SearchDup(
-                    stop,
+                    _stop,
                     strRecPath,
                     strXml,
                     strProjectName,
@@ -424,8 +427,8 @@ this.checkBox_returnSearchDetail.Checked);
                 if (lHitCount == 0)
                     goto END1;   // 查重发现没有命中
 
-                if (stop != null)
-                    stop.SetProgressRange(0, lHitCount);
+                if (_stop != null)
+                    _stop.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
@@ -434,16 +437,16 @@ this.checkBox_returnSearchDetail.Checked);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    _stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetDupSearchResult(
-                        stop,
+                        _stop,
                         lStart,
                         lPerCount,
                         strBrowseStyle, // "cols,excludecolsoflowthreshold",
@@ -508,8 +511,8 @@ this.checkBox_returnSearchDetail.Checked);
                             item.ImageIndex = ITEMTYPE_NORMAL;
                         }
 
-                        if (stop != null)
-                            stop.SetProgressValue(lStart + i + 1);
+                        if (_stop != null)
+                            _stop.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
@@ -524,10 +527,10 @@ this.checkBox_returnSearchDetail.Checked);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 EventFinish.Set();
 
@@ -900,9 +903,9 @@ this.checkBox_returnSearchDetail.Checked);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在填充浏览列 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在填充浏览列 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -921,13 +924,13 @@ this.checkBox_returnSearchDetail.Checked);
 
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    stop.SetMessage("正在装入浏览信息 " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
+                    _stop.SetMessage("正在装入浏览信息 " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
 
                     string[] paths = new string[nCount];
                     pathlist.CopyTo(nStart, paths, 0, nCount);
@@ -935,7 +938,7 @@ this.checkBox_returnSearchDetail.Checked);
                     Record[] searchresults = null;
 
                     long lRet = channel.GetBrowseRecords(
-                        this.stop,
+                        this._stop,
                         paths,
                         "id,cols",
                         out searchresults,
@@ -973,9 +976,9 @@ this.checkBox_returnSearchDetail.Checked);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 

@@ -285,14 +285,17 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.button_getProjectName.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.button_getProjectName.Enabled = bEnable;
 
-            this.dateControl_start.Enabled = bEnable;
-            this.dateControl_end.Enabled = bEnable;
+                this.dateControl_start.Enabled = bEnable;
+                this.dateControl_end.Enabled = bEnable;
 
-            this.button_next.Enabled = bEnable;
+                this.button_next.Enabled = bEnable;
 
-            this.button_projectManage.Enabled = bEnable;
+                this.button_projectManage.Enabled = bEnable;
+            }));
         }
 
         public override int RunScript(string strProjectName,
@@ -305,9 +308,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在执行脚本 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在执行脚本 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -433,10 +436,10 @@ namespace dp2Circulation
                 if (objStatis != null)
                     objStatis.FreeResources();
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.AssemblyMain = null;
 
@@ -617,14 +620,14 @@ namespace dp2Circulation
 
                 foreach (OperLogItem item in loader)
                 {
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断";
                         return 1;
                     }
 
-                    if (stop != null)
-                        stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+                    if (_stop != null)
+                        _stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
 
                     if (string.IsNullOrEmpty(item.Xml) == true)
                         continue;
@@ -1077,7 +1080,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetReaderInfo(
-                    stop,
+                    _stop,
                     strReaderBarcode,
                     strResultTypeList,
                     out results,
@@ -1171,7 +1174,7 @@ namespace dp2Circulation
             long lRet = 0;
             try
             {
-                lRet = channel.GetReaderInfo(stop,
+                lRet = channel.GetReaderInfo(_stop,
                     strPatronBarcode,
                     "xml",
                     out results,

@@ -268,9 +268,9 @@ this.checkBox_overwriteByG01.Checked);
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + $" 开始导入 MARC 文件 {strInputFileName}</div>");
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取ISO2709记录 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取ISO2709记录 ...");
+            _stop.BeginLoop();
 
             bool dont_display_retry_dialog = false;   //  不再出现重试对话框
             bool dont_display_compare_dialog = false;  // 不再出现两条书目记录对比的对话框
@@ -293,7 +293,7 @@ this.checkBox_overwriteByG01.Checked);
                 {
                     Application.DoEvents(); // 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         DialogResult result = MessageBox.Show(this,
                             "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
@@ -310,7 +310,7 @@ this.checkBox_overwriteByG01.Checked);
                         if (result == DialogResult.No)
                             return new NormalResult();   // 假装loop正常结束
 
-                        stop.Continue(); // 继续循环
+                        _stop.Continue(); // 继续循环
                     }
 
 
@@ -358,11 +358,11 @@ this.checkBox_overwriteByG01.Checked);
 
                     if (range != null && range.IsInRange(i, true) == false)
                     {
-                        stop.SetMessage("跳过第 " + (i + 1).ToString() + " 个 ISO2709 记录");
+                        _stop.SetMessage("跳过第 " + (i + 1).ToString() + " 个 ISO2709 记录");
                         continue;
                     }
                     else
-                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
+                        _stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
 
                     // 跳过太短的记录
                     if (string.IsNullOrEmpty(strMARC) == true
@@ -434,7 +434,7 @@ out strError);
                         // TODO: 去除记录中的 -01 字段
                         // 从服务器检索 strBiblioRecPath 位置的书目记录
                         lRet = channel.GetBiblioInfos(
-        stop,
+        _stop,
         strBiblioRecPath,
         "",
         new string[] { "xml" },   // formats
@@ -508,7 +508,7 @@ out strError);
                     }
 
                     lRet = channel.SetBiblioInfo(
-                        stop,
+                        _stop,
                         overwrite ? "change" : "new",
                         strBiblioRecPath,
                         "xml",
@@ -602,9 +602,9 @@ out strError);
 
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + $" 结束导入 MARC 文件 {strInputFileName}</div>");
@@ -799,7 +799,7 @@ out strError);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.Invoke((Action)(() =>
+            this.TryInvoke((Action)(() =>
             {
                 this._openMarcFileDialog.MainPanel.Enabled = bEnable;
 
@@ -811,7 +811,7 @@ out strError);
 
         private void ImportMarcForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
         }
 
         private void checkBox_overwriteByG01_CheckedChanged(object sender, EventArgs e)

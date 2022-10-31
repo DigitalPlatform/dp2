@@ -431,9 +431,9 @@ namespace dp2Circulation
                 EnableControls(false);
                 // MainForm.ShowProgress(true);
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在初始化浏览器组件 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在初始化浏览器组件 ...");
+                _stop.BeginLoop();
                 this.Update();
                 Program.MainForm.Update();
 
@@ -448,7 +448,7 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();
 
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断1";
                             goto ERROR1;
@@ -484,7 +484,7 @@ namespace dp2Circulation
                     }
 
                     // 设置进度范围
-                    stop.SetProgressRange(0, nLineCount);
+                    _stop.SetProgressRange(0, nLineCount);
                     sr.Close();
 
                     ProgressEstimate estimate = new ProgressEstimate();
@@ -498,7 +498,7 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();
 
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断1";
                             goto ERROR1;
@@ -517,13 +517,13 @@ namespace dp2Circulation
                         if (strLine[0] == '#')
                             continue;   // 注释行
 
-                        stop.SetProgressValue(i);
+                        _stop.SetProgressValue(i);
 
                         lines.Add(strLine);
                         if (lines.Count >= 100)
                         {
                             if (lines.Count > 0)
-                                stop.SetMessage("(" + i.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录。"
+                                _stop.SetMessage("(" + i.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录。"
                                     + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(i)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
 
                             // 处理一小批记录的装入
@@ -546,7 +546,7 @@ namespace dp2Circulation
                     if (lines.Count > 0)
                     {
                         if (lines.Count > 0)
-                            stop.SetMessage("(" + nLineCount.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录...");
+                            _stop.SetMessage("(" + nLineCount.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录...");
 
                         // 处理一小批记录的装入
                         nRet = DoLoadRecords(
@@ -565,10 +565,10 @@ namespace dp2Circulation
                 }
                 finally
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("装入完成。");
-                    stop.HideProgress();
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("装入完成。");
+                    _stop.HideProgress();
 
                     EnableControls(true);
                     // MainForm.ShowProgress(false);
@@ -642,7 +642,7 @@ namespace dp2Circulation
             {
                 Application.DoEvents();
 
-                if (stop != null && stop.State != 0)
+                if (_stop != null && _stop.State != 0)
                 {
                     strError = "用户中断1";
                     return -1;
@@ -736,7 +736,7 @@ namespace dp2Circulation
                     // TODO: 有没有可能希望取的事项数目一次性取得没有取够?
                 REDO_GETBIBLIOINFO:
                     long lRet = channel.GetBiblioInfos(
-                        stop,
+                        _stop,
                         strCommand,
                         "",
                         summary_col_names,
@@ -931,7 +931,7 @@ namespace dp2Circulation
 
             REDO_GETITEMINFO:
                 lRet = channel.GetItemInfo(
-                    stop,
+                    _stop,
                     strBarcodeOrRecPath,
                     "xml",
                     out strItemText,
@@ -976,12 +976,12 @@ namespace dp2Circulation
                     string[] results = null;
                     byte[] timestamp = null;
 
-                    stop.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 的摘要 ...");
+                    _stop.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 的摘要 ...");
 
                     Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
                 REDO_GETBIBLIOINFO:
                     lRet = channel.GetBiblioInfos(
-                        stop,
+                        _stop,
                         strBiblioRecPath,
                         "",
                         summary_col_names,
@@ -1209,9 +1209,9 @@ namespace dp2Circulation
                 EnableControls(false);
                 // MainForm.ShowProgress(true);
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在将册条码号转换为记录路径 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在将册条码号转换为记录路径 ...");
+                _stop.BeginLoop();
                 this.Update();
                 Program.MainForm.Update();
 
@@ -1228,7 +1228,7 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();
 
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断1";
                             goto ERROR1;
@@ -1264,7 +1264,7 @@ namespace dp2Circulation
                     barcode_table.Clear(); // 腾出空间
 
                     // 设置进度范围
-                    stop.SetProgressRange(0, nLineCount);
+                    _stop.SetProgressRange(0, nLineCount);
                     // stop.SetProgressValue(0);
 
                     // 逐行处理
@@ -1281,13 +1281,13 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();
 
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断1";
                             goto ERROR1;
                         }
 
-                        stop.SetProgressValue(i++);
+                        _stop.SetProgressValue(i++);
 
                         string strLine = s;
 
@@ -1359,10 +1359,10 @@ namespace dp2Circulation
                 }
                 finally
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("装入完成。");
-                    stop.HideProgress();
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("装入完成。");
+                    _stop.HideProgress();
 
                     EnableControls(true);
                     // MainForm.ShowProgress(false);
@@ -1404,7 +1404,7 @@ namespace dp2Circulation
             {
             REDO_GETITEMINFO:
                 string strBiblio = "";
-                long lRet = channel.GetItemInfo(stop,
+                long lRet = channel.GetItemInfo(_stop,
                     "@barcode-list:" + StringUtil.MakePathList(barcodes),
                     "get-path-list",
                     out string strResult,
@@ -1538,9 +1538,9 @@ namespace dp2Circulation
             long lRet = 0;
 
             EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索批次号 '" + strBatchNo + "' 和馆藏地点 '" + strLocation + "' ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在检索批次号 '" + strBatchNo + "' 和馆藏地点 '" + strLocation + "' ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -1551,7 +1551,7 @@ namespace dp2Circulation
                 {
                     string strBatchNoQueryXml = "";
                     lRet = channel.SearchItem(
-        stop,
+        _stop,
          strPubType == "图书" ? "<all book>" : "<all series>",
         strBatchNo,
         -1,
@@ -1568,7 +1568,7 @@ namespace dp2Circulation
 
                     string strLocationQueryXml = "";
                     lRet = channel.SearchItem(
-        stop,
+        _stop,
          strPubType == "图书" ? "<all book>" : "<all series>",
         strLocation,
         -1,
@@ -1602,10 +1602,10 @@ namespace dp2Circulation
                 }
                 else if (strBatchNo != null)
                 {
-                    stop.SetMessage("正在检索批次号 '" + strBatchNo + "' ...");
+                    _stop.SetMessage("正在检索批次号 '" + strBatchNo + "' ...");
 
                     lRet = channel.SearchItem(
-        stop,
+        _stop,
          strPubType == "图书" ? "<all book>" : "<all series>",
         strBatchNo,
         -1,
@@ -1622,10 +1622,10 @@ namespace dp2Circulation
                 }
                 else if (strLocation != null)
                 {
-                    stop.SetMessage("正在检索馆藏地点 '" + strLocation + "' ...");
+                    _stop.SetMessage("正在检索馆藏地点 '" + strLocation + "' ...");
 
                     lRet = channel.SearchItem(
-    stop,
+    _stop,
     strPubType == "图书" ? "<all book>" : "<all series>",
     strLocation,    // strBatchNo, BUG !!!
     -1,
@@ -1645,7 +1645,7 @@ namespace dp2Circulation
                     Debug.Assert(strBatchNo == null && strLocation == null,
                         "");
                     lRet = channel.SearchItem(
-    stop,
+    _stop,
     strPubType == "图书" ? "<all book>" : "<all series>",
     "", // strBatchNo,
     -1,
@@ -1665,7 +1665,7 @@ namespace dp2Circulation
 
                 using (StreamWriter sw = new StreamWriter(strOutputFilename))
                 {
-                    lRet = channel.Search(stop,
+                    lRet = channel.Search(_stop,
         strQueryXml,
         "default",
         "id",   // 只要记录路径
@@ -1677,7 +1677,7 @@ namespace dp2Circulation
 
                     lHitCount = lRet;
 
-                    stop.SetProgressRange(0, lHitCount);
+                    _stop.SetProgressRange(0, lHitCount);
 
                     long lStart = 0;
                     long lPerCount = Math.Min(150, lHitCount);
@@ -1688,7 +1688,7 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断";
                         }
@@ -1696,7 +1696,7 @@ namespace dp2Circulation
                         // stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                         lRet = channel.GetSearchResult(
-                            stop,
+                            _stop,
                             "default",   // strResultSetName
                             lStart,
                             lPerCount,
@@ -1724,7 +1724,7 @@ namespace dp2Circulation
                         if (lStart >= lHitCount || lPerCount <= 0)
                             break;
 
-                        stop.SetProgressValue(lStart);
+                        _stop.SetProgressValue(lStart);
                     }
                 }
 
@@ -1732,10 +1732,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 EnableControls(true);
                 // MainForm.ShowProgress(false);
@@ -1769,15 +1769,15 @@ namespace dp2Circulation
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.OnStop += new StopEventHandler(this.DoStop);
             if (this.InvokeRequired == false)
-                stop.Initial("正在刷新 ...");
-            stop.BeginLoop();
+                _stop.Initial("正在刷新 ...");
+            _stop.BeginLoop();
 
             try
             {
                 if (this.InvokeRequired == false)
-                    stop.SetProgressRange(0, items.Count);
+                    _stop.SetProgressRange(0, items.Count);
 
                 ProgressEstimate estimate = new ProgressEstimate();
                 estimate.SetRange(0, items.Count);
@@ -1790,7 +1790,7 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();
 
-                    if (stop.State != 0)
+                    if (_stop.State != 0)
                     {
                         strError = "用户中断1";
                         goto ERROR1;
@@ -1800,8 +1800,8 @@ namespace dp2Circulation
 
                     if (this.InvokeRequired == false)
                     {
-                        stop.SetMessage("正在刷新 " + item.Text + " ...");
-                        stop.SetProgressValue(i);
+                        _stop.SetMessage("正在刷新 " + item.Text + " ...");
+                        _stop.SetProgressValue(i);
                     }
 
                     string strRecPath = ListViewUtil.GetItemText(item, nRecPathColumn);
@@ -1816,7 +1816,7 @@ namespace dp2Circulation
                         if (this.InvokeRequired == false)
                         {
                             if (lines.Count > 0)
-                                stop.SetMessage("(" + i.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录。"
+                                _stop.SetMessage("(" + i.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录。"
                                     + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(i)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
                         }
 
@@ -1841,7 +1841,7 @@ namespace dp2Circulation
                     if (this.InvokeRequired == false)
                     {
                         if (lines.Count > 0)
-                            stop.SetMessage("(" + nLineCount.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录...");
+                            _stop.SetMessage("(" + nLineCount.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录...");
                     }
 
                     // 处理一小批记录的装入
@@ -1862,12 +1862,12 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
                 if (this.InvokeRequired == false)
                 {
-                    stop.Initial("刷新完成。");
-                    stop.HideProgress();
+                    _stop.Initial("刷新完成。");
+                    _stop.HideProgress();
                 }
 
                 this.ReturnChannel(channel);
@@ -1881,7 +1881,7 @@ namespace dp2Circulation
             if (this.InvokeRequired == false)
                 MessageBox.Show(this, strError);
             else
-                stop.SetMessage(strError);
+                _stop.SetMessage(strError);
         }
 
         #endregion

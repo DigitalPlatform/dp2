@@ -1219,6 +1219,12 @@ namespace DigitalPlatform.Script
                 text.Append(line + "\r\n");
             }
 
+            /*
+            // 2022/10/29
+            if (bHasCirculationClientUsing == false)
+                text.Insert(0, "using DigitalPlatform.CirculationClient; // 为兼容而作的自动修改\r\n\r\n");
+            */
+
             if (bHasCirculationClientUsing == true && bHasLibraryClientUsing == false)
             {
                 return "using DigitalPlatform.LibraryClient; // 为兼容而作的自动修改\r\n\r\n"

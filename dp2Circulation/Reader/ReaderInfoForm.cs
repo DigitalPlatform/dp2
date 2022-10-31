@@ -34,9 +34,8 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
-using DocumentFormat.OpenXml.Drawing.Diagrams;
-using DocumentFormat.OpenXml.Bibliography;
 using dp2Circulation.Reader;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace dp2Circulation
 {
@@ -46,7 +45,7 @@ namespace dp2Circulation
     public partial class ReaderInfoForm : MyForm
     {
         // 和 form_closed 关联
-        CancellationTokenSource _cancel = new CancellationTokenSource();
+        // CancellationTokenSource _cancel = new CancellationTokenSource();
 
         int m_nChannelInUse = 0; // >0表示通道正在被使用
 
@@ -56,21 +55,22 @@ namespace dp2Circulation
         const int WM_PREV_RECORD = API.WM_USER + 201;
         const int WM_LOAD_RECORD = API.WM_USER + 202;
         const int WM_DELETE_RECORD = API.WM_USER + 203;
-        const int WM_HIRE = API.WM_USER + 204;
-        const int WM_SAVETO = API.WM_USER + 205;
-        const int WM_SAVE_RECORD = API.WM_USER + 206;
-        const int WM_SAVE_RECORD_BARCODE = API.WM_USER + 207;
+        const int WM_FORCE_DELETE_RECORD = API.WM_USER + 204;
+        const int WM_HIRE = API.WM_USER + 205;
+        const int WM_SAVETO = API.WM_USER + 206;
+        const int WM_SAVE_RECORD = API.WM_USER + 207;
+        const int WM_SAVE_RECORD_BARCODE = API.WM_USER + 208;
 
         // 2020/5/26
-        const int WM_SAVE_RECORD_STATE = API.WM_USER + 208;
+        const int WM_SAVE_RECORD_STATE = API.WM_USER + 210;
 
-        const int WM_SAVE_RECORD_FORCE = API.WM_USER + 209;
-        const int WM_FOREGIFT = API.WM_USER + 210;
-        const int WM_RETURN_FOREGIFT = API.WM_USER + 211;
-        const int WM_SET_FOCUS = API.WM_USER + 212;
+        const int WM_SAVE_RECORD_FORCE = API.WM_USER + 220;
+        const int WM_FOREGIFT = API.WM_USER + 221;
+        const int WM_RETURN_FOREGIFT = API.WM_USER + 222;
+        const int WM_SET_FOCUS = API.WM_USER + 223;
 
-        const int WM_NEXT_RECORD_RESULTSET = API.WM_USER + 213; // 在命中结果集中向后翻页
-        const int WM_PREV_RECORD_RESULTSET = API.WM_USER + 214;
+        const int WM_NEXT_RECORD_RESULTSET = API.WM_USER + 230; // 在命中结果集中向后翻页
+        const int WM_PREV_RECORD_RESULTSET = API.WM_USER + 231;
 
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
@@ -85,6 +85,8 @@ namespace dp2Circulation
         /// </summary>
         public ReaderInfoForm()
         {
+            this.UseLooping = true;
+
             InitializeComponent();
         }
 
@@ -160,7 +162,7 @@ namespace dp2Circulation
             this.binaryResControl1.ReturnChannel += binaryResControl1_ReturnChannel;
 
             // this.binaryResControl1.Channel = this.Channel;
-            this.binaryResControl1.Stop = this.stop;
+            // this.binaryResControl1.Stop = null; // this._stop;
 
             // webBrowser_readerInfo
             this.m_webExternalHost.Initial(// Program.MainForm, 
@@ -235,16 +237,12 @@ namespace dp2Circulation
 
         void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)
         {
-            this.stop.EndLoop();
-            this.stop.OnStop -= new StopEventHandler(this.DoStop);
-            this.ReturnChannel(e.Channel);
+            OnReturnChannel(sender, e);
         }
 
         void binaryResControl1_GetChannel(object sender, GetChannelEventArgs e)
         {
-            e.Channel = this.GetChannel();
-            this.stop.OnStop += new StopEventHandler(this.DoStop);
-            this.stop.BeginLoop();
+            OnGetChannel(sender, e);
         }
 
         void LoadExternalFields()
@@ -439,8 +437,10 @@ namespace dp2Circulation
 
         private void ReaderInfoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            /*
             // 2022/6/10
             _cancel.Cancel();
+            */
 
             this.commander.Destroy();
 
@@ -581,191 +581,201 @@ MessageBoxDefaultButton.Button2);
             }
             try
             {
+#if REMOVED
                 LibraryChannel channel = this.GetChannel();
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在装载读者记录 ...");
-                stop.BeginLoop();
+                /*
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在装载读者记录 ...");
+                _stop.BeginLoop();
+                */
+                var looping = BeginLoop(this.DoStop, "正在装载读者记录 ...");
 
                 EnableControls(false);
-
-                this.readerEditControl1.Clear();
+#endif
+                using (var looping = Looping(
+                    out LibraryChannel channel,
+                    "正在装载读者记录 ...",
+                    "disableControl"))
+                {
+                    this.readerEditControl1.Clear();
 #if NO
                 Global.ClearHtmlPage(this.webBrowser_readerInfo,
                     Program.MainForm.DataDir);
 #endif
-                ClearReaderHtmlPage();
-                this.binaryResControl1.Clear();
+                    ClearReaderHtmlPage();
+                    this.binaryResControl1.Clear();
 
-                this.ClearBorrowHistoryPage();
-                this.ClearQrCodePage();
+                    this.ClearBorrowHistoryPage();
+                    this.ClearQrCodePage();
 
-                try
-                {
-                    byte[] baTimestamp = null;
-                    string strOutputRecPath = "";
-                    int nRedoCount = 0;
-
-                REDO:
-                    stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
-
-                    List<string> formats = new List<string>() { "xml", "html" };
-                    if (Control.ModifierKeys == Keys.Control)
-                        formats = new List<string>() { "xml" };
-                    // 2021/7/21
-                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
-                        formats.Add("structure");
-
-                    long lRet = channel.GetReaderInfo(
-                        stop,
-                        strBarcode,
-                        StringUtil.MakePathList(formats),
-                        out string[] results,
-                        out strOutputRecPath,
-                        out baTimestamp,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (lRet == 0)
-                        goto ERROR1;
-
-                    if (lRet > 1)
+                    try
                     {
-                        // 如果重试后依然发生重复
-                        if (nRedoCount > 0)
+                        byte[] baTimestamp = null;
+                        string strOutputRecPath = "";
+                        int nRedoCount = 0;
+
+                    REDO:
+                        looping.stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+
+                        List<string> formats = new List<string>() { "xml", "html" };
+                        if (Control.ModifierKeys == Keys.Control)
+                            formats = new List<string>() { "xml" };
+                        // 2021/7/21
+                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
+                            formats.Add("structure");
+
+                        long lRet = channel.GetReaderInfo(
+                            looping.stop,
+                            strBarcode,
+                            StringUtil.MakePathList(formats),
+                            out string[] results,
+                            out strOutputRecPath,
+                            out baTimestamp,
+                            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+
+                        if (lRet == 0)
+                            goto ERROR1;
+
+                        if (lRet > 1)
                         {
-                            if (bForceLoad == true)
+                            // 如果重试后依然发生重复
+                            if (nRedoCount > 0)
                             {
-                                strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，但仍装入其中第一条读者记录。\r\n\r\n这是一个严重错误，请系统管理员尽快排除。";
-                                MessageBox.Show(this, strError);    // 警告后继续装入第一条 
+                                if (bForceLoad == true)
+                                {
+                                    strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，但仍装入其中第一条读者记录。\r\n\r\n这是一个严重错误，请系统管理员尽快排除。";
+                                    MessageBox.Show(this, strError);    // 警告后继续装入第一条 
+                                }
+                                else
+                                {
+                                    strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
+                                    goto ERROR1;    // 当出错处理
+                                }
                             }
-                            else
-                            {
-                                strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
-                                goto ERROR1;    // 当出错处理
-                            }
+
+                            SelectPatronDialog dlg = new SelectPatronDialog();
+
+                            dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
+                            nRet = dlg.Initial(
+                                // Program.MainForm,
+                                StringUtil.SplitList(strOutputRecPath),
+                                "请选择一个读者记录",
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_SelectPatronDialog_state");
+                            dlg.ShowDialog(this);
+                            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                                return 0;
+
+                            strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16 // .SelectedBarcode;
+                            nRedoCount++;
+                            goto REDO;
                         }
 
-                        SelectPatronDialog dlg = new SelectPatronDialog();
+                        this.ReaderBarcode = strBarcode;
 
-                        dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
-                        nRet = dlg.Initial(
-                            // Program.MainForm,
-                            StringUtil.SplitList(strOutputRecPath),
-                            "请选择一个读者记录",
+                        /*
+                        this.RecPath = strRecPath;
+
+                        this.Timestamp = baTimestamp;
+
+                        // 保存刚获得的记录
+                        this.OldRecord = strXml;
+                         */
+
+
+                        // if (results == null || results.Length < 2)
+                        if (results == null || results.Length < 1)
+                        {
+                            strError = "返回的 results 不正常。";
+                            goto ERROR1;
+                        }
+
+                        string strXml = "";
+                        string strHtml = "";
+                        /*
+                        strXml = results[0];
+                        if (results.Length >= 2)
+                            strHtml = results[1];
+                        */
+                        strXml = GetValue(formats, results, "xml");
+                        strHtml = GetValue(formats, results, "html");
+                        string strStructure = GetValue(formats, results, "structure");
+
+                        nRet = this.readerEditControl1.SetData(
+                            strXml,
+                            strOutputRecPath,
+                            baTimestamp,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
-                        Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_SelectPatronDialog_state");
-                        dlg.ShowDialog(this);
-                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
-                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                            return 0;
-
-                        strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16 // .SelectedBarcode;
-                        nRedoCount++;
-                        goto REDO;
-                    }
-
-                    this.ReaderBarcode = strBarcode;
-
-                    /*
-                    this.RecPath = strRecPath;
-
-                    this.Timestamp = baTimestamp;
-
-                    // 保存刚获得的记录
-                    this.OldRecord = strXml;
-                     */
-
-
-                    // if (results == null || results.Length < 2)
-                    if (results == null || results.Length < 1)
-                    {
-                        strError = "返回的 results 不正常。";
-                        goto ERROR1;
-                    }
-
-                    string strXml = "";
-                    string strHtml = "";
-                    /*
-                    strXml = results[0];
-                    if (results.Length >= 2)
-                        strHtml = results[1];
-                    */
-                    strXml = GetValue(formats, results, "xml");
-                    strHtml = GetValue(formats, results, "html");
-                    string strStructure = GetValue(formats, results, "structure");
-
-                    nRet = this.readerEditControl1.SetData(
-                        strXml,
-                        strOutputRecPath,
-                        baTimestamp,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    if (string.IsNullOrEmpty(strStructure) == false)
-                    {
-                        ParseStructure(strStructure,
-        out string visibleFields,
-        out string writeableFields);
-
-                        this.readerEditControl1.SetEditable(visibleFields, writeableFields);
-                    }
-
-                    // 接着装入对象资源
-                    {
-                        nRet = this.binaryResControl1.LoadObject(
-                            channel,
-                            strOutputRecPath,    // 2008/11/2 changed
-                            strXml,
-                            Program.MainForm.ServerVersion,
-                            out strError);
-                        if (nRet == -1)
+                        if (string.IsNullOrEmpty(strStructure) == false)
                         {
-                            MessageBox.Show(this, strError);
-                            // return -1;
+                            ParseStructure(strStructure,
+            out string visibleFields,
+            out string writeableFields);
+
+                            this.readerEditControl1.SetEditable(visibleFields, writeableFields);
                         }
-                    }
 
-                    /*
-                    this.SetXmlToWebbrowser(this.webBrowser_xml,
-                        strXml);
-                     * */
-                    Global.SetXmlToWebbrowser(this.webBrowser_xml,
-                        Program.MainForm.DataDir,
-                        "xml",
-                        strXml);
+                        // 接着装入对象资源
+                        {
+                            nRet = this.binaryResControl1.LoadObject(
+                                looping.stop,
+                                channel,
+                                strOutputRecPath,    // 2008/11/2 changed
+                                strXml,
+                                Program.MainForm.ServerVersion,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                MessageBox.Show(this, strError);
+                                // return -1;
+                            }
+                        }
 
-                    this.m_strSetAction = "change";
+                        /*
+                        this.SetXmlToWebbrowser(this.webBrowser_xml,
+                            strXml);
+                         * */
+                        Global.SetXmlToWebbrowser(this.webBrowser_xml,
+                            Program.MainForm.DataDir,
+                            "xml",
+                            strXml);
 
-                    /*
-                    lRet = Channel.GetReaderInfo(
-                        stop,
-                        strBarcode,
-                        "html",
-                        out strHtml,
-                        out strRecPath,
-                        out baTimestamp,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        ChargingForm.SetHtmlString(this.webBrowser_readerInfo,
-    "装载读者记录发生错误: " + strError);
+                        this.m_strSetAction = "change";
 
-                    }
-                    else
-                    {
-                        ChargingForm.SetHtmlString(this.webBrowser_readerInfo,
-                            strHtml,
-        Program.MainForm.DataDir,
-        "readerinfoform_reader");
-                    }
-                     * */
+                        /*
+                        lRet = Channel.GetReaderInfo(
+                            stop,
+                            strBarcode,
+                            "html",
+                            out strHtml,
+                            out strRecPath,
+                            out baTimestamp,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            ChargingForm.SetHtmlString(this.webBrowser_readerInfo,
+        "装载读者记录发生错误: " + strError);
+
+                        }
+                        else
+                        {
+                            ChargingForm.SetHtmlString(this.webBrowser_readerInfo,
+                                strHtml,
+            Program.MainForm.DataDir,
+            "readerinfoform_reader");
+                        }
+                         * */
 
 #if NO
                     // 2013/12/21
@@ -777,18 +787,23 @@ MessageBoxDefaultButton.Button2);
         Program.MainForm.DataDir,
         "readerinfoform_reader");
 #endif
-                    this.SetReaderHtmlString(strHtml);
-
-                }
-                finally
-                {
+                        this.SetReaderHtmlString(strHtml);
+                    }
+                    finally
+                    {
+#if REMOVED
                     EnableControls(true);
 
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    /*
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+                    */
+                    EndLoop(looping);
 
                     this.ReturnChannel(channel);
+#endif
+                    }
                 }
             }
             finally
@@ -828,11 +843,11 @@ MessageBoxDefaultButton.Button2);
             if (string.IsNullOrEmpty(xml))
                 return;
             /*
- * <structure 
- * visibleFields="name,namePinyin,state,?comment"
- * writeableFields="name,namePinyin" />
- * 
- * */
+    * <structure 
+    * visibleFields="name,namePinyin,state,?comment"
+    * writeableFields="name,namePinyin" />
+    * 
+    * */
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(xml);
             visibleFields = dom.DocumentElement?.GetAttribute("visibleFields");
@@ -895,11 +910,11 @@ Program.MainForm.DataDir,
             {
                 // 警告尚未保存
                 DialogResult result = MessageBox.Show(this,
-"当前有信息被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要根据记录路径重新装载内容? ",
-"ReaderInfoForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
+    "当前有信息被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要根据记录路径重新装载内容? ",
+    "ReaderInfoForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.Yes)
                     return 0;   // cancelled
 
@@ -924,9 +939,12 @@ MessageBoxDefaultButton.Button2);
 
                 LibraryChannel channel = this.GetChannel();
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在初始化浏览器组件 ...");
-                stop.BeginLoop();
+                /*
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在初始化浏览器组件 ...");
+                _stop.BeginLoop();
+                */
+                var looping = BeginLoop(this.DoStop, "正在初始化浏览器组件 ...");
 
                 EnableControls(false);
 
@@ -950,7 +968,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     byte[] baTimestamp = null;
 
-                    stop.SetMessage("正在装入读者记录 " + strRecPath + " ...");
+                    looping.stop.SetMessage("正在装入读者记录 " + strRecPath + " ...");
 
                     List<string> formats = new List<string>() { "xml", "html" };
                     // 2021/7/21
@@ -958,7 +976,7 @@ MessageBoxDefaultButton.Button2);
                         formats.Add("structure");
                     // string[] results = null;
                     long lRet = channel.GetReaderInfo(
-                        stop,
+                        looping.stop,
                         "@path:" + strRecPath,
                         StringUtil.MakePathList(formats),   // "xml,html",
                         out string[] results,
@@ -1028,6 +1046,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         this.binaryResControl1.Clear();
                         nRet = this.binaryResControl1.LoadObject(
+                            looping.stop,
                             channel,
                             strOutputRecPath,    // 2008/11/2 changed
                             strXml,
@@ -1069,9 +1088,12 @@ MessageBoxDefaultButton.Button2);
                 {
                     EnableControls(true);
 
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    /*
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+                    */
+                    EndLoop(looping);
 
                     this.ReturnChannel(channel);
                 }
@@ -1167,7 +1189,9 @@ MessageBoxDefaultButton.Button2);
 
         private void ReaderInfoForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            /*
+            Program.MainForm.stopManager.Active(this._stop);
+            */
 
             SetMenuItemState();
 
@@ -1201,7 +1225,7 @@ MessageBoxDefaultButton.Button2);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.Invoke((Action)(() =>
+            this.TryInvoke((Action)(() =>
             {
                 // this.textBox_readerBarcode.Enabled = bEnable;
                 // this.button_load.Enabled = bEnable;
@@ -1210,17 +1234,17 @@ MessageBoxDefaultButton.Button2);
                 this.readerEditControl1.Enabled = bEnable;
 
                 if (bEnable == false)
-                    this.toolStripButton_delete.Enabled = bEnable;
+                    this.toolStripSplitButton_delete.Enabled = bEnable;
                 else
                 {
-                    if (this.readerEditControl1.RecPath != "")
-                        this.toolStripButton_delete.Enabled = true;  // 只有具备明确的路径的记录，才能被删除
+                    if (string.IsNullOrEmpty(this.readerEditControl1.RecPath) == false)
+                        this.toolStripSplitButton_delete.Enabled = true;  // 只有具备明确的路径的记录，才能被删除
                     else
-                        this.toolStripButton_delete.Enabled = false;
+                        this.toolStripSplitButton_delete.Enabled = false;
                 }
 
                 EnableToolStripExclude(bEnable,
-                    new ToolStripItem[] { this.toolStripButton_stopSummaryLoop, this.toolStripButton_delete });
+                    new ToolStripItem[] { this.toolStripButton_stopSummaryLoop, this.toolStripSplitButton_delete });
 
                 // this.toolStripButton_loadFromIdcard.Enabled = bEnable;
 
@@ -1330,23 +1354,26 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存配置文件 ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存配置文件 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在保存配置文件 ...");
 
             try
             {
-                stop.SetMessage("正在保存配置文件 " + strCfgFilePath + " ...");
+                looping.stop.SetMessage("正在保存配置文件 " + strCfgFilePath + " ...");
 
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
                 long lRet = channel.WriteRes(
-                    stop,
+                    looping.stop,
                     strCfgFilePath,
                     strContent,
                     true,
-                    "",	// style
+                    "", // style
                     baTimestamp,
                     out output_timestamp,
                     out strOutputPath,
@@ -1357,9 +1384,12 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -1496,9 +1526,9 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
 
                 tempdlg.Text = "请选择要修改的模板记录";
-                tempdlg.CheckNameExist = false;	// 按OK按钮时不警告"名字不存在",这样允许新建一个模板
-                //tempdlg.ap = Program.MainForm.applicationInfo;
-                //tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
+                tempdlg.CheckNameExist = false; // 按OK按钮时不警告"名字不存在",这样允许新建一个模板
+                                                //tempdlg.ap = Program.MainForm.applicationInfo;
+                                                //tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
                 tempdlg.ShowDialog(this);
 
                 if (tempdlg.DialogResult != DialogResult.OK)
@@ -1550,7 +1580,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-                if (tempdlg.Changed == false)	// 没有必要保存回去
+                if (tempdlg.Changed == false)   // 没有必要保存回去
                     return;
 
                 string strOutputXml = tempdlg.OutputXml;
@@ -1660,7 +1690,7 @@ MessageBoxDefaultButton.Button2);
 
                 selected = this.selected_templates.Find(strReaderDbName);
 
-                this.readerEditControl1.RecPath = dbname_dlg.DbName + "/?";	// 为了追加保存
+                this.readerEditControl1.RecPath = dbname_dlg.DbName + "/?"; // 为了追加保存
                 this.readerEditControl1.Changed = false;
                 ClearImportantFields();
 
@@ -1796,9 +1826,9 @@ MessageBoxDefaultButton.Button2);
 
 
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
-Program.MainForm.DataDir,
-"xml",
-select_temp_dlg.SelectedRecordXml);
+    Program.MainForm.DataDir,
+    "xml",
+    select_temp_dlg.SelectedRecordXml);
 
                 this.m_strSetAction = "new";
 
@@ -1850,7 +1880,7 @@ select_temp_dlg.SelectedRecordXml);
             try
             {
                 long lRet = channel.GetReaderInfo(
-                    stop,
+                    null,   // _stop,
                     string.IsNullOrEmpty(strDefaultXml) ? "<root />" : strDefaultXml,
                     StringUtil.MakePathList(formats),
                     out string[] results,
@@ -1960,9 +1990,9 @@ select_temp_dlg.SelectedRecordXml);
                     strNewDefault);
                  * */
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
-Program.MainForm.DataDir,
-"xml",
-strNewDefault);
+    Program.MainForm.DataDir,
+    "xml",
+    strNewDefault);
 
                 this.m_strSetAction = "new";
                 // this.m_strLoadSource = "local";
@@ -2108,14 +2138,17 @@ strNewDefault);
 
             try
             {
+                /*
                 bool bControlPressed = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
                 if (bControlPressed == false
                     && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == true)
                 {
-                    strError = "尚未输入证条码号";
+                    // 注: 这样做主要是对证条码号为空的情况制造一点操作麻烦，避免工作人员出现误操作
+                    strError = "尚未输入证条码号。\r\n\r\n可改为按住 Ctrl 键使用本命令，按照读者记录路径进行保存";
                     goto ERROR1;
                 }
+                */
 
                 // 是否强制修改册条码号
                 bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
@@ -2130,7 +2163,7 @@ strNewDefault);
                 if (bChangeReaderForce)
                 {
                     var result = MessageBox.Show(this,
-                        "您确实要强制修改当前读者记录？\r\n\r\n警告：当读者有在借记录的情况下，强制修改保存功能，*** 不会自动修改*** 这些在借册记录，会造成借阅信息关联错误。若只是想在修改证条码号以后保存记录，请改用“保存(强制修改证条码号)功能”",
+                        "您确实要强制修改当前读者记录？\r\n\r\n警告：当读者有在借信息的情况下，强制修改保存功能，*** 不会自动修改 *** 相关在借册记录，会造成借阅信息关联错误。若只是想在修改证条码号以后保存记录，请改用“保存(强制修改证条码号)功能”",
                         "谨慎使用“保存(强制修改)”功能",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Warning,
@@ -2173,7 +2206,8 @@ strNewDefault);
 
                 // 校验证条码号
                 if ((this.NeedVerifyBarcode == true || bVerifyBarcode)
-                    && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
+                    && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false
+                    && bChangeReaderForce == false/* 2020/10/31 */)
                 {
                     nRet = DoVerifyPatronBarcode(strTargetRecPath,
                         bVerifyBarcode,
@@ -2224,9 +2258,13 @@ strNewDefault);
 
                 LibraryChannel channel = this.GetChannel();
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
-                stop.BeginLoop();
+                /*
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
+                _stop.BeginLoop();
+                */
+                var looping = BeginLoop(this.DoStop, "正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
+
 
                 EnableControls(false);
 
@@ -2280,7 +2318,7 @@ strNewDefault);
                     // MessageBoxShow("1 this.m_strSetAction='"+this.m_strSetAction+"'");
 
                     long lRet = channel.SetReaderInfo(
-                        stop,
+                        looping.stop,
                         strAction,  // this.m_strSetAction,
                         strTargetRecPath,
                         strNewXml,
@@ -2360,6 +2398,7 @@ strNewDefault);
                         //		-1	error
                         //		>=0 实际上载的资源对象数
                         nRet = this.binaryResControl1.Save(
+                            looping.stop,
                             channel,
                             Program.MainForm.ServerVersion,
                             out strError);
@@ -2371,7 +2410,7 @@ strNewDefault);
                         {
                             // 重新获得时间戳
                             lRet = channel.GetReaderInfo(
-                                stop,
+                                looping.stop,
                                 "@path:" + strSavedPath,
                                 "", // "xml,html",
                                 out string[] results,
@@ -2412,13 +2451,13 @@ strNewDefault);
 
                             // string strBarcode = this.readerEditControl1.Barcode;
 
-                            stop.SetMessage($"正在装入读者记录 {strSavedPath} 的 HTML ...");
+                            looping.stop.SetMessage($"正在装入读者记录 {strSavedPath} 的 HTML ...");
 
                             int nRedoCount = 0;
                         REDO_LOAD_HTML:
                             string[] results = null;
                             lRet = channel.GetReaderInfo(
-                                stop,
+                                looping.stop,
                                 // strBarcode,
                                 "@path:" + strSavedPath,
                                 "html",
@@ -2518,9 +2557,12 @@ strNewDefault);
                 {
                     EnableControls(true);
 
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    /*
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+                    */
+                    EndLoop(looping);
 
                     this.ReturnChannel(channel);
                 }
@@ -2863,9 +2905,12 @@ strNewDefault);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
 
             EnableControls(false);
 
@@ -2912,7 +2957,7 @@ strNewDefault);
                 // MessageBox.Show(this, "2 this.m_strSetAction='" + this.m_strSetAction + "'");
 
                 long lRet = channel.SetReaderInfo(
-                    stop,
+                    looping.stop,
                     this.m_strSetAction,
                     saveto_dlg.RecPath, // this.readerEditControl1.RecPath,
                     strNewXml,
@@ -2985,6 +3030,7 @@ strNewDefault);
                     //		-1	error
                     //		>=0 实际上载的资源对象数
                     nRet = this.binaryResControl1.Save(
+                        looping.stop,
                         channel,
                         Program.MainForm.ServerVersion,
                         out strError);
@@ -2998,7 +3044,7 @@ strNewDefault);
                         string[] results = null;
                         string strOutputPath = "";
                         lRet = channel.GetReaderInfo(
-                            stop,
+                            looping.stop,
                             "@path:" + strSavedPath,
                             "", // "xml,html",
                             out results,
@@ -3023,15 +3069,16 @@ strNewDefault);
                         strSavedXml);
                      * */
                     Global.SetXmlToWebbrowser(this.webBrowser_xml,
-Program.MainForm.DataDir,
-"xml",
-strSavedXml);
+    Program.MainForm.DataDir,
+    "xml",
+    strSavedXml);
                     // 2007/11/12
                     this.m_strSetAction = "change";
 
                     // 接着装入对象资源
                     {
                         nRet = this.binaryResControl1.LoadObject(
+                            looping.stop,
                             channel,
                             strSavedPath,    // 2008/11/2 changed
                             strSavedXml,
@@ -3052,11 +3099,11 @@ strSavedXml);
 
                         string strBarcode = this.readerEditControl1.Barcode;
 
-                        stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                        looping.stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                         string[] results = null;
                         lRet = channel.GetReaderInfo(
-                            stop,
+                            looping.stop,
                             strBarcode,
                             "html",
                             out results,
@@ -3104,9 +3151,12 @@ strSavedXml);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -3121,6 +3171,7 @@ strSavedXml);
             return;
         }
 
+#if REMOVED
         // 删除记录
         private void toolStripButton_delete_Click(object sender, EventArgs e)
         {
@@ -3130,31 +3181,39 @@ strSavedXml);
             this.webBrowser_readerInfo.Stop();
 
             this.commander.AddMessage(WM_DELETE_RECORD);
-
         }
+#endif
 
         // 删除记录
-        void DeleteRecord()
+        // parameters:
+        //      style   force 表示强制删除。否则就是普通删除
+        void DeleteRecord(string style = "")
         {
             string strError = "";
 
-            if (this.readerEditControl1.Barcode == "")
-            {
-                strError = "尚未输入证条码号，无法删除";
-                goto ERROR1;
-            }
-
-            // bool bForceDelete = false;
-            string strRecPath = null;
-            string strText = "确实要删除证条码号为 '" + this.readerEditControl1.Barcode + "' 的读者记录 ? ";
-
+            bool bForceDelete = false;
+            string strActionName = "删除";
             // 如果同时按下control键，表示强制按照记录路径删除
-            if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+            if ((Control.ModifierKeys & Keys.Control) == Keys.Control
+                || StringUtil.IsInList("force", style))
             {
-                // bForceDelete = true;
-                strRecPath = this.readerEditControl1.RecPath;
-                strText = "确实要删除证条码号为 '" + this.readerEditControl1.Barcode + "' 并且记录路径为 '" + strRecPath + "' 的读者记录 ? ";
+                bForceDelete = true;
+                strActionName = "强制删除";
             }
+
+            string strRecPath = null;
+            string strText = $"确实要{strActionName}证条码号为 '" + this.readerEditControl1.Barcode + "' 的读者记录 ? ";
+
+            if (string.IsNullOrEmpty(this.readerEditControl1.Barcode) == true)
+            {
+                //strError = "尚未输入证条码号，无法删除。\r\n\r\n可改为按住 Ctrl 键使用本命令，按照读者记录路径进行删除";
+                //goto ERROR1;
+                strRecPath = this.readerEditControl1.RecPath;
+                strText = $"确实要{strActionName}证条码号为 '" + this.readerEditControl1.Barcode + "' 并且记录路径为 '" + strRecPath + "' 的读者记录 ? ";
+            }
+
+            if (bForceDelete)
+                strText += "\r\n\r\n警告：当读者有在借信息的情况下，强制删除功能在删除读者记录时 *** 不会修改 *** 相关在借册记录，会造成借阅信息关联错误。正常情况下应该先将该读者的在借册全部执行还书，然后再删除读者记录。请慎重操作";
 
             DialogResult result = MessageBox.Show(this,
                 strText,
@@ -3167,9 +3226,12 @@ strSavedXml);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在删除读者记录 " + this.readerEditControl1.Barcode + " ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在删除读者记录 " + this.readerEditControl1.Barcode + " ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在删除读者记录 " + this.readerEditControl1.Barcode + " ...");
 
             EnableControls(false);
 
@@ -3182,7 +3244,7 @@ strSavedXml);
                 if (nRet == -1)
                     goto ERROR1;
 
-                string strOldBarcode = this.readerEditControl1.Barcode;
+                // string strOldBarcode = this.readerEditControl1.Barcode;
 
                 ErrorCodeValue kernel_errorcode;
 
@@ -3192,8 +3254,8 @@ strSavedXml);
                 string strSavedPath = "";
 
                 long lRet = channel.SetReaderInfo(
-                    stop,
-                    "delete",
+                    looping.stop,
+                    bForceDelete ? "forcedelete" : "delete",
                     strRecPath,   // this.readerEditControl1.RecPath,
                     "", // strNewXml,
                     this.readerEditControl1.OldRecord,
@@ -3282,9 +3344,12 @@ strSavedXml);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -3851,9 +3916,12 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在创建读者记录 " + this.readerEditControl1.Barcode + " 的 租金交费请求 ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在创建读者记录 " + this.readerEditControl1.Barcode + " 的 租金交费请求 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在创建读者记录 " + this.readerEditControl1.Barcode + " 的 租金交费请求 ...");
 
             EnableControls(false);
             try
@@ -3865,7 +3933,7 @@ MessageBoxDefaultButton.Button2);
                 string strOutputID = "";
 
                 long lRet = channel.Hire(
-                    stop,
+                    looping.stop,
                     strAction,
                     strReaderBarcode,
                     out strOutputrReaderXml,
@@ -3882,9 +3950,12 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -3960,6 +4031,7 @@ MessageBoxDefaultButton.Button2);
                     }
                     return;
                 case WM_DELETE_RECORD:
+                case WM_FORCE_DELETE_RECORD:
                     EnableToolStrip(false);
                     try
                     {
@@ -3967,7 +4039,7 @@ MessageBoxDefaultButton.Button2);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.DeleteRecord();
+                            this.DeleteRecord(msg == WM_FORCE_DELETE_RECORD ? "force" : "");
                         }
                     }
                     finally
@@ -4268,9 +4340,12 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在创建读者记录 " + this.readerEditControl1.Barcode + " 的" + strActionName + "记录 ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在创建读者记录 " + this.readerEditControl1.Barcode + " 的" + strActionName + "记录 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在创建读者记录 " + this.readerEditControl1.Barcode + " 的" + strActionName + "记录 ...");
 
             EnableControls(false);
             try
@@ -4283,7 +4358,7 @@ MessageBoxDefaultButton.Button2);
                 Debug.Assert(strAction == "foregift" || strAction == "return", "");
 
                 long lRet = channel.Foregift(
-                    stop,
+                    looping.stop,
                     strAction,
                     strReaderBarcode,
                     out strOutputrReaderXml,
@@ -4298,9 +4373,12 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -4788,11 +4866,11 @@ MessageBoxDefaultButton.Button2);
 
             // 发证日期
             string strCreateDate = DomUtil.GetElementText(domSource.DocumentElement,
-"createDate");
+    "createDate");
 
             // 失效日期
             string strExpireDate = DomUtil.GetElementText(domSource.DocumentElement,
-"expireDate");
+    "expireDate");
             if (StringUtil.IsInList("validaterange", strSelection) == true)
             {
                 DomUtil.SetElementText(domTarget.DocumentElement,
@@ -4801,7 +4879,7 @@ MessageBoxDefaultButton.Button2);
 
             // 发证机关
             string strAgency = DomUtil.GetElementText(domSource.DocumentElement,
-"agency");
+    "agency");
             string strComment = "";
 
             if (StringUtil.IsInList("agency", strSelection) == true)
@@ -5166,11 +5244,11 @@ MessageBoxDefaultButton.Button2);
                         /*
                         // 固定间隔重新探测一下
                         DialogResult result = MessageBox.Show(this,
-"请把身份证放到读卡器上，并保持到操作完成...",
-"ReaderInfoForm",
-MessageBoxButtons.RetryCancel,
-MessageBoxIcon.Asterisk,
-MessageBoxDefaultButton.Button1);
+    "请把身份证放到读卡器上，并保持到操作完成...",
+    "ReaderInfoForm",
+    MessageBoxButtons.RetryCancel,
+    MessageBoxIcon.Asterisk,
+    MessageBoxDefaultButton.Button1);
                         if (result == System.Windows.Forms.DialogResult.Retry)
                             goto REDO;
                         strError = "放弃读卡";
@@ -5315,9 +5393,12 @@ MessageBoxDefaultButton.Button1);
 
                 LibraryChannel channel = this.GetChannel();
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在生成 HTML 预览 ...");
-                stop.BeginLoop();
+                /*
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在生成 HTML 预览 ...");
+                _stop.BeginLoop();
+                */
+                var looping = BeginLoop(this.DoStop, "正在生成 HTML 预览 ...");
 
                 EnableControls(false);
 
@@ -5330,7 +5411,7 @@ MessageBoxDefaultButton.Button1);
 
                     string[] results = null;
                     long lRet = channel.GetReaderInfo(
-                        stop,
+                        looping.stop,
                         strBarcode,
                         "html",
                         out results,
@@ -5364,9 +5445,12 @@ MessageBoxDefaultButton.Button1);
                 {
                     EnableControls(true);
 
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    /*
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+                    */
+                    EndLoop(looping);
 
                     this.ReturnChannel(channel);
                 }
@@ -5376,9 +5460,9 @@ MessageBoxDefaultButton.Button1);
                     strReaderXml);
                  * */
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
-Program.MainForm.DataDir,
-"xml",
-strReaderXml);
+    Program.MainForm.DataDir,
+    "xml",
+    strReaderXml);
                 if (bClear == false) // 2013/6/19
                 {
                     if (Global.IsAppendRecPath(this.readerEditControl1.RecPath) == true)
@@ -5410,12 +5494,12 @@ strReaderXml);
                 string strError = "";
 
                 string strTempXml = ""; // 2013/10/17
-                // prameters:
-                //      strStyle 如何获取数据。all/xml/photo 的一个或者多个的组合
-                // return:
-                //      -1  出错
-                //      0   成功
-                //      1   重复读入未拿走的卡号
+                                        // prameters:
+                                        //      strStyle 如何获取数据。all/xml/photo 的一个或者多个的组合
+                                        // return:
+                                        //      -1  出错
+                                        //      0   成功
+                                        //      1   重复读入未拿走的卡号
                 int nRet = m_idcardObj.ReadCard("all",
                     out strTempXml,
                     out m_baPhoto,
@@ -5472,11 +5556,11 @@ strReaderXml);
             {
                 // 警告尚未保存
                 DialogResult result = MessageBox.Show(this,
-"当前有信息被修改后尚未保存。若此时进行移动操作，现有未保存信息将丢失。\r\n\r\n确实要进行移动操作? ",
-"ReaderInfoForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
+    "当前有信息被修改后尚未保存。若此时进行移动操作，现有未保存信息将丢失。\r\n\r\n确实要进行移动操作? ",
+    "ReaderInfoForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.Yes)
                     return;   // cancelled
 
@@ -5500,9 +5584,12 @@ MessageBoxDefaultButton.Button2);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在移动读者记录 " + this.readerEditControl1.RecPath + " 到 " + saveto_dlg.RecPath + "...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在移动读者记录 " + this.readerEditControl1.RecPath + " 到 " + saveto_dlg.RecPath + "...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在移动读者记录 " + this.readerEditControl1.RecPath + " 到 " + saveto_dlg.RecPath + "...");
 
             EnableControls(false);
             try
@@ -5511,7 +5598,7 @@ MessageBoxDefaultButton.Button2);
 
                 byte[] target_timestamp = null;
                 long lRet = channel.MoveReaderInfo(
-    stop,
+    looping.stop,
     this.readerEditControl1.RecPath,
     ref strTargetRecPath,
     out target_timestamp,
@@ -5525,9 +5612,12 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -6507,16 +6597,19 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在加好友 ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在加好友 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在加好友 ...");
 
             EnableControls(false);
             try
             {
                 // Result.Value -1出错 0请求成功(注意，并不代表对方同意) 1:请求前已经是好友关系了，没有必要重复请求 2:已经成功添加
                 lRet = channel.SetFriends(
-    stop,
+    looping.stop,
     "request",
     dlg.ReaderBarcode,
     dlg.Comment,
@@ -6534,9 +6627,12 @@ MessageBoxDefaultButton.Button1);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -6556,30 +6652,55 @@ MessageBoxDefaultButton.Button1);
         {
             string strError = "";
 
-            string strNewXml = "";
-            int nRet = this.readerEditControl1.GetData(
-                out strNewXml,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在导出读者信息到 Excel 文件 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在导出读者信息到 Excel 文件 ...");
 
-            List<string> xmls = new List<string>();
-            xmls.Add(strNewXml);
+            EnableControls(false);
 
-            // 创建读者详情 Excel 文件。这是便于被外部调用的版本，只需要提供读者 XML 记录即可
-            // return:
-            //      -1  出错
-            //      0   用户中断
-            //      1   成功
-            nRet = ReaderSearchForm.CreateReaderDetailExcelFile(xmls,
-                Program.MainForm.GetBiblioSummary,
-                null,
-                false,
-                true,
-                out strError);
-            if (nRet != 1)
-                goto ERROR1;
-            return;
+            try
+            {
+                string strNewXml = "";
+                int nRet = this.readerEditControl1.GetData(
+                    out strNewXml,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                List<string> xmls = new List<string>();
+                xmls.Add(strNewXml);
+
+                // 创建读者详情 Excel 文件。这是便于被外部调用的版本，只需要提供读者 XML 记录即可
+                // return:
+                //      -1  出错
+                //      0   用户中断
+                //      1   成功
+                nRet = ReaderSearchForm.CreateReaderDetailExcelFile(xmls,
+                    Program.MainForm.GetBiblioSummary,
+                    looping.stop,
+                    false,
+                    true,
+                    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+                return;
+            }
+            finally
+            {
+                EnableControls(true);
+
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
+
+            }
+
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -6647,12 +6768,15 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
-            if (stop != null)
+            /*
+            if (_stop != null)
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在装载借阅历史 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在装载借阅历史 ...");
+                _stop.BeginLoop();
             }
+            */
+            var looping = BeginLoop(this.DoStop, "正在装载借阅历史 ...");
 
             EnableControls(false);
             try
@@ -6676,7 +6800,7 @@ MessageBoxDefaultButton.Button1);
                 try
                 {
                     lRet = channel.LoadChargingHistory(
-                        stop,
+                        looping.stop,
                         strBarcode,
                         "return,lost,read",
                         nPageNo,
@@ -6701,12 +6825,15 @@ MessageBoxDefaultButton.Button1);
             {
                 EnableControls(true);
 
-                if (stop != null)
+                /*
+                if (_stop != null)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -7094,16 +7221,19 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             strCode = "";
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得读者二维码 ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得读者二维码 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, "正在获得读者二维码 ...");
 
             LibraryChannel channel = this.GetChannel();
             try
             {
 
                 // 读入读者记录
-                long lRet = channel.VerifyReaderPassword(stop,
+                long lRet = channel.VerifyReaderPassword(looping.stop,
                     "!getpatrontempid:" + strReaderBarcode,
                     null,
                     out strError);
@@ -7120,9 +7250,12 @@ MessageBoxDefaultButton.Button1);
             {
                 this.ReturnChannel(channel);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
             }
         }
 
@@ -7304,11 +7437,11 @@ MessageBoxDefaultButton.Button1);
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
-result.ErrorInfo + "\r\n\r\n是否重试?",
-"ReaderInfoForm",
-MessageBoxButtons.RetryCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
+    result.ErrorInfo + "\r\n\r\n是否重试?",
+    "ReaderInfoForm",
+    MessageBoxButtons.RetryCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
                     if (temp_result == DialogResult.Retry)
                         goto REDO;
                 }
@@ -7484,14 +7617,16 @@ MessageBoxDefaultButton.Button1);
 
         private void toolStripMenuItem_bindCardNumber_Click(object sender, EventArgs e)
         {
-            BindCardNumberDialog dlg = new BindCardNumberDialog();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.Numbers = this.readerEditControl1.CardNumber;
-            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_BindCardNumberDialog_state");
-            dlg.ShowDialog(this);
-            if (dlg.DialogResult != DialogResult.OK)
-                return;
-            this.readerEditControl1.CardNumber = dlg.Numbers;
+            using (BindCardNumberDialog dlg = new BindCardNumberDialog())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.Numbers = this.readerEditControl1.CardNumber;
+                Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_BindCardNumberDialog_state");
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult != DialogResult.OK)
+                    return;
+                this.readerEditControl1.CardNumber = dlg.Numbers;
+            }
         }
 
         // 清除人脸特征和图片
@@ -9279,7 +9414,7 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
             XmlNode nodePrev = null;    // 插入参考节点
-            // 进行子字段组循环
+                                        // 进行子字段组循环
             for (int g = 0; ; g++)
             {
                 string strGroup = "";
@@ -9454,16 +9589,19 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial($"正在针对读者记录 {strRecPath} 触发超期通知 ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial($"正在针对读者记录 {strRecPath} 触发超期通知 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, $"正在针对读者记录 {strRecPath} 触发超期通知 ...");
 
             EnableControls(false);
 
             try
             {
                 long lRet = channel.SetReaderInfo(
-    stop,
+    looping.stop,
     "notifyOverdue",
     strRecPath,
     $"bodytypes:{message_type_list.Replace(",", "|")}", // strNewXml,
@@ -9482,9 +9620,12 @@ MessageBoxDefaultButton.Button1);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -9529,16 +9670,19 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial($"正在针对读者记录 {strRecPath} 触发召回通知 ...");
-            stop.BeginLoop();
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial($"正在针对读者记录 {strRecPath} 触发召回通知 ...");
+            _stop.BeginLoop();
+            */
+            var looping = BeginLoop(this.DoStop, $"正在针对读者记录 {strRecPath} 触发召回通知 ...");
 
             EnableControls(false);
 
             try
             {
                 long lRet = channel.SetReaderInfo(
-    stop,
+    looping.stop,
     "notifyRecall",
     strRecPath,
     $"bodytypes:{message_type_list.Replace(",", "|")},reason:{StringUtil.EscapeString(reason, ":,")}", // strNewXml,
@@ -9557,9 +9701,12 @@ MessageBoxDefaultButton.Button1);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                /*
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                */
+                EndLoop(looping);
 
                 this.ReturnChannel(channel);
             }
@@ -9598,7 +9745,7 @@ MessageBoxDefaultButton.Button1);
                 dlg.Text = "当前读者的 Email 等";
                 dlg.PropertyNameList = new List<string> {
                     "email",
-                    "weixinid", 
+                    "weixinid",
                     "" // 空字符串表示允许默认参数名。那么此处默认 email (第一个元素)
                 };
                 dlg.PropertyString = this.readerEditControl1.Email;
@@ -9607,6 +9754,33 @@ MessageBoxDefaultButton.Button1);
                     return;
                 this.readerEditControl1.Email = dlg.PropertyString;
             }
+        }
+
+        private void readerEditControl1_EditCardNumber(object sender, EventArgs e)
+        {
+            toolStripMenuItem_bindCardNumber_Click(sender, e);
+        }
+
+        // 普通删除记录
+        private void toolStripSplitButton_delete_ButtonClick(object sender, EventArgs e)
+        {
+            EnableToolStrip(false);
+
+            this.m_webExternalHost.StopPrevious();
+            this.webBrowser_readerInfo.Stop();
+
+            this.commander.AddMessage(WM_DELETE_RECORD);
+        }
+
+        // 强制删除记录
+        private void ToolStripMenuItem_forceDelete_Click(object sender, EventArgs e)
+        {
+            EnableToolStrip(false);
+
+            this.m_webExternalHost.StopPrevious();
+            this.webBrowser_readerInfo.Stop();
+
+            this.commander.AddMessage(WM_FORCE_DELETE_RECORD);
         }
     }
 }

@@ -134,8 +134,11 @@ namespace dp2Circulation
 
         public override void EnableControls(bool bEnable)
         {
-            this.tabControl_main.Enabled = bEnable;
-            this.toolStrip1.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.tabControl_main.Enabled = bEnable;
+                this.toolStrip1.Enabled = bEnable;
+            }));
         }
 
         void _biblio_GenerateData(object sender, GenerateDataEventArgs e)
@@ -2614,9 +2617,9 @@ out strError);
         {
             _zsearcher.InSearching = true;
             this.EnableControls(false);
-            stop.OnStop += OnZ3950LoadStop;
-            stop.Initial("正在装载 Z39.50 检索内容 ...");
-            stop.BeginLoop();
+            _stop.OnStop += OnZ3950LoadStop;
+            _stop.Initial("正在装载 Z39.50 检索内容 ...");
+            _stop.BeginLoop();
             try
             {
                 if (channel._fetched >= channel._resultCount)
@@ -2630,7 +2633,7 @@ out strError);
                     if (_zsearcher.InSearching == false)
                         break;
 
-                    stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
+                    _stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
 
                     var present_result = await Z3950Searcher.FetchRecords(channel,
                         all ? 50 : 10);
@@ -2655,10 +2658,10 @@ out strError);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= OnZ3950LoadStop;
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= OnZ3950LoadStop;
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.EnableControls(true);
                 _zsearcher.InSearching = false;

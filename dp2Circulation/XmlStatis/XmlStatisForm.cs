@@ -251,13 +251,16 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.button_findInputXmlFilename.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.button_findInputXmlFilename.Enabled = bEnable;
 
-            this.button_getProjectName.Enabled = bEnable;
+                this.button_getProjectName.Enabled = bEnable;
 
-            this.button_next.Enabled = bEnable;
+                this.button_next.Enabled = bEnable;
 
-            this.button_projectManage.Enabled = bEnable;
+                this.button_projectManage.Enabled = bEnable;
+            }));
         }
 
         public override int RunScript(string strProjectName,
@@ -270,9 +273,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在执行脚本 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在执行脚本 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -363,9 +366,9 @@ namespace dp2Circulation
                 if (objStatis != null)
                     objStatis.FreeResources();
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.AssemblyMain = null;
 
@@ -547,9 +550,9 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (_stop != null)
                         {
-                            if (stop.State != 0)
+                            if (_stop.State != 0)
                             {
                                 DialogResult result = MessageBox.Show(this,
                                     "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
@@ -566,7 +569,7 @@ namespace dp2Circulation
                                 if (result == DialogResult.No)
                                     return 0;   // 假装loop正常结束
 
-                                stop.Continue(); // 继续循环
+                                _stop.Continue(); // 继续循环
                             }
                         }
 
@@ -585,7 +588,7 @@ namespace dp2Circulation
 
                         string strXml = reader.ReadOuterXml();
 
-                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个XML记录");
+                        _stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个XML记录");
                         this.progressBar_records.Value = (int)file.Position;
 
                         // strXml中为XML记录

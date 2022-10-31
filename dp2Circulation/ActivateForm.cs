@@ -376,9 +376,9 @@ MessageBoxDefaultButton.Button2);
 
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在初始化浏览器组件 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在初始化浏览器组件 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -412,10 +412,10 @@ MessageBoxDefaultButton.Button2);
 
                 int nRedoCount = 0;
             REDO:
-                stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                _stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                 long lRet = Channel.GetReaderInfo(
-                    stop,
+                    _stop,
                     strBarcode,
                     "xml,html",
                     out string[] results,
@@ -520,9 +520,9 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             return 1;
@@ -537,20 +537,23 @@ MessageBoxDefaultButton.Button2);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_oldBarcode.Enabled = bEnable;
-            this.textBox_newBarcode.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.textBox_oldBarcode.Enabled = bEnable;
+                this.textBox_newBarcode.Enabled = bEnable;
 
-            this.tabControl_old.Enabled = bEnable;
-            this.tabControl_new.Enabled = bEnable;
+                this.tabControl_old.Enabled = bEnable;
+                this.tabControl_new.Enabled = bEnable;
 
-            this.button_loadOldUserInfo.Enabled = bEnable;
-            this.button_loadNewUserInfo.Enabled = bEnable;
+                this.button_loadOldUserInfo.Enabled = bEnable;
+                this.button_loadNewUserInfo.Enabled = bEnable;
 
-            this.button_devolve.Enabled = bEnable;
-            this.button_activate.Enabled = bEnable;
+                this.button_devolve.Enabled = bEnable;
+                this.button_activate.Enabled = bEnable;
 
-            this.toolStrip_new.Enabled = bEnable;
-            this.toolStrip_old.Enabled = bEnable;
+                this.toolStrip_new.Enabled = bEnable;
+                this.toolStrip_old.Enabled = bEnable;
+            }));
         }
 
         // 转移并激活目标证
@@ -687,9 +690,9 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存读者记录 " + edit.Barcode + " ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存读者记录 " + edit.Barcode + " ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -710,7 +713,7 @@ MessageBoxDefaultButton.Button2);
                 string strSavedPath = "";
 
                 long lRet = Channel.SetReaderInfo(
-                    stop,
+                    _stop,
                     "change",
                     edit.RecPath,
                     strNewXml,
@@ -791,9 +794,9 @@ MessageBoxDefaultButton.Button2);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             strError = "保存成功";
@@ -809,9 +812,9 @@ MessageBoxDefaultButton.Button2);
         {
             strError = "";
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在转移读者借阅信息 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在转移读者借阅信息 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -821,7 +824,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 long lRet = Channel.DevolveReaderInfo(
-                    stop,
+                    _stop,
                     strSourceReaderBarcode,
                     strTargetReaderBarcode,
                     out strError);
@@ -835,9 +838,9 @@ MessageBoxDefaultButton.Button2);
             {
                 this.EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
         }
 
@@ -967,7 +970,7 @@ MessageBoxDefaultButton.Button2);
 
         private void ActivateForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;

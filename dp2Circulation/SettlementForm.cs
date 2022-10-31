@@ -318,14 +318,14 @@ namespace dp2Circulation
             string strEndTime = DateTimeUtil.Rfc1123DateTimeString(end_time.ToUniversalTime());
 
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在获取违约金库名 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.SetMessage("正在获取违约金库名 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = Channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -341,9 +341,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             Debug.Assert(strDbName != "", "");
@@ -413,15 +413,15 @@ namespace dp2Circulation
             string strDbName = "违约金";
             string strFrom = "__id";
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在获取违约金库名 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.SetMessage("正在获取违约金库名 ...");
+            _stop.BeginLoop();
 
             try
             {
 
                 long lRet = Channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -437,9 +437,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             Debug.Assert(strDbName != "", "");
@@ -494,9 +494,9 @@ namespace dp2Circulation
             this.toolStripStatusLabel_items_message1.Text = "";
             this.toolStripStatusLabel_items_message2.Text = "";
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在检索违约金记录 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.SetMessage("正在检索违约金记录 ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
             this.Update();
@@ -548,7 +548,7 @@ namespace dp2Circulation
                  * */
 
                 long lRet = Channel.Search(
-                    stop,
+                    _stop,
                     strQueryXml,
                     "amerced",
                     "", // strOutputStyle
@@ -569,23 +569,23 @@ namespace dp2Circulation
                 long lPerCount = Math.Min(50, lHitCount);
                 Record[] searchresults = null;
 
-                stop.SetProgressRange(0, lHitCount);
+                _stop.SetProgressRange(0, lHitCount);
 
                 // 获得结果集，装入listview
                 for (; ; )
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    _stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = Channel.GetSearchResult(
-                        stop,
+                        _stop,
                         "amerced",   // strResultSetName
                         lStart,
                         lPerCount,
@@ -607,7 +607,7 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -620,9 +620,9 @@ namespace dp2Circulation
                         byte[] timestamp = null;
                         string strXml = "";
 
-                        stop.SetMessage("正在装入违约金记录 " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
+                        _stop.SetMessage("正在装入违约金记录 " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
 
-                        lRet = Channel.GetRecord(stop,
+                        lRet = Channel.GetRecord(_stop,
                             strPath,
                             out timestamp,
                             out strXml,
@@ -637,7 +637,7 @@ namespace dp2Circulation
 
                         int nRet = FillAmercedLine(
                             null,
-                            stop,
+                            _stop,
                             strXml,
                             strPath,
                             (bQuick == true || bTempQuick == true) ? false : true,
@@ -647,7 +647,7 @@ namespace dp2Circulation
 
                         nLoadCount++;
                     CONTINUE:
-                        stop.SetProgressValue(lStart + i + 1);
+                        _stop.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
@@ -662,10 +662,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.m_nInSearching--;
                 this.EnableControls(true);
@@ -689,9 +689,9 @@ namespace dp2Circulation
 
             if (bPrepareStop == true)
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("正在刷新违约金记录 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.SetMessage("正在刷新违约金记录 ...");
+                _stop.BeginLoop();
 
                 this.EnableControls(false);
             }
@@ -702,9 +702,9 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -724,11 +724,11 @@ namespace dp2Circulation
                     string strPath = item.SubItems[COLUMN_RECPATH].Text;
 
 
-                    stop.SetMessage("正在装入记录信息 " + strPath);
+                    _stop.SetMessage("正在装入记录信息 " + strPath);
                     byte[] timestamp = null;
                     string strXml = "";
 
-                    long lRet = Channel.GetRecord(stop,
+                    long lRet = Channel.GetRecord(_stop,
                         strPath,
                         out timestamp,
                         out strXml,
@@ -740,7 +740,7 @@ namespace dp2Circulation
 
                     int nRet = FillAmercedLine(
                         item,
-                        stop,
+                        _stop,
                         strXml,
                         strPath,
                         true,
@@ -754,9 +754,9 @@ namespace dp2Circulation
             {
                 if (bPrepareStop == true)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
 
                     this.EnableControls(true);
                 }
@@ -787,27 +787,30 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.button_next.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.button_next.Enabled = bEnable;
 
-            /*
-            this.button_settlement.Enabled = bEnable;
-            this.button_undoSettlement.Enabled = bEnable;
-             * */
-            this.toolStrip_items.Enabled = bEnable;
+                /*
+                this.button_settlement.Enabled = bEnable;
+                this.button_undoSettlement.Enabled = bEnable;
+                 * */
+                this.toolStrip_items.Enabled = bEnable;
 
-            /*
-            this.dateControl_start.Enabled = bEnable;
-            this.dateControl_end.Enabled = bEnable;
-             * 
-            this.textBox_range_startCtlno.Enabled = bEnable;
-            this.textBox_range_endCtlno.Enabled = bEnable;
-             * */
-            this.radioButton_range_amerceOperTime.Enabled = bEnable;
-            this.radioButton_range_ctlno.Enabled = bEnable;
+                /*
+                this.dateControl_start.Enabled = bEnable;
+                this.dateControl_end.Enabled = bEnable;
+                 * 
+                this.textBox_range_startCtlno.Enabled = bEnable;
+                this.textBox_range_endCtlno.Enabled = bEnable;
+                 * */
+                this.radioButton_range_amerceOperTime.Enabled = bEnable;
+                this.radioButton_range_ctlno.Enabled = bEnable;
 
-            SetRangeControlsEnabled(bEnable);
+                SetRangeControlsEnabled(bEnable);
 
-            this.comboBox_range_state.Enabled = bEnable;
+                this.comboBox_range_state.Enabled = bEnable;
+            }));
         }
 
         // 获得用于显示用途的状态字符串
@@ -1495,11 +1498,11 @@ namespace dp2Circulation
                 total_ids.Add(strID);
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在进行" + strOperName + " ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.SetMessage("正在进行" + strOperName + " ...");
+            _stop.BeginLoop();
 
-            stop.SetProgressRange(0, total_ids.Count);
+            _stop.SetProgressRange(0, total_ids.Count);
 
             this.EnableControls(false);
 
@@ -1517,7 +1520,7 @@ namespace dp2Circulation
                     total_ids.CopyTo(j * nPerCount, ids, 0, nThisCount);
 
                     long lRet = Channel.Settlement(
-                        stop,
+                        _stop,
                         strAction,
                         ids,
                         out strError);
@@ -1534,16 +1537,16 @@ namespace dp2Circulation
                         goto ERROR1;
 
                     nDone += nThisCount;
-                    stop.SetProgressValue(nDone);
+                    _stop.SetProgressValue(nDone);
                 }
 
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.EnableControls(true);
             }
@@ -1715,9 +1718,9 @@ namespace dp2Circulation
         {
             strError = "";
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在导出违约金记录 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.SetMessage("正在导出违约金记录 ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
 
@@ -1780,19 +1783,19 @@ namespace dp2Circulation
                     writer.WriteStartDocument();
                     writer.WriteStartElement("dprms", "collection", DpNs.dprms);
 
-                    stop.SetProgressRange(0, items.Count);
+                    _stop.SetProgressRange(0, items.Count);
                     for (int i = 0; i < items.Count; i++)
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null
-                            && stop.State != 0)
+                        if (_stop != null
+                            && _stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
                         }
 
-                        stop.SetMessage("正在导出违约金记录 " + (i + 1).ToString() + " / " + items.Count.ToString() + " ...");
+                        _stop.SetMessage("正在导出违约金记录 " + (i + 1).ToString() + " / " + items.Count.ToString() + " ...");
 
                         ListViewItem item = items[i];
                         string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
@@ -1800,7 +1803,7 @@ namespace dp2Circulation
                         string strXml = "";
                         byte[] timestamp = null;
                         long lRet = this.Channel.GetRecord(
-                            stop,
+                            _stop,
                             strRecPath,
                             out timestamp,
                             out strXml,
@@ -1820,7 +1823,7 @@ namespace dp2Circulation
                         }
                         dom.DocumentElement.WriteTo(writer);
 
-                        stop.SetProgressValue(i + 1);
+                        _stop.SetProgressValue(i + 1);
                     }
 
                     writer.WriteEndElement();
@@ -1830,10 +1833,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.EnableControls(true);
             }
@@ -2948,7 +2951,7 @@ namespace dp2Circulation
 
         private void SettlementForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
         }
 
         // 返回列表中各类事项的个数

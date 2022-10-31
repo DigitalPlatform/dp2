@@ -228,52 +228,55 @@ password);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_userName.Enabled = bEnable;
-            this.textBox_userRights.Enabled = bEnable;
-            this.textBox_userType.Enabled = bEnable;
-            // this.textBox_libraryCode.Enabled = bEnable;
-            this.checkedComboBox_libraryCode.Enabled = bEnable;
-            this.textBox_access.Enabled = bEnable;
-            this.textBox_binding.Enabled = bEnable;
-            this.textBox_location.Enabled = bEnable;
-            this.textBox_comment.Enabled = bEnable;
-            this.listView_users.Enabled = bEnable;
-
-            this.toolStripButton_listAllUsers.Enabled = bEnable;
-            this.toolStripButton_create.Enabled = bEnable;
-            this.button_editUserRights.Enabled = bEnable;
-
-            this.checkBox_changePassword.Enabled = bEnable;
-
-            if (bEnable == true)
+            this.TryInvoke((Action)(() =>
             {
-                if (this.m_bEditChanged == true)
-                    this.toolStripButton_save.Enabled = true;
+                this.textBox_userName.Enabled = bEnable;
+                this.textBox_userRights.Enabled = bEnable;
+                this.textBox_userType.Enabled = bEnable;
+                // this.textBox_libraryCode.Enabled = bEnable;
+                this.checkedComboBox_libraryCode.Enabled = bEnable;
+                this.textBox_access.Enabled = bEnable;
+                this.textBox_binding.Enabled = bEnable;
+                this.textBox_location.Enabled = bEnable;
+                this.textBox_comment.Enabled = bEnable;
+                this.listView_users.Enabled = bEnable;
+
+                this.toolStripButton_listAllUsers.Enabled = bEnable;
+                this.toolStripButton_create.Enabled = bEnable;
+                this.button_editUserRights.Enabled = bEnable;
+
+                this.checkBox_changePassword.Enabled = bEnable;
+
+                if (bEnable == true)
+                {
+                    if (this.m_bEditChanged == true)
+                        this.toolStripButton_save.Enabled = true;
+                    else
+                        this.toolStripButton_save.Enabled = false;
+                }
                 else
+                {
                     this.toolStripButton_save.Enabled = false;
-            }
-            else
-            {
-                this.toolStripButton_save.Enabled = false;
-            }
+                }
 
-            if (this.textBox_userName.Text == "")
-                this.toolStripButton_delete.Enabled = false;
-            else
-                this.toolStripButton_delete.Enabled = bEnable;
+                if (this.textBox_userName.Text == "")
+                    this.toolStripButton_delete.Enabled = false;
+                else
+                    this.toolStripButton_delete.Enabled = bEnable;
 
-            if (this.checkBox_changePassword.Checked == true)
-            {
-                this.textBox_confirmPassword.Enabled = bEnable;
-                this.textBox_password.Enabled = bEnable;
-                this.button_resetPassword.Enabled = bEnable;
-            }
-            else
-            {
-                this.textBox_confirmPassword.Enabled = false;
-                this.textBox_password.Enabled = false;
-                this.button_resetPassword.Enabled = false;
-            }
+                if (this.checkBox_changePassword.Checked == true)
+                {
+                    this.textBox_confirmPassword.Enabled = bEnable;
+                    this.textBox_password.Enabled = bEnable;
+                    this.button_resetPassword.Enabled = bEnable;
+                }
+                else
+                {
+                    this.textBox_confirmPassword.Enabled = false;
+                    this.textBox_password.Enabled = false;
+                    this.button_resetPassword.Enabled = false;
+                }
+            }));
         }
 
         void ClearEdit()
@@ -398,9 +401,9 @@ password);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得全部用户信息 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得全部用户信息 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -412,7 +415,7 @@ password);
                 {
                     UserInfo[] users = null;
                     long lRet = channel.GetUser(
-                        stop,
+                        _stop,
                         "list",
                         "",
                         nStart,
@@ -459,9 +462,9 @@ password);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -668,9 +671,9 @@ password);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在重设用户密码 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在重设用户密码 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -684,7 +687,7 @@ password);
                 info.SetPassword = true;    // 没有必要
 
                 long lRet = channel.SetUser(
-                    stop,
+                    _stop,
                     "resetpassword",
                     info,
                     out strError);
@@ -693,9 +696,9 @@ password);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -719,9 +722,9 @@ password);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存用户信息 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存用户信息 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -729,7 +732,7 @@ password);
             try
             {
                 long lRet = channel.SetUser(
-                    stop,
+                    _stop,
                     strAction,  // "change",
                     info,
                     out strError);
@@ -738,9 +741,9 @@ password);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -763,9 +766,9 @@ password);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在创建用户信息 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在创建用户信息 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -773,7 +776,7 @@ password);
             try
             {
                 long lRet = channel.SetUser(
-                    stop,
+                    _stop,
                     "new",
                     info,
                     out strError);
@@ -782,9 +785,9 @@ password);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -807,9 +810,9 @@ password);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在删除用户信息 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在删除用户信息 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -820,7 +823,7 @@ password);
                 info.UserName = strUserName;
 
                 long lRet = channel.SetUser(
-                    stop,
+                    _stop,
                     "delete",
                     info,
                     out strError);
@@ -829,9 +832,9 @@ password);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 
@@ -962,7 +965,7 @@ password);
 
         private void UserForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
@@ -1030,14 +1033,14 @@ password);
 
             LibraryChannel channel = this.GetChannel();
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得全部馆代码 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得全部馆代码 ...");
+            _stop.BeginLoop();
 
             try
             {
                 string strValue = "";
-                long lRet = channel.GetSystemParameter(stop,
+                long lRet = channel.GetSystemParameter(_stop,
                     "system",
                     "libraryCodes",
                     out strValue,
@@ -1052,9 +1055,9 @@ password);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.ReturnChannel(channel);
 

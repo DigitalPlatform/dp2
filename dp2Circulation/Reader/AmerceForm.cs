@@ -549,11 +549,11 @@ this.splitContainer_lists,
 
                 REDO:
 
-                stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                _stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
                 string[] results = null;
 
                 long lRet = Channel.GetReaderInfo(
-                    stop,
+                    _stop,
                     strBarcode,
                     "html,xml",
                     out results,
@@ -720,9 +720,9 @@ this.splitContainer_lists,
                 if (this.textBox_readerBarcode.Text != strReaderBarcode)
                     this.textBox_readerBarcode.Text = strReaderBarcode;
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在装载读者信息 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在装载读者信息 ...");
+                _stop.BeginLoop();
 
                 EnableControls(false);
                 try
@@ -805,9 +805,9 @@ this.splitContainer_lists,
                 {
                     EnableControls(true);
 
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
             }
             finally
@@ -1207,7 +1207,7 @@ this.splitContainer_lists,
                 string strLang = "zh";
 
                 long lRet = Channel.GetSystemParameter(
-                    stop,
+                    _stop,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -1270,7 +1270,7 @@ this.splitContainer_lists,
 
                 // 开始检索
                 lRet = channel.Search(
-    stop,
+    _stop,
     strQueryXml,
     strResultSetName,
     "", // strOutputStyle
@@ -1304,7 +1304,7 @@ this.splitContainer_lists,
                     // stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetSearchResult(
-                        stop,
+                        _stop,
                         strResultSetName,   // strResultSetName
                         lStart,
                         lPerCount,
@@ -1335,7 +1335,7 @@ this.splitContainer_lists,
                         byte[] timestamp = null;
                         string strXml = "";
 
-                        lRet = channel.GetRecord(stop,
+                        lRet = channel.GetRecord(_stop,
                             strPath,
                             out timestamp,
                             out strXml,
@@ -1352,7 +1352,7 @@ this.splitContainer_lists,
                         }
 
                         int nRet = Safe_fillAmercedLine(
-                            stop,
+                            _stop,
                             strXml,
                             strPath,
                             out strError);
@@ -3053,14 +3053,14 @@ this.splitContainer_lists,
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行 交费 操作: " + this.textBox_readerBarcode.Text + " ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行 交费 操作: " + this.textBox_readerBarcode.Text + " ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = Channel.Amerce(
-                    stop,
+                    _stop,
                     "amerce",
                     this.textBox_readerBarcode.Text,
                     amerce_items,
@@ -3227,9 +3227,9 @@ this.splitContainer_lists,
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -3255,9 +3255,9 @@ this.splitContainer_lists,
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行 回滚 操作");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行 回滚 操作");
+            _stop.BeginLoop();
 
             try
             {
@@ -3265,7 +3265,7 @@ this.splitContainer_lists,
 
                 string strReaderXml = "";
                 int nRet = (int)Channel.Amerce(
-                    stop,
+                    _stop,
                     "rollback",
                     "", // strReaderBarcode,
                     null,   // amerce_items,
@@ -3327,9 +3327,9 @@ this.splitContainer_lists,
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -3411,38 +3411,40 @@ this.splitContainer_lists,
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_readerBarcode.Enabled = bEnable;
-            this.button_load.Enabled = bEnable;
-
-            this.listView_overdues.Enabled = bEnable;
-            this.toolStripButton_amercing_selectAll.Enabled = bEnable;
-
-            /*
-            this.button_amercingOverdue_submit.Enabled = bEnable;
-            this.button_amercingOverdue_modifyPrice.Enabled = bEnable;
-             * */
-            if (bEnable == false)
+            this.TryInvoke((Action)(() =>
             {
-                this.toolStripButton_submit.Enabled = false;
-                this.toolStripButton_modifyPriceAndComment.Enabled = false;
-            }
-            else
-            {
-                SetOverduesButtonsEnable();
-            }
+                this.textBox_readerBarcode.Enabled = bEnable;
+                this.button_load.Enabled = bEnable;
 
-            this.listView_amerced.Enabled = bEnable;
-            this.toolStripButton_amerced_selectAll.Enabled = bEnable;
+                this.listView_overdues.Enabled = bEnable;
+                this.toolStripButton_amercing_selectAll.Enabled = bEnable;
 
-            if (bEnable == false)
-            {
-                this.toolStripButton_undoAmerce.Enabled = false;
-            }
-            else
-            {
-                SetAmercedButtonsEnable();
-            }
+                /*
+                this.button_amercingOverdue_submit.Enabled = bEnable;
+                this.button_amercingOverdue_modifyPrice.Enabled = bEnable;
+                 * */
+                if (bEnable == false)
+                {
+                    this.toolStripButton_submit.Enabled = false;
+                    this.toolStripButton_modifyPriceAndComment.Enabled = false;
+                }
+                else
+                {
+                    SetOverduesButtonsEnable();
+                }
 
+                this.listView_amerced.Enabled = bEnable;
+                this.toolStripButton_amerced_selectAll.Enabled = bEnable;
+
+                if (bEnable == false)
+                {
+                    this.toolStripButton_undoAmerce.Enabled = false;
+                }
+                else
+                {
+                    SetAmercedButtonsEnable();
+                }
+            }));
         }
 
 
@@ -3497,9 +3499,9 @@ this.splitContainer_lists,
 
             DateTime start_time = DateTime.Now;
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行 撤回交费 操作: " + this.textBox_readerBarcode.Text + " ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行 撤回交费 操作: " + this.textBox_readerBarcode.Text + " ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -3511,7 +3513,7 @@ this.splitContainer_lists,
                 AmerceItem[] failed_items = null;
 
                 long lRet = Channel.Amerce(
-                    stop,
+                    _stop,
                     "undo",
                     this.textBox_readerBarcode.Text,
                     amerce_items_param,
@@ -3628,9 +3630,9 @@ this.splitContainer_lists,
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -3731,7 +3733,7 @@ COLUMN_AMERCED_STATE);
 
         private void AmerceForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
@@ -4153,9 +4155,9 @@ COLUMN_AMERCED_STATE);
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行 修改金额/注释 的操作: " + this.textBox_readerBarcode.Text + " ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行 修改金额/注释 的操作: " + this.textBox_readerBarcode.Text + " ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -4168,7 +4170,7 @@ COLUMN_AMERCED_STATE);
                     AmerceItem[] failed_items = null;
 
                     long lRet = Channel.Amerce(
-                        stop,
+                        _stop,
                         "modifyprice",
                         this.textBox_readerBarcode.Text,
                         amerce_items_param,
@@ -4210,7 +4212,7 @@ COLUMN_AMERCED_STATE);
                     AmerceItem[] failed_items = null;
 
                     long lRet = Channel.Amerce(
-                        stop,
+                        _stop,
                         "modifycomment",
                         this.textBox_readerBarcode.Text,
                         amerce_items_param,
@@ -4273,9 +4275,9 @@ COLUMN_AMERCED_STATE);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }

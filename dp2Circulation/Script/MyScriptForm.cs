@@ -248,7 +248,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.stop;
+                return this._stop;
             }
         }
 

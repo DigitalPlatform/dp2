@@ -53,7 +53,10 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.menuStrip1.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.menuStrip1.Enabled = bEnable;
+            }));
         }
 
         CancellationTokenSource _cancel = new CancellationTokenSource();
@@ -97,7 +100,7 @@ namespace dp2Circulation
                 Progress.SetMessage("正在删除测试用书目库 ...");
                 string strOutputInfo = "";
                 long lRet = channel.ManageDatabase(
-    stop,
+    _stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -136,7 +139,7 @@ namespace dp2Circulation
 
                     Progress.SetMessage("正在删除测试用种次号库 ...");
                     lRet = channel.ManageDatabase(
-        stop,
+        _stop,
         "delete",
         strSeedDbName,    // strDatabaseNames,
         "",
@@ -228,7 +231,7 @@ UiTest3(strBiblioDbName)
                 // 删除测试用的书目库、排架体系、馆藏地定义
                 Progress.SetMessage("正在删除测试用书目库 ...");
                 lRet = channel.ManageDatabase(
-    stop,
+    _stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -242,7 +245,7 @@ UiTest3(strBiblioDbName)
                 {
                     Progress.SetMessage("正在删除测试用种次号库 ...");
                     lRet = channel.ManageDatabase(
-        stop,
+        _stop,
         "delete",
         strSeedDbName,    // strDatabaseNames,
         "",
@@ -686,7 +689,7 @@ UiTest3(strBiblioDbName)
                 Progress.SetMessage("正在删除测试用书目库 ...");
                 string strOutputInfo = "";
                 long lRet = channel.ManageDatabase(
-    stop,
+    _stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -822,7 +825,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 // 删除测试用的书目库、排架体系、馆藏地定义
                 Progress.SetMessage("正在删除测试用书目库 ...");
                 lRet = channel.ManageDatabase(
-    stop,
+    _stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -2012,7 +2015,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     strTestDbName = "_测试用盘点库";
                     Progress.SetMessage("正在删除" + strTestDbName + " ...");
                     lRet = channel.ManageDatabase(
-        stop,
+        _stop,
         "delete",
         strTestDbName,    // strDatabaseNames,
         "",
@@ -2046,7 +2049,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
                 {
                     List<string> errors = TestWriteXmlRecords(
-stop,
+_stop,
 channel,
 strTestDbName,
 "delete", // "delete,fix",
@@ -2062,7 +2065,7 @@ strTestDbName,
                 // 进行测试
                 {
                     List<string> errors = TestUploadObjectFiles(
-                stop,
+                _stop,
                 channel,
                 strTestDbName,
                 "delete,fix", // "delete,fix",
@@ -2077,7 +2080,7 @@ strTestDbName,
 
                 {
                     List<string> errors = TestUploadObjectFiles(
-    stop,
+    _stop,
     channel,
     strTestDbName,
     "delete", // "delete",
@@ -2092,7 +2095,7 @@ strTestDbName,
 
                 {
                     List<string> errors = TestUploadObjectFiles(
-    stop,
+    _stop,
     channel,
     strTestDbName,
     "delete,reuse_id", // "delete",
@@ -2110,7 +2113,7 @@ strTestDbName,
                 {
                     Progress.SetMessage("正在删除" + strTestDbName + " ...");
                     lRet = channel.ManageDatabase(
-        stop,
+        _stop,
         "delete",
         strTestDbName,    // strDatabaseNames,
         "",
@@ -4489,7 +4492,7 @@ out strError);
                     //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
                     //		0	成功
                     long lRet = this.Channel.GetRes(
-                        this.stop,
+                        this._stop,
                         strServerFilePath,
                         strLocalFilePath,
                         "content,data,metadata,timestamp,outputpath,gzip",
@@ -4710,7 +4713,7 @@ out strError);
         {
             strError = "";
 
-            long lRet = channel.GetReaderInfo(stop,
+            long lRet = channel.GetReaderInfo(_stop,
                 strReaderBarcode,
                 "xml",
                 out string[] results,
@@ -4740,7 +4743,7 @@ out strError);
 
             string strNewXml = dom.DocumentElement.OuterXml;
 
-            lRet = channel.SetReaderInfo(stop,
+            lRet = channel.SetReaderInfo(_stop,
     "change",
     strRecPath,
     strNewXml,
@@ -4786,7 +4789,7 @@ out strError);
 
                 for (; ; )
                 {
-                    if (stop?.State != 0)
+                    if (_stop?.State != 0)
                         break;
 
                     long lRet = 0;
@@ -4795,7 +4798,7 @@ out strError);
                     Progress.SetMessage("正在借 ...");
                     {
                         lRet = channel.Borrow(
-                            stop,
+                            _stop,
                             false,
                             strReaderBarcode,
                             strItemBarcode,
@@ -4837,7 +4840,7 @@ out strError);
                     Progress.SetMessage("正在还 ...");
                     {
                         lRet = channel.Return(
-                            stop,
+                            _stop,
                             "return",
                             strReaderBarcode,
                             strItemBarcode,

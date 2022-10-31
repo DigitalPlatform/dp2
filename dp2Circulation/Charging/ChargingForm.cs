@@ -1051,9 +1051,9 @@ namespace dp2Circulation
         int LoadReaderRecord(ref string strBarcode,
             out string strError)
         {
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在初始化浏览器组件 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在初始化浏览器组件 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -1073,13 +1073,13 @@ namespace dp2Circulation
                 if (this.VoiceName == true)
                     strStyle += ",summary";
 
-                stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                _stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                 string[] results = null;
                 byte[] baTimestamp = null;
                 string strRecPath = "";
                 long lRet = Channel.GetReaderInfo(
-                    stop,
+                    _stop,
                     GetRequestPatronBarcode(strBarcode),
                     strStyle,   // this.RenderFormat, // "html",
                     out results,
@@ -1152,9 +1152,9 @@ namespace dp2Circulation
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             return 1;
@@ -1171,9 +1171,9 @@ namespace dp2Circulation
             SetBiblioRenderString("(空)");
             SetItemRenderString("(空)");
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在装入册记录 " + strBarcode + " ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在装入册记录 " + strBarcode + " ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -1181,7 +1181,7 @@ namespace dp2Circulation
                 string strBiblioText = "";
 
                 long lRet = Channel.GetItemInfo(
-                    stop,
+                    _stop,
                     strBarcode,
                     this.RenderFormat, // "html",
                     out strItemText,
@@ -1200,9 +1200,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             return 1;
@@ -2124,10 +2124,10 @@ dlg.UiState);
                         strOperName = "续借";
                     }
 
-                    stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("正在进行" + strOperName + "操作: " + this.textBox_readerBarcode.Text
+                    _stop.OnStop += new StopEventHandler(this.DoStop);
+                    _stop.Initial("正在进行" + strOperName + "操作: " + this.textBox_readerBarcode.Text
                     + " " + strOperName + " " + this.textBox_itemBarcode.Text + " ...");
-                    stop.BeginLoop();
+                    _stop.BeginLoop();
 
                     if (this.NoBiblioAndItemInfo == false)
                     {
@@ -2182,7 +2182,7 @@ dlg.UiState);
                         //    strStyle += ",testmode";
 
                         lRet = Channel.Borrow(
-                            stop,
+                            _stop,
                             bRenew,
                             this.FuncState == dp2Circulation.FuncState.Renew ? "" : this.textBox_readerBarcode.Text,
                             this.textBox_itemBarcode.Text,
@@ -2333,9 +2333,9 @@ dlg.UiState);
                     }
                     finally
                     {
-                        stop.EndLoop();
-                        stop.OnStop -= new StopEventHandler(this.DoStop);
-                        stop.Initial("");
+                        _stop.EndLoop();
+                        _stop.OnStop -= new StopEventHandler(this.DoStop);
+                        _stop.Initial("");
                     }
 
                     // 累积同一读者借阅成功的册条码号
@@ -2398,10 +2398,10 @@ dlg.UiState);
                     }
 
                     // 还书
-                    stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("正在进行 " + strOperName + " 操作: " + this.textBox_readerBarcode.Text
+                    _stop.OnStop += new StopEventHandler(this.DoStop);
+                    _stop.Initial("正在进行 " + strOperName + " 操作: " + this.textBox_readerBarcode.Text
                     + " 还 " + this.textBox_itemBarcode.Text + " ...");
-                    stop.BeginLoop();
+                    _stop.BeginLoop();
 
                     if (this.NoBiblioAndItemInfo == false)
                     {
@@ -2450,7 +2450,7 @@ dlg.UiState);
                         //    strStyle += ",testmode";
 
                         lRet = Channel.Return(
-                            stop,
+                            _stop,
                             strAction,
                             this.textBox_readerBarcode.Text,
                             this.textBox_itemBarcode.Text,
@@ -2615,9 +2615,9 @@ dlg.UiState);
                     }
                     finally
                     {
-                        stop.EndLoop();
-                        stop.OnStop -= new StopEventHandler(this.DoStop);
-                        stop.Initial("");
+                        _stop.EndLoop();
+                        _stop.OnStop -= new StopEventHandler(this.DoStop);
+                        _stop.Initial("");
                     }
 
                     if (lRet == 1)
@@ -2759,9 +2759,11 @@ dlg.UiState);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_itemBarcode.Enabled = bEnable;
-            this.button_itemAction.Enabled = bEnable;
-            // this.checkBox_force.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.textBox_itemBarcode.Enabled = bEnable;
+                this.button_itemAction.Enabled = bEnable;
+                // this.checkBox_force.Enabled = bEnable;
 
 #if NO
             if (this.VerifyReaderPassword == true)
@@ -2770,23 +2772,23 @@ dlg.UiState);
                 this.button_verifyReaderPassword.Enabled = bEnable;
             }
 #endif
-            if (this.textBox_readerPassword.Visible == true)
-            {
-                this.textBox_readerPassword.Enabled = bEnable;
-                this.button_verifyReaderPassword.Enabled = bEnable;
-            }
+                if (this.textBox_readerPassword.Visible == true)
+                {
+                    this.textBox_readerPassword.Enabled = bEnable;
+                    this.button_verifyReaderPassword.Enabled = bEnable;
+                }
 
-            if (this.FuncState == FuncState.Return)
-            {
-                this.textBox_readerBarcode.Enabled = false;
-                this.button_loadReader.Enabled = false;
-            }
-            else
-            {
-                this.textBox_readerBarcode.Enabled = bEnable;
-                this.button_loadReader.Enabled = bEnable;
-            }
-
+                if (this.FuncState == FuncState.Return)
+                {
+                    this.textBox_readerBarcode.Enabled = false;
+                    this.button_loadReader.Enabled = false;
+                }
+                else
+                {
+                    this.textBox_readerBarcode.Enabled = bEnable;
+                    this.button_loadReader.Enabled = bEnable;
+                }
+            }));
         }
 
         /// <summary>
@@ -2823,9 +2825,9 @@ dlg.UiState);
         {
             string strError = "";
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在校验读者密码 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在校验读者密码 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -2835,7 +2837,7 @@ dlg.UiState);
             try
             {
                 long lRet = Channel.VerifyReaderPassword(
-                    stop,
+                    _stop,
                     this.textBox_readerBarcode.Text,
                     this.textBox_readerPassword.Text,
                     out strError);
@@ -2851,9 +2853,9 @@ dlg.UiState);
             {
                 this.EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             /*
@@ -3036,7 +3038,7 @@ dlg.UiState);
 
         private void ChargingForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;

@@ -277,9 +277,9 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在检索...");
+            _stop.BeginLoop();
 
             this.EnableControlsInSearching(false);
             try
@@ -311,7 +311,7 @@ namespace dp2Circulation
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("query");
                 for (int j = 0; j < nLoopTimes; j++)
                 {
-                    stop.SetMessage("循环 "+(j+1).ToString()+"...");
+                    _stop.SetMessage("循环 "+(j+1).ToString()+"...");
                     Global.WriteHtml(this.webBrowser1,
         "\r\n循环 "+(j+1).ToString()+"...\r\n");
 
@@ -319,9 +319,9 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (_stop != null)
                         {
-                            if (stop.State != 0)
+                            if (_stop.State != 0)
                             {
                                 strError = "中断";
                                 goto ERROR1;
@@ -353,7 +353,7 @@ namespace dp2Circulation
                                 this.m_nBeforeAbort = Convert.ToInt32(this.textBox_searchBiblio_beforeAbort.Text);
                         }
 
-                        stop.SetMessage("正在检索 '" + strWord + "' ...");
+                        _stop.SetMessage("正在检索 '" + strWord + "' ...");
                         Global.WriteHtml(this.webBrowser1,
             "正在检索 '" + strWord + "' 中断前毫秒数="+this.m_nBeforeAbort.ToString()+"; "+strComment+"...\r\n");
 
@@ -362,7 +362,7 @@ namespace dp2Circulation
                         DateTime timeStart = DateTime.Now;
 
                         string strQueryXml = "";
-                        long lRet = Channel.SearchBiblio(stop,
+                        long lRet = Channel.SearchBiblio(_stop,
                             strDbName,
                             strWord,
                             -1,
@@ -396,10 +396,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 this.EnableControlsInSearching(true);
             }

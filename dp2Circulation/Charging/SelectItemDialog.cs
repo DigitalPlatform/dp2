@@ -89,11 +89,11 @@ namespace dp2Circulation
 (object)this.toolStripStatusLabel1,
 (object)this.toolStripProgressBar1);
 
-            if (stop != null)
-                stop.Unregister();
+            if (_stop != null)
+                _stop.Unregister();
 
-            stop = new DigitalPlatform.Stop();
-            stop.Register(stopManager, true);	// 和容器关联
+            _stop = new DigitalPlatform.Stop();
+            _stop.Register(stopManager, true);	// 和容器关联
 
             if (this.AutoSearch == true
                 && string.IsNullOrEmpty(this.textBox_queryWord.Text) == false)
@@ -853,9 +853,12 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.comboBox_from.Enabled = bEnable;
-            this.textBox_queryWord.Enabled = bEnable;
-            this.button_search.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.comboBox_from.Enabled = bEnable;
+                this.textBox_queryWord.Enabled = bEnable;
+                this.button_search.Enabled = bEnable;
+            }));
         }
 
         private void SelectItemDialog_FormClosing(object sender, FormClosingEventArgs e)

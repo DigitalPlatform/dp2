@@ -362,17 +362,20 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.comboBox_biblioDbName.Enabled = bEnable;
-            this.textBox_classNumber.Enabled = bEnable;
-            this.textBox_maxNumber.Enabled = bEnable;
-            this.textBox_tailNumber.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.comboBox_biblioDbName.Enabled = bEnable;
+                this.textBox_classNumber.Enabled = bEnable;
+                this.textBox_maxNumber.Enabled = bEnable;
+                this.textBox_tailNumber.Enabled = bEnable;
 
-            this.button_copyMaxNumber.Enabled = bEnable;
-            this.button_getTailNumber.Enabled = bEnable;
-            this.button_pushTailNumber.Enabled = bEnable;
-            this.button_saveTailNumber.Enabled = bEnable;
-            this.button_searchClass.Enabled = bEnable;
-            this.button_searchDouble.Enabled = bEnable;
+                this.button_copyMaxNumber.Enabled = bEnable;
+                this.button_getTailNumber.Enabled = bEnable;
+                this.button_pushTailNumber.Enabled = bEnable;
+                this.button_saveTailNumber.Enabled = bEnable;
+                this.button_searchClass.Enabled = bEnable;
+                this.button_searchDouble.Enabled = bEnable;
+            }));
         }
 
         int FillList(bool bSort,
@@ -407,9 +410,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索同类书记录 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在检索同类书记录 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -419,7 +422,7 @@ namespace dp2Circulation
                 string strQueryXml = "";
 
                 long lRet = Channel.SearchUsedZhongcihao(
-                    stop,
+                    _stop,
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
@@ -442,17 +445,17 @@ namespace dp2Circulation
 
                 ZhongcihaoSearchResult[] searchresults = null;
 
-                if (stop != null)
-                    stop.SetProgressRange(0, lHitCount);
+                if (_stop != null)
+                    _stop.SetProgressRange(0, lHitCount);
 
                 // 装入浏览格式
                 for (; ; )
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -469,10 +472,10 @@ namespace dp2Circulation
                         lCurrentPerCount = lPerCount * 10;
                     }
 
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    _stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = Channel.GetZhongcihaoSearchResult(
-                        stop,
+                        _stop,
                         GetZhongcihaoDbGroupName(this.BiblioDbName),
                         // "!" + this.BiblioDbName,
                         "zhongcihao",   // strResultSetName
@@ -519,8 +522,8 @@ namespace dp2Circulation
                         }
 
                         this.listView_number.Items.Add(item);
-                        if (stop != null)
-                            stop.SetProgressValue(lStart + i + 1);
+                        if (_stop != null)
+                            _stop.SetProgressValue(lStart + i + 1);
                     }
                     this.listView_number.EndUpdate();
 
@@ -531,10 +534,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 EnableControls(true);
             }
@@ -691,14 +694,14 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = Channel.GetZhongcihaoTailNumber(
-                    stop,
+                    _stop,
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
@@ -711,9 +714,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -739,14 +742,14 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在推动尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在推动尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = Channel.SetZhongcihaoTailNumber(
-                    stop,
+                    _stop,
                     "conditionalpush",
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
@@ -761,9 +764,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -789,14 +792,14 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = Channel.SetZhongcihaoTailNumber(
-                    stop,
+                    _stop,
                     "save",
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
@@ -811,9 +814,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -1060,14 +1063,14 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在增量尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在增量尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = Channel.SetZhongcihaoTailNumber(
-                    stop,
+                    _stop,
                     "increase",
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
@@ -1082,9 +1085,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }

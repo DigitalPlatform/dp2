@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using System.IO;
+using System.ServiceModel.Channels;
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
@@ -117,10 +118,12 @@ namespace DigitalPlatform.CirculationClient
         public LibraryChannel Channel = null;
 #endif
 
+        /*
         /// <summary>
         /// 停止控制
         /// </summary>
         public DigitalPlatform.Stop Stop = null;
+        */
 
         /// <summary>
         /// 内容发生改变
@@ -166,6 +169,7 @@ namespace DigitalPlatform.CirculationClient
         //      0   没有装载
         //      1   已经装载
         public int LoadObject(
+            Stop stop,
             LibraryChannel channel,
             string strBiblioRecPath,
             string strXml,
@@ -202,6 +206,7 @@ namespace DigitalPlatform.CirculationClient
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
 
             return LoadObject(
+                stop,
                 channel,
                 nodes,
                 dp2library_version,
@@ -249,6 +254,7 @@ namespace DigitalPlatform.CirculationClient
         //      0   没有填充任何内容，列表为空
         //      1   已经填充了内容
         public int LoadObject(
+            Stop stop,
             LibraryChannel channel,
             XmlNodeList nodes,
             string dp2library_version,
@@ -302,13 +308,13 @@ namespace DigitalPlatform.CirculationClient
                     Stop.Initial("正在下载对象的元数据");
                     Stop.BeginLoop();
 #endif
-                    Stop.Initial("正在下载对象的元数据");
+                    stop?.Initial("正在下载对象的元数据");
 
                     try
                     {
                         BrowseLoader loader = new BrowseLoader();
                         loader.Channel = channel;
-                        loader.Stop = this.Stop;
+                        loader.Stop = stop;
                         loader.RecPaths = recpaths;
                         loader.Format = "id,metadata,timestamp";
 
@@ -317,7 +323,7 @@ namespace DigitalPlatform.CirculationClient
                         {
                             Application.DoEvents();
 
-                            if (this.Stop != null && this.Stop.State != 0)
+                            if (stop != null && stop.State != 0)
                             {
                                 strError = "用户中断";
                                 return -1;
@@ -381,11 +387,15 @@ namespace DigitalPlatform.CirculationClient
                         Stop.OnStop -= new StopEventHandler(this.DoStop);
                         Stop.Initial("");
 #endif
-                        Stop.Initial("");
+                        stop?.Initial("");
                     }
                 }
                 else
                 {
+                    /*
+                    strError = "dp2library 2.57 及以前的版本已经不被本功能支持";  // 2022/10/30
+                    return -1;
+                    */
                     // *** 以前的方法，速度较慢
                     // 第二阶段，从 dp2library 服务器获取 metadata 信息，填充其他字段内容
                     foreach (ListViewItem item in items)
@@ -396,6 +406,7 @@ namespace DigitalPlatform.CirculationClient
                         byte[] baMetadataTimestamp = null;
                         // 获得一个对象资源的元数据
                         int nRet = GetOneObjectMetadata(
+                            stop,
                             channel,
                             this.BiblioRecPath,
                             strID,
@@ -725,6 +736,7 @@ bool bChanged)
 
         // 获得一个对象资源的元数据
         int GetOneObjectMetadata(
+            Stop stop,
             LibraryChannel channel,
             string strBiblioRecPath,
             string strID,
@@ -744,7 +756,7 @@ bool bChanged)
             Stop.Initial("正在下载对象的元数据 " + strResPath);
             Stop.BeginLoop();
 #endif
-            Stop.Initial("正在下载对象的元数据 " + strResPath);
+            stop?.Initial("正在下载对象的元数据 " + strResPath);
 
             try
             {
@@ -754,7 +766,7 @@ bool bChanged)
                 string strResult = "";
                 // 只得到metadata
                 long lRet = channel.GetRes(
-                    Stop,
+                    stop,
                     strResPath,
                     "metadata,timestamp,outputpath",
                     out strResult,
@@ -778,7 +790,7 @@ bool bChanged)
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.Initial("");
+                stop?.Initial("");
             }
         }
 
@@ -1635,6 +1647,46 @@ bool bChanged)
                 this.Changed = false;
         }
 
+        // 包装后的版本。CallReturnChannel(channel, looping) 配套
+        LibraryChannel CallGetChannel(out Looping looping)
+        {
+            return CallGetChannel("beginLoop", out looping);
+        }
+
+        // 包装后的版本。CallReturnChannel(channel) 配套
+        LibraryChannel CallGetChannel()
+        {
+            return CallGetChannel("", out _);
+        }
+
+        LibraryChannel CallGetChannel(string style,
+            out Looping looping)
+        {
+            looping = null;
+            if (this.GetChannel == null)
+                return null;
+            GetChannelEventArgs e = new GetChannelEventArgs();
+            e.Style = style;
+            this.GetChannel(this, e);
+            if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                throw new Exception(e.ErrorInfo);
+            Debug.Assert(e.Looping != null);
+            looping = e.Looping;
+            return e.Channel;
+        }
+
+        void CallReturnChannel(LibraryChannel channel, Looping looping = null)
+        {
+            Debug.Assert(channel != null);
+            if (this.ReturnChannel == null)
+                return;
+            ReturnChannelEventArgs e = new ReturnChannelEventArgs();
+            e.Channel = channel;
+            e.Looping = looping;
+            this.ReturnChannel(this, e);
+        }
+
+#if REMOVED
         LibraryChannel CallGetChannel(bool bBeginLoop)
         {
             if (this.GetChannel == null)
@@ -1656,6 +1708,7 @@ bool bChanged)
             e.EndLoop = bEndLoop;
             this.ReturnChannel(this, e);
         }
+#endif
 
         ObjectViewerDialog _dlg = null;
 
@@ -1793,7 +1846,7 @@ bool bChanged)
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-            LibraryChannel channel = this.CallGetChannel(true);
+            LibraryChannel channel = this.CallGetChannel(out Looping looping);
 
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 5, 0);
@@ -1803,16 +1856,14 @@ bool bChanged)
             Stop.Initial("正在下载对象 " + strResPath);
             Stop.BeginLoop();
 #endif
-            Stop.Initial("正在下载对象 " + strResPath);
+            looping.stop.Initial("正在下载对象 " + strResPath);
 
             try
             {
-
                 // EnableControlsInLoading(true);
 
-
                 long lRet = channel.GetRes(
-                    Stop,
+                    looping.stop,
                     strResPath,
                     dlg.FileName,
                     "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
@@ -1836,8 +1887,8 @@ bool bChanged)
 #endif
                 channel.Timeout = old_timeout;
 
-                this.CallReturnChannel(channel, true);
-                Stop.Initial("");
+                this.CallReturnChannel(channel, looping);
+                // Stop.Initial("");
             }
             return;
         ERROR1:
@@ -2039,6 +2090,7 @@ bool bChanged)
         //		-1	error
         //		>=0 实际上载的资源对象数
         public int Save(
+            Stop stop,
             LibraryChannel channel,
             string dp2library_version,
             out string strError)
@@ -2067,11 +2119,11 @@ bool bChanged)
 
             StopStyle old_stop_style = StopStyle.None;
 
-            if (Stop != null)
+            if (stop != null)
             {
-                old_stop_style = Stop.Style;
-                Stop.Style = StopStyle.EnableHalfStop;
-                Stop.Initial("正在上载资源 ...");
+                old_stop_style = stop.Style;
+                stop.Style = StopStyle.EnableHalfStop;
+                stop.Initial("正在上载资源 ...");
             }
 
             int nUploadCount = 0;   // 实际上载的资源个数
@@ -2128,13 +2180,13 @@ bool bChanged)
                         continue;
                     }
 
-                    string strState = ListViewUtil.InvokeGetItemText(item, COLUMN_STATE);
+                    string strState = ListViewUtil.GetItemText(item, COLUMN_STATE);
 
-                    string strID = ListViewUtil.InvokeGetItemText(item, COLUMN_ID);
+                    string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
                     string strResPath = this.BiblioRecPath + "/object/" + ListViewUtil.GetItemText(item, COLUMN_ID);
-                    string strLocalFilename = ListViewUtil.InvokeGetItemText(item, COLUMN_LOCALPATH);
-                    string strMime = ListViewUtil.InvokeGetItemText(item, COLUMN_MIME);
-                    string strTimestamp = ListViewUtil.InvokeGetItemText(item, COLUMN_TIMESTAMP);
+                    string strLocalFilename = ListViewUtil.GetItemText(item, COLUMN_LOCALPATH);
+                    string strMime = ListViewUtil.GetItemText(item, COLUMN_MIME);
+                    string strTimestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
 
                     byte[] timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
                     byte[] output_timestamp = null;
@@ -2149,7 +2201,7 @@ bool bChanged)
                     if (bOnlyChangeMetadata)
                     {
                         long lRet = channel.UploadFile(
-Stop,
+stop,
 "", // strLocalFilename,
 strResPath,
 strMetadata,
@@ -2188,7 +2240,7 @@ out strError);
                             // int _hide_dialog_count = 0;
 
                             lRet = channel.UploadFile(
-                                Stop,
+                                stop,
                                 strLocalFilename,
                                 strResPath,
                                 strMetadata,
@@ -2272,12 +2324,12 @@ out strError);
             }
             finally
             {
-                if (Stop != null)
+                if (stop != null)
                 {
                     if (nUploadCount > 0)
-                        Stop.Initial("上载资源完成");
+                        stop.Initial("上载资源完成");
                     else
-                        Stop.Initial("");
+                        stop.Initial("");
                 }
             }
         }

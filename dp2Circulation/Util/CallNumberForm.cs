@@ -474,17 +474,20 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.comboBox_location.Enabled = bEnable;
-            this.textBox_classNumber.Enabled = bEnable;
-            this.textBox_maxNumber.Enabled = bEnable;
-            this.textBox_tailNumber.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.comboBox_location.Enabled = bEnable;
+                this.textBox_classNumber.Enabled = bEnable;
+                this.textBox_maxNumber.Enabled = bEnable;
+                this.textBox_tailNumber.Enabled = bEnable;
 
-            this.button_copyMaxNumber.Enabled = bEnable;
-            this.button_getTailNumber.Enabled = bEnable;
-            this.button_pushTailNumber.Enabled = bEnable;
-            this.button_saveTailNumber.Enabled = bEnable;
-            this.button_searchClass.Enabled = bEnable;
-            this.button_searchDouble.Enabled = bEnable;
+                this.button_copyMaxNumber.Enabled = bEnable;
+                this.button_getTailNumber.Enabled = bEnable;
+                this.button_pushTailNumber.Enabled = bEnable;
+                this.button_saveTailNumber.Enabled = bEnable;
+                this.button_searchClass.Enabled = bEnable;
+                this.button_searchDouble.Enabled = bEnable;
+            }));
         }
 
         // 将面板上输入的线索数据库名或者种次号方案名变换为API使用的形态
@@ -539,9 +542,9 @@ namespace dp2Circulation
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 5, 0);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索同类书实体记录 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在检索同类书实体记录 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -551,7 +554,7 @@ namespace dp2Circulation
                 string strQueryXml = "";
 
                 long lRet = channel.SearchOneClassCallNumber(
-                    stop,
+                    _stop,
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
@@ -573,17 +576,17 @@ namespace dp2Circulation
                 long lPerCount = Math.Min(50, lHitCount);
                 CallNumberSearchResult[] searchresults = null;
 
-                if (stop != null)
-                    stop.SetProgressRange(0, lHitCount);
+                if (_stop != null)
+                    _stop.SetProgressRange(0, lHitCount);
 
                 // 装入浏览格式
                 for (; ; )
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -601,10 +604,10 @@ namespace dp2Circulation
                         lCurrentPerCount = lPerCount * 10;
                     }
 
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    _stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetCallNumberSearchResult(
-                        stop,
+                        _stop,
                         GetArrangeGroupName(this.LocationString),
                         // "!" + this.BiblioDbName,
                         "callnumber",   // strResultSetName
@@ -677,8 +680,8 @@ namespace dp2Circulation
 
 
                         this.listView_number.Items.Add(item);
-                        if (stop != null)
-                            stop.SetProgressValue(lStart + i + 1);
+                        if (_stop != null)
+                            _stop.SetProgressValue(lStart + i + 1);
                     }
                     this.listView_number.EndUpdate();
 
@@ -689,10 +692,10 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -1532,14 +1535,14 @@ COLUMN_CALLNUMBER);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = channel.GetOneClassTailNumber(
-                    stop,
+                    _stop,
                     GetArrangeGroupName(this.LocationString),
                     this.ClassNumber,
                     out strTailNumber,
@@ -1551,9 +1554,9 @@ COLUMN_CALLNUMBER);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -1651,14 +1654,14 @@ COLUMN_CALLNUMBER);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    stop,
+                    _stop,
                     "save",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -1673,9 +1676,9 @@ COLUMN_CALLNUMBER);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -1728,9 +1731,9 @@ COLUMN_CALLNUMBER);
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保护尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保护尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -1777,9 +1780,9 @@ COLUMN_CALLNUMBER);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
             }
@@ -1806,14 +1809,14 @@ COLUMN_CALLNUMBER);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在推动尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在推动尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    stop,
+                    _stop,
                     "conditionalpush",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -1828,9 +1831,9 @@ COLUMN_CALLNUMBER);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -1864,14 +1867,14 @@ COLUMN_CALLNUMBER);
             channel.Timeout = new TimeSpan(0, 1, 0);
 
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在增量尾号 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在增量尾号 ...");
+            _stop.BeginLoop();
 
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    stop,
+                    _stop,
                     "increase",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -1886,9 +1889,9 @@ COLUMN_CALLNUMBER);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -2467,9 +2470,9 @@ COLUMN_CALLNUMBER);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在获取书目摘要 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.SetMessage("正在获取书目摘要 ...");
+            _stop.BeginLoop();
 
             try
             {
@@ -2479,9 +2482,9 @@ COLUMN_CALLNUMBER);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        if (stop.State != 0)
+                        if (_stop.State != 0)
                             return 0;
                     }
 
@@ -2498,7 +2501,7 @@ COLUMN_CALLNUMBER);
                     string strOutputBiblioRecPath = "";
 
                     long lRet = channel.GetBiblioSummary(
-                        stop,
+                        _stop,
                         "@bibliorecpath:" + strBiblioRecPath,
                         "", // strItemRecPath,
                         null,
@@ -2520,9 +2523,9 @@ COLUMN_CALLNUMBER);
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);

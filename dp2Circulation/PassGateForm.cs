@@ -363,9 +363,9 @@ namespace dp2Circulation
                     ReaderInfo info = (ReaderInfo)item.Tag;
                     string strBarcode = info.ReaderBarcode;
 
-                    stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("正在初始化浏览器组件 ...");
-                    stop.BeginLoop();
+                    _stop.OnStop += new StopEventHandler(this.DoStop);
+                    _stop.Initial("正在初始化浏览器组件 ...");
+                    _stop.BeginLoop();
 
                     string strTypeList = "xml";
                     int nTypeCount = 1;
@@ -383,7 +383,7 @@ namespace dp2Circulation
                     try
                     {
                         string[] results = null;
-                        long lRet = Channel.PassGate(stop,
+                        long lRet = Channel.PassGate(_stop,
                             strBarcode,
                             this.textBox_gateName.Text, // strGateName
                             strTypeList,
@@ -453,9 +453,9 @@ namespace dp2Circulation
                     }
                     finally
                     {
-                        stop.EndLoop();
-                        stop.OnStop -= new StopEventHandler(this.DoStop);
-                        stop.Initial("");
+                        _stop.EndLoop();
+                        _stop.OnStop -= new StopEventHandler(this.DoStop);
+                        _stop.Initial("");
                     }
 
                 CONTINUE:

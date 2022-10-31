@@ -68,7 +68,7 @@ namespace dp2Circulation
 
         public void BeginLoadLine(List<string> recpaths)
         {
-            Task.Factory.StartNew(() => LoadLine(recpaths));
+            _ = Task.Factory.StartNew(() => LoadLine(recpaths));
         }
 
         public void LoadLine(List<string> recpaths)
@@ -103,20 +103,20 @@ namespace dp2Circulation
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在装载书目和订购信息 ...");
-            stop.BeginLoop();
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在装载书目和订购信息 ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
             try
             {
-                if (stop != null)
-                    stop.SetProgressRange(0, recpaths.Count);
+                if (_stop != null)
+                    _stop.SetProgressRange(0, recpaths.Count);
 
                 BiblioLoader loader = new BiblioLoader();
                 loader.Channel = channel;
-                loader.Stop = stop;
+                loader.Stop = _stop;
                 loader.RecPaths = recpaths;
                 loader.Format = "table";
 
@@ -132,7 +132,7 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
@@ -140,10 +140,10 @@ namespace dp2Circulation
 
                     Debug.Assert(item.RecPath == recpaths[i], "");
 
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        stop.SetMessage("正在装载书目信息 " + item.RecPath + " ...");
-                        stop.SetProgressValue(i);
+                        _stop.SetMessage("正在装载书目信息 " + item.RecPath + " ...");
+                        _stop.SetProgressValue(i);
                     }
 
                     BiblioStore line = new BiblioStore();
@@ -157,7 +157,7 @@ namespace dp2Circulation
                     SubItemLoader sub_loader = new SubItemLoader();
                     sub_loader.BiblioRecPath = line.RecPath;
                     sub_loader.Channel = channel;
-                    sub_loader.Stop = stop;
+                    sub_loader.Stop = _stop;
                     sub_loader.DbType = "order";
 
                     sub_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -204,11 +204,11 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -1150,10 +1150,10 @@ namespace dp2Circulation
 
             this.ShowMessage("正在保存订购记录 ...");
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存订购记录 ...");
-            stop.BeginLoop();
+            _stop.Style = StopStyle.EnableHalfStop;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在保存订购记录 ...");
+            _stop.BeginLoop();
 
             this.EnableControls(false);
             try
@@ -1162,7 +1162,7 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null && stop.State != 0)
+                    if (_stop != null && _stop.State != 0)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -1194,11 +1194,11 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
+                _stop.HideProgress();
+                _stop.Style = StopStyle.None;
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
@@ -1311,7 +1311,7 @@ namespace dp2Circulation
                 EntityInfo[] current = GetPart(entities, i * nBatch, nCurrentCount);
 
                 long lRet = channel.SetOrders(
-    stop,
+    _stop,
     biblio.RecPath,
     current,
     out errorinfos,

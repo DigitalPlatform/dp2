@@ -203,9 +203,9 @@ namespace dp2Circulation
                     else
                         DisplayText($"{start} 正在进行检查...");
 
-                    stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("正在检索 ...");
-                    stop.BeginLoop();
+                    _stop.OnStop += new StopEventHandler(this.DoStop);
+                    _stop.Initial("正在检索 ...");
+                    _stop.BeginLoop();
 
                     EnableControls(false);
                     try
@@ -270,10 +270,10 @@ namespace dp2Circulation
                     {
                         EnableControls(true);
 
-                        stop.EndLoop();
-                        stop.OnStop -= new StopEventHandler(this.DoStop);
-                        stop.Initial("");
-                        stop.HideProgress();
+                        _stop.EndLoop();
+                        _stop.OnStop -= new StopEventHandler(this.DoStop);
+                        _stop.Initial("");
+                        _stop.HideProgress();
                     }
                 ERROR1:
                     ShowMessageBox(strError);
@@ -375,7 +375,7 @@ namespace dp2Circulation
 
                 if (hitcount > 0)
                 {
-                    stop.SetProgressRange(0, hitcount);
+                    _stop.SetProgressRange(0, hitcount);
 
                     // 把超时时间改短一点
                     var timeout0 = channel.Timeout;
@@ -384,7 +384,7 @@ namespace dp2Circulation
                     {
                         // 获取和存储记录
                         ResultSetLoader loader = new ResultSetLoader(channel,
-            stop,
+            _stop,
             resultset_name,
             $"id,xml,timestamp",
             "zh");
@@ -400,13 +400,13 @@ namespace dp2Circulation
                                     ErrorInfo = "用户中断"
                                 };
 
-                            stop.SetMessage($"正在处理 {record.Path} ...");
+                            _stop.SetMessage($"正在处理 {record.Path} ...");
 
                             processRecord?.Invoke(channel, record);
 
                             i++;
 
-                            stop.SetProgressValue(i);
+                            _stop.SetProgressValue(i);
                         }
                     }
                     finally
@@ -552,7 +552,7 @@ namespace dp2Circulation
                 {
                 REDO_REPAIR:
                     lRet = channel.RepairBorrowInfo(
-                        stop,
+                        _stop,
                         "checkfromreader",
                         strReaderBarcode,
                         "",
@@ -1515,7 +1515,7 @@ false);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.Invoke((Action)(() =>
+            this.TryInvoke((Action)(() =>
             {
                 this.button_beginCheckFromReader.Enabled = bEnable;
                 this.button_beginCheckFromItem.Enabled = bEnable;
@@ -1606,9 +1606,9 @@ false);
                     else
                         DisplayText($"{start} 正在进行检查...");
 
-                    stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("正在检索 ...");
-                    stop.BeginLoop();
+                    _stop.OnStop += new StopEventHandler(this.DoStop);
+                    _stop.Initial("正在检索 ...");
+                    _stop.BeginLoop();
 
                     EnableControls(false);
                     try
@@ -1718,10 +1718,10 @@ false);
                     {
                         EnableControls(true);
 
-                        stop.EndLoop();
-                        stop.OnStop -= new StopEventHandler(this.DoStop);
-                        stop.Initial("");
-                        stop.HideProgress();
+                        _stop.EndLoop();
+                        _stop.OnStop -= new StopEventHandler(this.DoStop);
+                        _stop.Initial("");
+                        _stop.HideProgress();
                     }
                 ERROR1:
                     ShowMessageBox(strError);
@@ -1912,13 +1912,13 @@ false);
 
                     DateTime search_time = DateTime.Now;
 
-                    int skip_count = 0;
-                    int error_count = 0;
+                    // int skip_count = 0;
+                    // int error_count = 0;
                     int succeed_count = 0;
 
                     if (hitcount > 0)
                     {
-                        stop.SetProgressRange(0, hitcount);
+                        _stop.SetProgressRange(0, hitcount);
 
                         // string strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/uid";
 
@@ -1931,7 +1931,7 @@ false);
 
                             // 获取和存储记录
                             ResultSetLoader loader = new ResultSetLoader(channel,
-                stop,
+                _stop,
                 resultset_name,
                 format, //$"id,xml",
                 "zh");
@@ -1959,7 +1959,7 @@ false);
                                     };
                                 }
 
-                                stop.SetMessage($"正在处理 {record.Path} ... (实体库 {db_index + 1}/{item_dbnames.Count})");
+                                _stop.SetMessage($"正在处理 {record.Path} ... (实体库 {db_index + 1}/{item_dbnames.Count})");
 
                                 // 
                                 processRecord?.Invoke(channel, record);
@@ -1967,7 +1967,7 @@ false);
                                 i++;
                                 succeed_count++;
 
-                                stop.SetProgressValue(i);
+                                _stop.SetProgressValue(i);
                             }
                         }
                         finally
@@ -2445,7 +2445,7 @@ false);
 
             REDO_REPAIR:
                 long lRet = channel.RepairBorrowInfo(
-                    stop,
+                    _stop,
                     "checkfromitem",
                     "",
                     strItemBarcode,
@@ -2504,7 +2504,7 @@ false);
                             string[] aDupPathTemp = null;
                             // string strOutputReaderBarcode = "";
                             long lRet_2 = channel.RepairBorrowInfo(
-                                stop,
+                                _stop,
                                 "checkfromitem",
                                 "",
                                 strItemBarcode,
@@ -2888,7 +2888,7 @@ false);
         REDO_GETITEM:
             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
             long lRet = channel.GetItemInfo(
-                stop,
+                _stop,
                 strItemBarcode,
                 "xml",   // strResultType
                 out strItemXml,
@@ -2913,7 +2913,7 @@ false);
                 {
                 REDO_GETITEM2:
                     lRet = channel.GetItemInfo(
-stop,
+_stop,
 "@path:" + strConfirmItemRecPath,
 "xml",   // strResultType
 out strItemXml,
@@ -2978,7 +2978,7 @@ out strError);
             int nProcessedBorrowItems = 0;
             int nTotalBorrowItems = 0;
             lRet = channel.RepairBorrowInfo(
-                stop,
+                _stop,
                 "repairitemside",
                 strBorrower,
                 strItemBarcode,
@@ -3017,9 +3017,9 @@ out strError);
     out string strError)
         {
             strError = "";
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行修复 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行修复 ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -3027,7 +3027,7 @@ out strError);
             try
             {
             REDO_GET:
-                long lRet = channel.GetReaderInfo(stop,
+                long lRet = channel.GetReaderInfo(_stop,
         strReaderBarcode,
         "xml",
         out string[] results,
@@ -3073,9 +3073,9 @@ out strError);
 
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
         }
 
@@ -3127,7 +3127,7 @@ out strError);
 
             REDO_REPAIR:
                 long lRet = channel.RepairBorrowInfo(
-                    stop,
+                    _stop,
                     "repairreaderside",
                     strReaderBarcode,
                     strItemBarcode,
@@ -3185,9 +3185,9 @@ out strError);
 
             Debug.Assert(strAction == "repairreaderside" || strAction == "repairitemside", "");
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行修复 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行修复 ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -3202,7 +3202,7 @@ out strError);
                 string strOutputReaderBarcode = "";
 
                 long lRet = channel.RepairBorrowInfo(
-                    stop,
+                    _stop,
                     strAction,  // "repairreaderside",
                     strReaderBarcode,
                     strItemBarcode,
@@ -3271,9 +3271,9 @@ out strError);
 
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
             return 0;
@@ -3294,9 +3294,9 @@ out strError);
 
             if (string.IsNullOrEmpty(strReaderBarcode))
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在获取册记录 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在获取册记录 ...");
+                _stop.BeginLoop();
 
                 EnableControls(false);
 
@@ -3307,7 +3307,7 @@ out strError);
                 REDO_GET:
                     // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                     long lRet = channel.GetItemInfo(
-                        stop,
+                        _stop,
                         strItemBarcode,
                         "xml",
                         out string strItemXml,
@@ -3356,9 +3356,9 @@ out strError);
 
                     EnableControls(true);
 
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
             }
 
@@ -3966,9 +3966,9 @@ out strError);
                 goto ERROR1;
             }
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行检查 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行检查 ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -3980,7 +3980,7 @@ out strError);
             {
             REDO_GET:
                 // 根据册条码号获得册记录
-                long lRet = channel.GetItemInfo(stop,
+                long lRet = channel.GetItemInfo(_stop,
                     strItemBarcode,
                     "xml",
                     out string xml,
@@ -4031,9 +4031,9 @@ out strError);
 
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
         ERROR1:
@@ -4095,7 +4095,7 @@ out strError);
 
         private void CheckBorrowInfoForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
         }
 
         // 零星检查，从读者侧
@@ -4134,9 +4134,9 @@ out strError);
                 goto ERROR1;
             */
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行检查 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在进行检查 ...");
+            _stop.BeginLoop();
 
             EnableControls(false);
 
@@ -4145,7 +4145,7 @@ out strError);
             {
             REDO_GET:
                 // 根据证条码号获得读者记录 XML
-                long lRet = channel.GetReaderInfo(stop,
+                long lRet = channel.GetReaderInfo(_stop,
                     strReaderBarcode,
                     "xml,recpaths",
                     out string[] results,
@@ -4193,9 +4193,9 @@ out strError);
 
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
             }
 
         ERROR1:
@@ -4216,7 +4216,7 @@ out strError);
         {
         REDO_GET:
             // 根据册条码号获得册记录
-            long lRet = channel.GetItemInfo(stop,
+            long lRet = channel.GetItemInfo(_stop,
                 strItemBarcode,
                 "xml",
                 out xml,

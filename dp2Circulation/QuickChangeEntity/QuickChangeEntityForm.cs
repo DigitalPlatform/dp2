@@ -219,9 +219,9 @@ namespace dp2Circulation
             {
                 EnableControls(false);
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在初始化浏览器组件 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在初始化浏览器组件 ...");
+                _stop.BeginLoop();
 
 
                 this.Update();
@@ -238,7 +238,7 @@ namespace dp2Circulation
 
             this.textBox_message.Text = "";
 
-            stop.SetMessage("正在装入册记录 " + strBarcode + " ...");
+            _stop.SetMessage("正在装入册记录 " + strBarcode + " ...");
 
 
             try
@@ -252,7 +252,7 @@ namespace dp2Circulation
                 byte[] item_timestamp = null;
 
                 long lRet = Channel.GetItemInfo(
-                    stop,
+                    _stop,
                     strBarcode,
                     "xml",
                     out strItemText,
@@ -301,9 +301,9 @@ namespace dp2Circulation
             {
                 if (bEnableControls == true)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
 
                     EnableControls(true);
                 }
@@ -322,24 +322,27 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_barcode.Enabled = bEnable;
-            this.textBox_message.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.textBox_barcode.Enabled = bEnable;
+                this.textBox_message.Enabled = bEnable;
 
-            this.textBox_barcodeFile.Enabled = bEnable;
-            this.textBox_outputBarcodes.Enabled = bEnable;
+                this.textBox_barcodeFile.Enabled = bEnable;
+                this.textBox_outputBarcodes.Enabled = bEnable;
 
-            this.button_loadBarcode.Enabled = bEnable;
-            this.entityEditControl1.Enabled = bEnable;
+                this.button_loadBarcode.Enabled = bEnable;
+                this.entityEditControl1.Enabled = bEnable;
 
-            this.button_beginByBarcodeFile.Enabled = bEnable;
-            this.button_changeParam.Enabled = bEnable;
-            this.button_file_getBarcodeFilename.Enabled = bEnable;
-            this.button_saveCurrentRecord.Enabled = bEnable;
-            this.button_saveToBarcodeFile.Enabled = bEnable;
+                this.button_beginByBarcodeFile.Enabled = bEnable;
+                this.button_changeParam.Enabled = bEnable;
+                this.button_file_getBarcodeFilename.Enabled = bEnable;
+                this.button_saveCurrentRecord.Enabled = bEnable;
+                this.button_saveToBarcodeFile.Enabled = bEnable;
 
-            this.button_getRecPathFileName.Enabled = bEnable;
-            this.textBox_recPathFile.Enabled = bEnable;
-            this.button_beginByRecPathFile.Enabled = bEnable;
+                this.button_getRecPathFileName.Enabled = bEnable;
+                this.textBox_recPathFile.Enabled = bEnable;
+                this.button_beginByRecPathFile.Enabled = bEnable;
+            }));
         }
 
         // 是否已经提示过修改动作
@@ -1122,9 +1125,9 @@ false);
         {
             if (bEnableControls == true)
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在保存册信息 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在保存册信息 ...");
+                _stop.BeginLoop();
 
                 this.Update();
                 Program.MainForm.Update();
@@ -1134,7 +1137,7 @@ false);
             try
             {
                 long lRet = Channel.SetEntities(
-                    stop,
+                    _stop,
                     strBiblioRecPath,
                     entities,
                     out errorinfos,
@@ -1147,9 +1150,9 @@ false);
             {
                 if (bEnableControls == true)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
             }
 
@@ -1483,7 +1486,7 @@ false);
                 false);
 
             if (lLineCount != -1)
-                stop.SetProgressRange(0, lLineCount);
+                _stop.SetProgressRange(0, lLineCount);
 
             int nCurrentLine = 0;
             StreamReader sr = null;
@@ -1497,9 +1500,9 @@ false);
 
                 EnableControls(false);
 
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在初始化浏览器组件 ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.Initial("正在初始化浏览器组件 ...");
+                _stop.BeginLoop();
                 this.Update();
                 Program.MainForm.Update();
 
@@ -1511,9 +1514,9 @@ false);
                     for (; ; )
                     {
                         Application.DoEvents();
-                        if (stop != null)
+                        if (_stop != null)
                         {
-                            if (stop.State != 0)
+                            if (_stop.State != 0)
                             {
                                 strError = "用户中断1";
                                 return -1;
@@ -1531,10 +1534,10 @@ false);
                             continue;
 
                         if (strFileType == "barcode")
-                            stop.SetMessage("正在处理册条码号 " + strLine + " 对应的记录...");
+                            _stop.SetMessage("正在处理册条码号 " + strLine + " 对应的记录...");
                         else
-                            stop.SetMessage("正在处理记录路径 " + strLine + " 对应的记录...");
-                        stop.SetProgressValue(nCurrentLine);
+                            _stop.SetMessage("正在处理记录路径 " + strLine + " 对应的记录...");
+                        _stop.SetProgressValue(nCurrentLine);
 
                         nCurrentLine++;
 
@@ -1587,10 +1590,10 @@ false);
                 }
                 finally
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-                    stop.HideProgress();
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
+                    _stop.HideProgress();
 
                     EnableControls(true);
                 }

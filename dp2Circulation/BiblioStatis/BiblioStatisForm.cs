@@ -175,7 +175,7 @@ namespace dp2Circulation
                 this,
                 "", // 不分图书和期刊
                 "biblio",
-                this.stop,
+                this._stop,
                 this.Channel);
         }
 
@@ -345,13 +345,16 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.button_getProjectName.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.button_getProjectName.Enabled = bEnable;
 
-            // this.checkBox_departmentTable.Enabled = bEnable;
+                // this.checkBox_departmentTable.Enabled = bEnable;
 
-            this.button_next.Enabled = bEnable;
+                this.button_next.Enabled = bEnable;
 
-            this.button_projectManage.Enabled = bEnable;
+                this.button_projectManage.Enabled = bEnable;
+            }));
         }
 
         /*
@@ -380,9 +383,9 @@ Stack:
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在执行脚本 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在执行脚本 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -528,9 +531,9 @@ Stack:
                     objStatis.Prompt -= ObjStatis_Prompt;
                 }
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 this.AssemblyMain = null;
 
@@ -849,7 +852,7 @@ Stack:
 
                     BiblioLoader loader = new BiblioLoader();
                     loader.Channel = Channel;
-                    loader.Stop = stop;
+                    loader.Stop = _stop;
                     loader.TextReader = sr;
                     loader.Format = objStatis.BiblioFormat;    // "xml";
                     loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
@@ -863,7 +866,7 @@ Stack:
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             DialogResult result = MessageBox.Show(this,
                                 "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
@@ -880,7 +883,7 @@ Stack:
                             if (result == DialogResult.No)
                                 return 0;   // 假装loop正常结束
 
-                            stop.Continue(); // 继续循环
+                            _stop.Continue(); // 继续循环
                         }
 
 #if NO
@@ -899,7 +902,7 @@ Stack:
                             continue;
 #endif
 
-                        stop.SetMessage("正在获取第 " + ((i++) + 1).ToString() + " 个书目记录，" + strAccessPointName + "为 " + item.RecPath);
+                        _stop.SetMessage("正在获取第 " + ((i++) + 1).ToString() + " 个书目记录，" + strAccessPointName + "为 " + item.RecPath);
                         this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
 #if NO
@@ -1193,7 +1196,7 @@ Stack:
                     // 不指定批次号，意味着特定库全部条码
                     if (String.IsNullOrEmpty(strBatchNo) == true)
                     {
-                        lRet = Channel.SearchBiblio(stop,
+                        lRet = Channel.SearchBiblio(_stop,
                              this.comboBox_inputBiblioDbName.Text,
                              "",
                              -1,    // nPerMax
@@ -1212,7 +1215,7 @@ Stack:
                     else
                     {
                         // 指定批次号。特定库。
-                        lRet = Channel.SearchBiblio(stop,
+                        lRet = Channel.SearchBiblio(_stop,
                              this.comboBox_inputBiblioDbName.Text,
                              strBatchNo,
                              -1,    // nPerMax
@@ -1242,14 +1245,14 @@ Stack:
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
                         }
 
                         lRet = Channel.GetSearchResult(
-                            stop,
+                            _stop,
                             null,   // strResultSetName
                             lStart,
                             lCount,
@@ -1279,7 +1282,7 @@ Stack:
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
@@ -1856,7 +1859,7 @@ Stack:
             }
             */
             long lRet = Channel.SetBiblioInfo(
-                stop,
+                _stop,
                 strAction,
                 strPath,
                 "xml",

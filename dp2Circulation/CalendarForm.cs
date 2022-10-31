@@ -130,9 +130,9 @@ namespace dp2Circulation
 
             EnableControls(false, true);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得全部日历名 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得全部日历名 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -148,7 +148,7 @@ namespace dp2Circulation
                     CalenderInfo[] infos = null;
 
                     long lRet = Channel.GetCalendar(
-                        stop,
+                        _stop,
                         "list",
                         "",
                         nStart,
@@ -179,9 +179,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true, true);
             }
@@ -209,9 +209,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得日历 '"+strName+"' 的内容 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获得日历 '" + strName + "' 的内容 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
@@ -221,7 +221,7 @@ namespace dp2Circulation
                 CalenderInfo[] infos = null;
 
                 long lRet = Channel.GetCalendar(
-                    stop,
+                    _stop,
                     "get",
                     strName,
                     0,
@@ -250,9 +250,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
 
@@ -279,23 +279,23 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在对日历 '" + strName + "' 进行 "+strAction+" 操作 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在对日历 '" + strName + "' 进行 " + strAction + " 操作 ...");
+            _stop.BeginLoop();
 
             this.Update();
             Program.MainForm.Update();
 
             try
             {
-                CalenderInfo　info = new CalenderInfo();
+                CalenderInfo info = new CalenderInfo();
                 info.Name = strName;
                 info.Range = strRange;
                 info.Comment = strComment;
                 info.Content = strContent;
 
                 long lRet = Channel.SetCalendar(
-                    stop,
+                    _stop,
                     strAction,
                     info,
                     out strError);
@@ -304,9 +304,9 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("");
 
                 EnableControls(true);
 
@@ -391,7 +391,7 @@ namespace dp2Circulation
             int nRet = FillCalendarNames(out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
-            else 
+            else
             {
 
                 if (this.comboBox_calendarName.Text == ""
@@ -415,16 +415,19 @@ namespace dp2Circulation
 
         void EnableControls(bool bEnable, bool bExcludeNameList)
         {
-            if (bExcludeNameList == true)
-                this.comboBox_calendarName.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                if (bExcludeNameList == true)
+                    this.comboBox_calendarName.Enabled = bEnable;
 
-            this.button_load.Enabled = bEnable;
-            this.calenderControl1.Enabled = bEnable;
+                this.button_load.Enabled = bEnable;
+                this.calenderControl1.Enabled = bEnable;
 
-            if (bEnable == false)
-                this.button_save.Enabled = bEnable;
-            else
-                this.button_save.Enabled = this.calenderControl1.Changed;
+                if (bEnable == false)
+                    this.button_save.Enabled = bEnable;
+                else
+                    this.button_save.Enabled = this.calenderControl1.Changed;
+            }));
         }
 
         private void comboBox_calendarName_DropDownClosed(object sender, EventArgs e)
@@ -578,7 +581,7 @@ namespace dp2Circulation
             string strError = "";
 
             DialogResult result = MessageBox.Show(this,
-"确实要删除日历 '"+this.comboBox_calendarName.Text+"' ? ",
+"确实要删除日历 '" + this.comboBox_calendarName.Text + "' ? ",
 "CalendarForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -615,17 +618,18 @@ MessageBoxDefaultButton.Button2);
 
         private void CalendarForm_Activated(object sender, EventArgs e)
         {
-            Program.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this._stop);
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
             Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
- 
+
     }
 
     // 日历名排序器
-    /*public*/ class CalencarNameComparer : IComparer<string>
+    /*public*/
+    class CalencarNameComparer : IComparer<string>
     {
         int IComparer<string>.Compare(string x, string y)
         {
