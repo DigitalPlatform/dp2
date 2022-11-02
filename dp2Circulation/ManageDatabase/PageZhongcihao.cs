@@ -19,6 +19,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -190,6 +191,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             strError = "";
             strZhongcihaoXml = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -200,21 +202,27 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             Program.MainForm.Update();
 
             var channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取种次号定义 ...",
+                "disableControl");
 
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    _stop,
+                    looping.stop,
                     "circulation",
                     "zhongcihao",
                     out strZhongcihaoXml,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 _stop.EndLoop();
@@ -222,10 +230,8 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-        ERROR1:
-            return -1;
         }
 
         // 保存种次号定义
@@ -236,6 +242,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -246,22 +253,28 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             Program.MainForm.Update();
 
             var channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存种次号定义 ...",
+                "disableControl");
 
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    _stop,
+                    looping.stop,
                     "circulation",
                     "zhongcihao",
                     strZhongcihaoXml,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 _stop.EndLoop();
@@ -269,10 +282,8 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-        ERROR1:
-            return -1;
         }
 
 

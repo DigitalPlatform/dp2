@@ -10,7 +10,7 @@ namespace DigitalPlatform
     {
         public Stop stop { get; set; }
         StopEventHandler _handler = null;
-        static StopManager _stopManager = null;
+        // static StopManager _stopManager = null;
 
         // 2022/10/30
         public LoopingHost Host { get; set; }
@@ -20,9 +20,15 @@ namespace DigitalPlatform
 
         public Action Closed;
 
+        /*
         public static void Initialize(StopManager stopManager)
         {
             _stopManager = stopManager;
+        }
+        */
+        public Looping(LoopingHost host)
+        {
+            Host = host;
         }
 
         public void Dispose()
@@ -49,19 +55,23 @@ namespace DigitalPlatform
             Closed = null;
         }
 
-        public Looping(StopEventHandler handler,
+        public Looping(
+            LoopingHost host,
+            StopEventHandler handler,
             string text,
             bool activate = true)
         {
-            if (_stopManager == null)
-                throw new ArgumentException("尚未初始化 _stopManager");
+            this.Host = host;
+            if (this.Host.StopManager == null)
+                throw new ArgumentException("尚未初始化 Host.StopManager");
 
             stop = new Stop();
-            stop.Register(_stopManager, activate);	// 和容器关联
+            stop.Register(this.Host.StopManager/*_stopManager*/, activate);	// 和容器关联
 
             _handler = handler;
             stop.OnStop += handler;
-            stop.Initial(text);
+            if (text != null)
+                stop.Initial(text);
             stop.BeginLoop();
         }
 
@@ -90,16 +100,29 @@ namespace DigitalPlatform
     }
 
 
-    public class LoopingHost
+    public class LoopingHost : ILoopingHost
     {
         List<Looping> _loopings = new List<Looping>();
         object _syncRoot_loopings = new object();
+
+        StopManager _stopManager = null;
+        public StopManager StopManager
+        {
+            get
+            {
+                return _stopManager;
+            }
+            set
+            {
+                _stopManager = value;
+            }
+        }
 
         public Looping BeginLoop(StopEventHandler handler,
             string text,
             string style = null)
         {
-            var looping = new Looping(handler, text/*, _isActive*/);
+            var looping = new Looping(this, handler, text/*, _isActive*/);
             lock (_syncRoot_loopings)
             {
                 _loopings.Add(looping);
@@ -112,7 +135,7 @@ namespace DigitalPlatform
                     looping.stop.Style = StopStyle.EnableHalfStop;
             }
 
-            looping.Host = this;
+            // looping.Host = this;
             return looping;
         }
 

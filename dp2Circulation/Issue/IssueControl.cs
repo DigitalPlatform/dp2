@@ -124,13 +124,10 @@ namespace dp2Circulation
             long lCount = -1;
             for (; ; )
             {
-                if (stop != null)
+                if (stop != null && stop.State != 0)
                 {
-                    if (stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        return -1;
-                    }
+                    strError = "用户中断";
+                    return -1;
                 }
                 EntityInfo[] entities = null;
 
@@ -594,6 +591,7 @@ namespace dp2Circulation
         //      0   not dup
         //      1   dup
         int SearchIssueRefIdDup(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strRefID,
             // string strBiblioRecPath,
@@ -615,7 +613,7 @@ namespace dp2Circulation
             Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
             Stop.BeginLoop();
 #endif
-            Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
+            stop?.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
 
             try
             {
@@ -629,7 +627,7 @@ namespace dp2Circulation
                     out strError);
                  * */
                 long lRet = channel.SearchIssue(
-    Stop,
+    stop,
     "<全部>",
     strRefID,
     100,
@@ -648,7 +646,7 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                lRet = channel.GetSearchResult(Stop,
+                lRet = channel.GetSearchResult(stop,
                     "dup",
                     0,
                     Math.Min(lHitCount, 100),
@@ -683,7 +681,7 @@ namespace dp2Circulation
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.Initial("");
+                stop?.Initial("");
             }
 
             return 1;   // found
@@ -808,6 +806,9 @@ namespace dp2Circulation
             TriggerContentChanged(bOldChanged, true);
 
             LibraryChannel channel = Program.MainForm.GetChannel();
+            var looping = BeginLoop((s, e) => Program.MainForm.DoStop(s, e),
+                "...");
+
             this.EnableControls(false);
             try
             {
@@ -871,7 +872,6 @@ namespace dp2Circulation
                     {
                         // Debug.Assert(false, "");
 
-                        string[] paths = null;
                         // 参考ID查重。
                         // parameters:
                         //      strOriginRecPath    出发记录的路径。
@@ -881,11 +881,12 @@ namespace dp2Circulation
                         //      0   not dup
                         //      1   dup
                         nRet = SearchIssueRefIdDup(
+                            looping.stop,
                             channel,
                             issueitem.RefID,
                             // this.BiblioRecPath,
                             issueitem.RecPath,
-                            out paths,
+                            out string[] paths,
                             out strError);
                         if (nRet == -1)
                             MessageBox.Show(ForegroundWindow.Instance, "对参考ID '" + issueitem.RefID + "' 进行查重的过程中发生错误: " + strError);
@@ -896,7 +897,6 @@ namespace dp2Circulation
 
                             string strText = "参考ID '" + issueitem.RefID + "' 在数据库中发现已经被(属于其他种的)下列期记录所使用。\r\n" + pathlist + "\r\n\r\n按“确定”按钮重新编辑期信息，或者根据提示的期记录路径，去修改其他期记录信息。";
                             MessageBox.Show(ForegroundWindow.Instance, strText);
-
                             goto REDO;
                         }
                     }
@@ -911,6 +911,7 @@ namespace dp2Circulation
             finally
             {
                 this.EnableControls(true);
+                looping.Dispose();
                 Program.MainForm.ReturnChannel(channel);
             }
         }

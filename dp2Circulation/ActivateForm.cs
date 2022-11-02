@@ -16,6 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -43,6 +44,8 @@ namespace dp2Circulation
         /// </summary>
         public ActivateForm()
         {
+            this.UseLooping = true; // 2022/11/1
+
             InitializeComponent();
         }
 
@@ -376,6 +379,7 @@ MessageBoxDefaultButton.Button2);
 
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在初始化浏览器组件 ...");
             _stop.BeginLoop();
@@ -384,6 +388,10 @@ MessageBoxDefaultButton.Button2);
             Program.MainForm.Update();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在初始化浏览器组件 ...",
+                "disableControl");
 
             if (edit != null)
                 edit.Clear();
@@ -407,20 +415,17 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-                byte[] baTimestamp = null;
-                string strRecPath = "";
-
                 int nRedoCount = 0;
             REDO:
-                _stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                looping.stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
-                long lRet = Channel.GetReaderInfo(
-                    _stop,
+                long lRet = channel.GetReaderInfo(
+                    looping.stop,
                     strBarcode,
                     "xml,html",
                     out string[] results,
-                    out strRecPath,
-                    out baTimestamp,
+                    out string strRecPath,
+                    out byte[] baTimestamp,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -463,10 +468,6 @@ MessageBoxDefaultButton.Button2);
                     nRedoCount++;
                     goto REDO;
                 }
-
-
-
-                // this.ReaderBarcode = strBarcode;
 
                 if (results == null || results.Length < 2)
                 {
@@ -518,11 +519,14 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
 
             return 1;
@@ -687,14 +691,19 @@ MessageBoxDefaultButton.Button2);
             if (edit.Barcode == "")
             {
                 strError = "尚未输入证条码号";
-                goto ERROR1;
+                return -1;
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在保存读者记录 " + edit.Barcode + " ...");
             _stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存读者记录 " + edit.Barcode + " ...",
+                "disableControl");
 
             try
             {
@@ -703,7 +712,7 @@ MessageBoxDefaultButton.Button2);
                     out strNewXml,
                     out strError);
                 if (nRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 ErrorCodeValue kernel_errorcode;
 
@@ -712,8 +721,8 @@ MessageBoxDefaultButton.Button2);
                 string strSavedXml = "";
                 string strSavedPath = "";
 
-                long lRet = Channel.SetReaderInfo(
-                    _stop,
+                long lRet = channel.SetReaderInfo(
+                    looping.stop,
                     "change",
                     edit.RecPath,
                     strNewXml,
@@ -758,7 +767,7 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
 
-                    goto ERROR1;
+                    return -1;
                 }
 
                 /*
@@ -772,7 +781,7 @@ MessageBoxDefaultButton.Button2);
                     // 部分字段被拒绝
                     MessageBox.Show(this, strError);
 
-                    if (Channel.ErrorCode == ErrorCode.PartialDenied)
+                    if (channel.ErrorCode == ErrorCode.PartialDenied)
                     {
                         // 提醒重新装载?
                         MessageBox.Show(this, "请重新装载记录, 检查哪些字段内容修改被拒绝。");
@@ -786,23 +795,24 @@ MessageBoxDefaultButton.Button2);
                         baNewTimestamp,
                         out strError);
                     if (nRet == -1)
-                        goto ERROR1;
+                        return -1;
                 }
 
+
+                strError = "保存成功";
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
-
-            strError = "保存成功";
-            return 0;
-        ERROR1:
-            return -1;
         }
 
 
@@ -812,6 +822,7 @@ MessageBoxDefaultButton.Button2);
         {
             strError = "";
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在转移读者借阅信息 ...");
             _stop.BeginLoop();
@@ -820,11 +831,15 @@ MessageBoxDefaultButton.Button2);
             Program.MainForm.Update();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在转移读者借阅信息 ...",
+                "disableControl");
 
             try
             {
-                long lRet = Channel.DevolveReaderInfo(
-                    _stop,
+                long lRet = channel.DevolveReaderInfo(
+                    looping.stop,
                     strSourceReaderBarcode,
                     strTargetReaderBarcode,
                     out strError);
@@ -832,15 +847,17 @@ MessageBoxDefaultButton.Button2);
                     return -1;
 
                 return (int)lRet;
-
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
         }
 
@@ -970,7 +987,9 @@ MessageBoxDefaultButton.Button2);
 
         private void ActivateForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;

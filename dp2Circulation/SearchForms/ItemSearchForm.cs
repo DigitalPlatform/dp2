@@ -8306,12 +8306,14 @@ out strError);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在创建索取号 ...");
             _stop.BeginLoop();
-            */
-            var looping = BeginLoop(this.DoStop, "正在创建索取号 ...", "halfstop");
-
             LibraryChannel channel = this.GetChannel();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在创建索取号 ...", 
+                "halfstop,disableControl");
+
             try
             {
                 // 打开一个新的种册窗
@@ -8364,6 +8366,7 @@ out strError);
                         nCount++;
                         // form.DoSaveAll();
                         nRet = form.EntityControl.SaveItems(
+                            looping.stop,
                             channel,
                             "",
                             out strError);
@@ -8437,18 +8440,18 @@ out strError);
             }
             finally
             {
+
+                /*
                 this.EnableControls(true);
 
                 this.ReturnChannel(channel);
-
-                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
                 _stop.Style = StopStyle.None;
                 */
-                EndLoop(looping);
+                looping.Dispose();
             }
 
             ShowMessageBox("共处理 " + nCount.ToString() + " 个册记录");

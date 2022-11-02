@@ -69,6 +69,7 @@ namespace dp2ManageCenter
 
         }
 
+        // TODO: 增加 Looping 支持
         private void kernelResTree1_GetChannel(object sender, DigitalPlatform.LibraryClient.GetChannelEventArgs e)
         {
             e.Channel = Program.MainForm.GetChannel(this.ServerUrl);

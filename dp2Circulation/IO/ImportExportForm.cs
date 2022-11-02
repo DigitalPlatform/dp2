@@ -30,6 +30,8 @@ namespace dp2Circulation
 
         public ImportExportForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
 
             this.panel_map.Controls.Add(_mapDialog.ListView);
@@ -245,10 +247,14 @@ strStringTable);
             string strError = "";
             bool bRet = false;
 
+            var looping = Looping(out LibraryChannel channel,
+                "...",
+                "timeout:0:2:0,disableControl");
+
             ProcessInfo info = new ProcessInfo();
             {
-                info.Channel = this.GetChannel();
-                info.stop = _stop;
+                info.Channel = channel; //  this.GetChannel();
+                info.stop = looping.stop;   // _stop;
 
                 info.TargetBiblioDbName = (string)this.Invoke(new Func<string>(() =>
                 {
@@ -420,9 +426,6 @@ strStringTable);
 Program.MainForm.ActivateFixPage("history")
     ));
 
-            this.Invoke((Action)(() =>
-                EnableControls(false)
-                ));
 
             string strText = "正在从书目转储文件导入数据 ...";
             if (info.Simulate)
@@ -432,6 +435,9 @@ Program.MainForm.ActivateFixPage("history")
 
             WriteText(strText + "\r\n");
 
+            /*
+            EnableControls(false);
+
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial(strText);
@@ -439,6 +445,8 @@ Program.MainForm.ActivateFixPage("history")
 
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
+            */
+            looping.stop.SetMessage(strText);
 
             // int nBiblioRecordCount = 0;
 
@@ -457,8 +465,8 @@ Program.MainForm.ActivateFixPage("history")
     FileAccess.Read))
                 using (XmlTextReader reader = new XmlTextReader(file))
                 {
-                    if (_stop != null)
-                        _stop.SetProgressRange(0, file.Length);
+                    if (looping != null)
+                        looping.stop.SetProgressRange(0, file.Length);
 
                     // 到根元素
                     while (true)
@@ -475,7 +483,7 @@ Program.MainForm.ActivateFixPage("history")
 
                     for (; ; )
                     {
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -496,8 +504,8 @@ Program.MainForm.ActivateFixPage("history")
 
                         DoRecord(reader, info);
 
-                        if (_stop != null)
-                            _stop.SetProgressValue(file.Position);
+                        if (looping != null)
+                            looping.stop.SetProgressValue(file.Position);
 
                         info.BiblioRecCount++;
                     }
@@ -535,6 +543,8 @@ Program.MainForm.ActivateFixPage("history")
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -544,9 +554,8 @@ Program.MainForm.ActivateFixPage("history")
                 info.Channel.Timeout = old_timeout;
                 this.ReturnChannel(info.Channel);
 
-                this.Invoke((Action)(() =>
-                    EnableControls(true)
-                    ));
+                EnableControls(true);
+                */
             }
 
         ERROR1:

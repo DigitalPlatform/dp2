@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -27,6 +28,8 @@ namespace dp2Circulation
 
         public SelectLocationDialog()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
 
             this.SuppressSizeSetting = true;  // 不需要基类 MyForm 的尺寸设定功能

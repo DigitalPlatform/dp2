@@ -41,6 +41,8 @@ namespace dp2Circulation
         /// </summary>
         public ChannelForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
         }
 
@@ -116,6 +118,7 @@ namespace dp2Circulation
 
             this.listView_channel.Items.Clear();
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -126,6 +129,10 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得服务器通道信息 ...",
+                "disableControl");
 
             this.listView_channel.BeginUpdate();
             try
@@ -136,7 +143,7 @@ namespace dp2Circulation
                     ChannelInfo[] contents = null;
 
                     long lRet = channel.GetChannelInfo(
-                        this._stop,
+                        looping.stop,
                         strQuery,
                         strStyle,
                         nStart,
@@ -207,6 +214,8 @@ namespace dp2Circulation
             {
                 this.listView_channel.EndUpdate();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -214,6 +223,7 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
 
             RefreshBackForwardButtons();
@@ -236,6 +246,7 @@ namespace dp2Circulation
             strError = "";
 
             int nCount = 0;
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -246,6 +257,10 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在关闭指定的通道 ...",
+                "disableControl");
 
             try
             {
@@ -268,7 +283,7 @@ namespace dp2Circulation
                 foreach (List<string> one in batchs)
                 {
                     ChannelInfo[] requests = new ChannelInfo[one.Count];
-                    for(int i = 0;i<requests.Length;i++)
+                    for (int i = 0; i < requests.Length; i++)
                     {
                         ChannelInfo info = new ChannelInfo();
                         if (strIdType == "sessionid")
@@ -277,7 +292,7 @@ namespace dp2Circulation
                             info.ClientIP = one[i];
                         else
                         {
-                            strError = "未知的 strIdType 类型 '"+strIdType+"'";
+                            strError = "未知的 strIdType 类型 '" + strIdType + "'";
                             return -1;
                         }
                         requests[i] = info;
@@ -285,7 +300,7 @@ namespace dp2Circulation
 
                     ChannelInfo[] results = null;
                     long lRet = channel.ManageChannel(
-this._stop,
+looping.stop,
 "close",
 "",
 requests,
@@ -295,9 +310,12 @@ out strError);
                         return -1;
                     nCount += (int)lRet;
                 }
+                return nCount;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -305,9 +323,8 @@ out strError);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return nCount;
         }
 
         // 规整 IP 字符串
@@ -316,7 +333,7 @@ out strError);
             if (string.IsNullOrEmpty(strText) == true)
                 return "";
             StringBuilder text = new StringBuilder(20);
-            string [] parts = strText.Split(new char[] {'.'});
+            string[] parts = strText.Split(new char[] { '.' });
             foreach (string s in parts)
             {
                 if (text.Length > 0)
@@ -530,7 +547,7 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_channel, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_channel, new Point(e.X, e.Y));
         }
 
         void menu_channel_selectAll_Click(object sender, EventArgs e)
@@ -550,7 +567,7 @@ out strError);
 
             int nSubCount = 0;  // 统计每个 IP 对应的从属的通道的总数
             List<string> sessionids = new List<string>();
-            foreach(ListViewItem item in this.listView_channel.SelectedItems)
+            foreach (ListViewItem item in this.listView_channel.SelectedItems)
             {
                 if (this._queryState.IsCountMode() == false)
                 {
@@ -609,7 +626,7 @@ MessageBoxDefaultButton.Button2);
             if (nRet == -1)
                 goto ERROR1;
 
-            MessageBox.Show(this, "成功关闭 "+nRet.ToString()+" 个通道。显示未刷新");
+            MessageBox.Show(this, "成功关闭 " + nRet.ToString() + " 个通道。显示未刷新");
             return;
         ERROR1:
             MessageBox.Show(this, strError);

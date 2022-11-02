@@ -47,6 +47,8 @@ namespace dp2Circulation
         /// </summary>
         public CardPrintForm()
         {
+            this.UseLooping = true; // 2022/11/1
+
             InitializeComponent();
         }
 
@@ -165,10 +167,14 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
+            /*
             _stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping("正在打印卡片 ...", "disableControl");
+            _looping = looping;
             /*
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
@@ -280,12 +286,15 @@ namespace dp2Circulation
                 /*
                 this.Cursor = oldCursor;
                  * */
+                _looping = null;
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new DigitalPlatform.StopEventHandler(stop_OnStop);
-
                 this._stop.HideProgress();
+                */
             }
 
             this.EndPrint();
@@ -317,9 +326,13 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
+            /*
             _stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
             _stop.BeginLoop(); 
             this.EnableControls(false);
+            */
+            var looping = Looping("...", "disableControl");
+            _looping = looping;
             this.estimate.StartEstimate();
             try
             {
@@ -403,12 +416,15 @@ namespace dp2Circulation
             }
             finally
             {
+                _looping = null;
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
                 _stop.EndLoop();
                 _stop.OnStop -= new DigitalPlatform.StopEventHandler(stop_OnStop);
 
                 this._stop.HideProgress();
-
+                */
             }
 
             this.EndPrint();
@@ -462,6 +478,8 @@ namespace dp2Circulation
             return 0;
         }
 
+        Looping _looping = null;
+
         long m_lCount = 0;
 
         void document_SetProgress(object sender, SetProgressEventArgs e)
@@ -472,7 +490,7 @@ namespace dp2Circulation
             {
                 this.estimate.SetRange(e.Start, e.End);
 
-                this._stop.SetProgressRange(e.Start, e.End);
+                _looping?.stop?.SetProgressRange(e.Start, e.End);
 
                 this.progressBar_records.Minimum = (int)e.Start;
                 this.progressBar_records.Maximum = (int)e.End;
@@ -480,9 +498,9 @@ namespace dp2Circulation
             else
             {
                 if ((this.m_lCount++ % 10) == 1)
-                    this._stop.SetMessage("剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(e.Value)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
+                    _looping?.stop?.SetMessage("剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(e.Value)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
 
-                this._stop.SetProgressValue(e.Value);
+                _looping?.stop?.SetProgressValue(e.Value);
                 // this.stop.SetMessage(e.Value.ToString() + " - " + (((double)e.Value / (double)e.End) * 100).ToString() + "%");
 
                 this.progressBar_records.Value = (int)e.Value;

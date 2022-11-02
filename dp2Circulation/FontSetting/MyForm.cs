@@ -33,7 +33,7 @@ namespace dp2Circulation
     /// <summary>
     /// 通用的 MDI 子窗口基类。提供了通讯通道和窗口尺寸维持等通用设施
     /// </summary>
-    public class MyForm : Form, IMdiWindow, ILoopingHost
+    public class MyForm : Form, IMdiWindow, ILoopingHost, IChannelHost, IEnableControl, IChannelLooping
     {
         #region test
         /// <summary>
@@ -327,12 +327,19 @@ namespace dp2Circulation
         public Looping Looping(
             out LibraryChannel channel,
             string text = "",
-            string style = null)
+            string style = null,
+            StopEventHandler handler = null)
         {
             var controlDisabled = StringUtil.IsInList("disableControl", style);
-            var timeout_string = StringUtil.GetParameterByPrefix(style, "timeout");
+            var timeout_string = StringUtil.GetParameterByPrefix(style, "timeout"); // 不小于这么多
+            var settimeout_string = StringUtil.GetParameterByPrefix(style, "settimeout");   // 设置为这么多
 
-            channel = this.GetChannel();
+            var serverUrl = StringUtil.GetParameterByPrefix(style, "serverUrl");
+            if (string.IsNullOrEmpty(serverUrl) == false)
+                serverUrl = StringUtil.UnescapeString(serverUrl);
+            var userName = StringUtil.GetParameterByPrefix(style, "userName");
+
+            channel = this.GetChannel(serverUrl, userName);
 
             var old_timeout = channel.Timeout;
             bool timeout_changed = false;
@@ -345,8 +352,20 @@ namespace dp2Circulation
                     timeout_changed = true;
                 }
             }
+            if (string.IsNullOrEmpty(settimeout_string) == false)
+            {
+                var new_timeout = TimeSpan.Parse(settimeout_string);
+                if (new_timeout != old_timeout)
+                {
+                    channel.Timeout = new_timeout;
+                    timeout_changed = true;
+                }
+            }
 
-            var looping = _loopingHost.BeginLoop(this.DoStop, text, style);
+            var looping = _loopingHost.BeginLoop(
+                handler == null ? this.DoStop : handler,
+                text, 
+                style);
 
             if (controlDisabled)
                 this.EnableControls(false);
@@ -366,11 +385,15 @@ namespace dp2Circulation
 
         // 两种动作: BeginLoop() 和 EnableControl()
         public Looping Looping(string text,
-            string style = null)
+            string style = null,
+            StopEventHandler handler = null)
         {
             var controlDisabled = StringUtil.IsInList("disableControl", style);
 
-            var looping = _loopingHost.BeginLoop(this.DoStop, text, style);
+            var looping = _loopingHost.BeginLoop(
+                handler == null ? this.DoStop : handler,
+                text, 
+                style);
 
             if (controlDisabled)
                 this.EnableControls(false);
@@ -385,7 +408,7 @@ namespace dp2Circulation
         }
 
 
-        LoopingHost _loopingHost = new LoopingHost();
+        internal LoopingHost _loopingHost = new LoopingHost();
 
         public Looping BeginLoop(StopEventHandler handler,
 string text,
@@ -491,8 +514,16 @@ string style = null)
             this.Channel.Idle -= Channel_Idle;
             this.Channel.Idle += Channel_Idle;
 
-            _stop = new DigitalPlatform.Stop();
-            _stop.Register(Program.MainForm?.stopManager, true);	// 和容器关联
+            if (this.UseLooping == true)
+            {
+                // 默认使用 MainForm 的 StopManager
+                this._loopingHost.StopManager = Program.MainForm.stopManager;
+            }
+            else
+            {
+                _stop = new DigitalPlatform.Stop();
+                _stop.Register(Program.MainForm?.stopManager, true);    // 和容器关联
+            }
 
             {
                 _floatingMessage = new FloatingMessageForm(this, true);
@@ -688,34 +719,39 @@ bool bClickClose = false)
 
         #region 新风格的 ChannelPool
 
+        ChannelList _channelList = new ChannelList();
+
         // parameters:
         //      strStyle    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
-        public LibraryChannel GetChannel(string strServerUrl = ".",
+        public virtual LibraryChannel GetChannel(string strServerUrl = ".",
             string strUserName = ".",
             GetChannelStyle style = GetChannelStyle.GUI,
             string strClientIP = "")
         {
             LibraryChannel channel = Program.MainForm.GetChannel(strServerUrl, strUserName, style, strClientIP);
 
+            /*
             lock (_syncRoot_channelList)
             {
                 _channelList.Add(channel);
             }
+            */
+            _channelList.AddChannel(channel);
             // TODO: 检查数组是否溢出
             return channel;
         }
 
-        public void ReturnChannel(LibraryChannel channel)
+        public virtual void ReturnChannel(LibraryChannel channel)
         {
             Program.MainForm.ReturnChannel(channel);
+            /*
             lock (_syncRoot_channelList)
             {
                 _channelList.Remove(channel);
             }
+            */
+            _channelList.RemoveChannel(channel);
         }
-
-        private static readonly Object _syncRoot_channelList = new Object(); // 2017/5/18
-        List<LibraryChannel> _channelList = new List<LibraryChannel>();
 
         /*
 操作类型 crashReport -- 异常报告 
@@ -750,13 +786,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
 本机 MAC 地址: F44D3077D567 
 操作时间 2017/5/18 13:25:07 (Thu, 18 May 2017 13:25:07 +0800) 
 前端地址 xxx 经由 http://dp2003.com/dp2library 
-         * */
-        internal void DoStop(object sender, StopEventArgs e)
+ * */
+        public void DoStop(object sender, StopEventArgs e)
         {
             // 兼容旧风格
             if (this.Channel != null)
                 this.Channel.Abort();
 
+            /*
             lock (_syncRoot_channelList)
             {
                 foreach (LibraryChannel channel in _channelList)
@@ -765,7 +802,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                         channel.Abort();
                 }
             }
+            */
+            _channelList.AbortAll();
         }
+
 
         public string CurrentUserName
         {
@@ -843,6 +883,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         public void BeginLoop(string strStyle = "",
             string strMessage = "")
         {
+            if (this.UseLooping == true)
+                throw new ArgumentException("UseLooping 为 true 时不应该调用本函数");
+
             if (StringUtil.IsInList("halfstop", strStyle) == true)
                 _stop.Style = StopStyle.EnableHalfStop;
 
@@ -856,6 +899,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// </summary>
         public void EndLoop()
         {
+            if (this.UseLooping == true)
+                throw new ArgumentException("UseLooping 为 true 时不应该调用本函数");
+
             _stop.EndLoop();
             _stop.OnStop -= new StopEventHandler(this.DoStop);
             _stop.Initial("");
@@ -869,6 +915,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// <returns>true: 循环已经结束; false: 循环尚未结束</returns>
         public bool IsStopped()
         {
+            if (this.UseLooping == true)
+                throw new ArgumentException("UseLooping 为 true 时不应该调用本函数");
+
             Application.DoEvents();	// 出让界面控制权
 
             if (this._stop != null)
@@ -886,6 +935,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// <param name="strMessage">要显示的字符串</param>
         public void SetProgressMessage(string strMessage)
         {
+            if (this.UseLooping == true)
+                throw new ArgumentException("UseLooping == true 时不应调用本函数");
             _stop.SetMessage(strMessage);
         }
 
@@ -1204,6 +1255,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         {
             strError = "";
 
+            /*
             // EnableControls(false);
             // 2022/8/30
             var channel = this.GetChannel();
@@ -1213,11 +1265,13 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             stop.BeginLoop();
 #endif
             string strOldMessage = _stop.Initial("正在验证条码号 " + strBarcode + "...");
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在验证条码号 " + strBarcode + "...");
             try
             {
                 return Program.MainForm.VerifyBarcode(
-                    _stop,
+                    looping.stop,
                     channel,
                     strLibraryCodeList,
                     strBarcode,
@@ -1226,6 +1280,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
             finally
             {
+                looping.Dispose();
+                /*
 #if NO
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -1234,6 +1290,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 _stop.Initial(strOldMessage);
                 this.ReturnChannel(channel);
                 // EnableControls(true);
+                */
             }
         }
 
@@ -1319,6 +1376,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 return -1;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
             string strOldMessage = Progress.Initial("正在下载配置文件 ...");
             TimeSpan old_timeout = channel.Timeout;
@@ -1329,18 +1387,22 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             Progress.Initial("正在下载配置文件 ...");
             Progress.BeginLoop();
 #endif
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在下载配置文件 ...",
+                "timeout:0:1:0");
 
             m_nInGetCfgFile++;
 
             try
             {
-                Progress.SetMessage("正在下载配置文件 " + strCfgFilePath + " ...");
+                looping.stop.SetMessage("正在下载配置文件 " + strCfgFilePath + " ...");
                 string strMetaData = "";
                 string strOutputPath = "";
 
                 string strStyle = "content,data,metadata,timestamp,outputpath,gzip";
 
-                long lRet = channel.GetRes(Progress,
+                long lRet = channel.GetRes(looping.stop,
                     Program.MainForm?.cfgCache,
                     strCfgFilePath,
                     strStyle,
@@ -1360,6 +1422,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
             finally
             {
+                /*
 #if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
@@ -1369,6 +1432,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
 
                 m_nInGetCfgFile--;
             }
@@ -1401,6 +1466,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 return -1;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
             string strOldMessage = Progress.Initial("正在下载配置文件 ...");
             TimeSpan old_timeout = channel.Timeout;
@@ -1411,6 +1477,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             Progress.Initial("正在下载配置文件 ...");
             Progress.BeginLoop();
 #endif
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在下载配置文件 ...",
+                "timeout:0:1:0");
 
             m_nInGetCfgFile++;
 
@@ -1418,13 +1488,13 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             {
                 string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
 
-                Progress.SetMessage("正在下载配置文件 " + strPath + " ...");
+                looping.stop.SetMessage("正在下载配置文件 " + strPath + " ...");
                 string strMetaData = "";
                 string strOutputPath = "";
 
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
-                long lRet = channel.GetResLocalFile(Progress,
+                long lRet = channel.GetResLocalFile(looping.stop,
                     Program.MainForm?.cfgCache,
                     strPath,
                     strStyle,
@@ -1438,12 +1508,15 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                     if (channel.ErrorCode == ErrorCode.NotFound)
                         return 0;
 
-                    goto ERROR1;
+                    return -1;
                 }
 
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
 #if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
@@ -1453,13 +1526,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
-
+                */
                 m_nInGetCfgFile--;
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         // 保存配置文件
@@ -1471,6 +1540,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         {
             strError = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
             string strOldMessage = Progress.Initial("正在保存配置文件 ...");
             TimeSpan old_timeout = channel.Timeout;
@@ -1481,18 +1551,22 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             Progress.Initial("正在保存配置文件 ...");
             Progress.BeginLoop();
 #endif
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存配置文件 ...",
+                "timeout:0:1:0");
 
             try
             {
                 string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
 
-                Progress.SetMessage("正在保存配置文件 " + strPath + " ...");
+                looping.stop.SetMessage("正在保存配置文件 " + strPath + " ...");
 
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
                 long lRet = channel.WriteRes(
-                    Progress,
+                    looping.stop,
                     strPath,
                     strContent,
                     true,
@@ -1502,11 +1576,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                     out strOutputPath,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
 #if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
@@ -1516,11 +1593,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         #endregion
@@ -1572,15 +1646,20 @@ out string strError)
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(text) + "</div>");
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
             string strOldMessage = Progress.Initial(strAction == "protect" ? "正在请求保护尾号 ..." : "正在请求释放保护尾号 ...");
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                strAction == "protect" ? "正在请求保护尾号 ..." : "正在请求释放保护尾号 ...",
+                "timeout:0:1:0");
 
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    _stop,
+                    looping.stop,
                     strAction,
                     strArrangeGroupName,
                     strClass,
@@ -1598,10 +1677,13 @@ out string strError)
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.Initial(strOldMessage);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1612,6 +1694,7 @@ out string strError)
             out string strResultValue,
             out string strError)
         {
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 0, 10);
@@ -1624,10 +1707,15 @@ out string strError)
 
             string strOldMessage = Progress.Message;
             Progress.SetMessage("正在装入书目记录 " + strBiblioRecPath + " 的局部 ...");
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在装入书目记录 " + strBiblioRecPath + " 的局部 ...",
+                "timeout:0:0:10");
+            
             try
             {
                 long lRet = channel.GetBiblioInfo(
-                    null,   // Progress.State == 0 ? Progress : null,
+                    looping.stop,   // Progress.State == 0 ? Progress : null,
                     strBiblioRecPath,
                     strBiblioXml,
                     strPartName,    // 包含'@'符号
@@ -1637,6 +1725,8 @@ out string strError)
             }
             finally
             {
+                looping.Dispose();
+                /*
 #if NO
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
@@ -1646,6 +1736,7 @@ out string strError)
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1669,7 +1760,7 @@ out string strError)
             out string strError)
         {
             long lRet = channel.GetBiblioInfo(
-                _stop,
+                null,   // _stop,
                 strBiblioRecPath,
                 strBiblioXml,
                 strPartName,    // 包含'@'符号
@@ -1700,7 +1791,7 @@ out string strError)
             out string strError)
         {
             long lRet = channel.GetBiblioSummary(
-                _stop,
+                null, // _stop,
                 strItemBarcode,
                 strConfirmItemRecPath,
                 strBiblioRecPathExclude,
@@ -1729,13 +1820,18 @@ out string strError)
             out string strSummary,
             out string strError)
         {
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 0, 10);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "timeout:0:0:10");
             try
             {
                 long lRet = channel.GetBiblioSummary(
-                    _stop,
+                    looping.stop,
                     strItemBarcode,
                     strConfirmItemRecPath,
                     strBiblioRecPathExclude,
@@ -1746,8 +1842,11 @@ out string strError)
             }
             finally
             {
+                looping.Dispose();
+                /*
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1847,6 +1946,7 @@ out string strError)
             strError = "";
             projectnames = null;
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -1854,21 +1954,22 @@ out string strError)
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在获取可用的查重方案名 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取可用的查重方案名 ...",
+                "disableControl");
             try
             {
-                DupProjectInfo[] dpis = null;
-
                 // string strBiblioDbName = Global.GetDbName(strRecPath);
                 string strBiblioDbName = null;
 
                 long lRet = channel.ListDupProjectInfos(
-                    _stop,
+                    looping.stop,
                     strBiblioDbName,
-                    out dpis,
+                    out DupProjectInfo[] dpis,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 projectnames = new string[dpis.Length];
                 for (int i = 0; i < projectnames.Length; i++)
@@ -1880,6 +1981,8 @@ out string strError)
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -1887,9 +1990,8 @@ out string strError)
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-        ERROR1:
-            return -1;
         }
 
 
@@ -1915,18 +2017,21 @@ out string strError)
                 return -1;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在获得102信息 ...");
             Progress.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得102信息 ...");
             try
             {
                 string strAction = "";
 
                 long lRet = channel.GetUtilInfo(
-                    Progress,
+                    looping.stop,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -1944,11 +2049,14 @@ out string strError)
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1974,18 +2082,22 @@ out string strError)
                 return -1;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在设置102信息 ...");
             Progress.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在设置102信息 ...");
 
             try
             {
                 string strAction = "";
 
                 long lRet = channel.SetUtilInfo(
-                    Progress,
+                    looping.stop,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -2002,11 +2114,14 @@ out string strError)
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -2033,18 +2148,21 @@ out string strError)
                 return -1;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在获得出版社信息 ...");
             Progress.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得出版社信息 ...");
             try
             {
                 string strAction = "";
 
                 long lRet = channel.GetUtilInfo(
-                    Progress,
+                    looping.stop,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -2062,11 +2180,14 @@ out string strError)
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -2092,18 +2213,21 @@ out string strError)
                 return -1;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在设置出版社信息 ...");
             Progress.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在设置出版社信息 ...");
             try
             {
                 string strAction = "";
 
                 long lRet = channel.SetUtilInfo(
-                    Progress,
+                    looping.stop,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -2120,11 +2244,14 @@ out string strError)
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
 
         }
@@ -3307,11 +3434,15 @@ out string strError)
             list = new List<string>();
             string strOutputInfo = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null);
             try
             {
                 long lRet = channel.GetSystemParameter(
-_stop,
+looping.stop,
 "circulation",
 "locationTypes",
 out strOutputInfo,
@@ -3321,7 +3452,10 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
 
             // 
@@ -3388,14 +3522,18 @@ out strError);
             if (string.IsNullOrEmpty(strStyleList) == false)
                 strFormat += ":" + strStyleList.Replace(",", "|");
 
+            /*
             LibraryChannel channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null);
             try
             {
             REDO:
                 string[] results = null;
                 byte[] baNewTimestamp = null;
                 long lRet = channel.GetBiblioInfos(
-                    _stop,
+                    looping.stop,
                     strRecPath,
                     "",
                     new string[] { strFormat },   // formats
@@ -3440,7 +3578,10 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
         }
 

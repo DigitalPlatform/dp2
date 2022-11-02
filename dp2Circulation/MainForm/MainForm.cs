@@ -363,7 +363,7 @@ namespace dp2Circulation
 
             InitializeComponent();
             // 2022/10/29
-            Looping.Initialize(stopManager);
+            // Looping.Initialize(stopManager);
 
             FormClientInfo.CommunityModeChanged += (s, e) =>
             {

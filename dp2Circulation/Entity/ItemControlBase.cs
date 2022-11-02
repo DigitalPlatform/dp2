@@ -9,12 +9,12 @@ using System.Xml;
 using System.Drawing;
 
 using DigitalPlatform;
+using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
@@ -24,16 +24,18 @@ namespace dp2Circulation
     /// </summary>
     /// <typeparam name="T">事项类型。例如 BookItem IssueItem OrderItem CommentItem</typeparam>
     /// <typeparam name="TC">事项集合类型。例如 BookItemCollection IssueItemCollection OrderItemCollection CommentItemCollection</typeparam>
-    public class ItemControlBase<T, TC> : UserControl
+    public class ItemControlBase<T, TC> : UserControl, IChannelLooping
         where T : BookItemBase, new()
         where TC : BookItemCollectionBase, new()
     {
         public event ShowMessageEventHandler ShowMessage = null;
 
+        /*
         /// <summary>
         /// 界面许可 / 禁止状态发生改变
         /// </summary>
         public event EnableControlsHandler EnableControlsEvent = null;
+        */
 
         // Ctrl+A自动创建数据
         /// <summary>
@@ -70,10 +72,12 @@ namespace dp2Circulation
         }
 #endif
 
+        /*
         /// <summary>
         /// 停止控制
         /// </summary>
         public DigitalPlatform.Stop Stop = null;
+        */
 
         /*
         /// <summary>
@@ -102,6 +106,7 @@ namespace dp2Circulation
         /// </summary>
         public TC Items = null;
 
+        /*
         internal void EnableControls(bool bEnable)
         {
             if (this.EnableControlsEvent == null)
@@ -111,6 +116,7 @@ namespace dp2Circulation
             e.bEnable = bEnable;
             this.EnableControlsEvent(this, e);
         }
+        */
 
         // 原名 EntityCount
         /// <summary>
@@ -522,6 +528,7 @@ namespace dp2Circulation
         /// <summary>
         /// 装载 Item 记录
         /// </summary>
+        /// <param name="stop_param"></param>
         /// <param name="channel_param">通讯通道。如果为 null，表示函数内使用自动获得的通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="preload_entities">预先装载好的事项集合</param>
@@ -529,6 +536,7 @@ namespace dp2Circulation
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有装载; 1: 已经装载</returns>
         public virtual int LoadItemRecords(
+            Stop stop_param,
             LibraryChannel channel_param,
             string strBiblioRecPath,
             EntityInfo[] preload_entities,
@@ -538,18 +546,31 @@ namespace dp2Circulation
         {
             strError = "";
 
+            string strMessage = "";
+            if (preload_entities != null)
+                strMessage = ("正在填充" + this.ItemTypeName + "信息 ...");
+            else
+                strMessage = ("正在装入" + this.ItemTypeName + "信息 ...");
+
+            Looping looping = null;
+            Stop stop = stop_param;
+
             LibraryChannel channel = channel_param;
             if (channel == null)
-                channel = Program.MainForm.GetChannel();
+            {
+                // channel = Program.MainForm.GetChannel();
+                looping = Looping(out channel,
+                    strMessage);
+                stop = looping.stop;
+            }
+            else
+                stop?.SetMessage(strMessage);
+
 #if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在装入"+this.ItemTypeName+"信息 ...");
             Stop.BeginLoop();
 #endif
-            if (preload_entities != null)
-                Stop.Initial("正在填充" + this.ItemTypeName + "信息 ...");
-            else
-                Stop.Initial("正在装入" + this.ItemTypeName + "信息 ...");
 
             try
             {
@@ -563,6 +584,7 @@ namespace dp2Circulation
                 {
                     // 
                     int nRet = FillEntities(
+                        stop,
                         channel,
                         preload_entities,
                         Global.GetRecordID(strBiblioRecPath),
@@ -586,14 +608,14 @@ namespace dp2Circulation
                         // ? Thread.Sleep(500);
 
                         if (lCount > 0)
-                            Stop.SetMessage("正在装入册信息 " + lStart.ToString() + "-" + (lStart + lCount - 1).ToString() + " ...");
+                            stop?.SetMessage("正在装入册信息 " + lStart.ToString() + "-" + (lStart + lCount - 1).ToString() + " ...");
 
                         long lRet = 0;
 
                         if (this.ItemType == "item")
                         {
                             lRet = channel.GetEntities(
-                                 Stop,
+                                 stop,
                                  strBiblioRecPath,
                                  lStart,
                                  lCount,
@@ -607,7 +629,7 @@ namespace dp2Circulation
                         else if (this.ItemType == "order")
                         {
                             lRet = channel.GetOrders(
-                                Stop,
+                                stop,
                                 strBiblioRecPath,
                                 lStart,
                                 lCount,
@@ -621,7 +643,7 @@ namespace dp2Circulation
                         else if (this.ItemType == "issue")
                         {
                             lRet = channel.GetIssues(
-                                Stop,
+                                stop,
                                 strBiblioRecPath,
                                 lStart,
                                 lCount,
@@ -635,7 +657,7 @@ namespace dp2Circulation
                         else if (this.ItemType == "comment")
                         {
                             lRet = channel.GetComments(
-                                Stop,
+                                stop,
                                 strBiblioRecPath,
                                 lStart,
                                 lCount,
@@ -661,6 +683,7 @@ namespace dp2Circulation
 
                         // 
                         int nRet = FillEntities(
+                            stop,
                             channel,
                             entities,
                             Global.GetRecordID(strBiblioRecPath),
@@ -692,19 +715,23 @@ namespace dp2Circulation
             finally
             {
                 if (channel_param == null)
-                    Program.MainForm.ReturnChannel(channel);
+                {
+                    // Program.MainForm.ReturnChannel(channel);
+                    looping.Dispose();
+                }
 #if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.Initial("");
+                // Stop.Initial("");
             }
         }
 
         // parameters:
         //      parent_id   (下级记录所从属的)书目记录的 ID。用于补充有错误的下级记录的内存结构
         int FillEntities(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             EntityInfo[] entities,
             string parent_id,
@@ -793,7 +820,7 @@ namespace dp2Circulation
                     {
                         nRet = bookitem.LoadObjects(
                             channel,
-                            this.Stop,
+                            stop,
                             Program.MainForm.ServerVersion,
                             entity.OldRecPath,
                             entity.OldRecord,
@@ -1144,6 +1171,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         //      -1  出错
         //      0   保存成功，没有错误和警告
         internal int SaveEntities(
+            Stop stop, // 2022/11/1
             LibraryChannel channel,
             EntityInfo[] entities,
             out string strError)
@@ -1161,6 +1189,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 EntityInfo[] current = GetPart(entities, i * nBatch, nCurrentCount);
 
                 int nRet = SaveEntityRecords(
+                    stop,
                     channel,
                     this.BiblioRecPath,
                     current,
@@ -1461,6 +1490,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         // 保存实体记录
         // 不负责刷新界面和报错
         int SaveEntityRecords(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strBiblioRecPath,
             EntityInfo[] entities,
@@ -1478,7 +1508,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             this.Update();
             Program.MainForm.Update();
 #endif
-            Stop.Initial("正在保存" + this.ItemTypeName + "信息 ...");
+            stop?.Initial("正在保存" + this.ItemTypeName + "信息 ...");
 
             try
             {
@@ -1487,7 +1517,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 if (this.ItemType == "item")
                 {
                     lRet = channel.SetEntities(
-                         Stop,
+                         stop,
                          strBiblioRecPath,
                          entities,
                          out errorinfos,
@@ -1498,7 +1528,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 else if (this.ItemType == "order")
                 {
                     lRet = channel.SetOrders(
-    Stop,
+    stop,
     strBiblioRecPath,
     entities,
     out errorinfos,
@@ -1509,7 +1539,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 else if (this.ItemType == "issue")
                 {
                     lRet = channel.SetIssues(
-    Stop,
+    stop,
     strBiblioRecPath,
     entities,
     out errorinfos,
@@ -1520,7 +1550,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 else if (this.ItemType == "comment")
                 {
                     lRet = channel.SetComments(
-    Stop,
+    stop,
     strBiblioRecPath,
     entities,
     out errorinfos,
@@ -1541,7 +1571,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.Initial("");
+                stop.Initial("");
             }
 
             return 1;
@@ -1579,6 +1609,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
         public virtual int SaveItems(
+            Stop stop,
             LibraryChannel channel,
             string strStyle,
             out string strError)
@@ -1642,6 +1673,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     //      -1  出错
                     //      0   保存成功，没有错误和警告
                     nRet = SaveEntities(
+                        stop,
                         channel,
                         entities,
                         out strError);
@@ -1653,7 +1685,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     {
                         nRet = SaveObjects(
                             channel,
-                            this.Stop,
+                            stop,
                             Program.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
@@ -1715,12 +1747,16 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         /// 提交 Items 保存请求
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
-        public virtual int DoSaveItems(LibraryChannel channel,
+        public virtual int DoSaveItems(
+            Stop stop,
+            LibraryChannel channel,
             string strStyle,
             out string strError)
         {
             strError = "";
-            int nRet = SaveItems(channel,
+            int nRet = SaveItems(
+                stop,
+                channel,
                 strStyle,
                 out strError);
 
@@ -1904,6 +1940,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             }
 #endif
             LibraryChannel channel = Program.MainForm.GetChannel();
+            var looping = BeginLoop((s, e) => Program.MainForm.DoStop(s, e),
+    "正在保存 ...");
             try
             {
                 // 分批进行保存
@@ -1911,12 +1949,16 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 //      -2  部分成功，部分失败
                 //      -1  出错
                 //      0   保存成功，没有错误和警告
-                nRet = SaveEntities(channel, entities, out strError);
+                nRet = SaveEntities(looping.stop,
+                    channel,
+                    entities,
+                    out strError);
                 if (nRet != 0)
                     goto ERROR1;
             }
             finally
             {
+                looping.Dispose();
                 Program.MainForm.ReturnChannel(channel);
             }
 
@@ -2143,7 +2185,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
 
             try
             {
-
                 // 先检查是否已在本窗口中?
                 // 对当前窗口内进行册记录路径查重
                 if (this.Items != null)
@@ -2176,9 +2217,12 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
 
                 // 根据事项记录路径检索，检索出其从属的书目记录路径。
                 LibraryChannel channel = Program.MainForm.GetChannel();
+                var looping = BeginLoop((s, e) => Program.MainForm.DoStop(s, e),
+                    "正在检索 ...");
                 try
                 {
                     nRet = SearchBiblioRecPath(
+                        looping.stop,
                         channel,
                         strIndex,
                         out strOutputItemRecPath,
@@ -2190,6 +2234,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 }
                 finally
                 {
+                    looping.Dispose();
                     Program.MainForm.ReturnChannel(channel);
                 }
                 if (nRet == -1)
@@ -2327,9 +2372,12 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
 
             string strResultXml = "";
             LibraryChannel channel = Program.MainForm.GetChannel();
+            var looping = BeginLoop((s, e) => Program.MainForm.DoStop(s, e),
+                "正在获取检索点 ...");
             try
             {
                 int nRet = GetKeys(
+                    looping.stop,
                     channel,
                     strRecPath,
                     strXml,
@@ -2340,6 +2388,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
             }
             finally
             {
+                looping.Dispose();
                 Program.MainForm.ReturnChannel(channel);
             }
 
@@ -2356,6 +2405,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
         }
 
         int GetKeys(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strRecPath,
     string strXml,
@@ -2376,7 +2426,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
             Stop.Initial("正在获得记录 " + strRecPath + " 的检索点 ...");
             Stop.BeginLoop();
 #endif
-            Stop.Initial("正在获得记录 " + strRecPath + " 的检索点 ...");
+            stop?.Initial("正在获得记录 " + strRecPath + " 的检索点 ...");
 
             try
             {
@@ -2387,7 +2437,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 long lRet = 0;
 
                 lRet = channel.GetItemInfo(
- Stop,
+ stop,
  this.ItemType,
   "@path:" + strRecPath,
  strXml,
@@ -2411,16 +2461,15 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.Initial("");
+                stop.Initial("");
             }
-
-            return 1;
         }
 
         // 根据事项记录路径，检索出其从属的书目记录路径。
         // parameters:
         //      strIndex    注意使用的时候用 @path @refID 引导
         int SearchBiblioRecPath(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strIndex,
             out string strOutputItemRecPath,
@@ -2441,7 +2490,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
             Stop.Initial("正在检索" + this.ItemTypeName + "记录 '" + strIndex + "' 所从属的书目记录路径 ...");
             Stop.BeginLoop();
 #endif
-            Stop.Initial("正在检索" + this.ItemTypeName + "记录 '" + strIndex + "' 所从属的书目记录路径 ...");
+            stop?.Initial("正在检索" + this.ItemTypeName + "记录 '" + strIndex + "' 所从属的书目记录路径 ...");
 
             try
             {
@@ -2453,7 +2502,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 if (this.ItemType == "item")
                 {
                     lRet = channel.GetItemInfo(
-    Stop,
+    stop,
     strIndex,
     null,
     out strItemText,
@@ -2469,7 +2518,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 else if (this.ItemType == "order")
                 {
                     lRet = channel.GetOrderInfo(
-    Stop,
+    stop,
     strIndex,
     // "", // strBiblioRecPath,
     null,
@@ -2486,7 +2535,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 else if (this.ItemType == "issue")
                 {
                     lRet = channel.GetIssueInfo(
-                         Stop,
+                         stop,
                          strIndex,
                          // "", // strBiblioRecPath,
                          null,
@@ -2503,7 +2552,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 else if (this.ItemType == "comment")
                 {
                     lRet = channel.GetCommentInfo(
-    Stop,
+    stop,
     strIndex,
     // "", // strBiblioRecPath,
     null,
@@ -2532,7 +2581,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.Initial("");
+                stop.Initial("");
             }
         }
 
@@ -2689,8 +2738,90 @@ size.Height);
                     Application.DoEvents();
             }
         }
+
+        #region ILoopingHost
+
+        IChannelLooping _loopingHost = null;
+
+        // 连接外部的 ILoopingHost
+        public void SetLoopingHost(IChannelLooping host)
+        {
+            _loopingHost = host;
+        }
+
+        public Looping TopLooping => _loopingHost.TopLooping;
+
+
+        public Looping BeginLoop(StopEventHandler handler, string text, string style = null)
+        {
+            return _loopingHost.BeginLoop(handler, text, style);
+        }
+
+        public void EndLoop(Looping looping)
+        {
+            _loopingHost.EndLoop(looping);
+        }
+
+        public bool HasLooping()
+        {
+            return _loopingHost.HasLooping();
+        }
+
+        public LibraryChannel GetChannel(string strServerUrl = ".",
+            string strUserName = ".",
+            GetChannelStyle style = GetChannelStyle.GUI,
+            string strClientIP = "")
+        {
+            return _loopingHost.GetChannel(strServerUrl,
+                strUserName,
+                style,
+                strClientIP);
+        }
+
+        public void ReturnChannel(LibraryChannel channel)
+        {
+            _loopingHost.ReturnChannel(channel);
+        }
+
+        public void DoStop(object sender, StopEventArgs e)
+        {
+            _loopingHost.DoStop(sender, e);
+        }
+
+        public void EnableControls(bool enable)
+        {
+            _loopingHost.EnableControls(enable);
+        }
+
+        // 三种动作: GetChannel() BeginLoop() 和 EnableControl()
+        // parameters:
+        //          style 可以有如下子参数:
+        //              disableControl
+        //              timeout:hh:mm:ss 确保超时参数在 hh:mm:ss 以长
+        // https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0
+        // [ws][-]{ d | [d.]hh:mm[:ss[.ff]] }[ws]
+        public Looping Looping(
+            out LibraryChannel channel,
+            string text = "",
+            string style = null,
+            StopEventHandler handler = null)
+        {
+            return _loopingHost.Looping(out channel, text, style, handler);
+        }
+
+        // 两种动作: BeginLoop() 和 EnableControl()
+        public Looping Looping(string text,
+            string style = null,
+            StopEventHandler handler = null)
+        {
+            return _loopingHost.Looping(text, style, handler);
+        }
+
+
+        #endregion
     }
 
+    /*
     /// <summary>
     /// 使能/禁止界面控件
     /// </summary>
@@ -2709,7 +2840,7 @@ size.Height);
         /// </summary>
         public bool bEnable = false;
     }
-
+        */
 
     /// <summary>
     /// 装载书目记录和下属的期记录、册记录

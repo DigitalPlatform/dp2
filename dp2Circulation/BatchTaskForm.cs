@@ -14,6 +14,7 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using System.Threading.Tasks;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -75,6 +76,8 @@ namespace dp2Circulation
         /// </summary>
         public BatchTaskForm()
         {
+            this.UseLooping = true; // 2022/11/1
+
             InitializeComponent();
         }
 
@@ -137,9 +140,11 @@ namespace dp2Circulation
             {
                 case WM_INITIAL:
                     {
+                        /*
                         _stop.SetMessage("正在初始化浏览器控件...");
                         this.Update();
                         Program.MainForm.Update();
+                        */
 
                         ClearWebBrowser(this.webBrowser_info, true);
 
@@ -148,7 +153,7 @@ namespace dp2Circulation
                             StartMonitor(this.comboBox_taskName.Text,
                                 this.toolStripButton_monitoring.Checked);
                         }
-                        _stop.SetMessage("");
+                        // _stop.SetMessage("");
                     }
                     return;
             }
@@ -509,6 +514,7 @@ namespace dp2Circulation
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
+                /*
                 EnableControls(false);
 
                 _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -519,6 +525,10 @@ namespace dp2Circulation
 
                 this.Update();
                 Program.MainForm.Update();
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在启动任务 '" + strTaskName + "' ...",
+                    "disableControl");
 
                 try
                 {
@@ -531,8 +541,8 @@ namespace dp2Circulation
                     //      -1  出错
                     //      0   启动成功
                     //      1   调用前任务已经处于执行状态，本次调用激活了这个任务
-                    long lRet = Channel.BatchTask(
-                        _stop,
+                    long lRet = channel.BatchTask(
+                        looping.stop,
                         strTaskName,
                         "start",
                         param,
@@ -632,11 +642,14 @@ namespace dp2Circulation
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
 
                     EnableControls(true);
+                    */
                 }
 
                 strError = "任务 '" + strTaskName + "' 已成功启动";
@@ -678,6 +691,7 @@ namespace dp2Circulation
             try
             {
 
+                /*
                 EnableControls(false);
 
                 _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -688,14 +702,20 @@ namespace dp2Circulation
 
                 this.Update();
                 Program.MainForm.Update();
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在"
+                    + "停止"
+                    + "任务 '" + strTaskName + "' ...",
+                    "disableControl");
 
                 try
                 {
                     BatchTaskInfo param = new BatchTaskInfo();
                     BatchTaskInfo resultInfo = null;
 
-                    long lRet = Channel.BatchTask(
-                        _stop,
+                    long lRet = channel.BatchTask(
+                        looping.stop,
                         strTaskName,
                         strAction,  // "stop",
                         param,
@@ -712,11 +732,14 @@ namespace dp2Circulation
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
 
                     EnableControls(true);
+                    */
                 }
 
                 return 1;
@@ -739,6 +762,7 @@ namespace dp2Circulation
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
+                /*
                 EnableControls(false);
 
                 _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -747,7 +771,10 @@ namespace dp2Circulation
 
                 this.Update();
                 Program.MainForm.Update();
-
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在继续全部批处理任务 ...",
+                    "disableControl");
                 try
                 {
                     BatchTaskInfo param = new BatchTaskInfo();
@@ -755,8 +782,8 @@ namespace dp2Circulation
 
                     BatchTaskInfo resultInfo = null;
 
-                    long lRet = Channel.BatchTask(
-                        _stop,
+                    long lRet = channel.BatchTask(
+                        looping.stop,
                         "",
                         "continue",
                         param,
@@ -776,11 +803,14 @@ namespace dp2Circulation
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
 
                     EnableControls(true);
+                    */
                 }
 
                 return 1;
@@ -803,6 +833,7 @@ namespace dp2Circulation
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
+                /*
                 EnableControls(false);
 
                 _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -811,6 +842,10 @@ namespace dp2Circulation
 
                 this.Update();
                 Program.MainForm.Update();
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在暂停全部批处理任务 ...",
+                    "disableControl");
 
                 try
                 {
@@ -819,8 +854,8 @@ namespace dp2Circulation
 
                     BatchTaskInfo resultInfo = null;
 
-                    long lRet = Channel.BatchTask(
-                        _stop,
+                    long lRet = channel.BatchTask(
+                        looping.stop,
                         "",
                         "pause",
                         param,
@@ -840,11 +875,14 @@ namespace dp2Circulation
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
 
                     EnableControls(true);
+                    */
                 }
 
                 return 1;
@@ -964,25 +1002,28 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
 
         void DoRefresh()
         {
+            string strError = "";
+
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
-            this.m_nInRefresh++;
-            this.toolStripButton_refresh.Enabled = false;
-            // this.EnableControls(false);
             try
             {
-                string strError = "";
+                this.m_nInRefresh++;
+                this.toolStripButton_refresh.Enabled = false;
 
+                /*
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Initial("正在获取任务 '" + MonitorTaskName + "' 的最新信息 ...");
                 _stop.BeginLoop();
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在获取任务 '" + MonitorTaskName + "' 的最新信息 ...");
 
                 try
                 {
-
                     for (int i = 0; i < 10; i++)  // 最多循环获取10次
                     {
                         Application.DoEvents();
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -1004,10 +1045,10 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
 
                         param.ResultOffset = this.CurResultOffs;
 
-                        _stop.SetMessage("正在获取任务 '" + MonitorTaskName + "' 的最新信息 (第 " + (i + 1).ToString() + " 批 共10批)...");
+                        looping.stop.SetMessage("正在获取任务 '" + MonitorTaskName + "' 的最新信息 (第 " + (i + 1).ToString() + " 批 共10批)...");
 
-                        long lRet = Channel.BatchTask(
-                            _stop,
+                        long lRet = channel.BatchTask(
+                            looping.stop,
                             MonitorTaskName,
                             "getinfo",
                             param,
@@ -1066,25 +1107,28 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
                         if (resultInfo.ResultOffset >= resultInfo.ResultTotalLength)
                             break;
                     }
+
+                    return;
                 }
                 finally
                 {
                     this.toolStripButton_refresh.Enabled = true;
-                    // this.EnableControls(true);
                     this.m_nInRefresh--;
+
+                    looping.Dispose();
+                    /*
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
+                    */
                 }
-
-                return;
-            ERROR1:
-                this.label_progress.Text = strError;
             }
             finally
             {
                 this.m_lock.ReleaseWriterLock();
             }
+        ERROR1:
+            this.label_progress.Text = strError;
         }
 
         // *** 已经删除
@@ -1120,7 +1164,9 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
 
         private void BatchTaskForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;

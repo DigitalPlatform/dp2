@@ -51,7 +51,7 @@ namespace dp2Circulation
         /// 是否要在验收操作末段自动出现允许输入册条码号的界面?
         /// </summary>
         public bool InputItemsBarcode = true;   // 是否要在验收操作末段自动出现允许输入册条码号的界面?
-        
+
         /*
         /// <summary>
         /// 是否为新创建的册记录设置“加工中”状态
@@ -75,7 +75,7 @@ namespace dp2Circulation
         /// 书商过滤器
         /// </summary>
         public string SellerFilter { get; set; }
-        
+
         // 
         /// <summary>
         /// 打开验收目标记录(以便输入条码等)
@@ -154,15 +154,11 @@ namespace dp2Circulation
             long lCount = -1;
             for (; ; )
             {
-                if (stop != null)
+                if (stop != null && stop.State != 0)
                 {
-                    if (stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        return -1;
-                    }
+                    strError = "用户中断";
+                    return -1;
                 }
-                EntityInfo[] entities = null;
 
                 /*
                 if (lCount > 0)
@@ -176,7 +172,7 @@ namespace dp2Circulation
                     lCount,
                     "onlygetpath",
                     "zh",
-                    out entities,
+                    out EntityInfo[] entities,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -211,7 +207,7 @@ namespace dp2Circulation
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -678,7 +674,7 @@ namespace dp2Circulation
 #endif
             TriggerContentChanged(bOldChanged, true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -743,11 +739,13 @@ namespace dp2Circulation
             e.Xml = strNewDefault;
 
             return;
-            ERROR1:
+        ERROR1:
             throw new Exception(strError);
         }
 
-        public override int DoSaveItems(LibraryChannel channel,
+        public override int DoSaveItems(
+            Stop stop,
+            LibraryChannel channel,
             string strStyle,
             out string strError)
         {
@@ -761,7 +759,7 @@ namespace dp2Circulation
                     return -1;
                 }
             }
-            return base.DoSaveItems(channel, strStyle, out strError);
+            return base.DoSaveItems(stop, channel, strStyle, out strError);
         }
 
         // 检查即将保存的订购记录里面是否有 fixedPrice 和 discount 元素
@@ -1332,7 +1330,7 @@ namespace dp2Circulation
             TriggerContentChanged(bOldChanged, true);
             return;
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -1375,7 +1373,7 @@ namespace dp2Circulation
 
                 strPrice = CanonicalizePrice(strPrice);
 
-                results.Add("书目价:" + strPrice); 
+                results.Add("书目价:" + strPrice);
             }
 
             return StringUtil.MakePathList(results, ";");
@@ -1880,7 +1878,7 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -2077,6 +2075,7 @@ namespace dp2Circulation
         }
 #endif
         int SearchOrderRefIdDup(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strRefID,
     string strOriginRecPath,
@@ -2097,12 +2096,12 @@ namespace dp2Circulation
             Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
             Stop.BeginLoop();
 #endif
-            Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
+            stop?.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
 
             try
             {
                 long lRet = channel.SearchOrder(
-    Stop,
+    stop,
     "<全部>",
     strRefID,
     100,
@@ -2121,7 +2120,7 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                lRet = channel.GetSearchResult(Stop,
+                lRet = channel.GetSearchResult(stop,
                     "dup",
                     0,
                     Math.Min(lHitCount, 100),
@@ -2156,7 +2155,7 @@ namespace dp2Circulation
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.Initial("");
+                stop?.Initial("");
             }
 
             return 1;   // found
@@ -2272,7 +2271,7 @@ namespace dp2Circulation
                     this.ParentShowMessage("", "", false);
                 }
 
-                REDO:
+            REDO:
                 Program.MainForm.AppInfo.LinkFormState(edit, "OrderEditForm_state");
                 edit.ShowDialog(this);
                 Program.MainForm.AppInfo.UnlinkFormState(edit);
@@ -2283,6 +2282,8 @@ namespace dp2Circulation
                 TriggerContentChanged(bOldChanged, true);
 
                 LibraryChannel channel = Program.MainForm.GetChannel();
+                var looping = BeginLoop((s, e) => Program.MainForm.DoStop(s, e),
+    "...");
                 this.EnableControls(false);
                 try
                 {
@@ -2355,6 +2356,7 @@ namespace dp2Circulation
                             //      0   not dup
                             //      1   dup
                             nRet = SearchOrderRefIdDup(
+                                looping.stop,
                                 channel,
                                 orderitem.RefID,
                                 // this.BiblioRecPath,
@@ -2385,6 +2387,7 @@ namespace dp2Circulation
                 finally
                 {
                     this.EnableControls(true);
+                    looping.Dispose();
                     Program.MainForm.ReturnChannel(channel);
                 }
             }

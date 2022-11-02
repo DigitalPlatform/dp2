@@ -19,6 +19,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -200,6 +201,7 @@ namespace dp2Circulation
             strError = "";
             strRightsTableXml = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -210,22 +212,28 @@ namespace dp2Circulation
             Program.MainForm.Update();
 
             var channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取读者流通权限定义 ...",
+                "disableControl");
 
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    _stop,
+                    looping.stop,
                     "circulation",
                     "rightsTable",
                     out strRightsTableXml,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 _stop.EndLoop();
@@ -233,10 +241,8 @@ namespace dp2Circulation
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-        ERROR1:
-            return -1;
         }
 
         // 保存流通读者权限相关定义
@@ -247,6 +253,7 @@ namespace dp2Circulation
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -254,22 +261,27 @@ namespace dp2Circulation
             _stop.BeginLoop();
 
             var channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存读者流通权限定义 ...",
+                "disableControl");
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    _stop,
+                    looping.stop,
                     "circulation",
                     "rightsTable",
                     strRightsTableXml,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 _stop.EndLoop();
@@ -277,10 +289,8 @@ namespace dp2Circulation
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-        ERROR1:
-            return -1;
         }
 
 

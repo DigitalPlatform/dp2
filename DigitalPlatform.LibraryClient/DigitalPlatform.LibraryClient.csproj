@@ -57,6 +57,7 @@
     <Compile Include="Behavior.cs" />
     <Compile Include="BiblioLoader.cs" />
     <Compile Include="BrowseLoader.cs" />
+    <Compile Include="ChannelHost.cs" />
     <Compile Include="ChargingHistoryLoader.cs" />
     <Compile Include="DirItemLoader.cs" />
     <Compile Include="DynamicDownloader.cs" />

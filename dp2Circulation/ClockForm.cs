@@ -31,6 +31,8 @@ namespace dp2Circulation
         /// </summary>
         public ClockForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
         }
 
@@ -116,6 +118,7 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -123,6 +126,10 @@ MessageBoxDefaultButton.Button2);
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在设置服务器当前时钟为 " + this.RFC1123TimeString + " ...",
+                "disableControl");
 
             // int value = Interlocked.Increment(ref this.m_nIn);
 
@@ -137,7 +144,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                 long lRet = channel.SetClock(
-                    _stop,
+                    looping.stop,
                     this.RFC1123TimeString,
                     out strError);
                 if (lRet == -1)
@@ -148,6 +155,8 @@ MessageBoxDefaultButton.Button2);
             {
                 // Interlocked.Decrement(ref this.m_nIn);
 
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
 
                 _stop.EndLoop();
@@ -155,6 +164,7 @@ MessageBoxDefaultButton.Button2);
                 _stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
 
             // MessageBox.Show(this, "时钟设置成功");
@@ -171,6 +181,7 @@ MessageBoxDefaultButton.Button2);
         {
             strError = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -179,6 +190,10 @@ MessageBoxDefaultButton.Button2);
 
             if (bChangeEnableState == true)
                 this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得服务器当前时钟 ...",
+                bChangeEnableState == true ? "disableControl" : "");
 
             // int value = Interlocked.Increment(ref this.m_nIn);
             try
@@ -190,7 +205,7 @@ MessageBoxDefaultButton.Button2);
 
                 string strTime = "";
                 long lRet = channel.GetClock(
-                    _stop,
+                    looping.stop,
                     out strTime,
                     out strError);
                 if (lRet == -1)
@@ -204,6 +219,8 @@ MessageBoxDefaultButton.Button2);
             {
                 // Interlocked.Decrement(ref this.m_nIn);
 
+                looping.Dispose();
+                /*
                 if (bChangeEnableState == true)
                     this.EnableControls(true);
 
@@ -212,6 +229,7 @@ MessageBoxDefaultButton.Button2);
                 _stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -244,6 +262,7 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -251,6 +270,10 @@ MessageBoxDefaultButton.Button2);
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在将服务器时钟复原为硬件时钟 ...",
+                "disableControl");
 
             // int value = Interlocked.Increment(ref this.m_nIn);
 
@@ -265,7 +288,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                 long lRet = channel.SetClock(
-                    _stop,
+                    looping.stop,
                     null,
                     out strError);
                 if (lRet == -1)
@@ -276,6 +299,8 @@ MessageBoxDefaultButton.Button2);
             {
                 // Interlocked.Decrement(ref this.m_nIn);
 
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
 
                 _stop.EndLoop();
@@ -283,6 +308,7 @@ MessageBoxDefaultButton.Button2);
                 _stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
 
             MessageBox.Show(this, "服务器时钟复原成功");
@@ -355,7 +381,9 @@ MessageBoxDefaultButton.Button2);
 
         private void ClockForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;

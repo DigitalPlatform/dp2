@@ -171,6 +171,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         /// </summary>
         public ItemInfoForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
         }
 
@@ -236,16 +238,22 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
         void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)
         {
+            /*
             this._stop.EndLoop();
             this._stop.OnStop -= new StopEventHandler(this.DoStop);
             this.ReturnChannel(e.Channel);
+            */
+            OnReturnChannel(sender, e);
         }
 
         void binaryResControl1_GetChannel(object sender, GetChannelEventArgs e)
         {
+            /*
             e.Channel = this.GetChannel();
             this._stop.OnStop += new StopEventHandler(this.DoStop);
             this._stop.BeginLoop();
+            */
+            OnGetChannel(sender, e);
         }
 
         // 
@@ -364,11 +372,16 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
             string strError = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在装载册信息 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在装载册信息 ...",
+                "disableControl");
 
             Global.ClearHtmlPage(this.webBrowser_itemHTML,
                 Program.MainForm.DataDir);
@@ -383,7 +396,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             // this.textBox_message.Text = "";
             this.toolStripLabel_message.Text = "";
 
-            _stop.SetMessage("正在装入册记录 " + strItemBarcode + " ...");
+            looping.stop.SetMessage("正在装入册记录 " + strItemBarcode + " ...");
             try
             {
                 string strItemText = "";
@@ -394,8 +407,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
                 byte[] item_timestamp = null;
 
-                long lRet = Channel.GetItemInfo(
-                    _stop,
+                long lRet = channel.GetItemInfo(
+                    looping.stop,
                     strItemBarcode,
                     "html",
                     out strItemText,
@@ -451,8 +464,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 this.comboBox_from.Text = "册条码号";
 
                 // 最后获得item xml
-                lRet = Channel.GetItemInfo(
-                    _stop,
+                lRet = channel.GetItemInfo(
+                    looping.stop,
                     strItemBarcode,
                     "xml",
                     out strItemText,
@@ -478,8 +491,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                     {
                         this.binaryResControl1.Clear();
                         int nRet = this.binaryResControl1.LoadObject(
-                            this._stop,
-                            this.Channel,
+                            looping.stop,
+                            channel,
                             strItemRecPath,
                             this.Xml,
                             Program.MainForm.ServerVersion,
@@ -493,11 +506,14 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
 
                 this.textBox_queryWord.SelectAll();
                 this.textBox_queryWord.Focus();
@@ -542,6 +558,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         {
             string strError = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -550,6 +567,10 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
 
             bool bPrevNext = false;
 
@@ -578,7 +599,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             ClearBorrowHistoryPage();
             SetItemRefID("");
 
-            _stop.SetMessage("正在装入" + this.DbTypeCaption + "记录 " + strItemRecPath + " ...");
+            looping.stop.SetMessage("正在装入" + this.DbTypeCaption + "记录 " + strItemRecPath + " ...");
             try
             {
                 string strItemText = "";
@@ -594,8 +615,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 long lRet = 0;
 
                 if (this.m_strDbType == "item")
-                    lRet = Channel.GetItemInfo(
-                         _stop,
+                    lRet = channel.GetItemInfo(
+                         looping.stop,
                          strBarcode,
                          "html",
                          out strItemText,
@@ -606,8 +627,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strBiblioRecPath,
                          out strError);
                 else if (this.m_strDbType == "comment")
-                    lRet = Channel.GetCommentInfo(
-                         _stop,
+                    lRet = channel.GetCommentInfo(
+                         looping.stop,
                          strBarcode,    // "@path:" + strItemRecPath,
                                         // "",
                          "html",
@@ -619,8 +640,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strBiblioRecPath,
                          out strError);
                 else if (this.m_strDbType == "order")
-                    lRet = Channel.GetOrderInfo(
-                         _stop,
+                    lRet = channel.GetOrderInfo(
+                         looping.stop,
                          strBarcode,    // "@path:" + strItemRecPath,
                                         // "",
                          "html",
@@ -632,8 +653,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strBiblioRecPath,
                          out strError);
                 else if (this.m_strDbType == "issue")
-                    lRet = Channel.GetIssueInfo(
-                         _stop,
+                    lRet = channel.GetIssueInfo(
+                         looping.stop,
                          strBarcode,    // "@path:" + strItemRecPath,
                                         // "",
                          "html",
@@ -654,7 +675,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 if (lRet == -1 || lRet == 0)
                 {
                     if (bPrevNext == true
-                        && this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                        && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                     {
                         strError += "\r\n\r\n新记录没有装载，窗口中还保留了装载前的记录";
                         goto ERROR1;
@@ -692,8 +713,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
                 // 最后获得item xml
                 if (this.m_strDbType == "item")
-                    lRet = Channel.GetItemInfo(
-                        _stop,
+                    lRet = channel.GetItemInfo(
+                        looping.stop,
                         "@path:" + strOutputItemRecPath, // strBarcode,
                         "xml",
                         out strItemText,
@@ -704,8 +725,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                         out strBiblioRecPath,
                         out strError);
                 else if (this.m_strDbType == "comment")
-                    lRet = Channel.GetCommentInfo(
-                         _stop,
+                    lRet = channel.GetCommentInfo(
+                         looping.stop,
                          "@path:" + strOutputItemRecPath,
                          // "",
                          "xml",
@@ -717,8 +738,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strBiblioRecPath,
                          out strError);
                 else if (this.m_strDbType == "order")
-                    lRet = Channel.GetOrderInfo(
-                         _stop,
+                    lRet = channel.GetOrderInfo(
+                         looping.stop,
                          "@path:" + strOutputItemRecPath,
                          // "",
                          "xml",
@@ -730,8 +751,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strBiblioRecPath,
                          out strError);
                 else if (this.m_strDbType == "issue")
-                    lRet = Channel.GetIssueInfo(
-                         _stop,
+                    lRet = channel.GetIssueInfo(
+                         looping.stop,
                          "@path:" + strOutputItemRecPath,
                          // "",
                          "xml",
@@ -775,8 +796,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                     {
                         this.binaryResControl1.Clear();
                         int nRet = this.binaryResControl1.LoadObject(
-                            this._stop,
-                            this.Channel,
+                            looping.stop,
+                            channel,
                             strOutputItemRecPath,
                             this.Xml,
                             Program.MainForm.ServerVersion,
@@ -790,11 +811,14 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
 
             tabControl_item_SelectedIndexChanged(this, new EventArgs());
@@ -810,14 +834,21 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         {
             string strError = "";
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在保存册记录 " + this.ItemRecPath + " ...");
             _stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存册记录 " + this.ItemRecPath + " ...",
+                "disableControl");
             try
             {
                 int nRet = SaveItemInfo(
+                    looping.stop,
+                    channel,
                     strStyle,
                     this.DbType,
                     out strError);
@@ -830,8 +861,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 //		-1	error
                 //		>=0 实际上载的资源对象数
                 nRet = this.binaryResControl1.Save(
-                    this._stop,
-                    this.Channel,
+                    looping.stop,
+                    channel,
                     Program.MainForm.ServerVersion,
                     out strError);
                 if (nRet == -1)
@@ -843,11 +874,14 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -917,6 +951,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         }
 
         public int SaveItemInfo(
+            Stop stop,
+            LibraryChannel channel,
             string strStyle,
             string strDbType,
             out string strError)
@@ -936,10 +972,9 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
                 info.RefID = this._refID;
 
-                string strXml = "";
                 nRet = GetXml(true,
             false,
-            out strXml,
+            out string strXml,
             out strError);
                 if (nRet == -1)
                     return -1;
@@ -970,29 +1005,29 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             long lRet = 0;
 
             if (strDbType == "item")
-                lRet = this.Channel.SetEntities(
-                     this._stop,
+                lRet = channel.SetEntities(
+                     stop,
                      this.BiblioRecPath,
                      entities,
                      out errorinfos,
                      out strError);
             else if (strDbType == "order")
-                lRet = this.Channel.SetOrders(
-                     this._stop,
+                lRet = channel.SetOrders(
+                     stop,
                      this.BiblioRecPath,
                      entities,
                      out errorinfos,
                      out strError);
             else if (strDbType == "issue")
-                lRet = this.Channel.SetIssues(
-                     this._stop,
+                lRet = channel.SetIssues(
+                     stop,
                      this.BiblioRecPath,
                      entities,
                      out errorinfos,
                      out strError);
             else if (strDbType == "comment")
-                lRet = this.Channel.SetComments(
-                     this._stop,
+                lRet = channel.SetComments(
+                     stop,
                      this.BiblioRecPath,
                      entities,
                      out errorinfos,
@@ -1079,7 +1114,9 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
         private void ItemInfoForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             SetMenuItemState();
         }
@@ -1282,11 +1319,16 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             string strError = "";
             int nRet = 0;
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在获取书目记录 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取书目记录 ...",
+                "disableControl");
 
             try
             {
@@ -1296,6 +1338,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 string strBiblioXml = "";
 
                 nRet = GetExistSubject(
+                    looping.stop,
+                    channel,
                     this.BiblioRecPath,
                     out strBiblioXml,
                     out reserve_subjects,
@@ -1308,7 +1352,10 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 string strCommentState = "";
                 string strNewSubject = "";
                 byte[] item_timestamp = null;
-                nRet = GetCommentContent(this.ItemRecPath,
+                nRet = GetCommentContent(
+                    looping.stop,
+                    channel,
+                    this.ItemRecPath,
             out strNewSubject,
             out strCommentState,
             out item_timestamp,
@@ -1348,8 +1395,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 // 保存书目记录
                 byte[] output_timestamp = null;
                 string strOutputBiblioRecPath = "";
-                long lRet = Channel.SetBiblioInfo(
-                    _stop,
+                long lRet = channel.SetBiblioInfo(
+                    looping.stop,
                     "change",
                     this.BiblioRecPath,
                     "xml",
@@ -1368,6 +1415,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 //      0   没有发生修改
                 //      1   发生了修改
                 nRet = ChangeCommentState(
+                    looping.stop,
+                    channel,
                     this.BiblioRecPath,
                     this.ItemRecPath,
                     "已处理",
@@ -1378,11 +1427,14 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
 
             // 重新装载内容
@@ -1400,6 +1452,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         /// <summary>
         /// 修改评注记录的状态字段
         /// </summary>
+        /// <param name="stop"></param>
+        /// <param name="channel"></param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="strCommentRecPath">评注记录路径</param>
         /// <param name="strAddList">要在状态字符串中加入的子串列表</param>
@@ -1411,6 +1465,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         ///      1   发生了修改
         /// </returns>
         public int ChangeCommentState(
+            Stop stop,
+            LibraryChannel channel,
             string strBiblioRecPath,
             string strCommentRecPath,
             string strAddList,
@@ -1440,8 +1496,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             byte[] comment_timestamp = null;
             string strBiblio = "";
             string strTempBiblioRecPath = "";
-            long lRet = Channel.GetCommentInfo(
-null,
+            long lRet = channel.GetCommentInfo(
+stop,
 "@path:" + strCommentRecPath,
 "xml", // strResultType
 out strOldXml,
@@ -1503,7 +1559,7 @@ out strError);
                 nRet = Global.SetOperation(
                     ref dom,
                     "stateModified",
-                    Channel.UserName,
+                    channel.UserName,
                     strComment,
                     true,
                     out strError);
@@ -1520,6 +1576,8 @@ out strError);
 
                 // 覆盖
                 nRet = ChangeCommentInfo(
+                    stop,
+                    channel,
                     strBiblioRecPath,
                     strCommentRecPath,
                     strOldXml,
@@ -1541,6 +1599,8 @@ out strError);
         /// <summary>
         /// 修改一个评注记录
         /// </summary>
+        /// <param name="stop"></param>
+        /// <param name="channel"></param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="strCommentRecPath">评注记录路径</param>
         /// <param name="strOldXml">评注记录修改前的 XML</param>
@@ -1551,6 +1611,8 @@ out strError);
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 1: 成功</returns>
         public int ChangeCommentInfo(
+            Stop stop,
+            LibraryChannel channel,
             string strBiblioRecPath,
             string strCommentRecPath,
             string strOldXml,
@@ -1597,8 +1659,8 @@ out strError);
 
             EntityInfo[] errorinfos = null;
 
-            long lRet = Channel.SetComments(
-                null,
+            long lRet = channel.SetComments(
+                stop,
                 strBiblioRecPath,
                 comments,
                 out errorinfos,
@@ -1641,13 +1703,18 @@ out strError);
         /// 获得评注记录内容
         /// 请参考 dp2Library API GetCommentInfo() 的详细信息
         /// </summary>
+        /// <param name="stop"></param>
+        /// <param name="channel"></param>
         /// <param name="strCommentRecPath">评注记录路径</param>
         /// <param name="strContent">返回内容</param>
         /// <param name="strState">返回状态</param>
         /// <param name="item_timestamp">返回时间戳</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
-        int GetCommentContent(string strCommentRecPath,
+        int GetCommentContent(
+            Stop stop,
+            LibraryChannel channel,
+            string strCommentRecPath,
             out string strContent,
             out string strState,
             out byte[] item_timestamp,
@@ -1662,8 +1729,8 @@ out strError);
             string strOutputItemRecPath = "";
             string strBiblioText = "";
             string strBiblioRecPath = "";
-            long lRet = Channel.GetCommentInfo(
-     _stop,
+            long lRet = channel.GetCommentInfo(
+     stop,
      "@path:" + strCommentRecPath,
      // "",
      "xml",
@@ -1854,6 +1921,8 @@ out strError);
         //      reserve_subjects   保留的自由词。指指示符1为 0/1/2 的自由词。这些自由词不让对话框修改(可以在 MARC 编辑器修改)
         //      subjects          让修改的自由词。指示符1为 空。这些自由词让对话框修改
         int GetExistSubject(
+            Stop stop,
+            LibraryChannel channel,
             string strBiblioRecPath,
             out string strBiblioXml,
             out List<string> reserve_subjects,
@@ -1870,8 +1939,8 @@ out strError);
             string[] results = null;
 
             // 获得书目记录
-            long lRet = Channel.GetBiblioInfos(
-                _stop,
+            long lRet = channel.GetBiblioInfos(
+                stop,
                 strBiblioRecPath,
                 "",
                 new string[] { "xml" },   // formats
@@ -2048,11 +2117,16 @@ out strError);
         {
             strError = "";
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在装载借阅历史 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在装载借阅历史 ...",
+                "disableControl");
             try
             {
                 long lRet = 0;
@@ -2073,7 +2147,7 @@ out strError);
                 // this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
                 try
                 {
-                    lRet = this.Channel.LoadChargingHistory(_stop,
+                    lRet = channel.LoadChargingHistory(looping.stop,
                         strBarcode,
                         "return,lost,read",
                         nPageNo,
@@ -2096,11 +2170,14 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
         }
 

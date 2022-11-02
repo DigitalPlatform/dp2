@@ -15,6 +15,7 @@ using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -31,6 +32,8 @@ namespace dp2Circulation
 
         public ReservationListForm()
         {
+            this.UseLooping = true; // 2022/11/1
+
             InitializeComponent();
         }
 
@@ -108,21 +111,25 @@ namespace dp2Circulation
                 return -1;
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在获得读者记录 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得读者记录 ...",
+                "disableControl");
             try
             {
-                _stop.SetMessage("正在装入读者记录 " + strUserName + " ...");
+                looping.stop.SetMessage("正在装入读者记录 " + strUserName + " ...");
 
                 string[] results = null;
                 byte[] baTimestamp = null;
                 string strRecPath = "";
-                long lRet = Channel.GetReaderInfo(
-                    _stop,
+                long lRet = channel.GetReaderInfo(
+                    looping.stop,
                     strUserName,
                     "xml",   // this.RenderFormat, // "html",
                     out results,
@@ -168,17 +175,19 @@ namespace dp2Circulation
                 info.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(Global.GetDbName(strRecPath));
                 info.PersonalLibrary = DomUtil.GetElementText(dom.DocumentElement, "personalLibrary");
 
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
-
-            return 1;
         }
 
         // 列出所有读者的所有预约到书信息
@@ -195,11 +204,16 @@ namespace dp2Circulation
             this._items.Clear();
             this.ClearHtml();
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在检索预约到书记录 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索预约到书记录 ...",
+                "disableControl");
 
             try
             {
@@ -212,7 +226,7 @@ namespace dp2Circulation
     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
 
                 string strOutputStyle = "";
-                long lRet = Channel.Search(_stop,
+                long lRet = channel.Search(looping.stop,
                     strQueryXml,
                     "",
                     strOutputStyle,
@@ -224,7 +238,7 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                _stop.SetProgressRange(0, lHitCount);
+                looping.stop.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -235,14 +249,14 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "中断";
                         return -1;
                     }
 
-                    lRet = Channel.GetSearchResult(
-                        _stop,
+                    lRet = channel.GetSearchResult(
+                        looping.stop,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -270,27 +284,30 @@ namespace dp2Circulation
                         this._items.Add(item);
 
                         // paths.Add(record.Path);
-                        _stop.SetProgressValue(lStart + i);
+                        looping.stop.SetProgressValue(lStart + i);
                         i++;
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    _stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
-                    _stop.SetProgressValue(lStart);
+                    looping.stop.SetProgressValue(lStart);
                 }
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
 
             FillItems(this._items);
@@ -315,11 +332,16 @@ namespace dp2Circulation
                 return -1;
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在检索预约到书记录 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索预约到书记录 ...",
+                "disableControl");
 
             try
             {
@@ -336,7 +358,7 @@ namespace dp2Circulation
     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
 
                 string strOutputStyle = "";
-                long lRet = Channel.Search(_stop,
+                long lRet = channel.Search(looping.stop,
                     strQueryXml,
                     "",
                     strOutputStyle,
@@ -348,7 +370,7 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                _stop.SetProgressRange(0, lHitCount);
+                looping.stop.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -359,14 +381,14 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "中断";
                         return -1;
                     }
 
-                    lRet = Channel.GetSearchResult(
-                        _stop,
+                    lRet = channel.GetSearchResult(
+                        looping.stop,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -390,30 +412,33 @@ namespace dp2Circulation
                     {
                         // record.RecordBody.Xml;
                         paths.Add(record.Path);
-                        _stop.SetProgressValue(lStart + i);
+                        looping.stop.SetProgressValue(lStart + i);
                         i++;
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    _stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
-                    _stop.SetProgressValue(lStart);
+                    looping.stop.SetProgressValue(lStart);
                 }
+
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
-
-            return 1;
         }
 
         void ListReservations()

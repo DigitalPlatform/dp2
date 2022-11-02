@@ -1818,6 +1818,7 @@ dlg.UiState);
             MessageBox.Show(this, strError);
         }
 
+        // TODO: 增加 Looping 支持
         private void kernelResTree1_GetChannel(object sender, GetChannelEventArgs e)
         {
             e.Channel = Program.MainForm.GetChannel();

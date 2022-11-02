@@ -93,6 +93,8 @@ namespace dp2Circulation
         /// </summary>
         public OperLogForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
         }
 
@@ -306,6 +308,7 @@ namespace dp2Circulation
             if (PrepareFilter(ref nLevel) == false)
                 return 0;
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -314,32 +317,25 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
 
-#if NO
-            this.listView_records.Items.Clear();
-            // 2008/11/22
-            this.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
-
-            this.ClearAllTempFiles();
-
-            Global.ClearHtmlPage(this.webBrowser_xml,
-                Program.MainForm.DataDir);
-            Global.ClearHtmlPage(this.webBrowser_html,
-                Program.MainForm.DataDir);
-#endif
             this.Clear();
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
     + "开始装入日志文件 " + strLogFileName + " 中的记录" + "</div>");
 
-            _stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录...");
 #if DELAY_UPDATE
             this.listView_records.BeginUpdate();
 #endif
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(30);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "timeout:0:0:30,disableControl");
+            looping.stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录...");
             try
             {
                 List<string> lines = new List<string>();
@@ -352,7 +348,7 @@ namespace dp2Circulation
                     StringUtil.SetInList(ref strStyle, "accessLog", true);
 
                 int nRet = ProcessFiles(this,
-    _stop,
+    looping.stop,
     this.estimate,
     channel,
     lines,
@@ -365,28 +361,30 @@ namespace dp2Circulation
     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                return 1;
             }
             finally
             {
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
 
 #if DELAY_UPDATE
                 this.listView_records.EndUpdate();
 #endif
+                /*
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
+                EnableControls(true);
+                */
+                looping.Dispose();
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + "结束装入日志文件 " + strLogFileName + " 中的记录" + "</div>");
-
-
-                EnableControls(true);
             }
-
-            return 1;
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
@@ -3934,7 +3932,9 @@ FileShare.ReadWrite))
 
         private void OperLogForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
@@ -4324,6 +4324,7 @@ FileShare.ReadWrite))
             if (PrepareFilter(ref nLevel) == false)
                 return;
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -4333,46 +4334,35 @@ FileShare.ReadWrite))
 
             this.Update();
             Program.MainForm.Update();
+            */
 
 #if DELAY_UPDATE
             this.listView_records.BeginUpdate();
-#endif
-#if NO
-            this.listView_records.Items.Clear();
-            // 2008/11/22
-            this.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
-
-
-            this.ClearAllTempFiles();
-
-            Global.ClearHtmlPage(this.webBrowser_xml,
-                Program.MainForm.DataDir);
-            Global.ClearHtmlPage(this.webBrowser_html,
-                Program.MainForm.DataDir);
 #endif
             this.Clear();
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + "开始装入日志文件中的记录" + "</div>");
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(30);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "timeout:0:0:30,disableControl");
 
             try
             {
-                _stop.SetMessage("正在准备日志文件名 ...");
+                looping.stop.SetMessage("正在准备日志文件名 ...");
                 List<string> lines = new List<string>();
                 for (int i = 0; i < this.textBox_filenames.Lines.Length; i++)
                 {
                     Application.DoEvents();
 
-                    if (_stop != null)
-                    {
-                        if (_stop.State != 0)
-                            return;
-                    }
+                    if (looping.Stopped)
+                        return;
 
                     string strLine = this.textBox_filenames.Lines[i];
                     lines.Add(strLine);
@@ -4385,7 +4375,7 @@ FileShare.ReadWrite))
                     StringUtil.SetInList(ref strStyle, "accessLog", true);
 
                 nRet = ProcessFiles(this,
-                    _stop,
+                    looping.stop,
                     this.estimate,
                     channel,
                     lines,
@@ -4401,23 +4391,26 @@ FileShare.ReadWrite))
             }
             finally
             {
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
 
 #if DELAY_UPDATE
                 this.listView_records.EndUpdate();
 #endif
+                looping.Dispose();
+                /*
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
+                EnableControls(true);
+                */
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + "结束装入日志文件中的记录" + "</div>");
 
 
-                EnableControls(true);
             }
 
             Program.MainForm.StatusBarMessage = "总共耗费时间: " + this.estimate.GetTotalTime().ToString();
@@ -4715,52 +4708,37 @@ FileShare.ReadWrite))
 
             this.tabControl_main.SelectedTab = this.tabPage_logRecords;
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在初始化浏览器组件 ...");
             _stop.BeginLoop();
+            */
 
-
-            //this.Update();
-            //Program.MainForm.Update();
-
-#if NO
-            this.listView_records.Items.Clear();
-            // 2008/11/22
-            this.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
-
-
-            this.ClearAllTempFiles();
-
-            Global.ClearHtmlPage(this.webBrowser_xml,
-                Program.MainForm.DataDir);
-            Global.ClearHtmlPage(this.webBrowser_html,
-                Program.MainForm.DataDir);
-#endif
             this.Clear();
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + "开始装入日志文件中的记录" + "</div>");
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(30);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "timeout:0:0:30,disableControl");
             try
             {
-                _stop.SetMessage("正在准备日志文件名 ...");
+                looping.stop.SetMessage("正在准备日志文件名 ...");
                 List<string> lines = new List<string>();
                 for (int i = 0; i < this.textBox_filenames.Lines.Length; i++)
                 {
                     Application.DoEvents();
 
-                    if (_stop != null)
-                    {
-                        if (_stop.State != 0)
-                            return 0;
-                    }
+                    if (looping.Stopped)
+                        return 0;
 
                     string strLine = this.textBox_filenames.Lines[i];
                     if (String.IsNullOrEmpty(strLine) == true)
@@ -4776,7 +4754,7 @@ FileShare.ReadWrite))
                     strStyle += ",accessLog";
 
                 nRet = ProcessFiles(this,
-    _stop,
+    looping.stop,
     this.estimate,
     channel,
     lines,
@@ -4794,22 +4772,24 @@ FileShare.ReadWrite))
             }
             finally
             {
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
                 /*
                 if (sr != null)
                     sr.Close();
                  * */
+                looping.Dispose();
+                /*
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
+                EnableControls(true);
+                */
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + "结束装入日志文件中的记录" + "</div>");
-
-                EnableControls(true);
             }
         }
 
@@ -4852,26 +4832,35 @@ FileShare.ReadWrite))
             string strError = "";
             int nRet = 0;
 
+            /*
             this.EnableControls(false);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在修复日志文件 " + this.textBox_repair_sourceFilename.Text + " ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在修复日志文件 " + this.textBox_repair_sourceFilename.Text + " ...",
+                "disableControl");
             try
             {
-                nRet = RepairLogFile(this.textBox_repair_sourceFilename.Text,
-                        this.textBox_repair_targetFilename.Text,
-                        out strError);
+                nRet = RepairLogFile(
+                    looping.stop,
+                    this.textBox_repair_sourceFilename.Text,
+                    this.textBox_repair_targetFilename.Text,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
 
             MessageBox.Show(this, "修复完成。\r\n\r\n共丢弃 " + nRet.ToString() + " 个段落。\r\n\r\n修复后的内容已经写入目标文件 " + this.textBox_repair_targetFilename.Text);
@@ -4883,7 +4872,9 @@ FileShare.ReadWrite))
         // return:
         //      -1  出错
         //      >=0 丢弃的段落数
-        int RepairLogFile(string strSourceFilename,
+        int RepairLogFile(
+            Stop stop,
+            string strSourceFilename,
             string strTargetFilename,
             out string strError)
         {
@@ -4941,8 +4932,8 @@ FileShare.ReadWrite))
                     return -1;
                 }
 
-                if (_stop != null)
-                    _stop.SetProgressRange(0, source.Length);
+                if (stop != null)
+                    stop.SetProgressRange(0, source.Length);
 
                 bool bTry = false;
                 // TODO: 要汇报丢弃的段数
@@ -4950,7 +4941,7 @@ FileShare.ReadWrite))
                 {
                     Application.DoEvents();
 
-                    if (_stop != null && _stop.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断1";
                         return -1;
@@ -4976,8 +4967,8 @@ FileShare.ReadWrite))
                         bTry = false;
                     }
 
-                    if (_stop != null)
-                        _stop.SetProgressValue(source.Position);
+                    if (stop != null)
+                        stop.SetProgressValue(source.Position);
 
                     long lBodyLength = source.Position - lStart;
                     // 写入目标文件
@@ -5409,16 +5400,22 @@ FileShare.ReadWrite))
             List<string> errorfilenames = null;
             int nFileCount = 0;
 
+            /*
             this.EnableControls(false);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在验证目录 " + this.textBox_repair_verifyFolderName.Text + " 中的所有日志文件 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在验证目录 " + this.textBox_repair_verifyFolderName.Text + " 中的所有日志文件 ...",
+                "disableControl");
             try
             {
                 // return:
                 //      -1  运行出错
                 //      >=0 发生错误的文件数。文件名在errorfilenames中
-                nRet = VerifyLogFiles(this.textBox_repair_verifyFolderName.Text,
+                nRet = VerifyLogFiles(
+                    looping.stop,
+                    this.textBox_repair_verifyFolderName.Text,
                     out nFileCount,
                     out errorfilenames,
                     out strError);
@@ -5427,12 +5424,15 @@ FileShare.ReadWrite))
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
 
             MessageBox.Show(this, "验证完成。\r\n\r\n共验证 " + nFileCount + " 个日志文件，其中有 " + nRet.ToString() + " 个日志文件发现格式错误。\r\n\r\n"
@@ -5445,7 +5445,9 @@ FileShare.ReadWrite))
         // return:
         //      -1  运行出错
         //      >=0 发生错误的文件数。文件名在errorfilenames中
-        int VerifyLogFiles(string strDirectory,
+        int VerifyLogFiles(
+            Stop stop,
+            string strDirectory,
             out int nFileCount,
             out List<string> errorfilenames,
             out string strError)
@@ -5468,13 +5470,10 @@ FileShare.ReadWrite))
             {
                 Application.DoEvents();
 
-                if (_stop != null)
+                if (stop != null && stop.State != 0)
                 {
-                    if (_stop.State != 0)
-                    {
-                        strError = "用户中断1";
-                        return -1;
-                    }
+                    strError = "用户中断1";
+                    return -1;
                 }
 
                 string strFileName = fis[i].FullName;
@@ -5482,7 +5481,9 @@ FileShare.ReadWrite))
                 // return:
                 //      -1  出错
                 //      >=0 丢弃的段落数
-                int nRet = VerifyLogFile(strFileName,
+                int nRet = VerifyLogFile(
+                    stop,
+                    strFileName,
                     out strError);
                 if (nRet == -1)
                 {
@@ -5509,7 +5510,9 @@ FileShare.ReadWrite))
         // return:
         //      -1  出错
         //      >=0 丢弃的段落数
-        int VerifyLogFile(string strSourceFilename,
+        int VerifyLogFile(
+            Stop stop,
+            string strSourceFilename,
             out string strError)
         {
             strError = "";
@@ -5531,8 +5534,8 @@ FileShare.ReadWrite))
                         FileShare.ReadWrite))
                 {
 
-                    _stop.SetMessage("正在验证日志文件 " + strSourceFilename + " ...");
-                    _stop.SetProgressRange(0, source.Length);
+                    stop.SetMessage("正在验证日志文件 " + strSourceFilename + " ...");
+                    stop.SetProgressRange(0, source.Length);
 
                     bool bTry = false;
                     // TODO: 要汇报丢弃的段数
@@ -5540,7 +5543,7 @@ FileShare.ReadWrite))
                     {
                         Application.DoEvents();
 
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "用户中断1";
                             return -1;
@@ -5566,12 +5569,11 @@ FileShare.ReadWrite))
                             bTry = false;
                         }
 
-                        _stop.SetProgressValue(source.Position);
+                        stop.SetProgressValue(source.Position);
 
                         if (source.Position >= source.Length)
                             break;
                     }
-
                 }
             }
             catch (FileNotFoundException /*ex*/)
@@ -6028,6 +6030,7 @@ FileShare.ReadWrite))
                 }
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Stop stop = new DigitalPlatform.Stop();
@@ -6036,16 +6039,20 @@ FileShare.ReadWrite))
             stop.OnStop += new StopEventHandler(this.DoStopPrint);
             stop.Initial("正在补做 SetBiblioInfo-move ...");
             stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在补做 SetBiblioInfo-move ...",
+                "disableControl",
+                this.DoStopPrint);
             try
             {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
                     Application.DoEvents();
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -6103,7 +6110,7 @@ FileShare.ReadWrite))
                     //      0   没有找到
                     //      1   找到
                     nRet = DetectBiblioRecord(channel,
-                        stop,
+                        looping.stop,
                 strOldRecPath,
                 out strError);
                     if (nRet == -1)
@@ -6128,14 +6135,14 @@ MessageBoxDefaultButton.Button1);
                             goto CONTINUE;
                     }
 
-                    stop.SetMessage(" " + strOldRecPath + " --> " + strRecPath + " (" + strMergeStyle + ")");
+                    looping.stop.SetMessage(" " + strOldRecPath + " --> " + strRecPath + " (" + strMergeStyle + ")");
 
                     // return:
                     //      -1  出错
                     //      0   成功，没有警告信息。
                     //      1   成功，有警告信息。警告信息在 strError 中
                     nRet = DoMove(channel,
-                        stop,
+                        looping.stop,
             strOldRecPath,
             strRecPath,
             strMergeStyle,
@@ -6154,12 +6161,16 @@ MessageBoxDefaultButton.Button1);
                     }
 
                 CONTINUE:
-                    stop.SetProgressValue(i + 1);
+                    looping.stop.SetProgressValue(i + 1);
                     i++;
                 }
+
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStopPrint);
                 stop.Initial("");
@@ -6172,9 +6183,8 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 this.ReturnChannel(channel);
+                */
             }
-
-            return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -7064,22 +7074,26 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
+            /*
             Stop stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 
             stop.OnStop += new StopEventHandler(this.DoStopPrint);
             stop.Initial("正在处理日志记录 ...");
             stop.BeginLoop();
-
+            */
+            var looping = Looping("正在处理日志记录 ...",
+                null,
+                this.DoStopPrint);
             try
             {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
                     Application.DoEvents();
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
@@ -7123,7 +7137,7 @@ MessageBoxDefaultButton.Button1);
                             break;
                     }
 
-                    stop.SetProgressValue(i + 1);
+                    looping.stop.SetProgressValue(i + 1);
                     i++;
                 }
 
@@ -7136,6 +7150,8 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStopPrint);
                 stop.Initial("处理完成");
@@ -7146,6 +7162,7 @@ MessageBoxDefaultButton.Button1);
                     stop.Unregister();	// 和容器关联
                     stop = null;
                 }
+                */
             }
         }
 
@@ -7172,12 +7189,17 @@ MessageBoxDefaultButton.Button1);
     GetHeadString(false) +
     "<body>");
 
+            /*
             Stop stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 
             stop.OnStop += new StopEventHandler(this.DoStopPrint);
             stop.Initial("正在创建打印页面 ...");
             stop.BeginLoop();
+            */
+            var looping = Looping("正在创建打印页面 ...",
+                "disableControl",
+                this.DoStopPrint);
 
             m_webExternalHost = new WebExternalHost();
             m_webExternalHost.Initial(// Program.MainForm,
@@ -7187,13 +7209,13 @@ MessageBoxDefaultButton.Button1);
             this.GetSummary += new GetSummaryEventHandler(OperLogForm_GetSummary);
             try
             {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
                     Application.DoEvents();
 
-                    if (stop != null && stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -7242,7 +7264,7 @@ MessageBoxDefaultButton.Button1);
                     StreamUtil.WriteText(strFilename,
         "<p class='record_title'>" + strLogFileName + " : " + strIndex + "</p>" + strHtml);
 
-                    stop.SetProgressValue(i + 1);
+                    looping.stop.SetProgressValue(i + 1);
                     i++;
                 }
             }
@@ -7256,6 +7278,8 @@ MessageBoxDefaultButton.Button1);
                     m_webExternalHost = null;
                 }
 
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStopPrint);
                 stop.Initial("打印页面创建完成");
@@ -7266,6 +7290,7 @@ MessageBoxDefaultButton.Button1);
                     stop.Unregister();	// 和容器关联
                     stop = null;
                 }
+                */
             }
 
             StreamUtil.WriteText(strFilename,
@@ -9094,31 +9119,43 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
+            /*
             this.EnableControls(false);
             _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在装在日志文件 " + dlg.FileName + " ...");
+            _stop.Initial("正在装载日志文件 " + dlg.FileName + " ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在装载日志文件 " + dlg.FileName + " ...",
+                "disableControl");
             try
             {
-                nRet = LoadFile(dlg.FileName, out strError);
+                nRet = LoadFile(
+                    looping.stop,
+                    dlg.FileName,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
-            return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        int LoadFile(string strFileName,
+        int LoadFile(
+            Stop stop,
+            string strFileName,
             out string strError)
         {
             strError = "";
@@ -9135,14 +9172,14 @@ MessageBoxDefaultButton.Button1);
                         FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
                         FileShare.ReadWrite))
             {
-                if (_stop != null)
-                    _stop.SetProgressRange(0, source.Length);
+                if (stop != null)
+                    stop.SetProgressRange(0, source.Length);
 
                 for (int i = 0; ; i++)
                 {
                     Application.DoEvents();
 
-                    if (_stop != null && _stop.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断1";
                         return -1;
@@ -9158,8 +9195,8 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                         return -1;
 
-                    if (_stop != null)
-                        _stop.SetProgressValue(source.Position);
+                    if (stop != null)
+                        stop.SetProgressValue(source.Position);
 
                     if (source.Position >= source.Length)
                         break;
@@ -9596,6 +9633,7 @@ MessageBoxDefaultButton.Button1);
             // Ctrl 用于弹出对话框选择用哪个 XML 来写回数据库
             // var control = (Control.ModifierKeys & Keys.Control) == Keys.Control;
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             _stop.Style = StopStyle.EnableHalfStop;
@@ -9604,9 +9642,13 @@ MessageBoxDefaultButton.Button1);
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存数据库记录 ...",
+                "disableControl");
             try
             {
-                _stop.SetProgressRange(0, this.listView_restoreList.SelectedItems.Count);
+                looping.stop.SetProgressRange(0, this.listView_restoreList.SelectedItems.Count);
 
                 bool bDontAsk = false;
                 DialogResult timestamp_result = DialogResult.Yes;
@@ -9695,11 +9737,11 @@ dlg.UiState);
 
                     int nRedoCount = 0;
                 REDO:
-                    _stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
+                    looping.stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
                     if (data.DbType == "biblio")
                         lRet = channel.SetBiblioInfo(
-                        _stop,
+                        looping.stop,
                         "change",
                         strBiblioRecPath,
                         "xml",
@@ -9713,7 +9755,7 @@ dlg.UiState);
                     {
                         // TODO: 应该允许在 forcechange 和 change 之间进行选择
                         lRet = channel.SetReaderInfo(
-                            _stop,
+                            looping.stop,
                             "forcechange",
                             strBiblioRecPath,
                             xml,
@@ -9843,11 +9885,15 @@ MessageBoxDefaultButton.Button1);
 
                 CONTINUE:
                     i++;
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
                 }
+
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -9857,9 +9903,8 @@ MessageBoxDefaultButton.Button1);
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
+                */
             }
-
-            return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -9895,16 +9940,19 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
-
+            /*
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在保存书目记录到 .bdf 文件 ...");
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping("正在保存书目记录到 .bdf 文件 ...",
+                "disableControl");
             try
             {
-                _stop.SetProgressRange(0, this.listView_restoreList.Items.Count);
+                looping.stop.SetProgressRange(0, this.listView_restoreList.Items.Count);
 
                 writer.Formatting = Formatting.Indented;
                 writer.Indentation = 4;
@@ -9920,7 +9968,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     Application.DoEvents();
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -9942,7 +9990,7 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
                     }
 
-                    _stop.SetMessage("正在保存书目记录 " + strBiblioRecPath + " 到 .bdf 文件");
+                    looping.stop.SetMessage("正在保存书目记录 " + strBiblioRecPath + " 到 .bdf 文件");
 
                     if (data.Xmls != null)
                         foreach (var xml in data.Xmls)
@@ -9973,7 +10021,7 @@ MessageBoxDefaultButton.Button1);
 
                     CONTINUE:
                     i++;
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
                 }
 
                 writer.WriteEndElement();   // </collection>
@@ -9983,11 +10031,15 @@ MessageBoxDefaultButton.Button1);
             {
                 strError = "写入文件 " + dlg.FileName + " 失败，原因: " + ex.Message;
                 goto ERROR1;
+
+                return;
             }
             finally
             {
                 writer.Close();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -9995,9 +10047,8 @@ MessageBoxDefaultButton.Button1);
                 _stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
+                */
             }
-
-            return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -10235,6 +10286,7 @@ MessageBoxDefaultButton.Button1);
 
             _recoverTable = new Hashtable();
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -10245,6 +10297,10 @@ MessageBoxDefaultButton.Button1);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在从日志记录恢复数据库记录 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在从日志记录恢复数据库记录 ...",
+                "timeout:0:2:0,disableControl");
 
             this.listView_restoreList.BeginUpdate();
             try
@@ -10253,7 +10309,7 @@ MessageBoxDefaultButton.Button1);
 
                 OperLogLoader loader = new OperLogLoader();
                 loader.Channel = channel;
-                loader.Stop = this.Progress;
+                loader.Stop = looping.stop;
                 loader.Estimate = estimate;
                 loader.Dates = dates;
                 loader.Level = 0;   // 2;  // Program.MainForm.OperLogLevel;
@@ -10270,14 +10326,14 @@ MessageBoxDefaultButton.Button1);
                 {
                     Application.DoEvents();
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return 0;
                     }
 
-                    if (_stop != null)
-                        _stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+                    if (looping != null)
+                        looping.stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
 
                     if (string.IsNullOrEmpty(item.Xml) == true)
                         continue;
@@ -10365,6 +10421,8 @@ MessageBoxDefaultButton.Button1);
             {
                 this.listView_restoreList.EndUpdate();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -10374,8 +10432,8 @@ MessageBoxDefaultButton.Button1);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
         }
 
         // 获得累积的最终记录

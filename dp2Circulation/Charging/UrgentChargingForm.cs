@@ -14,6 +14,7 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -45,6 +46,8 @@ namespace dp2Circulation
         /// </summary>
         public UrgentChargingForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
         }
 
@@ -607,7 +610,9 @@ this.InfoDlgOpacity,
 
         private void UrgentChargingForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.toolButton_amerce.Enabled = false;
             /*
@@ -666,6 +671,7 @@ this.InfoDlgOpacity,
 
             int nLineCount = 0;
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在初始化浏览器组件 ...");
             _stop.BeginLoop();
@@ -674,6 +680,10 @@ this.InfoDlgOpacity,
             Program.MainForm.Update();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
 
             Global.WriteHtml(this.webBrowser_operationInfo,
     "开始恢复。\r\n");
@@ -698,8 +708,8 @@ this.InfoDlgOpacity,
                         if (nRet == -1)
                             goto ERROR1;
 
-                        long lRet = this.Channel.UrgentRecover(
-                            _stop,
+                        long lRet = channel.UrgentRecover(
+                            looping.stop,
                             strXml,
                             out strError);
                         if (lRet == -1)
@@ -738,11 +748,14 @@ this.InfoDlgOpacity,
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
 
             Global.WriteHtml(this.webBrowser_operationInfo,

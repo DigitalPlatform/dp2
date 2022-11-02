@@ -39,6 +39,7 @@ namespace dp2Circulation
             strError = "本功能暂时不允许使用";
             return -1;
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -49,21 +50,27 @@ namespace dp2Circulation
             Program.MainForm.Update();
 
             var channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在设置中心服务器定义 ...",
+                "disableControl");
 
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    _stop,
+                    looping.stop,
                     "center",
                     strAction,
                     strCenterDef,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 _stop.EndLoop();
@@ -71,10 +78,8 @@ namespace dp2Circulation
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-        ERROR1:
-            return -1;
         }
 
         internal List<string> GetCenterServerNames()
@@ -191,6 +196,7 @@ namespace dp2Circulation
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -201,21 +207,26 @@ namespace dp2Circulation
             Program.MainForm.Update();
 
             var channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取中心服务器信息 ...",
+                "disableControl");
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    _stop,
+                    looping.stop,
                     "center",
                     "def",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 _stop.EndLoop();
@@ -223,10 +234,8 @@ namespace dp2Circulation
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-        ERROR1:
-            return -1;
         }
 
         string CenterInfoXml = "";

@@ -34,6 +34,8 @@ namespace dp2Circulation
 
         public ChatForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
 
             this.webBrowser1.Width = 300;

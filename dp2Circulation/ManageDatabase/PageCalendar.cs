@@ -19,6 +19,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -100,6 +101,7 @@ namespace dp2Circulation
             //this.SortColumns.Clear();
             //SortColumns.ClearColumnSortDisplay(this.listView_calendar.Columns);
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -107,7 +109,10 @@ namespace dp2Circulation
             _stop.BeginLoop();
 
             var channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得全部日历 ...",
+                "disableControl");
             try
             {
                 int nStart = 0;
@@ -118,7 +123,7 @@ namespace dp2Circulation
                     CalenderInfo[] infos = null;
 
                     long lRet = channel.GetCalendar(
-                        _stop,
+                        looping.stop,
                         (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0 ? "list" : "get"), // "list",
                         "",
                         nStart,
@@ -165,6 +170,8 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 _stop.EndLoop();
@@ -172,13 +179,14 @@ namespace dp2Circulation
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
 
 
             this.CalendarDefChanged = false;
 
             // dp2Library 版本 2.29 以后，才允许 get 获得全部事项内容，此处界面才允许修改日历定义
-            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion,"2.29") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0)
                 this.toolStrip_calendar.Enabled = false;
 
             // 缺省按照第一列排序
@@ -307,6 +315,7 @@ namespace dp2Circulation
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -317,6 +326,10 @@ namespace dp2Circulation
             Program.MainForm.Update();
 
             var channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存日历 ...",
+                "disableControl");
 
             try
             {
@@ -343,19 +356,19 @@ namespace dp2Circulation
                         strAction = "delete";
                     else
                     {
-                        strError = "未知的 item.ImageIndex ["+item.ImageIndex.ToString()+"]";
+                        strError = "未知的 item.ImageIndex [" + item.ImageIndex.ToString() + "]";
                         return -1;
                     }
 
                     long lRet = channel.SetCalendar(
-                        _stop,
+                        looping.stop,
                         strAction,
                         info,
                         out strError);
                     if (lRet == -1)
                     {
                         DialogResult result = MessageBox.Show(this,
-    "针对日历 " + info.Name + " 进行 "+strAction+" 操作出错："+strError+"\r\n\r\n请问是否继续进行余下的保存操作?",
+    "针对日历 " + info.Name + " 进行 " + strAction + " 操作出错：" + strError + "\r\n\r\n请问是否继续进行余下的保存操作?",
     "ManagerForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -379,9 +392,12 @@ namespace dp2Circulation
 
                 if (nErrorCount == 0)
                     this.CalendarDefChanged = false;
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 _stop.EndLoop();
@@ -389,10 +405,8 @@ namespace dp2Circulation
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-            return 0;
         }
-
     }
 }

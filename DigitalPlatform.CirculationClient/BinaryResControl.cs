@@ -1659,6 +1659,7 @@ bool bChanged)
             return CallGetChannel("", out _);
         }
 
+        // 注意 looping 可能返回 null，表示宿主不支持 Looping，只支持 GetChannel()
         LibraryChannel CallGetChannel(string style,
             out Looping looping)
         {
@@ -1856,14 +1857,14 @@ bool bChanged)
             Stop.Initial("正在下载对象 " + strResPath);
             Stop.BeginLoop();
 #endif
-            looping.stop.Initial("正在下载对象 " + strResPath);
+            looping?.stop?.Initial("正在下载对象 " + strResPath);
 
             try
             {
                 // EnableControlsInLoading(true);
 
                 long lRet = channel.GetRes(
-                    looping.stop,
+                    looping?.stop,
                     strResPath,
                     dlg.FileName,
                     "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip

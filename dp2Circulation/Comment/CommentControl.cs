@@ -65,7 +65,7 @@ namespace dp2Circulation
             {
                 InitializeComponent();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2019/4/19
                 //if (this.DesignMode == false)
@@ -229,13 +229,10 @@ namespace dp2Circulation
             long lCount = -1;
             for (; ; )
             {
-                if (stop != null)
+                if (stop != null && stop.State != 0)
                 {
-                    if (stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        return -1;
-                    }
+                    strError = "用户中断";
+                    return -1;
                 }
                 EntityInfo[] entities = null;
 
@@ -400,6 +397,7 @@ namespace dp2Circulation
         /// <summary>
         /// 装载 Item 记录
         /// </summary>
+        /// <param name="stop"></param>
         /// <param name="channel">通讯通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="preload_entities">预先装载好的事项集合</param>
@@ -407,6 +405,7 @@ namespace dp2Circulation
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有装载; 1: 已经装载</returns>
         public override int LoadItemRecords(
+            Stop stop,
             LibraryChannel channel,
             string strBiblioRecPath,
             EntityInfo[] preload_entities,
@@ -415,6 +414,7 @@ namespace dp2Circulation
             out string strError)
         {
             int nRet = base.LoadItemRecords(
+                stop,
                 channel,
                 strBiblioRecPath,
                 preload_entities,
@@ -1792,8 +1792,8 @@ namespace dp2Circulation
 
             this.Update();
 #endif
-            Stop.SetMessage("正在获得评注 HTML 信息 ...");
-
+            var looping = BeginLoop((s, e) => Program.MainForm.DoStop(s, e),
+"正在获得评注 HTML 信息 ...");
             try
             {
                 string strOutputCommentRecPath = "";
@@ -1802,7 +1802,7 @@ namespace dp2Circulation
                 string strOutputBiblioRecPath = "";
 
                 long lRet = channel.GetCommentInfo(
-                    Stop,
+                    looping.stop,
                     strXml,
                     // "",
                     "html",
@@ -1818,6 +1818,8 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+
                 if (channel_param == null)
                     Program.MainForm.ReturnChannel(channel);
 #if NO
@@ -1825,7 +1827,7 @@ namespace dp2Circulation
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.SetMessage("");
+                // Stop.SetMessage("");
             }
 
             return 1;
@@ -2034,7 +2036,8 @@ namespace dp2Circulation
             TriggerContentChanged(bOldChanged, true);
 
             LibraryChannel channel = Program.MainForm.GetChannel();
-
+            var looping = BeginLoop((s, e) => Program.MainForm.DoStop(s, e),
+    "...");
             this.EnableControls(false);
             try
             {
@@ -2077,6 +2080,7 @@ namespace dp2Circulation
                         //      0   not dup
                         //      1   dup
                         nRet = SearchCommentRefIdDup(
+                            looping.stop,
                             channel,
                             commentitem.RefID,
                             // this.BiblioRecPath,
@@ -2107,7 +2111,7 @@ namespace dp2Circulation
             finally
             {
                 this.EnableControls(true);
-
+                looping.Dispose();
                 Program.MainForm.ReturnChannel(channel);
             }
         }
@@ -2182,6 +2186,7 @@ namespace dp2Circulation
         }
 #endif
         int SearchCommentRefIdDup(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strRefID,
     // string strBiblioRecPath,
@@ -2203,12 +2208,12 @@ namespace dp2Circulation
             Stop.Initial("正在对参考ID '" + strRefID + "' 进行查重 ...");
             Stop.BeginLoop();
 #endif
-            Stop.SetMessage("正在对参考ID '" + strRefID + "' 进行查重 ...");
+            stop?.SetMessage("正在对参考ID '" + strRefID + "' 进行查重 ...");
 
             try
             {
                 long lRet = channel.SearchComment(
-    Stop,
+    stop,
     "<全部>",
     strRefID,
     100,
@@ -2227,7 +2232,7 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                lRet = channel.GetSearchResult(Stop,
+                lRet = channel.GetSearchResult(stop,
                     "dup",
                     0,
                     Math.Min(lHitCount, 100),
@@ -2262,7 +2267,7 @@ namespace dp2Circulation
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 #endif
-                Stop.SetMessage("");
+                stop?.SetMessage("");
             }
 
             return 1;   // found

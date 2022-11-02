@@ -126,6 +126,8 @@ namespace dp2Circulation
         /// </summary>
         public DupForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
 
             //this.panel1.MaximumSize = new System.Drawing.Size(500, 0);
@@ -383,6 +385,7 @@ this.checkBox_returnSearchDetail.Checked);
 
             EventFinish.Reset();
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -392,6 +395,10 @@ this.checkBox_returnSearchDetail.Checked);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行查重 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行查重 ...",
+                "timeout:0:2:0,disableControl");
 
             try
             {
@@ -409,7 +416,7 @@ this.checkBox_returnSearchDetail.Checked);
                     strBrowseStyle += ",detail";
 
                 long lRet = channel.SearchDup(
-                    _stop,
+                    looping.stop,
                     strRecPath,
                     strXml,
                     strProjectName,
@@ -419,7 +426,7 @@ this.checkBox_returnSearchDetail.Checked);
                 if (lRet == -1)
                 {
                     strError = "channel.SearchDup() error: " + strError;
-                    goto ERROR1;
+                    return -1;
                 }
 
                 long lHitCount = lRet;
@@ -427,8 +434,8 @@ this.checkBox_returnSearchDetail.Checked);
                 if (lHitCount == 0)
                     goto END1;   // 查重发现没有命中
 
-                if (_stop != null)
-                    _stop.SetProgressRange(0, lHitCount);
+                if (looping != null)
+                    looping.stop.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
@@ -437,16 +444,16 @@ this.checkBox_returnSearchDetail.Checked);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
-                        goto ERROR1;
+                        return -1;
                     }
 
-                    _stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetDupSearchResult(
-                        _stop,
+                        looping.stop,
                         lStart,
                         lPerCount,
                         strBrowseStyle, // "cols,excludecolsoflowthreshold",
@@ -455,7 +462,7 @@ this.checkBox_returnSearchDetail.Checked);
                     if (lRet == -1)
                     {
                         strError = "channel.GetDupSearchResult() error: " + strError;
-                        goto ERROR1;
+                        return -1;
                     }
 
                     if (lRet == 0)
@@ -511,8 +518,8 @@ this.checkBox_returnSearchDetail.Checked);
                             item.ImageIndex = ITEMTYPE_NORMAL;
                         }
 
-                        if (_stop != null)
-                            _stop.SetProgressValue(lStart + i + 1);
+                        if (looping != null)
+                            looping.stop.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
@@ -527,6 +534,8 @@ this.checkBox_returnSearchDetail.Checked);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -538,11 +547,8 @@ this.checkBox_returnSearchDetail.Checked);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-
-        ERROR1:
-            return -1;
         }
 
         private void comboBox_projectName_DropDown(object sender, EventArgs e)
@@ -899,6 +905,7 @@ this.checkBox_returnSearchDetail.Checked);
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -909,6 +916,10 @@ this.checkBox_returnSearchDetail.Checked);
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在填充浏览列 ...",
+                "disableControl");
 
             try
             {
@@ -924,13 +935,13 @@ this.checkBox_returnSearchDetail.Checked);
 
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    _stop.SetMessage("正在装入浏览信息 " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
+                    looping.stop.SetMessage("正在装入浏览信息 " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
 
                     string[] paths = new string[nCount];
                     pathlist.CopyTo(nStart, paths, 0, nCount);
@@ -938,7 +949,7 @@ this.checkBox_returnSearchDetail.Checked);
                     Record[] searchresults = null;
 
                     long lRet = channel.GetBrowseRecords(
-                        this._stop,
+                        looping.stop,
                         paths,
                         "id,cols",
                         out searchresults,
@@ -973,9 +984,13 @@ this.checkBox_returnSearchDetail.Checked);
 
                     nStart += searchresults.Length;
                 }
+
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -983,9 +998,8 @@ this.checkBox_returnSearchDetail.Checked);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return 0;
         }
 
         private void DupForm_SizeChanged(object sender, EventArgs e)

@@ -13,6 +13,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -48,6 +49,8 @@ namespace dp2Circulation
         /// </summary>
         public CalendarForm()
         {
+            this.UseLooping = true; // 2022/11/1
+
             InitializeComponent();
         }
 
@@ -128,6 +131,7 @@ namespace dp2Circulation
         {
             this.comboBox_calendarName.Items.Clear();
 
+            /*
             EnableControls(false, true);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -136,6 +140,10 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得全部日历名 ...",
+                "disableControl");
 
             try
             {
@@ -145,15 +153,13 @@ namespace dp2Circulation
 
                 while (true)
                 {
-                    CalenderInfo[] infos = null;
-
-                    long lRet = Channel.GetCalendar(
-                        _stop,
+                    long lRet = channel.GetCalendar(
+                        looping.stop,
                         "list",
                         "",
                         nStart,
                         nCount,
-                        out infos,
+                        out CalenderInfo[] infos,
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
@@ -179,11 +185,14 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true, true);
+                */
             }
 
             return 1;
@@ -207,6 +216,7 @@ namespace dp2Circulation
             strComment = "";
             strError = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -215,18 +225,20 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得日历 '" + strName + "' 的内容 ...",
+                "disableControl");
 
             try
             {
-                CalenderInfo[] infos = null;
-
-                long lRet = Channel.GetCalendar(
-                    _stop,
+                long lRet = channel.GetCalendar(
+                    looping.stop,
                     "get",
                     strName,
                     0,
                     -1,
-                    out infos,
+                    out CalenderInfo[] infos,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -246,16 +258,17 @@ namespace dp2Circulation
                 strContent = infos[0].Content;
                 strRange = infos[0].Range;
                 strComment = infos[0].Comment;
-
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
-
+                */
             }
 
             return 1;
@@ -277,6 +290,7 @@ namespace dp2Circulation
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -285,7 +299,10 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在对日历 '" + strName + "' 进行 " + strAction + " 操作 ...",
+                "disableControl");
             try
             {
                 CalenderInfo info = new CalenderInfo();
@@ -294,8 +311,8 @@ namespace dp2Circulation
                 info.Comment = strComment;
                 info.Content = strContent;
 
-                long lRet = Channel.SetCalendar(
-                    _stop,
+                long lRet = channel.SetCalendar(
+                    looping.stop,
                     strAction,
                     info,
                     out strError);
@@ -304,12 +321,14 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
-
+                */
             }
 
             return 0;
@@ -618,7 +637,9 @@ MessageBoxDefaultButton.Button2);
 
         private void CalendarForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;

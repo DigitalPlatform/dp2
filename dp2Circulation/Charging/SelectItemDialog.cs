@@ -85,15 +85,18 @@ namespace dp2Circulation
 #endif
             this._floatingMessage.RectColor = Color.Purple;
 
+            // 把状态条和进度条映射到本对话框内的控件上
             stopManager.Initial(this.button_stop,
 (object)this.toolStripStatusLabel1,
 (object)this.toolStripProgressBar1);
-
+            this._loopingHost.StopManager = stopManager;
+            /*
             if (_stop != null)
                 _stop.Unregister();
 
             _stop = new DigitalPlatform.Stop();
             _stop.Register(stopManager, true);	// 和容器关联
+            */
 
             if (this.AutoSearch == true
                 && string.IsNullOrEmpty(this.textBox_queryWord.Text) == false)
@@ -184,6 +187,7 @@ namespace dp2Circulation
             this._biblioRecPaths.Clear();
             this.dpTable_items.Rows.Clear();
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Progress.Style = StopStyle.EnableHalfStop;
@@ -192,6 +196,10 @@ namespace dp2Circulation
             Progress.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索 ...",
+                "disableControl,halfstop");
 
             m_nInSearching++;
 
@@ -250,7 +258,7 @@ namespace dp2Circulation
                 string strQueryWord = GetBiblioQueryString();
 
                 string strQueryXml = "";
-                long lRet = channel.SearchBiblio(Progress,
+                long lRet = channel.SearchBiblio(looping.stop,
                     this.GetBiblioDbNames(),    // "<全部>",
                     strQueryWord,   // this.textBox_queryWord.Text,
                     1000,
@@ -288,19 +296,16 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (Progress != null)
+                    if (looping.Stopped)
                     {
-                        if (Progress.State != 0)
-                        {
-                            // MessageBox.Show(this, "用户中断");
-                            break;  // 已经装入的还在
-                        }
+                        // MessageBox.Show(this, "用户中断");
+                        break;  // 已经装入的还在
                     }
 
-                    Progress.SetMessage("正在装入书目记录ID " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.stop.SetMessage("正在装入书目记录ID " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetSearchResult(
-                        Progress,
+                        looping.stop,
                         null,   // strResultSetName
                         lStart,
                         lPerCount,
@@ -310,7 +315,7 @@ namespace dp2Circulation
                         out strError);
                     if (lRet == -1)
                     {
-                        if (Progress.State != 0)
+                        if (looping.Stopped)
                         {
                             // MessageBox.Show(this, "用户中断");
                             break;
@@ -341,28 +346,31 @@ namespace dp2Circulation
                 }
 
                 this.SetFloatMessage("waiting", "正在装入册记录 ...");
-                Progress.SetProgressRange(0, this._biblioRecPaths.Count);
+                looping.stop.SetProgressRange(0, this._biblioRecPaths.Count);
                 // 将每条书目记录下属的册记录装入
                 int i = 0;
                 foreach (string strBiblioRecPath in this._biblioRecPaths)
                 {
                     Application.DoEvents();
 
-                    if (Progress.State != 0)
+                    if (looping.Stopped)
                         break;
 
                     nRet = LoadBiblioSubItems(
+                        looping.stop,
                         channel,
                         strBiblioRecPath,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    Progress.SetProgressValue(++i);
+                    looping.stop.SetProgressValue(++i);
                 }
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -372,6 +380,7 @@ namespace dp2Circulation
                 this.EnableControls(true);
 
                 this.ReturnChannel(channel);
+                */
 
                 m_nInSearching--;
             }
@@ -447,13 +456,14 @@ namespace dp2Circulation
         //      -1  出错
         //      >=0 装入的册记录条数
         int LoadBiblioSubItems(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strBiblioRecPath,
             out string strError)
         {
             strError = "";
 
-            Progress.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 下属的册记录 ...");
+            stop?.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 下属的册记录 ...");
 
             if (this.FunctionType == "read")
             {
@@ -468,22 +478,20 @@ namespace dp2Circulation
             long lCount = -1;
             for (; ; )
             {
-                if (Progress.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断";
                     return -2;
                 }
 
-                EntityInfo[] entities = null;
-
                 long lRet = channel.GetEntities(
-         Progress,
+         stop,
          strBiblioRecPath,
          lStart,
          lCount,
          "",  // bDisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
          "zh",
-         out entities,
+         out EntityInfo[] entities,
          out strError);
                 if (lRet == -1)
                     return -1;
@@ -863,8 +871,12 @@ namespace dp2Circulation
 
         private void SelectItemDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
+            /*
             if (this.Progress != null)
                 this.Progress.DoStop();
+            */
+            if (HasLooping())
+                this.DoStop(sender, new StopEventArgs());
         }
 
         private void dpTable_items_DoubleClick(object sender, EventArgs e)
@@ -904,7 +916,10 @@ namespace dp2Circulation
 
             // 如果正在检索
             if (this.m_nInSearching > 0)
-                Progress.DoStop();
+            {
+                // Progress.DoStop();
+                this.DoStop(sender, new StopEventArgs());
+            }
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
@@ -1109,11 +1124,13 @@ namespace dp2Circulation
 
         private void button_stop_Click(object sender, EventArgs e)
         {
+            /*
             if (Control.ModifierKeys == Keys.Control)
                 stopManager.DoStopAll(null);
             else
                 stopManager.DoStopActive();
-
+            */
+            this.DoStop(sender, new StopEventArgs());
         }
 
         private void dpTable_items_MouseUp(object sender, MouseEventArgs e)

@@ -69,6 +69,8 @@ namespace dp2Circulation
         /// </summary>
         public QuickChargingForm()
         {
+            this.UseLooping = true; // 2022/11/1
+
             InitializeComponent();
 
             this.dpTable_tasks.ImageList = this.imageList_progress;
@@ -4436,11 +4438,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 return -1;
             }
 
+            /*
             this.EnableControls(false);
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行盘点操作 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在进行盘点操作 ...", "disableControl,halfstop");
 
             this.SmartFuncState = dp2Circulation.FuncState.InventoryBook;
 
@@ -4461,6 +4466,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                         this.AsyncDoAction(this.SmartFuncState, strLine);
                     }
                 }
+
+                return 0;
             }
             catch (Exception ex)
             {
@@ -4469,6 +4476,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -4476,9 +4485,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 _stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
+                */
             }
-
-            return 0;
         }
 
         // 根据册条码号列表进行还书操作
@@ -4487,11 +4495,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
         {
             strError = "";
 
+            /*
             this.EnableControls(false);
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行还书操作 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在进行还书操作 ...", "disableControl,halfstop");
 
             this.SmartFuncState = dp2Circulation.FuncState.Return;
 
@@ -4512,6 +4523,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -4519,6 +4532,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 _stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
+                */
             }
 
             return 0;

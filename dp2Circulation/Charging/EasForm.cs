@@ -26,6 +26,8 @@ namespace dp2Circulation.Charging
 
         public EasForm()
         {
+            this.UseLooping = true; // 2022/11/1
+
             InitializeComponent();
 
             this.SuppressSizeSetting = true;  // 不需要基类 MyForm 的尺寸设定功能
@@ -335,14 +337,18 @@ out string strError);
                         // true if the current instance receives a signal; otherwise, false.
                         _limit.WaitOne(TimeSpan.FromSeconds(10));
 
+                        /*
                         LibraryChannel channel = Program.MainForm.GetChannel();
                         TimeSpan old_timeout = channel.Timeout;
                         channel.Timeout = new TimeSpan(0, 0, 5);
-
+                        */
+                        var looping = Looping(out LibraryChannel channel,
+                            "正在获得书目摘要 ...",
+                            "settimeout:0:0:5");    // TODO: 实现 settimeout:
                         try
                         {
                             long lRet = channel.GetBiblioSummary(
-        null,
+        looping.stop,
         pii,
         null,
         null,
@@ -359,13 +365,14 @@ out string strError);
                                      null,
                                      strSummary);
                             }
-
                         }
                         finally
                         {
+                            looping.Dispose();
+                            /*
                             channel.Timeout = old_timeout;
                             Program.MainForm.ReturnChannel(channel);
-
+                            */
                             _limit.Release();
                         }
                     }
@@ -545,10 +552,13 @@ out string strError);
 
         GetItemXmlResult GetItemXml(string pii)
         {
+            /*
             LibraryChannel channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel);
             try
             {
-                long lRet = channel.GetItemInfo(null,
+                long lRet = channel.GetItemInfo(looping.stop,
                     pii,
                     "xml",
                     out string strItemXml,
@@ -570,7 +580,10 @@ out string strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
         }
 

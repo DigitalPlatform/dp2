@@ -395,6 +395,7 @@ namespace dp2Circulation
         /// </summary>
         public EntityForm()
         {
+            this.UseLooping = true; // 2022/11/1
             try
             {
                 InitializeComponent();
@@ -617,8 +618,10 @@ namespace dp2Circulation
             this.issueControl1.ContentChanged -= new ContentChangedEventHandler(issueControl1_ContentChanged);
             this.issueControl1.ContentChanged += new ContentChangedEventHandler(issueControl1_ContentChanged);
 
+            /*
             this.issueControl1.EnableControlsEvent -= new EnableControlsHandler(entityControl1_EnableControls);
             this.issueControl1.EnableControlsEvent += new EnableControlsHandler(entityControl1_EnableControls);
+            */
 
             this.issueControl1.ChangeItem -= new ChangeItemEventHandler(issueControl1_ChangeItem);
             this.issueControl1.ChangeItem += new ChangeItemEventHandler(issueControl1_ChangeItem);
@@ -634,7 +637,9 @@ namespace dp2Circulation
             this.issueControl1.GetBiblio -= issueControl1_GetBiblio;
             this.issueControl1.GetBiblio += issueControl1_GetBiblio;
 
-            this.issueControl1.Stop = this.Progress;
+            // this.issueControl1.Stop = this.Progress;
+            this.issueControl1.SetLoopingHost(this);
+
             // this.issueControl1.MainForm = Program.MainForm;
 
             this.EnableIssuesPage(false);
@@ -664,8 +669,10 @@ namespace dp2Circulation
             this.orderControl1.ContentChanged -= new ContentChangedEventHandler(issueControl1_ContentChanged);
             this.orderControl1.ContentChanged += new ContentChangedEventHandler(issueControl1_ContentChanged);
 
+            /*
             this.orderControl1.EnableControlsEvent -= new EnableControlsHandler(entityControl1_EnableControls);
             this.orderControl1.EnableControlsEvent += new EnableControlsHandler(entityControl1_EnableControls);
+            */
 
             this.orderControl1.GenerateEntity -= new GenerateEntityEventHandler(orderControl1_GenerateEntity);
             this.orderControl1.GenerateEntity += new GenerateEntityEventHandler(orderControl1_GenerateEntity);
@@ -691,7 +698,9 @@ namespace dp2Circulation
             this.orderControl1.ShowMessage -= entityControl1_ShowMessage;
             this.orderControl1.ShowMessage += entityControl1_ShowMessage;
 
-            this.orderControl1.Stop = this.Progress;
+            // this.orderControl1.Stop = this.Progress;
+            this.orderControl1.SetLoopingHost(this);
+
             // this.orderControl1.MainForm = Program.MainForm;
 
             this.EnableOrdersPage(false);
@@ -703,8 +712,10 @@ namespace dp2Circulation
             this.commentControl1.ContentChanged -= new ContentChangedEventHandler(issueControl1_ContentChanged);
             this.commentControl1.ContentChanged += new ContentChangedEventHandler(issueControl1_ContentChanged);
 
+            /*
             this.commentControl1.EnableControlsEvent -= new EnableControlsHandler(entityControl1_EnableControls);
             this.commentControl1.EnableControlsEvent += new EnableControlsHandler(entityControl1_EnableControls);
+            */
 
             /*
             this.commentControl1.GenerateEntity -= new GenerateEntityEventHandler(orderControl1_GenerateEntity);
@@ -726,7 +737,9 @@ namespace dp2Circulation
             this.CommentControl.AddSubject -= new AddSubjectEventHandler(CommentControl_AddSubject);
             this.CommentControl.AddSubject += new AddSubjectEventHandler(CommentControl_AddSubject);
 
-            this.commentControl1.Stop = this.Progress;
+            // this.commentControl1.Stop = this.Progress;
+            this.CommentControl.SetLoopingHost(this);
+
             // this.commentControl1.MainForm = Program.MainForm;
 
             this.EnableCommentsPage(false);
@@ -938,7 +951,9 @@ true);
 
                 this.entityControl1.VerifyBarcode += new VerifyBarcodeHandler(entityControl1_VerifyBarcode);
 
+                /*
                 this.entityControl1.EnableControlsEvent += new EnableControlsHandler(entityControl1_EnableControls);
+                */
 
                 this.entityControl1.LoadRecord += new LoadRecordHandler(entityControl1_LoadRecord111);
 
@@ -947,8 +962,10 @@ true);
 
                 this.entityControl1.ShowMessage += entityControl1_ShowMessage;
 
-                ////this.entityControl1.Channel = this.Channel;
-                this.entityControl1.Stop = this.Progress;
+
+                // this.entityControl1.Stop = this.Progress;
+                this.entityControl1.SetLoopingHost(this);
+
                 // this.entityControl1.MainForm = Program.MainForm;
             }
             else
@@ -957,13 +974,15 @@ true);
                 this.entityControl1.ContentChanged -= new ContentChangedEventHandler(issueControl1_ContentChanged);
                 this.entityControl1.GetParameterValue -= new GetParameterValueHandler(entityControl1_GetParameterValue);
                 this.entityControl1.VerifyBarcode -= new VerifyBarcodeHandler(entityControl1_VerifyBarcode);
+                /*
                 this.entityControl1.EnableControlsEvent -= new EnableControlsHandler(entityControl1_EnableControls);
+                */
                 this.entityControl1.LoadRecord -= new LoadRecordHandler(entityControl1_LoadRecord111);
                 this.entityControl1.GenerateData -= new GenerateDataEventHandler(entityControl1_GenerateData);
                 this.entityControl1.ShowMessage -= entityControl1_ShowMessage;
 
-                this.entityControl1.Stop = null;
-
+                // this.entityControl1.Stop = null;
+                this.entityControl1.SetLoopingHost(null);
             }
 
 
@@ -982,16 +1001,22 @@ true);
 
         void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)
         {
+            /*
             this._stop.EndLoop();
             this._stop.OnStop -= new StopEventHandler(this.DoStop);
             this.ReturnChannel(e.Channel);
+            */
+            OnReturnChannel(sender, e);
         }
 
         void binaryResControl1_GetChannel(object sender, GetChannelEventArgs e)
         {
+            /*
             e.Channel = this.GetChannel();
             this._stop.OnStop += new StopEventHandler(this.DoStop);
             this._stop.BeginLoop();
+            */
+            OnGetChannel(sender, e);
         }
 
         void entityControl1_ShowMessage(object sender, ShowMessageEventArgs e)
@@ -1560,7 +1585,9 @@ true);
 
             List<InputBookItem> bookitems = new List<InputBookItem>();
 
-            LibraryChannel channel = this.GetChannel();
+            // LibraryChannel channel = this.GetChannel();
+            var looping = Looping(out LibraryChannel channel,
+                "...");
             try
             {
                 // 创建实体记录
@@ -1572,6 +1599,7 @@ true);
                     // 外部调用，设置一个实体记录。
                     // 具体动作有：new change delete neworchange
                     int nRet = this.entityControl1.DoSetEntity(
+                        looping.stop,
                         channel,
                         true,
                         data.Action,
@@ -1605,7 +1633,8 @@ true);
             }
             finally
             {
-                this.ReturnChannel(channel);
+                looping.Dispose();
+                // this.ReturnChannel(channel);
             }
 
             if (bookitems.Count > 0
@@ -1893,7 +1922,9 @@ true);
 
             List<InputBookItem> bookitems = new List<InputBookItem>();
 
-            LibraryChannel channel = this.GetChannel();
+            // LibraryChannel channel = this.GetChannel();
+            var looping = Looping(out LibraryChannel channel,
+    "正在创建下级记录 ...");
             try
             {
                 // 创建实体记录
@@ -1905,6 +1936,7 @@ true);
                     // 外部调用，设置一个实体记录。
                     // 具体动作有：new change delete
                     nRet = form.entityControl1.DoSetEntity(
+                        looping.stop,
                         channel,
                         false,
                         data.Action,
@@ -2055,6 +2087,7 @@ true);
 
                         // 重新装载评注属性页
                         nRet = form.CommentControl.LoadItemRecords(
+                            looping.stop,
                             channel,
                             form.BiblioRecPath,
                             null,
@@ -2088,12 +2121,14 @@ true);
                 {
                     form.Close();
                 }
+
+                return;
             }
             finally
             {
-                this.ReturnChannel(channel);
+                looping.Dispose();
+                // this.ReturnChannel(channel);
             }
-            return;
         }
 
         /*
@@ -2386,11 +2421,13 @@ true);
                 false);
         }
 
+        /*
         void entityControl1_EnableControls(object sender, EnableControlsEventArgs e)
         {
             if (this.m_nInDisable == 0)
                 this.EnableControls(e.bEnable);
         }
+        */
 
         // 册控件请求校验条码
         void entityControl1_VerifyBarcode(object sender, VerifyBarcodeEventArgs e)
@@ -2585,6 +2622,15 @@ true);
 #endif
             if (this.browseWindow != null)
             {
+                // 2022/11/1
+                // 避免用 MyForm 的警告机制导致 MessageBox 被 TopMost 状态的小浏览窗遮住无法操作
+                if (HasLooping())
+                {
+                    this.DoStop(sender, new StopEventArgs());
+                    e.Cancel = true;
+                    return;
+                }
+                /*
                 // 避免用 MyForm 的警告机制导致 MessageBox 被 TopMost 状态的小浏览窗遮住无法操作
                 if (Progress != null && Progress.State == 0)    // 0 表示正在处理
                 {
@@ -2592,6 +2638,7 @@ true);
                     e.Cancel = true;
                     return;
                 }
+                */
                 CloseBrowseWindow();
                 //e.Cancel = true;
                 //this.ShowMessage("浏览小窗已经关闭。再关闭一次可关闭种册窗", "yellow", true);
@@ -3286,7 +3333,9 @@ out string strErrorCode)
         {
             strTotalError = "";
 
-            if (Progress.IsInLoop == true && Progress.AllowNest == false)
+#if REMOVED
+            // if (Progress.IsInLoop == true && Progress.AllowNest == false)
+            if (HasLooping())
             {
                 strTotalError = "种册窗正在执行长操作。装载书目记录 "
                     + strBiblioRecPath
@@ -3294,6 +3343,7 @@ out string strErrorCode)
                     + " 的操作被放弃。请稍后重试";
                 return 2;
             }
+#endif
 
             string strError = "";
 
@@ -3336,18 +3386,22 @@ out string strErrorCode)
                 }
             }
 
+            string strMessage = "正在装载书目记录 " + strBiblioRecPath + " " + strPrevNextStyle + " ...";
+            this.ShowMessage(strMessage);
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);    // 保存大量册记录时可能会耗时长一点
 
-            string strMessage = "正在装载书目记录 " + strBiblioRecPath + " " + strPrevNextStyle + " ...";
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial(strMessage);
             Progress.BeginLoop();
 
-            this.ShowMessage(strMessage);
-
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                strMessage,
+                "timeout:00:01:00,disableControl");
             try
             {
                 // 2012/7/25 移动到这里
@@ -3362,6 +3416,7 @@ out string strErrorCode)
                     bLoadSubrecords = false;
 
                 int nRet = this.LoadBiblioRecord(
+                    looping.stop,
                     channel,
                     strBiblioRecPath,
                     strPrevNextStyle,
@@ -3480,6 +3535,7 @@ out string strErrorCode)
                 {
                     // 装载下级记录
                     nRet = LoadSubRecords(
+                        looping.stop,
                         channel,
                         strOutputBiblioRecPath,
                         strXml, // 书目记录 XML
@@ -3576,6 +3632,7 @@ out string strErrorCode)
             }
             finally
             {
+                /*
                 EnableControls(true);
 
                 Progress.EndLoop();
@@ -3584,6 +3641,8 @@ out string strErrorCode)
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
 
                 // this.m_nChannelInUse--;
                 this.ClearMessage();
@@ -3602,6 +3661,7 @@ out string strErrorCode)
         //      strSubRecords   若干子记录的 XML 组合内容。若以 "error:" 开头，表示里面是报错信息，不能当作 XML 字符串
         //      bRefresh    是否要刷新列表中已有的事项的 old 部分信息
         int LoadSubRecords(
+            Stop stop,
             LibraryChannel channel,
             string strOutputBiblioRecPath,
             string strXml, // 书目记录 XML
@@ -3652,6 +3712,7 @@ out string strErrorCode)
                         strStyle += ",_refresh";
 
                     nRet = this.entityControl1.LoadItemRecords(
+                        stop,
                         channel,
                         strOutputBiblioRecPath,    // 2008/11/2 new changed
                         GetItems(collection_dom, "item"),
@@ -3703,6 +3764,7 @@ out string strErrorCode)
                 {
 
                     nRet = this.issueControl1.LoadItemRecords(
+                        stop,
                         channel,
                         strOutputBiblioRecPath,  // 2008/11/2 changed
                         GetItems(collection_dom, "issue"),
@@ -3758,6 +3820,7 @@ out string strErrorCode)
                 {
 
                     nRet = this.orderControl1.LoadItemRecords(
+                        stop,
                         channel,
                         strOutputBiblioRecPath,  // 2008/11/2 changed
                         GetItems(collection_dom, "order"),
@@ -3809,6 +3872,7 @@ out string strErrorCode)
                 {
 
                     nRet = this.commentControl1.LoadItemRecords(
+                        stop,
                         channel,
                         strOutputBiblioRecPath,
                         GetItems(collection_dom, "comment"),
@@ -3843,7 +3907,7 @@ out string strErrorCode)
             if (strXml != null)
             {
                 nRet = this.binaryResControl1.LoadObject(
-                    this._stop,
+                    stop,
                     channel,
                     strOutputBiblioRecPath,    // 2008/11/2 changed
                     strXml,
@@ -4016,12 +4080,15 @@ out string strErrorCode)
             strError = "";
             timestamp = null;
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在检测书目记录 " + strBiblioRecPath + " ...");
             Progress.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检测书目记录 " + strBiblioRecPath + " ...");
             try
             {
 
@@ -4031,7 +4098,7 @@ out string strErrorCode)
                 string[] results = null;
 
                 long lRet = channel.GetBiblioInfos(
-                    Progress,
+                    looping.stop,
                     strBiblioRecPath,
                     "",
                     formats,
@@ -4047,11 +4114,14 @@ out string strErrorCode)
             }
             finally
             {
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
             }
         }
 
@@ -4065,6 +4135,7 @@ out string strErrorCode)
         //      0   not found
         //      1   found
         int LoadBiblioRecord(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strBiblioRecPath,
             string strDirectionStyle,
@@ -4115,7 +4186,7 @@ out string strErrorCode)
             Progress.Initial("正在装入书目记录 ...");
             Progress.BeginLoop();
 #endif
-            Progress.Initial("正在装入书目记录 ...");
+            stop?.Initial("正在装入书目记录 ...");
 
             try
             {
@@ -4129,7 +4200,7 @@ out string strErrorCode)
 #endif
                 this.m_webExternalHost_biblio.SetHtmlString("(空白)", "entityform_error");
 
-                Progress.SetMessage("正在装入书目记录 " + strBiblioRecPath + " ...");
+                stop?.SetMessage("正在装入书目记录 " + strBiblioRecPath + " ...");
 
                 bool bCataloging = this.Cataloging;
 
@@ -4158,7 +4229,7 @@ out string strErrorCode)
                 byte[] baTimestamp = null;
 
                 long lRet = channel.GetBiblioInfos(
-                    Progress,
+                    stop,
                     strBiblioRecPath,
                     "",
                     format_list.ToArray(),
@@ -4314,7 +4385,7 @@ out string strErrorCode)
 
                 this.ReturnChannel(channel);
 #endif
-                Progress.Initial("");
+                stop.Initial("");
             }
 
             return 1;
@@ -4639,12 +4710,17 @@ out string strErrorCode)
 
             string strHtml = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
             channel.Timeout = new TimeSpan(0, 5, 0);    // 保存大量册记录时可能会耗时长一点
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在保存记录 ...");
             Progress.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存记录 ...",
+                "timeout:00:05:00");
 
             this.ShowMessage("正在保存记录 ...");
             try
@@ -4678,6 +4754,7 @@ out string strErrorCode)
                     //      1   已经保存
                     //      2   已经保存，但有部分错误
                     nRet = SaveBiblioToDatabase(
+                        looping.stop,
                         channel,
                         true,
                         out strHtml,
@@ -4729,6 +4806,7 @@ out string strErrorCode)
                 }
 
                 nRet = SaveSubRecords(
+                    looping.stop,
                     channel,
                     info,
                     null,
@@ -4791,11 +4869,14 @@ out string strErrorCode)
                     }
                 }
 
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
             }
         }
 
@@ -4880,6 +4961,7 @@ out string strErrorCode)
         // parameters:
         //      strStyle    风格。如果为 force 表示希望强制保存
         int SaveSubRecords(
+            Stop stop,
             LibraryChannel channel,
             SavedInfo info,
             string strBiblioRecPath,
@@ -4929,7 +5011,7 @@ out string strErrorCode)
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.orderControl1.DoSaveItems(channel, strStyle, out strError);
+                nRet = this.orderControl1.DoSaveItems(stop, channel, strStyle, out strError);
                 if (nRet == 1)
                 {
                     info.bOrdersSaved = true;
@@ -4954,7 +5036,7 @@ out string strErrorCode)
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.issueControl1.DoSaveItems(channel, strStyle, out strError);
+                nRet = this.issueControl1.DoSaveItems(stop, channel, strStyle, out strError);
                 if (nRet == 1)
                 {
                     info.bIssuesSaved = true;
@@ -4984,7 +5066,7 @@ out string strErrorCode)
                     //      -1  出错
                     //      0   没有必要保存
                     //      1   保存成功
-                    nRet = this.entityControl1.DoSaveItems(channel, strStyle + ",outofrangeAsError", out strError);
+                    nRet = this.entityControl1.DoSaveItems(stop, channel, strStyle + ",outofrangeAsError", out strError);
                     if (nRet == 1)
                     {
                         ReleaseProtectedTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
@@ -5007,7 +5089,7 @@ out string strErrorCode)
                 //      -1  出错
                 //      0   没有必要保存
                 //      1   保存成功
-                nRet = this.commentControl1.DoSaveItems(channel, strStyle, out strError);
+                nRet = this.commentControl1.DoSaveItems(stop, channel, strStyle, out strError);
                 if (nRet == 1)
                 {
                     info.bCommentsSaved = true;
@@ -5031,7 +5113,7 @@ out string strErrorCode)
                     //		-1	error
                     //		>=0 实际上载的资源对象数
                     nRet = this.binaryResControl1.Save(
-                        this._stop,
+                        stop,
                         channel,
                         Program.MainForm.ServerVersion,
                         out strError);
@@ -5230,6 +5312,7 @@ out string strErrorCode)
 
                 this.browseWindow.RecordsList.Items.Clear();
 
+                /*
                 LibraryChannel channel = this.GetChannel();
                 TimeSpan old_timeout = channel.Timeout;
                 channel.Timeout = TimeSpan.FromMinutes(2);
@@ -5239,14 +5322,19 @@ out string strErrorCode)
                 Progress.Initial("正在检索 ...");
                 Progress.BeginLoop();
 
-                this.ShowMessage("正在检索 ...");
-
-                this.browseWindow.stop = Progress;
-
                 //this.button_search.Enabled = false;
                 this.EnableControls(false);
-
                 ////m_nInSearching++;
+
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在检索 ...",
+                    "timeout:00:02:00,disableControl",
+                    Progress_OnStop);
+
+                this.ShowMessage("正在检索 ...");
+
+                this.browseWindow.stop = looping.stop;
                 try
                 {
                     if (this.comboBox_from.Text == "")
@@ -5329,7 +5417,7 @@ out string strErrorCode)
                     }
 
                     string strQueryXml = "";
-                    long lRet = channel.SearchBiblio(Progress,
+                    long lRet = channel.SearchBiblio(looping.stop,
                         this.checkedComboBox_biblioDbNames.Text,    // "<全部>",
                         strQueryWord,   // this.textBox_queryWord.Text,
                         this.MaxSearchResultCount,  // 1000
@@ -5356,7 +5444,7 @@ out string strErrorCode)
                     }
                     else
                     {
-                        if (Progress != null && Progress.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -5379,17 +5467,17 @@ out string strErrorCode)
                         {
                             Application.DoEvents(); // 出让界面控制权
 
-                            if ((Progress != null && Progress.State != 0)
+                            if (looping.Stopped
                                 || _willCloseBrowseWindow)
                             {
                                 // MessageBox.Show(this, "用户中断");
                                 break;  // 已经装入的还在
                             }
 
-                            Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                            looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                             lRet = channel.GetSearchResult(
-                                Progress,
+                                looping.stop,
                                 null,   // strResultSetName
                                 lStart,
                                 lPerCount,
@@ -5400,7 +5488,7 @@ out string strErrorCode)
                             if (lRet == -1)
                             {
                                 if (this.browseWindow == null
-                                    || (Progress != null && Progress.State != 0)
+                                    || looping.Stopped
                                     || _willCloseBrowseWindow)
                                 {
                                     // MessageBox.Show(this, "用户中断");
@@ -5502,7 +5590,7 @@ out string strErrorCode)
                         // return:
                         //      -1  出错
                         //      >=0 命中记录个数
-                        nRet = EndSearchShareBiblio(out strError);
+                        nRet = EndSearchShareBiblio(looping.stop, out strError);
                         if (nRet == -1)
                         {
                             // 显示错误信息
@@ -5563,6 +5651,7 @@ out string strErrorCode)
                     if (Program.MainForm.MessageHub != null)
                         Program.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
+                    /*
                     Progress.EndLoop();
                     Progress.OnStop -= Progress_OnStop;
                     Progress.Initial("");
@@ -5574,6 +5663,8 @@ out string strErrorCode)
                     // this.button_search.Enabled = true;
                     this.EnableControls(true);
                     //// m_nInSearching--;
+                    */
+                    looping.Dispose();
                 }
 
                 if (lHitCount > 1)
@@ -5647,10 +5738,15 @@ out string strErrorCode)
                 return;
 
             _zsearcher.InSearching = true;
+            /*
             this.EnableControls(false);
             _stop.OnStop += OnZ3950LoadStop;
             _stop.Initial("正在装载 Z39.50 检索内容 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在装载 Z39.50 检索内容 ...",
+                "disableControl",
+                OnZ3950LoadStop);
             try
             {
                 ListViewItem item = this.browseWindow.RecordsList.SelectedItems[0];
@@ -5667,7 +5763,7 @@ out string strErrorCode)
                     if (_zsearcher.InSearching == false)
                         break;
 
-                    _stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
+                    looping.stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
 
                     var present_result = await Z3950Searcher.FetchRecords(channel,
                         all ? 100 : 10);
@@ -5693,12 +5789,15 @@ out string strErrorCode)
             }
             finally
             {
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= OnZ3950LoadStop;
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
+                looping.Dispose();
                 _zsearcher.InSearching = false;
             }
         }
@@ -5951,7 +6050,7 @@ out string strErrorCode)
         // return:
         //      -1  出错
         //      >=0 命中记录个数
-        int EndSearchShareBiblio(out string strError)
+        int EndSearchShareBiblio(Stop stop, out string strError)
         {
             strError = "";
 
@@ -5966,7 +6065,7 @@ out string strErrorCode)
                     Thread.Sleep(200);
                     if (DateTime.Now - start_time > timeout)    // 超时
                         break;
-                    if (this.Progress != null && this.Progress.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
@@ -6345,10 +6444,20 @@ out strError);
          * */
         void browseWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
+            /*
             if (_stop != null && _stop.State == 0 && e.CloseReason == CloseReason.UserClosing)    // 0 表示正在处理
             {
                 // 如果是在检索中途关闭小窗口，则需要先设置 stop 为停止状态，不能直接关闭小窗口
                 _stop.DoStop();
+                e.Cancel = true;
+                // 通知检索循环结束后关闭小窗口
+                _willCloseBrowseWindow = true;
+            }
+            */
+            if (HasLooping() && e.CloseReason == CloseReason.UserClosing)    // 0 表示正在处理
+            {
+                // 如果是在检索中途关闭小窗口，则需要先设置 stop 为停止状态，不能直接关闭小窗口
+                this.DoStop(sender, new StopEventArgs());
                 e.Cancel = true;
                 // 通知检索循环结束后关闭小窗口
                 _willCloseBrowseWindow = true;
@@ -6395,7 +6504,7 @@ out strError);
                 Debug.Assert(info != null, "");
 
                 bool is_z3950 = info.RecPath.IndexOf("@") != -1;
-                if (this._stop.IsInLoop == true
+                if (/*this._stop.IsInLoop == true*/ HasLooping()
                     && is_z3950 == false)
                 {
                     this.AddToPendingList(info.RecPath, "");
@@ -6422,7 +6531,7 @@ out strError);
 
             string strBiblioRecPath = e.Paths[0];
 
-            if (this._stop.IsInLoop == true)
+            if (/*this._stop.IsInLoop == true*/ HasLooping())
             {
                 this.AddToPendingList(strBiblioRecPath, "");
                 return;
@@ -6880,12 +6989,18 @@ out strError);
             }
 
             string strMessage = "正在装载记录 " + strItemRecPath + " 所从属的书目记录 ...";
+            this.ShowMessage(strMessage);
+
+            /*
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial(strMessage);
             Progress.BeginLoop();
-            bool bOldNest = Progress.SetAllowNest(true);
-            this.ShowMessage(strMessage);
             this.EnableControls(false);
+            */
+            var looping = Looping(strMessage, "disableControl");
+
+            // ??
+            bool bOldNest = looping.stop.SetAllowNest(true);
             try
             {
                 /*
@@ -6927,14 +7042,16 @@ out strError);
 #if NO
                 this.m_nChannelInUse--;
 #endif
-                this.EnableControls(true);
 
-                Progress.SetAllowNest(bOldNest);
+                looping.stop.SetAllowNest(bOldNest);
+                /*
+                this.EnableControls(true);
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+                */
+                looping.Dispose();
                 this.ClearMessage();
-
             }
         }
 
@@ -7480,7 +7597,9 @@ out strError);
 #endif
             }
 
+            /*
             Program.MainForm.stopManager.Active(this.Progress);
+            */
 
             Program.MainForm.SetMenuItemState();
 
@@ -7987,6 +8106,7 @@ out strError);
         /// <summary>
         /// 把当前书目记录复制到目标位置
         /// </summary>
+        /// <param name="stop"></param>
         /// <param name="channel">通讯通道</param>
         /// <param name="strAction">动作。为 copy / move / onlycopybiblio / onlymovebiblio 之一</param>
         /// <param name="strTargetBiblioRecPath">目标书目记录路径</param>
@@ -7997,6 +8117,7 @@ out strError);
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int CopyBiblio(
+            Stop stop,  // 2022/11/1
             LibraryChannel channel,
             string strAction,
             string strTargetBiblioRecPath,
@@ -8073,13 +8194,18 @@ out strError);
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 2, 0);    // 查重和复制一般都需要较长时间
 #endif
-            Progress.OnStop += new StopEventHandler(this.DoStop);
+            string strMessage = "";
             if (string.IsNullOrEmpty(strAction) == false && strAction.IndexOf("move") != -1)
-                Progress.Initial("正在移动书目记录 ...");
+                strMessage = ("正在移动书目记录 ...");
             else
-                Progress.Initial("正在复制书目记录 ...");
-            Progress.BeginLoop();
+                strMessage = ("正在复制书目记录 ...");
+            stop?.SetMessage(strMessage);
 
+            /*
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial(strMessage);
+            Progress.BeginLoop();
+            */
             try
             {
                 string strOutputBiblio = "";
@@ -8094,7 +8220,7 @@ out strError);
                 //      0   成功，没有警告信息。
                 //      1   成功，有警告信息。警告信息在 result.ErrorInfo 中
                 long lRet = channel.CopyBiblioInfo(
-                    this.Progress,
+                    stop,
                     strAction,
                     this.BiblioRecPath,
                     "xml",
@@ -8138,20 +8264,22 @@ out strError);
                     // 有警告
                     MessageBox.Show(this, strError);
                 }
+
+                return 0;
             }
             finally
             {
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
+                */
 
 #if NO
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 #endif
             }
-
-            return 0;
         }
 
         // 2013/12/2
@@ -8201,6 +8329,7 @@ out strError);
         /// <para>2   已经保存，但有部分错误</para>
         /// </returns>
         public int SaveBiblioToDatabase(
+            Stop stop,
             LibraryChannel channel_param,
             bool bIncludeFileID,
             out string strHtml,
@@ -8343,6 +8472,7 @@ out strError);
                         }
                     }
                     nRet = CheckUniqueToDatabase(
+                        stop,
                         channel,
                         strTargetPath,
                         this.BiblioChanged == true ? strXmlBody : "",
@@ -8354,6 +8484,7 @@ out strError);
                 else
                 {
                     nRet = SaveXmlBiblioRecordToDatabase(
+                        stop,
                         channel,
                         strTargetPath,
                         this.DeletedMode == true,
@@ -8434,6 +8565,7 @@ out strError);
                     // 重新装载实体记录，以便反映其listview变空的事实
                     // 接着装入相关的所有册
                     nRet = this.entityControl1.LoadItemRecords(
+                        stop,
                         channel,
                         this.BiblioRecPath,
                         null,
@@ -8481,7 +8613,7 @@ out strError);
                         formats[0] = "html";
                     }
                     long lRet = channel.GetBiblioInfos(
-        Progress,
+        stop,
         strOutputPath,
         "",
         formats,
@@ -8552,6 +8684,7 @@ out strError);
                             //      0   not found
                             //      1   found
                             nRet = LoadBiblioRecord(
+                                stop,
                                 channel,
                                 strOutputPath,
                                 "",
@@ -8614,7 +8747,7 @@ out strError);
             byte[] baTimestamp = null;
 
             long lRet = channel.GetBiblioInfos(
-                Progress,
+                null,
                 strRecPath,
                 "",
                 format_list.ToArray(),
@@ -9018,6 +9151,7 @@ out strError);
         //      -1  出错。包括出现重复的情况
         //      0   没有重复
         int CheckUniqueToDatabase(
+            Stop stop,
             LibraryChannel channel,
             string strPath,
             string strXml,
@@ -9027,7 +9161,7 @@ out strError);
             strError = "";
             strOutputPath = "";
 
-            Progress.Initial("正在进行 997 查重 ...");
+            stop?.Initial("正在进行 997 查重 ...");
 
             try
             {
@@ -9036,7 +9170,7 @@ out strError);
             REDO:
                 byte[] baNewTimestamp = null;
                 long lRet = channel.SetBiblioInfo(
-                    Progress,
+                    stop,
                     strAction,
                     strPath,
                     "xml",
@@ -9059,7 +9193,7 @@ out strError);
             }
             finally
             {
-                Progress.Initial("");
+                stop?.Initial("");
             }
         }
 
@@ -9067,6 +9201,7 @@ out strError);
         // parameters:
         //      bResave 是否为删除后重新保存的模式。在这种模式下，使用 strAction == "new"
         int SaveXmlBiblioRecordToDatabase(
+            Stop stop,
             LibraryChannel channel,
             string strPath,
             bool bResave,
@@ -9087,7 +9222,7 @@ out strError);
             Progress.Initial("正在保存书目记录 ...");
             Progress.BeginLoop();
 #endif
-            Progress.Initial("正在保存书目记录 ...");
+            stop?.Initial("正在保存书目记录 ...");
 
             try
             {
@@ -9100,7 +9235,7 @@ out strError);
 
                 REDO:
                 long lRet = channel.SetBiblioInfo(
-                    Progress,
+                    stop,
                     strAction,
                     strPath,
                     "xml",
@@ -9149,7 +9284,7 @@ out strError);
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 #endif
-                Progress.Initial("");
+                stop?.Initial("");
             }
 
             return 1;
@@ -9166,6 +9301,7 @@ out strError);
         {
             strError = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 2, 0);
@@ -9173,6 +9309,10 @@ out strError);
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在删除书目记录 ...");
             Progress.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在删除书目记录 ...",
+                "timeout:0:2:0");
 
             this.ShowMessage("正在删除书目记录");
 
@@ -9182,7 +9322,7 @@ out strError);
                 byte[] baNewTimestamp = null;
 
                 long lRet = channel.SetBiblioInfo(
-                    Progress,
+                    looping.stop,
                     strAction,  // "delete",
                     strPath,
                     "xml",
@@ -9207,12 +9347,15 @@ out strError);
             {
                 this.ClearMessage();
 
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
             }
         }
 
@@ -9274,6 +9417,7 @@ out strError);
 
                 string strHtml = "";
                 SaveBiblioToDatabase(null,
+                    null,
                     true,
                     out strHtml,
                     out _);
@@ -10664,16 +10808,25 @@ out strError);
             int nRet = 0;
             string strError = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
             // TODO: 要解决EnableControls调用多层嵌套的问题。另外焦点转移是否还正确？
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "...",
+                "disableControl");
             try
             {
                 // 看看输入的条码是否为ISBN条码
                 if (IsISBnBarcode(this.textBox_itemBarcode.Text) == true)
                 {
                     // 保存当前册信息
-                    nRet = this.entityControl1.DoSaveItems(channel, "", out strError);
+                    nRet = this.entityControl1.DoSaveItems(
+                        looping.stop,
+                        channel, 
+                        "", 
+                        out strError);
                     if (nRet == -1)
                     {
                         MessageBox.Show(this, strError);
@@ -10762,8 +10915,11 @@ out strError);
             }
             finally
             {
+                /*
                 this.EnableControls(true);
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
             }
             return;
         ERROR1:
@@ -11395,9 +11551,9 @@ out strError);
             return null;
         }
 
-        #region 期 相关功能
+#region 期 相关功能
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 获得对象资源信息
@@ -11689,11 +11845,15 @@ out strError);
                 goto ERROR1;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在装入目标记录 '" + strTargetBiblioRecPath + "' ...");
             Progress.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在装入目标记录 '" + strTargetBiblioRecPath + "' ...");
 
             try
             {
@@ -11701,7 +11861,7 @@ out strError);
                 this.m_webExternalHost_biblio.SetHtmlString("(空白)",
                     "entityform_error");
 
-                Progress.SetMessage("正在装入目标记录 " + strTargetBiblioRecPath + " ...");
+                looping.stop.SetMessage("正在装入目标记录 " + strTargetBiblioRecPath + " ...");
 
                 bool bCataloging = this.Cataloging;
 
@@ -11725,7 +11885,7 @@ out strError);
                 byte[] baTimestamp = null;
 
                 long lRet = channel.GetBiblioInfos(
-                    Progress,
+                    looping.stop,
                     strTargetBiblioRecPath,
                     "",
                     formats,
@@ -11802,11 +11962,14 @@ out strError);
             }
             finally
             {
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
             }
 
             return 1;
@@ -13148,12 +13311,16 @@ out strError);
             bool bOldChanged = this.GetMarcChanged();   // this.m_marcEditor.Changed;
             bool bSucceed = false;
 
+            /*
             this.EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 2, 0);    // 查重和复制一般都需要较长时间
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在移动记录 ...",
+                "timeout:0:2:0,disableControl");
             try
             {
                 // 保存原来的记录路径
@@ -13254,6 +13421,7 @@ out strError);
                     if (copy_param.CopyChildRecords == false)
                     {
                         nRet = CopyBiblio(
+                            looping.stop,
                             channel,
             "onlycopybiblio",
             strTargetRecPathParam,
@@ -13266,6 +13434,7 @@ out strError);
                     else
                     {
                         nRet = CopyBiblio(
+                            looping.stop,
                             channel,
                             "copy",
                             strTargetRecPathParam,
@@ -13280,6 +13449,7 @@ out strError);
                 if (strAction == "move")
                 {
                     nRet = CopyBiblio(
+                        looping.stop,
                         channel,
                         "move",
                         strTargetRecPathParam,
@@ -13330,6 +13500,7 @@ out strError);
 
                     LoadSubRecordsInfo load_info = new LoadSubRecordsInfo();
                     nRet = LoadSubRecords(
+                        looping.stop,
         channel,
         strOutputBiblioRecPath,
         strXml, // null,   // strXml, // 书目记录 XML
@@ -13349,6 +13520,7 @@ out strError);
                     {
                         // 装载下级记录，为保存下级记录的修改做准备
                         nRet = LoadSubRecords(
+                            looping.stop,
                             channel,
                             strOutputBiblioRecPath,
                             strXml, // null,   // strXml, // 书目记录 XML
@@ -13361,7 +13533,9 @@ out strError);
                         // TODO: load_info.ErrorCount ?
                     }
 
-                    nRet = SaveSubRecords(channel,
+                    nRet = SaveSubRecords(
+                        looping.stop,
+                        channel,
                         info,
                         strOutputBiblioRecPath,
                         "",
@@ -13372,10 +13546,13 @@ out strError);
             }
             finally
             {
+                /*
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
+                */
+                looping.Dispose();
 
 #if NO
                 // 复原当前窗口的记录
@@ -13424,6 +13601,7 @@ out strError);
             {
                 string strHtml = "";
                 SaveBiblioToDatabase(null,
+                    null,
                     true,
                     out strHtml,
                     out _,
@@ -14365,12 +14543,15 @@ out strError);
             strError = "";
             strResultXml = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在获得书目记录 " + strBiblioRecPath + " 的检索点 ...");
             Progress.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得书目记录 " + strBiblioRecPath + " 的检索点 ...");
             try
             {
                 string[] formats = new string[1];
@@ -14379,7 +14560,7 @@ out strError);
                 string[] results = null;
                 byte[] timestamp = null;
                 long lRet = channel.GetBiblioInfos(
-                    Progress,
+                    looping.stop,
                     strBiblioRecPath,
                     strBiblioXml,
                     formats,
@@ -14394,11 +14575,14 @@ out strError);
             }
             finally
             {
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
             }
         }
 
@@ -14415,6 +14599,7 @@ out strError);
             string strBiblioSummary = "";
             string strBiblioTable = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
@@ -14422,6 +14607,10 @@ out strError);
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在获得书目记录摘要");
             Progress.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得书目记录摘要",
+                "timeout:0:1:0,disableControl");
 
             try
             {
@@ -14430,7 +14619,7 @@ out strError);
                 byte[] timestamp = null;
 
                 long lRet = channel.GetBiblioInfos(
-                    _stop,
+                    looping.stop,
                     this.BiblioRecPath,
                     "",
                     formats.ToArray(),
@@ -14453,6 +14642,7 @@ out strError);
             }
             finally
             {
+                /*
                 EnableControls(true);
 
                 Progress.EndLoop();
@@ -14461,6 +14651,8 @@ out strError);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
+                looping.Dispose();
             }
 
             strBiblioTable = DomUtil.GetIndentXml(strBiblioTable);

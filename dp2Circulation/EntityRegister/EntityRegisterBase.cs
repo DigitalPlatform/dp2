@@ -25,7 +25,8 @@ namespace dp2Circulation
         // TODO: 要改为使用 MainForm 的公共 ChannelPool
         internal LibraryChannelPool _channelPool = new LibraryChannelPool();
 
-        public Stop Progress = null;
+        // public Stop Progress = null;
+
         public string Lang = "zh";
 
         AccountInfo _currentAccount = null;
@@ -40,21 +41,6 @@ namespace dp2Circulation
                 _currentAccount = value;
             }
         }
-
-#if NO
-        MainForm _mainForm = null;
-        public virtual MainForm MainForm
-        {
-            get
-            {
-                return this._mainForm;
-            }
-            set
-            {
-                this._mainForm = value;
-            }
-        }
-#endif
 
         XmlDocument _servers_dom = null;
         public XmlDocument ServersDom
@@ -222,7 +208,8 @@ false);
             }
         }
 
-        public LibraryChannel GetChannel(string strServerUrl,
+
+        public LibraryChannel MyGetChannel(string strServerUrl,
             string strUserName,
             GetChannelStyle style = GetChannelStyle.GUI)
         {
@@ -242,7 +229,7 @@ false);
             Application.DoEvents();
         }
 
-        public void ReturnChannel(LibraryChannel channel)
+        public void MyReturnChannel(LibraryChannel channel)
         {
             channel.Idle -= channel_Idle;
 
@@ -339,6 +326,7 @@ false);
         // 准备服务器信息
         public int GetServerInfo(
             // RegisterLine line,
+            Stop stop,  // 2022/11/2
             LibraryChannel channel,
             AccountInfo account,
             out ServerInfo info,
@@ -356,7 +344,7 @@ false);
                 info = new ServerInfo();
                 info.AccountInfo = account;
                 int nRet = info.GetAllDatabaseInfo(channel,
-                    Progress,
+                    stop,
                     out strError);
                 if (nRet == -1)
                     return -1;

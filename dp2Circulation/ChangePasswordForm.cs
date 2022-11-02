@@ -29,6 +29,8 @@ namespace dp2Circulation
         /// </summary>
         public ChangePasswordForm()
         {
+            this.UseLooping = true; // 2022/11/1
+
             InitializeComponent();
         }
 
@@ -118,6 +120,7 @@ namespace dp2Circulation
 
             bool bOldPasswordEnabled = this.textBox_reader_oldPassword.Enabled;
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在修改读者密码 ...");
             _stop.BeginLoop();
@@ -126,6 +129,10 @@ namespace dp2Circulation
             Program.MainForm.Update();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在修改读者密码 ...",
+                "disableControl");
 
             try
             {
@@ -133,8 +140,8 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   旧密码不正确
                 //      1   旧密码正确,已修改为新密码
-                lRet = Channel.ChangeReaderPassword(
-                    _stop,
+                lRet = channel.ChangeReaderPassword(
+                    looping.stop,
                     this.textBox_reader_barcode.Text,
                     bOldPasswordEnabled == false ? null : this.textBox_reader_oldPassword.Text,
                     this.textBox_reader_newPassword.Text,
@@ -146,11 +153,14 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
 
             MessageBox.Show(this, "读者密码修改成功。");
@@ -218,6 +228,7 @@ namespace dp2Circulation
                 return;
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在修改工作人员密码 ...");
             _stop.BeginLoop();
@@ -226,6 +237,10 @@ namespace dp2Circulation
             Program.MainForm.Update();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在修改工作人员密码 ...",
+                "disableControl");
 
             try
             {
@@ -243,7 +258,7 @@ namespace dp2Circulation
                             //      -1  error
                             //      0   登录未成功
                             //      1   登录成功
-                            lRet = Channel.Login(this.textBox_worker_userName.Text,
+                            lRet = channel.Login(this.textBox_worker_userName.Text,
                                 this.textBox_worker_oldPassword.Text,
                                 "type=worker,client=dp2circulation|" + Program.ClientVersion,
                                 out strError);
@@ -262,12 +277,11 @@ namespace dp2Circulation
 
                     try
                     {
-
                         // return.Value:
                         //      -1  出错
                         //      0   成功
-                        lRet = Channel.ChangeUserPassword(
-                            _stop,
+                        lRet = channel.ChangeUserPassword(
+                            looping.stop,
                             this.textBox_worker_userName.Text,
                             this.textBox_worker_oldPassword.Text,
                             this.textBox_worker_newPassword.Text,
@@ -277,8 +291,7 @@ namespace dp2Circulation
                     }
                     finally
                     {
-                        string strError_1 = "";
-                        Channel.Logout(out strError_1);
+                        channel.Logout(out _);
                     }
                 }
 
@@ -289,25 +302,25 @@ namespace dp2Circulation
                     info.UserName = this.textBox_worker_userName.Text;
                     info.Password = this.textBox_worker_newPassword.Text;
                     // 当action为"resetpassword"时，则info.ResetPassword状态不起作用，无论怎样都要修改密码。resetpassword并不修改其他信息，也就是说info中除了Password/UserName以外其他成员的值无效。
-                    lRet = Channel.SetUser(
-                        _stop,
+                    lRet = channel.SetUser(
+                        looping.stop,
                         "resetpassword",
                         info,
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
-
                 }
-
-
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
 
             MessageBox.Show(this, "工作人员 '" + this.textBox_worker_userName.Text + "' 密码修改成功。");
@@ -398,12 +411,16 @@ namespace dp2Circulation
             else
                 strParameters += ",queryword=" + GetParamValue(this.textBox_resetPatronPassword_queryWord.Text);
 
+            /*
             LibraryChannel channel = this.Channel;
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在重设密码 ...",
+                "disableControl");
             try
             {
-                long lRet =
-                    channel.ResetPassword(
-                    null,
+                long lRet = channel.ResetPassword(
+                    looping.stop,
                     strParameters,
                     "",
                     out string strMessage,
@@ -419,6 +436,7 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
                 // sessioninfo.ReturnChannel(channel);
             }
         ERROR1:
@@ -476,12 +494,16 @@ namespace dp2Circulation
                 + ",style=returnMessage";
             */
 
+            /*
             LibraryChannel channel = this.Channel;
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得临时密码 ...",
+                "disableControl");
             try
             {
-                long lRet =
-                    channel.ResetPassword(
-                    null,
+                long lRet = channel.ResetPassword(
+                    looping.stop,
                     strParameters,
                     "",
                     out string strMessage,
@@ -494,6 +516,7 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
                 // sessioninfo.ReturnChannel(channel);
             }
         ERROR1:

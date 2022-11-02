@@ -11,6 +11,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -21,6 +22,8 @@ namespace dp2Circulation
     {
         public MessageForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
         }
 
@@ -58,19 +61,22 @@ namespace dp2Circulation
 
             this.listView_message.Items.Clear();
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在装入消息 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在装入消息 ...",
+                "disableControl");
 
             try
             {
                 int nTotalCount = 0;
 
-                MessageData[] messages = null;
-
-                long nRet = this.Channel.ListMessage(
+                long nRet = channel.ListMessage(
                     "search", // true,
                     "message",
                     strBox,
@@ -78,7 +84,7 @@ namespace dp2Circulation
                     0,
                     0,
                     out nTotalCount,
-                    out messages,
+                    out MessageData[] messages,
                     out strError);
                 if (nRet == -1)
                 {
@@ -89,7 +95,7 @@ namespace dp2Circulation
                 int nMax = -1;
                 for (; ; )
                 {
-                    nRet = this.Channel.ListMessage(
+                    nRet = channel.ListMessage(
         "", // false,
         "message",
         strBox,
@@ -120,17 +126,19 @@ namespace dp2Circulation
                     if (nStart >= nTotalCount)
                         break;
                 }
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
-
-            return 0;
         }
 
         private void comboBox_box_SelectedIndexChanged(object sender, EventArgs e)

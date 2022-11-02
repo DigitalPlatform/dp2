@@ -182,6 +182,7 @@
     <Compile Include="GetDp2ResDlg.Designer.cs">
       <DependentUpon>GetDp2ResDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="IEnableControl.cs" />
     <Compile Include="IUi.cs" />
     <Compile Include="LoginDialog\ChangePasswordDialog.cs">
       <SubType>Form</SubType>
