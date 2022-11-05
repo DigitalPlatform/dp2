@@ -27,6 +27,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.dp2.Statis;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -53,6 +54,8 @@ namespace dp2Circulation
         /// </summary>
         public PrintClaimForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
         }
 
@@ -477,11 +480,16 @@ false);
         /// <summary>
         /// 获得一条书目记录下属的全部订购记录路径
         /// </summary>
+        /// <param name="stop"></param>
+        /// <param name="channel"></param>
         /// <param name="sw">姚写入的 StreamWriter 对象</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错；>=0: 返回实际写入的路径个数</returns>
-        int GetChildOrderRedPath(StreamWriter sw,
+        int GetChildOrderRedPath(
+            Stop stop,
+            LibraryChannel channel,
+            StreamWriter sw,
             string strBiblioRecPath,
             out string strError)
         {
@@ -493,16 +501,14 @@ false);
 
             for (; ; )
             {
-                EntityInfo[] orders = null;
-
-                long lRet = Channel.GetOrders(
-                    _stop,
+                long lRet = channel.GetOrders(
+                    stop,
                     strBiblioRecPath,
                     lStart,
                     lCount,
                     "onlygetpath",
                     this.Lang,
-                    out orders,
+                    out EntityInfo[] orders,
                     out strError);
                 if (lRet == -1)
                     return -1;
@@ -536,6 +542,8 @@ false);
         // 2012/8/30
         // 检索订购库，将订购记录路径输出到文件
         int SearchOrderRecPath(
+            Stop stop,
+            LibraryChannel channel,
             string strRecPathFilename,
             out string strError)
         {
@@ -556,7 +564,7 @@ false);
             {
                 long lRet = 0;
 
-                lRet = Channel.SearchOrder(_stop,
+                lRet = channel.SearchOrder(stop,
                      this.comboBox_inputOrderDbName.Text,
                      "",
                      -1,    // nPerMax
@@ -581,17 +589,14 @@ false);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (_stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
+                        strError = "用户中断";
+                        goto ERROR1;
                     }
 
-                    lRet = Channel.GetSearchResult(
-                        _stop,
+                    lRet = channel.GetSearchResult(
+                        stop,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -621,19 +626,19 @@ false);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                    stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                 }
+
+                return 0;
             }
             finally
             {
                 if (sw != null)
                     sw.Close();
             }
-
-            return 0;
         ERROR1:
             return -1;
         }
@@ -642,7 +647,10 @@ false);
         // 根据书目库记录路径文件，得到下属的订购库记录路径
         // parameters:
         //      strBiblioRecPathFilename    书目库记录路径文件名。也可以是逗号间隔的书目库记录路径列表
-        int GetOrderRecPath(string strBiblioRecPathFilename,
+        int GetOrderRecPath(
+            Stop stop,
+            LibraryChannel channel,
+            string strBiblioRecPathFilename,
             string strOutputFilename,
             out string strError)
         {
@@ -714,7 +722,10 @@ false);
                             }
 
                             // 获得一条书目记录下属的全部订购记录路径
-                            int nRet = GetChildOrderRedPath(sw,
+                            int nRet = GetChildOrderRedPath(
+                                stop,
+                                channel,
+                                sw,
                                 strBiblioRecPath,
                                 out strError);
                             if (nRet == -1)
@@ -739,6 +750,8 @@ false);
         // 2012/8/3-
         // 检索书目库， 获得特定批次号，或者所有书目记录，然后将下属的订购记录路径输出到文件
         int SearchBiblioOrderRecPath(
+            Stop stop,
+            LibraryChannel channel,
             string strBatchNo,
             string strRecPathFilename,
             out string strError)
@@ -788,7 +801,7 @@ false);
                 // 不指定批次号，意味着特定库全部条码
                 if (String.IsNullOrEmpty(strBatchNo) == true)
                 {
-                    lRet = Channel.SearchBiblio(_stop,
+                    lRet = channel.SearchBiblio(stop,
                          this.comboBox_inputBiblioDbName.Text,
                          "",
                          -1,    // nPerMax
@@ -802,12 +815,12 @@ false);
                          out strQueryXml,
                          out strError);
                     if (lRet == -1)
-                        goto ERROR1;
+                        return -1;
                 }
                 else
                 {
                     // 指定批次号。特定库。
-                    lRet = Channel.SearchBiblio(_stop,
+                    lRet = channel.SearchBiblio(stop,
                          this.comboBox_inputBiblioDbName.Text,
                          strBatchNo,
                          -1,    // nPerMax
@@ -821,14 +834,13 @@ false);
                          out strQueryXml,
                          out strError);
                     if (lRet == -1)
-                        goto ERROR1;
+                        return -1;
                 }
 
                 long lHitCount = lRet;
 
                 long lStart = 0;
                 long lCount = lHitCount;
-
 
                 DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
@@ -837,18 +849,14 @@ false);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (_stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
+                        strError = "用户中断";
+                        return -1;
                     }
 
-
-                    lRet = Channel.GetSearchResult(
-                        _stop,
+                    lRet = channel.GetSearchResult(
+                        stop,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -857,12 +865,12 @@ false);
                         out searchresults,
                         out strError);
                     if (lRet == -1)
-                        goto ERROR1;
+                        return -1;
 
                     if (lRet == 0)
                     {
                         strError = "未命中";
-                        goto ERROR1;
+                        return -1;
                     }
 
                     Debug.Assert(searchresults != null, "");
@@ -871,31 +879,32 @@ false);
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         string strBiblioRecPath = searchresults[i].Path;
-                        int nRet = GetChildOrderRedPath(sw,
+                        int nRet = GetChildOrderRedPath(
+                            stop,
+                            channel,
+                            sw,
                             strBiblioRecPath,
                             out strError);
                         if (nRet == -1)
-                            goto ERROR1;
+                            return -1;
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                    stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                 }
+
+                return 0;
             }
             finally
             {
                 if (sw != null)
                     sw.Close();
             }
-
-            return 0;
-        ERROR1:
-            return -1;
         }
 
         // 2012/8/30
@@ -904,6 +913,8 @@ false);
         //      0   普通返回
         //      1   要全部中断
         int MakeOrderRecPathFile(
+            Stop stop,
+            LibraryChannel channel,
             out string strTempRecPathFilename,
             out string strError)
         {
@@ -922,6 +933,8 @@ false);
                 this.SourceStyle = "bibliodatabase";
 
                 nRet = SearchBiblioOrderRecPath(
+                    stop,
+                    channel,
                     "", // this.tabComboBox_inputBatchNo.Text,
                     strTempRecPathFilename,
                     out strError);
@@ -934,7 +947,10 @@ false);
                 this.SourceStyle = "bibliorecpathfile";
 
                 // 根据书目库记录路径文件，得到下属的订购库记录路径
-                nRet = GetOrderRecPath(this.textBox_inputBiblioRecPathFilename.Text,
+                nRet = GetOrderRecPath(
+                    stop,
+                    channel,
+                    this.textBox_inputBiblioRecPathFilename.Text,
                     strTempRecPathFilename,
                     out strError);
                 if (nRet == -1)
@@ -948,6 +964,8 @@ false);
 
                 // 检索订购库，将订购记录路径输出到文件
                 nRet = SearchOrderRecPath(
+                    stop,
+                    channel,
                     strTempRecPathFilename,
                     out strError);
                 if (nRet == -1)
@@ -1218,12 +1236,16 @@ false);
             // string strInputFileName = "";   // 外部指定的输入文件，为条码号文件或者记录路径文件格式
             string strAccessPointName = "";
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在检索 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索 ...",
+                "disableControl");
             try
             {
                 if (this.InputStyle == PrintClaimInputStyle.OrderRecPathFile)
@@ -1246,6 +1268,8 @@ false);
                 else
                 {
                     nRet = MakeOrderRecPathFile(
+                        looping.stop,
+                        channel,
             out strTempRecPathFilename,
             out strError);
                     if (nRet == -1)
@@ -1272,14 +1296,14 @@ false);
                     || this.comboBox_source_type.Text == "期刊")
                 {
                     issue_host = new IssueHost();
-                    issue_host.Channel = this.Channel;
-                    issue_host.Stop = this._stop;
+                    issue_host.Channel = channel;
+                    issue_host.Stop = looping.stop;
                 }
                 else
                 {
                     order_host = new BookHost();
-                    order_host.Channel = this.Channel;
-                    order_host.Stop = this._stop;
+                    order_host.Channel = channel;
+                    order_host.Stop = looping.stop;
                 }
 
                 /*
@@ -1288,7 +1312,7 @@ false);
                 this.progressBar_records.Value = 0;
                  * */
 
-                _stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
 
                 try
                 {
@@ -1298,27 +1322,24 @@ false);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null)
+                        if (looping.Stopped)
                         {
-                            if (_stop.State != 0)
+                            DialogResult result = MessageBox.Show(this,
+                                "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
+                                "bibliostatisform",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button3);
+
+                            if (result == DialogResult.Yes)
                             {
-                                DialogResult result = MessageBox.Show(this,
-                                    "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
-                                    "bibliostatisform",
-                                    MessageBoxButtons.YesNoCancel,
-                                    MessageBoxIcon.Question,
-                                    MessageBoxDefaultButton.Button3);
-
-                                if (result == DialogResult.Yes)
-                                {
-                                    strError = "用户中断";
-                                    return -1;
-                                }
-                                if (result == DialogResult.No)
-                                    return 0;   // 假装loop正常结束
-
-                                _stop.Continue(); // 继续循环
+                                strError = "用户中断";
+                                return -1;
                             }
+                            if (result == DialogResult.No)
+                                return 0;   // 假装loop正常结束
+
+                            looping.stop.Continue(); // 继续循环
                         }
 
                         string strOrderRecPath = sr.ReadLine();
@@ -1370,9 +1391,9 @@ false);
                             }
                         }
 
-                        _stop.SetMessage("正在获取第 " + (nRecord + 1).ToString() + " 个订购记录，" + strAccessPointName + "为 " + strOrderRecPath);
+                        looping.stop.SetMessage("正在获取第 " + (nRecord + 1).ToString() + " 个订购记录，" + strAccessPointName + "为 " + strOrderRecPath);
 
-                        _stop.SetProgressValue(sr.BaseStream.Position);
+                        looping.stop.SetProgressValue(sr.BaseStream.Position);
                         // this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
                         // 获得书目记录
@@ -1494,6 +1515,8 @@ false);
                             //      0   未处理
                             //      1   已处理
                             nRet = ProcessIssues(
+                                looping.stop,
+                                channel,
                                 issue_host,
                                 filter,
                                 strOrderRecPath);
@@ -1505,6 +1528,8 @@ false);
                             //      0   未处理
                             //      1   已处理
                             nRet = ProcessBooks(
+                                looping.stop,
+                                channel,
                                 order_host,
                                 filter,
                                 strOrderRecPath);
@@ -1519,27 +1544,31 @@ false);
                     if (sr != null)
                         sr.Close();
                 }
+
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
-
+                */
                 if (string.IsNullOrEmpty(strTempRecPathFilename) == false)
                     File.Delete(strTempRecPathFilename);
             }
-
-            return 0;
         }
 
         // return:
         //      0   未处理
         //      1   已处理
         int ProcessIssues(
+            Stop stop,
+            LibraryChannel channel,
             IssueHost issue_host,
             TimeFilter filter,
             string strOrderRecPath)
@@ -1625,8 +1654,8 @@ false);
 
                         Debug.Assert(String.IsNullOrEmpty(strOrderRecPath) == false, "strRecPath值不能为空");
 
-                        lRet = Channel.GetBiblioInfos(
-                            _stop,
+                        lRet = channel.GetBiblioInfos(
+                            stop,
                             issue_host.BiblioRecPath, // strOrderRecPath,
                             "",
                             formats,
@@ -1714,6 +1743,8 @@ false);
         //      0   未处理
         //      1   已处理
         int ProcessBooks(
+            Stop stop,
+            LibraryChannel channel,
             BookHost book_host,
             TimeFilter filter,
             string strOrderRecPath)
@@ -1803,8 +1834,8 @@ false);
 
                         Debug.Assert(String.IsNullOrEmpty(book_host.BiblioRecPath) == false, "book_host.BiblioRecPath值不能为空");
 
-                        lRet = Channel.GetBiblioInfos(
-                            _stop,
+                        lRet = channel.GetBiblioInfos(
+                            stop,
                             book_host.BiblioRecPath,    // strOrderRecPath,
                             "",
                             formats,
@@ -2065,12 +2096,16 @@ false);
 
             try
             {
+                /*
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Initial("正在检索 ...");
                 _stop.BeginLoop();
 
                 EnableControls(false);
-
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在检索 ...",
+                    "disableControl");
                 try
                 {
                     long lRet = 0;
@@ -2079,38 +2114,40 @@ false);
                     // 不指定批次号，意味着特定库全部条码
                     if (String.IsNullOrEmpty(strBatchNo) == true)
                     {
-                        lRet = Channel.SearchBiblio(_stop,
-                             strDbNameList,
-                             "",
-                             -1,    // nPerMax
-                             "recid",
-                             "left",
-                             this.Lang,
-                             null,   // strResultSetName
-                             "",    // strSearchStyle
-                             "", // strOutputStyle
-                             "",
-                             out strQueryXml,
-                             out strError);
+                        lRet = channel.SearchBiblio(
+                            looping.stop,
+                            strDbNameList,
+                            "",
+                            -1,    // nPerMax
+                            "recid",
+                            "left",
+                            this.Lang,
+                            null,   // strResultSetName
+                            "",    // strSearchStyle
+                            "", // strOutputStyle
+                            "",
+                            out strQueryXml,
+                            out strError);
                         if (lRet == -1)
                             goto ERROR1;
                     }
                     else
                     {
                         // 指定批次号。特定库。
-                        lRet = Channel.SearchBiblio(_stop,
-                             strDbNameList,
-                             strBatchNo,
-                             -1,    // nPerMax
-                             "batchno",
-                             "exact",
-                             this.Lang,
-                             null,   // strResultSetName
-                             "",    // strSearchStyle
-                             "", // strOutputStyle
-                             "",
-                             out strQueryXml,
-                             out strError);
+                        lRet = channel.SearchBiblio(
+                            looping.stop,
+                            strDbNameList,
+                            strBatchNo,
+                            -1,    // nPerMax
+                            "batchno",
+                            "exact",
+                            this.Lang,
+                            null,   // strResultSetName
+                            "",    // strSearchStyle
+                            "", // strOutputStyle
+                            "",
+                            out strQueryXml,
+                            out strError);
                         if (lRet == -1)
                             goto ERROR1;
                     }
@@ -2128,18 +2165,14 @@ false);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null)
+                        if (looping.Stopped)
                         {
-                            if (_stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                goto ERROR1;
-                            }
+                            strError = "用户中断";
+                            goto ERROR1;
                         }
 
-
-                        lRet = Channel.GetSearchResult(
-                            _stop,
+                        lRet = channel.GetSearchResult(
+                            looping.stop,
                             null,   // strResultSetName
                             lStart,
                             lCount,
@@ -2169,7 +2202,7 @@ false);
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        looping.stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
@@ -2178,11 +2211,14 @@ false);
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     EnableControls(true);
 
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
+                    */
                 }
             }
             finally
@@ -3365,7 +3401,9 @@ false);
 
         private void PrintClaimForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
         }
 
         private void button_printOption_Click(object sender, EventArgs e)

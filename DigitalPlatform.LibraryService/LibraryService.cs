@@ -3213,7 +3213,7 @@ namespace dp2Library
                     string filePath = app.GetMemorySetFilePath(
                         sessioninfo,
                         strResultSetName,
-                        sort_cols.Replace("|","_"));    // 注: sort_cols 形如 "-1|0|1|2"
+                        sort_cols.Replace("|", "_"));    // 注: sort_cols 形如 "-1|0|1|2"
 
                     BeginSearch();  // 如果创建本地结果集的时间太长，前端可以用 Stop() API 中断
                     channel.Idle += new IdleEventHandler(channel_IdleEvent);
@@ -3803,10 +3803,10 @@ namespace dp2Library
                 return;
 
             // 当前用户只能获取和管辖的馆代码关联的违约金记录
-            XmlDocument dom = new XmlDocument();
+            XmlDocument amerce_dom = new XmlDocument();
             try
             {
-                dom.LoadXml(origin_xml);
+                amerce_dom.LoadXml(origin_xml);
             }
             catch (Exception ex)
             {
@@ -3814,18 +3814,29 @@ namespace dp2Library
                 ClearXml(record);
                 return;
             }
-            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
-            if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
+
+            int nRet = HasAmerceRight(
+    sessioninfo,
+    record.Path,
+    amerce_dom,
+    out string strError);
+            if (nRet != 1)
             {
-                /*
-                result.Value = -1;
-                result.ErrorInfo = "违约金记录 '" + strPath + "' 超出当前用户管辖范围，无法获取";
-                result.ErrorCode = ErrorCode.AccessDenied;
-                return result;
-                */
+                ClearXml(record);
+                ClearCols(record, LibraryApplication.FILTERED);
+                record.RecordBody.Result.ErrorCode = ErrorCodeValue.AccessDenied;
+                record.RecordBody.Result.ErrorString = strError;
+            }
+
+            /*
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
+            if (SessionInfo.IsGlobalUser(sessioninfo.LibraryCodeList) == false
+                && StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
+            {
                 ClearXml(record);
                 ClearCols(record, LibraryApplication.FILTERED);
             }
+            */
         }
 
         // 获得数据库记录
@@ -3922,16 +3933,41 @@ namespace dp2Library
                 if (strDbName == app.AmerceDbName
                     && sessioninfo.GlobalUser == false)
                 {
-                    XmlDocument dom = new XmlDocument();
+                    XmlDocument amerce_dom = new XmlDocument();
                     try
                     {
-                        dom.LoadXml(strXml);
+                        amerce_dom.LoadXml(strXml);
                     }
                     catch (Exception ex)
                     {
                         strError = "违约金记录 '" + strPath + "' 装入XMLDOM时出错: " + ex.Message;
                         goto ERROR1;
                     }
+
+                    // 2022/11/3
+                    // 检查当前账户是否有查看一条违约金记录的权限
+                    // return:
+                    //      -1  出错
+                    //      0   不具备权限
+                    //      1   具备权限
+                    int nRet = HasAmerceRight(
+                        sessioninfo,
+                        strPath,
+                        amerce_dom,
+                        out strError);
+                    if (nRet != 1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                    if (nRet == 1)
+                    {
+                        lRet = 1;
+                        goto END1;
+                    }
+#if REMOVED
                     string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
                     string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement, "itemBarcode");
                     if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
@@ -3945,7 +3981,7 @@ namespace dp2Library
                             //      1   在控制范围
                             int nRet = app.IsItemInControl(
                                 sessioninfo,
-                                channel,
+                                // channel,
                                 strItemBarcode,
                                 out strError);
                             if (nRet == -1)
@@ -3967,12 +4003,12 @@ namespace dp2Library
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
+#endif
                 }
 
             END1:
                 result.Value = lRet;
                 result.ErrorInfo = strError;
-
                 return result;
             }
             catch (Exception ex)
@@ -3991,6 +4027,55 @@ namespace dp2Library
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 2022/11/3
+        // 检查当前账户是否有查看一条违约金记录的权限
+        // return:
+        //      -1  出错
+        //      0   不具备权限
+        //      1   具备权限
+        int HasAmerceRight(
+            SessionInfo sessioninfo,
+            string strAmerceRecPath,
+            XmlDocument amerce_dom,
+            out string strError)
+        {
+            strError = "";
+            // 当前用户只能获取和管辖的馆代码关联的违约金记录
+            if (sessioninfo.GlobalUser == false)
+            {
+                string strLibraryCode = DomUtil.GetElementText(amerce_dom.DocumentElement, "libraryCode");
+                string strItemBarcode = DomUtil.GetElementText(amerce_dom.DocumentElement, "itemBarcode");
+                if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
+                {
+                    // 进一步判断册记录是否在当前用户管辖范围内
+                    if (string.IsNullOrEmpty(strItemBarcode) == false)
+                    {
+                        // return:
+                        //      -1  errpr
+                        //      0   不在控制范围
+                        //      1   在控制范围
+                        int nRet = app.IsItemInControl(
+                            sessioninfo,
+                            // channel,
+                            strItemBarcode,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = $"违约金记录 '{strAmerceRecPath}' 超出当前用户管辖范围，并且在尝试检索册记录 '{strItemBarcode}' 时遇到问题: {strError}";
+                            return -1;  // AceessDenied and error
+                        }
+                        if (nRet == 1)
+                        {
+                            return 1;
+                        }
+                    }
+                    strError = "违约金记录 '" + strAmerceRecPath + "' 超出当前用户管辖范围，无法获取";
+                    return 0;
+                }
+            }
+            return 1;
         }
 
         // 获得指定记录的浏览信息
@@ -4872,7 +4957,7 @@ namespace dp2Library
             {
                 List<FilterItem> results = new List<FilterItem>();
                 FilterItem current = null;
-                foreach(char ch in text)
+                foreach (char ch in text)
                 {
                     if (ch == '*' || ch == '-' || ch == '+')
                     {
@@ -4901,13 +4986,13 @@ namespace dp2Library
                 return results;
             }
 
-            public static string BuildQueryXml(string strQueryXml, 
+            public static string BuildQueryXml(string strQueryXml,
                 List<FilterItem> items)
             {
                 StringBuilder text = new StringBuilder();
                 text.Append("<group>");
                 text.Append(strQueryXml);
-                foreach(var item in items)
+                foreach (var item in items)
                 {
                     text.Append($"<operator value='{item.Operator}'/>");
                     text.Append($"<item resultset='#{item.ResultsetName}' />");

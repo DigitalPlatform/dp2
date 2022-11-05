@@ -12641,7 +12641,7 @@ out string _);
                             //      1   在控制范围
                             nRet = IsItemInControl(
                                 sessioninfo,
-                                channel,
+                                // channel,
                                 strItemBarcode,
                                 out strError);
                             if (nRet == -1)
@@ -12912,6 +12912,7 @@ out string _);
             return -1;
         }
 
+        // 2022/11/3
         // 判断册记录是否在当前用户管辖范围内
         // return:
         //      -1  errpr
@@ -12919,11 +12920,41 @@ out string _);
         //      1   在控制范围
         public int IsItemInControl(
             SessionInfo sessioninfo,
-            RmsChannel channel,
+            XmlDocument item_dom,
+            out string strError)
+        {
+            strError = "";
+
+            // return:
+            //      -1  检查过程出错
+            //      0   符合要求
+            //      1   不符合要求
+            int nRet = CheckItemLibraryCode(item_dom,
+                sessioninfo.LibraryCodeList,
+                out string strItemLibraryCode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 1;
+            return 0;
+        }
+
+
+        // 判断册记录是否在当前用户管辖范围内
+        // return:
+        //      -1  errpr
+        //      0   不在控制范围
+        //      1   在控制范围
+        public int IsItemInControl(
+            SessionInfo sessioninfo,
+            // RmsChannel channel,
             string strItemBarcode,
             out string strError)
         {
             strError = "";
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
 
             // 获得册记录
             // return:
@@ -12949,6 +12980,8 @@ out string _);
             }
             XmlDocument item_dom = new XmlDocument();
             item_dom.LoadXml(strItemXml);
+
+            /*
             // return:
             //      -1  检查过程出错
             //      0   符合要求
@@ -12962,6 +12995,11 @@ out string _);
             if (nRet == 0)
                 return 1;
             return 0;
+            */
+            return IsItemInControl(
+            sessioninfo,
+            item_dom,
+            out strError);
         }
 
         // UNDO违约金交纳

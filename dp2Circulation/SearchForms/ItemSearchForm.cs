@@ -1537,6 +1537,7 @@ bClearList);
                     FillLineParameter param = new FillLineParameter
                     {
                         channel = channel,
+                        stop = stop,
                         query = query,
                         bOutputKeyCount = bOutputKeyCount,
                         bOutputKeyID = bOutputKeyID,
@@ -1606,6 +1607,7 @@ bClearList);
         class FillLineParameter
         {
             public LibraryChannel channel { get; set; }
+            public Stop stop { get; set; } // 2022/11/4
             public ItemQueryParam query { get; set; }
             public bool bOutputKeyCount { get; set; }
             public bool bOutputKeyID { get; set; }
@@ -1673,10 +1675,11 @@ bClearList);
                     //      0   用户中断
                     //      1   完成
                     int nRet = _fillBiblioSummaryColumn(
+                        param.stop,
                         param.channel,
                         items,
                         0,
-                        null,   // false,
+                        // false,
                         true,   // false,  // bAutoSearch
                         out strError);
                     if (nRet == -1)
@@ -1886,6 +1889,7 @@ out string strError);
                     //      0   相关数据库没有配置 parent id 浏览列
                     //      1   找到
                     int nRet = GetBiblioRecPath(
+                        param.stop,
                         param.channel,
                         item,
                         false,
@@ -5850,6 +5854,7 @@ Program.MainForm.DefaultFont);
                     //      0   相关数据库没有配置 parent id 浏览列
                     //      1   找到
                     nRet = GetBiblioRecPath(
+                        looping.stop,
                         channel,
                         item,
                         true,
@@ -9074,10 +9079,11 @@ MessageBoxDefaultButton.Button1);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
+                    looping.stop,
                     channel,
                     items,
                     "",
-                    false,
+                    // false,
                     true,
                     out strError);
                 if (nRet == -1)
@@ -9206,10 +9212,11 @@ MessageBoxDefaultButton.Button1);
 
                 // 刷新浏览行
                 nRet = RefreshListViewLines(
+                    looping.stop,
                     channel,
                     items,
                     "",
-                    false,
+                    //false,
                     true,
                     out strError);
                 if (nRet == -1)
@@ -9562,10 +9569,11 @@ MessageBoxDefaultButton.Button1);
 
                     // 刷新浏览行
                     nRet = RefreshListViewLines(
+                        looping.stop,
                     channel,
                     items,
                     "",
-                    false,
+                    //false,
                     true,
                     out strError);
                 }));
@@ -10236,7 +10244,7 @@ dlg.UiState);
 
                     BrowseLoader item_loader = new BrowseLoader();
                     item_loader.Channel = channel;
-                    item_loader.Stop = this.Progress;
+                    item_loader.Stop = looping.stop;
                     item_loader.Format = "id,cols,format:@coldef:*/price";
 
                     item_loader.RecPaths = all_item_recpaths;
@@ -10280,7 +10288,7 @@ dlg.UiState);
 #endif
                 BrowseLoader loader = new BrowseLoader();
                 loader.Channel = channel;
-                loader.Stop = this.Progress;
+                loader.Stop = looping.stop;
                 // loader.Format = "id,cols,format:@coldef://marc:record/marc:datafield[@tag='690']/marc:subfield[@code='a']->nl:marc=http://dp2003.com/UNIMARC->dm:\t|//marc:record/marc:datafield[@tag='093']/marc:subfield[@code='a']->nl:marc=http://www.loc.gov/MARC21/slim->dm:\t";
                 loader.Format = "id,cols,format:@coldef://marc:record/marc:datafield[@tag='" + unimarc.FieldName + "']/marc:subfield[@code='" + unimarc.SubfieldName + "']->nl:marc=http://dp2003.com/UNIMARC->dm:\t|//marc:record/marc:datafield[@tag='" + marc21.FieldName + "']/marc:subfield[@code='" + marc21.SubfieldName + "']->nl:marc=http://www.loc.gov/MARC21/slim->dm:\t";
                 loader.RecPaths = biblioRecPathList;
@@ -10603,6 +10611,7 @@ dlg.UiState);
                     //      0   相关数据库没有配置 parent id 浏览列
                     //      1   找到
                     nRet = GetBiblioRecPath(
+                        looping.stop,
                         channel,
                         item,
                         true,
@@ -13565,10 +13574,10 @@ out strError);
                 {
                     // 刷新保存过的事项显示
                     nRet = RefreshListViewLines(
-                        null,
+                        //null,
                         changed_items,
                         "",
-                        true,
+                        //true,
                         true,
                         out strError);
                     if (nRet == -1)
@@ -14364,10 +14373,10 @@ out strError);
 
             {
                 RefreshListViewLines(
-        null,
+        //null,
         items,
         "",
-        true,
+        //true,
         true,
         out string strError);
                 LibraryChannel channel = this.GetChannel();

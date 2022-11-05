@@ -35,6 +35,8 @@ namespace dp2Circulation
 
         public Marc856SearchForm()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
 
             ListViewProperty prop = new ListViewProperty();
@@ -250,26 +252,29 @@ namespace dp2Circulation
         //      0   用户中断
         //      1   完成
         public int FillBiblioSummaryColumn(
+            Stop stop,
             LibraryChannel channel,
             List<ListViewItem> items,
             long lStartIndex,
             bool bDisplayMessage,
-            bool bPrepareLoop,
+            // bool bPrepareLoop,
             out string strError)
         {
             strError = "";
             // int nRet = 0;
 
+            /*
             if (bPrepareLoop)
             {
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Initial("正在填充书目摘要 ...");
                 _stop.BeginLoop();
             }
+            */
 
             try
             {
-                _stop.SetProgressRange(0, items.Count);
+                stop?.SetProgressRange(0, items.Count);
 
                 List<string> biblio_recpaths = new List<string>();  // 尺寸可能比 items 数组小，没有包含里面不具有 parent id 列的事项
                 // List<int> colindex_list = new List<int>();  // 存储每个 item 对应的 parent id colindex。数组大小等于 items 数组大小
@@ -281,7 +286,7 @@ namespace dp2Circulation
 
                 CacheableBiblioLoader loader = new CacheableBiblioLoader();
                 loader.Channel = channel;   //  this.Channel;
-                loader.Stop = this._stop;
+                loader.Stop = stop;
                 loader.Format = "summary";
                 loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                 loader.RecPaths = biblio_recpaths;
@@ -293,18 +298,18 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null
-                        && _stop.State != 0)
+                    if (stop != null
+                        && stop.State != 0)
                     {
                         strError = "用户中断";
                         return 0;
                     }
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
-                    if (_stop != null && bDisplayMessage == true)
+                    if (stop != null && bDisplayMessage == true)
                     {
-                        _stop.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
-                        _stop.SetProgressValue(lStartIndex + i);
+                        stop.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
+                        stop.SetProgressValue(lStartIndex + i);
                     }
 
                     try
@@ -333,7 +338,7 @@ namespace dp2Circulation
                         1,
                         biblio.Content);
                     i++;
-                    _stop.SetProgressValue(i);
+                    stop?.SetProgressValue(i);
                 }
 
                 return 1;
@@ -345,6 +350,7 @@ namespace dp2Circulation
             }
             finally
             {
+                /*
                 if (bPrepareLoop)
                 {
                     _stop.EndLoop();
@@ -352,6 +358,7 @@ namespace dp2Circulation
                     _stop.Initial("");
                     _stop.HideProgress();
                 }
+                */
             }
         }
 
@@ -599,19 +606,24 @@ namespace dp2Circulation
             List<string> changed_biblio_recpaths = new List<string>();
             Hashtable relation_table = new Hashtable(); // 书目记录路径 --> List<ListViewItem>
 
+            /*
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在保存书目记录 ...");
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存书目记录 ...",
+                "disableControl,halfstop");
             this.listView_records.Enabled = false;
             try
             {
                 // 创建书目记录和册事项的对照关系。注意这是针对全部行的，不仅仅是已经选择的行。因为删除操作可能会涉及到没有选择的行的 index 列内容刷新显示
                 foreach (ListViewItem item in this.listView_records.Items)
                 {
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "已中断";
                         return -1;
@@ -634,7 +646,7 @@ namespace dp2Circulation
 
                 foreach (ListViewItem item in items)
                 {
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "已中断";
                         return -1;
@@ -718,7 +730,7 @@ namespace dp2Circulation
                 }
 
                 // TODO: 如果要优化算法的话，可以建立书目记录和浏览行之间的联系，在书目记录保存成功后才修改 line_info.NewField 和刷新浏览行显示。这样的好处是，一旦中途出错，还有干净重新保存的可能
-                _stop.SetProgressRange(0, changed_biblio_recpaths.Count);
+                looping.stop.SetProgressRange(0, changed_biblio_recpaths.Count);
                 int i = 0;
                 foreach(string strBiblioRecPath in changed_biblio_recpaths)
                 {
@@ -744,26 +756,22 @@ namespace dp2Circulation
                         goto CONTINUE;
                     }
 
-                    string strOutputPath = "";
+                    looping.stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
-                    _stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
-
-                    byte[] baNewTimestamp = null;
-
-                    long lRet = Channel.SetBiblioInfo(
-                        _stop,
+                    long lRet = channel.SetBiblioInfo(
+                        looping.stop,
                         "change",
                         strBiblioRecPath,
                         "xml",
                         biblio_info.NewXml,
                         biblio_info.Timestamp,
                         "",
-                        out strOutputPath,
-                        out baNewTimestamp,
+                        out string strOutputPath,
+                        out byte[] baNewTimestamp,
                         out strError);
                     if (lRet == -1)
                     {
-                        if (Channel.ErrorCode == ErrorCode.TimestampMismatch)
+                        if (channel.ErrorCode == ErrorCode.TimestampMismatch)
                         {
                             DialogResult result = MessageBox.Show(this,
     "保存书目记录 " + strBiblioRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
@@ -777,14 +785,12 @@ namespace dp2Circulation
                                 goto CONTINUE;
 
                             // 重新装载书目记录到 OldXml
-                            string[] results = null;
-                            // byte[] baTimestamp = null;
-                            lRet = Channel.GetBiblioInfos(
-                                _stop,
+                            lRet = channel.GetBiblioInfos(
+                                looping.stop,
                                 strBiblioRecPath,
                                 "",
                                 new string[] { "xml" },   // formats
-                                out results,
+                                out string[] results,
                                 out baNewTimestamp,
                                 out strError);
                             if (lRet == 0)
@@ -809,7 +815,7 @@ namespace dp2Circulation
                     }
 
                     // 检查是否有部分字段被拒绝
-                    if (Channel.ErrorCode == ErrorCode.PartialDenied)
+                    if (channel.ErrorCode == ErrorCode.PartialDenied)
                     {
                         DialogResult result = MessageBox.Show(this,
 "保存书目记录 " + strBiblioRecPath + " 时部分字段被拒绝。\r\n\r\n此记录已部分保存成功。\r\n\r\n请问现在是否要顺便重新装载此记录以便观察? \r\n\r\n(Yes 重新装载(到旧记录部分)；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
@@ -822,14 +828,12 @@ MessageBoxDefaultButton.Button1);
                         if (result == System.Windows.Forms.DialogResult.No)
                             goto CONTINUE;
                         // 重新装载书目记录到 OldXml
-                        string[] results = null;
-                        // byte[] baTimestamp = null;
-                        lRet = Channel.GetBiblioInfos(
-                            _stop,
+                        lRet = channel.GetBiblioInfos(
+                            looping.stop,
                             strBiblioRecPath,
                             "",
                             new string[] { "xml" },   // formats
-                            out results,
+                            out string[] results,
                             out baNewTimestamp,
                             out strError);
                         if (lRet == 0)
@@ -856,12 +860,14 @@ MessageBoxDefaultButton.Button1);
 
                     nSavedCount++;
                 CONTINUE:
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
                     i++;
                 }
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -869,6 +875,7 @@ MessageBoxDefaultButton.Button1);
                 _stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
+                */
                 this.listView_records.Enabled = true;
             }
 
@@ -1152,19 +1159,23 @@ dlg.UiState);
             // TODO: 检查一下，看看是否一项修改动作都没有
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改 856 字段</div>");
 
+            /*
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("快速修改 856 字段 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping("快速修改 856 字段 ...",
+                "disableControl,halfstop");
             this.listView_records.Enabled = false;
 
             int nProcessCount = 0;
             int nChangedCount = 0;
             try
             {
-                _stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -1204,14 +1215,13 @@ dlg.UiState);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null
-                        && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     LineInfo info = (LineInfo)item.Tag;
                     if (info == null)
@@ -1309,15 +1319,17 @@ dlg.UiState);
             }
             finally
             {
-                EnableControls(true);
                 this.listView_records.Enabled = true;
+                looping.Dispose();
+                /*
+                EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
                 _stop.Style = StopStyle.None;
-
+                */
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改 856 字段</div>");
             }
 

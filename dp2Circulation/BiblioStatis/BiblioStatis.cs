@@ -8,6 +8,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform;
 
 // 2013/3/16 添加 XML 注释
 
@@ -100,15 +101,35 @@ namespace dp2Circulation
             //
         }
 
+        // 兼容以前版本
+        public int SaveMarcRecord(
+    string strMARC,
+    out string strError)
+        {
+            using (var looping = this.BiblioStatisForm.Looping(out LibraryChannel channel))
+            {
+                return SaveMarcRecord(
+                looping.stop,
+                channel,
+                strMARC,
+                out strError);
+            }
+        }
+
         /// <summary>
         /// 将一条 MARC 记录保存到当前正在处理的书目记录的数据库原始位置
         /// 所谓当前位置由 this.CurrentRecPath 决定
         /// 提交保存所采用的时间戳是 this.Timestamp
         /// </summary>
+        /// <param name="stop"></param>
+        /// <param name="channel"></param>
         /// <param name="strMARC">MARC机内格式字符串</param>
         /// <param name="strError">出错信息</param>
         /// <returns>-1: 出错，错误信息在 strError 中; 0: 成功</returns>
-        public int SaveMarcRecord(string strMARC,
+        public int SaveMarcRecord(
+            Stop stop,
+            LibraryChannel channel,
+            string strMARC,
             out string strError)
         {
             strError = "";
@@ -123,7 +144,10 @@ namespace dp2Circulation
 
             string strOutputPath = "";
             byte[] baNewTimestamp = null;
-            nRet = this.BiblioStatisForm.SaveXmlBiblioRecordToDatabase(this.CurrentRecPath,
+            nRet = this.BiblioStatisForm.SaveXmlBiblioRecordToDatabase(
+                stop,
+                channel,
+                this.CurrentRecPath,
                 strXml,
                 this.Timestamp,
                 out strOutputPath,
@@ -202,7 +226,7 @@ namespace dp2Circulation
                 string strError = "";
                 long lRet = 0;
 
-                REDO:
+            REDO:
 
                 if (strDbType == "item")
                     lRet = this.BiblioStatisForm.Channel.GetEntities(

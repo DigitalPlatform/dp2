@@ -102,7 +102,7 @@ namespace DigitalPlatform.LibraryServer
                 debug_info.Append("著者字符串 '" + strAuthorParam + "' 经去除非用字、将阿拉伯和罗马数字转换为汉字数字后，为 '" + strAuthor + "'。\r\n");
             }
 
-            string strComfirmPinyin = "";   // 用于在多选中进行确认的拼音
+            string strConfirmPinyin = "";   // 用于在多选中进行确认的拼音
 
         REDOSEARCH:
             List<string> parts = new List<string>();
@@ -178,12 +178,12 @@ namespace DigitalPlatform.LibraryServer
 
                 int nIndex = 0;
 
-                if (aPath.Count > 1 && strComfirmPinyin != "")
+                if (aPath.Count > 1 && strConfirmPinyin != "")
                 {
                     strPath = SelectOneRecByPinyin(
                         channel,
                         aPath,
-                        strComfirmPinyin,
+                        strConfirmPinyin,
                         out strError);
                     if (strPath == null)
                         return -1;
@@ -200,7 +200,7 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 strPaths += (string)aPath[k] + ";";
                             }
-                            debug_info.Append("警告：用于确认多选的拼音 '" + strComfirmPinyin + "' 在命中记录集 '" + strPaths + "' 中没有匹配上。\r\n");
+                            debug_info.Append("警告：用于确认多选的拼音 '" + strConfirmPinyin + "' 在命中记录集 '" + strPaths + "' 中没有匹配上。\r\n");
                         }
                     }
                 }
@@ -333,12 +333,12 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet != -1)
                 {
                     strAuthor = strRef.Substring(0, nRet).Trim();
-                    strComfirmPinyin = strRef.Substring(nRet + 1).Trim();	// 用于确认多选的拼音
+                    strConfirmPinyin = strRef.Substring(nRet + 1).Trim();	// 用于确认多选的拼音
                 }
                 else
                 {
                     strAuthor = strRef;
-                    strComfirmPinyin = "";
+                    strConfirmPinyin = "";
                 }
                 goto REDOSEARCH;
             }
@@ -684,7 +684,7 @@ namespace DigitalPlatform.LibraryServer
         string SelectOneRecByPinyin(
             RmsChannel channel,
             List<string> aPath,
-            string strComfirmPinyin,
+            string strConfirmPinyin,
             out string strError)
         {
             strError = "";
@@ -726,7 +726,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 string strPinyin = dom.DocumentElement.GetAttribute("p");
-                if (String.Compare(strPinyin, strComfirmPinyin, true) == 0)
+                if (String.Compare(strPinyin, strConfirmPinyin, true) == 0)
                     return strPath;
             }
 

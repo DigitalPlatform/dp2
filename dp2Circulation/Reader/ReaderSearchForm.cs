@@ -2402,10 +2402,11 @@ TaskScheduler.Default);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
+                    looping.stop,
                     channel,
                     items,
                     "",
-                    false,
+                    //false,
                     true,
                     out strError);
                 if (nRet == -1)
@@ -2706,10 +2707,11 @@ TaskScheduler.Default);
                 }
 
                 int nRet = RefreshListViewLines(
+                    looping.stop,
                     channel,
                     items,
                     "",
-                    false,
+                    //false,
                     true,
                     out strError);
                 if (nRet == -1)

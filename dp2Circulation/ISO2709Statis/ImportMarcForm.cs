@@ -22,6 +22,8 @@ namespace dp2Circulation
 
         public ImportMarcForm()
         {
+            this.UseLooping = true; // 2022/11/5
+
             InitializeComponent();
 
             _openMarcFileDialog = new OpenMarcFileDlg();
@@ -268,20 +270,24 @@ this.checkBox_overwriteByG01.Checked);
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + $" 开始导入 MARC 文件 {strInputFileName}</div>");
 
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在获取ISO2709记录 ...");
-            _stop.BeginLoop();
-
             bool dont_display_retry_dialog = false;   //  不再出现重试对话框
             bool dont_display_compare_dialog = false;  // 不再出现两条书目记录对比的对话框
             int overwrite_count = 0;
             int append_count = 0;
             int skip_count = 0;
 
+            /*
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在获取ISO2709记录 ...");
+            _stop.BeginLoop();
+
             LibraryChannel channel = this.GetChannel();
 
             EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取ISO2709记录 ...",
+                "disableControl");
             try
             {
                 // 读入 ISO2709 记录的索引
@@ -598,6 +604,8 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 this.ReturnChannel(channel);
@@ -605,6 +613,7 @@ out strError);
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + $" 结束导入 MARC 文件 {strInputFileName}</div>");

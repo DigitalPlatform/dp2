@@ -743,23 +743,24 @@ namespace dp2Circulation
             int nDupCount = 0;
             int nRet = 0;
 
-            LibraryChannel channel = this.GetChannel();
+            /*
+            EnableControls(false);
 
-            StreamReader sr = null;
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在初始化浏览器组件 ...");
+            _stop.BeginLoop();
+            this.Update();
+            Program.MainForm.Update();
+
+            LibraryChannel channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
             try
             {
                 // 打开文件
-                sr = new StreamReader(strFilename);
-
-                EnableControls(false);
-
-                _stop.OnStop += new StopEventHandler(this.DoStop);
-                _stop.Initial("正在初始化浏览器组件 ...");
-                _stop.BeginLoop();
-                this.Update();
-                Program.MainForm.Update();
-
-                try
+                using (StreamReader sr = new StreamReader(strFilename))
                 {
                     if (System.Windows.Forms.Control.ModifierKeys == Keys.Control)
                     {
@@ -795,7 +796,7 @@ namespace dp2Circulation
                     int nLineCount = 0;
                     for (; ; )
                     {
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断1";
                             goto ERROR1;
@@ -863,14 +864,15 @@ namespace dp2Circulation
                     }
 
                     // 设置进度范围
-                    _stop.SetProgressRange(0, nLineCount);
+                    looping.stop.SetProgressRange(0, nLineCount);
+                    // sr.Close();
+                }
 
-                    sr.Close();
-
-                    sr = new StreamReader(strFilename);
+                using (StreamReader sr = new StreamReader(strFilename))
+                {
                     for (int i = 0; ; i++)
                     {
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断2";
                             goto ERROR1;
@@ -879,7 +881,7 @@ namespace dp2Circulation
                         string strOrderRecPath = "";
                         strOrderRecPath = sr.ReadLine();
 
-                        _stop.SetProgressValue(i);
+                        looping.stop.SetProgressValue(i);
 
                         if (strOrderRecPath == null)
                             break;
@@ -891,7 +893,7 @@ namespace dp2Circulation
                         if (strOrderRecPath[0] == '#')
                             continue;   // 注释行
 
-                        _stop.SetMessage("正在装入路径 " + strOrderRecPath + " 对应的记录...");
+                        looping.stop.SetMessage("正在装入路径 " + strOrderRecPath + " 对应的记录...");
 
 
                         // 根据记录路径，装入订购记录
@@ -900,6 +902,7 @@ namespace dp2Circulation
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
+                            looping.stop,
                             channel,
                             strOrderRecPath,
                             this.listView_origin,
@@ -910,15 +913,6 @@ namespace dp2Circulation
                             nDupCount++;
                     }
                 }
-                finally
-                {
-                    _stop.EndLoop();
-                    _stop.OnStop -= new StopEventHandler(this.DoStop);
-                    _stop.Initial("装入完成。");
-                    _stop.HideProgress();
-
-                    EnableControls(true);
-                }
             }
             catch (Exception ex)
             {
@@ -927,9 +921,19 @@ namespace dp2Circulation
             }
             finally
             {
-                sr.Close();
+                // sr.Close();
 
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("装入完成。");
+                _stop.HideProgress();
+
+                EnableControls(true);
+                */
             }
 
             // 记忆文件名
@@ -942,11 +946,18 @@ namespace dp2Circulation
             }
 
             // 填充合并后数据列表
-            _stop.SetMessage("正在合并数据...");
-            nRet = FillMergedList(out strError);
-            _stop.SetMessage("");
-            if (nRet == -1)
-                goto ERROR1;
+            using (var looping1 = Looping("正在合并数据..."))
+            {
+                /*
+                _stop.SetMessage("正在合并数据...");
+                */
+                nRet = FillMergedList(out strError);
+                /*
+                _stop.SetMessage("");
+                */
+                if (nRet == -1)
+                    goto ERROR1;
+            }
 
             // 汇报数据装载情况。
             // return:
@@ -958,7 +969,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return 1;
-            ERROR1:
+        ERROR1:
             this.ShowMessage(strError, "red", true);
             return -1;
         }
@@ -991,7 +1002,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return;
-            ERROR1:
+        ERROR1:
             this.Text = "打印订单";
             MessageBox.Show(this, strError);
         }
@@ -1082,14 +1093,14 @@ namespace dp2Circulation
             strError = "";
             strXmlRecord = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel);
             try
             {
                 string[] formats = new string[1];
                 formats[0] = "xml";
-                string[] results = null;
-                byte[] timestamp = null;
 
                 if (String.IsNullOrEmpty(strBiblioRecPath) == true)
                 {
@@ -1098,12 +1109,12 @@ namespace dp2Circulation
                 }
 
                 long lRet = channel.GetBiblioInfos(
-                    _stop,
+                    looping.stop,
                     strBiblioRecPath,
                     "",
                     formats,
-                    out results,
-                    out timestamp,
+                    out string[] results,
+                    out byte[] timestamp,
                     out strError);
                 if (lRet == 0)
                 {
@@ -1127,7 +1138,10 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1137,6 +1151,7 @@ namespace dp2Circulation
         //      -1  出错
         //      1   成功
         int LoadOneItem(
+            Stop stop,
             LibraryChannel channel,
             string strRecPath,
             ListView list,
@@ -1160,7 +1175,7 @@ namespace dp2Circulation
             }
 
             long lRet = channel.GetOrderInfo(
-                _stop,
+                stop,
                 "@path:" + strRecPath,
                 // "",
                 "xml",
@@ -1227,7 +1242,7 @@ namespace dp2Circulation
                 Debug.Assert(String.IsNullOrEmpty(strOutputBiblioRecPath) == false, "strBiblioRecPath值不能为空");
 
                 lRet = channel.GetBiblioInfos(
-                    _stop,
+                    stop,
                     strOutputBiblioRecPath,
                     "",
                     formats,
@@ -1284,7 +1299,7 @@ namespace dp2Circulation
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -2301,7 +2316,7 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2443,16 +2458,18 @@ out strError);
 
             this.tabControl_items.SelectedTab = this.tabPage_mergedItems;
 
+            /*
             EnableControls(false);
             // MainForm.ShowProgress(true);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在构造订单 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping("正在构造订单 ...",
+                "disableControl");
             try
             {
-
                 NamedListViewItemsCollection lists = new NamedListViewItemsCollection();
 
                 // 先检查是否有错误事项，顺便构建item列表
@@ -2461,7 +2478,7 @@ out strError);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -2489,18 +2506,18 @@ out strError);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
                         }
 
-                        List<string> temp_filenames = null;
                         int nRet = PrintMergedList(
+                            looping.stop,
                             i,
                             lists[i],
                             ref doc,
-                            out temp_filenames,
+                            out List<string> temp_filenames,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -2511,7 +2528,7 @@ out strError);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -2519,6 +2536,7 @@ out strError);
 
                         // 按渠道打印分类统计页
                         int nRet = PrintClassStatisList(
+                            looping.stop,
                             i,
                             "class",
                             lists[i],
@@ -2536,6 +2554,7 @@ out strError);
                         // 按渠道打印出版社统计页
                         temp_filenames = null;
                         nRet = PrintClassStatisList(
+                            looping.stop,
                             i,
                             "publisher",
                             lists[i],
@@ -2574,6 +2593,8 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -2581,6 +2602,7 @@ out strError);
 
                 EnableControls(true);
                 // MainForm.ShowProgress(false);
+                */
             }
 
             //END1:
@@ -2607,12 +2629,13 @@ out strError);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
         // 打印一个渠道的分类统计表
         int PrintClassStatisList(
+            Stop stop,
             int nSheetIndex,
             string strStatisType,
             NamedListViewItems items,
@@ -2633,6 +2656,7 @@ out strError);
 
                 // 构造html页面
                 int nRet = BuildStatisHtml(
+                    stop,
                     nSheetIndex,
                     strStatisType,
                     items,
@@ -2658,6 +2682,7 @@ out strError);
 
         // 打印一个渠道的订单
         int PrintMergedList(
+            Stop stop,
             int nSheetIndex,
             NamedListViewItems items,
             ref /*ExcelDocument*/ XLWorkbook doc,
@@ -2676,6 +2701,7 @@ out strError);
 
                 // 构造html页面
                 int nRet = BuildMergedHtml(
+                    stop,
                     nSheetIndex,
                     items,
                     ref doc,
@@ -2948,6 +2974,7 @@ out strError);
         // parameters:
         //      strStatisType   统计表类型 "class" "publisher"
         int BuildStatisHtml(
+            Stop stop,
             int nSheetIndex,
             string strStatisType,
             NamedListViewItems items,
@@ -3180,15 +3207,15 @@ out strError);
 
             bool bWiledMatched = false; // 是否遇到过通配符
 
-            _stop.SetProgressValue(0);
-            _stop.SetProgressRange(0, items.Count);
+            stop?.SetProgressValue(0);
+            stop?.SetProgressRange(0, items.Count);
 
-            _stop.SetMessage("正在遍历合并行 ...");
+            stop?.SetMessage("正在遍历合并行 ...");
             for (int i = 0; i < items.Count; i++)
             {
                 Application.DoEvents();	// 出让界面控制权
 
-                if (_stop != null && _stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断";
                     return -1;
@@ -3245,7 +3272,7 @@ out strError);
                         }
                     }
 
-                    _stop.SetProgressValue(i + 1);
+                    stop?.SetProgressValue(i + 1);
                 }
 
                 // 匹配行
@@ -3539,7 +3566,7 @@ XLColor.LightGray);
             List<InnerTableLine> inner_tables = new List<InnerTableLine>();
 
             int nExcelLineIndex = 3;
-            _stop.SetMessage("正在输出统计页 HTML ...");
+            stop?.SetMessage("正在输出统计页 HTML ...");
             foreach (StatisLine line in main_lines)
             {
                 if (line.Class == "*")
@@ -4518,6 +4545,7 @@ out string strError);
 #endif
         // 构造订单页面
         int BuildMergedHtml(
+            Stop stop,
             int nSheetIndex,
             NamedListViewItems items,
             ref /*ExcelDocument*/ XLWorkbook doc,
@@ -4528,7 +4556,7 @@ out string strError);
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
             int nRet = 0;
 
-            _stop.SetMessage("正在构造订单 ...");
+            stop?.SetMessage("正在构造订单 ...");
 
             Hashtable macro_table = new Hashtable();
 
@@ -4815,7 +4843,7 @@ nLineIndex++,
             {
                 Application.DoEvents();	// 出让界面控制权
 
-                if (_stop != null && _stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断";
                     return -1;
@@ -4837,7 +4865,7 @@ nLineIndex++,
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
@@ -4860,8 +4888,8 @@ nLineIndex++,
 
             if (sheet != null && column_max_chars.Count > 0)
             {
-                if (_stop != null)
-                    _stop.SetMessage("正在调整列宽度 ...");
+                if (stop != null)
+                    stop.SetMessage("正在调整列宽度 ...");
                 Application.DoEvents();
 
                 AdjectColumnWidth(sheet, column_max_chars);
@@ -5643,7 +5671,7 @@ strContent);
                 col_index++;
             }
 
-            END1:
+        END1:
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
 
@@ -6568,6 +6596,7 @@ strContent);
 
             _changed_recpaths = Program.MainForm.GetChangedRecords("order");
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -6575,17 +6604,20 @@ strContent);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在检索 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索 ...",
+                "disableControl");
             try
             {
-                _stop.SetProgressRange(0, 100);
+                looping.stop.SetProgressRange(0, 100);
 
                 long lRet = 0;
                 if (this.BatchNo == "<不指定>")
                 {
                     // 2013/3/25
                     lRet = channel.SearchOrder(
-        _stop,
+        looping.stop,
         this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
         "", // dlg.BatchNo,
         -1,
@@ -6605,7 +6637,7 @@ strContent);
                 else
                 {
                     lRet = channel.SearchOrder(
-                        _stop,
+                        looping.stop,
                         this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
                         dlg.BatchNo,
                         -1,
@@ -6630,7 +6662,7 @@ strContent);
 
                 long lHitCount = lRet;
 
-                _stop.SetProgressRange(0, lHitCount);
+                looping.stop.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -6641,14 +6673,14 @@ strContent);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         MessageBox.Show(this, "用户中断");
                         return;
                     }
 
                     lRet = channel.GetSearchResult(
-                        _stop,
+                        looping.stop,
                         "batchno",   // strResultSetName
                         lStart,
                         lCount,
@@ -6679,6 +6711,7 @@ strContent);
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
+                            looping.stop,
                             channel,
                             strRecPath,
                             this.listView_origin,
@@ -6688,26 +6721,29 @@ strContent);
                         if (nRet == -2)
                             nDupCount++;
 
-                        _stop.SetProgressValue(lStart + i + 1);
+                        looping.stop.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    _stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                 }
 
                 // 填充合并后数据列表
-                _stop.SetMessage("正在合并数据...");
+                looping.stop.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -6716,30 +6752,34 @@ strContent);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return;
-            ERROR1:
+        ERROR1:
             this.ShowMessage(strError, "red", true);
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
         }
 
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
+            /*
             LibraryChannel channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel);
             try
             {
                 Global.GetBatchNoTable(e,
                     this,
                     this.comboBox_load_type.Text,
                     "order",
-                    this._stop,
+                    looping.stop,
                     channel);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
 
 #if NOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -7057,17 +7097,20 @@ strContent);
         void menu_merge_Click(object sender, EventArgs e)
         {
             string strError = "";
-            _stop.SetMessage("正在合并数据...");
-            int nRet = FillMergedList(out strError);
-            _stop.SetMessage("");
-            if (nRet == -1)
+            using (var looping = Looping("正在合并数据..."))
             {
-                MessageBox.Show(this, strError);
-            }
-            else
-            {
-                // 切换到 已合并 列表
-                this.tabControl_items.SelectedTab = this.tabPage_mergedItems;
+                //_stop.SetMessage("正在合并数据...");
+                int nRet = FillMergedList(out strError);
+                //_stop.SetMessage("");
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+                else
+                {
+                    // 切换到 已合并 列表
+                    this.tabControl_items.SelectedTab = this.tabPage_mergedItems;
+                }
             }
         }
 
@@ -7090,12 +7133,15 @@ strContent);
 
             // 填充合并后数据列表
             string strError = "";
-            _stop.SetMessage("正在合并数据...");
-            int nRet = FillMergedList(out strError);
-            _stop.SetMessage("");
-            if (nRet == -1)
+            using (var looping = Looping("正在合并数据..."))
             {
-                MessageBox.Show(this, strError);
+                //_stop.SetMessage("正在合并数据...");
+                int nRet = FillMergedList(out strError);
+                //_stop.SetMessage("");
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
             }
 
             /*
@@ -7119,12 +7165,15 @@ strContent);
 
             // 填充合并后数据列表
             string strError = "";
-            _stop.SetMessage("正在合并数据...");
-            int nRet = FillMergedList(out strError);
-            _stop.SetMessage("");
-            if (nRet == -1)
+            using (var looping = Looping("正在合并数据..."))
             {
-                MessageBox.Show(this, strError);
+                //_stop.SetMessage("正在合并数据...");
+                int nRet = FillMergedList(out strError);
+                //_stop.SetMessage("");
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
             }
 
             /*
@@ -7164,12 +7213,15 @@ MessageBoxDefaultButton.Button2);
 
             // 填充合并后数据列表
             string strError = "";
-            _stop.SetMessage("正在合并数据...");
-            int nRet = FillMergedList(out strError);
-            _stop.SetMessage("");
-            if (nRet == -1)
+            using (var looping = Looping("正在合并数据..."))
             {
-                MessageBox.Show(this, strError);
+                //_stop.SetMessage("正在合并数据...");
+                int nRet = FillMergedList(out strError);
+                //_stop.SetMessage("");
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
             }
 
             SetNextButtonEnable();  // 2008/12/22
@@ -7197,6 +7249,7 @@ MessageBoxDefaultButton.Button2);
         {
             string strError = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -7204,38 +7257,46 @@ MessageBoxDefaultButton.Button2);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在刷新 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在刷新 ...",
+                "disableControl");
             try
             {
-                _stop.SetProgressRange(0, items.Count);
+                looping.stop.SetProgressRange(0, items.Count);
 
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if (_stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断1";
                         goto ERROR1;
                     }
 
-
                     ListViewItem item = items[i];
 
-                    _stop.SetMessage("正在刷新 " + item.Text + " ...");
+                    looping.stop.SetMessage("正在刷新 " + item.Text + " ...");
 
-                    int nRet = RefreshOneItem(channel, item, out strError);
+                    int nRet = RefreshOneItem(
+                        looping.stop,
+                        channel,
+                        item,
+                        out strError);
                     /*
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
                      * */
 
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
                 }
 
-                _stop.SetProgressValue(items.Count);
-
+                looping.stop.SetProgressValue(items.Count);
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("刷新完成。");
@@ -7244,13 +7305,14 @@ MessageBoxDefaultButton.Button2);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-            return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
         int RefreshOneItem(
+            Stop stop,
             LibraryChannel channel,
             ListViewItem item,
             out string strError)
@@ -7268,7 +7330,7 @@ MessageBoxDefaultButton.Button2);
             string strIndex = "@path:" + item.SubItems[ORIGIN_COLUMN_RECPATH].Text;
 
             long lRet = channel.GetOrderInfo(
-                _stop,
+                stop,
                 strIndex,
                 // "",
                 "xml",
@@ -7301,7 +7363,7 @@ MessageBoxDefaultButton.Button2);
                 Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
 
                 lRet = channel.GetBiblioInfos(
-                    _stop,
+                    stop,
                     strBiblioRecPath,
                     "",
                     formats,
@@ -7354,7 +7416,7 @@ MessageBoxDefaultButton.Button2);
             // item.ImageIndex = TYPE_NORMAL;
             SetItemColor(item, TYPE_NORMAL);
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -9666,7 +9728,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10022,7 +10084,7 @@ column.Evalue);
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-            END1:
+        END1:
 
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
@@ -10505,6 +10567,7 @@ column.Evalue);
             strError = "";
             int nRet = 0;
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -10512,7 +10575,10 @@ column.Evalue);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在保存原始记录 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存原始记录 ...",
+                "disableControl");
             try
             {
                 string strPrevBiblioRecPath = "";
@@ -10544,6 +10610,7 @@ column.Evalue);
                     {
                         // 保存一个批次
                         nRet = SaveOneBatchOrders(
+                            looping.stop,
                             channel,
                             entity_list,
                             strPrevBiblioRecPath,
@@ -10642,6 +10709,7 @@ column.Evalue);
                 {
                     // 保存一个批次
                     nRet = SaveOneBatchOrders(
+                        looping.stop,
                         channel,
                         entity_list,
                         strPrevBiblioRecPath,
@@ -10652,9 +10720,12 @@ column.Evalue);
                     entity_list.Clear();
                 }
 
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -10662,12 +10733,12 @@ column.Evalue);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return 0;
         }
 
         int SaveOneBatchOrders(
+            Stop stop,
             LibraryChannel channel,
             List<EntityInfo> entity_list,
             string strBiblioRecPath,
@@ -10680,7 +10751,7 @@ column.Evalue);
 
             EntityInfo[] errorinfos = null;
             long lRet = channel.SetOrders(
-                _stop,
+                stop,
                 strBiblioRecPath,
                 entities,
                 out errorinfos,
@@ -10929,7 +11000,7 @@ column.Evalue);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11104,17 +11175,18 @@ column.Evalue);
             if (Program.MainForm.DataDir.ToLower() != strOutputDir.ToLower())
                 DeleteAllFiles(strOutputDir);
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在输出订单 ...");
             _stop.BeginLoop();
-
-            NamedListViewItemsCollection lists = new NamedListViewItemsCollection();
-
+            */
+            var looping = Looping("正在输出订单 ...",
+                "disableControl");
             try
             {
-
+                NamedListViewItemsCollection lists = new NamedListViewItemsCollection();
                 int nErrorCount = 0;
 
                 this.tabControl_items.SelectedTab = this.tabPage_mergedItems;
@@ -11122,16 +11194,13 @@ column.Evalue);
                 // 先检查是否有错误事项，顺便构建item列表
                 List<ListViewItem> items = new List<ListViewItem>();
 
-                _stop.SetMessage("正在构造Item列表...");
+                looping.stop.SetMessage("正在构造Item列表...");
                 for (int i = 0; i < this.listView_merged.Items.Count; i++)
                 {
-                    if (_stop != null)
+                    if (looping.Stopped)
                     {
-                        if (_stop.State != 0)
-                        {
-                            strError = "用户中断1";
-                            return -1;
-                        }
+                        strError = "用户中断1";
+                        return -1;
                     }
 
                     ListViewItem item = this.listView_merged.Items[i];
@@ -11152,7 +11221,9 @@ column.Evalue);
                 {
                     string strOutputFilename = PathUtil.MergePath(strOutputDir, lists[i].Seller + ".xml");
 
-                    int nRet = OutputOneOrder(lists[i],
+                    int nRet = OutputOneOrder(
+                        looping.stop,
+                        lists[i],
                         strOutputDir,
                         strOutputFilename,
                         out strError);
@@ -11161,22 +11232,26 @@ column.Evalue);
 
                 }
 
+                return lists.Count;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("输出订单完成。共输出订单 " + lists.Count.ToString() + " 个");
                 _stop.HideProgress();
 
                 EnableControls(true);
+                */
             }
-
-            return lists.Count;
         }
 
         // 输出有关一个渠道的订单
-        int OutputOneOrder(NamedListViewItems items,
+        int OutputOneOrder(
+            Stop stop,
+            NamedListViewItems items,
             string strOutputDir,
             string strOutputFilename,
             out string strError)
@@ -11229,18 +11304,15 @@ column.Evalue);
                 writer.WriteEndElement();
             }
 
-            _stop.SetProgressRange(0, items.Count);
+            stop?.SetProgressRange(0, items.Count);
 
             // 内容行
             for (int i = 0; i < items.Count; i++)
             {
-                if (_stop != null)
+                if (stop != null && stop.State != 0)
                 {
-                    if (_stop.State != 0)
-                    {
-                        strError = "用户中断2";
-                        return -1;
-                    }
+                    strError = "用户中断2";
+                    return -1;
                 }
 
                 ListViewItem item = items[i];
@@ -11324,9 +11396,9 @@ column.Evalue);
 
                 writer.WriteEndElement();   // of item
 
-                _stop.SetMessage("正在输出事项 " + strSeller + " " + (i + 1).ToString());
+                stop?.SetMessage("正在输出事项 " + strSeller + " " + (i + 1).ToString());
 
-                _stop.SetProgressValue(i);
+                stop?.SetProgressValue(i);
             }
 
             writer.WriteEndElement();   // of order
@@ -11683,7 +11755,7 @@ column.Evalue);
             objOutputOrder.ProjectDir = strProjectLocate;
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -11702,9 +11774,10 @@ column.Evalue);
 
         private void PrintOrderForm_Activated(object sender, EventArgs e)
         {
+            /*
             // 2009/8/13
             Program.MainForm.stopManager.Active(this._stop);
-
+            */
         }
 
         private void checkBox_print_accepted_CheckedChanged(object sender, EventArgs e)
@@ -11738,7 +11811,7 @@ column.Evalue);
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11801,6 +11874,7 @@ column.Evalue);
 
             this.tabControl_items.SelectedTab = this.tabPage_mergedItems;
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -11808,7 +11882,10 @@ column.Evalue);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在归并订购时间 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在归并订购时间 ...",
+                "disableControl");
             try
             {
                 NamedListViewItemsCollection lists = new NamedListViewItemsCollection();
@@ -11820,7 +11897,7 @@ column.Evalue);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -11894,15 +11971,16 @@ column.Evalue);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
                         }
 
                         int nRet = BuildArriveHtml(
-                            i,
+                            looping.stop,
                             channel,
+                            i,
                             lists[i],
                             ref doc,
                             time_ranges,
@@ -11936,6 +12014,8 @@ column.Evalue);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -11944,6 +12024,7 @@ column.Evalue);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
 
             if (doc != null)
@@ -11967,7 +12048,7 @@ column.Evalue);
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             // MessageBox.Show(this, strError);
             return -1;
         }
@@ -11991,6 +12072,7 @@ column.Evalue);
         // 获得全部册记录的 refid --> 到书时间 对照表。所谓到书时间就是记录创建的时间。如果没有记录创建时间，用最后修改时间代替
         // 册refid --> 到书时间
         int GetArriveTimes(
+            Stop stop,
             LibraryChannel channel,
             NamedListViewItems items,
             out List<OneLine> infos,
@@ -12045,6 +12127,7 @@ column.Evalue);
                 if (temp_refids.Count >= 100)
                 {
                     nRet = GetRecordTimes(
+                        stop,
                         channel,
                         temp_refids,
                         ref table,
@@ -12059,6 +12142,7 @@ column.Evalue);
             if (temp_refids.Count > 0)
             {
                 nRet = GetRecordTimes(
+                    stop,
                     channel,
                     temp_refids,
                     ref table,
@@ -12091,6 +12175,7 @@ column.Evalue);
 
         // 根据 refid 获得一批记录的创建时间，追加到 Hashtable 中
         int GetRecordTimes(
+            Stop stop,
             LibraryChannel channel,
             List<string> refids,
             ref Hashtable result_table,
@@ -12105,6 +12190,7 @@ column.Evalue);
             Hashtable table = null;
             // 获得册记录信息
             nRet = LoadItemRecord(
+                stop,
                 channel,
                 refids,
                 ref table,
@@ -12147,7 +12233,6 @@ column.Evalue);
                     strError = "refid为 '" + key + "' 的记录中RFC1123字符串 '" + strTime + "' 格式不正确";
                     return -1;
                 }
-
             }
 
             return 0;
@@ -12162,6 +12247,7 @@ column.Evalue);
 
         // 根据册记录refid，转换为册记录的recpath，然后获得册记录XML
         int LoadItemRecord(
+            Stop stop,
             LibraryChannel channel,
             List<string> refids,
             ref Hashtable table,
@@ -12174,7 +12260,7 @@ column.Evalue);
             REDO_GETITEMINFO:
             string strBiblio = "";
             string strResult = "";
-            long lRet = channel.GetItemInfo(_stop,
+            long lRet = channel.GetItemInfo(stop,
                 "@refid-list:" + StringUtil.MakePathList(refids),
                 "get-path-list",
                 out strResult,
@@ -12257,7 +12343,7 @@ MessageBoxDefaultButton.Button1);
                 // 集中获取全部册记录信息
                 for (; ; )
                 {
-                    if (_stop != null && _stop.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断1";
                         return -1;
@@ -12267,9 +12353,9 @@ MessageBoxDefaultButton.Button1);
 
                     string[] paths = new string[item_recpaths.Count];
                     item_recpaths.CopyTo(paths);
-                    REDO_GETRECORDS:
+                REDO_GETRECORDS:
                     lRet = channel.GetBrowseRecords(
-                        this._stop,
+                        stop,
                         paths,
                         "id,xml",
                         out searchresults,
@@ -12361,8 +12447,9 @@ MessageBoxDefaultButton.Button1);
 
         // 到货率统计
         int BuildArriveHtml(
-            int nSheetIndex,
+            Stop stop,
             LibraryChannel channel,
+            int nSheetIndex,
             NamedListViewItems items,
             ref /*ExcelDocument*/ XLWorkbook doc,
             List<TimeSlice> time_ranges,
@@ -12373,10 +12460,11 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
 
-            _stop.SetMessage("正在进行到货率统计 ...");
+            stop?.SetMessage("正在进行到货率统计 ...");
 
             // 准备册记录
             nRet = GetArriveTimes(
+                stop,
                 channel,
                 items,
                 out List<OneLine> infos,
@@ -12754,7 +12842,7 @@ string strFileName)
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -12767,7 +12855,7 @@ string strFileName)
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -12929,7 +13017,7 @@ string strFileName)
                 goto ERROR1;
             }
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -12956,7 +13044,7 @@ string strFileName)
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -12995,6 +13083,7 @@ string strFileName)
 
             _changed_recpaths = Program.MainForm.GetChangedRecords("order");
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -13004,16 +13093,19 @@ string strFileName)
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在检索 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索 ...",
+                "timeout:0:2:0,disableControl");
             try
             {
-                _stop.SetProgressRange(0, 100);
+                looping.stop.SetProgressRange(0, 100);
 
                 long lRet = 0;
 
                 // 2013/3/25
                 lRet = channel.SearchOrder(
-    _stop,
+    looping.stop,
     this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
     strQueryWord,   // "", // dlg.BatchNo,
     -1,
@@ -13034,7 +13126,7 @@ string strFileName)
                 }
 
                 ResultSetLoader loader = new ResultSetLoader(channel,
-                    _stop,
+                    looping.stop,
                     "batchno",
                     "id"); // "id,cols"
 
@@ -13042,7 +13134,7 @@ string strFileName)
 
                 long lHitCount = lRet;
 
-                _stop.SetProgressRange(0, lHitCount);
+                looping.stop.SetProgressRange(0, lHitCount);
 
                 // DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
@@ -13052,7 +13144,7 @@ string strFileName)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
@@ -13068,6 +13160,7 @@ string strFileName)
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
+                            looping.stop,
                             channel,
                             strRecPath,
                             this.listView_origin,
@@ -13077,21 +13170,24 @@ string strFileName)
                         if (nRet == -2)
                             nDupCount++;
 
-                        _stop.SetProgressValue(i + 1);
+                        looping.stop.SetProgressValue(i + 1);
                     }
 
-                    _stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + (i + 1).ToString() + " 条");
+                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + (i + 1).ToString() + " 条");
                     i++;
                 }
 
                 // 填充合并后数据列表
-                _stop.SetMessage("正在合并数据...");
+                looping.stop.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
                 if (nRet == -1)
                     return -1;
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -13101,9 +13197,8 @@ string strFileName)
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return 1;
         }
 
     }

@@ -73,10 +73,12 @@ namespace dp2Circulation
             get;
         }
 
+#if SUPPORT_OLD_STOP
         Stop Progress
         {
             get;
         }
+#endif
 
         /// <summary>
         /// 宿主窗口

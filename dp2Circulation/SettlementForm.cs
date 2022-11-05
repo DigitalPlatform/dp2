@@ -18,6 +18,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -63,6 +64,8 @@ namespace dp2Circulation
         /// </summary>
         public SettlementForm()
         {
+            this.UseLooping = true; // 2022/11/4
+
             InitializeComponent();
         }
 
@@ -72,16 +75,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
 
             // 起始日期
             this.dateControl_start.Text = Program.MainForm.AppInfo.GetString(
@@ -317,15 +310,19 @@ namespace dp2Circulation
             string strStartTime = DateTimeUtil.Rfc1123DateTimeString(start_time.ToUniversalTime());
             string strEndTime = DateTimeUtil.Rfc1123DateTimeString(end_time.ToUniversalTime());
 
-
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.SetMessage("正在获取违约金库名 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取违约金库名 ...",
+                null);
 
             try
             {
-                long lRet = Channel.GetSystemParameter(
-                    _stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -341,22 +338,25 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
 
             Debug.Assert(strDbName != "", "");
 
             strQueryXml = "<target list='" + strDbName + ":" + strFrom + "'>"
 
-                // start
+            // start
             + "<item><word>"
             + StringUtil.GetXmlStringSimple(strStartTime)
             + "</word><match>left</match><relation>" + StringUtil.GetXmlStringSimple(">=") + "</relation><dataType>number</dataType><maxCount>-1</maxCount></item>"
 
             + "<operator value='AND' />"
-                // end
+            // end
             + "<item><word>"
             + StringUtil.GetXmlStringSimple(strEndTime)
             + "</word><match>left</match><relation>" + StringUtil.GetXmlStringSimple("<=") + "</relation><dataType>number</dataType><maxCount>-1</maxCount></item>"
@@ -413,15 +413,19 @@ namespace dp2Circulation
             string strDbName = "违约金";
             string strFrom = "__id";
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.SetMessage("正在获取违约金库名 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取违约金库名 ...",
+                null);
 
             try
             {
-
-                long lRet = Channel.GetSystemParameter(
-                    _stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -437,9 +441,12 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
 
             Debug.Assert(strDbName != "", "");
@@ -494,6 +501,7 @@ namespace dp2Circulation
             this.toolStripStatusLabel_items_message1.Text = "";
             this.toolStripStatusLabel_items_message2.Text = "";
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.SetMessage("正在检索违约金记录 ...");
             _stop.BeginLoop();
@@ -501,12 +509,14 @@ namespace dp2Circulation
             this.EnableControls(false);
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索违约金记录 ...",
+                "disableControl");
 
             this.m_nInSearching++;
-
             try
             {
-
                 /*
                 string strDbName = "违约金";
                 string strFrom = "缴款时间";
@@ -514,7 +524,6 @@ namespace dp2Circulation
                 string strQueryXml = "";
                 string strStartTime = DateTimeUtil.Rfc1123DateTimeString(start_time.ToUniversalTime());
                 string strEndTime = DateTimeUtil.Rfc1123DateTimeString(end_time.ToUniversalTime());
-
 
                 long lRet = Channel.GetSystemParameter(
                     stop,
@@ -547,8 +556,8 @@ namespace dp2Circulation
                 + "<lang>" + strLang + "</lang></target>";
                  * */
 
-                long lRet = Channel.Search(
-                    _stop,
+                long lRet = channel.Search(
+                    looping.stop,
                     strQueryXml,
                     "amerced",
                     "", // strOutputStyle
@@ -569,23 +578,23 @@ namespace dp2Circulation
                 long lPerCount = Math.Min(50, lHitCount);
                 Record[] searchresults = null;
 
-                _stop.SetProgressRange(0, lHitCount);
+                looping.stop.SetProgressRange(0, lHitCount);
 
                 // 获得结果集，装入listview
                 for (; ; )
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    _stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
-                    lRet = Channel.GetSearchResult(
-                        _stop,
+                    lRet = channel.GetSearchResult(
+                        looping.stop,
                         "amerced",   // strResultSetName
                         lStart,
                         lPerCount,
@@ -607,7 +616,7 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -617,19 +626,16 @@ namespace dp2Circulation
 
                         string strPath = searchresults[i].Path;
 
-                        byte[] timestamp = null;
-                        string strXml = "";
+                        looping.stop.SetMessage("正在装入违约金记录 " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
 
-                        _stop.SetMessage("正在装入违约金记录 " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
-
-                        lRet = Channel.GetRecord(_stop,
+                        lRet = channel.GetRecord(looping.stop,
                             strPath,
-                            out timestamp,
-                            out strXml,
+                            out byte[] timestamp,
+                            out string strXml,
                             out strError);
                         if (lRet == -1)
                         {
-                            if (Channel.ErrorCode == ErrorCode.AccessDenied)
+                            if (channel.ErrorCode == ErrorCode.AccessDenied)
                                 goto CONTINUE;
 
                             goto ERROR1;
@@ -637,7 +643,8 @@ namespace dp2Circulation
 
                         int nRet = FillAmercedLine(
                             null,
-                            _stop,
+                            looping.stop,
+                            channel,
                             strXml,
                             strPath,
                             (bQuick == true || bTempQuick == true) ? false : true,
@@ -647,7 +654,7 @@ namespace dp2Circulation
 
                         nLoadCount++;
                     CONTINUE:
-                        _stop.SetProgressValue(lStart + i + 1);
+                        looping.stop.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
@@ -662,13 +669,16 @@ namespace dp2Circulation
             }
             finally
             {
+                this.m_nInSearching--;
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
-                this.m_nInSearching--;
                 this.EnableControls(true);
+                */
             }
 
             OnItemTypeChanged();
@@ -681,12 +691,15 @@ namespace dp2Circulation
         // parameters:
         //      bPrepareStop    是否准备stop循环状态？如果外部调用前已经准备好了，就需要用false调用
         int RefreshAmercedRecords(
-            bool bPrepareStop,
+            Stop stop,
+            LibraryChannel channel,
+            // bool bPrepareStop,
             string[] ids,
             out string strError)
         {
             strError = "";
 
+            /*
             if (bPrepareStop == true)
             {
                 _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -695,20 +708,18 @@ namespace dp2Circulation
 
                 this.EnableControls(false);
             }
-
+            */
+            stop?.SetMessage("正在刷新违约金记录 ...");
             try
             {
                 for (int i = 0; i < ids.Length; i++)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (_stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
+                        strError = "用户中断";
+                        goto ERROR1;
                     }
 
                     string strID = ids[i];
@@ -723,15 +734,11 @@ namespace dp2Circulation
 
                     string strPath = item.SubItems[COLUMN_RECPATH].Text;
 
-
-                    _stop.SetMessage("正在装入记录信息 " + strPath);
-                    byte[] timestamp = null;
-                    string strXml = "";
-
-                    long lRet = Channel.GetRecord(_stop,
+                    stop?.SetMessage("正在装入记录信息 " + strPath);
+                    long lRet = channel.GetRecord(stop,
                         strPath,
-                        out timestamp,
-                        out strXml,
+                        out byte[] timestamp,
+                        out string strXml,
                         out strError);
                     if (lRet == -1)
                     {
@@ -740,7 +747,8 @@ namespace dp2Circulation
 
                     int nRet = FillAmercedLine(
                         item,
-                        _stop,
+                        stop,
+                        channel,
                         strXml,
                         strPath,
                         true,
@@ -752,6 +760,7 @@ namespace dp2Circulation
             }
             finally
             {
+                /*
                 if (bPrepareStop == true)
                 {
                     _stop.EndLoop();
@@ -760,6 +769,7 @@ namespace dp2Circulation
 
                     this.EnableControls(true);
                 }
+                */
             }
 
             return 1;
@@ -849,6 +859,7 @@ namespace dp2Circulation
         int FillAmercedLine(
             ListViewItem item,
             Stop stop,
+            LibraryChannel channel,
             string strXml,
             string strRecPath,
             bool bFillSummary,
@@ -910,14 +921,12 @@ namespace dp2Circulation
 
                 try
                 {
-
-                    string strBiblioRecPath = "";
-                    long lRet = Channel.GetBiblioSummary(
+                    long lRet = channel.GetBiblioSummary(
                         stop,
                         strItemBarcode,
                         strItemRecPath,
                         null,
-                        out strBiblioRecPath,
+                        out string strBiblioRecPath,
                         out strSummary,
                         out strError);
                     if (lRet == -1)
@@ -1498,14 +1507,18 @@ namespace dp2Circulation
                 total_ids.Add(strID);
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.SetMessage("正在进行" + strOperName + " ...");
             _stop.BeginLoop();
 
-            _stop.SetProgressRange(0, total_ids.Count);
-
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行" + strOperName + " ...",
+                "disableControl");
 
+            looping.stop.SetProgressRange(0, total_ids.Count);
             try
             {
                 int nDone = 0;
@@ -1519,8 +1532,8 @@ namespace dp2Circulation
                     string[] ids = new string[nThisCount];
                     total_ids.CopyTo(j * nPerCount, ids, 0, nThisCount);
 
-                    long lRet = Channel.Settlement(
-                        _stop,
+                    long lRet = channel.Settlement(
+                        looping.stop,
                         strAction,
                         ids,
                         out strError);
@@ -1530,25 +1543,30 @@ namespace dp2Circulation
 
                     // 刷新
                     int nRet = RefreshAmercedRecords(
-                        false,
+                        looping.stop,
+                        channel,
+                        // false,
                         ids,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
 
                     nDone += nThisCount;
-                    _stop.SetProgressValue(nDone);
+                    looping.stop.SetProgressValue(nDone);
                 }
 
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
 
             // 结算成功
@@ -1718,12 +1736,16 @@ namespace dp2Circulation
         {
             strError = "";
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.SetMessage("正在导出违约金记录 ...");
             _stop.BeginLoop();
 
             this.EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在导出违约金记录 ...",
+                "disableControl");
             try
             {
                 List<ListViewItem> items = new List<ListViewItem>();
@@ -1733,7 +1755,7 @@ namespace dp2Circulation
                     if (this.listView_amerced.CheckedItems.Count == 0)
                     {
                         strError = "尚未勾选要导出的事项";
-                        goto ERROR1;
+                        return -1;
                     }
 
                     for (int i = 0; i < this.listView_amerced.CheckedItems.Count; i++)
@@ -1747,7 +1769,7 @@ namespace dp2Circulation
                     if (this.listView_amerced.SelectedItems.Count == 0)
                     {
                         strError = "尚未选定要导出的事项";
-                        goto ERROR1;
+                        return -1;
                     }
 
                     foreach (ListViewItem item in this.listView_amerced.SelectedItems)
@@ -1783,33 +1805,32 @@ namespace dp2Circulation
                     writer.WriteStartDocument();
                     writer.WriteStartElement("dprms", "collection", DpNs.dprms);
 
-                    _stop.SetProgressRange(0, items.Count);
+                    looping.stop.SetProgressRange(0, items.Count);
                     for (int i = 0; i < items.Count; i++)
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null
-                            && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
-                            goto ERROR1;
+                            return -1;
                         }
 
-                        _stop.SetMessage("正在导出违约金记录 " + (i + 1).ToString() + " / " + items.Count.ToString() + " ...");
+                        looping.stop.SetMessage("正在导出违约金记录 " + (i + 1).ToString() + " / " + items.Count.ToString() + " ...");
 
                         ListViewItem item = items[i];
                         string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
                         string strXml = "";
                         byte[] timestamp = null;
-                        long lRet = this.Channel.GetRecord(
-                            _stop,
+                        long lRet = channel.GetRecord(
+                            looping.stop,
                             strRecPath,
                             out timestamp,
                             out strXml,
                             out strError);
                         if (lRet == -1)
-                            goto ERROR1;    // TODO: 提示重试
+                            return -1;    // TODO: 提示重试
 
                         XmlDocument dom = new XmlDocument();
                         try
@@ -1819,30 +1840,31 @@ namespace dp2Circulation
                         catch (Exception ex)
                         {
                             strError = "XML装入DOM时出错: " + ex.Message;
-                            goto ERROR1;
+                            return -1;
                         }
                         dom.DocumentElement.WriteTo(writer);
 
-                        _stop.SetProgressValue(i + 1);
+                        looping.stop.SetProgressValue(i + 1);
                     }
 
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
                     // writer.Close();
                 }
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         // 从数据库中删除 勾选的 已结算(settlemented) 事项
@@ -2951,7 +2973,9 @@ namespace dp2Circulation
 
         private void SettlementForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
         }
 
         // 返回列表中各类事项的个数

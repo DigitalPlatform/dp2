@@ -18,6 +18,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -58,6 +59,8 @@ namespace dp2Circulation
         /// </summary>
         public PassGateForm()
         {
+            this.UseLooping = true; // 2022/11/2
+
             InitializeComponent();
         }
 
@@ -363,9 +366,13 @@ namespace dp2Circulation
                     ReaderInfo info = (ReaderInfo)item.Tag;
                     string strBarcode = info.ReaderBarcode;
 
+                    /*
                     _stop.OnStop += new StopEventHandler(this.DoStop);
                     _stop.Initial("正在初始化浏览器组件 ...");
                     _stop.BeginLoop();
+                    */
+                    var looping = Looping(out LibraryChannel channel,
+                        null);
 
                     string strTypeList = "xml";
                     int nTypeCount = 1;
@@ -383,7 +390,7 @@ namespace dp2Circulation
                     try
                     {
                         string[] results = null;
-                        long lRet = Channel.PassGate(_stop,
+                        long lRet = channel.PassGate(looping.stop,
                             strBarcode,
                             this.textBox_gateName.Text, // strGateName
                             strTypeList,
@@ -453,9 +460,12 @@ namespace dp2Circulation
                     }
                     finally
                     {
+                        looping.Dispose();
+                        /*
                         _stop.EndLoop();
                         _stop.OnStop -= new StopEventHandler(this.DoStop);
                         _stop.Initial("");
+                        */
                     }
 
                 CONTINUE:

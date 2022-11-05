@@ -262,12 +262,12 @@ namespace dp2Circulation
 
         void AcceptForm_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            Global.GetBatchNoTable(e,
-                this,
-                this.comboBox_prepare_type.Text,    // 和出版物类型有关
-                "item",
-                this.stop,
-                this.Channel);
+                Global.GetBatchNoTable(e,
+                    this,
+                    this.comboBox_prepare_type.Text,    // 和出版物类型有关
+                    "item",
+                    looping.stop,
+                    channel);
         }
 
         bool InitialSizeParam()

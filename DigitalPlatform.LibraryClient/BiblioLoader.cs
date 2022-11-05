@@ -14,6 +14,7 @@ namespace DigitalPlatform.LibraryClient
     /// <summary>
     /// 快速获得书目记录信息
     /// 可以用字符串集合，或者用 TextReader 来驱动
+    /// 在向 dp2library 请求 API 的时候，能自动划分为适当的批，多次进行
     /// </summary>
     public class BiblioLoader : IEnumerable
     {

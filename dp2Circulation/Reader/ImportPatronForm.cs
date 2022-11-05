@@ -24,6 +24,8 @@ namespace dp2Circulation
     {
         public ImportPatronForm()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
         }
 
@@ -138,10 +140,14 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+            var looping = Looping(out LibraryChannel channel,
+                "正在导入读者 XML 记录",
+                "timeout:0:2:0,disableControl");
+
             ProcessInfo info = new ProcessInfo();
             {
-                info.Channel = this.GetChannel();
-                info.stop = _stop;
+                info.Channel = channel; // this.GetChannel();
+                info.stop = looping.stop;   // _stop;
                 info.TargetDbName = this.comboBox_targetDbName.Text;
                 info.AppendMode = this.comboBox_appendMode.Text;
                 info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
@@ -193,20 +199,25 @@ namespace dp2Circulation
 
             var strSourceFileName = this.textBox_patronXmlFileName.Text;
 
+            /*
             this.Invoke((Action)(() =>
     EnableControls(false)
     ));
+            */
 
             OutputText($"{DateTime.Now.ToString()} 开始导入读者 XML 记录", 0);
 
+            /*
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在导入读者 XML 记录");
             _stop.BeginLoop();
+            */
 
+            /*
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
-
+            */
             try
             {
                 // 用 FileStream 方式打开，主要是为了能在中途观察进度
@@ -215,8 +226,8 @@ namespace dp2Circulation
     FileAccess.Read))
                 using (XmlTextReader reader = new XmlTextReader(file))
                 {
-                    if (_stop != null)
-                        _stop.SetProgressRange(0, file.Length);
+                    if (looping != null)
+                        looping.stop.SetProgressRange(0, file.Length);
 
                     bool bRet = false;
 
@@ -235,7 +246,7 @@ namespace dp2Circulation
 
                     for (; ; )
                     {
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
@@ -256,8 +267,8 @@ namespace dp2Circulation
 
                         DoRecord(reader, info);
 
-                        if (_stop != null)
-                            _stop.SetProgressValue(file.Position);
+                        if (looping != null)
+                            looping.stop.SetProgressValue(file.Position);
 
                         info.PatronRecCount++;
                     }
@@ -272,6 +283,7 @@ namespace dp2Circulation
             }
             finally
             {
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -281,11 +293,12 @@ namespace dp2Circulation
                 info.Channel.Timeout = old_timeout;
                 this.ReturnChannel(info.Channel);
 
-                OutputText($"{DateTime.Now.ToString()} 结束导入读者 XML 记录", 0);
-
                 this.Invoke((Action)(() =>
                     EnableControls(true)
                     ));
+                */
+                looping.Dispose();
+                OutputText($"{DateTime.Now.ToString()} 结束导入读者 XML 记录", 0);
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -493,7 +506,7 @@ EnableControls(false)
 
         REDO:
             long lRet = info.Channel.SetReaderInfo(
-    _stop,
+    info.stop,
     strAction,
     strTargetRecPath,
     root.OuterXml,

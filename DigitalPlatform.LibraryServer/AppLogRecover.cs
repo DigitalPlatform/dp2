@@ -274,7 +274,7 @@ out strError);
                         }
                         else
                         {
-                            strError = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，但此时comfirmItemRecPath却为空";
+                            strError = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，但此时confirmItemRecPath却为空";
                             goto ERROR1;
                         }
                     }
@@ -1404,7 +1404,7 @@ out strError);
                         }
 
                         /*
-                        strError = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，但此时comfirmItemRecPath却为空";
+                        strError = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，但此时confirmItemRecPath却为空";
                         goto ERROR1;
                          * */
                         // bItemBarcodeDup = true; // 此时已经需要设置状态。虽然后面可以进一步识别出真正的册记录
@@ -7957,7 +7957,7 @@ domLog.DocumentElement,
                     if (aPath.Count > 1)
                     {
 
-                        strError = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，但此时comfirmItemRecPath却为空";
+                        strError = "册条码号为 '" + strItemBarcode + "' 的册记录有 " + aPath.Count.ToString() + " 条，但此时confirmItemRecPath却为空";
                         goto ERROR1;
                     }
                     else

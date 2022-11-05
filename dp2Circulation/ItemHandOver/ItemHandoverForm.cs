@@ -508,11 +508,16 @@ this.splitContainer_inAndOutof,
             int nDupCount = 0;
             string strRecPathFilename = Path.GetTempFileName();
 
+            /*
             LibraryChannel channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+null,
+"disableControl");
             try
             {
                 nRet = ConvertBarcodeFile(
+                    looping.stop,
                     channel,
                     dlg.FileName,
                     strRecPathFilename,
@@ -522,6 +527,7 @@ this.splitContainer_inAndOutof,
                     goto ERROR1;
 
                 nRet = LoadFromRecPathFile(
+                    looping.stop,
                     channel,
                     strRecPathFilename,
                     this.comboBox_load_type.Text,
@@ -534,8 +540,10 @@ this.splitContainer_inAndOutof,
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
-
+                */
                 if (string.IsNullOrEmpty(strRecPathFilename) == false)
                 {
                     File.Delete(strRecPathFilename);
@@ -781,6 +789,7 @@ this.splitContainer_inAndOutof,
 
         // 处理一小批记录的装入
         internal override int DoLoadRecords(
+            Stop stop,
             LibraryChannel channel,
             List<string> lines,
             List<ListViewItem> items,
@@ -801,7 +810,7 @@ this.splitContainer_inAndOutof,
             // 集中获取全部册记录信息
             for (; ; )
             {
-                if (_stop != null && _stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断1";
                     return -1;
@@ -813,7 +822,7 @@ this.splitContainer_inAndOutof,
                 lines.CopyTo(paths);
             REDO_GETRECORDS:
                 long lRet = channel.GetBrowseRecords(
-                    this._stop,
+                    stop,
                     paths,
                     "id,xml,timestamp", // 注意，包含了 timestamp
                     out searchresults,
@@ -848,10 +857,10 @@ this.splitContainer_inAndOutof,
                     break;
             }
 
-
             // 准备 DOM 和书目摘要等
             List<RecordInfo> infos = null;
             int nRet = GetSummaries(
+                stop,
                 channel,
                 bFillSummaryColumn,
                 summary_col_names,
@@ -871,13 +880,10 @@ this.splitContainer_inAndOutof,
             {
                 for (int i = 0; i < infos.Count; i++)
                 {
-                    if (_stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (_stop.State != 0)
-                        {
-                            strError = "用户中断1";
-                            return -1;
-                        }
+                        strError = "用户中断1";
+                        return -1;
                     }
 
                     RecordInfo info = infos[i];
@@ -901,6 +907,7 @@ this.splitContainer_inAndOutof,
                     //      -1  出错
                     //      1   成功
                     nRet = LoadOneItem(
+                        stop,
                         channel,
                         this.LoadType,  // this.comboBox_load_type.Text,
                         bFillSummaryColumn,
@@ -2013,6 +2020,7 @@ this.splitContainer_inAndOutof,
 
             if (item == null)
             {
+                /*
                 EnableControls(false);
 
                 LibraryChannel channel = this.GetChannel();
@@ -2022,7 +2030,12 @@ this.splitContainer_inAndOutof,
                     + this.textBox_verify_itemBarcode.Text
                     + " ...");
                 _stop.BeginLoop();
-
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在装载册 "
+                    + this.textBox_verify_itemBarcode.Text
+                    + " ...",
+                    "disableControl");
                 try
                 {
                     // Debug.Assert(false, "");
@@ -2041,6 +2054,7 @@ this.splitContainer_inAndOutof,
                     //      -1  出错
                     //      1   成功
                     nRet = LoadOneItem(
+                        looping.stop,
                         channel,
                         this.comboBox_load_type.Text,
                         true,
@@ -2055,11 +2069,14 @@ this.splitContainer_inAndOutof,
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
 
                     this.ReturnChannel(channel);
+                    */
 
                     EnableControls(true);
                 }
@@ -3512,14 +3529,19 @@ strContent);
 
             string strRecPathFilename = Path.GetTempFileName();
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+null,
+"timeout:0:2:0,disableControl");
             try
             {
                 // 检索 批次号 和 馆藏地点 将命中的记录路径写入文件
                 int nRet = SearchBatchNoAndLocation(
+                    looping.stop,
                     channel,
                     this.comboBox_load_type.Text,
                     strBatchNo,
@@ -3530,6 +3552,7 @@ strContent);
                     goto ERROR1;
 
                 nRet = LoadFromRecPathFile(
+                    looping.stop,
                     channel,
                     strRecPathFilename,
                     this.comboBox_load_type.Text,
@@ -3539,12 +3562,14 @@ strContent);
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
             }
             finally
             {
+                looping.Dispose();
+                /*
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
 
                 if (string.IsNullOrEmpty(strRecPathFilename) == false)
                 {
@@ -3819,20 +3844,14 @@ strContent);
 
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            LibraryChannel channel = this.GetChannel();
-
-            try
+            using (var looping = Looping(out LibraryChannel channel))
             {
                 Global.GetBatchNoTable(e,
                     this,
                     this.comboBox_load_type.Text,
                     "item",
-                    this._stop,
+                    looping.stop,
                     channel);
-            }
-            finally
-            {
-                this.ReturnChannel(channel);
             }
 
 #if NOOOOOOOOOOOOOOOOOOO
@@ -6617,12 +6636,17 @@ MessageBoxDefaultButton.Button2);
 
             this.SourceStyle = "recpathfile";
 
+            /*
             LibraryChannel channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+null,
+"disableControl");
             try
             {
                 // int nDupCount = 0;
                 nRet = LoadFromRecPathFile(
+                    looping.stop,
                     channel,
                     dlg.FileName,
                     this.comboBox_load_type.Text,
@@ -6635,7 +6659,10 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
 
             // 记忆文件名
@@ -7018,40 +7045,44 @@ MessageBoxDefaultButton.Button2);
 
                     if (barcodes.Count > 0)
                     {
-                        // 转换为记录路径
-                        List<string> recpaths = new List<string>();
-                        nRet = this.Container.ConvertItemBarcodeToRecPath(
-                            null,
-                            barcodes,
-                            out recpaths,
-                            out strError);
-                        if (nRet == -1)
+                        using (var looping = Container.Looping(out LibraryChannel channel))
                         {
-                            // 为每一行加入错误信息，避免线程重复报错
-                            int i = 0;
-                            foreach (ListViewItem item in items)
+                            // 转换为记录路径
+                            List<string> recpaths = new List<string>();
+                            nRet = this.Container.ConvertItemBarcodeToRecPath(
+                                looping.stop,
+                                channel,
+                                barcodes,
+                                out recpaths,
+                                out strError);
+                            if (nRet == -1)
                             {
-                                string barcode = barcodes[i];
-                                ListViewItem temp = item;
-                                this.Container.SetError(item.ListView,
-    ref temp,
-    barcode,
-    strError);
-                                i++;
+                                // 为每一行加入错误信息，避免线程重复报错
+                                int i = 0;
+                                foreach (ListViewItem item in items)
+                                {
+                                    string barcode = barcodes[i];
+                                    ListViewItem temp = item;
+                                    this.Container.SetError(item.ListView,
+        ref temp,
+        barcode,
+        strError);
+                                    i++;
+                                }
+                                goto ERROR1;
                             }
-                            goto ERROR1;
+
+                            Debug.Assert(barcodes.Count == recpaths.Count, "");
+
+                            // 将 recpath 列内容填入
+                            this.Container.SetRecPathColumn(items, recpaths);
+
+                            // 刷新指定的行
+                            this.Container.RefreshLines(COLUMN_RECPATH,
+        items,
+        true,
+        new string[] { "summary", "@isbnissn", "targetrecpath" });
                         }
-
-                        Debug.Assert(barcodes.Count == recpaths.Count, "");
-
-                        // 将 recpath 列内容填入
-                        this.Container.SetRecPathColumn(items, recpaths);
-
-                        // 刷新指定的行
-                        this.Container.RefreshLines(COLUMN_RECPATH,
-    items,
-    true,
-    new string[] { "summary", "@isbnissn", "targetrecpath" });
                     }
 
                     // m_bStopThread = true;   // 只作一轮就停止

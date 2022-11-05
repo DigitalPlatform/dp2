@@ -14,6 +14,7 @@ namespace dp2Circulation
     /// <summary>
     /// 带有缓存的书目记录枚举器
     /// 注意每次使用时事项不能太多，避免 Hashtable 体积太大
+    /// 在向 dp2library 请求 API 的时候，能自动划分为适当的批，多次进行
     /// </summary>
     internal class CacheableBiblioLoader : IEnumerable
     {
@@ -122,7 +123,6 @@ namespace dp2Circulation
                             tempTable[strRecPath] = info;
                             continue;
                         }
-
                     }
                     if (info == null)
                         info = (BiblioItem)tempTable[strRecPath];   // 注： tempTable 自带去重效果

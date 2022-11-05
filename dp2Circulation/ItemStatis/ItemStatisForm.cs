@@ -23,6 +23,7 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.dp2.Statis;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 // 2013/3/26 添加 XML 注释
 
@@ -284,12 +285,15 @@ namespace dp2Circulation
 
         void ItemStatisForm_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            Global.GetBatchNoTable(e,
+            using (var looping = Looping(out LibraryChannel channel))
+            {
+                Global.GetBatchNoTable(e,
                 this,
                 "", // 目前不分图书和期刊。 TODO: 其实将来可以把pubtype列表定为3态，其中一个是“书+刊”
                 this.DbType,    // "item",
-                this._stop,
-                this.Channel);
+                looping.stop,
+                channel);
+            }
         }
 
         private void ItemStatisForm_FormClosing(object sender, FormClosingEventArgs e)

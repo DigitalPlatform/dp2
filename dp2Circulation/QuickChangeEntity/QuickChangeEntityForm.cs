@@ -17,6 +17,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
 using static dp2Circulation.MainForm;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -37,12 +38,13 @@ namespace dp2Circulation
 
         LoadActionType m_loadActionType = LoadActionType.LoadAndAutoChange;
 
-
         /// <summary>
         /// 构造函数
         /// </summary>
         public QuickChangeEntityForm()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
         }
 
@@ -200,7 +202,8 @@ namespace dp2Circulation
         /// <summary>
         /// 根据册条码号，装入册记录和书目记录
         /// </summary>
-        /// <param name="bEnableControls">是否在处理过程中禁止界面元素</param>
+        /// <param name="stop"></param>
+        /// <param name="channel"></param>
         /// <param name="strBarcode">册条码号</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
@@ -209,12 +212,15 @@ namespace dp2Circulation
         ///      1   找到
         /// </returns>
         public int LoadRecord(
-            bool bEnableControls,
+            Stop stop,
+            LibraryChannel channel,
+            // bool bEnableControls,
             string strBarcode,
             out string strError)
         {
             strError = "";
 
+            /*
             if (bEnableControls == true)
             {
                 EnableControls(false);
@@ -227,6 +233,7 @@ namespace dp2Circulation
                 this.Update();
                 Program.MainForm.Update();
             }
+            */
 
             this.entityEditControl1.Clear();
 
@@ -238,8 +245,7 @@ namespace dp2Circulation
 
             this.textBox_message.Text = "";
 
-            _stop.SetMessage("正在装入册记录 " + strBarcode + " ...");
-
+            stop?.SetMessage("正在装入册记录 " + strBarcode + " ...");
 
             try
             {
@@ -251,8 +257,8 @@ namespace dp2Circulation
 
                 byte[] item_timestamp = null;
 
-                long lRet = Channel.GetItemInfo(
-                    _stop,
+                long lRet = channel.GetItemInfo(
+                    stop,
                     strBarcode,
                     "xml",
                     out strItemText,
@@ -299,6 +305,7 @@ namespace dp2Circulation
             }
             finally
             {
+                /*
                 if (bEnableControls == true)
                 {
                     _stop.EndLoop();
@@ -307,6 +314,7 @@ namespace dp2Circulation
 
                     EnableControls(true);
                 }
+                */
             }
 
             return 1;
@@ -355,105 +363,123 @@ namespace dp2Circulation
 
             // Debug.Assert(false, "");
 
-            // 先保存前一条
-            if (this.entityEditControl1.Changed == true)
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
+            try
             {
-                if (this.LoadActionType == LoadActionType.LoadOnly)
+                // 先保存前一条
+                if (this.entityEditControl1.Changed == true)
                 {
-                    // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
-        "当前有信息被修改后尚未保存。若此时装载新的信息，现有未保存信息将丢失。\r\n\r\n是否保存后再装入新的信息? (Yes 保存后装入; No 不保存但装入; Cancel 不保存，也放弃装入)",
-        "QuickChangeEntityForm",
-        MessageBoxButtons.YesNoCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button3);
-                    if (result == DialogResult.Cancel)
+                    if (this.LoadActionType == LoadActionType.LoadOnly)
+                    {
+                        // 警告尚未保存
+                        DialogResult result = MessageBox.Show(this,
+            "当前有信息被修改后尚未保存。若此时装载新的信息，现有未保存信息将丢失。\r\n\r\n是否保存后再装入新的信息? (Yes 保存后装入; No 不保存但装入; Cancel 不保存，也放弃装入)",
+            "QuickChangeEntityForm",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button3);
+                        if (result == DialogResult.Cancel)
+                            return;
+                        if (result == DialogResult.No)
+                            goto DOLOAD;
+                    }
+                    else
+                    {
+                        // 在装入并自动修改的状态下，不必询问，直接保存后装入
+                    }
+
+                    nRet = DoSave(
+                        looping.stop,
+                        channel,
+                        // true,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        MessageBoxAndSpeak(strError);
                         return;
-                    if (result == DialogResult.No)
-                        goto DOLOAD;
-                }
-                else
-                {
-                    // 在装入并自动修改的状态下，不必询问，直接保存后装入
+                    }
                 }
 
-                nRet = DoSave(true, out strError);
-                if (nRet == -1)
+                // 检查是否至少有一个动作
+                var names = GetChangeNames();
+                if (names.Count == 0 /*&& _warningActions == false*/)
                 {
-                    MessageBoxAndSpeak(strError);
-                    return;
+                    Program.MainForm.Speak("警告: 当前没有设置任何修改动作");
+                    DialogResult result = MessageBox.Show(this,
+        "警告: 当前没有设置任何修改动作。请问是否继续操作？\r\n\r\n(点“动作参数”按钮可以设置修改动作)",
+        "QuickChangeEntityForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    if (result != DialogResult.Yes)
+                        return;
                 }
-            }
-
-            // 检查是否至少有一个动作
-            var names = GetChangeNames();
-            if (names.Count == 0 /*&& _warningActions == false*/)
-            {
-                Program.MainForm.Speak("警告: 当前没有设置任何修改动作");
-                DialogResult result = MessageBox.Show(this,
-    "警告: 当前没有设置任何修改动作。请问是否继续操作？\r\n\r\n(点“动作参数”按钮可以设置修改动作)",
-    "QuickChangeEntityForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                if (result != DialogResult.Yes)
-                    return;
-            }
             //_warningActions = true;
 
-        DOLOAD:
+            DOLOAD:
 
-            nRet = LoadRecord(true, this.textBox_barcode.Text,
-                out strError);
-            if (nRet != 1)
-            {
-                MessageBoxAndSpeak(strError);
-                goto SETFOCUS;
-            }
-
-            if (this.LoadActionType == LoadActionType.LoadAndAutoChange)
-            {
-                // 自动修改
-                AutoChangeData();
-                nRet = TryWriteToRfidTag();
-                if (nRet == 1)
+                nRet = LoadRecord(
+                    looping.stop,
+                    channel,
+                    // true,
+                    this.textBox_barcode.Text,
+                    out strError);
+                if (nRet != 1)
                 {
-                    Console.Beep();
-                    Program.MainForm.Speak($"标签 {this.textBox_barcode.Text} 写入成功");
+                    MessageBoxAndSpeak(strError);
+                    goto SETFOCUS;
+                }
+
+                if (this.LoadActionType == LoadActionType.LoadAndAutoChange)
+                {
+                    // 自动修改
+                    AutoChangeData();
+                    nRet = TryWriteToRfidTag();
+                    if (nRet == 1)
+                    {
+                        Console.Beep();
+                        Program.MainForm.Speak($"标签 {this.textBox_barcode.Text} 写入成功");
+                    }
+                }
+
+                this.textBox_outputBarcodes.Text += this.textBox_barcode.Text + "\r\n";
+
+            SETFOCUS:
+                // 焦点定位
+                string strFocusAction = Program.MainForm.AppInfo.GetString(
+    "change_param",
+    "focusAction",
+    "册条码号，并全选");
+                if (strFocusAction == "册条码号，并全选")
+                {
+                    BeginSwitchFocus("load_barcode", true);
+                }
+                else if (strFocusAction == "册信息编辑器-册条码号")
+                {
+                    BeginSwitchFocus("barcode", true);
+                }
+                else if (strFocusAction == "册信息编辑器-状态")
+                {
+                    BeginSwitchFocus("state", true);
+                }
+                else if (strFocusAction == "册信息编辑器-馆藏地")
+                {
+                    BeginSwitchFocus("location", true);
+                }
+                else if (strFocusAction == "册信息编辑器-图书类型")
+                {
+                    BeginSwitchFocus("bookType", true);
+                }
+                else if (strFocusAction == "册信息编辑器-登录号")
+                {
+                    BeginSwitchFocus("registerNo", true);
                 }
             }
-
-            this.textBox_outputBarcodes.Text += this.textBox_barcode.Text + "\r\n";
-
-        SETFOCUS:
-            // 焦点定位
-            string strFocusAction = Program.MainForm.AppInfo.GetString(
-"change_param",
-"focusAction",
-"册条码号，并全选");
-            if (strFocusAction == "册条码号，并全选")
+            finally
             {
-                BeginSwitchFocus("load_barcode", true);
-            }
-            else if (strFocusAction == "册信息编辑器-册条码号")
-            {
-                BeginSwitchFocus("barcode", true);
-            }
-            else if (strFocusAction == "册信息编辑器-状态")
-            {
-                BeginSwitchFocus("state", true);
-            }
-            else if (strFocusAction == "册信息编辑器-馆藏地")
-            {
-                BeginSwitchFocus("location", true);
-            }
-            else if (strFocusAction == "册信息编辑器-图书类型")
-            {
-                BeginSwitchFocus("bookType", true);
-            }
-            else if (strFocusAction == "册信息编辑器-登录号")
-            {
-                BeginSwitchFocus("registerNo", true);
+                looping.Dispose();
             }
         }
 
@@ -1003,7 +1029,15 @@ false);
         private void button_saveCurrentRecord_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = DoSave(true, out strError);
+            int nRet;
+            using (var looping = Looping(out LibraryChannel channel))
+            {
+                nRet = DoSave(
+                    looping.stop,
+                    channel,
+                    //true,
+                    out strError);
+            }
             if (nRet != 1)
                 MessageBox.Show(this, strError);
         }
@@ -1012,14 +1046,18 @@ false);
         //      -1  出错
         //      0   没有必要保存
         //      1   保存成功
-        int DoSave(bool bEnableControls,
+        int DoSave(
+            Stop stop,
+            LibraryChannel channel,
+            // bool bEnableControls,
             out string strError)
         {
             strError = "";
 
+            /*
             if (bEnableControls == true)
                 EnableControls(false);
-
+            */
             try
             {
                 if (this.entityEditControl1.Changed == false)
@@ -1040,7 +1078,9 @@ false);
                     return 0; // 没有必要保存
 
                 nRet = SaveEntityRecords(
-                    bEnableControls,
+                    stop,
+                    channel,
+                    // bEnableControls,
                     this.BiblioRecPath,
                     entities,
                     out EntityInfo[] errorinfos,
@@ -1067,8 +1107,10 @@ false);
             }
             finally
             {
+                /*
                 if (bEnableControls == true)
                     EnableControls(true);
+                */
             }
         }
 
@@ -1117,12 +1159,15 @@ false);
         // 保存实体记录
         // 不负责刷新界面和报错
         int SaveEntityRecords(
-            bool bEnableControls,
+            Stop stop,
+            LibraryChannel channel,
+            // bool bEnableControls,
             string strBiblioRecPath,
             EntityInfo[] entities,
             out EntityInfo[] errorinfos,
             out string strError)
         {
+            /*
             if (bEnableControls == true)
             {
                 _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1132,12 +1177,12 @@ false);
                 this.Update();
                 Program.MainForm.Update();
             }
-
-
+            */
+            stop?.SetMessage("正在保存册信息 ...");
             try
             {
-                long lRet = Channel.SetEntities(
-                    _stop,
+                long lRet = channel.SetEntities(
+                    stop,
                     strBiblioRecPath,
                     entities,
                     out errorinfos,
@@ -1148,12 +1193,14 @@ false);
             }
             finally
             {
+                /*
                 if (bEnableControls == true)
                 {
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
                 }
+                */
             }
 
             return 1;
@@ -1498,6 +1545,7 @@ false);
 
                 sr = new StreamReader(strFilename);
 
+                /*
                 EnableControls(false);
 
                 _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1505,7 +1553,10 @@ false);
                 _stop.BeginLoop();
                 this.Update();
                 Program.MainForm.Update();
-
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    null,
+                    "diableControl");
                 try
                 {
                     int nRet = 0;
@@ -1514,15 +1565,11 @@ false);
                     for (; ; )
                     {
                         Application.DoEvents();
-                        if (_stop != null)
+                        if (looping.Stopped)
                         {
-                            if (_stop.State != 0)
-                            {
-                                strError = "用户中断1";
-                                return -1;
-                            }
+                            strError = "用户中断1";
+                            return -1;
                         }
-
 
                         string strLine = "";
                         strLine = sr.ReadLine();
@@ -1534,24 +1581,30 @@ false);
                             continue;
 
                         if (strFileType == "barcode")
-                            _stop.SetMessage("正在处理册条码号 " + strLine + " 对应的记录...");
+                            looping.stop.SetMessage("正在处理册条码号 " + strLine + " 对应的记录...");
                         else
-                            _stop.SetMessage("正在处理记录路径 " + strLine + " 对应的记录...");
-                        _stop.SetProgressValue(nCurrentLine);
+                            looping.stop.SetMessage("正在处理记录路径 " + strLine + " 对应的记录...");
+                        looping.stop.SetProgressValue(nCurrentLine);
 
                         nCurrentLine++;
 
                         // 先保存前一条
                         if (this.entityEditControl1.Changed == true)
                         {
-                            nRet = DoSave(false,
+                            nRet = DoSave(
+                                looping.stop,
+                                channel,
+                                //false,
                                 out strError);
                             if (nRet == -1)
                                 MessageBox.Show(this, strError);
                         }
                         // DOLOAD:
 
-                        nRet = LoadRecord(false,
+                        nRet = LoadRecord(
+                            looping.stop,
+                            channel,
+                            //false,
                             strFileType == "barcode" ? strLine : "@path:" + strLine,
                             out strError);
                         if (nRet != 1)
@@ -1569,7 +1622,10 @@ false);
 
                         if (this.entityEditControl1.Changed == true)
                         {
-                            nRet = DoSave(false,
+                            nRet = DoSave(
+                                looping.stop,
+                                channel,
+                                // false,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -1590,12 +1646,15 @@ false);
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
                     _stop.HideProgress();
 
                     EnableControls(true);
+                    */
                 }
 
                 return nCurrentLine;

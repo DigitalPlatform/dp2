@@ -71,6 +71,8 @@ namespace dp2Circulation
         /// </summary>
         public XmlStatisForm()
         {
+            this.UseLooping = true; // 2022/11/5
+
             InitializeComponent();
         }
 
@@ -81,15 +83,6 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
             ScriptManager.CfgFilePath = Path.Combine(
     Program.MainForm.UserDir,
     "xml_statis_projects.xml");
@@ -271,6 +264,7 @@ namespace dp2Circulation
         {
             strWarning = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -279,6 +273,9 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping("正在执行脚本 ...",
+                "disableControl");
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -335,14 +332,16 @@ namespace dp2Circulation
                 }
 
                 // 循环
-                nRet = DoLoop(out strError);
+                nRet = DoLoop(
+                    looping.stop,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 if (nRet == 1)
                     goto END1;  // TODO: SkipAll如何执行? 是否连OnEnd也不执行了？
 
-            END1:
+                END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
                 {
@@ -366,13 +365,16 @@ namespace dp2Circulation
                 if (objStatis != null)
                     objStatis.FreeResources();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
-                this.AssemblyMain = null;
-
                 EnableControls(true);
+                */
+
+                this.AssemblyMain = null;
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
@@ -404,10 +406,10 @@ namespace dp2Circulation
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\dp2circulation.exe",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
 
 
@@ -472,7 +474,9 @@ namespace dp2Circulation
         // return:
         //      0   普通返回
         //      1   要全部中断
-        int DoLoop(out string strError)
+        int DoLoop(
+            Stop stop,
+            out string strError)
         {
             strError = "";
             // int nRet = 0;
@@ -550,29 +554,25 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (_stop.State != 0)
+                            DialogResult result = MessageBox.Show(this,
+                                "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
+                                "ReaderStatisForm",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button3);
+
+                            if (result == DialogResult.Yes)
                             {
-                                DialogResult result = MessageBox.Show(this,
-                                    "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
-                                    "ReaderStatisForm",
-                                    MessageBoxButtons.YesNoCancel,
-                                    MessageBoxIcon.Question,
-                                    MessageBoxDefaultButton.Button3);
-
-                                if (result == DialogResult.Yes)
-                                {
-                                    strError = "用户中断";
-                                    return -1;
-                                }
-                                if (result == DialogResult.No)
-                                    return 0;   // 假装loop正常结束
-
-                                _stop.Continue(); // 继续循环
+                                strError = "用户中断";
+                                return -1;
                             }
-                        }
+                            if (result == DialogResult.No)
+                                return 0;   // 假装loop正常结束
 
+                            stop.Continue(); // 继续循环
+                        }
 
                         while (true)
                         {
@@ -588,7 +588,7 @@ namespace dp2Circulation
 
                         string strXml = reader.ReadOuterXml();
 
-                        _stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个XML记录");
+                        stop?.SetMessage("正在获取第 " + (i + 1).ToString() + " 个XML记录");
                         this.progressBar_records.Value = (int)file.Position;
 
                         // strXml中为XML记录

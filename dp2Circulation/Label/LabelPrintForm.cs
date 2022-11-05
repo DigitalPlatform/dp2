@@ -16,6 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Text;
 using System.Threading.Tasks;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -801,7 +802,7 @@ out string strError);
             {
                 this._processing--;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1076,7 +1077,7 @@ out string strError);
                         return 1;
                     }
 
-                    END1:
+                END1:
                     document.DefaultPageSettings.PaperSize = paper_size;    // 注：直接 new PaperSize 这样赋值，会导致打印机对话框中纸张名字为空。也许可以把 PrinterSetting 里面的也修改了就可以了?
                     document.DefaultPageSettings.Landscape = bLandscape;
                 }
@@ -1400,7 +1401,7 @@ out string strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -1500,7 +1501,7 @@ out string strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1638,7 +1639,7 @@ out string strError);
             {
                 this._processing--;
             }
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1735,7 +1736,7 @@ out string strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -2183,8 +2184,8 @@ out string strError);
                 goto ERROR1;
             }
 
-            //return;
-            ERROR1:
+        //return;
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2524,15 +2525,18 @@ out string strError);
                 goto ERROR1;
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在导入条码号 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在导入条码号 ...");
 
             try
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
                 ListViewUtil.ClearSortColumns(this.listView_records);
-
 
                 if (this.listView_records.Items.Count > 0)
                 {
@@ -2550,7 +2554,7 @@ out string strError);
                     }
                 }
 
-                _stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
 
                 List<ListViewItem> items = new List<ListViewItem>();
 
@@ -2558,18 +2562,15 @@ out string strError);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null)
-                    {
-                        if (_stop.State != 0)
+                    if (looping.Stopped)
                         {
                             MessageBox.Show(this, "用户中断");
                             return;
                         }
-                    }
 
                     string strBarcode = sr.ReadLine();
 
-                    _stop.SetProgressValue(sr.BaseStream.Position);
+                    looping.stop.SetProgressValue(sr.BaseStream.Position);
 
 
                     if (strBarcode == null)
@@ -2593,10 +2594,11 @@ out string strError);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
-                    this.Channel,
+                    looping.stop,
+                    channel,
                     items,
                     "",
-                    false,
+                    //false,
                     true,
                     out strError);
                 if (nRet == -1)
@@ -2605,25 +2607,28 @@ out string strError);
                 // 2014/1/15
                 // 刷新书目摘要
                 nRet = FillBiblioSummaryColumn(
-                    this.Channel,
+                    channel,
                     items,
                     false,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
+                */
 
                 if (sr != null)
                     sr.Close();
             }
-            return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2958,7 +2963,7 @@ TaskScheduler.Default);
 
             Program.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(strError);
         }
 
@@ -3175,7 +3180,7 @@ TaskScheduler.Default);
             item.EnsureVisible();
 
             return;
-            ERROR1:
+        ERROR1:
             Console.Beep();
         }
 
@@ -3348,7 +3353,7 @@ TaskScheduler.Default);
             }
 
             return;
-            ERROR1:
+        ERROR1:
             return;
         }
 

@@ -13,7 +13,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryClient;
 using dp2Circulation.ISO2709Statis;
-using System.Speech.Synthesis;
 using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
@@ -73,6 +72,8 @@ namespace dp2Circulation
         /// </summary>
         public BiblioStatisForm()
         {
+            this.UseLooping = true; // 2022/11/5
+
             InitializeComponent();
         }
 
@@ -82,16 +83,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-
-            /*
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-             * */
 
             ScriptManager.CfgFilePath =
                 Path.Combine(Program.MainForm.UserDir, "biblio_statis_projects.xml");
@@ -171,12 +162,15 @@ namespace dp2Circulation
 
         void BiblioStatisForm_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            Global.GetBatchNoTable(e,
+            using (var looping = Looping(out LibraryChannel channel))
+            {
+                Global.GetBatchNoTable(e,
                 this,
                 "", // 不分图书和期刊
                 "biblio",
-                this._stop,
-                this.Channel);
+                looping.stop,
+                channel);
+            }
         }
 
         private void BiblioStatisForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -381,6 +375,7 @@ Stack:
             strError = "";
             strWarning = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -389,6 +384,10 @@ Stack:
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在执行脚本 ...",
+                "disableControl");
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -495,7 +494,10 @@ Stack:
                 }
 
                 // 循环
-                nRet = DoLoop(out strError,
+                nRet = DoLoop(
+                    looping.stop,
+                    channel,
+                    out strError,
                     out strWarning);
                 if (nRet == -1)
                     goto ERROR1;
@@ -531,14 +533,16 @@ Stack:
                     objStatis.Prompt -= ObjStatis_Prompt;
                 }
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
-                this.AssemblyMain = null;
-
                 EnableControls(true);
+                */
 
+                this.AssemblyMain = null;
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
@@ -764,7 +768,10 @@ Stack:
         // return:
         //      0   普通返回
         //      1   要全部中断
-        int DoLoop(out string strError,
+        int DoLoop(
+            Stop stop,
+            LibraryChannel channel,
+            out string strError,
             out string strWarning)
         {
             strError = "";
@@ -792,6 +799,8 @@ Stack:
                 if (this.InputStyle == BiblioStatisInputStyle.BatchNo)
                 {
                     nRet = SearchBiblioRecPath(
+                        stop,
+                        channel,
                         this.tabComboBox_inputBatchNo.Text,
                         strTempRecPathFilename,
                         out strError);
@@ -851,8 +860,8 @@ Stack:
                     }
 
                     BiblioLoader loader = new BiblioLoader();
-                    loader.Channel = Channel;
-                    loader.Stop = _stop;
+                    loader.Channel = channel;
+                    loader.Stop = stop;
                     loader.TextReader = sr;
                     loader.Format = objStatis.BiblioFormat;    // "xml";
                     loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
@@ -866,7 +875,7 @@ Stack:
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             DialogResult result = MessageBox.Show(this,
                                 "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
@@ -883,7 +892,7 @@ Stack:
                             if (result == DialogResult.No)
                                 return 0;   // 假装loop正常结束
 
-                            _stop.Continue(); // 继续循环
+                            stop.Continue(); // 继续循环
                         }
 
 #if NO
@@ -902,7 +911,7 @@ Stack:
                             continue;
 #endif
 
-                        _stop.SetMessage("正在获取第 " + ((i++) + 1).ToString() + " 个书目记录，" + strAccessPointName + "为 " + item.RecPath);
+                        stop?.SetMessage("正在获取第 " + ((i++) + 1).ToString() + " 个书目记录，" + strAccessPointName + "为 " + item.RecPath);
                         this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
 #if NO
@@ -1167,6 +1176,8 @@ Stack:
         // 注意：上级函数RunScript()已经使用了BeginLoop()和EnableControls()
         // 检索获得特定批次号，或者所有书目记录路径(输出到文件)
         int SearchBiblioRecPath(
+            Stop stop,
+            LibraryChannel channel,
             string strBatchNo,
             string strRecPathFilename,
             out string strError)
@@ -1196,7 +1207,7 @@ Stack:
                     // 不指定批次号，意味着特定库全部条码
                     if (String.IsNullOrEmpty(strBatchNo) == true)
                     {
-                        lRet = Channel.SearchBiblio(_stop,
+                        lRet = channel.SearchBiblio(stop,
                              this.comboBox_inputBiblioDbName.Text,
                              "",
                              -1,    // nPerMax
@@ -1215,7 +1226,7 @@ Stack:
                     else
                     {
                         // 指定批次号。特定库。
-                        lRet = Channel.SearchBiblio(_stop,
+                        lRet = channel.SearchBiblio(stop,
                              this.comboBox_inputBiblioDbName.Text,
                              strBatchNo,
                              -1,    // nPerMax
@@ -1245,14 +1256,14 @@ Stack:
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "用户中断";
                             goto ERROR1;
                         }
 
-                        lRet = Channel.GetSearchResult(
-                            _stop,
+                        lRet = channel.GetSearchResult(
+                            stop,
                             null,   // strResultSetName
                             lStart,
                             lCount,
@@ -1282,7 +1293,7 @@ Stack:
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
@@ -1823,6 +1834,8 @@ Stack:
         /// <summary>
         /// 保存XML格式的书目记录到数据库
         /// </summary>
+        /// <param name="stop"></param>
+        /// <param name="channel"></param>
         /// <param name="strPath">记录路径</param>
         /// <param name="strXml">XML 记录体</param>
         /// <param name="baTimestamp">时间戳</param>
@@ -1830,7 +1843,10 @@ Stack:
         /// <param name="baNewTimestamp">返回最新时间戳</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 1: 保存成功</returns>
-        public int SaveXmlBiblioRecordToDatabase(string strPath,
+        public int SaveXmlBiblioRecordToDatabase(
+            Stop stop,
+            LibraryChannel channel,
+            string strPath,
             string strXml,
             byte[] baTimestamp,
             out string strOutputPath,
@@ -1858,8 +1874,8 @@ Stack:
                     strAction = "new";
             }
             */
-            long lRet = Channel.SetBiblioInfo(
-                _stop,
+            long lRet = channel.SetBiblioInfo(
+                stop,
                 strAction,
                 strPath,
                 "xml",

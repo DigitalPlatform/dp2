@@ -4,13 +4,13 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
-using System.Text;
 
 namespace dp2Circulation
 {
@@ -56,6 +56,8 @@ namespace dp2Circulation
         /// </summary>
         public UserForm()
         {
+            this.UseLooping = true; // 2022/11/4
+
             InitializeComponent();
         }
 
@@ -370,6 +372,23 @@ password);
             }
         }
 
+        public override LibraryChannel GetChannel(string strServerUrl = ".", string strUserName = ".", GetChannelStyle style = GetChannelStyle.GUI, string strClientIP = "")
+        {
+            if (_channel != null)
+                return _channel;
+            return base.GetChannel(strServerUrl, strUserName, style, strClientIP);
+        }
+
+        public override void ReturnChannel(LibraryChannel channel)
+        {
+            if (_channel == null)
+                base.ReturnChannel(channel);
+            else
+            {
+            }
+        }
+
+#if REMOVED
         LibraryChannel GetChannel()
         {
             if (_channel == null)
@@ -383,6 +402,7 @@ password);
             if (_channel == null)
                 base.ReturnChannel(channel);
         }
+#endif
 
         // 列出所有用户
         // return:
@@ -397,6 +417,7 @@ password);
             this.m_nCurrentItemIndex = -1;
             this.ClearEdit();
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -407,23 +428,25 @@ password);
 
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得全部用户信息 ...",
+                "disableControl");
             try
             {
                 int nStart = 0;
                 for (; ; )
                 {
-                    UserInfo[] users = null;
                     long lRet = channel.GetUser(
-                        _stop,
+                        looping.stop,
                         "list",
                         "",
                         nStart,
                         -1,
-                        out users,
+                        out UserInfo[] users,
                         out strError);
                     if (lRet == -1)
-                        goto ERROR1;
+                        return -1;
                     if (lRet == 0)
                     {
                         strError = "不存在用户信息。";
@@ -459,9 +482,13 @@ password);
                     if (nStart >= lRet)
                         break;
                 }
+
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -469,11 +496,8 @@ password);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         static void SetListViewItemValue(ItemInfo item_info,
@@ -667,6 +691,7 @@ password);
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -677,7 +702,10 @@ password);
 
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在重设用户密码 ...",
+                "disableControl");
             try
             {
                 UserInfo info = new UserInfo();
@@ -687,15 +715,18 @@ password);
                 info.SetPassword = true;    // 没有必要
 
                 long lRet = channel.SetUser(
-                    _stop,
+                    looping.stop,
                     "resetpassword",
                     info,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -703,11 +734,8 @@ password);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         // 保存用户信息
@@ -718,6 +746,7 @@ password);
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -728,19 +757,25 @@ password);
 
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存用户信息 ...",
+                "disableControl");
             try
             {
                 long lRet = channel.SetUser(
-                    _stop,
+                    looping.stop,
                     strAction,  // "change",
                     info,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -748,11 +783,8 @@ password);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         // 保存用户信息
@@ -762,6 +794,7 @@ password);
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -772,19 +805,25 @@ password);
 
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在创建用户信息 ...",
+                "disableControl");
             try
             {
                 long lRet = channel.SetUser(
-                    _stop,
+                    looping.stop,
                     "new",
                     info,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -792,11 +831,8 @@ password);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         // 删除用户信息
@@ -806,6 +842,7 @@ password);
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -816,22 +853,28 @@ password);
 
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在删除用户信息 ...",
+                "disableControl");
             try
             {
                 UserInfo info = new UserInfo();
                 info.UserName = strUserName;
 
                 long lRet = channel.SetUser(
-                    _stop,
+                    looping.stop,
                     "delete",
                     info,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -839,11 +882,8 @@ password);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         // 编辑权限
@@ -965,7 +1005,9 @@ password);
 
         private void UserForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
@@ -1029,6 +1071,7 @@ password);
             strError = "";
             librarycodes = new List<string>();
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -1036,11 +1079,15 @@ password);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在获得全部馆代码 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得全部馆代码 ...",
+                "disableControl");
             try
             {
                 string strValue = "";
-                long lRet = channel.GetSystemParameter(_stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "system",
                     "libraryCodes",
                     out strValue,
@@ -1052,9 +1099,12 @@ password);
                 }
 
                 librarycodes = StringUtil.FromListString(strValue);
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -1062,9 +1112,9 @@ password);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
 
-            return 1;
         }
 
         private void textBox_comment_TextChanged(object sender, EventArgs e)
@@ -1437,13 +1487,13 @@ password);
             List<string> rights = null;
             if (string.IsNullOrEmpty(origin) == false)
                 rights = new List<string>(origin?.Split(new char[] { ',' }));
-            else 
+            else
                 rights = new List<string>();
 
             if (string.IsNullOrEmpty(append_list) == false)
             {
                 string[] new_rights = append_list.Split(new char[] { ',' });
-                foreach(var new_right in new_rights)
+                foreach (var new_right in new_rights)
                 {
                     if (rights.IndexOf(new_right) == -1)
                         rights.Add(new_right);

@@ -182,6 +182,8 @@ namespace dp2Circulation
         /// </summary>
         public AmerceForm()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
 
             ListViewProperty prop = new ListViewProperty();
@@ -514,7 +516,10 @@ this.splitContainer_lists,
         //      -1  error
         //      0   not found
         //      >=1 命中的读者记录条数
-        int LoadReaderHtmlRecord(ref string strBarcode,
+        int LoadReaderHtmlRecord(
+            Stop stop,
+            LibraryChannel channel,
+            ref string strBarcode,
             out string strXml,
             out string strError)
         {
@@ -540,23 +545,20 @@ this.splitContainer_lists,
 
             try
             {
-
                 Global.ClearHtmlPage(this.webBrowser_readerInfo, Program.MainForm.DataDir);
 
                 byte[] baTimestamp = null;
                 string strOutputRecPath = "";
                 int nRedoCount = 0;
 
-                REDO:
+            REDO:
 
-                _stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
-                string[] results = null;
-
-                long lRet = Channel.GetReaderInfo(
-                    _stop,
+                stop?.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                long lRet = channel.GetReaderInfo(
+                    stop,
                     strBarcode,
                     "html,xml",
-                    out results,
+                    out string[] results,
                     out strOutputRecPath,
                     out baTimestamp,
                     out strError);
@@ -647,7 +649,7 @@ this.splitContainer_lists,
             }
 
             return nRecordCount;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -708,6 +710,7 @@ this.splitContainer_lists,
             StopFillAmercing(false);
             StopFillAmerced(false);
 
+            /*
             this.m_nChannelInUse++;
             if (this.m_nChannelInUse > 1)
             {
@@ -715,16 +718,22 @@ this.splitContainer_lists,
                 MessageBox.Show(this, "通道已经被占用。请稍后重试");
                 return -1;
             }
+            */
             try
             {
                 if (this.textBox_readerBarcode.Text != strReaderBarcode)
                     this.textBox_readerBarcode.Text = strReaderBarcode;
 
+                /*
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Initial("正在装载读者信息 ...");
                 _stop.BeginLoop();
 
                 EnableControls(false);
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在装载读者信息 ...",
+                    "disableControl");
                 try
                 {
                     // 搜索出记录，显示在窗口中
@@ -735,7 +744,10 @@ this.splitContainer_lists,
                     //      -1  error
                     //      0   not found
                     //      >=1 命中的读者记录条数
-                    int nRet = LoadReaderHtmlRecord(ref strReaderBarcode,
+                    int nRet = LoadReaderHtmlRecord(
+                        looping.stop,
+                        channel,
+                        ref strReaderBarcode,
                         out string strXml,
                         out strError);
 
@@ -803,20 +815,24 @@ this.splitContainer_lists,
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     EnableControls(true);
 
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
+                    */
                 }
+                return 1;
             }
             finally
             {
+                /*
                 this.m_nChannelInUse--;
+                */
             }
-
-            return 1;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1191,13 +1207,14 @@ this.splitContainer_lists,
             string strError = "";
             m_bStopFillAmerced = false;
 
+            /*
             LibraryChannel channel = new LibraryChannel();
             channel.Url = Program.MainForm.LibraryServerUrl;
-
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
             channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取已交费信息 ...");
             try
             {
                 string strResultSetName = "";
@@ -1206,8 +1223,8 @@ this.splitContainer_lists,
                 string strQueryXml = "";
                 string strLang = "zh";
 
-                long lRet = Channel.GetSystemParameter(
-                    _stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -1270,7 +1287,7 @@ this.splitContainer_lists,
 
                 // 开始检索
                 lRet = channel.Search(
-    _stop,
+    looping.stop,
     strQueryXml,
     strResultSetName,
     "", // strOutputStyle
@@ -1287,7 +1304,73 @@ this.splitContainer_lists,
                     return;
 
                 long lHitCount = lRet;
+                looping.stop.SetProgressRange(0, lHitCount);
 
+                if (lHitCount > 0)
+                {
+                    ResultSetLoader loader = new ResultSetLoader(channel,
+                        looping.stop,
+                        strResultSetName,
+                        "id,xml",
+                        strLang);
+                    int i = 0;
+                    foreach (Record record in loader)
+                    {
+                        if (m_bStopFillAmerced == true
+                            || looping.Stopped)
+                        {
+                            strError = "中断，列表不完整...";
+                            goto ERROR1;
+                        }
+
+                        string strPath = record.Path;
+
+                        looping.stop.SetMessage($"正在装载已交费事项 {strPath} ...");
+
+                        /*
+                        lRet = channel.GetRecord(looping.stop,
+                            strPath,
+                            out byte[] timestamp,
+                            out string strXml,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.ErrorCode == ErrorCode.AccessDenied)
+                            {
+                                // 2018/11/6
+                                SetError(listView_amerced, "获取记录 '" + strPath + "' 时权限不够: " + strError);
+                                continue;
+                            }
+                            goto ERROR1;
+                        }
+                        */
+                        if (record.RecordBody != null && record.RecordBody.Result != null
+                            && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                        {
+                            // 2022/11/3
+                            SetError(listView_amerced, "获取记录 '" + strPath + "' 时出错: " + record.RecordBody.Result.ErrorString);
+                            continue;
+                        }
+                        string strXml = record.RecordBody?.Xml;
+                        if (string.IsNullOrEmpty(strXml))
+                        {
+                            // 2022/11/3
+                            SetError(listView_amerced, "获取记录 '" + strPath + "' 时出错: XML 为空");
+                            continue;
+                        }
+
+                        int nRet = Safe_fillAmercedLine(
+                            looping.stop,
+                            strXml,
+                            strPath,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        i++;
+                        looping.stop.SetProgressValue(i);
+                    }
+                }
+#if REMOVED
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
                 Record[] searchresults = null;
@@ -1295,7 +1378,6 @@ this.splitContainer_lists,
                 // 获得结果集，装入listview
                 for (; ; )
                 {
-
                     if (m_bStopFillAmerced == true)
                     {
                         strError = "中断，列表不完整...";
@@ -1304,7 +1386,7 @@ this.splitContainer_lists,
                     // stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetSearchResult(
-                        _stop,
+                        looping.stop,
                         strResultSetName,   // strResultSetName
                         lStart,
                         lPerCount,
@@ -1335,7 +1417,7 @@ this.splitContainer_lists,
                         byte[] timestamp = null;
                         string strXml = "";
 
-                        lRet = channel.GetRecord(_stop,
+                        lRet = channel.GetRecord(looping.stop,
                             strPath,
                             out timestamp,
                             out strXml,
@@ -1352,7 +1434,7 @@ this.splitContainer_lists,
                         }
 
                         int nRet = Safe_fillAmercedLine(
-                            _stop,
+                            looping.stop,
                             strXml,
                             strPath,
                             out strError);
@@ -1364,17 +1446,28 @@ this.splitContainer_lists,
                     if (lStart >= lHitCount || lPerCount <= 0)
                         break;
                 }
-
+#endif
 
                 // 第二阶段，填充摘要
                 if (this.FillAmercedParam.FillSummary == true)
                 {
+                    looping.stop.SetMessage("正在装载已交费事项的书目摘要 ...");
+
                     List<ListViewItem> items = GetItemList(this.listView_amerced);
+                    //looping.stop.SetProgressRange(0, items.Count);
+                    //looping.stop.SetProgressValue(0);
+
+                    List<string> path_list = new List<string>();
+                    List<ListViewItem> item_list = new List<ListViewItem>();
 
                     for (int i = 0; i < items.Count; i++)
                     {
+                        if (looping.Stopped)
+                            return;
                         if (this.m_bStopFillAmerced == true)
                             return;
+
+                        // looping.stop.SetProgressValue(i);
 
                         ListViewItem item = items[i];
 
@@ -1394,42 +1487,66 @@ this.splitContainer_lists,
                             /*&& String.IsNullOrEmpty(strItemRecPath) == true*/)
                             continue;
 
-                        try
-                        {
-                            string strBiblioRecPath = "";
-                            lRet = channel.GetBiblioSummary(
-                                null,
-                                strItemBarcode,
-                                "", // strItemRecPath,
-                                null,
-                                out strBiblioRecPath,
-                                out strSummary,
-                                out strError);
-                            if (lRet == -1)
-                            {
-                                strSummary = strError;  // 2009/3/13 changed
-                                // return -1;
-                            }
+                        path_list.Add($"@itemBarcode:{strItemBarcode}");
+                        item_list.Add(item);
 
-                        }
-                        finally
+                        /*
+                        looping.stop.SetMessage($"正在装载已交费事项 {strItemBarcode} 的书目摘要 ...");
+
+                        lRet = channel.GetBiblioSummary(
+                            looping.stop,
+                            strItemBarcode,
+                            "", // strItemRecPath,
+                            null,
+                            out string strBiblioRecPath,
+                            out strSummary,
+                            out strError);
+                        if (lRet == -1)
                         {
+                            strSummary = strError;  // 2009/3/13 changed
+                                                    // return -1;
                         }
 
                         ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
+                        */
+                    }
+
+                    {
+                        CacheableBiblioLoader loader = new CacheableBiblioLoader();
+                        loader.Channel = channel;   //  this.Channel;
+                        loader.Stop = looping.stop;
+                        loader.Format = "summary";
+                        loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
+                        loader.RecPaths = path_list;
+
+                        looping.stop.SetProgressRange(0, item_list.Count);
+                        looping.stop.SetProgressValue(0);
+                        int j = 0;
+                        foreach (BiblioItem summary in loader)
+                        {
+                            looping.stop.SetMessage($"正在装载已交费事项的书目摘要 {summary.Content} ...");
+
+                            var item = item_list[j];
+                            ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, summary.Content);
+                            j++;
+                            looping.stop.SetProgressValue(j);
+                        }
                     }
                 }
                 return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
                 channel.Close();
+                */
                 m_bStopFillAmerced = true;
             }
 
-            ERROR1:
+        ERROR1:
             SetError(this.listView_amerced, strError);
             // Safe_errorBox(strError);
         }
@@ -1663,11 +1780,14 @@ this.splitContainer_lists,
             string strError = "";
             m_bStopFillAmercing = false;
 
+            /*
             LibraryChannel channel = new LibraryChannel();
             channel.Url = Program.MainForm.LibraryServerUrl;
 
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取待交费信息 ...");
             try
             {
                 ClearList(this.listView_overdues);
@@ -1811,7 +1931,7 @@ this.splitContainer_lists,
                         try
                         {
                             long lRet = channel.GetBiblioSummary(
-                                null,
+                                looping.stop,
                                 strItemBarcode,
                                 "", // strItemRecPath,
                                 null,
@@ -1845,12 +1965,15 @@ this.splitContainer_lists,
             }
             finally
             {
+                looping.Dispose();
+                /*
                 channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
+                */
                 m_bStopFillAmercing = true;
             }
 
-            ERROR1:
+        ERROR1:
             SetError(this.listView_overdues, strError);
             this.ShowMessage(strError, "red", true);    // 2019/9/19
             // Safe_errorBox(strError);
@@ -2044,41 +2167,6 @@ this.splitContainer_lists,
 
             strSettlementTime = DateTimeUtil.LocalTime(strSettlementTime, "u");
 
-#if NO
-            if (String.IsNullOrEmpty(strItemBarcode) == false)
-            {
-                // stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("正在获取摘要 " + strItemBarcode + " ...");
-                // stop.BeginLoop();
-
-                try
-                {
-
-                    string strBiblioRecPath = "";
-                    long lRet = Channel.GetBiblioSummary(
-                        stop,
-                        strItemBarcode,
-                        strItemRecPath,
-                        null,
-                        out strBiblioRecPath,
-                        out strSummary,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strSummary = strError;
-                        // return -1;
-                    }
-
-                }
-                finally
-                {
-                    // stop.EndLoop();
-                    // stop.OnStop -= new StopEventHandler(this.DoStop);
-                    // stop.Initial("");
-                }
-            }
-#endif
-
             ListViewItem item = new ListViewItem(strItemBarcode, 0);
 
             /*
@@ -2153,218 +2241,8 @@ this.splitContainer_lists,
             item.Tag = info;
 
             this.listView_amerced.Items.Add(item);
-
             return 0;
         }
-
-#if NOOOOOOOOOOOOOOOOOO
-        // 装入读者XML记录
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
-        int LoadReaderXmlRecord(string strBarcode,
-            out string strXml,
-            out string strError)
-        {
-            strXml = "";
-            strError = "";
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在装入读者XML记录 " + strBarcode + " ...");
-            stop.BeginLoop();
-
-            this.Update();
-            Program.MainForm.Update();
-
-
-            try
-            {
-
-                // ChargingForm.SetHtmlString(this.webBrowser_readerInfo, "(空)");
-
-                long lRet = Channel.GetReaderInfo(
-                    stop,
-                    strBarcode,
-                    "xml",
-                    out strXml,
-                    out strError);
-                if (lRet == 0)
-                {
-                    strError = "not found";
-                    return 0;   // not found
-                }
-                if (lRet == -1)
-                    goto ERROR1;
-
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-
-#endif
-
-
-
-#if NO
-        // 旧的、界面线程版本
-        // 填充“未交费用”列表
-        int FillAmercingList(string strXml,
-            out string strError)
-        {
-            strError = "";
-
-            this.listView_overdues.Items.Clear();
-
-            XmlDocument dom = new XmlDocument();
-            try
-            {
-                dom.LoadXml(strXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "读者XML记录装入XMLDOM时发生错误: " + ex.Message;
-                return -1;
-            }
-
-            List<string> dup_ids = new List<string>();
-
-            // 选出所有<overdue>元素
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("overdues/overdue");
-
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                XmlNode node = nodes[i];
-                string strItemBarcode = DomUtil.GetAttr(node, "barcode");
-                string strItemRecPath = DomUtil.GetAttr(node, "recPath");
-                string strReason = DomUtil.GetAttr(node, "reason");
-                string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
-
-                strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
-
-                string strBorrowPeriod = DomUtil.GetAttr(node, "borrowPeriod");
-                string strReturnDate = DomUtil.GetAttr(node, "returnDate");
-
-                strReturnDate = DateTimeUtil.LocalTime(strReturnDate, "u");
-
-
-                string strID = DomUtil.GetAttr(node, "id");
-                string strPrice = DomUtil.GetAttr(node, "price");
-                string strComment = DomUtil.GetAttr(node, "comment");
-
-                string strBorrowOperator = DomUtil.GetAttr(node, "borrowOperator");
-                string strReturnOperator = DomUtil.GetAttr(node, "operator");
-
-                XmlNodeList dup_nodes = dom.DocumentElement.SelectNodes("overdues/overdue[@id='"+strID+"']");
-                if (dup_nodes.Count > 1)
-                {
-                    dup_ids.Add(strID);
-                }
-
-
-                // TODO: 摘要建议异步作，或者在全部数据装载完成后单独扫描一遍做
-                string strSummary = "";
-
-#if NOOOOOOOOO
-                if (String.IsNullOrEmpty(strItemBarcode) == false)
-                {
-                    stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.SetMessage("正在获取摘要 " + strItemBarcode + " ...");
-                    stop.BeginLoop();
-
-                    try
-                    {
-
-                        string strBiblioRecPath = "";
-                        long lRet = Channel.GetBiblioSummary(
-                            stop,
-                            strItemBarcode,
-                            strItemRecPath,
-                            null,
-                            out strBiblioRecPath,
-                            out strSummary,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            strSummary = strError;  // 2009/3/13 changed
-                            // return -1;
-                        }
-
-                    }
-                    finally
-                    {
-                        stop.EndLoop();
-                        stop.OnStop -= new StopEventHandler(this.DoStop);
-                        stop.Initial("");
-                    }
-                }
-#endif
-
-                ListViewItem item = new ListViewItem(strItemBarcode);
-
-                this.listView_overdues.Items.Add(item);
-
-                // 摘要
-                // item.SubItems.Add(strSummary);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
-
-                // 金额
-                // item.SubItems.Add(strPrice);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_PRICE, strPrice);
-
-                // 注释
-                // item.SubItems.Add(strComment);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_COMMENT, strComment);
-
-                // 违约原因
-                // item.SubItems.Add(strReason);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_REASON, strReason);
-
-                // 借阅日期
-                // item.SubItems.Add(strBorrowDate);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWDATE, strBorrowDate);
-
-                // 借阅时限
-                // item.SubItems.Add(strBorrowPeriod);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWPERIOD, strBorrowPeriod);
-
-                // 还书日期
-                // item.SubItems.Add(strReturnDate);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_RETURNDATE, strReturnDate);
-
-                // id
-                // item.SubItems.Add(strID);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_ID, strID);
-
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWOPERATOR, strBorrowOperator);
-                ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_RETURNOPERATOR, strReturnOperator);
-
-                // 储存原始价格和注释备用
-                AmercingItemInfo info = new AmercingItemInfo();
-                info.Price = strPrice;
-                info.Comment = strComment;
-                item.Tag = info;
-            }
-
-            if (dup_ids.Count > 0)
-            {
-                StringUtil.RemoveDupNoSort(ref dup_ids);
-                Debug.Assert(dup_ids.Count >= 1, "");
-                strError = "未交费用列表中发现下列ID出现了重复，这是一个严重错误，请系统管理员尽快排除。\r\n---\r\n" + StringUtil.MakePathList(dup_ids, "; ");
-                MessageBox.Show(this, strError);
-            }
-
-            return 0;
-        }
-#endif
 
         // checkbox被选择
         private void listView_overdues_ItemChecked(object sender, ItemCheckedEventArgs e)
@@ -3026,7 +2904,7 @@ this.splitContainer_lists,
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3051,16 +2929,20 @@ this.splitContainer_lists,
 
             DateTime start_time = DateTime.Now;
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行 交费 操作: " + this.textBox_readerBarcode.Text + " ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行 交费 操作: " + this.textBox_readerBarcode.Text + " ...",
+                "disableControl");
             try
             {
-                long lRet = Channel.Amerce(
-                    _stop,
+                long lRet = channel.Amerce(
+                    looping.stop,
                     "amerce",
                     this.textBox_readerBarcode.Text,
                     amerce_items,
@@ -3077,7 +2959,7 @@ this.splitContainer_lists,
                         strError += "\r\n\r\n但是当前读者的IC卡已经被扣款 " + strPrice + "。请联系卡中心取消该次IC卡扣款。";
                     }
                      * */
-                    goto ERROR1;
+                    return -1;
                 }
                 // 部分成功
                 if (lRet == 1)
@@ -3108,8 +2990,8 @@ this.splitContainer_lists,
                     strReaderSummary = Global.GetReaderSummary(strReaderXml);
 
                 string strAmerceOperator = "";
-                if (this.Channel != null)
-                    strAmerceOperator = this.Channel.UserName;
+                if (channel != null)
+                    strAmerceOperator = channel.UserName;
 
                 List<string> ids = new List<string>();
                 // 为数组中每个元素添加AmerceOperator
@@ -3117,7 +2999,7 @@ this.splitContainer_lists,
                 {
                     foreach (OverdueItemInfo item in overdue_infos)
                     {
-                        item.AmerceOperator = this.Channel.UserName;
+                        item.AmerceOperator = channel.UserName;
                         ids.Add(item.ID);
                     }
                 }
@@ -3148,7 +3030,6 @@ this.splitContainer_lists,
                     }
 #endif
                     BeginFillAmercing(strReaderXml);
-
                 }
                 else
                 {
@@ -3169,7 +3050,10 @@ this.splitContainer_lists,
                 string strXml = "";
                 string strReaderBarcode = this.textBox_readerBarcode.Text;
                 // 刷新html?
-                nRet = LoadReaderHtmlRecord(ref strReaderBarcode,
+                nRet = LoadReaderHtmlRecord(
+                    looping.stop,
+                    channel,
+                    ref strReaderBarcode,
                     out strXml,
                     out strError);
                 if (this.textBox_readerBarcode.Text != strReaderBarcode)
@@ -3182,7 +3066,7 @@ this.splitContainer_lists,
                         "装载读者记录发生错误: " + strError);
 #endif
                     this.m_webExternalHost.SetTextString("装载读者记录发生错误: " + strError);
-                    goto ERROR1;
+                    return -1;
                 }
 
                 if (bRefreshAll == true)
@@ -3224,22 +3108,22 @@ this.splitContainer_lists,
                     this.BeginFillSummary();
 #endif
 
+                if (bPartialSucceed == true)
+                    return 1;
+
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-            if (bPartialSucceed == true)
-                return 1;
-
-            return 0;
-            ERROR1:
-            return -1;
         }
 
         // 回滚
@@ -3253,24 +3137,25 @@ this.splitContainer_lists,
             StopFillAmercing(false);
             StopFillAmerced(false);
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行 回滚 操作");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行 回滚 操作",
+                "disableControl");
             try
             {
-                AmerceItem[] failed_items = null;
-
-                string strReaderXml = "";
-                int nRet = (int)Channel.Amerce(
-                    _stop,
+                int nRet = (int)channel.Amerce(
+                    looping.stop,
                     "rollback",
                     "", // strReaderBarcode,
                     null,   // amerce_items,
-                    out failed_items,
-                    out strReaderXml,
+                    out AmerceItem[] failed_items,
+                    out string strReaderXml,
                     out strError);
                 if (nRet == -1 || nRet == 1)
                     return -1;
@@ -3293,7 +3178,10 @@ this.splitContainer_lists,
                 string strXml = "";
                 string strReaderBarcode = this.textBox_readerBarcode.Text;
                 // 刷新html?
-                nRet = LoadReaderHtmlRecord(ref strReaderBarcode,
+                nRet = LoadReaderHtmlRecord(
+                    looping.stop,
+                    channel,
+                    ref strReaderBarcode,
                     out strXml,
                     out strError);
                 if (this.textBox_readerBarcode.Text != strReaderBarcode)
@@ -3324,17 +3212,20 @@ this.splitContainer_lists,
                 if (this.checkBox_fillSummary.Checked == true)
                     this.BeginFillSummary();
 #endif
+
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-            return 0;
         }
 
         // 利用卡中心接口进行扣款操作
@@ -3495,30 +3386,29 @@ this.splitContainer_lists,
                 goto ERROR1;
             }
 
-            EnableControls(false);
-
             DateTime start_time = DateTime.Now;
+            /*
+            EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行 撤回交费 操作: " + this.textBox_readerBarcode.Text + " ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行 撤回交费 操作: " + this.textBox_readerBarcode.Text + " ...",
+                "disableControl");
             try
             {
-                string strReaderXml = "";
-
                 AmerceItem[] amerce_items_param = new AmerceItem[amerce_items.Count];
                 amerce_items.CopyTo(amerce_items_param);
 
-                AmerceItem[] failed_items = null;
-
-                long lRet = Channel.Amerce(
-                    _stop,
+                long lRet = channel.Amerce(
+                    looping.stop,
                     "undo",
                     this.textBox_readerBarcode.Text,
                     amerce_items_param,
-                    out failed_items,
-                    out strReaderXml,
+                    out AmerceItem[] failed_items,
+                    out string strReaderXml,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -3547,7 +3437,6 @@ this.splitContainer_lists,
                             }
                         }
                     }
-
                 }
 
                 string strReaderSummary = "";
@@ -3555,8 +3444,8 @@ this.splitContainer_lists,
                     strReaderSummary = Global.GetReaderSummary(strReaderXml);
 
                 string strAmerceOperator = "";
-                if (this.Channel != null)
-                    strAmerceOperator = this.Channel.UserName;
+                if (channel != null)
+                    strAmerceOperator = channel.UserName;
 
                 List<string> ids = new List<string>();
                 // 为数组中每个元素添加AmerceOperator
@@ -3564,7 +3453,7 @@ this.splitContainer_lists,
                 {
                     foreach (OverdueItemInfo item in overdue_infos)
                     {
-                        item.AmerceOperator = this.Channel.UserName;
+                        item.AmerceOperator = channel.UserName;
                         ids.Add(item.ID);
                     }
                 }
@@ -3591,11 +3480,13 @@ this.splitContainer_lists,
 #endif
                 BeginFillAmercing(strReaderXml);
 
-
                 string strXml = "";
                 string strReaderBarcode = this.textBox_readerBarcode.Text;
                 // 刷新html?
-                nRet = LoadReaderHtmlRecord(ref strReaderBarcode,
+                nRet = LoadReaderHtmlRecord(
+                    looping.stop,
+                    channel,
+                    ref strReaderBarcode,
                     out strXml,
                     out strError);
                 if (this.textBox_readerBarcode.Text != strReaderBarcode)
@@ -3627,21 +3518,23 @@ this.splitContainer_lists,
                     this.BeginFillSummary();
 #endif
 
+                if (bPartialSucceed == true)
+                    return 1;
+
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-            if (bPartialSucceed == true)
-                return 1;
-
-            return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -3733,7 +3626,9 @@ COLUMN_AMERCED_STATE);
 
         private void AmerceForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
@@ -4153,12 +4048,16 @@ COLUMN_AMERCED_STATE);
                 goto ERROR1;
             }
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行 修改金额/注释 的操作: " + this.textBox_readerBarcode.Text + " ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行 修改金额/注释 的操作: " + this.textBox_readerBarcode.Text + " ...",
+                "disableControl");
             try
             {
                 string strReaderXml = "";
@@ -4169,8 +4068,8 @@ COLUMN_AMERCED_STATE);
                     modifyprice_items.CopyTo(amerce_items_param);
                     AmerceItem[] failed_items = null;
 
-                    long lRet = Channel.Amerce(
-                        _stop,
+                    long lRet = channel.Amerce(
+                        looping.stop,
                         "modifyprice",
                         this.textBox_readerBarcode.Text,
                         amerce_items_param,
@@ -4209,14 +4108,13 @@ COLUMN_AMERCED_STATE);
                 {
                     AmerceItem[] amerce_items_param = new AmerceItem[modifycomment_items.Count];
                     modifycomment_items.CopyTo(amerce_items_param);
-                    AmerceItem[] failed_items = null;
 
-                    long lRet = Channel.Amerce(
-                        _stop,
+                    long lRet = channel.Amerce(
+                        looping.stop,
                         "modifycomment",
                         this.textBox_readerBarcode.Text,
                         amerce_items_param,
-                        out failed_items,
+                        out AmerceItem[] failed_items,
                         out strReaderXml,
                         out strError);
                     if (lRet == -1)
@@ -4237,12 +4135,13 @@ COLUMN_AMERCED_STATE);
 #endif
                 BeginFillAmercing(strReaderXml);
 
-
-                string strXml = "";
                 string strReaderBarcode = this.textBox_readerBarcode.Text;
                 // 刷新html?
-                nRet = LoadReaderHtmlRecord(ref strReaderBarcode,
-                    out strXml,
+                nRet = LoadReaderHtmlRecord(
+                    looping.stop,
+                    channel,
+                    ref strReaderBarcode,
+                    out string strXml,
                     out strError);
                 if (this.textBox_readerBarcode.Text != strReaderBarcode)
                     this.textBox_readerBarcode.Text = strReaderBarcode;
@@ -4272,20 +4171,22 @@ COLUMN_AMERCED_STATE);
                     this.BeginFillSummary();
 #endif
 
+                if (bPartialSucceed == true)
+                    return 1;
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-            if (bPartialSucceed == true)
-                return 1;
-            return 0;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -4480,7 +4381,7 @@ COLUMN_AMERCED_STATE);
                 }
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, "DoViewOperlog() 出错: " + strError);
         }
 

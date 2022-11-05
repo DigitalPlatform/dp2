@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -245,7 +246,7 @@ new BinaryWriter(File.Open(FilePath, FileMode.Create)))
 
         // parameters:
         //      indices 要参与排序的列 index。1 表示 Path, 从 2 开始表示 Cols 的列。负数表示倒序
-        static int CompareItems(SortItem item1, 
+        public static int CompareItems(SortItem item1, 
             SortItem item2,
             int [] indices)
         {
@@ -260,9 +261,11 @@ new BinaryWriter(File.Open(FilePath, FileMode.Create)))
                     int ret = ComparePath(item1.Path, item2.Path);
                     if (ret != 0)
                         return index_param * ret;
+                    continue;   // 2022/11/4
                 }
 
                 int index = Math.Abs(index_param) - 2;
+                Debug.Assert(index >= 0);
                 string s1 = "";
                 if (item1.Cols != null && index < item1.Cols.Length)
                     s1 = item1.Cols[index];

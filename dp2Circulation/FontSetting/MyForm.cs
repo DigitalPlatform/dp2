@@ -36,6 +36,9 @@ namespace dp2Circulation
     public class MyForm : Form, IMdiWindow, ILoopingHost, IChannelHost, IEnableControl, IChannelLooping
     {
         #region test
+
+
+#if SUPPORT_OLD_STOP
         /// <summary>
         /// 通讯通道
         /// </summary>
@@ -53,6 +56,7 @@ namespace dp2Circulation
                 return this._stop;
             }
         }
+#endif
 
         public int _processing = 0;   // 是否正在进行处理中
 
@@ -109,6 +113,7 @@ namespace dp2Circulation
                 {
                 }
 
+#if SUPPORT_OLD_STOP
                 if (this.Channel != null)
                     this.Channel.Dispose();
 
@@ -118,7 +123,7 @@ namespace dp2Circulation
                     _stop.Unregister();	// 和容器关联
                     _stop = null;
                 }
-
+#endif
                 CloseFloatingMessage();
             }
 
@@ -237,7 +242,7 @@ namespace dp2Circulation
                 method.Invoke();
         }
 
-        #region looping
+#region looping
 
 #if REMOVED
         bool _isActive = false;
@@ -435,9 +440,9 @@ string style = null)
             }
         }
 
-        #endregion
+#endregion
 
-        #endregion // of test
+#endregion // of test
 
 
         /// <summary>
@@ -503,6 +508,7 @@ string style = null)
             this.HelpRequested -= MyForm_HelpRequested;
             this.HelpRequested += MyForm_HelpRequested;
 
+#if SUPPORT_OLD_STOP
             this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -513,7 +519,7 @@ string style = null)
 
             this.Channel.Idle -= Channel_Idle;
             this.Channel.Idle += Channel_Idle;
-
+#endif
             if (this.UseLooping == true)
             {
                 // 默认使用 MainForm 的 StopManager
@@ -521,8 +527,10 @@ string style = null)
             }
             else
             {
+#if SUPPORT_OLD_STOP
                 _stop = new DigitalPlatform.Stop();
                 _stop.Register(Program.MainForm?.stopManager, true);    // 和容器关联
+#endif
             }
 
             {
@@ -581,6 +589,8 @@ string style = null)
             }
             else
             {
+                throw new Exception("MyForm 不再支持 UseLooping == false");
+#if SUPPORT_OLD_STOP
                 if ((_stop != null && _stop.State == 0)    // 0 表示正在处理
                     || this._processing > 0)
                 {
@@ -588,6 +598,7 @@ string style = null)
                     e.Cancel = true;
                     return;
                 }
+#endif
             }
         }
 
@@ -607,6 +618,7 @@ string style = null)
             {
             }
 
+#if SUPPORT_OLD_STOP
             if (this.Channel != null)
             {
                 this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -621,6 +633,7 @@ string style = null)
                 _stop.Unregister();	// 和容器关联
                 _stop = null;
             }
+#endif
 
             // 原来
 
@@ -717,7 +730,7 @@ bool bClickClose = false)
             }
         }
 
-        #region 新风格的 ChannelPool
+#region 新风格的 ChannelPool
 
         ChannelList _channelList = new ChannelList();
 
@@ -832,9 +845,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
         }
 
-        #endregion
+#endregion
 
-        #region 旧风格的 Channel
+#region 旧风格的 Channel
 
         /// <summary>
         /// 通讯通道登录前被触发
@@ -873,8 +886,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         }
 #endif
 
-        #endregion
+#endregion
 
+#if SUPPORT_OLD_STOP
         /// <summary>
         /// 开始一个循环
         /// </summary>
@@ -939,6 +953,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 throw new ArgumentException("UseLooping == true 时不应调用本函数");
             _stop.SetMessage(strMessage);
         }
+#endif
 
         /// <summary>
         /// 为当前窗口恢复缺省字体
@@ -1208,7 +1223,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 }
                 else
                 {
+#if SUPPORT_OLD_STOP
                     Program.MainForm?.stopManager?.Active(this._stop);
+#endif
                 }
 
                 Program.MainForm.MenuItem_font.Enabled = true;
@@ -1330,7 +1347,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         }
 
 
-        #region 配置文件相关
+#region 配置文件相关
 
         // 包装版本
         // 获得配置文件
@@ -1597,9 +1614,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
         }
 
-        #endregion
+#endregion
 
-        #region 种次号尾号相关
+#region 种次号尾号相关
 
         public int ReleaseProtectedTailNumber(
 dp2Circulation.CallNumberForm.MemoTailNumber number,
@@ -1856,6 +1873,7 @@ out string strError)
         //      0   没有找到
         //      1   找到
         public static int GetFirstOperLogDate(
+            Stop stop,
             LibraryChannel channel,
             LogType logType,
             out string strFirstDate,
@@ -1887,7 +1905,7 @@ out string strError)
                 //      1   succeed
                 //      2   超过范围，本次调用无效
                 long lRet = channel.GetOperLogs(
-                    null,
+                    stop,
                     "",
                     0,
                     -1,
@@ -1928,7 +1946,7 @@ out string strError)
             return 1;
         }
 
-        #endregion
+#endregion
 
 
         // 
@@ -2257,7 +2275,7 @@ out string strError)
         }
 
 
-        #region 创建书目记录的浏览格式
+#region 创建书目记录的浏览格式
 
         public int BuildBrowseText(string strXml,
             out string strBrowseText,
@@ -2469,7 +2487,7 @@ out string strError)
             return -1;
         }
 
-        #endregion
+#endregion
 
         // TODO: 值变化后要出现延时关闭的 floatingMessage
         public bool SearchShareBiblio
@@ -2550,7 +2568,7 @@ out string strError)
         }
 #endif
 
-        #region 防止控件泄露
+#region 防止控件泄露
 
         // 不会被自动 Dispose 的 子 Control，放在这里托管，避免内存泄漏
         List<Control> _freeControls = new List<Control>();
@@ -2570,7 +2588,7 @@ out string strError)
             ControlExtention.DisposeFreeControls(_freeControls);
         }
 
-        #endregion
+#endregion
 
 
         public void ParseOneMacro(ParseOneMacroEventArgs e)
@@ -2717,7 +2735,7 @@ out string strError)
 
 
 
-        #region RFID 有关功能
+#region RFID 有关功能
 
 #if REMOVED
 
@@ -2807,9 +2825,9 @@ out string strError)
 
 #endif
 
-        #endregion
+#endregion
 
-        #region 人脸识别有关功能
+#region 人脸识别有关功能
 
         public class FaceChannel
         {
@@ -2957,9 +2975,9 @@ out string strError)
             }
         }
 #endif
-        #endregion
+#endregion
 
-        #region 人脸登记功能(从 ReaderInfoForm 移动过来)
+#region 人脸登记功能(从 ReaderInfoForm 移动过来)
 
         public Task<NormalResult> FaceNotifyTask(string event_name)
         {
@@ -3265,10 +3283,10 @@ out string strError)
             }
         }
 #endif
-        #endregion
+#endregion
 
 
-        #region 指纹有关功能
+#region 指纹有关功能
 
 
         public class FingerprintChannel
@@ -3421,9 +3439,9 @@ out string strError)
             }
         }
 
-        #endregion
+#endregion
 
-        #region 其他 API
+#region 其他 API
 
         // 获得馆藏地列表
         public int GetLocationList(
@@ -3601,7 +3619,7 @@ out strError);
             }
         }
 
-        #endregion
+#endregion
 
 #if NO
         protected override bool ProcessDialogKey(
@@ -3726,7 +3744,7 @@ Keys keyData)
 
         internal ErrorTable _errorTable = null;
 
-        #region 临时文件集合
+#region 临时文件集合
 
         private static readonly Object _syncRootOfTempFilenames = new Object();
 
@@ -3775,7 +3793,7 @@ Keys keyData)
             }
         }
 
-        #endregion
+#endregion
 
 
         public void OnReturnChannel(object sender, ReturnChannelEventArgs e)

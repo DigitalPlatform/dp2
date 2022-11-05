@@ -4299,20 +4299,15 @@ out strError);
 
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            LibraryChannel channel = this.GetChannel();
-
-            try
+            using (var looping = Looping(out LibraryChannel channel))
             {
+
                 Global.GetBatchNoTable(e,
                     this,
                     this.comboBox_load_type.Text,
                     "item",
-                    this._stop,
+                    looping.stop,
                     channel);
-            }
-            finally
-            {
-                this.ReturnChannel(channel);
             }
 
 #if NOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -4972,19 +4967,14 @@ out strError);
 
         void dlg_GetOrderBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            LibraryChannel channel = this.GetChannel();
-            try
+            using (var looping = Looping(out LibraryChannel channel))
             {
                 Global.GetBatchNoTable(e,
                     this,
                     this.comboBox_load_type.Text,
                     "order",
-                    this._stop,
+                    looping.stop,
                     channel);
-            }
-            finally
-            {
-                this.ReturnChannel(channel);
             }
         }
 

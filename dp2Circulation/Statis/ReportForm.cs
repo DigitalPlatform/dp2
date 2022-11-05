@@ -44,6 +44,8 @@ namespace dp2Circulation
         /// </summary>
         public ReportForm()
         {
+            this.UseLooping = true; // 2022/11/4
+
             InitializeComponent();
         }
 
@@ -219,6 +221,8 @@ namespace dp2Circulation
 
         // 根据日志文件创建本地 operlogxxx 表
         int DoCreateOperLogTable(
+            Stop stop,
+            LibraryChannel channel,
             long lProgressStart,
             string strStartDate,
             string strEndDate,
@@ -304,7 +308,7 @@ namespace dp2Circulation
                 filenames[0] = filenames[0] + ":" + strStartRange;
             }
 
-            this.Channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
+            channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
 
             using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
             {
@@ -313,8 +317,8 @@ namespace dp2Circulation
                 ProgressEstimate estimate = new ProgressEstimate();
 
                 OperLogLoader loader = new OperLogLoader();
-                loader.Channel = this.Channel;
-                loader.Stop = this.Progress;
+                loader.Channel = channel;
+                loader.Stop = stop;
                 // loader.owner = this;
                 loader.Estimate = estimate;
                 loader.Dates = filenames;
@@ -479,15 +483,18 @@ namespace dp2Circulation
         }
 
         // 根据当前命中数，调整进度条总范围
-        void AdjustProgressRange(long lOldCount, long lNewCount)
+        void AdjustProgressRange(
+            Stop stop,
+            long lOldCount,
+            long lNewCount)
         {
-            if (this._stop == null)
+            if (stop == null)
                 return;
 
             long lDelta = lNewCount - lOldCount;
             if (lDelta != 0)
             {
-                this._stop.SetProgressRange(this._stop.ProgressMin, this._stop.ProgressMax + lDelta);
+                stop.SetProgressRange(stop.ProgressMin, stop.ProgressMax + lDelta);
                 if (this._estimate != null)
                     this._estimate.EndPosition += lDelta;
             }
@@ -498,15 +505,18 @@ namespace dp2Circulation
             return "#" + Guid.NewGuid().ToString();
         }
 
-        public void DeleteResultSet(string strResultSetName)
+        public void DeleteResultSet(
+            Stop stop,
+            LibraryChannel channel,
+            string strResultSetName)
         {
             string strError = "";
             // 删除全局结果集对象
             // 管理结果集
             // parameters:
             //      strAction   share/remove 分别表示共享为全局结果集对象/删除全局结果集对象
-            long lRet = this.Channel.ManageSearchResult(
-                null,
+            long lRet = channel.ManageSearchResult(
+                stop,
                 "remove",
                 "",
                 strResultSetName,
@@ -540,6 +550,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
         //      lIndex  [in] 起点 index
         //              [out] 返回中断位置的 index
         int BuildItemRecords(
+            Stop stop,
+            LibraryChannel channel,
             string strItemDbNameParam,
             long lOldCount,
             ref long lProgress,
@@ -559,8 +571,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 string strResultSetName = GetResultSetName();
                 try
                 {
-                    this.Channel.Timeout = TimeSpan.FromMinutes(5); // 2018/5/10
-                    long lRet = this.Channel.SearchItem(_stop,
+                    channel.Timeout = TimeSpan.FromMinutes(5); // 2018/5/10
+                    long lRet = channel.SearchItem(stop,
                         strItemDbNameParam,
                         "", // (lIndex+1).ToString() + "-", // 
                         -1,
@@ -578,7 +590,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
                     long lHitCount = lRet;
 
-                    AdjustProgressRange(lOldCount, lHitCount);
+                    AdjustProgressRange(stop, lOldCount, lHitCount);
 
                     long lStart = lIndex;
                     long lCount = lHitCount - lIndex;
@@ -604,14 +616,14 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         if (this.InvokeRequired == false)
                             Application.DoEvents(); // 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
                             return -1;
                         }
 
-                        lRet = this.Channel.GetSearchResult(
-                            _stop,
+                        lRet = channel.GetSearchResult(
+                            stop,
                             strResultSetName,
                             lStart,
                             lCount,
@@ -747,9 +759,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
                         lProgress += searchresults.Length;
                         // stop.SetProgressValue(lProgress);
-                        SetProgress(lProgress);
+                        SetProgress(stop, lProgress);
 
-                        _stop.SetMessage(strItemDbNameParam + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
+                        stop.SetMessage(strItemDbNameParam + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
                             + GetProgressTimeString(lProgress));
 
                         if (lStart >= lHitCount || lCount <= 0)
@@ -763,12 +775,14 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 }
                 finally
                 {
-                    this.DeleteResultSet(strResultSetName);
+                    this.DeleteResultSet(
+                        stop,
+                        channel,
+                        strResultSetName);
                 }
 
                 return 0;
             }
-
         }
 
         static string DumpResultItem(DigitalPlatform.LibraryClient.localhost.Record searchresult)
@@ -779,16 +793,18 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
         }
 
         // safe set progress value, between max and min
-        void SetProgress(long lProgress)
+        static void SetProgress(Stop stop, long lProgress)
         {
-            if (lProgress <= _stop.ProgressMax)
-                _stop.SetProgressValue(lProgress);
-            else if (_stop.ProgressValue < _stop.ProgressMax)
-                _stop.SetProgressValue(_stop.ProgressMax);
+            if (lProgress <= stop.ProgressMax)
+                stop.SetProgressValue(lProgress);
+            else if (stop.ProgressValue < stop.ProgressMax)
+                stop.SetProgressValue(stop.ProgressMax);
         }
 
         // 复制读者记录
         int BuildReaderRecords(
+            Stop stop,
+            LibraryChannel channel,
             string strReaderDbNameParam,
             long lOldCount,
             ref long lProgress,
@@ -807,8 +823,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 string strResultSetName = GetResultSetName();
                 try
                 {
-                    this.Channel.Timeout = TimeSpan.FromMinutes(5); // 2018/5/10
-                    long lRet = this.Channel.SearchReader(_stop,
+                    channel.Timeout = TimeSpan.FromMinutes(5); // 2018/5/10
+                    long lRet = channel.SearchReader(stop,
                         strReaderDbNameParam,
                         "", // (lIndex + 1).ToString() + "-", // 
                         -1,
@@ -826,7 +842,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
                     long lHitCount = lRet;
 
-                    AdjustProgressRange(lOldCount, lHitCount);
+                    AdjustProgressRange(stop, lOldCount, lHitCount);
 
                     long lStart = lIndex;
                     long lCount = lHitCount - lIndex;
@@ -844,14 +860,14 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         if (this.InvokeRequired == false)
                             Application.DoEvents(); // 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
                             return -1;
                         }
 
-                        lRet = this.Channel.GetSearchResult(
-                            _stop,
+                        lRet = channel.GetSearchResult(
+                            stop,
                             strResultSetName,
                             lStart,
                             lCount,
@@ -924,9 +940,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         // lIndex += searchresults.Length;
                         lProgress += searchresults.Length;
                         // stop.SetProgressValue(lProgress);
-                        SetProgress(lProgress);
+                        SetProgress(stop, lProgress);
 
-                        _stop.SetMessage(strReaderDbNameParam + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
+                        stop.SetMessage(strReaderDbNameParam + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
                             + GetProgressTimeString(lProgress));
 
                         if (lStart >= lHitCount || lCount <= 0)
@@ -940,7 +956,10 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 }
                 finally
                 {
-                    this.DeleteResultSet(strResultSetName);
+                    this.DeleteResultSet(
+                        stop,
+                        channel,
+                        strResultSetName);
                 }
 
                 return 0;
@@ -949,6 +968,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
         // 复制书目记录
         int BuildBiblioRecords(
+            Stop stop,
+            LibraryChannel channel,
             string strBiblioDbNameParam,
             long lOldCount,
             ref long lProgress,
@@ -970,8 +991,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 string strResultSetName = GetResultSetName();
                 try
                 {
-                    this.Channel.Timeout = new TimeSpan(0, 5, 0);
-                    long lRet = this.Channel.SearchBiblio(_stop,
+                    channel.Timeout = new TimeSpan(0, 5, 0);
+                    long lRet = channel.SearchBiblio(stop,
                         strBiblioDbNameParam,
                         "", // (lIndex + 1).ToString() + "-", // 
                         -1,
@@ -991,7 +1012,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
                     long lHitCount = lRet;
 
-                    AdjustProgressRange(lOldCount, lHitCount);
+                    AdjustProgressRange(stop, lOldCount, lHitCount);
 
                     long lStart = lIndex;
                     long lCount = lHitCount - lIndex;
@@ -1011,16 +1032,16 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         if (this.InvokeRequired == false)
                             Application.DoEvents(); // 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
                             return -1;
                         }
 
                         // 2015/11/25
-                        this.Channel.Timeout = new TimeSpan(0, 0, 30);
-                        lRet = this.Channel.GetSearchResult(
-                            _stop,
+                        channel.Timeout = new TimeSpan(0, 0, 30);
+                        lRet = channel.GetSearchResult(
+                            stop,
                             strResultSetName,
                             lStart,
                             lCount,
@@ -1061,12 +1082,12 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                             Debug.Assert(biblio_recpaths.Count == lines.Count, "");
 
                             // 2015/11/25
-                            this.Channel.Timeout = new TimeSpan(0, 0, 30);
+                            channel.Timeout = new TimeSpan(0, 0, 30);
 
                             // 获得书目摘要
                             BiblioLoader loader = new BiblioLoader();
-                            loader.Channel = this.Channel;
-                            loader.Stop = this.Progress;
+                            loader.Channel = channel;
+                            loader.Stop = stop;
                             loader.Format = "summary";
                             loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                             loader.RecPaths = biblio_recpaths;
@@ -1119,9 +1140,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         // lIndex += searchresults.Length;
                         lProgress += searchresults.Length;
                         // stop.SetProgressValue(lProgress);
-                        SetProgress(lProgress);
+                        SetProgress(stop, lProgress);
 
-                        _stop.SetMessage(strBiblioDbNameParam + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
+                        stop.SetMessage(strBiblioDbNameParam + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
                             + GetProgressTimeString(lProgress));
 
                         if (lStart >= lHitCount || lCount <= 0)
@@ -1135,7 +1156,10 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 }
                 finally
                 {
-                    this.DeleteResultSet(strResultSetName);
+                    this.DeleteResultSet(
+                        stop,
+                        channel,
+                        strResultSetName);
                 }
 
                 return 0;
@@ -1347,6 +1371,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
         // 复制分类号条目
         int BuildClassRecords(
+            Stop stop,
+            LibraryChannel channel,
             string strBiblioDbNameParam,
             string strClassFromStyle,
             string strClassTableName,
@@ -1369,8 +1395,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 string strResultSetName = GetResultSetName();
                 try
                 {
-                    this.Channel.Timeout = TimeSpan.FromMinutes(5); // 2018/5/10
-                    long lRet = this.Channel.SearchBiblio(_stop,
+                    channel.Timeout = TimeSpan.FromMinutes(5); // 2018/5/10
+                    long lRet = channel.SearchBiblio(stop,
                         strBiblioDbNameParam,
                         "", // 
                         -1,
@@ -1385,7 +1411,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         out strError);
                     if (lRet == -1)
                     {
-                        if (this.Channel.ErrorCode == ErrorCode.FromNotFound)
+                        if (channel.ErrorCode == ErrorCode.FromNotFound)
                             return 0;
                         return -1;
                     }
@@ -1394,7 +1420,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
                     long lHitCount = lRet;
 
-                    AdjustProgressRange(lOldCount, lHitCount);
+                    AdjustProgressRange(stop, lOldCount, lHitCount);
 
                     long lStart = lIndex;
                     long lCount = lHitCount - lIndex;
@@ -1410,14 +1436,14 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         if (this.InvokeRequired == false)
                             Application.DoEvents(); // 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
                             return -1;
                         }
 
-                        lRet = this.Channel.GetSearchResult(
-                            _stop,
+                        lRet = channel.GetSearchResult(
+                            stop,
                             strResultSetName,
                             lStart,
                             lCount,
@@ -1473,9 +1499,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         // lIndex += searchresults.Length;
                         lProgress += searchresults.Length;
                         // stop.SetProgressValue(lProgress);
-                        SetProgress(lProgress);
+                        SetProgress(stop, lProgress);
 
-                        _stop.SetMessage(strBiblioDbNameParam + " " + strClassFromStyle + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
+                        stop.SetMessage(strBiblioDbNameParam + " " + strClassFromStyle + " " + lStart.ToString() + "/" + lHitCount.ToString() + " "
                             + GetProgressTimeString(lProgress));
 
                         if (lStart >= lHitCount || lCount <= 0)
@@ -1489,7 +1515,10 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 }
                 finally
                 {
-                    this.DeleteResultSet(strResultSetName);
+                    this.DeleteResultSet(
+                        stop,
+                        channel,
+                        strResultSetName);
                 }
 
                 return 0;
@@ -2713,7 +2742,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
         //      -1  出错
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
-        int Create_102_report(string strLibraryCode,
+        int Create_102_report(
+            Stop stop,
+            string strLibraryCode,
             string strDateRange,
             string strCfgFile,
             // string strTitle,    // 例如： 各年级
@@ -2857,7 +2888,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
         //      -1  出错
         //      0   没有创建目录
         //      1   创建了目录
-        int Create_131_report(string strLibraryCode,
+        int Create_131_report(
+            Stop stop,
+            string strLibraryCode,
             string strDateRange,
             string strCfgFile,
             // string strTitle,    // 例如： 各年级
@@ -2925,7 +2958,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
             {
                 if (this.InvokeRequired == false)
                     Application.DoEvents();
-                if (_stop != null && _stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断...";
                     return -1;
@@ -2960,7 +2993,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                     return -1;
                 }
 
-                _stop.SetMessage("正在创建报表文件 " + strOutputFileName + " " + (i + 1).ToString() + "/" + reader_table.Count.ToString() + " ...");
+                stop?.SetMessage("正在创建报表文件 " + strOutputFileName + " " + (i + 1).ToString() + "/" + reader_table.Count.ToString() + " ...");
 
 #if NO
                 Table tableList = null;
@@ -3047,8 +3080,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 string strIndexXmlFileName = Path.Combine(strOutputDir, "index.xml");
                 string strIndexHtmlFileName = Path.Combine(strOutputDir, "index.html");
 
-                if (_stop != null)
-                    _stop.SetMessage("正在创建 " + strIndexHtmlFileName);
+                if (stop != null)
+                    stop.SetMessage("正在创建 " + strIndexHtmlFileName);
 
                 // 根据 index.xml 文件创建 index.html 文件
                 nRet = CreateIndexHtmlFile(strIndexXmlFileName,
@@ -3137,7 +3170,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
         //      -1  出错
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
-        int Create_1XX_report(string strLibraryCode,
+        int Create_1XX_report(
+            Stop stop,
+            string strLibraryCode,
             string strDateRange,
             string strCfgFile,
             Hashtable macro_table,
@@ -3184,7 +3219,9 @@ out strError);
         //      -1  出错
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
-        int Create_201_report(string strLibraryCode,
+        int Create_201_report(
+            Stop stop,
+            string strLibraryCode,
             string strDateRange,
             string strCfgFile,
             Hashtable macro_table,
@@ -3232,7 +3269,9 @@ out strError);
         //      -1  出错
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
-        int Create_202_report(string strLibraryCode,
+        int Create_202_report(
+            Stop stop,
+            string strLibraryCode,
             string strDateRange,
             string strCfgFile,
             Hashtable macro_table,
@@ -3282,6 +3321,7 @@ out strError);
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
         int Create_212_report(
+            Stop stop,
             string strLocation,
             string strClassType,
             string strClassCaption,
@@ -3427,6 +3467,7 @@ out strError);
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
         int Create_301_report(
+            Stop stop,
             string strLocation,
             string strClassType,
             string strClassCaption,
@@ -3560,6 +3601,7 @@ out strError);
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
         int Create_302_report(
+            Stop stop,
             string strLocation,
             string strClassType,
             string strClassCaption,
@@ -3612,7 +3654,9 @@ out strError);
         //      -1  出错
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
-        int Create_4XX_report(string strLibraryCode,
+        int Create_4XX_report(
+            Stop stop,
+            string strLibraryCode,
             string strDateRange,
             string strCfgFile,
             Hashtable macro_table,
@@ -3726,6 +3770,7 @@ out strError);
         //      0   没有创建文件(因为输出的表格为空)
         //      1   成功创建文件
         int Create_493_report(
+            Stop stop,
             string strLibraryCode,
             string strClassType,
             string strClassCaption,
@@ -6048,6 +6093,7 @@ MessageBoxDefaultButton.Button2);
             long lRet = 0;
             int nRet = 0;
 
+            /*
             EnableControls(false);
 
             this.ChannelDoEvents = !this.InvokeRequired;
@@ -6055,7 +6101,10 @@ MessageBoxDefaultButton.Button2);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在计划任务 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在计划任务 ...",
+                "disableControl");
             try
             {
                 task_dom = new XmlDocument();
@@ -6102,10 +6151,10 @@ MessageBoxDefaultButton.Button2);
                     // 获得每个实体库的尺寸
                     foreach (string strItemDbName in item_dbnames)
                     {
-                        _stop.SetMessage("正在计划任务 检索 " + strItemDbName + " ...");
+                        looping.stop.SetMessage("正在计划任务 检索 " + strItemDbName + " ...");
 
                         // 此处检索仅获得命中数即可
-                        lRet = this.Channel.SearchItem(_stop,
+                        lRet = channel.SearchItem(looping.stop,
             strItemDbName,
             "", // 
             -1,
@@ -6146,9 +6195,9 @@ MessageBoxDefaultButton.Button2);
                     // 
                     foreach (string strReaderDbName in reader_dbnames)
                     {
-                        _stop.SetMessage("正在计划任务 检索 " + strReaderDbName + " ...");
+                        looping.stop.SetMessage("正在计划任务 检索 " + strReaderDbName + " ...");
                         // 此处检索仅获得命中数即可
-                        lRet = this.Channel.SearchReader(_stop,
+                        lRet = channel.SearchReader(looping.stop,
             strReaderDbName,
             "", // 
             -1,
@@ -6229,10 +6278,10 @@ MessageBoxDefaultButton.Button2);
                     //
                     foreach (string strBiblioDbName in biblio_dbnames)
                     {
-                        _stop.SetMessage("正在计划任务 检索 " + strBiblioDbName + " ...");
+                        looping.stop.SetMessage("正在计划任务 检索 " + strBiblioDbName + " ...");
                         string strQueryXml = "";
                         // 此处检索仅获得命中数即可
-                        lRet = this.Channel.SearchBiblio(_stop,
+                        lRet = channel.SearchBiblio(looping.stop,
                             strBiblioDbName,
                             "", // 
                             -1,
@@ -6257,9 +6306,9 @@ MessageBoxDefaultButton.Button2);
 
                         foreach (string strStyle in styles)
                         {
-                            _stop.SetMessage("正在计划任务 检索 " + strBiblioDbName + " " + strStyle + " ...");
+                            looping.stop.SetMessage("正在计划任务 检索 " + strBiblioDbName + " " + strStyle + " ...");
                             // 此处检索仅获得命中数即可
-                            lRet = this.Channel.SearchBiblio(_stop,
+                            lRet = channel.SearchBiblio(looping.stop,
                                 strBiblioDbName,
                                 "", // 
                                 -1,
@@ -6274,7 +6323,7 @@ MessageBoxDefaultButton.Button2);
                                 out strError);
                             if (lRet == -1)
                             {
-                                if (this.Channel.ErrorCode == ErrorCode.FromNotFound)
+                                if (channel.ErrorCode == ErrorCode.FromNotFound)
                                     continue;
                                 return -1;
                             }
@@ -6299,7 +6348,8 @@ MessageBoxDefaultButton.Button2);
                     //      0   没有找到
                     //      1   找到
                     nRet = GetFirstOperLogDate(
-                        this.Channel,
+                        looping.stop,
+                        channel,
                         LogType.OperLog | LogType.AccessLog,
                         out string strFirstDate,
                         out strError);
@@ -6318,8 +6368,8 @@ MessageBoxDefaultButton.Button2);
                     //      0   日志文件不存在，或者记录数为 0
                     //      >0  记录数
                     long lCount = OperLogLoader.GetOperLogCount(
-                        _stop,
-                        this.Channel,
+                        looping.stop,
+                        channel,
                         strEndDate,
                         LogType.OperLog,
                         out strError);
@@ -6361,7 +6411,8 @@ MessageBoxDefaultButton.Button2);
                     //      0   没有找到
                     //      1   找到
                     nRet = GetFirstOperLogDate(
-                        this.Channel,
+                        looping.stop,
+                        channel,
                         LogType.AccessLog,
                         out strFirstDate,
                         out strError);
@@ -6380,8 +6431,8 @@ MessageBoxDefaultButton.Button2);
                     //      0   日志文件不存在，或者记录数为 0
                     //      >0  记录数
                     long lCount = OperLogLoader.GetOperLogCount(
-                        _stop,
-                        this.Channel,
+                        looping.stop,
+                        channel,
                         strEndDate,
                         LogType.AccessLog,
                         out strError);
@@ -6411,15 +6462,17 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 EnableControls(true);
+                */
             }
         }
-
 
 
         ProgressEstimate _estimate = new ProgressEstimate();
@@ -6463,6 +6516,7 @@ MessageBoxDefaultButton.Button2);
             strError = "";
             int nRet = 0;
 
+            /*
             EnableControls(false);
 
             this.ChannelDoEvents = !this.InvokeRequired;
@@ -6470,6 +6524,10 @@ MessageBoxDefaultButton.Button2);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在创建本地存储 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在创建本地存储 ...",
+                "disableControl");
 
             try
             {
@@ -6480,7 +6538,7 @@ MessageBoxDefaultButton.Button2);
                     "initial_tables");
                 if (strInitilized != "finish")
                 {
-                    _stop.SetMessage("正在删除残余的数据库文件 ...");
+                    looping.stop.SetMessage("正在删除残余的数据库文件 ...");
                     // 删除以前遗留的数据库文件
                     string strDatabaseFile = Path.Combine(GetBaseDirectory(), "operlog.bin");
                     if (File.Exists(strDatabaseFile) == true)
@@ -6488,7 +6546,7 @@ MessageBoxDefaultButton.Button2);
                         File.Delete(strDatabaseFile);
                     }
 
-                    _stop.SetMessage("正在初始化本地数据库 ...");
+                    looping.stop.SetMessage("正在初始化本地数据库 ...");
                     nRet = ItemLine.CreateItemTable(
         this._connectionString,
         out strError);
@@ -6542,18 +6600,17 @@ MessageBoxDefaultButton.Button2);
                     if (strState == "finish")
                         continue;
 
-                    long lCount = 0;
                     nRet = DomUtil.GetIntegerParam(node,
                         "count",
                         0,
-                        out lCount,
+                        out long lCount,
                         out strError);
                     if (nRet == -1)
                         return -1;
                     lTotalCount += lCount;
                 }
 
-                _stop.SetProgressRange(0, lTotalCount * 2); // 第一阶段，占据进度条一半
+                looping.stop.SetProgressRange(0, lTotalCount * 2); // 第一阶段，占据进度条一半
                 long lProgress = 0;
 
                 _estimate.SetRange(0, lTotalCount * 2);
@@ -6570,20 +6627,18 @@ MessageBoxDefaultButton.Button2);
                         string strType = DomUtil.GetAttr(node, "type");
                         string strState = DomUtil.GetAttr(node, "state");
 
-                        long lIndex = 0;
                         nRet = DomUtil.GetIntegerParam(node,
                             "index",
                             0,
-                            out lIndex,
+                            out long lIndex,
                             out strError);
                         if (nRet == -1)
                             return -1;
 
-                        long lCurrentCount = 0;
                         nRet = DomUtil.GetIntegerParam(node,
                             "count",
                             0,
-                            out lCurrentCount,
+                            out long lCurrentCount,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -6593,6 +6648,8 @@ MessageBoxDefaultButton.Button2);
                             try
                             {
                                 nRet = BuildItemRecords(
+                                    looping.stop,
+                                    channel,
             strDbName,
             lCurrentCount,
             ref lProgress,
@@ -6617,6 +6674,8 @@ MessageBoxDefaultButton.Button2);
                             try
                             {
                                 nRet = BuildReaderRecords(
+                                    looping.stop,
+                                    channel,
             strDbName,
             lCurrentCount,
             ref lProgress,
@@ -6643,6 +6702,8 @@ MessageBoxDefaultButton.Button2);
                                 try
                                 {
                                     nRet = BuildBiblioRecords(
+                                        looping.stop,
+                                        channel,
                 strDbName,
                 lCurrentCount,
             ref lProgress,
@@ -6691,6 +6752,8 @@ MessageBoxDefaultButton.Button2);
                                     try
                                     {
                                         nRet = BuildClassRecords(
+                                            looping.stop,
+                                            channel,
                                             strDbName,
                                             strFromStyle,
                                             strClassTableName,
@@ -6722,6 +6785,8 @@ MessageBoxDefaultButton.Button2);
                         if (strState != "finish")
                         {
                             nRet = DoCreateUserTable(
+                                looping.stop,
+                                channel,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -6755,7 +6820,7 @@ MessageBoxDefaultButton.Button2);
 
                         if (strTableInitilized != "finish")
                         {
-                            _stop.SetMessage("正在初始化本地数据库的日志表 ...");
+                            looping.stop.SetMessage("正在初始化本地数据库的日志表 ...");
                             if (this.InvokeRequired == false)
                                 Application.DoEvents();
 
@@ -6774,6 +6839,8 @@ MessageBoxDefaultButton.Button2);
                             // TODO: 中断时断点记载
                             // TODO: 进度条应该是重新设置的
                             nRet = DoCreateOperLogTable(
+                                looping.stop,
+                                channel,
                                 -1,
                                 strStartDate,
                                 strEndDate,
@@ -6825,6 +6892,8 @@ MessageBoxDefaultButton.Button2);
                             // TODO: 中断时断点记载
                             // TODO: 进度条应该是重新设置的
                             nRet = DoCreateOperLogTable(
+                                looping.stop,
+                                channel,
                                 -1,
                                 strStartDate,
                                 strEndDate,
@@ -6850,21 +6919,27 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
+                */
 
                 EnableControls(true);
             }
         }
 
         // 创建 user 表
-        int DoCreateUserTable(out string strError)
+        int DoCreateUserTable(
+            Stop stop,
+            LibraryChannel channel,
+            out string strError)
         {
             strError = "";
 
-            _stop.SetMessage("正在初始化本地数据库的用户表 ...");
+            stop?.SetMessage("正在初始化本地数据库的用户表 ...");
             if (this.InvokeRequired == false)
                 Application.DoEvents();
 
@@ -6883,8 +6958,8 @@ MessageBoxDefaultButton.Button2);
                 for (; ; )
                 {
                     UserInfo[] users = null;
-                    long lRet = Channel.GetUser(
-                        _stop,
+                    long lRet = channel.GetUser(
+                        stop,
                         "list",
                         "",
                         nStart,
@@ -7346,6 +7421,7 @@ MessageBoxDefaultButton.Button2);
                 return -1;
             }
 
+            /*
             EnableControls(false);
 
             this.ChannelDoEvents = !this.InvokeRequired;
@@ -7353,7 +7429,10 @@ MessageBoxDefaultButton.Button2);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行同步 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行同步 ...",
+                "disableControl");
             try
             {
                 List<BiblioDbFromInfo> styles = null;
@@ -7385,7 +7464,7 @@ MessageBoxDefaultButton.Button2);
                     dates[0] = dates[0] + ":" + strRight;
                 }
 
-                this.Channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
+                channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
 
                 this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
@@ -7396,8 +7475,8 @@ MessageBoxDefaultButton.Button2);
                     ProgressEstimate estimate = new ProgressEstimate();
 
                     OperLogLoader loader = new OperLogLoader();
-                    loader.Channel = this.Channel;
-                    loader.Stop = this.Progress;
+                    loader.Channel = channel;
+                    loader.Stop = looping.stop;
                     // loader.owner = this;
                     loader.Estimate = estimate;
                     loader.Dates = dates;
@@ -7420,14 +7499,14 @@ MessageBoxDefaultButton.Button2);
                     long lLastItemIndex = -1;
                     foreach (OperLogItem item in loader)
                     {
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             return 0;
                         }
 
-                        if (_stop != null)
-                            _stop.SetMessage("正在同步 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+                        if (looping != null)
+                            looping.stop.SetMessage("正在同步 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
 
                         if (string.IsNullOrEmpty(item.Xml) == true)
                             goto CONTINUE;
@@ -7550,6 +7629,8 @@ MessageBoxDefaultButton.Button2);
                         //      0   中断
                         //      1   完成
                         nRet = ProcessLogRecord(
+                            looping.stop,
+                            channel,
                             connection,
                             item,
                             dom,
@@ -7584,6 +7665,8 @@ MessageBoxDefaultButton.Button2);
 
                     // 缓存中尚未最后兑现的部分
                     nRet = FlushUpdate(
+                        looping.stop,
+                        channel,
                         connection,
                         out strError);
                     if (nRet == -1)
@@ -7604,7 +7687,10 @@ MessageBoxDefaultButton.Button2);
 
                 if (bUserChanged == true)
                 {
-                    nRet = DoCreateUserTable(out strError);
+                    nRet = DoCreateUserTable(
+                        looping.stop,
+                        channel,
+                        out strError);
                     if (nRet == -1)
                         return -1;
                 }
@@ -7618,22 +7704,29 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 EnableControls(true);
+                */
             }
         }
 
         int FlushUpdate(
+            Stop stop,
+            LibraryChannel channel,
             SQLiteConnection connection,
             out string strError)
         {
             strError = "";
 
             int nRet = CommitUpdateBiblios(
+                stop,
+                channel,
     connection,
     out strError);
             if (nRet == -1)
@@ -7680,6 +7773,8 @@ out strError);
         //      0   中断
         //      1   完成
         int ProcessLogRecord(
+            Stop stop,
+            LibraryChannel channel,
             SQLiteConnection connection,
             // DigitalPlatform.LibraryClient.localhost.OperLogInfo info,
             OperLogItem info,
@@ -7710,6 +7805,8 @@ out strError);
             if (strOperation == "setBiblioInfo")
             {
                 nRet = this.TraceSetBiblioInfo(
+                    stop,
+                    channel,
                     connection,
                     dom,
                     out strError);
@@ -7755,6 +7852,8 @@ out strError);
         }
 
         int DeleteBiblioRecord(
+            Stop stop,
+            LibraryChannel channel,
             SQLiteConnection connection,
             string strBiblioRecPath,
             bool bDeleteBiblio,
@@ -7768,6 +7867,8 @@ out strError);
             if (this._updateBiblios.Count > 0)
             {
                 nRet = CommitUpdateBiblios(
+                    stop,
+                    channel,
                     connection,
                     out strError);
                 if (nRet == -1)
@@ -7914,6 +8015,8 @@ out strError);
 
         // 更新 biblio 表 和 class_xxx 表中的行
         int UpdateBiblioRecord(
+            Stop stop,
+            LibraryChannel channel,
             SQLiteConnection connection,
             string strBiblioRecPath,
             string strBiblioXml,
@@ -7950,6 +8053,8 @@ out strError);
             if (this._updateBiblios.Count >= UPDATE_BIBLIOS_BATCHSIZE)
             {
                 nRet = CommitUpdateBiblios(
+                    stop,
+                    channel,
         connection,
         out strError);
                 if (nRet == -1)
@@ -7962,6 +8067,8 @@ out strError);
         }
 
         int CommitUpdateBiblios(
+            Stop stop,
+            LibraryChannel channel,
             SQLiteConnection connection,
             out string strError)
         {
@@ -8055,8 +8162,8 @@ out strError);
                     string[] results = null;
                     byte[] timestamp = null;
                 REDO:
-                    long lRet = Channel.GetBiblioInfos(
-                        Progress,
+                    long lRet = channel.GetBiblioInfos(
+                        stop,
                         "@path-list:" + StringUtil.MakePathList(recpaths),
                         text.ToString(),
                         formats,
@@ -8791,6 +8898,8 @@ out strError);
 快照恢复的时候，可以根据operlogdom直接删除记录了path的那些实体记录
          * */
         public int TraceSetBiblioInfo(
+            Stop stop,
+            LibraryChannel channel,
             SQLiteConnection connection,
             XmlDocument domLog,
             out string strError)
@@ -8826,6 +8935,8 @@ out strError);
                 // 把分类号写入若干分类号表
 
                 nRet = UpdateBiblioRecord(
+                    stop,
+                    channel,
         connection,
         strRecPath,
         strRecord,
@@ -8932,6 +9043,8 @@ out strError);
                 {
                     // 写入新的书目记录
                     nRet = UpdateBiblioRecord(
+                        stop,
+                        channel,
 connection,
 strTargetRecPath,
 strTargetRecord,
@@ -8945,6 +9058,8 @@ out strError);
                 || strAction == "copy")
                 {
                     nRet = CopySubRecords(
+                        stop,
+                        channel,
                         connection,
                         domLog,
                         strAction,
@@ -8959,6 +9074,8 @@ out strError);
                 {
                     // 删除旧的书目记录
                     nRet = DeleteBiblioRecord(
+                        stop,
+                        channel,
                         connection,
                         strOldRecPath,
                         true,
@@ -8987,6 +9104,8 @@ out strError);
                 {
                     // 删除书目记录
                     nRet = DeleteBiblioRecord(
+                        stop,
+                        channel,
                         connection,
                         strRecPath,
                         strAction == "delete" || strAction == "onlydeletebiblio" ? true : false,
@@ -9002,6 +9121,8 @@ out strError);
 
         // TODO: 需要扩展为也能复制 order issue comment 记录
         int CopySubRecords(
+            Stop stop,
+            LibraryChannel channel,
             SQLiteConnection connection,
             XmlDocument dom,
             string strAction,
@@ -9026,6 +9147,8 @@ out strError);
                 return 0;
 
             nRet = CommitUpdateBiblios(
+                stop,
+                channel,
     connection,
     out strError);
             if (nRet == -1)
@@ -9606,6 +9729,7 @@ Stack:
                 goto ERROR1;
             }
 
+            /*
             EnableControls(false);
 
             this.ChannelDoEvents = !this.InvokeRequired;
@@ -9613,6 +9737,9 @@ Stack:
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在查询数据库 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在查询数据库 ...",
+                "disableControl");
 
             this.listView_query_results.BeginUpdate();
             this.timer_qu.Start();
@@ -9671,7 +9798,7 @@ Stack:
                                 {
                                     if (this.InvokeRequired == false)
                                         Application.DoEvents();
-                                    if (_stop != null && _stop.State != 0)
+                                    if (looping.Stopped)
                                     {
                                         strError = "用户中断...";
                                         goto ERROR1;
@@ -9686,7 +9813,7 @@ Stack:
                                     nCount++;
 
                                     if ((nCount % 1000) == 0)
-                                        _stop.SetMessage(nCount.ToString());
+                                        looping.stop.SetMessage(nCount.ToString());
                                 }
                             }
                             finally
@@ -9701,21 +9828,24 @@ Stack:
                         }
                     }
                 }
+
+                return;
             }
             finally
             {
                 this.timer_qu.Stop();
                 this.listView_query_results.EndUpdate();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 EnableControls(true);
+                */
             }
-
-            return;
         ERROR1:
             this.Invoke((Action)(() =>
             {
@@ -9995,11 +10125,15 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 #endif
 
+            /*
             this.EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在规划任务 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在规划任务 ...",
+                "disableControl");
             try
             {
 #if NO
@@ -10079,7 +10213,7 @@ MessageBoxDefaultButton.Button2);
 
                                 if (this.InvokeRequired == false)
                                     Application.DoEvents();
-                                if (_stop != null && _stop.State != 0)
+                                if (looping.Stopped)
                                 {
                                     strError = "中断";
                                     goto ERROR1;
@@ -10136,12 +10270,15 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
 
             // 由于没有修改报表最后时间，所以“每日报表”按钮状态和文字没有变化 
@@ -10426,11 +10563,15 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
+            /*
             this.EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在规划任务 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在规划任务 ...",
+                "disableControl");
             try
             {
 #if NO
@@ -10496,7 +10637,7 @@ MessageBoxDefaultButton.Button1);
 
                                 if (this.InvokeRequired == false)
                                     Application.DoEvents();
-                                if (_stop != null && _stop.State != 0)
+                                if (looping.Stopped)
                                 {
                                     strError = "中断";
                                     goto ERROR1;
@@ -10554,12 +10695,15 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
 
 #if NO
@@ -10692,16 +10836,20 @@ MessageBoxDefaultButton.Button1);
             // string strRealEndDate = "";
             bool bFoundReports = false;
 
+            /*
             this.EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在创建报表 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在创建报表 ...",
+                "disableControl");
             try
             {
                 // 创建必要的索引
                 this._connectionString = GetOperlogConnectionString();
-                _stop.SetMessage("正在检查和创建 SQL 索引 ...");
+                looping.stop.SetMessage("正在检查和创建 SQL 索引 ...");
                 foreach (string type in OperLogTable.DbTypes)
                 {
                     // Application.DoEvents();
@@ -10720,14 +10868,14 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
 
                 XmlNodeList all_item_nodes = task_dom.DocumentElement.SelectNodes("library/item");
-                _stop.SetProgressRange(0, all_item_nodes.Count + nDoneCount);
+                looping.stop.SetProgressRange(0, all_item_nodes.Count + nDoneCount);
 
                 _estimate.SetRange(0, all_item_nodes.Count + nDoneCount);
                 _estimate.StartEstimate();
 
                 XmlNodeList library_nodes = task_dom.DocumentElement.SelectNodes("library");
                 int i = nDoneCount;
-                _stop.SetProgressValue(i);
+                looping.stop.SetProgressValue(i);
                 foreach (XmlElement library_element in library_nodes)
                 {
                     if (this.InvokeRequired == false)
@@ -10747,11 +10895,11 @@ MessageBoxDefaultButton.Button1);
                         if (report_names.Count == 0)
                             report_names = null;
 
-                        _stop.SetMessage("正在创建 " + GetDisplayLibraryCode(strLibraryCode) + " " + time.Time + " 的报表。" + GetProgressTimeString(i));
+                        looping.stop.SetMessage("正在创建 " + GetDisplayLibraryCode(strLibraryCode) + " " + time.Time + " 的报表。" + GetProgressTimeString(i));
 
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "中断";
                             goto ERROR1;
@@ -10762,6 +10910,7 @@ MessageBoxDefaultButton.Button1);
                         //      0   没有任何匹配的报表
                         //      1   成功处理
                         nRet = CreateOneTimeReports(
+                            looping.stop,
                             strTimeType,
                             time,
                             bTailTime,
@@ -10779,7 +10928,7 @@ MessageBoxDefaultButton.Button1);
                         nDoneCount++;
 
                         i++;
-                        _stop.SetProgressValue(i);
+                        looping.stop.SetProgressValue(i);
                     }
 
                     // fileType 没有 html 的时候，不要创建 index.html 文件
@@ -10789,8 +10938,8 @@ MessageBoxDefaultButton.Button1);
                         string strIndexXmlFileName = Path.Combine(strOutputDir, "index.xml");
                         string strIndexHtmlFileName = Path.Combine(strOutputDir, "index.html");
 
-                        if (_stop != null)
-                            _stop.SetMessage("正在创建 " + strIndexHtmlFileName);
+                        if (looping != null)
+                            looping.stop.SetMessage("正在创建 " + strIndexHtmlFileName);
 
                         // 根据 index.xml 文件创建 index.html 文件
                         nRet = CreateIndexHtmlFile(strIndexXmlFileName,
@@ -10808,12 +10957,15 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
 
                 task_dom.DocumentElement.SetAttribute("doneCount", nDoneCount.ToString());
             }
@@ -11426,6 +11578,7 @@ MessageBoxDefaultButton.Button1);
         //      0   没有任何匹配的报表
         //      1   成功处理
         int CreateOneTimeReports(
+            Stop stop,
             string strTimeType,
             OneTime time,
             bool bTailTime,
@@ -11544,7 +11697,7 @@ MessageBoxDefaultButton.Button1);
             {
                 if (this.InvokeRequired == false)
                     Application.DoEvents();
-                if (_stop != null && _stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     strError = "中断";
                     return -1;
@@ -11611,7 +11764,9 @@ MessageBoxDefaultButton.Button1);
                 {
                     // *** 102
                     // 按照指定的单位名称列表，列出借书册数
-                    nRet = Create_102_report(strLibraryCode,
+                    nRet = Create_102_report(
+                        stop,
+                        strLibraryCode,
                         time.Time,
                         strCfgFile,
                         // "选定的部门",    // 例如： 各年级
@@ -11633,7 +11788,9 @@ MessageBoxDefaultButton.Button1);
                     || strReportType == "122" || strReportType == "9122"
                     || strReportType == "141")
                 {
-                    nRet = Create_1XX_report(strLibraryCode,
+                    nRet = Create_1XX_report(
+                        stop,
+                        strLibraryCode,
                         time.Time,
                         strCfgFile,
                         macro_table,
@@ -11651,7 +11808,9 @@ MessageBoxDefaultButton.Button1);
                 {
                     string str131Dir = Path.Combine(strOutputDir, "table_" + strReportType);
                     // 这是创建到一个子目录(会在子目录中创建很多文件和下级目录)，而不是输出到一个文件
-                    nRet = Create_131_report(strLibraryCode,
+                    nRet = Create_131_report(
+                        stop,
+                        strLibraryCode,
                         time.Time,
                         strCfgFile,
                         macro_table,
@@ -11709,7 +11868,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "中断";
                             return -1;
@@ -11725,7 +11884,9 @@ MessageBoxDefaultButton.Button1);
 
                         if (strReportType == "201" || strReportType == "9201")
                         {
-                            nRet = Create_201_report(strLocation,
+                            nRet = Create_201_report(
+                                stop,
+                                strLocation,
                                 time.Time,
                                 strCfgFile,
                                 macro_table,
@@ -11737,7 +11898,9 @@ MessageBoxDefaultButton.Button1);
                         }
                         else if (strReportType == "202" || strReportType == "9202")
                         {
-                            nRet = Create_202_report(strLocation,
+                            nRet = Create_202_report(
+                                stop,
+                                strLocation,
                                 time.Time,
                                 strCfgFile,
                                 macro_table,
@@ -11788,7 +11951,9 @@ MessageBoxDefaultButton.Button1);
                                 if (string.IsNullOrEmpty(strOutputFileName) == true)
                                     strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");
 
-                                nRet = Create_212_report(strLocation,
+                                nRet = Create_212_report(
+                                    stop,
+                                    strLocation,
                                     style.Style,
                                     style.Caption,
                                     time.Time,
@@ -11868,7 +12033,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "中断";
                             return -1;
@@ -11900,7 +12065,7 @@ MessageBoxDefaultButton.Button1);
                             {
                                 if (this.InvokeRequired == false)
                                     Application.DoEvents();
-                                if (_stop != null && _stop.State != 0)
+                                if (stop != null && stop.State != 0)
                                 {
                                     strError = "中断";
                                     return -1;
@@ -11929,7 +12094,9 @@ MessageBoxDefaultButton.Button1);
                                     strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");
 
                                 if (strReportType == "301")
-                                    nRet = Create_301_report(strLocation,
+                                    nRet = Create_301_report(
+                                        stop,
+                                        strLocation,
                                         style.Style,
                                         style.Caption,
                                         time.Time,
@@ -11939,7 +12106,9 @@ MessageBoxDefaultButton.Button1);
                                         strOutputFileName,
                                         out strError);
                                 else if (strReportType == "302")
-                                    nRet = Create_302_report(strLocation,
+                                    nRet = Create_302_report(
+                                        stop,
+                                        strLocation,
         style.Style,
         style.Caption,
         time.Time,
@@ -12014,7 +12183,9 @@ MessageBoxDefaultButton.Button1);
                     || strReportType == "492"
                     )
                 {
-                    nRet = Create_4XX_report(strLibraryCode,
+                    nRet = Create_4XX_report(
+                        stop,
+                        strLibraryCode,
                         time.Time,
                         strCfgFile,
                         macro_table,
@@ -12049,7 +12220,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "中断";
                             return -1;
@@ -12070,6 +12241,7 @@ MessageBoxDefaultButton.Button1);
                             strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");
 
                         nRet = Create_493_report(
+                            stop,
                             strLibraryCode,
                             style.Style,
                             style.Caption,
@@ -13026,6 +13198,7 @@ MessageBoxDefaultButton.Button1);
             long lUnzipFileLength = 0;
             long lUploadedFiles = 0;
 
+            /*
             EnableControls(false);
 
             this.ChannelDoEvents = !this.InvokeRequired;
@@ -13033,11 +13206,14 @@ MessageBoxDefaultButton.Button1);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在上传报表 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在上传报表 ...",
+                "disableControl");
             try
             {
-                if (_stop != null)
-                    _stop.SetMessage("正在搜集文件名 ...");
+                if (looping != null)
+                    looping.stop.SetMessage("正在搜集文件名 ...");
 
                 if (this.InvokeRequired == false)
                     Application.DoEvents();
@@ -13058,7 +13234,7 @@ MessageBoxDefaultButton.Button1);
                     if (this.InvokeRequired == false)
                         Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -13091,7 +13267,7 @@ MessageBoxDefaultButton.Button1);
                     //      0   没有发现需要上传的文件
                     //      1   成功压缩创建了 .zip 文件
                     nRet = CompressReport(
-                        _stop,
+                        looping.stop,
                         strReportDir,
                         strZipFileName,
                         Encoding.UTF8,
@@ -13111,15 +13287,15 @@ MessageBoxDefaultButton.Button1);
                     FileInfo fi = new FileInfo(strZipFileName);
                     lZipFileLength += fi.Length;
 
-                    _stop.SetProgressRange(0, lTotalFiles);
-                    _stop.SetProgressValue(lUploadedFiles);
+                    looping.stop.SetProgressRange(0, lTotalFiles);
+                    looping.stop.SetProgressValue(lUploadedFiles);
 
                     // return:
                     //		-1	出错
                     //		0   上传文件成功
                     nRet = UploadFile(
-                        this._stop,
-                        this.Channel,
+                        looping.stop,
+                        channel,
                         strZipFileName,
                         strServerFileName,
                         "extractzip",
@@ -13147,17 +13323,20 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     lUploadedFiles += part_filenames.Count;
-                    _stop.SetProgressValue(lUploadedFiles);
+                    looping.stop.SetProgressValue(lUploadedFiles);
                 }
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 EnableControls(true);
+                */
             }
 
             // SetUploadButtonState();
@@ -13220,46 +13399,58 @@ MessageBoxDefaultButton.Button1);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
+
+            /*
             if (_stop != null)
                 _stop.SetMessage("正在搜集文件名 ...");
+            */
 
-            if (this.InvokeRequired == false)
-                Application.DoEvents();
-
-            string strReportDir = Path.Combine(GetBaseDirectory(), "reports");
             List<string> filenames = null;
-
-            bool bDelete = this.DeleteReportFileAfterUpload;
-
-            if (this.InvokeRequired == false)
-                Application.DoEvents();
-
-            filenames = GetFileNames(strReportDir, FileAttributes.Archive);
-
-            if (filenames.Count == 0)
+            string strReportDir = "";
+            bool bDelete = false;
+            using (var looping0 = Looping("正在搜集文件名 ..."))
             {
-                strError = "没有发现要上传的报表文件";
-                goto ERROR1;
+                if (this.InvokeRequired == false)
+                    Application.DoEvents();
+
+                strReportDir = Path.Combine(GetBaseDirectory(), "reports");
+
+                bDelete = this.DeleteReportFileAfterUpload;
+
+                if (this.InvokeRequired == false)
+                    Application.DoEvents();
+
+                filenames = GetFileNames(strReportDir, FileAttributes.Archive);
+
+                if (filenames.Count == 0)
+                {
+                    strError = "没有发现要上传的报表文件";
+                    goto ERROR1;
+                }
             }
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在上传报表 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在上传报表 ...",
+                "disableControl");
 
             try
             {
                 Hashtable dir_table = new Hashtable();
 
-                _stop.SetProgressRange(0, filenames.Count);
+                looping.stop.SetProgressRange(0, filenames.Count);
                 int i = 0;
                 foreach (string filename in filenames)
                 {
                     if (this.InvokeRequired == false)
                         Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -13268,7 +13459,7 @@ MessageBoxDefaultButton.Button1);
                     // string strPath = Path.GetDirectoryName(filename.Substring(strReportDir.Length + 1));
                     string strPath = filename.Substring(strReportDir.Length + 1);
 
-                    _stop.SetMessage("正在上传 " + filename);
+                    looping.stop.SetMessage("正在上传 " + filename);
 
                     // 上传文件
                     // 自动创建所需的目录
@@ -13298,19 +13489,22 @@ MessageBoxDefaultButton.Button1);
                         File.SetAttributes(filename, FileAttributes.Normal);
 
                     i++;
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     nUploadCount++;
                 }
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 EnableControls(true);
+                */
             }
 
             if (nUploadCount > 0)
@@ -13721,17 +13915,20 @@ MessageBoxDefaultButton.Button1);
             }
 
             int nCount = 0;
+
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在转换格式 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping("正在转换格式 ...",
+                "disableControl");
             try
             {
-
-                if (_stop != null)
-                    _stop.SetMessage("正在搜集文件名 ...");
+                if (looping != null)
+                    looping.stop.SetMessage("正在搜集文件名 ...");
 
                 if (this.InvokeRequired == false)
                     Application.DoEvents();
@@ -13744,8 +13941,8 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
-                if (_stop != null)
-                    _stop.SetProgressRange(0, filenames.Count);
+                if (looping != null)
+                    looping.stop.SetProgressRange(0, filenames.Count);
 
                 int i = 0;
                 foreach (string strFileName in filenames)
@@ -13753,14 +13950,14 @@ MessageBoxDefaultButton.Button1);
                     if (this.InvokeRequired == false)
                         Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    if (_stop != null)
-                        _stop.SetMessage("正在转换文件 " + strFileName);
+                    if (looping != null)
+                        looping.stop.SetMessage("正在转换文件 " + strFileName);
 
                     // 创建 .html 文件
                     if (dlg.ToHtml == true)
@@ -13789,31 +13986,27 @@ MessageBoxDefaultButton.Button1);
                         nCount++;
                     }
 
-                    if (_stop != null)
-                        _stop.SetProgressValue(++i);
+                    if (looping != null)
+                        looping.stop.SetProgressValue(++i);
                 }
-
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 EnableControls(true);
+                */
             }
 
-            this.Invoke((Action)(() =>
-            {
-                MessageBox.Show(this, "成功转换文件 " + nCount.ToString() + " 个");
-            }));
+            MessageBoxShow("成功转换文件 " + nCount.ToString() + " 个");
             return;
         ERROR1:
-            this.Invoke((Action)(() =>
-            {
-                MessageBox.Show(this, strError);
-            }));
+            MessageBoxShow(strError);
         }
 
         FileCounting _counting = null;

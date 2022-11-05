@@ -22,6 +22,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace dp2Circulation
 {
@@ -29,6 +30,8 @@ namespace dp2Circulation
     {
         public TestingForm()
         {
+            this.UseLooping = true; // 2022/11/4
+
             InitializeComponent();
         }
 
@@ -59,7 +62,7 @@ namespace dp2Circulation
             }));
         }
 
-        CancellationTokenSource _cancel = new CancellationTokenSource();
+        // CancellationTokenSource _cancel = new CancellationTokenSource();
 
         // 测试创建索取号
         private void ToolStripMenuItem_createAccessNo_Click(object sender, EventArgs e)
@@ -78,6 +81,9 @@ namespace dp2Circulation
             string strError = "";
             int nRet = 0;
 
+            /*
+            EnableControls(false);
+
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
@@ -86,10 +92,10 @@ namespace dp2Circulation
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在进行测试 ...");
             Progress.BeginLoop();
-
-            this.Invoke((Action)(() =>
-                EnableControls(false)
-                ));
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行测试 ...",
+                "timeout:0:10:0,disableControl,halfstop");
             try
             {
                 // 创建测试所需的书目库
@@ -97,10 +103,10 @@ namespace dp2Circulation
                 string strBiblioDbName = "_测试用中文图书";
 
                 // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-                Progress.SetMessage("正在删除测试用书目库 ...");
+                looping.stop.SetMessage("正在删除测试用书目库 ...");
                 string strOutputInfo = "";
                 long lRet = channel.ManageDatabase(
-    _stop,
+    looping.stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -113,7 +119,7 @@ namespace dp2Circulation
                         goto ERROR1;
                 }
 
-                Progress.SetMessage("正在创建测试用书目库 ...");
+                looping.stop.SetMessage("正在创建测试用书目库 ...");
                 // 创建一个书目库
                 // parameters:
                 // return:
@@ -122,7 +128,7 @@ namespace dp2Circulation
                 //      1   成功创建
                 nRet = ManageHelper.CreateBiblioDatabase(
                     channel,
-                    this.Progress,
+                    looping.stop,
                     strBiblioDbName,
                     "book",
                     "unimarc",
@@ -137,9 +143,9 @@ namespace dp2Circulation
                 {
                     strSeedDbName = "_测试用种次号库";
 
-                    Progress.SetMessage("正在删除测试用种次号库 ...");
+                    looping.stop.SetMessage("正在删除测试用种次号库 ...");
                     lRet = channel.ManageDatabase(
-        _stop,
+        looping.stop,
         "delete",
         strSeedDbName,    // strDatabaseNames,
         "",
@@ -152,7 +158,7 @@ namespace dp2Circulation
                             goto ERROR1;
                     }
 
-                    Progress.SetMessage("正在创建测试用种次号库 ...");
+                    looping.stop.SetMessage("正在创建测试用种次号库 ...");
 
                     // parameters:
                     // return:
@@ -161,7 +167,7 @@ namespace dp2Circulation
                     //      1   成功创建
                     nRet = ManageHelper.CreateSimpleDatabase(
                         channel,
-                        this.Progress,
+                        looping.stop,
                         strSeedDbName,
                         "zhongcihao",
                         "",
@@ -178,7 +184,7 @@ namespace dp2Circulation
                 // 为系统添加新的馆藏地定义
                 nRet = ManageHelper.AddLocationTypes(
                     channel,
-                    this.Progress,
+                    looping.stop,
                     "add",
                     items,
                     out strError);
@@ -194,7 +200,7 @@ namespace dp2Circulation
                 string strOldCallNumberDef = "";
                 nRet = ManageHelper.ChangeCallNumberDef(
                     channel,
-                    this.Progress,
+                    looping.stop,
                     strGroupFragment,
                     out strOldCallNumberDef,
                     out strError);
@@ -229,9 +235,9 @@ UiTest3(strBiblioDbName)
 ));
 
                 // 删除测试用的书目库、排架体系、馆藏地定义
-                Progress.SetMessage("正在删除测试用书目库 ...");
+                looping.stop.SetMessage("正在删除测试用书目库 ...");
                 lRet = channel.ManageDatabase(
-    _stop,
+    looping.stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -243,9 +249,9 @@ UiTest3(strBiblioDbName)
 
                 if (string.IsNullOrEmpty(strSeedDbName) == false)
                 {
-                    Progress.SetMessage("正在删除测试用种次号库 ...");
+                    looping.stop.SetMessage("正在删除测试用种次号库 ...");
                     lRet = channel.ManageDatabase(
-        _stop,
+        looping.stop,
         "delete",
         strSeedDbName,    // strDatabaseNames,
         "",
@@ -256,20 +262,20 @@ UiTest3(strBiblioDbName)
                         goto ERROR1;
                 }
 
-                Progress.SetMessage("正在复原测试前的排架体系 ...");
+                looping.stop.SetMessage("正在复原测试前的排架体系 ...");
                 nRet = ManageHelper.RestoreCallNumberDef(
     channel,
-    this.Progress,
+    looping.stop,
     strOldCallNumberDef,
     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
 
-                Progress.SetMessage("正在删除测试用的馆藏地 ...");
+                looping.stop.SetMessage("正在删除测试用的馆藏地 ...");
                 nRet = ManageHelper.AddLocationTypes(
     channel,
-    this.Progress,
+    looping.stop,
     "remove",
     items,
     out strError);
@@ -288,17 +294,18 @@ UiTest3(strBiblioDbName)
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
                 Progress.HideProgress();
 
-                this.Invoke((Action)(() =>
-                    EnableControls(true)
-                    ));
+                EnableControls(true);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
             ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
@@ -667,6 +674,7 @@ UiTest3(strBiblioDbName)
             string strError = "";
             int nRet = 0;
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
@@ -676,9 +684,11 @@ UiTest3(strBiblioDbName)
             Progress.Initial("正在进行测试 ...");
             Progress.BeginLoop();
 
-            this.Invoke((Action)(() =>
-                EnableControls(false)
-                ));
+            EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在进行测试 ...",
+                "timeout:0:10:0,disableControl,halfstop");
             try
             {
                 // 创建测试所需的书目库
@@ -686,10 +696,10 @@ UiTest3(strBiblioDbName)
                 string strBiblioDbName = "_测试用中文图书";
 
                 // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-                Progress.SetMessage("正在删除测试用书目库 ...");
+                looping.stop.SetMessage("正在删除测试用书目库 ...");
                 string strOutputInfo = "";
                 long lRet = channel.ManageDatabase(
-    _stop,
+    looping.stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -702,7 +712,7 @@ UiTest3(strBiblioDbName)
                         goto ERROR1;
                 }
 
-                Progress.SetMessage("正在创建测试用书目库 ...");
+                looping.stop.SetMessage("正在创建测试用书目库 ...");
                 // 创建一个书目库
                 // parameters:
                 // return:
@@ -711,7 +721,7 @@ UiTest3(strBiblioDbName)
                 //      1   成功创建
                 nRet = ManageHelper.CreateBiblioDatabase(
                     channel,
-                    this.Progress,
+                    looping.stop,
                     strBiblioDbName,
                     "book",
                     "unimarc",
@@ -729,7 +739,7 @@ UiTest3(strBiblioDbName)
                 // 为系统添加新的馆藏地定义
                 nRet = ManageHelper.AddLocationTypes(
                     channel,
-                    this.Progress,
+                    looping.stop,
                     "add",
                     items,
                     out strError);
@@ -823,9 +833,9 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 }
 
                 // 删除测试用的书目库、排架体系、馆藏地定义
-                Progress.SetMessage("正在删除测试用书目库 ...");
+                looping.stop.SetMessage("正在删除测试用书目库 ...");
                 lRet = channel.ManageDatabase(
-    _stop,
+    looping.stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -835,10 +845,10 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 if (lRet == -1)
                     goto ERROR1;
 
-                Progress.SetMessage("正在删除测试用的馆藏地 ...");
+                looping.stop.SetMessage("正在删除测试用的馆藏地 ...");
                 nRet = ManageHelper.AddLocationTypes(
     channel,
-    this.Progress,
+    looping.stop,
     "remove",
     items,
     out strError);
@@ -857,17 +867,18 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
                 Progress.HideProgress();
 
-                this.Invoke((Action)(() =>
-                    EnableControls(true)
-                    ));
+                EnableControls(true);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
             ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
@@ -1522,8 +1533,10 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
         string VerifyBiblioRecordExisting(string strBiblioRecPath)
         {
+            /*
             LibraryChannel channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel);
             try
             {
                 string[] results = null;
@@ -1532,7 +1545,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 List<string> format_list = new List<string>();
                 format_list.Add("xml");
                 long lRet = channel.GetBiblioInfos(
-                    Progress,
+                    looping.stop,
                     strBiblioRecPath,
                     "",
                     format_list.ToArray(),
@@ -1547,7 +1560,10 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1994,6 +2010,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             int nRet = 0;
             long lRet = 0;
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
@@ -2006,6 +2023,11 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             this.Invoke((Action)(() =>
                 EnableControls(false)
                 ));
+            */
+            var looping = Looping(out LibraryChannel channel,
+    "正在进行测试 ...",
+    "timeout:0:10:0,disableControl,halfstop");
+
             try
             {
                 string strTestDbName = "";
@@ -2013,9 +2035,9 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
                 {
                     strTestDbName = "_测试用盘点库";
-                    Progress.SetMessage("正在删除" + strTestDbName + " ...");
+                    looping.stop.SetMessage("正在删除" + strTestDbName + " ...");
                     lRet = channel.ManageDatabase(
-        _stop,
+        looping.stop,
         "delete",
         strTestDbName,    // strDatabaseNames,
         "",
@@ -2028,7 +2050,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                             goto ERROR1;
                     }
 
-                    Progress.SetMessage("正在创建" + strTestDbName + " ...");
+                    looping.stop.SetMessage("正在创建" + strTestDbName + " ...");
 
                     // parameters:
                     // return:
@@ -2037,7 +2059,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     //      1   成功创建
                     nRet = ManageHelper.CreateSimpleDatabase(
                         channel,
-                        this.Progress,
+                        looping.stop,
                         strTestDbName,
                         "inventory",
                         "",
@@ -2049,7 +2071,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
                 {
                     List<string> errors = TestWriteXmlRecords(
-_stop,
+looping.stop,
 channel,
 strTestDbName,
 "delete", // "delete,fix",
@@ -2065,7 +2087,7 @@ strTestDbName,
                 // 进行测试
                 {
                     List<string> errors = TestUploadObjectFiles(
-                _stop,
+                looping.stop,
                 channel,
                 strTestDbName,
                 "delete,fix", // "delete,fix",
@@ -2080,7 +2102,7 @@ strTestDbName,
 
                 {
                     List<string> errors = TestUploadObjectFiles(
-    _stop,
+    looping.stop,
     channel,
     strTestDbName,
     "delete", // "delete",
@@ -2095,7 +2117,7 @@ strTestDbName,
 
                 {
                     List<string> errors = TestUploadObjectFiles(
-    _stop,
+    looping.stop,
     channel,
     strTestDbName,
     "delete,reuse_id", // "delete",
@@ -2111,9 +2133,9 @@ strTestDbName,
 
                 if (string.IsNullOrEmpty(strTestDbName) == false)
                 {
-                    Progress.SetMessage("正在删除" + strTestDbName + " ...");
+                    looping.stop.SetMessage("正在删除" + strTestDbName + " ...");
                     lRet = channel.ManageDatabase(
-        _stop,
+        looping.stop,
         "delete",
         strTestDbName,    // strDatabaseNames,
         "",
@@ -2132,6 +2154,8 @@ strTestDbName,
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -2143,6 +2167,7 @@ strTestDbName,
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
             ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
@@ -2657,6 +2682,7 @@ strTestDbName,
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 开始进行日志和恢复的测试</div>");
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
@@ -2669,12 +2695,17 @@ strTestDbName,
             this.Invoke((Action)(() =>
                 EnableControls(false)
                 ));
+            */
+            var looping = Looping(out LibraryChannel channel,
+    "正在进行测试 ...",
+    "timeout:0:10:0,disableControl,halfstop");
+
             try
             {
                 if (strAction == "createDatabase")
                 {
                     nRet = TestRecoverCreatingDatabases(
-this.Progress,
+looping.stop,
 channel,
 strStyle,
 out strError);
@@ -2682,7 +2713,7 @@ out strError);
                 else if (strAction == "deleteBiblioDatabase")
                 {
                     nRet = TestRecoverDeletingBiblioDatabases(
-this.Progress,
+looping.stop,
 channel,
 strStyle,
 out strError);
@@ -2690,7 +2721,7 @@ out strError);
                 else if (strAction == "deleteSimpleDatabase")
                 {
                     nRet = TestRecoverDeletingSimpleDatabases(
-this.Progress,
+looping.stop,
 channel,
 strStyle,
 out strError);
@@ -2712,6 +2743,8 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -2723,6 +2756,7 @@ out strError);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 结束日志和恢复的测试</div>");
@@ -2924,7 +2958,7 @@ out strError);
             if (string.IsNullOrEmpty(strSubType) == true)
                 strSubType = "";    // 完全可能创建没有任何下级数据库的书目库
 
-            DisplayTitle("=== 创建一个 " + strType + " 类型的数据库 ===");
+            DisplayTitle(stop,"=== 创建一个 " + strType + " 类型的数据库 ===");
 
             string strSingleDbName = "test_" + strType;
 
@@ -2959,7 +2993,7 @@ out strError);
                     if (strSingleDbName == strOldDbName
                         && String.IsNullOrEmpty(strSingleDbName) == false)
                     {
-                        DisplayTitle("因当前已经存在的同类数据库名正好和测试用临时文件名重复，所以改为不用保护它");
+                        DisplayTitle(stop,"因当前已经存在的同类数据库名正好和测试用临时文件名重复，所以改为不用保护它");
 
                         /*
                         DisplayTitle("拟用于测试的数据库名已经存在，需要删除残留的数据库 '" + strSingleDbName + "'");
@@ -2986,15 +3020,15 @@ out strError);
                 }
             }
             else
-                DisplayTitle("不保护以前的同类数据库。因为此类数据库是可以重复创建的");
+                DisplayTitle(stop,"不保护以前的同类数据库。因为此类数据库是可以重复创建的");
 
             {
                 // 删除遗留的临时库
                 {
-                    DisplayTitle("尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
+                    DisplayTitle(stop,"尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
 
                     lRet = channel.ManageDatabase(
-                        this.Progress,
+                        stop,
         "delete",
         strSingleDbName,    // strDatabaseNames,
         "",
@@ -3013,7 +3047,7 @@ out strError);
 
             if (string.IsNullOrEmpty(strOldDbName) == false)
             {
-                DisplayTitle("保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
+                DisplayTitle(stop,"保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
 
                 // 修改一个简单库
                 // parameters:
@@ -3089,7 +3123,7 @@ out strError);
                 //      0   日志文件不存在，或者记录数为 0
                 //      >0  记录数
                 lRet = OperLogLoader.GetOperLogCount(
-                    this.Progress,
+                    stop,
                     channel,
                     strDate,
                     LogType.OperLog,
@@ -3107,7 +3141,7 @@ out strError);
                     if (strType == "biblio")
                     {
                         // TODO: 图书/连续出版物 MARC格式 都应该组合探索
-                        DisplayTitle("创建关键日志动作：创建数据库 '" + strSingleDbName + "' usage=" + strUsage + " syntax=" + strSyntax + " subtype=" + strSubType + "。创建动作带有校验功能");
+                        DisplayTitle(stop,"创建关键日志动作：创建数据库 '" + strSingleDbName + "' usage=" + strUsage + " syntax=" + strSyntax + " subtype=" + strSubType + "。创建动作带有校验功能");
                         // 创建一个书目库
                         // parameters:
                         // return:
@@ -3116,7 +3150,7 @@ out strError);
                         //      1   成功创建
                         nRet = ManageHelper.CreateBiblioDatabase(
                             channel,
-                            this.Progress,
+                            stop,
                             strSingleDbName,
                             strUsage,    // "book",
                             strRole?.Replace("|", ","),
@@ -3130,9 +3164,9 @@ out strError);
                     }
                     else if (strType == "reader")
                     {
-                        DisplayTitle("创建关键日志动作：创建数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
+                        DisplayTitle(stop,"创建关键日志动作：创建数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
                         nRet = ManageHelper.CreateReaderDatabase(channel,
-            this.Progress,
+            stop,
             strSingleDbName,
             "_测试分馆", // strLibraryCode,
             true, // bInCirculation,
@@ -3144,10 +3178,10 @@ out strError);
                     }
                     else
                     {
-                        DisplayTitle("创建关键日志动作：创建数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
+                        DisplayTitle(stop,"创建关键日志动作：创建数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
                         nRet = ManageHelper.CreateSimpleDatabase(
         channel,
-        this.Progress,
+        stop,
         strSingleDbName,
         strType,
         "verify",
@@ -3163,10 +3197,10 @@ out strError);
 
                 // TODO: 此处即可进行一次验证
                 {
-                    DisplayTitle("验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
+                    DisplayTitle(stop,"验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
 
                     // 验证数据库操作的结果状态
-                    nRet = VerifyDatabaseState(this.Progress,
+                    nRet = VerifyDatabaseState(stop,
                         channel,
                         strSingleDbName + "#" + strType,
                         "create",
@@ -3182,7 +3216,7 @@ out strError);
                     //      0   比较发现完全一致
                     //      1   比较中发现(至少一处)不一致
                     nRet = CompareLogOfCreatingDatabase(
-                        this.Progress,
+                        stop,
                         channel,
                         strDate,
                         lStartOffs,
@@ -3195,10 +3229,10 @@ out strError);
 
                 // *** 恢复测试
                 // 从指定偏移位置启动 dp2library 日志恢复后台任务
-                DisplayTitle("启动 日志恢复 dp2library后台任务");
+                DisplayTitle(stop,"启动 日志恢复 dp2library后台任务");
                 string strTaskName = "日志恢复";
                 nRet = StartBatchTask(
-                    this.Progress,
+                    stop,
                     channel,
                     strTaskName,
                     strDate,
@@ -3207,11 +3241,11 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                DisplayTitle("等待后台任务结束 ...");
+                DisplayTitle(stop,"等待后台任务结束 ...");
                 // 等待，直到 dp2library 后台任务结束
                 string strErrorInfo = "";
                 nRet = WaitBatchTaskFinish(
-                    this.Progress,
+                    stop,
             channel,
             strTaskName,
             out strErrorInfo,
@@ -3226,10 +3260,10 @@ out strError);
 
                 // 验证恢复情况
                 {
-                    DisplayTitle("验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
+                    DisplayTitle(stop,"验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
 
                     // 验证数据库操作的结果状态
-                    nRet = VerifyDatabaseState(this.Progress,
+                    nRet = VerifyDatabaseState(stop,
                         channel,
                         strSingleDbName + "#" + strType,
                         "create",
@@ -3245,7 +3279,7 @@ out strError);
                     //      0   比较发现完全一致
                     //      1   比较中发现(至少一处)不一致
                     nRet = CompareLogOfCreatingDatabase(
-                        this.Progress,
+                        stop,
                         channel,
                         strDate,
                         lStartOffs,
@@ -3259,9 +3293,9 @@ out strError);
                 // 清除残留信息
                 {
                     // 删除测试用的书目库
-                    DisplayTitle("正在删除测试用的" + strType + "库 '" + strSingleDbName + "'");
+                    DisplayTitle(stop,"正在删除测试用的" + strType + "库 '" + strSingleDbName + "'");
                     lRet = channel.ManageDatabase(
-                        this.Progress,
+                        stop,
         "delete",
         strSingleDbName,    // strDatabaseNames,
         "",
@@ -3283,7 +3317,7 @@ out strError);
                 {
                     Debug.Assert(string.IsNullOrEmpty(strDetachOldDbName) == false, "");
 
-                    DisplayTitle("(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
+                    DisplayTitle(stop,"(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
                     string strError1 = "";
                     // 修改一个简单库
                     // parameters:
@@ -3576,15 +3610,15 @@ out strError);
             strError = "";
             int nRet = 0;
 
-            DisplayTitle("=== 删除一个书目库 ===");
+            DisplayTitle(stop,"=== 删除一个书目库 ===");
 
             string strBiblioDbName = "_测试用中文图书";
 
             // *** 预先准备阶段
             // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-            DisplayTitle("正在尝试删除以前残留的测试用书目库 ...");
+            DisplayTitle(stop,"正在尝试删除以前残留的测试用书目库 ...");
             long lRet = channel.ManageDatabase(
-                this.Progress,
+                stop,
 "delete",
 strBiblioDbName,    // strDatabaseNames,
 "",
@@ -3615,7 +3649,7 @@ out strError);
 
             // 创建一个书目库，以便后面进行删除操作
             {
-                DisplayTitle("创建一个书目库 '" + strBiblioDbName + "'，以前后面能模拟出测试动作(删除) " + strStyleCaption);
+                DisplayTitle(stop,"创建一个书目库 '" + strBiblioDbName + "'，以前后面能模拟出测试动作(删除) " + strStyleCaption);
 
                 // 创建一个书目库
                 // parameters:
@@ -3625,7 +3659,7 @@ out strError);
                 //      1   成功创建
                 nRet = ManageHelper.CreateBiblioDatabase(
                     channel,
-                    this.Progress,
+                    stop,
                     strBiblioDbName,
                     strUsage,
                     strRole?.Replace("|", ","),
@@ -3651,7 +3685,7 @@ out strError);
             //      0   日志文件不存在，或者记录数为 0
             //      >0  记录数
             lRet = OperLogLoader.GetOperLogCount(
-                this.Progress,
+                stop,
                 channel,
                 strDate,
                 LogType.OperLog,
@@ -3665,10 +3699,10 @@ out strError);
 
             // 进行删除操作，并记入日志
             {
-                DisplayTitle("创建关键日志动作：删除数据库 '" + strBiblioDbName + "'。创建动作带有校验功能");
+                DisplayTitle(stop,"创建关键日志动作：删除数据库 '" + strBiblioDbName + "'。创建动作带有校验功能");
 
                 lRet = channel.ManageDatabase(
-                    this.Progress,
+                    stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -3685,7 +3719,7 @@ out strError);
             }
             else
             {
-                DisplayTitle("准备进行恢复模拟。先创建临时书目库 '" + strBiblioDbName + "' 以作为恢复的准备条件 " + strStyleCaption);
+                DisplayTitle(stop,"准备进行恢复模拟。先创建临时书目库 '" + strBiblioDbName + "' 以作为恢复的准备条件 " + strStyleCaption);
 
                 // 创建书目库，以便在恢复操作前的环境中，先具有这个数据库
                 // 创建一个书目库
@@ -3696,7 +3730,7 @@ out strError);
                 //      1   成功创建
                 nRet = ManageHelper.CreateBiblioDatabase(
                     channel,
-                    this.Progress,
+                    stop,
                     strBiblioDbName,
                     strUsage,
                     strRole?.Replace("|", ","),
@@ -3713,7 +3747,7 @@ out strError);
             // 从指定偏移位置启动 dp2library 日志恢复后台任务
             string strTaskName = "日志恢复";
             nRet = StartBatchTask(
-                this.Progress,
+                stop,
                 channel,
                 strTaskName,
                 strDate,
@@ -3725,7 +3759,7 @@ out strError);
             // 等待，直到 dp2library 后台任务结束
             string strErrorInfo = "";
             nRet = WaitBatchTaskFinish(
-                this.Progress,
+                stop,
         channel,
         strTaskName,
         out strErrorInfo,
@@ -3740,10 +3774,10 @@ out strError);
 
             // 验证删除情况
             {
-                DisplayTitle("验证数据库 '" + strBiblioDbName + "' 是否确实被删除");
+                DisplayTitle(stop,"验证数据库 '" + strBiblioDbName + "' 是否确实被删除");
 
                 // 验证数据库操作的结果状态
-                nRet = VerifyDatabaseState(this.Progress,
+                nRet = VerifyDatabaseState(stop,
                     channel,
                     strBiblioDbName + "#" + "biblio",
                     "delete",
@@ -3756,7 +3790,7 @@ out strError);
                 //      0   比较发现完全一致
                 //      1   比较中发现(至少一处)不一致
                 nRet = CompareLogOfDeletingDatabase(
-                    this.Progress,
+                    stop,
                     channel,
                     strDate,
                     lStartOffs,
@@ -3834,7 +3868,7 @@ out strError);
             int nRet = 0;
             long lRet = 0;
 
-            DisplayTitle("=== 删除一个简单库 ===");
+            DisplayTitle(stop,"=== 删除一个简单库 ===");
 
             bool bProtect = !StringUtil.IsInList("dont_protect", strStyle);
 
@@ -3847,11 +3881,11 @@ out strError);
 
             string strSingleDbName = "test_" + strType;
 
-            DisplayTitle("数据库类型 '" + strType + "', 用于测试的数据库名为 '" + strSingleDbName + "'");
+            DisplayTitle(stop,"数据库类型 '" + strType + "', 用于测试的数据库名为 '" + strSingleDbName + "'");
 
             // *** 预先准备阶段
             // 如果测试用的书目库以前就存在，要先保护起来
-            Progress.SetMessage("正在保护测试前的单个库 ...");
+            stop?.SetMessage("正在保护测试前的单个库 ...");
 
             // 得到当前此类型的简单库名
             string strOldDbName = "";
@@ -3881,11 +3915,11 @@ out strError);
                     if (strSingleDbName == strOldDbName
                         && String.IsNullOrEmpty(strSingleDbName) == false)
                     {
-                        DisplayTitle("拟用于测试的数据库名已经存在，需要删除残留的数据库 '" + strSingleDbName + "'");
+                        DisplayTitle(stop,"拟用于测试的数据库名已经存在，需要删除残留的数据库 '" + strSingleDbName + "'");
 
                         string strOutputInfo = "";
                         lRet = channel.ManageDatabase(
-                            this.Progress,
+                            stop,
             "delete",
             strSingleDbName,    // strDatabaseNames,
             "",
@@ -3907,14 +3941,14 @@ out strError);
             }
             else
             {
-                DisplayTitle("不保护以前的同类数据库。因为此类数据库是可以重复创建的");
+                DisplayTitle(stop,"不保护以前的同类数据库。因为此类数据库是可以重复创建的");
                 // 删除遗留的临时库
                 {
-                    DisplayTitle("尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
+                    DisplayTitle(stop,"尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
 
                     string strOutputInfo = "";
                     lRet = channel.ManageDatabase(
-                        this.Progress,
+                        stop,
         "delete",
         strSingleDbName,    // strDatabaseNames,
         "",
@@ -3933,7 +3967,7 @@ out strError);
 
             if (string.IsNullOrEmpty(strOldDbName) == false)
             {
-                DisplayTitle("保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
+                DisplayTitle(stop,"保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
 
                 // 修改一个简单库
                 // parameters:
@@ -3961,9 +3995,9 @@ out strError);
 
                 // 创建一个简单库，以便后面进行删除操作
                 {
-                    DisplayTitle("创建一个临时的简单库 '" + strSingleDbName + "'，以前后面能模拟出测试动作(删除)");
+                    DisplayTitle(stop,"创建一个临时的简单库 '" + strSingleDbName + "'，以前后面能模拟出测试动作(删除)");
 
-                    Progress.SetMessage("正在创建测试用简单库 ...");
+                    stop?.SetMessage("正在创建测试用简单库 ...");
                     // 创建一个书目库
                     // parameters:
                     // return:
@@ -3972,7 +4006,7 @@ out strError);
                     //      1   成功创建
                     nRet = ManageHelper.CreateSimpleDatabase(
                         channel,
-                        this.Progress,
+                        stop,
                         strSingleDbName,
                         strType,
                         "skipOperLog",
@@ -3994,7 +4028,7 @@ out strError);
                 //      0   日志文件不存在，或者记录数为 0
                 //      >0  记录数
                 lRet = OperLogLoader.GetOperLogCount(
-                    this.Progress,
+                    stop,
                     channel,
                     strDate,
                     LogType.OperLog,
@@ -4008,10 +4042,10 @@ out strError);
 
                 // 进行删除操作，并记入日志
                 {
-                    DisplayTitle("创建关键日志动作：删除数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
+                    DisplayTitle(stop,"创建关键日志动作：删除数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
 
                     lRet = channel.ManageDatabase(
-                        this.Progress,
+                        stop,
         "delete",
         strSingleDbName,    // strDatabaseNames,
         "",
@@ -4028,7 +4062,7 @@ out strError);
                 }
                 else
                 {
-                    DisplayTitle("准备进行恢复模拟。先创建临时数据库 '" + strSingleDbName + "' 以作为恢复的准备条件");
+                    DisplayTitle(stop,"准备进行恢复模拟。先创建临时数据库 '" + strSingleDbName + "' 以作为恢复的准备条件");
                     // 创建简单库，以便在恢复操作前的环境中，先具有这个数据库
                     // parameters:
                     // return:
@@ -4037,7 +4071,7 @@ out strError);
                     //      1   成功创建
                     nRet = ManageHelper.CreateSimpleDatabase(
                         channel,
-                        this.Progress,
+                        stop,
                         strSingleDbName,
                         strType,
                         "skipOperLog,verify",
@@ -4046,12 +4080,12 @@ out strError);
                         goto ERROR1;
                 }
 
-                DisplayTitle("启动 日志恢复 dp2library后台任务");
+                DisplayTitle(stop,"启动 日志恢复 dp2library后台任务");
                 // *** 恢复测试
                 // 从指定偏移位置启动 dp2library 日志恢复后台任务
                 string strTaskName = "日志恢复";
                 nRet = StartBatchTask(
-                    this.Progress,
+                    stop,
                     channel,
                     strTaskName,
                     strDate,
@@ -4060,11 +4094,11 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                DisplayTitle("等待后台任务结束 ...");
+                DisplayTitle(stop,"等待后台任务结束 ...");
                 // 等待，直到 dp2library 后台任务结束
                 string strErrorInfo = "";
                 nRet = WaitBatchTaskFinish(
-                    this.Progress,
+                    stop,
             channel,
             strTaskName,
             out strErrorInfo,
@@ -4079,10 +4113,10 @@ out strError);
 
                 // 验证删除情况
                 {
-                    DisplayTitle("验证数据库 '" + strSingleDbName + "' 是否确实被删除");
+                    DisplayTitle(stop,"验证数据库 '" + strSingleDbName + "' 是否确实被删除");
 
                     // 验证数据库操作的结果状态
-                    nRet = VerifyDatabaseState(this.Progress,
+                    nRet = VerifyDatabaseState(stop,
                         channel,
                         strSingleDbName + "#" + strType,
                         "delete",
@@ -4095,7 +4129,7 @@ out strError);
                     //      0   比较发现完全一致
                     //      1   比较中发现(至少一处)不一致
                     nRet = CompareLogOfDeletingDatabase(
-                        this.Progress,
+                        stop,
                         channel,
                         strDate,
                         lStartOffs,
@@ -4115,7 +4149,7 @@ out strError);
                 {
                     Debug.Assert(string.IsNullOrEmpty(strDetachOldDbName) == false, "");
 
-                    DisplayTitle("(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
+                    DisplayTitle(stop,"(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
                     string strError1 = "";
                     // 修改一个简单库
                     // parameters:
@@ -4427,9 +4461,9 @@ out strError);
 
         #endregion
 
-        void DisplayTitle(string strText)
+        void DisplayTitle(Stop stop, string strText)
         {
-            Progress.SetMessage(strText);
+            stop?.SetMessage(strText);
             Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(strText) + "</div>");
         }
         void DisplayOK(string strText)
@@ -4466,6 +4500,7 @@ out strError);
 
             List<string> filenames = new List<string>();
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
@@ -4478,6 +4513,10 @@ out strError);
             this.Invoke((Action)(() =>
                 EnableControls(false)
                 ));
+            */
+            var looping = Looping(out LibraryChannel channel,
+    "正在进行测试 ...",
+    "timeout:0:10:0,disableControl,halfstop");
 
             try
             {
@@ -4485,14 +4524,14 @@ out strError);
                 for (int i = 0; i < 10; i++)
                 {
                     string strLocalFilePath = Program.MainForm.GetTempFileName("test");
-                    Progress.SetMessage(strServerFilePath + "-->" + strLocalFilePath);
+                    looping.stop.SetMessage(strServerFilePath + "-->" + strLocalFilePath);
                     // parameters:
                     //		strOutputFileName	输出文件名。可以为null。如果调用前文件已经存在, 会被覆盖。
                     // return:
                     //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
                     //		0	成功
                     long lRet = this.Channel.GetRes(
-                        this._stop,
+                        looping.stop,
                         strServerFilePath,
                         strLocalFilePath,
                         "content,data,metadata,timestamp,outputpath,gzip",
@@ -4527,6 +4566,8 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -4538,6 +4579,7 @@ out strError);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
             return;
             ERROR1:
@@ -4563,10 +4605,15 @@ out strError);
             XmlDocument dom = new XmlDocument();
             dom.Load(dlg.FileName);
 
+            /*
             Progress.Style = StopStyle.EnableHalfStop;
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在进行测试 ...");
             Progress.BeginLoop();
+            */
+            var looping = Looping(
+    "正在进行测试 ...",
+    "disableControl,halfstop");
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行测试 " + dlg.FileName + "</div>");
 
@@ -4580,7 +4627,7 @@ out strError);
                 int i = 0;
                 foreach (XmlElement item in nodes)
                 {
-                    if (Progress != null && Progress.IsStopped)
+                    if (looping.Stopped)
                     {
                         strError = "中断";
                         break;
@@ -4609,7 +4656,7 @@ out strError);
                     //      1   succeed
                     int nRet = BiblioItemsHost.GetAuthorNumber(
                     ref question_table,
-                    Progress,
+                    looping.stop,
                     this,
                     strGcatWebServiceUrl,
                     strAuthor,
@@ -4682,11 +4729,13 @@ out strError);
                     }
                 }
 
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
                 Progress.HideProgress();
-
+                */
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行测试 " + dlg.FileName + "</div>");
             }
 
@@ -4707,13 +4756,15 @@ out strError);
             });
         }
 
-        int TestChangeReaderRecord(LibraryChannel channel,
+        int TestChangeReaderRecord(
+            Stop stop,
+            LibraryChannel channel,
             string strReaderBarcode,
             out string strError)
         {
             strError = "";
 
-            long lRet = channel.GetReaderInfo(_stop,
+            long lRet = channel.GetReaderInfo(stop,
                 strReaderBarcode,
                 "xml",
                 out string[] results,
@@ -4743,7 +4794,7 @@ out strError);
 
             string strNewXml = dom.DocumentElement.OuterXml;
 
-            lRet = channel.SetReaderInfo(_stop,
+            lRet = channel.SetReaderInfo(stop,
     "change",
     strRecPath,
     strNewXml,
@@ -4770,6 +4821,7 @@ out strError);
             string strError = "";
             int nRet = 0;
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(10);
@@ -4782,6 +4834,11 @@ out strError);
             this.Invoke((Action)(() =>
                 EnableControls(false)
                 ));
+            */
+            var looping = Looping(out LibraryChannel channel,
+    "正在进行测试 ...",
+    "timeout:0:10:0,disableControl,halfstop");
+
             try
             {
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
@@ -4789,16 +4846,16 @@ out strError);
 
                 for (; ; )
                 {
-                    if (_stop?.State != 0)
+                    if (looping.Stopped)
                         break;
 
                     long lRet = 0;
 
                     // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-                    Progress.SetMessage("正在借 ...");
+                    looping.stop.SetMessage("正在借 ...");
                     {
                         lRet = channel.Borrow(
-                            _stop,
+                            looping.stop,
                             false,
                             strReaderBarcode,
                             strItemBarcode,
@@ -4827,7 +4884,9 @@ out strError);
                         DisplayOK($"读者 {strReaderBarcode} 借书 {strItemBarcode} 成功");
 
                     {
-                        nRet = TestChangeReaderRecord(channel,
+                        nRet = TestChangeReaderRecord(
+                            looping.stop,
+                            channel,
                             strReaderBarcode,
                             out strError);
                         if (nRet == -1)
@@ -4837,10 +4896,10 @@ out strError);
 
                     }
 
-                    Progress.SetMessage("正在还 ...");
+                    looping.stop.SetMessage("正在还 ...");
                     {
                         lRet = channel.Return(
-                            _stop,
+                            looping.stop,
                             "return",
                             strReaderBarcode,
                             strItemBarcode,
@@ -4876,6 +4935,8 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -4887,6 +4948,7 @@ out strError);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
             ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));

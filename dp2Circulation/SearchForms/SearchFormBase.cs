@@ -566,10 +566,10 @@ namespace dp2Circulation
             }
 
             nRet = RefreshListViewLines(
-                null,
+                //null,
                 items,
                 "",
-                true,
+                //true,
                 true,
                 out strError);
             if (nRet == -1)
@@ -623,10 +623,10 @@ namespace dp2Circulation
             }
 
             nRet = RefreshListViewLines(
-                null,
+                //null,
                 items,
                 "",
-                true,
+                //true,
                 true,
                 out strError);
             if (nRet == -1)
@@ -638,6 +638,28 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
+        // 包装后的版本
+        public int RefreshListViewLines(
+    List<ListViewItem> items_param,
+    string strFormat,
+    bool bClearRestColumns,
+    out string strError)
+        {
+            using (var looping = Looping(out LibraryChannel channel,
+                "正在刷新浏览行 ...",
+                "disableControl,halfstop"))
+            {
+                return RefreshListViewLines(
+looping.stop,
+channel,
+items_param,
+strFormat,
+bClearRestColumns,
+out strError);
+            }
+        }
+
+#if REMOVED
         // 包装后的版本
         public int RefreshListViewLines(
     LibraryChannel channel_param,
@@ -654,10 +676,10 @@ namespace dp2Circulation
                 try
                 {
                     return RefreshListViewLines(
+    looping.stop,
     channel_param,
     items_param,
     strFormat,
-    looping.stop,
     bClearRestColumns,
     out strError);
                 }
@@ -669,35 +691,38 @@ namespace dp2Circulation
             }
 
             return RefreshListViewLines(
+    null,
     channel_param,
     items_param,
     strFormat,
-    null,
     bClearRestColumns,
     out strError);
         }
+#endif
 
         // TODO: 检查是否有脚本调用过没有 channel_param 参数的版本
         /// <summary>
         /// 刷新浏览行
         /// </summary>
-        /// <param name="channel_param">通讯通道。可以为空</param>
+        /// <param name="stop">Stop 对象</param>
+        /// <param name="channel">通讯通道。可以为空</param>
         /// <param name="items_param">要刷新的 ListViewItem 集合</param>
         /// <param name="strFormat">浏览格式。供调用 GetSearchResult() 时 strStyle 参数之用 </param>
-        /// <param name="stop">Stop 对象</param>
         /// <param name="bClearRestColumns">是否清除右侧多余的列内容</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int RefreshListViewLines(
-            LibraryChannel channel_param,
+            Stop stop,
+            LibraryChannel channel,
             List<ListViewItem> items_param,
             string strFormat,
             // bool bBeginLoop,
-            Stop stop,
             bool bClearRestColumns,
             out string strError)
         {
             strError = "";
+
+            Debug.Assert(channel != null);
 
             if (items_param.Count == 0)
                 return 0;
@@ -718,9 +743,6 @@ namespace dp2Circulation
             }
 #endif
 
-            LibraryChannel channel = channel_param;
-            if (channel == null)
-                channel = this.GetChannel();
 
             try
             {
@@ -738,8 +760,7 @@ namespace dp2Circulation
                     ClearOneChange(item, true);
                 }
 
-                if (stop != null)
-                    stop.SetProgressRange(0, items.Count);
+                stop?.SetProgressRange(0, items.Count);
 
                 BrowseLoader loader = new BrowseLoader();
                 loader.Channel = channel;
@@ -766,8 +787,8 @@ namespace dp2Circulation
 
                     if (stop != null)
                     {
-                        stop.SetMessage("正在刷新浏览行 " + record.Path + " ...");
-                        stop.SetProgressValue(i);
+                        stop?.SetMessage("正在刷新浏览行 " + record.Path + " ...");
+                        stop?.SetProgressValue(i);
                     }
 
                     ListViewItem item = items[i];
@@ -791,9 +812,6 @@ namespace dp2Circulation
             }
             finally
             {
-                if (channel_param == null)
-                    this.ReturnChannel(channel);
-
 #if REMOVED
                 if (/*_stop != null && */bBeginLoop == true)
                 {
@@ -1340,10 +1358,10 @@ namespace dp2Circulation
                 {
                     // 2013/10/22
                     nRet = RefreshListViewLines(
-                        null,
+                        //null,
                         items,
                         "",
-                        true,
+                        //true,
                         true,
                         out strError);
                     if (nRet == -1)

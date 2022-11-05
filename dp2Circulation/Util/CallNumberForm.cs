@@ -118,6 +118,8 @@ namespace dp2Circulation
         /// </summary>
         public CallNumberForm()
         {
+            this.UseLooping = true; // 2022/11/4
+
             InitializeComponent();
 
             ListViewProperty prop = new ListViewProperty();
@@ -133,19 +135,8 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
-
             this.GetValueTable -= new GetValueTableEventHandler(CallNumberForm_GetValueTable);
             this.GetValueTable += new GetValueTableEventHandler(CallNumberForm_GetValueTable);
-
 
             // 类号
             if (String.IsNullOrEmpty(this.textBox_classNumber.Text) == true)
@@ -536,6 +527,7 @@ namespace dp2Circulation
 
             bool bFast = StringUtil.IsInList("fast", strStyle);
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -548,18 +540,19 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索同类书实体记录 ...",
+                "timeout:0:5:0,disableControl");
             try
             {
-                string strQueryXml = "";
-
                 long lRet = channel.SearchOneClassCallNumber(
-                    _stop,
+                    looping.stop,
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
                     "callnumber",
-                    out strQueryXml,
+                    out string strQueryXml,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -576,21 +569,18 @@ namespace dp2Circulation
                 long lPerCount = Math.Min(50, lHitCount);
                 CallNumberSearchResult[] searchresults = null;
 
-                if (_stop != null)
-                    _stop.SetProgressRange(0, lHitCount);
+                if (looping != null)
+                    looping.stop.SetProgressRange(0, lHitCount);
 
                 // 装入浏览格式
                 for (; ; )
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null)
+                    if (looping.Stopped)
                     {
-                        if (_stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
+                        strError = "用户中断";
+                        goto ERROR1;
                     }
 
                     long lCurrentPerCount = lPerCount;
@@ -604,10 +594,10 @@ namespace dp2Circulation
                         lCurrentPerCount = lPerCount * 10;
                     }
 
-                    _stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetCallNumberSearchResult(
-                        _stop,
+                        looping.stop,
                         GetArrangeGroupName(this.LocationString),
                         // "!" + this.BiblioDbName,
                         "callnumber",   // strResultSetName
@@ -680,8 +670,8 @@ namespace dp2Circulation
 
 
                         this.listView_number.Items.Add(item);
-                        if (_stop != null)
-                            _stop.SetProgressValue(lStart + i + 1);
+                        if (looping != null)
+                            looping.stop.SetProgressValue(lStart + i + 1);
                     }
                     this.listView_number.EndUpdate();
 
@@ -692,6 +682,8 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -701,6 +693,7 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
 
         END1:
@@ -1529,6 +1522,7 @@ COLUMN_CALLNUMBER);
         {
             strTailNumber = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -1538,22 +1532,27 @@ COLUMN_CALLNUMBER);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在获得尾号 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得尾号 ...",
+                "timeout:0:1:0,disableControl");
             try
             {
                 long lRet = channel.GetOneClassTailNumber(
-                    _stop,
+                    looping.stop,
                     GetArrangeGroupName(this.LocationString),
                     this.ClassNumber,
                     out strTailNumber,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -1562,11 +1561,8 @@ COLUMN_CALLNUMBER);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-        // return 0;
-        ERROR1:
-            return -1;
         }
 
         // 获取尾号
@@ -1648,6 +1644,7 @@ COLUMN_CALLNUMBER);
         {
             strOutputNumber = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -1657,11 +1654,14 @@ COLUMN_CALLNUMBER);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在保存尾号 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存尾号 ...",
+                "timeout:0:1:0,disableControl");
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    _stop,
+                    looping.stop,
                     "save",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -1670,12 +1670,14 @@ COLUMN_CALLNUMBER);
                     out strOutputNumber,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -1684,11 +1686,8 @@ COLUMN_CALLNUMBER);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-        // return 0;
-        ERROR1:
-            return -1;
         }
 
         // 用检索得到的同类书中实际用到的最大号，试探性推动种次号库中的尾号
@@ -1729,12 +1728,15 @@ COLUMN_CALLNUMBER);
 
             Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在保护尾号 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping("正在保护尾号 ...",
+                "disableControl");
             try
             {
                 string strArrangeGroupName = GetArrangeGroupName(this.LocationString);
@@ -1780,11 +1782,14 @@ COLUMN_CALLNUMBER);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
         }
 
@@ -1803,6 +1808,7 @@ COLUMN_CALLNUMBER);
         {
             strOutputNumber = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -1812,11 +1818,14 @@ COLUMN_CALLNUMBER);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在推动尾号 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在推动尾号 ...",
+                "timeout:0:1:0,disableControl");
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    _stop,
+                    looping.stop,
                     "conditionalpush",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -1825,12 +1834,14 @@ COLUMN_CALLNUMBER);
                     out strOutputNumber,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -1839,11 +1850,8 @@ COLUMN_CALLNUMBER);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-        // return 0;
-        ERROR1:
-            return -1;
         }
 
         // 增量尾号
@@ -1860,21 +1868,24 @@ COLUMN_CALLNUMBER);
         {
             strOutputNumber = "";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
 
-
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在增量尾号 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在增量尾号 ...",
+                "timeout:0:1:0,disableControl");
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    _stop,
+                    looping.stop,
                     "increase",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -1883,12 +1894,14 @@ COLUMN_CALLNUMBER);
                     out strOutputNumber,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -1897,11 +1910,8 @@ COLUMN_CALLNUMBER);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
-
-        // return 0;
-        ERROR1:
-            return -1;
         }
 
         // 复制比当前书目中统计出来的最大号还大1的号
@@ -2466,6 +2476,7 @@ COLUMN_CALLNUMBER);
         {
             strError = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
@@ -2473,7 +2484,10 @@ COLUMN_CALLNUMBER);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.SetMessage("正在获取书目摘要 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取书目摘要 ...",
+                "timeout:0:1:0,disableControl");
             try
             {
                 string strPrevBiblioRecPath = "";
@@ -2482,11 +2496,8 @@ COLUMN_CALLNUMBER);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null)
-                    {
-                        if (_stop.State != 0)
-                            return 0;
-                    }
+                    if (looping.Stopped)
+                        return 0;
 
                     ListViewItem item = this.listView_number.Items[i];
                     string strSummary = "";
@@ -2499,9 +2510,9 @@ COLUMN_CALLNUMBER);
                     }
 
                     string strOutputBiblioRecPath = "";
-
+                    // TODO: 这里要用 CacheableBiblioLoader 重构
                     long lRet = channel.GetBiblioSummary(
-                        _stop,
+                        looping.stop,
                         "@bibliorecpath:" + strBiblioRecPath,
                         "", // strItemRecPath,
                         null,
@@ -2519,19 +2530,20 @@ COLUMN_CALLNUMBER);
                     strPrevBiblioRecPath = strBiblioRecPath;
                     strPrevSummary = strSummary;
                 }
-
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
-
-            return 0;
         }
 
         private void checkBox_topmost_CheckedChanged(object sender, EventArgs e)

@@ -16,6 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -47,6 +48,8 @@ namespace dp2Circulation
         /// </summary>
         public ReaderManageForm()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
         }
 
@@ -56,18 +59,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-
-#if NO
-            MainForm.AppInfo.LoadMdiChildFormStates(this,
-    "mdi_form_state");
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
 
             this.GetValueTable += new GetValueTableEventHandler(ReaderManageForm_GetValueTable);
 
@@ -79,7 +70,6 @@ namespace dp2Circulation
             this.commander = new Commander(this);
             this.commander.IsBusy -= new IsBusyEventHandler(commander_IsBusy);
             this.commander.IsBusy += new IsBusyEventHandler(commander_IsBusy);
-
         }
 
         void commander_IsBusy(object sender, IsBusyEventArgs e)
@@ -90,10 +80,9 @@ namespace dp2Circulation
         void ReaderManageForm_GetValueTable(object sender, GetValueTableEventArgs e)
         {
             string strError = "";
-            string[] values = null;
             int nRet = MainForm.GetValueTable(e.TableName,
                 e.DbName,
-                out values,
+                out string[] values,
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -102,18 +91,6 @@ namespace dp2Circulation
 
         private void ReaderManageForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if NO
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
-            }
-#endif
-
             if (this.Changed == true)
             {
                 // 警告尚未保存
@@ -138,20 +115,7 @@ namespace dp2Circulation
             if (this.m_webExternalHost != null)
                 this.m_webExternalHost.Destroy();
 
-#if NO
-            if (stop != null) // 脱离关联
-            {
-                stop.Unregister();	// 和容器关联
-                stop = null;
-            }
-#endif
-
             this.GetValueTable -= new GetValueTableEventHandler(ReaderManageForm_GetValueTable);
-
-#if NO
-            MainForm.AppInfo.SaveMdiChildFormStates(this,
-   "mdi_form_state");
-#endif
         }
 
         /// <summary>
@@ -288,6 +252,7 @@ MessageBoxDefaultButton.Button2);
 
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在初始化浏览器组件 ...");
             _stop.BeginLoop();
@@ -296,26 +261,26 @@ MessageBoxDefaultButton.Button2);
             Program.MainForm.Update();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
 
             this.ClearOperationInfo();
-
             try
             {
-
                 byte[] baTimestamp = null;
                 string strRecPath = "";
 
                 int nRedoCount = 0;
             REDO:
-                _stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                looping.stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
-                string[] results = null;
-
-                long lRet = Channel.GetReaderInfo(
-                    _stop,
+                long lRet = channel.GetReaderInfo(
+                    looping.stop,
                     strBarcode,
                     "xml,html",
-                    out results,
+                    out string[] results,
                     out strRecPath,
                     out baTimestamp,
                     out strError);
@@ -381,54 +346,11 @@ MessageBoxDefaultButton.Button2);
                 // 保存刚获得的记录
                 this.OldRecord = strXml;
 
-                /*
-                int nRet = this.readerEditControl1.SetData(
-                    strXml,
-                    strRecPath,
-                    baTimestamp,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                 * */
-
-                /*
-                this.SetXmlToWebbrowser(this.webBrowser_xml,
-                    strXml);
-                 * */
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
                     Program.MainForm.DataDir,
                     "xml",
                     strXml);
 
-                // this.m_strSetAction = "change";
-
-                /*
-                lRet = Channel.GetReaderInfo(
-                    stop,
-                    strBarcode,
-                    "html",
-                    out strHtml,
-                    out strRecPath,
-                    out baTimestamp,
-                    out strError);
-                if (lRet == -1)
-                {
-                    ChargingForm.SetHtmlString(this.webBrowser_normalInfo,
-"装载读者记录发生错误: " + strError);
-
-                }
-                else
-                {
-                    ChargingForm.SetHtmlString(this.webBrowser_normalInfo,
-                        strHtml);
-                }
-                 * */
-#if NO
-                Global.SetHtmlString(this.webBrowser_normalInfo,
-                    strHtml,
-                    Program.MainForm.DataDir,
-                    "readermanageform_reader");
-#endif
                 this.m_webExternalHost.SetHtmlString(strHtml,
                     "readermanageform_reader");
 
@@ -437,45 +359,23 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
 
                 this.Changed = false;
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
-
-            return 1;
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
-
-#if NO
-        void SetXmlToWebbrowser(WebBrowser webbrowser,
-    string strXml)
-        {
-            string strTargetFileName = MainForm.DataDir + "\\xml.xml";
-
-            StreamWriter sw = new StreamWriter(strTargetFileName,
-                false,	// append
-                System.Text.Encoding.UTF8);
-            sw.Write(strXml);
-            sw.Close();
-
-            webbrowser.Navigate(strTargetFileName);
-        }
-#endif
-
-#if NO
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
 
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
@@ -540,7 +440,6 @@ MessageBoxDefaultButton.Button2);
                     "default_account",
                     "username",
                     "");
-
             return 0;
         }
 
@@ -603,25 +502,26 @@ MessageBoxDefaultButton.Button2);
             if (nRet == -1)
                 goto ERROR1;
 
-
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在保存读者记录 " + this.ReaderBarcode + " ...");
             _stop.BeginLoop();
 
             EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存读者记录 " + this.ReaderBarcode + " ...",
+                "disableControl");
             try
             {
-                ErrorCodeValue kernel_errorcode;
-
                 byte[] baNewTimestamp = null;
                 string strExistingXml = "";
                 string strSavedXml = "";
                 string strSavedPath = "";
 
                 // changestate操作需要"setreaderinfo"和"changereaderstate"之一权限。
-                long lRet = Channel.SetReaderInfo(
-                    _stop,
+                long lRet = channel.SetReaderInfo(
+                    looping.stop,
                     "changestate",   // "change",
                     this.RecPath,
                     strXml,
@@ -631,7 +531,7 @@ MessageBoxDefaultButton.Button2);
                     out strSavedXml,
                     out strSavedPath,
                     out baNewTimestamp,
-                    out kernel_errorcode,
+                    out ErrorCodeValue kernel_errorcode,
                     out strError);
                 if (lRet == -1)
                 {
@@ -677,7 +577,7 @@ MessageBoxDefaultButton.Button2);
                     // 部分字段被拒绝
                     MessageBox.Show(this, strError);
 
-                    if (Channel.ErrorCode == ErrorCode.PartialDenied)
+                    if (channel.ErrorCode == ErrorCode.PartialDenied)
                     {
                         // 提醒重新装载?
                         MessageBox.Show(this, "请重新装载记录, 检查哪些字段内容修改被拒绝。");
@@ -705,11 +605,14 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
+                */
             }
 
             MessageBox.Show(this, "保存成功");
@@ -736,12 +639,13 @@ MessageBoxDefaultButton.Button2);
             Global.ClearHtmlPage(this.webBrowser_xml,
     Program.MainForm.DataDir);
             // this.webBrowser_xml.Navigate("about:blank");    // ??
-
         }
 
         private void ReaderManageForm_Activated(object sender, EventArgs e)
         {
+            /*
             Program.MainForm.stopManager.Active(this._stop);
+            */
 
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
@@ -787,7 +691,6 @@ MessageBoxDefaultButton.Button2);
             }
             else
                 e.Effect = DragDropEffects.None;
-
         }
 
         private void ReaderManageForm_DragDrop(object sender, DragEventArgs e)
@@ -850,7 +753,5 @@ MessageBoxDefaultButton.Button2);
         {
             this.comboBox_operation.Invalidate();
         }
-
-
     }
 }

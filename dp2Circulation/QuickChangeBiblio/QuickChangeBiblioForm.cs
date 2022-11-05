@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO;
 using System.Web;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -20,7 +21,7 @@ using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Script;
-using System.Collections;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -31,6 +32,8 @@ namespace dp2Circulation
     {
         public QuickChangeBiblioForm()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
         }
 
@@ -89,27 +92,35 @@ namespace dp2Circulation
         {
             this.tabControl_input.SelectedTab = this.tabPage_paths;
 
+            /*
             this.EnableControls(false);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("");
             _stop.BeginLoop();
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
 
             try
             {
-                return DoTextLines();
+                return DoTextLines(looping.stop,
+                    channel);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
-
         }
 
         public void DoRecPathFile(string strFileName)
@@ -117,56 +128,72 @@ namespace dp2Circulation
             this.tabControl_input.SelectedTab = this.tabPage_recpathFile;
             this.textBox_recpathFile.Text = strFileName;
 
+            /*
             this.EnableControls(false);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("");
             _stop.BeginLoop();
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
             try
             {
-                DoFileName();
+                DoFileName(looping.stop,
+                    channel);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
         }
 
         private void button_begin_Click(object sender, EventArgs e)
         {
+            /*
             this.EnableControls(false);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("");
             _stop.BeginLoop();
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
             try
             {
                 if (this.tabControl_input.SelectedTab == this.tabPage_paths)
                 {
-                    DoTextLines();
+                    DoTextLines(looping.stop, channel);
                 }
                 else if (this.tabControl_input.SelectedTab == this.tabPage_recpathFile)
                 {
-                    DoFileName();
+                    DoFileName(looping.stop, channel);
                 }
 
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
         }
 
@@ -198,7 +225,8 @@ namespace dp2Circulation
         //      -1  出错
         //      0   放弃处理
         //      1   正常结束
-        int DoTextLines()
+        int DoTextLines(Stop stop,
+            LibraryChannel channel)
         {
             string strError = "";
             int nRet = 0;
@@ -253,20 +281,17 @@ MessageBoxDefaultButton.Button1);
 
             DateTime now = DateTime.Now;
 
-            _stop.SetProgressRange(0, this.textBox_paths.Lines.Length);
+            stop?.SetProgressRange(0, this.textBox_paths.Lines.Length);
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 开始批处理修改书目记录</div>");
             for (int i = 0; i < this.textBox_paths.Lines.Length; i++)
             {
                 Application.DoEvents();
-                if (_stop != null)
+                if (stop != null && stop.State != 0)
                 {
-                    if (_stop.State != 0)
-                    {
-                        strError = "用户中断1";
-                        goto ERROR1;
-                    }
+                    strError = "用户中断1";
+                    goto ERROR1;
                 }
 
                 string strLine = this.textBox_paths.Lines[i].Trim();
@@ -278,7 +303,10 @@ MessageBoxDefaultButton.Button1);
 
                 if (String.IsNullOrEmpty(strLine) == true)
                     continue;
-                nRet = ChangeOneRecord(strLine,
+                nRet = ChangeOneRecord(
+                    stop,
+                    channel,
+                    strLine,
                     now,
                     out strError);
                 if (nRet == -1)
@@ -286,7 +314,7 @@ MessageBoxDefaultButton.Button1);
                 nCount++;
                 if (nRet == 1)
                     nChangedCount++;
-                _stop.SetProgressValue(i + 1);
+                stop?.SetProgressValue(i + 1);
             }
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
@@ -300,7 +328,8 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
-        void DoFileName()
+        void DoFileName(Stop stop,
+            LibraryChannel channel)
         {
             string strError = "";
             int nRet = 0;
@@ -346,10 +375,9 @@ MessageBoxDefaultButton.Button1);
 
             using (StreamReader sr = new StreamReader(this.textBox_recpathFile.Text))
             {
-
                 DateTime now = DateTime.Now;
 
-                _stop.SetProgressRange(0, sr.BaseStream.Length);
+                stop?.SetProgressRange(0, sr.BaseStream.Length);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 开始批处理修改书目记录</div>");
@@ -357,13 +385,10 @@ MessageBoxDefaultButton.Button1);
                 for (; ; )
                 {
                     Application.DoEvents();
-                    if (_stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (_stop.State != 0)
-                        {
-                            strError = "用户中断2";
-                            goto ERROR1;
-                        }
+                        strError = "用户中断2";
+                        goto ERROR1;
                     }
 
                     string strLine = "";
@@ -387,7 +412,10 @@ MessageBoxDefaultButton.Button1);
                     //      -1  出错
                     //      0   未发生改变
                     //      1   发生了改变
-                    nRet = ChangeOneRecord(strLine,
+                    nRet = ChangeOneRecord(
+                        stop,
+                        channel,
+                        strLine,
                         now,
                         out strError);
                     if (nRet == -1)
@@ -395,7 +423,7 @@ MessageBoxDefaultButton.Button1);
                     nCount++;
                     if (nRet == 1)
                         nChangedCount++;
-                    _stop.SetProgressValue(sr.BaseStream.Position);
+                    stop?.SetProgressValue(sr.BaseStream.Position);
                 }
             }
 
@@ -430,14 +458,17 @@ MessageBoxDefaultButton.Button1);
         //      -1  出错
         //      0   未发生改变
         //      1   发生了改变
-        int ChangeOneRecord(string strBiblioRecPath,
+        int ChangeOneRecord(
+            Stop stop,
+            LibraryChannel channel,
+            string strBiblioRecPath,
             DateTime now,
             out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            _stop.SetMessage("正在处理 " + strBiblioRecPath + " ...");
+            stop?.SetMessage("正在处理 " + strBiblioRecPath + " ...");
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"=== {strBiblioRecPath} ===") + "</div>");
 
@@ -446,8 +477,8 @@ MessageBoxDefaultButton.Button1);
 
             string[] results = null;
             byte[] timestamp = null;
-            long lRet = Channel.GetBiblioInfos(
-                _stop,
+            long lRet = channel.GetBiblioInfos(
+                stop,
                 strBiblioRecPath,
                 "",
                 formats,
@@ -606,8 +637,8 @@ MessageBoxDefaultButton.Button1);
             // 保存
             byte[] baNewTimestamp = null;
             string strOutputPath = "";
-            lRet = Channel.SetBiblioInfo(
-    _stop,
+            lRet = channel.SetBiblioInfo(
+    stop,
     "change",
     strBiblioRecPath,
     "xml",

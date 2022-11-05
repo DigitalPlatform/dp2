@@ -31,6 +31,8 @@ namespace dp2Circulation
 
         public InvoiceSearchForm()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
         }
 

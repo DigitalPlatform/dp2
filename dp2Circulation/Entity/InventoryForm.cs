@@ -30,6 +30,8 @@ namespace dp2Circulation
 
         public InventoryForm()
         {
+            this.UseLooping = true; // 2022/11/4
+
             InitializeComponent();
 
             this.DbType = "inventory";
@@ -346,14 +348,18 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "disableControl");
             try
             {
                 SelectBatchNoDialog dlg = new SelectBatchNoDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.Channel = channel;
-                dlg.Stop = this._stop;
+                dlg.Stop = looping.stop;
                 dlg.InventoryDbName = strInventoryDbName;
                 dlg.LibraryCodeList = GetOwnerLibraryCodes();
                 Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_state");
@@ -364,7 +370,10 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -473,6 +482,7 @@ namespace dp2Circulation
             }
             strQueryXml += "</target>";
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -483,6 +493,10 @@ namespace dp2Circulation
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在检索盘点记录 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索盘点记录 ...",
+                "timeout:0:2:0,disableControl");
 
             this.listView_inventoryList_records.BeginUpdate();
             this._listview = this.listView_inventoryList_records;
@@ -491,7 +505,7 @@ namespace dp2Circulation
             {
                 // 开始检索
                 long lRet = channel.Search(
-    _stop,
+    looping.stop,
     strQueryXml,
     strResultSetName,
     "", // strOutputStyle
@@ -506,8 +520,8 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                _stop.SetProgressRange(0, lHitCount);
-                _stop.Style = StopStyle.EnableHalfStop;
+                looping.stop.SetProgressRange(0, lHitCount);
+                looping.stop.Style = StopStyle.EnableHalfStop;
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
@@ -516,17 +530,17 @@ namespace dp2Circulation
                 // 获得结果集，装入listview
                 for (; ; )
                 {
-                    _stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
                     lRet = channel.GetSearchResult(
-                        _stop,
+                        looping.stop,
                         strResultSetName,   // strResultSetName
                         lStart,
                         lPerCount,
@@ -551,7 +565,7 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             return -1;
@@ -563,7 +577,7 @@ namespace dp2Circulation
     Global.InsertBlankColumn(record.Cols));
 
                         items.Add(item);
-                        _stop.SetProgressValue(lStart + i);
+                        looping.stop.SetProgressValue(lStart + i);
                         i++;
                     }
 
@@ -575,6 +589,7 @@ namespace dp2Circulation
                         //      0   用户中断
                         //      1   完成
                         int nRet = _fillBiblioSummaryColumn0(
+                            looping.stop,
                             channel,
                             items,
                             0,
@@ -607,6 +622,8 @@ namespace dp2Circulation
                 this.timer_qu.Stop();
                 this.listView_inventoryList_records.EndUpdate();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 // stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -617,6 +634,7 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
         }
 
@@ -628,6 +646,7 @@ namespace dp2Circulation
         //      0   用户中断
         //      1   完成
         internal int _fillBiblioSummaryColumn0(
+            Stop stop,
             LibraryChannel channel,
             List<ListViewItem> items,
             long lStartIndex,
@@ -707,6 +726,7 @@ namespace dp2Circulation
                 //      0   相关数据库没有配置 parent id 浏览列
                 //      1   找到
                 nRet = GetBiblioRecPath(
+                    stop,
                     channel,
                     item,
                     out strBiblioRecPath,
@@ -742,7 +762,7 @@ namespace dp2Circulation
 
             CacheableBiblioLoader loader = new CacheableBiblioLoader();
             loader.Channel = channel;
-            loader.Stop = this._stop;
+            loader.Stop = stop;
             loader.Format = "summary";
             loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
             loader.RecPaths = biblio_recpaths;
@@ -757,18 +777,18 @@ namespace dp2Circulation
             {
                 Application.DoEvents();	// 出让界面控制权
 
-                if (_stop != null
-                    && _stop.State != 0)
+                if (stop != null
+                    && stop.State != 0)
                 {
                     strError = "用户中断";
                     return 0;
                 }
 
                 string strRecPath = ListViewUtil.GetItemText(item, 0);
-                if (_stop != null && bDisplayMessage == true)
+                if (stop != null && bDisplayMessage == true)
                 {
-                    _stop.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
-                    _stop.SetProgressValue(lStartIndex + i);
+                    stop.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
+                    stop.SetProgressValue(lStartIndex + i);
                 }
 
 #if NO
@@ -826,6 +846,7 @@ namespace dp2Circulation
         //      0   相关数据库没有配置 parent id 浏览列
         //      1   找到
         int GetBiblioRecPath(
+            Stop stop,
             LibraryChannel channel,
             ListViewItem item,
             // bool bAutoSearch,
@@ -892,7 +913,7 @@ namespace dp2Circulation
                 // Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
 
                 nRet = SearchTwoRecPathByBarcode(
-                    this._stop,
+                    stop,
                     channel,
                     strQueryString,    // "@path:" + strRecPath,
                     out strOutputItemRecPath,
@@ -914,35 +935,6 @@ namespace dp2Circulation
                     return -1;
                 }
             }
-
-#if NO
-                    {
-                        nRet = SearchBiblioRecPath(
-                            this.stop,
-                            this.Channel,
-                            this.DbType,
-                            strRecPath,
-                            out strBiblioRecPath,
-                            out strError);
-                    }
-
-                    if (nRet == -1)
-                    {
-                        strError = "获得书目记录路径时出错: " + strError;
-                        return -1;
-                    }
-                    else if (nRet == 0)
-                    {
-                        strError = "记录路径 '" + strRecPath + "' 没有找到记录";
-                        return -1;
-                    }
-                    else if (nRet > 1) // 命中发生重复
-                    {
-                        strError = "记录路径 '" + strRecPath + "' 命中 " + nRet.ToString() + " 条记录，这是一个严重错误";
-                        return -1;
-                    }
-#endif
-
             return 1;
         }
 
@@ -964,14 +956,17 @@ namespace dp2Circulation
         {
             // string strError = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null);
             try
             {
                 SelectBatchNoDialog dlg = new SelectBatchNoDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.Channel = channel;
-                dlg.Stop = this._stop;
+                dlg.Stop = looping.stop;
                 dlg.InventoryDbName = "";
                 Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
                 dlg.ShowDialog(this);
@@ -981,7 +976,10 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
 #if NO
         ERROR1:
@@ -1075,6 +1073,7 @@ namespace dp2Circulation
 
             ClearBaseListViewItems();
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -1084,6 +1083,10 @@ namespace dp2Circulation
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在检索册记录 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索册记录 ...",
+                "timeout:0:2:0,disableControl");
 
             this.DbType = "item";
             this.listView_baseList_records.BeginUpdate();
@@ -1110,7 +1113,7 @@ namespace dp2Circulation
                 {
                     string strResultSetName = "default";
 
-                    long lRet = channel.SearchItem(_stop,
+                    long lRet = channel.SearchItem(looping.stop,
         "<all>",
         location,
         -1,
@@ -1130,8 +1133,8 @@ namespace dp2Circulation
 
                     long lHitCount = lRet;
 
-                    _stop.SetProgressRange(0, lTotalCount + lHitCount);
-                    _stop.Style = StopStyle.EnableHalfStop;
+                    looping.stop.SetProgressRange(0, lTotalCount + lHitCount);
+                    looping.stop.Style = StopStyle.EnableHalfStop;
 
                     long lStart = 0;
                     long lPerCount = Math.Min(50, lHitCount);
@@ -1140,17 +1143,17 @@ namespace dp2Circulation
                     // 获得结果集，装入listview
                     for (; ; )
                     {
-                        _stop.SetMessage("正在装入浏览信息 " + (lStart + lTotalCount + 1).ToString() + " - " + (lStart + lTotalCount + lPerCount).ToString() + " (命中 " + (lTotalCount + lHitCount).ToString() + " 条记录) ...");
+                        looping.stop.SetMessage("正在装入浏览信息 " + (lStart + lTotalCount + 1).ToString() + " - " + (lStart + lTotalCount + lPerCount).ToString() + " (命中 " + (lTotalCount + lHitCount).ToString() + " 条记录) ...");
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             return -1;
                         }
 
                         lRet = channel.GetSearchResult(
-                            _stop,
+                            looping.stop,
                             strResultSetName,   // strResultSetName
                             lStart,
                             lPerCount,
@@ -1175,7 +1178,7 @@ namespace dp2Circulation
                         {
                             Application.DoEvents();	// 出让界面控制权
 
-                            if (_stop != null && _stop.State != 0)
+                            if (looping.Stopped)
                             {
                                 strError = "用户中断";
                                 return -1;
@@ -1187,7 +1190,7 @@ namespace dp2Circulation
         Global.InsertBlankColumn(record.Cols));
 
                             items.Add(item);
-                            _stop.SetProgressValue(lStart + i);
+                            looping.stop.SetProgressValue(lStart + i);
                             i++;
                         }
 
@@ -1199,10 +1202,11 @@ namespace dp2Circulation
                             //      0   用户中断
                             //      1   完成
                             nRet = _fillBiblioSummaryColumn(
+                                looping.stop,
                                 channel,
                                 items,
                                 0,
-                                null,   // false,
+                                // false,
                                 true,   // false,  // bAutoSearch
                                 out strError);
                             if (nRet == -1)
@@ -1234,6 +1238,8 @@ namespace dp2Circulation
                 this.listView_baseList_records.EndUpdate();
                 this.DbType = "inventory";
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -1243,6 +1249,7 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
         }
 
@@ -1254,6 +1261,7 @@ namespace dp2Circulation
         //      0   相关数据库没有配置 parent id 浏览列
         //      1   找到
         public override int GetBiblioRecPath(
+            Stop stop,
             LibraryChannel channel,
             ListViewItem item,
             bool bAutoSearch,
@@ -1351,7 +1359,7 @@ namespace dp2Circulation
                         Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
 
                         nRet = SearchTwoRecPathByBarcode(
-                            this._stop,
+                            stop,
                             channel,
                             strQueryString,    // "@path:" + strRecPath,
                             out strItemRecPath,
@@ -1376,7 +1384,7 @@ namespace dp2Circulation
                     else
                     {
                         nRet = SearchBiblioRecPath(
-                            this._stop,
+                            stop,
                             channel,
                             this.DbType,
                             strRecPath,
@@ -1532,14 +1540,17 @@ null);
             }
             int nOpertimeColumnIndex = this._defs._base_colmun_defs.Count + nTemp + 2;
 
+            /*
             EnableControls(false);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在进行交叉运算 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在进行交叉运算 ...",
+                "disableControl");
 
             this.ShowMessage("正在进行交叉运算 ...");
             Application.DoEvents();
-
             try
             {
                 this.ShowMessage("正在清除标记 ...");
@@ -1835,11 +1846,14 @@ null);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
         }
 
@@ -2056,15 +2070,14 @@ null);
                 nCount++;
             }
 
-
             string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
 
             // 刷新浏览行
             nRet = RefreshListViewLines(
-                null,
+                //null,
                 items,
                 strBrowseStyle,
-                false,
+                //false,
                 false,  // 不清除右侧多出来的列内容
                 out strError);
             if (nRet == -1)
@@ -2191,12 +2204,16 @@ null);
 
             this.ShowMessage("正在创建 Excel 报表");
 
+            /*
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在创建 Excel 报表 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping("正在创建 Excel 报表 ...",
+                "disableControl,halfstop");
             this.listView_baseList_records.Enabled = false;
             this.listView_inventoryList_records.Enabled = false;
             try
@@ -2208,7 +2225,7 @@ null);
                 //      0   放弃或中断
                 //      1   成功
                 nRet = CreateLostSheet(
-                    _stop,
+                    looping.stop,
                     doc,
                     output_columns,
                     out strError);
@@ -2220,7 +2237,7 @@ null);
                 //      0   放弃或中断
                 //      1   成功
                 nRet = CreateOutOfRangeSheet(
-                    _stop,
+                    looping.stop,
                     doc,
                     output_columns,
                     out strError);
@@ -2232,7 +2249,7 @@ null);
                 //      0   放弃或中断
                 //      1   成功
                 nRet = CreateBorrowedSheet(
-                    _stop,
+                    looping.stop,
                     doc,
                     output_columns,
                     out strError);
@@ -2244,7 +2261,7 @@ null);
                 //      0   放弃或中断
                 //      1   成功
                 nRet = CreateVerifiedSheet(
-                    _stop,
+                    looping.stop,
                     doc,
                     output_columns,
                     out strError);
@@ -2253,15 +2270,18 @@ null);
             }
             finally
             {
-                EnableControls(true);
                 this.listView_baseList_records.Enabled = true;
                 this.listView_inventoryList_records.Enabled = true;
 
+                looping.Dispose();
+                /*
+                EnableControls(true);
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
                 _stop.Style = StopStyle.None;
+                */
 
                 if (doc != null)
                 {
@@ -2280,7 +2300,6 @@ null);
 
                     }
                 }
-
             }
 
             this.ShowMessage("创建完成", "green", true);
@@ -2776,6 +2795,7 @@ null);
             _operLogItems = new List<OperLogData>();
             _operLogTable = new Hashtable();
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -2784,13 +2804,17 @@ null);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在装载日志记录 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在装载日志记录 ...",
+                "disableControl,halfstop");
             try
             {
                 ProgressEstimate estimate = new ProgressEstimate();
 
                 OperLogLoader loader = new OperLogLoader();
                 loader.Channel = channel;
-                loader.Stop = this.Progress;
+                loader.Stop = looping.stop;
                 loader.Estimate = estimate;
                 loader.Dates = dates;
                 loader.Level = 2;  // Program.MainForm.OperLogLevel;
@@ -2803,14 +2827,14 @@ null);
 
                 foreach (OperLogItem item in loader)
                 {
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return 0;
                     }
 
-                    if (_stop != null)
-                        _stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+                    if (looping != null)
+                        looping.stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
 
                     if (string.IsNullOrEmpty(item.Xml) == true)
                         continue;
@@ -2884,6 +2908,8 @@ null);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -2892,6 +2918,7 @@ null);
                 this.ReturnChannel(channel);
 
                 EnableControls(true);
+                */
             }
 
         }
@@ -3117,6 +3144,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
+            /*
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -3125,12 +3153,16 @@ MessageBoxDefaultButton.Button1);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在修改册记录状态 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在修改册记录状态 ...",
+                "disableControl,halfstop");
             try
             {
-                _stop.SetProgressRange(0, items.Count);
+                looping.stop.SetProgressRange(0, items.Count);
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-    _stop,
+    looping.stop,
     items,
     this.m_biblioTable);
                 loader.DbTypeCaption = "实体库";
@@ -3141,14 +3173,13 @@ MessageBoxDefaultButton.Button1);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null
-                        && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -3200,7 +3231,6 @@ MessageBoxDefaultButton.Button1);
 
                     info.NewXml = item_dom.DocumentElement.OuterXml;
 
-                    byte[] baNewTimestamp = null;
                     // 保存一条记录
                     // 保存成功后， info.Timestamp 会被更新
                     // return:
@@ -3208,10 +3238,11 @@ MessageBoxDefaultButton.Button1);
                     //      -1  出错
                     //      0   成功
                     nRet = SaveItemRecord(
+                        looping.stop,
                         channel,
                         info.RecPath,
                     info,
-                    out baNewTimestamp,
+                    out byte[] baNewTimestamp,
                     out strError);
                     if (nRet == -1)
                         return -1;
@@ -3240,25 +3271,28 @@ MessageBoxDefaultButton.Button1);
 
                     // 刷新浏览行
                     nRet = RefreshListViewLines(
+                        looping.stop,
                         channel,
                         changed_items,
                         strBrowseStyle,
-                        false,
+                        //false,
                         false,  // 不清除右侧多出来的列内容
                         out strError);
                     if (nRet == -1)
                         return -1;
                 }
-
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.Style = StopStyle.None;
 
                 this.ReturnChannel(channel);
+                */
 
                 EnableControls(true);
             }
@@ -3306,6 +3340,7 @@ MessageBoxDefaultButton.Button1);
         //      -1  出错
         //      0   成功
         int SaveItemRecord(
+            Stop stop,
             LibraryChannel channel,
             string strRecPath,
             BiblioInfo info,
@@ -3346,7 +3381,7 @@ MessageBoxDefaultButton.Button1);
             long lRet = 0;
 
             lRet = channel.SetEntities(
-                 this._stop,   // this.BiblioStatisForm.stop,
+                 stop,   // this.BiblioStatisForm.stop,
                  "",
                  entities,
                  out errorinfos,
@@ -3561,14 +3596,17 @@ MessageBoxDefaultButton.Button1);
 
         private void button_start_setLocations_Click(object sender, EventArgs e)
         {
+            /*
             LibraryChannel channel = this.GetChannel();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null);
             try
             {
                 SelectBatchNoDialog dlg = new SelectBatchNoDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.Channel = channel;
-                dlg.Stop = this._stop;
+                dlg.Stop = looping.stop;
                 dlg.InventoryDbName = "";
                 dlg.LibraryCodeList = GetOwnerLibraryCodes();
                 Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
@@ -3579,7 +3617,10 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -3658,10 +3699,10 @@ MessageBoxDefaultButton.Button1);
 
                 // 刷新浏览行
                 nRet = RefreshListViewLines(
-                    null,
+                    //null,
                     items,
                     strBrowseStyle,
-                    true,   // bBeginLoop
+                    //true,   // bBeginLoop
                     false,  // 不清除右侧多出来的列内容
                     out strError);
                 if (nRet == -1)
@@ -3859,6 +3900,7 @@ MessageBoxDefaultButton.Button2);
 
             string strError = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             _stop.Style = StopStyle.EnableHalfStop;
@@ -3867,13 +3909,17 @@ MessageBoxDefaultButton.Button2);
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在删除盘点记录 ...",
+                "disableControl,halfstop");
             this.listView_inventoryList_records.Enabled = false;
             try
             {
-                _stop.SetProgressRange(0, items.Count);
+                looping.stop.SetProgressRange(0, items.Count);
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-    _stop,
+    looping.stop,
     items,
     this.m_biblioTable);
                 loader.DbTypeCaption = "盘点";
@@ -3883,14 +3929,13 @@ MessageBoxDefaultButton.Button2);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null
-                        && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -3904,14 +3949,14 @@ MessageBoxDefaultButton.Button2);
                         entity.RefID = BookItem.GenRefID();
 #endif
 
-                    _stop.SetMessage("正在删除盘点记录 " + info.RecPath);
+                    looping.stop.SetMessage("正在删除盘点记录 " + info.RecPath);
 
                     long lRet = 0;
 
                     string strOutputResPath = "";
                     byte[] output_timestamp = null;
                     lRet = channel.WriteRes(
-                         _stop,
+                         looping.stop,
                          info.RecPath,
                          "",
                          0,
@@ -3925,7 +3970,7 @@ MessageBoxDefaultButton.Button2);
                     if (lRet == -1)
                         goto ERROR1;
 
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
 
                     this.listView_inventoryList_records.Items.Remove(item.ListViewItem);
                     i++;
@@ -3933,6 +3978,9 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                this.listView_inventoryList_records.Enabled = true;
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -3940,9 +3988,8 @@ MessageBoxDefaultButton.Button2);
                 _stop.Style = StopStyle.None;
 
                 this.EnableControls(true);
-                this.listView_inventoryList_records.Enabled = true;
-
                 this.ReturnChannel(channel);
+                */
             }
 
             MessageBox.Show(this, "成功删除盘点记录 " + items.Count + " 条");
@@ -4065,10 +4112,10 @@ MessageBoxDefaultButton.Button2);
 
             // 刷新浏览行
             int nRet = RefreshListViewLines(
-                null,
+                //null,
                 items,
                 strBrowseStyle,
-                true,
+                //true,
                 false,  // 不清除右侧多出来的列内容
                 out strError);
             if (nRet == -1)

@@ -94,6 +94,8 @@ namespace dp2Circulation
 
         public RfidToolForm()
         {
+            this.UseLooping = true; // 2022/11/4
+
             InitializeComponent();
 
             this.chipEditor1.TitleVisible = false;
@@ -168,7 +170,7 @@ namespace dp2Circulation
 
         }
 
-        CancellationTokenSource _cancel = new CancellationTokenSource();
+        // CancellationTokenSource _cancel = new CancellationTokenSource();
 
         private void RfidToolForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -1045,12 +1047,15 @@ this.toolStripButton_autoFixEas.Checked);
                     if (string.IsNullOrEmpty(pii))
                         continue;
 
+                    /*
                     LibraryChannel channel = this.GetChannel();
+                    */
+                    var looping = Looping(out LibraryChannel channel);
                     try
                     {
                         token.ThrowIfCancellationRequested();
 
-                        long lRet = channel.GetItemInfo(null,
+                        long lRet = channel.GetItemInfo(looping.stop,
                             pii,
                             "xml",
                             out string xml,
@@ -1072,7 +1077,10 @@ this.toolStripButton_autoFixEas.Checked);
                     }
                     finally
                     {
+                        looping.Dispose();
+                        /*
                         this.ReturnChannel(channel);
+                        */
                     }
                 }
             }

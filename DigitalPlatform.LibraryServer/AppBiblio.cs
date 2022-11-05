@@ -1757,7 +1757,7 @@ namespace DigitalPlatform.LibraryServer
         // 权限:   需要具有getbibliosummary权限
         // parameters:
         //      strConfirmItemRecPath       册、订购、期、评注记录路径
-        //                                  如果 strComfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
+        //                                  如果 strConfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
         //      strBiblioRecPathExclude   除开列表中的这些种路径, 才返回摘要内容, 否则仅仅返回种路径即可
         //                                  如果包含 "coverimage"，表示要在 strSummary 头部包含封面图像的 <img ... /> 片段
         public LibraryServerResult GetBiblioSummary(

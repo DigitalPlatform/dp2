@@ -7688,11 +7688,12 @@ Keys keyData)
                 }
 
                 nRet = form.FillBiblioSummaryColumn(
+                    looping.stop,
                     channel,
                     new_items,
                     0,
                     true,
-                    true,
+                    // true,
                     out strError);
                 if (nRet == -1)
                     return -1;

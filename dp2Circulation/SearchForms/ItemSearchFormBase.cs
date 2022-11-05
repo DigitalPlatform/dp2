@@ -550,10 +550,11 @@ namespace dp2Circulation
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
+                    looping.stop,
                 channel,
                 items,
                 "",
-                false,
+                //false,
                 true,
                 out strError);
                 if (nRet == -1)
@@ -1190,10 +1191,11 @@ item_recpath);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
+                    looping.stop,
                     channel,
                     items,
                     "",
-                    looping.stop,   // false,
+                    // false,
                     true,
                     out strError);
                 if (nRet == -1)
@@ -1368,6 +1370,7 @@ item_recpath);
         // 实体数据库名 --> parent id 列号
         internal Hashtable m_tableSummaryColIndex = new Hashtable();
 
+        // TODO: 用 CacheableBiblioLoader 改造
         // parameters:
         //      bBeginLoop  是否要 BeginLoop()。在大循环中使用本函数，要用 false    
         // return:
@@ -1426,10 +1429,10 @@ item_recpath);
                         //      0   用户中断
                         //      1   完成
                         nRet = _fillBiblioSummaryColumn(
+                            stop,
                             channel,
                             batch,
                             lStartIndex,
-                            stop,// TODO: 需要重构，比如传入 stop 对象
                             true,
                             out strError);
                         if (nRet == -1 || nRet == -2)
@@ -1449,10 +1452,11 @@ item_recpath);
                     //      0   用户中断
                     //      1   完成
                     nRet = _fillBiblioSummaryColumn(
+                        stop,
                         channel,
                         batch,
                         lStartIndex,
-                        stop,   // bBeginLoop,
+                        // bBeginLoop,
                         true,
                         out strError);
                     if (nRet == -1 || nRet == -2)
@@ -1534,6 +1538,7 @@ item_recpath);
             return results;
         }
 
+        // TODO: 用 CacheableBiblioLoader 改造
         // parameters:
         //      lStartIndex 调用前已经做过的事项数。为了准确显示 Progress
         // return:
@@ -1542,11 +1547,11 @@ item_recpath);
         //      0   用户中断
         //      1   完成
         internal int _fillBiblioSummaryColumn(
+        Stop stop,
         LibraryChannel channel,
         List<ListViewItem> items,
         long lStartIndex,
         // bool bDisplayMessage,
-        Stop stop,
         bool bAutoSearch,
         out string strError)
         {
@@ -1640,6 +1645,7 @@ item_recpath);
                 //      0   相关数据库没有配置 parent id 浏览列
                 //      1   找到
                 nRet = GetBiblioRecPath(
+                    stop,
                     channel,
                     item,
                     bAutoSearch,   // true 如果遇到没有 parent id 列的时候速度较慢
@@ -1962,12 +1968,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
          * * */
         // 获得事项所从属的书目记录的路径
         // parameters:
+        //      channel 一般情况不会用到 channel 来请求 API
         //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
         // return:
         //      -1  出错
         //      0   相关数据库没有配置 parent id 浏览列
         //      1   找到
         public virtual int GetBiblioRecPath(
+            Stop stop,
             LibraryChannel channel,
             ListViewItem item,
             bool bAutoSearch,
@@ -2072,7 +2080,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                         Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
 
                         nRet = SearchTwoRecPathByBarcode(
-                            null,   // this._stop,
+                            stop,   // this._stop,
                             channel,
                             strQueryString,    // "@path:" + strRecPath,
                             out strItemRecPath,
@@ -2097,7 +2105,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                     else
                     {
                         nRet = SearchBiblioRecPath(
-                            null,   // this._stop,
+                            stop,   // this._stop,
                             channel,
                             this.DbType,
                             strRecPath,

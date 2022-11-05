@@ -16,6 +16,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -34,6 +35,8 @@ namespace dp2Circulation
 
         public TestSearchForm()
         {
+            this.UseLooping = true; // 2022/11/4
+
             InitializeComponent();
         }
 
@@ -129,14 +132,22 @@ namespace dp2Circulation
             this.textBox_biblioSearch_queryFilename.Text = dlg.FileName;
         }
 
+        // 2022/11/4
+        public override void EnableControls(bool bEnable)
+        {
+            EnableControlsInSearching(bEnable);
+        }
+
         void EnableControlsInSearching(bool bEnable)
         {
-
-            this.button_beginSearch.Enabled = bEnable;
-            this.textBox_biblioSearch_queryFilename.Enabled = bEnable;
-            this.button_searchBiblio_findFilename.Enabled = bEnable;
-            this.textBox_searchBiblio_beforeAbort.Enabled = bEnable;
-            this.textBox_searchBiblio_loopTimes.Enabled = bEnable;
+            this.TryInvoke(() =>
+            {
+                this.button_beginSearch.Enabled = bEnable;
+                this.textBox_biblioSearch_queryFilename.Enabled = bEnable;
+                this.button_searchBiblio_findFilename.Enabled = bEnable;
+                this.textBox_searchBiblio_beforeAbort.Enabled = bEnable;
+                this.textBox_searchBiblio_loopTimes.Enabled = bEnable;
+            });
         }
 
         // parameters:
@@ -191,7 +202,8 @@ namespace dp2Circulation
                 // 进行中断
                 try
                 {
-                    this.Channel.Abort();
+                    // this.Channel.Abort();
+                    this.DoStop(null, null);
                 }
                 catch
                 {
@@ -277,11 +289,16 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在检索...");
             _stop.BeginLoop();
 
             this.EnableControlsInSearching(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索...",
+                "disableControl");
             try
             {
                 ClearWebBrowser(this.webBrowser1);
@@ -292,7 +309,6 @@ namespace dp2Circulation
                 int nRet = this.textBox_searchBiblio_beforeAbort.Text.IndexOf("-");
                 if (nRet == -1 || this.textBox_searchBiblio_beforeAbort.Text == "-1")
                 {
-
                     this.m_nBeforeAbort = Convert.ToInt32(this.textBox_searchBiblio_beforeAbort.Text);
                 }
                 else
@@ -303,29 +319,23 @@ namespace dp2Circulation
                     nEnd = Convert.ToInt32(strEnd);
                 }
 
-
-
-
                 int nLoopTimes = Convert.ToInt32(this.textBox_searchBiblio_loopTimes.Text);
 
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("query");
                 for (int j = 0; j < nLoopTimes; j++)
                 {
-                    _stop.SetMessage("循环 "+(j+1).ToString()+"...");
+                    looping.stop.SetMessage("循环 " + (j + 1).ToString() + "...");
                     Global.WriteHtml(this.webBrowser1,
-        "\r\n循环 "+(j+1).ToString()+"...\r\n");
+        "\r\n循环 " + (j + 1).ToString() + "...\r\n");
 
                     for (int i = 0; i < nodes.Count; i++)
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null)
+                        if (looping.Stopped)
                         {
-                            if (_stop.State != 0)
-                            {
-                                strError = "中断";
-                                goto ERROR1;
-                            }
+                            strError = "中断";
+                            goto ERROR1;
                         }
 
                         XmlNode node = nodes[i];
@@ -353,16 +363,16 @@ namespace dp2Circulation
                                 this.m_nBeforeAbort = Convert.ToInt32(this.textBox_searchBiblio_beforeAbort.Text);
                         }
 
-                        _stop.SetMessage("正在检索 '" + strWord + "' ...");
+                        looping.stop.SetMessage("正在检索 '" + strWord + "' ...");
                         Global.WriteHtml(this.webBrowser1,
-            "正在检索 '" + strWord + "' 中断前毫秒数="+this.m_nBeforeAbort.ToString()+"; "+strComment+"...\r\n");
+            "正在检索 '" + strWord + "' 中断前毫秒数=" + this.m_nBeforeAbort.ToString() + "; " + strComment + "...\r\n");
 
                         this.eventActive.Set();
 
                         DateTime timeStart = DateTime.Now;
 
                         string strQueryXml = "";
-                        long lRet = Channel.SearchBiblio(_stop,
+                        long lRet = channel.SearchBiblio(looping.stop,
                             strDbName,
                             strWord,
                             -1,
@@ -379,29 +389,29 @@ namespace dp2Circulation
                         TimeSpan delta = DateTime.Now - timeStart;
 
                         Global.WriteHtml(this.webBrowser1,
-    "    返回 lRet='" + lRet.ToString() + "' strError='" + strError + "' 用时= "+delta.TotalSeconds.ToString()+" 秒\r\n");
+    "    返回 lRet='" + lRet.ToString() + "' strError='" + strError + "' 用时= " + delta.TotalSeconds.ToString() + " 秒\r\n");
 
                         if (lRet == -1)
                         {
-                            if (this.Channel.ErrorCode != ErrorCode.RequestCanceled)
+                            if (channel.ErrorCode != ErrorCode.RequestCanceled)
                                 goto ERROR1;
                         }
 
                         long lHitCount = lRet;
-
                     }
-
                 }
-
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 this.EnableControlsInSearching(true);
+                */
             }
 
             return;

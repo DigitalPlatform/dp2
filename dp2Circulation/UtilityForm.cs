@@ -11,6 +11,7 @@ using System.Xml;
 using System.IO;
 using System.Web;
 using System.Collections;
+using System.Threading.Tasks;
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
@@ -22,7 +23,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -31,13 +31,13 @@ namespace dp2Circulation
     /// </summary>
     public partial class UtilityForm : MyForm
     {
-        // public MainForm MainForm = null;
-
         /// <summary>
         /// 构造函数
         /// </summary>
         public UtilityForm()
         {
+            this.UseLooping = true;
+
             InitializeComponent();
         }
 
@@ -624,22 +624,23 @@ namespace dp2Circulation
         {
             string strError = "";
             //int nRet = 0;
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在测算网络速度 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在测算网络速度 ...",
+                "disableControl");
             try
             {
-                string strVersion = "";
-                string strUID = "";
-
                 // 第一次可能要登录，先不计算时间
-                long lRet = this.Channel.GetVersion(
-    this._stop,
-    out strVersion,
-    out strUID,
+                long lRet = channel.GetVersion(
+    looping.stop,
+    out string strVersion,
+    out string strUID,
     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -650,13 +651,13 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
-                    lRet = this.Channel.GetVersion(
-this._stop,
+                    lRet = channel.GetVersion(
+looping.stop,
 out strVersion,
 out strUID,
 out strError);
@@ -669,20 +670,22 @@ out strError);
 
                 int score = (int)(((double)50 * 10 / m_secs) * (double)100);
                 this.label_health_message.Text = $"{score.ToString()}\r\n\r\n以每次通讯 50 毫秒为基准，满分 100\r\n服务器: {Program.MainForm.LibraryServerUrl}\r\n检测时间: {DateTime.Now.ToString()}";
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-            return;
         ERROR1:
             this.label_health_message.Text = "";
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
         }
 
         void ConvertISBN(string strAction)
@@ -780,28 +783,29 @@ out strError);
             strError = "";
             baOutputTimestamp = null;
 
+            /*
             this._stop.OnStop += new StopEventHandler(this.DoStop);
             this._stop.Initial("正在探索文件信息 ...");
             this._stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在探索文件信息 ...");
             try
             {
-                byte[] baContent = null;
-                string strMetadata = "";
-                string strOutputResPath = "";
-                long lRet = this.Channel.GetRes(
-                   this._stop,
+                long lRet = channel.GetRes(
+                   looping.stop,
                    strServerFilePath,
                    0,
                    0,
                    "timestamp",
-                   out baContent,
-                   out strMetadata,
-                   out strOutputResPath,
+                   out byte[] baContent,
+                   out string strMetadata,
+                   out string strOutputResPath,
                    out baOutputTimestamp,
                    out strError);
                 if (lRet == -1)
                 {
-                    if (this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                    if (channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
                         return 0;
                     return -1;
                 }
@@ -809,9 +813,12 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this._stop.EndLoop();
                 this._stop.OnStop -= new StopEventHandler(this.DoStop);
                 this._stop.Initial("");
+                */
             }
         }
 
@@ -832,6 +839,7 @@ out strError);
         {
             strError = "";
 
+            /*
             StopStyle old_stop_style = StopStyle.None;
 
             if (this._stop != null)
@@ -843,6 +851,10 @@ out strError);
                 this._stop.Initial("正在上传文件 ...");
                 this._stop.BeginLoop();
             }
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在上传文件 ...",
+                "halfstop");
 
             try
             {
@@ -878,7 +890,7 @@ out strError);
                     // 按照100K作为一个chunk
                     // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
                     ranges = RangeList.ChunkRange(strRange,
-                        this.Channel.UploadResChunkSize // 500 * 1024
+                        channel.UploadResChunkSize // 500 * 1024
                         );
                 }
 
@@ -896,7 +908,7 @@ out strError);
 
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (this._stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
@@ -914,14 +926,14 @@ out strError);
                         strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
                     }
 
-                    if (this._stop != null)
-                        this._stop.SetMessage("正在上载 " + ranges[j] + "/"
+                    if (looping != null)
+                        looping.stop.SetMessage("正在上载 " + ranges[j] + "/"
                             + Convert.ToString(fi.Length)
                             + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
                     int nRedoCount = 0;
                 REDO:
-                    long lRet = this.Channel.SaveResObject(
-                        this._stop,
+                    long lRet = channel.SaveResObject(
+                        looping.stop,
                         strResPath,
                         strClientFilePath,
                         strClientFilePath,
@@ -941,7 +953,7 @@ out strError);
                         // 如果是第一个 chunk，自动用返回的时间戳重试一次覆盖
                         if (bRetryOverwiteExisting == true
                             && j == 0
-                            && this.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
+                            && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
                             && nRedoCount == 0)
                         {
                             nRedoCount++;
@@ -957,6 +969,8 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 if (this._stop != null)
                 {
                     this._stop.EndLoop();
@@ -964,6 +978,7 @@ out strError);
                     this._stop.Initial("上传文件完成");
                     this._stop.Style = old_stop_style;
                 }
+                */
             }
         }
 
@@ -1054,6 +1069,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+            /*
             StopStyle old_stop_style = StopStyle.None;
             old_stop_style = this._stop.Style;
             this._stop.Style = StopStyle.EnableHalfStop;
@@ -1063,7 +1079,10 @@ MessageBoxDefaultButton.Button2);
             this._stop.BeginLoop();
 
             this.EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在下载文件 ...",
+                "disableControl,halfstop");
             try
             {
                 string strMetaData = "";
@@ -1074,8 +1093,8 @@ MessageBoxDefaultButton.Button2);
                 // return:
                 //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
                 //		0	成功
-                long lRet = this.Channel.GetRes(
-                    this._stop,
+                long lRet = channel.GetRes(
+                    looping.stop,
                     this.textBox_serverFilePath.Text,
                     this.textBox_clientFilePath.Text,
                     // "metadata",
@@ -1088,19 +1107,22 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 // 根据返回的时间戳设置文件最后修改时间
                 FileUtil.SetFileLastWriteTimeByTimestamp(this.textBox_clientFilePath.Text, baOutputTimeStamp);
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this._stop.EndLoop();
                 this._stop.OnStop -= new StopEventHandler(this.DoStop);
                 this._stop.Initial("下载文件完成");
                 this._stop.Style = old_stop_style;
 
                 this.EnableControls(true);
+                */
             }
-            return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
         }
 
         void FillSystemInfo()
@@ -1204,13 +1226,15 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在转换文件格式 ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping("正在转换文件格式 ...",
+                "disableControl");
             try
             {
                 using (TextReader reader = new StreamReader(this.textBox_worToIso_worFilename.Text, encoding))
@@ -1224,16 +1248,15 @@ MessageBoxDefaultButton.Button2);
 
                     for (int i = 0; ; i++)
                     {
-                        _stop.SetMessage("正在转换 " + (i + 1).ToString());
+                        looping.stop.SetMessage("正在转换 " + (i + 1).ToString());
 
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
                         }
-                        string strMARC = "";
                         // return:
                         //	-2	MARC格式错
                         //	-1	出错
@@ -1241,7 +1264,7 @@ MessageBoxDefaultButton.Button2);
                         //	1	结束(当前返回的记录有效)
                         //	2	结束(当前返回的记录无效)
                         nRet = MarcUtil.ReadWorksheetRecord(reader,
-                out strMARC,
+                out string strMARC,
                 out strError);
                         if (nRet == -1 || nRet == -2)
                             goto ERROR1;
@@ -1295,11 +1318,14 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
             MessageBox.Show(this, "转换完成。记录已写入文件 " + dlg.FileName + " 中");
             return;
@@ -1406,15 +1432,20 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在测算网络速度 ...");
+            _stop.Initial("正在获得前端出口 IP ...");
             _stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得前端出口 IP ...",
+                "disableControl");
             try
             {
-                long lRet = this.Channel.GetSystemParameter(_stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "utility",
                     "getClientIP",
                     out strValue,
@@ -1422,7 +1453,6 @@ MessageBoxDefaultButton.Button2);
                 if (lRet == -1)
                     goto ERROR1;
 
-                // InputDlg.GetInput(this, "本机 IP 地址", "本机 IP 地址", strValue, this.Font);
                 bool bTemp = false;
                 MessageDlg.Show(this,
     "本机 IP 地址为:\r\n" + strValue,
@@ -1431,19 +1461,21 @@ MessageBoxDefaultButton.Button2);
     MessageBoxDefaultButton.Button1,
     ref bTemp);
 
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-            return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
         }
 
         // 取 GCAT 著者号
@@ -1465,15 +1497,19 @@ MessageBoxDefaultButton.Button2);
             StringBuilder result1 = new StringBuilder();
             StringBuilder result2 = new StringBuilder();
 
+            /*
             this.EnableControls(false);
 
             this._stop.OnStop += new StopEventHandler(this.DoStop);
             this._stop.Initial("正在取著者号 ...");
             this._stop.BeginLoop();
+            */
+            var looping = Looping("正在取著者号 ...",
+                "disableControl");
             try
             {
                 int count = this.textBox_textLines_source1.Lines.Length;
-                _stop.SetProgressRange(0, count);
+                looping.stop.SetProgressRange(0, count);
                 int i = 0;
 
                 foreach (string line in this.textBox_textLines_source1.Lines)
@@ -1497,7 +1533,7 @@ MessageBoxDefaultButton.Button2);
 #endif
                     Hashtable question_table = new Hashtable();
 
-                    _stop.SetMessage("正在取著者号 '" + strLine + "' ...");
+                    looping.stop.SetMessage("正在取著者号 '" + strLine + "' ...");
 
                     string strDebugInfo = "";
                     string strAuthorNumber = "";
@@ -1509,7 +1545,7 @@ MessageBoxDefaultButton.Button2);
                     //      1   succeed
                     long nRet = BiblioItemsHost.GetAuthorNumber(
                         ref question_table,
-                        this._stop,
+                        looping.stop,
                         this,
                         strGcatWebServiceUrl,
                         strLine,
@@ -1546,11 +1582,14 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this._stop.EndLoop();
                 this._stop.OnStop -= new StopEventHandler(this.DoStop);
                 this._stop.Initial("");
 
                 this.EnableControls(true);
+                */
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1562,6 +1601,7 @@ MessageBoxDefaultButton.Button2);
 
             this.textBox_biblioTableXml.Text = "";
 
+            /*
             this.EnableControls(false);
 
             this._stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1569,19 +1609,20 @@ MessageBoxDefaultButton.Button2);
             this._stop.BeginLoop();
 
             LibraryChannel channel = this.GetChannel();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取书目 table 格式 ...",
+                "disableControl");
             try
             {
                 List<string> formats = new List<string> { "table:" + this.textBox_biblioTableStyle.Text.Replace(",", "|") };
-                string[] results = null;
-                byte[] timestamp = null;
-
                 long lRet = channel.GetBiblioInfos(
-                    _stop,
+                    looping.stop,
                     this.textBox_biblioRecPath.Text,
                     "",
                     formats.ToArray(),
-                    out results,
-                    out timestamp,
+                    out string[] results,
+                    out byte[] timestamp,
                     out strError);
                 if (lRet == -1 || lRet == 0)
                 {
@@ -1600,6 +1641,8 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.ReturnChannel(channel);
 
                 this._stop.EndLoop();
@@ -1607,6 +1650,7 @@ MessageBoxDefaultButton.Button2);
                 this._stop.Initial("");
 
                 this.EnableControls(true);
+                */
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1623,15 +1667,24 @@ MessageBoxDefaultButton.Button2);
             StringBuilder error = new StringBuilder();
             StringBuilder result2 = new StringBuilder();
 
+            /*
             this.EnableControls(false);
 
             this._stop.OnStop += new StopEventHandler(this.DoStop);
             this._stop.Initial("正在转换 UID ...");
             this._stop.BeginLoop();
+            */
+            var looping = Looping("正在转换 UID ...",
+                "disableControl");
             try
             {
                 foreach (string line in this.textBox_textLines_source1.Lines)
                 {
+                    if (looping.Stopped)
+                    {
+                        strError = "中断";
+                        goto ERROR1;
+                    }
                     if (string.IsNullOrEmpty(line))
                     {
                         result2.AppendLine();
@@ -1662,11 +1715,14 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this._stop.EndLoop();
                 this._stop.OnStop -= new StopEventHandler(this.DoStop);
                 this._stop.Initial("");
 
                 this.EnableControls(true);
+                */
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1682,15 +1738,24 @@ MessageBoxDefaultButton.Button2);
             StringBuilder error = new StringBuilder();
             StringBuilder result2 = new StringBuilder();
 
+            /*
             this.EnableControls(false);
 
             this._stop.OnStop += new StopEventHandler(this.DoStop);
             this._stop.Initial("正在转换 UID ...");
             this._stop.BeginLoop();
+            */
+            var looping = Looping("正在转换 UID ...",
+                "disableControl");
             try
             {
                 foreach (string line in this.textBox_textLines_source1.Lines)
                 {
+                    if (looping.Stopped)
+                    {
+                        strError = "中断";
+                        goto ERROR1;
+                    }
                     if (string.IsNullOrEmpty(line))
                     {
                         result2.AppendLine();
@@ -1721,11 +1786,14 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this._stop.EndLoop();
                 this._stop.OnStop -= new StopEventHandler(this.DoStop);
                 this._stop.Initial("");
 
                 this.EnableControls(true);
+                */
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1735,22 +1803,27 @@ MessageBoxDefaultButton.Button2);
         private void button_health_tryLogin_Click(object sender, EventArgs e)
         {
             string strError = "";
-            EnableControls(false);
 
             this.label_health_message.Text = "";
+            this.ShowMessage("正在测试当前用户登录");
 
+            /*
+            EnableControls(false);
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在测试当前用户登录 ...");
             _stop.BeginLoop();
 
-            this.ShowMessage("正在测试当前用户登录");
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在测试当前用户登录 ...",
+                "disableControl");
             try
             {
                 // 先登出一次
-                long lRet = this.Channel.Logout(out strError);
+                long lRet = channel.Logout(out strError);
 
-                lRet = this.Channel.GetSystemParameter(this._stop,
+                lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "system",
                     "biblioDbGroup",
                     out string strValue,
@@ -1759,22 +1832,24 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
 
                 this.label_health_message.Text = $"登录成功";
+            return;
             }
             finally
             {
                 this.ClearMessage();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-            return;
         ERROR1:
             this.label_health_message.Text = strError;
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
         }
 
         public void Health()
@@ -1899,6 +1974,7 @@ MessageBoxDefaultButton.Button2);
                 StringBuilder result1 = new StringBuilder();
                 StringBuilder result2 = new StringBuilder();
 
+                /*
                 this.EnableControls(false);
 
                 this._stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1906,21 +1982,24 @@ MessageBoxDefaultButton.Button2);
                 this._stop.BeginLoop();
 
                 var channel = this.GetChannel();
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在取书目摘要 ...",
+                    "disableControl");
                 try
                 {
                     int count = this.textBox_textLines_source1.Lines.Length;
-                    _stop.SetProgressRange(0, count);
+                    looping.stop.SetProgressRange(0, count);
                     int i = 0;
                     foreach (string line in this.textBox_textLines_source1.Lines)
                     {
-                        // Application.DoEvents(); // 出让界面控制权
-                        if (this._stop.State != 0)
+                        if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
                         }
 
-                        _stop.SetProgressValue(i);
+                        looping.stop.SetProgressValue(i);
 
                         if (string.IsNullOrEmpty(line))
                         {
@@ -1945,9 +2024,10 @@ MessageBoxDefaultButton.Button2);
                             barcode = null;
                         }
 
-                        _stop.SetMessage("正在取书目摘要 '" + strLine + "' ...");
+                        looping.stop.SetMessage("正在取书目摘要 '" + strLine + "' ...");
 
-                        long lRet = channel.GetBiblioSummary(_stop,
+                        long lRet = channel.GetBiblioSummary(
+                            looping.stop,
                             barcode,
                             recpath,
                             null,
@@ -1971,6 +2051,8 @@ MessageBoxDefaultButton.Button2);
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     this.ReturnChannel(channel);
 
                     this._stop.EndLoop();
@@ -1978,6 +2060,7 @@ MessageBoxDefaultButton.Button2);
                     this._stop.Initial("");
 
                     this.EnableControls(true);
+                    */
                 }
             ERROR1:
                 ShowMessageBox(strError);

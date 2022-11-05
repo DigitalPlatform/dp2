@@ -46,6 +46,8 @@ namespace dp2Circulation
 
         public BatchOrderForm()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
 
             _script.BatchOrderForm = this;
@@ -99,6 +101,7 @@ namespace dp2Circulation
 
             this._values = new Values();
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
@@ -109,14 +112,18 @@ namespace dp2Circulation
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在装载书目和订购信息 ...",
+                "timeout:0:2:0,disableControl");
             try
             {
-                if (_stop != null)
-                    _stop.SetProgressRange(0, recpaths.Count);
+                if (looping != null)
+                    looping.stop.SetProgressRange(0, recpaths.Count);
 
                 BiblioLoader loader = new BiblioLoader();
                 loader.Channel = channel;
-                loader.Stop = _stop;
+                loader.Stop = looping.stop;
                 loader.RecPaths = recpaths;
                 loader.Format = "table";
 
@@ -132,7 +139,7 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
@@ -140,10 +147,10 @@ namespace dp2Circulation
 
                     Debug.Assert(item.RecPath == recpaths[i], "");
 
-                    if (_stop != null)
+                    if (looping != null)
                     {
-                        _stop.SetMessage("正在装载书目信息 " + item.RecPath + " ...");
-                        _stop.SetProgressValue(i);
+                        looping.stop.SetMessage("正在装载书目信息 " + item.RecPath + " ...");
+                        looping.stop.SetProgressValue(i);
                     }
 
                     BiblioStore line = new BiblioStore();
@@ -157,7 +164,7 @@ namespace dp2Circulation
                     SubItemLoader sub_loader = new SubItemLoader();
                     sub_loader.BiblioRecPath = line.RecPath;
                     sub_loader.Channel = channel;
-                    sub_loader.Stop = _stop;
+                    sub_loader.Stop = looping.stop;
                     sub_loader.DbType = "order";
 
                     sub_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -204,6 +211,8 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -214,6 +223,7 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
+                */
             }
         }
 
@@ -1144,11 +1154,11 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+            this.ShowMessage("正在保存订购记录 ...");
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
-
-            this.ShowMessage("正在保存订购记录 ...");
 
             _stop.Style = StopStyle.EnableHalfStop;
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1156,22 +1166,25 @@ namespace dp2Circulation
             _stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存订购记录 ...",
+                "timeout:0:2:0,disableControl");
             try
             {
                 foreach (BiblioStore biblio in this._lines)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (_stop != null && _stop.State != 0)
+                    if (looping.Stopped)
                     {
                         strError = "用户中断";
                         goto ERROR1;
                     }
 
-                    List<EntityInfo> entities = null;
                     int nRet = BuildSaveEntities(
                         biblio,
-                        out entities,
+                        out List<EntityInfo> entities,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -1180,6 +1193,7 @@ namespace dp2Circulation
                         continue;
 
                     nRet = SaveEntities(
+                        looping.stop,
                         channel,
                         biblio,
                         entities,
@@ -1194,6 +1208,8 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
@@ -1204,7 +1220,7 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
-
+                */
                 this.ClearMessage();
             }
         ERROR1:
@@ -1293,6 +1309,7 @@ namespace dp2Circulation
         }
 
         internal int SaveEntities(
+            Stop stop,
             LibraryChannel channel,
             BiblioStore biblio,
             List<EntityInfo> entities,
@@ -1311,7 +1328,7 @@ namespace dp2Circulation
                 EntityInfo[] current = GetPart(entities, i * nBatch, nCurrentCount);
 
                 long lRet = channel.SetOrders(
-    _stop,
+    stop,
     biblio.RecPath,
     current,
     out errorinfos,
@@ -1320,11 +1337,10 @@ namespace dp2Circulation
                     return -1;
 
                 // 把出错的事项和需要更新状态的事项兑现到显示、内存
-                string strError1 = "";
                 if (RefreshOperResult(
                     biblio,
                     errorinfos,
-                    out strError1) == true)
+                    out string strError1) == true)
                 {
                     bWarning = true;
                     strWarning += " " + strError1;

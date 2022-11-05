@@ -7895,7 +7895,7 @@ out strError);
             // not found
             if (lRet == 0)
             {
-                strError = "册条码号 '" + strBarcode + "' 没有找到";
+                strError = $"{strFrom} '{strBarcode}' 没有找到";
                 return 0;
             }
 

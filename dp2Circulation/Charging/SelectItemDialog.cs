@@ -64,6 +64,8 @@ namespace dp2Circulation
         /// </summary>
         public SelectItemDialog()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
 
             this.statusStrip1.Renderer = new TransparentToolStripRenderer(this.statusStrip1);
@@ -89,6 +91,7 @@ namespace dp2Circulation
             stopManager.Initial(this.button_stop,
 (object)this.toolStripStatusLabel1,
 (object)this.toolStripProgressBar1);
+            // 本窗口独立管理 stopManager
             this._loopingHost.StopManager = stopManager;
             /*
             if (_stop != null)

@@ -241,6 +241,7 @@ namespace dp2Circulation
             }
         }
 
+        /*
         /// <summary>
         /// 停止对象
         /// </summary>
@@ -251,6 +252,7 @@ namespace dp2Circulation
                 return this._stop;
             }
         }
+        */
 
         /// <summary>
         /// 是否正在执行运算

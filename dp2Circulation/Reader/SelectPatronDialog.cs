@@ -27,7 +27,7 @@ namespace dp2Circulation
 
         WebExternalHost m_webExternalHost_patron = new WebExternalHost();
 
-        DigitalPlatform.StopManager _stopManager = new DigitalPlatform.StopManager();
+        DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
 
         List<string> m_recpaths = new List<string>();
 
@@ -50,6 +50,8 @@ namespace dp2Circulation
 
         public SelectPatronDialog()
         {
+            this.UseLooping = true; // 2022/11/3
+
             InitializeComponent();
         }
 
@@ -67,13 +69,15 @@ namespace dp2Circulation
 
         private void SelectPatronDialog_Load(object sender, EventArgs e)
         {
-            _stopManager.Initial(this.toolStripButton_stop,
+            stopManager.Initial(this.toolStripButton_stop,
 (object)this.toolStripLabel_message,
 (object)null);
-
+            // 本窗口独立管理 stopManager
+            this._loopingHost.StopManager = stopManager;
+            /*
             _stop = new DigitalPlatform.Stop();
             _stop.Register(this._stopManager, true);	// 和容器关联
-
+            */
             FillRecPath();
 
             EnableControls(false);
@@ -106,11 +110,13 @@ namespace dp2Circulation
             if (this.m_webExternalHost_patron != null)
                 this.m_webExternalHost_patron.Destroy();
 
+            /*
             if (_stop != null) // 脱离关联
             {
                 _stop.Unregister();	// 和容器关联
                 _stop = null;
             }
+            */
         }
 
         // 在 listview 中填充路径列。不填充其他列
@@ -391,23 +397,27 @@ namespace dp2Circulation
             string strPatronXml = "";
             string strPatronHtml = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在获取路径为 '" + strRecPath + "' 的读者记录 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取路径为 '" + strRecPath + "' 的读者记录 ...",
+                null);
 
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
 
             try
             {
-                string[] results = null;
                 long lRet = channel.GetReaderInfo(
-                    _stop,
+                    looping.stop,
                     "@path:" + strRecPath,
                     strFormatList,  // "xml,html",
-                    out results,
+                    out string[] results,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;  // error
@@ -431,11 +441,14 @@ namespace dp2Circulation
             {
                 this.Cursor = oldCursor;
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
 
             ItemInfo info = new ItemInfo();
