@@ -6596,10 +6596,14 @@ out strError);
         {
             get
             {
+                /*
                 if (this.Channel == null)
                     return false;
                 return StringUtil.IsInList("client_forceverifydata",
                     this.CurrentRights);
+                */
+                return StringUtil.IsInList("client_forceverifydata",
+    Program.MainForm.GetCurrentUserRights());
             }
         }
 

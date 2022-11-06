@@ -23,6 +23,7 @@ using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
+#if REMOVED
     /// <summary>
     /// 出纳操作窗口
     /// </summary>
@@ -582,8 +583,10 @@ namespace dp2Circulation
                 this.m_webExternalHost_biblioInfo.Destroy();
             }
 
+#if SUPPORT_OLD_STOP
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
+#endif
 
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
@@ -3112,7 +3115,7 @@ dlg.UiState);
             }
         }
 
-        #region 读者证条码号快速导航菜单功能
+#region 读者证条码号快速导航菜单功能
 
         private void toolStripMenuItem_naviToAmerceForm_Click(object sender, EventArgs e)
         {
@@ -3185,9 +3188,9 @@ dlg.UiState);
             form.LoadRecord(this.ActiveReaderBarcode);
         }
 
-        #endregion
+#endregion
 
-        #region 册条码号快速导航菜单功能
+#region 册条码号快速导航菜单功能
 
 
         private void toolStripMenuItem_openEntityForm_Click(object sender, EventArgs e)
@@ -3218,7 +3221,7 @@ dlg.UiState);
             form.LoadRecord(this.ActiveItemBarcode);
         }
 
-        #endregion
+#endregion
 
         private void webBrowser_reader_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
@@ -3391,6 +3394,8 @@ Keys keyData)
 
     }
 
+#endif
+
     /// <summary>
     /// 功能类型
     /// </summary>
@@ -3517,6 +3522,5 @@ Keys keyData)
             if (this.StopGettingSummary != null)
                 this.StopGettingSummary(sender, e);
         }
-
     }
 }

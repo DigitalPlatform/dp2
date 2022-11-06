@@ -89,7 +89,9 @@ namespace dp2Circulation
                 this.tabPage_batchAddItemPrice = null;
             }
 
+#if SUPPORT_OLD_STOP
             this.Channel = null;    // testing
+#endif
         }
 
         private void CheckBorrowInfoForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -3286,7 +3288,10 @@ out strError);
 
                     if (channel.ErrorCode == ErrorCode.ItemBarcodeDup)
                     {
+                        /*
                         LibraryChannel channel0 = this.GetChannel();
+                        */
+                        var looping_nest = Looping(out LibraryChannel channel0);
                         try
                         {
                             ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
@@ -3297,7 +3302,7 @@ out strError);
                                 aDupPath,
                                 "因册条码号发生重复，修复操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
                                 channel0,    // Program.MainForm.Channel,
-                                Program.MainForm.Stop,
+                                looping_nest.stop,
                                 out strErrorNew);
                             if (nRet == -1)
                             {
@@ -3319,7 +3324,10 @@ out strError);
                         }
                         finally
                         {
+                            looping_nest.Dispose();
+                            /*
                             this.ReturnChannel(channel0);
+                            */
                         }
                     }
 

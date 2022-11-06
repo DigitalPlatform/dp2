@@ -71,6 +71,8 @@ namespace dp2Circulation
         }
 
         DigitalPlatform.StopManager _stopManager = new DigitalPlatform.StopManager();
+        
+        // TODO: 需要用 Looping 重构
         DigitalPlatform.Stop _stop = null;
 
         private void SelectDictionaryItemDialog_Load(object sender, EventArgs e)

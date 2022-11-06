@@ -260,16 +260,6 @@ namespace dp2Circulation
 
             CreateMemberColumnHeader(this.listView_member);
 
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
-
             this.BarcodeFilePath = Program.MainForm.AppInfo.GetString(
                 "printbindingform",
                 "barcode_filepath",
@@ -657,7 +647,7 @@ namespace dp2Circulation
                 if (this.BatchNo == "<不指定>")
                 {
                     // 2013/3/25
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
                     looping.stop,
                      // 2010/2/25 changed
                      "<all series>",
@@ -678,7 +668,7 @@ namespace dp2Circulation
                     }
                 }
                 else
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
                         looping.stop,
                          // 2010/2/25 changed
                          "<all series>",
@@ -723,7 +713,7 @@ namespace dp2Circulation
                         return;
                     }
 
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         looping.stop,
                         "batchno",   // strResultSetName
                         lStart,
@@ -2125,7 +2115,9 @@ strPubType);
                 _stop.Initial("正在构造HTML页面 ...");
                 _stop.BeginLoop();
                 */
-                var looping = Looping("正在构造HTML页面 ...",
+                var looping = Looping(
+                    out LibraryChannel channel,
+                    "正在构造HTML页面 ...",
                     "disableControl");
                 try
                 {
@@ -2144,7 +2136,7 @@ strPubType);
                         //string strOneWarning = "";
                         nRet = PrintOneBinding(
                             looping.stop,
-                            Channel,
+                            channel,
                                 main_option,
                                 secondary_option,
                                 macro_table,
@@ -2364,7 +2356,10 @@ strPubType);
                 // TODO: 有错误要明显报出来，否则容易在打印出来后才发现，就晚了
 
                 // 获得MARC格式书目记录
-                nRet = GetMarc(item,
+                nRet = GetMarc(
+                    stop,
+                    channel,
+                    item,
                     out string strMARC,
                     out string strOutMarcSyntax,
                     out strError);
@@ -3334,7 +3329,10 @@ strPubType);
         }
 
         // 获得MARC格式书目记录
-        int GetMarc(ListViewItem item,
+        int GetMarc(
+            Stop stop,
+            LibraryChannel channel,
+            ListViewItem item,
             out string strMARC,
             out string strOutMarcSyntax,
             out string strError)
@@ -3354,8 +3352,8 @@ strPubType);
 
             Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
 
-            long lRet = Channel.GetBiblioInfos(
-                    null, // stop,
+            long lRet = channel.GetBiblioInfos(
+                    stop,
                     strBiblioRecPath,
                     "",
                     formats,
@@ -3391,7 +3389,10 @@ strPubType);
             return 1;
         }
 
-        int GetMarcTable(ListViewItem item,
+        int GetMarcTable(
+            Stop stop,
+            LibraryChannel channel,
+            ListViewItem item,
     out string strResult,
     out string strError)
         {
@@ -3409,8 +3410,8 @@ strPubType);
 
             Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
 
-            long lRet = Channel.GetBiblioInfos(
-                    null, // stop,
+            long lRet = channel.GetBiblioInfos(
+                    stop,
                     strBiblioRecPath,
                     "",
                     formats,

@@ -186,151 +186,154 @@ namespace dp2Circulation
             if (item_infos != null)
                 return item_infos;
 
-            // 如果当前书目库下没有包含实体库，调用会抛出异常。特殊处理
-            // TODO: 是否需要用hashtable优化速度?
-            string strBiblioDBName = Global.GetDbName(this.CurrentRecPath);
-            string strItemDbName = "";
-
-            if (strDbType == "item")
-                strItemDbName = this.BiblioStatisForm.MainForm.GetItemDbName(strBiblioDBName);
-            else if (strDbType == "order")
-                strItemDbName = this.BiblioStatisForm.MainForm.GetOrderDbName(strBiblioDBName);
-            else if (strDbType == "issue")
-                strItemDbName = this.BiblioStatisForm.MainForm.GetIssueDbName(strBiblioDBName);
-            else if (strDbType == "comment")
-                strItemDbName = this.BiblioStatisForm.MainForm.GetCommentDbName(strBiblioDBName);
-            else
+            using (var looping = this.BiblioStatisForm.Looping(out LibraryChannel channel))
             {
-                throw new Exception("未知的 strDbType '" + strDbType + "'");
-            }
-
-            if (String.IsNullOrEmpty(strItemDbName) == true)
-                return new List<ItemInfo>();    // 返回一个空的数组
-
-            item_infos = new List<ItemInfo>();
-
-            long lPerCount = 100; // 每批获得多少个
-            long lStart = 0;
-            long lResultCount = 0;
-            long lCount = -1;
-            for (; ; )
-            {
-
-                string strStyle = "";
-                if (strHowToGetItemRecord == "delay")
-                    strStyle = "onlygetpath";
-                else if (strHowToGetItemRecord == "first")
-                    strStyle = "onlygetpath,getfirstxml";
-
-                EntityInfo[] infos = null;
-                string strError = "";
-                long lRet = 0;
-
-            REDO:
+                // 如果当前书目库下没有包含实体库，调用会抛出异常。特殊处理
+                // TODO: 是否需要用hashtable优化速度?
+                string strBiblioDBName = Global.GetDbName(this.CurrentRecPath);
+                string strItemDbName = "";
 
                 if (strDbType == "item")
-                    lRet = this.BiblioStatisForm.Channel.GetEntities(
-                         null,
-                         this.CurrentRecPath,
-                         lStart,
-                         lCount,
-                         strStyle,
-                         "zh",
-                         out infos,
-                         out strError);
+                    strItemDbName = this.BiblioStatisForm.MainForm.GetItemDbName(strBiblioDBName);
                 else if (strDbType == "order")
-                    lRet = this.BiblioStatisForm.Channel.GetOrders(
-                         null,
-                         this.CurrentRecPath,
-                         lStart,
-                         lCount,
-                         strStyle,
-                         "zh",
-                         out infos,
-                         out strError);
+                    strItemDbName = this.BiblioStatisForm.MainForm.GetOrderDbName(strBiblioDBName);
                 else if (strDbType == "issue")
-                    lRet = this.BiblioStatisForm.Channel.GetIssues(
-                         null,
-                         this.CurrentRecPath,
-                         lStart,
-                         lCount,
-                         strStyle,
-                         "zh",
-                         out infos,
-                         out strError);
+                    strItemDbName = this.BiblioStatisForm.MainForm.GetIssueDbName(strBiblioDBName);
                 else if (strDbType == "comment")
-                    lRet = this.BiblioStatisForm.Channel.GetComments(
-                         null,
-                         this.CurrentRecPath,
-                         lStart,
-                         lCount,
-                         strStyle,
-                         "zh",
-                         out infos,
-                         out strError);
-
-                if (lRet == -1)
+                    strItemDbName = this.BiblioStatisForm.MainForm.GetCommentDbName(strBiblioDBName);
+                else
                 {
-                    // 2018/6/6
-                    if (this.Prompt != null)
+                    throw new Exception("未知的 strDbType '" + strDbType + "'");
+                }
+
+                if (String.IsNullOrEmpty(strItemDbName) == true)
+                    return new List<ItemInfo>();    // 返回一个空的数组
+
+                item_infos = new List<ItemInfo>();
+
+                long lPerCount = 100; // 每批获得多少个
+                long lStart = 0;
+                long lResultCount = 0;
+                long lCount = -1;
+                for (; ; )
+                {
+
+                    string strStyle = "";
+                    if (strHowToGetItemRecord == "delay")
+                        strStyle = "onlygetpath";
+                    else if (strHowToGetItemRecord == "first")
+                        strStyle = "onlygetpath,getfirstxml";
+
+                    EntityInfo[] infos = null;
+                    string strError = "";
+                    long lRet = 0;
+
+                REDO:
+
+                    if (strDbType == "item")
+                        lRet = channel.GetEntities(
+                             looping.stop,
+                             this.CurrentRecPath,
+                             lStart,
+                             lCount,
+                             strStyle,
+                             "zh",
+                             out infos,
+                             out strError);
+                    else if (strDbType == "order")
+                        lRet = channel.GetOrders(
+                             looping.stop,
+                             this.CurrentRecPath,
+                             lStart,
+                             lCount,
+                             strStyle,
+                             "zh",
+                             out infos,
+                             out strError);
+                    else if (strDbType == "issue")
+                        lRet = channel.GetIssues(
+                             looping.stop,
+                             this.CurrentRecPath,
+                             lStart,
+                             lCount,
+                             strStyle,
+                             "zh",
+                             out infos,
+                             out strError);
+                    else if (strDbType == "comment")
+                        lRet = channel.GetComments(
+                             looping.stop,
+                             this.CurrentRecPath,
+                             lStart,
+                             lCount,
+                             strStyle,
+                             "zh",
+                             out infos,
+                             out strError);
+
+                    if (lRet == -1)
                     {
-                        MessagePromptEventArgs e = new MessagePromptEventArgs
+                        // 2018/6/6
+                        if (this.Prompt != null)
                         {
-                            MessageText = "获得 " + strDbType + " 记录时发生错误： " + strError,
-                            Actions = "yes,no,cancel"
-                        };
-                        this.Prompt(this, e);
-                        if (e.ResultAction == "cancel")
-                            throw new ChannelException(this.BiblioStatisForm.Channel.ErrorCode, strError);
-                        else if (e.ResultAction == "yes")
-                            goto REDO;
-                        else
-                        {
-                            // no 也是抛出异常。因为继续下一批代价太大
-                            throw new ChannelException(this.BiblioStatisForm.Channel.ErrorCode, strError);
+                            MessagePromptEventArgs e = new MessagePromptEventArgs
+                            {
+                                MessageText = "获得 " + strDbType + " 记录时发生错误： " + strError,
+                                Actions = "yes,no,cancel"
+                            };
+                            this.Prompt(this, e);
+                            if (e.ResultAction == "cancel")
+                                throw new ChannelException(channel.ErrorCode, strError);
+                            else if (e.ResultAction == "yes")
+                                goto REDO;
+                            else
+                            {
+                                // no 也是抛出异常。因为继续下一批代价太大
+                                throw new ChannelException(channel.ErrorCode, strError);
+                            }
                         }
+                        else
+                            throw new ChannelException(channel.ErrorCode, strError);
                     }
-                    else
-                        throw new ChannelException(this.BiblioStatisForm.Channel.ErrorCode, strError);
-                }
 
-                lResultCount = lRet;    // 2009/11/23 
+                    lResultCount = lRet;    // 2009/11/23 
 
-                if (infos == null)
-                    return item_infos;
+                    if (infos == null)
+                        return item_infos;
 
-                for (int i = 0; i < infos.Length; i++)
-                {
-                    EntityInfo info = infos[i];
-                    string strXml = info.OldRecord;
+                    for (int i = 0; i < infos.Length; i++)
+                    {
+                        EntityInfo info = infos[i];
+                        string strXml = info.OldRecord;
 
-                    /*
-                    if (String.IsNullOrEmpty(strXml) == true)
-                        continue;
-                     * */
+                        /*
+                        if (String.IsNullOrEmpty(strXml) == true)
+                            continue;
+                         * */
 
-                    ItemInfo item_info = new ItemInfo(strDbType);
-                    item_info.Container = this;
-                    item_info.RecPath = info.OldRecPath;
-                    item_info.Timestamp = info.OldTimestamp;
-                    item_info.OldRecord = strXml;
+                        ItemInfo item_info = new ItemInfo(strDbType);
+                        item_info.Container = this;
+                        item_info.RecPath = info.OldRecPath;
+                        item_info.Timestamp = info.OldTimestamp;
+                        item_info.OldRecord = strXml;
 
-                    item_infos.Add(item_info);
-                }
+                        item_infos.Add(item_info);
+                    }
 
-                lStart += infos.Length;
-                if (lStart >= lResultCount)
-                    break;
+                    lStart += infos.Length;
+                    if (lStart >= lResultCount)
+                        break;
 
-                if (lCount == -1)
-                    lCount = lPerCount;
+                    if (lCount == -1)
+                        lCount = lPerCount;
 
-                if (lStart + lCount > lResultCount)
-                    lCount = lResultCount - lStart;
+                    if (lStart + lCount > lResultCount)
+                        lCount = lResultCount - lStart;
 
-            } // end of for
+                } // end of for
 
-            return item_infos;
+                return item_infos;
+            }
         }
 
         #region 实体库
@@ -543,112 +546,116 @@ namespace dp2Circulation
             out string strError)
         {
             strError = "";
-            List<EntityInfo> entityArray = new List<EntityInfo>();
 
-            for (int i = 0; i < iteminfos.Count; i++)
+            using (var looping = this.BiblioStatisForm.Looping(out LibraryChannel channel))
             {
-                ItemInfo item = iteminfos[i];
+                List<EntityInfo> entityArray = new List<EntityInfo>();
 
-                EntityInfo info = new EntityInfo();
-
-                if (String.IsNullOrEmpty(item.RefID) == true)
+                for (int i = 0; i < iteminfos.Count; i++)
                 {
-                    item.RefID = Guid.NewGuid().ToString();
+                    ItemInfo item = iteminfos[i];
+
+                    EntityInfo info = new EntityInfo();
+
+                    if (String.IsNullOrEmpty(item.RefID) == true)
+                    {
+                        item.RefID = Guid.NewGuid().ToString();
+                    }
+
+                    info.RefID = item.RefID;
+
+                    DomUtil.SetElementText(item.Dom.DocumentElement,
+                        "parent", Global.GetRecordID(CurrentRecPath));
+
+                    string strXml = item.Dom.DocumentElement.OuterXml;
+
+                    info.OldRecPath = item.RecPath;
+                    info.Action = "change";
+                    info.NewRecPath = item.RecPath;
+
+                    info.NewRecord = strXml;
+                    info.NewTimestamp = null;
+
+                    info.OldRecord = item.OldRecord;
+                    info.OldTimestamp = item.Timestamp;
+
+                    entityArray.Add(info);
                 }
 
-                info.RefID = item.RefID;
-
-                DomUtil.SetElementText(item.Dom.DocumentElement,
-                    "parent", Global.GetRecordID(CurrentRecPath));
-
-                string strXml = item.Dom.DocumentElement.OuterXml;
-
-                info.OldRecPath = item.RecPath;
-                info.Action = "change";
-                info.NewRecPath = item.RecPath;
-
-                info.NewRecord = strXml;
-                info.NewTimestamp = null;
-
-                info.OldRecord = item.OldRecord;
-                info.OldTimestamp = item.Timestamp;
-
-                entityArray.Add(info);
-            }
-
-            // 复制到目标
-            EntityInfo[] entities = null;
-            entities = new EntityInfo[entityArray.Count];
-            for (int i = 0; i < entityArray.Count; i++)
-            {
-                entities[i] = entityArray[i];
-            }
-
-            EntityInfo[] errorinfos = null;
-
-            long lRet = 0;
-
-            if (strDbType == "item")
-                lRet = this.BiblioStatisForm.Channel.SetEntities(
-                     null,   // this.BiblioStatisForm.stop,
-                     this.CurrentRecPath,
-                     entities,
-                     out errorinfos,
-                     out strError);
-            else if (strDbType == "order")
-                lRet = this.BiblioStatisForm.Channel.SetOrders(
-                     null,   // this.BiblioStatisForm.stop,
-                     this.CurrentRecPath,
-                     entities,
-                     out errorinfos,
-                     out strError);
-            else if (strDbType == "issue")
-                lRet = this.BiblioStatisForm.Channel.SetIssues(
-                     null,   // this.BiblioStatisForm.stop,
-                     this.CurrentRecPath,
-                     entities,
-                     out errorinfos,
-                     out strError);
-            else if (strDbType == "comment")
-                lRet = this.BiblioStatisForm.Channel.SetComments(
-                     null,   // this.BiblioStatisForm.stop,
-                     this.CurrentRecPath,
-                     entities,
-                     out errorinfos,
-                     out strError);
-            else
-            {
-                strError = "未知的 strDbType '" + strDbType + "'";
-                return -1;
-            }
-            if (lRet == -1)
-                return -1;
-
-            // string strWarning = ""; // 警告信息
-
-            if (errorinfos == null)
-                return 0;
-
-            strError = "";
-            for (int i = 0; i < errorinfos.Length; i++)
-            {
-                if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
+                // 复制到目标
+                EntityInfo[] entities = null;
+                entities = new EntityInfo[entityArray.Count];
+                for (int i = 0; i < entityArray.Count; i++)
                 {
-                    strError = "服务器返回的EntityInfo结构中RefID为空";
+                    entities[i] = entityArray[i];
+                }
+
+                EntityInfo[] errorinfos = null;
+
+                long lRet = 0;
+
+                if (strDbType == "item")
+                    lRet = channel.SetEntities(
+                         looping.stop,   // this.BiblioStatisForm.stop,
+                         this.CurrentRecPath,
+                         entities,
+                         out errorinfos,
+                         out strError);
+                else if (strDbType == "order")
+                    lRet = channel.SetOrders(
+                         looping.stop,   // this.BiblioStatisForm.stop,
+                         this.CurrentRecPath,
+                         entities,
+                         out errorinfos,
+                         out strError);
+                else if (strDbType == "issue")
+                    lRet = channel.SetIssues(
+                         looping.stop,   // this.BiblioStatisForm.stop,
+                         this.CurrentRecPath,
+                         entities,
+                         out errorinfos,
+                         out strError);
+                else if (strDbType == "comment")
+                    lRet = channel.SetComments(
+                         looping.stop,   // this.BiblioStatisForm.stop,
+                         this.CurrentRecPath,
+                         entities,
+                         out errorinfos,
+                         out strError);
+                else
+                {
+                    strError = "未知的 strDbType '" + strDbType + "'";
                     return -1;
                 }
+                if (lRet == -1)
+                    return -1;
 
-                // 正常信息处理
-                if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
-                    continue;
+                // string strWarning = ""; // 警告信息
 
-                strError += errorinfos[i].RefID + "在提交保存过程中发生错误 -- " + errorinfos[i].ErrorInfo + "\r\n";
+                if (errorinfos == null)
+                    return 0;
+
+                strError = "";
+                for (int i = 0; i < errorinfos.Length; i++)
+                {
+                    if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
+                    {
+                        strError = "服务器返回的EntityInfo结构中RefID为空";
+                        return -1;
+                    }
+
+                    // 正常信息处理
+                    if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
+                        continue;
+
+                    strError += errorinfos[i].RefID + "在提交保存过程中发生错误 -- " + errorinfos[i].ErrorInfo + "\r\n";
+                }
+
+                if (String.IsNullOrEmpty(strError) == false)
+                    return -1;
+
+                return 0;
             }
-
-            if (String.IsNullOrEmpty(strError) == false)
-                return -1;
-
-            return 0;
         }
 
 
@@ -738,64 +745,67 @@ namespace dp2Circulation
                 string strError = "";
                 long lRet = 0;
 
-                if (this.DbType == "item")
-                    lRet = this.Container.BiblioStatisForm.Channel.GetItemInfo(
-         null,
-         strBarcodeOrRecPath,
-         "xml",
-         out strItemXml,
-         out strOutputItemRecPath,
-         out item_timestamp,
-         "",
-         out strBiblioText,
-         out strBiblioRecPath,
-         out strError);
-                else if (this.DbType == "order")
-                    lRet = this.Container.BiblioStatisForm.Channel.GetOrderInfo(
-         null,
-         strBarcodeOrRecPath,
-         "xml",
-         out strItemXml,
-         out strOutputItemRecPath,
-         out item_timestamp,
-         "",
-         out strBiblioText,
-         out strBiblioRecPath,
-         out strError);
-                else if (this.DbType == "issue")
-                    lRet = this.Container.BiblioStatisForm.Channel.GetIssueInfo(
-         null,
-         strBarcodeOrRecPath,
-         "xml",
-         out strItemXml,
-         out strOutputItemRecPath,
-         out item_timestamp,
-         "",
-         out strBiblioText,
-         out strBiblioRecPath,
-         out strError);
-                else if (this.DbType == "comment")
-                    lRet = this.Container.BiblioStatisForm.Channel.GetCommentInfo(
-         null,
-         strBarcodeOrRecPath,
-         "xml",
-         out strItemXml,
-         out strOutputItemRecPath,
-         out item_timestamp,
-         "",
-         out strBiblioText,
-         out strBiblioRecPath,
-         out strError);
-                else
+                using (var looping = this.Container.BiblioStatisForm.Looping(out LibraryChannel channel))
                 {
-                    throw new Exception("无法识别的 DbType '" + this.DbType + "'");
-                }
+                    if (this.DbType == "item")
+                        lRet = channel.GetItemInfo(
+             looping.stop,
+             strBarcodeOrRecPath,
+             "xml",
+             out strItemXml,
+             out strOutputItemRecPath,
+             out item_timestamp,
+             "",
+             out strBiblioText,
+             out strBiblioRecPath,
+             out strError);
+                    else if (this.DbType == "order")
+                        lRet = channel.GetOrderInfo(
+             looping.stop,
+             strBarcodeOrRecPath,
+             "xml",
+             out strItemXml,
+             out strOutputItemRecPath,
+             out item_timestamp,
+             "",
+             out strBiblioText,
+             out strBiblioRecPath,
+             out strError);
+                    else if (this.DbType == "issue")
+                        lRet = channel.GetIssueInfo(
+             looping.stop,
+             strBarcodeOrRecPath,
+             "xml",
+             out strItemXml,
+             out strOutputItemRecPath,
+             out item_timestamp,
+             "",
+             out strBiblioText,
+             out strBiblioRecPath,
+             out strError);
+                    else if (this.DbType == "comment")
+                        lRet = channel.GetCommentInfo(
+             looping.stop,
+             strBarcodeOrRecPath,
+             "xml",
+             out strItemXml,
+             out strOutputItemRecPath,
+             out item_timestamp,
+             "",
+             out strBiblioText,
+             out strBiblioRecPath,
+             out strError);
+                    else
+                    {
+                        throw new Exception("无法识别的 DbType '" + this.DbType + "'");
+                    }
 
-                if (lRet == -1 || lRet == 0)
-                    throw new Exception(strError);
-                this.m_strOldRecord = strItemXml;
-                this.Timestamp = item_timestamp;
-                return strItemXml;
+                    if (lRet == -1 || lRet == 0)
+                        throw new Exception(strError);
+                    this.m_strOldRecord = strItemXml;
+                    this.Timestamp = item_timestamp;
+                    return strItemXml;
+                }
             }
             set
             {

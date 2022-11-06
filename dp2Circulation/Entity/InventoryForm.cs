@@ -222,8 +222,9 @@ namespace dp2Circulation
             this._statisInfo = null;
             this.SetButtonState(null);
 
+#if SUPPORT_OLD_STOP
             this.Channel = null;    // testing
-
+#endif
             this.BeginInvoke(new Action(Initial));
         }
 

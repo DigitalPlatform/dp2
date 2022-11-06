@@ -23,6 +23,7 @@ using DigitalPlatform.dp2.Statis;
 
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -74,6 +75,8 @@ namespace dp2Circulation
         /// </summary>
         public ReaderStatisForm()
         {
+            this.UseLooping = true; // 2022/11/5
+
             InitializeComponent();
         }
 
@@ -405,6 +408,7 @@ namespace dp2Circulation
         {
             strWarning = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -413,6 +417,11 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(
+                out LibraryChannel channel,
+                "正在执行脚本 ...",
+                "disableControl");
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -474,7 +483,10 @@ namespace dp2Circulation
                 }
 
                 // 循环
-                nRet = DoLoop(out strError);
+                nRet = DoLoop(
+                    looping.stop,
+                    channel,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -504,13 +516,16 @@ namespace dp2Circulation
                 if (objStatis != null)
                     objStatis.FreeResources();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
-                this.AssemblyMain = null;
-
                 EnableControls(true);
+                */
+
+                this.AssemblyMain = null;
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
@@ -614,7 +629,10 @@ namespace dp2Circulation
         // return:
         //      0   普通返回
         //      1   要全部中断
-        int DoLoop(out string strError)
+        int DoLoop(
+            Stop stop,
+            LibraryChannel channel,
+            out string strError)
         {
             strError = "";
             int nRet = 0;
@@ -683,7 +701,10 @@ namespace dp2Circulation
             {
                 if (this.InputStyle == ReaderStatisInputStyle.WholeReaderDatabase)
                 {
-                    nRet = SearchAllReaderRecPath(strTempRecPathFilename,
+                    nRet = SearchAllReaderRecPath(
+                        stop,
+                        channel,
+                        strTempRecPathFilename,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -741,9 +762,7 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null)
-                        {
-                            if (_stop.State != 0)
+                        if (stop != null && stop.State != 0)
                             {
                                 DialogResult result = MessageBox.Show(this,
                                     "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
@@ -760,9 +779,8 @@ namespace dp2Circulation
                                 if (result == DialogResult.No)
                                     return 0;   // 假装loop正常结束
 
-                                _stop.Continue(); // 继续循环
+                                stop.Continue(); // 继续循环
                             }
-                        }
 
                         // string strItemBarcode = barcodes[i];
                         string strRecPathOrBarcode = sr.ReadLine();
@@ -773,7 +791,7 @@ namespace dp2Circulation
                         if (String.IsNullOrEmpty(strRecPathOrBarcode) == true)
                             continue;
 
-                        _stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个读者记录，" + strAccessPointName + "为 " + strRecPathOrBarcode);
+                        stop?.SetMessage("正在获取第 " + (i + 1).ToString() + " 个读者记录，" + strAccessPointName + "为 " + strRecPathOrBarcode);
                         this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
                         // 获得读者记录
@@ -802,8 +820,8 @@ namespace dp2Circulation
                         }
 
                         // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
-                        lRet = Channel.GetReaderInfo(
-                            _stop,
+                        lRet = channel.GetReaderInfo(
+                            stop,
                             strAccessPoint,
                             objStatis.XmlFormat,    // "xml",   // strResultType
                             out results,
@@ -1004,7 +1022,10 @@ namespace dp2Circulation
 
         // 注意：上级函数RunScript()已经使用了BeginLoop()和EnableControls()
         // 检索获得所有读者记录路径(输出到文件)
-        int SearchAllReaderRecPath(string strRecPathFilename,
+        int SearchAllReaderRecPath(
+            Stop stop,
+            LibraryChannel channel,
+            string strRecPathFilename,
             out string strError)
         {
             strError = "";
@@ -1024,7 +1045,8 @@ namespace dp2Circulation
 
                 try
                 {
-                    long lRet = Channel.SearchReader(_stop,
+                    long lRet = channel.SearchReader(
+                        stop,
                         this.comboBox_inputReaderDbName.Text,
                         "",
                         -1,
@@ -1035,7 +1057,7 @@ namespace dp2Circulation
                         "", // strOutputStyle
                         out strError);
                     if (lRet == -1)
-                        goto ERROR1;
+                        return -1;
 
                     long lHitCount = lRet;
 
@@ -1055,14 +1077,14 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null && _stop.State != 0)
+                        if (stop != null && stop.State != 0)
                         {
                             strError = "用户中断";
-                            goto ERROR1;
+                            return -1;
                         }
 
-                        lRet = Channel.GetSearchResult(
-                            _stop,
+                        lRet = channel.GetSearchResult(
+                            stop,
                             null,   // strResultSetName
                             lStart,
                             lCount,
@@ -1071,12 +1093,12 @@ namespace dp2Circulation
                             out searchresults,
                             out strError);
                         if (lRet == -1)
-                            goto ERROR1;
+                            return -1;
 
                         if (lRet == 0)
                         {
                             strError = "未命中";
-                            goto ERROR1;
+                            return -1;
                         }
 
                         Debug.Assert(searchresults != null, "");
@@ -1092,11 +1114,13 @@ namespace dp2Circulation
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        stop?.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
                     }
+
+                    return 0;
                 }
                 finally
                 {
@@ -1109,9 +1133,6 @@ namespace dp2Circulation
                      * */
                 }
             }
-            return 0;
-        ERROR1:
-            return -1;
         }
 
         // 下一步 按钮
@@ -1497,6 +1518,7 @@ namespace dp2Circulation
 
             EnableControls(false);
              * */
+            var looping = Looping(out LibraryChannel channel);
 
             try
             {
@@ -1504,8 +1526,8 @@ namespace dp2Circulation
 
                 string strExistingXml = "";
 
-                long lRet = Channel.SetReaderInfo(
-                    _stop,
+                long lRet = channel.SetReaderInfo(
+                    looping.stop,
                     strAction,
                     strRecPath,
                     strNewXml,
@@ -1529,6 +1551,7 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
                 /*
                 EnableControls(true);
 

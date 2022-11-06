@@ -102,7 +102,8 @@ namespace dp2Circulation
                     throw new Exception("CurrentBiblioRecPath为空，无法取得书目记录");
 
                 REDO:
-                int nRet = this.ItemStatisForm.GetBiblioInfo(this.CurrentBiblioRecPath,
+                int nRet = this.ItemStatisForm.GetBiblioInfo(
+                    this.CurrentBiblioRecPath,
                     "xml",
                     out string strBiblioXml,
                     out string strError);

@@ -83,7 +83,8 @@ namespace dp2Circulation
                 else
                     e.LibraryServerUrl = _currentAccount.ServerUrl;
 
-                if (IsDot(_currentAccount.UserName) == true)
+                if (IsDot(_currentAccount.UserName) == true
+                    && /*2022/11/6*/e.LibraryServerUrl == Program.MainForm.LibraryServerUrl)
                 {
                     e.UserName = Program.MainForm.AppInfo.GetString(
                     "default_account",
@@ -213,10 +214,27 @@ false);
             string strUserName,
             GetChannelStyle style = GetChannelStyle.GUI)
         {
+            /*
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
                 strServerUrl = Program.MainForm.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = Program.MainForm.DefaultUserName;
+            */
+
+            // 2022/11/6
+            {
+                if (EntityRegisterBase.IsDot(strServerUrl) == true)
+                    strServerUrl = Program.MainForm.LibraryServerUrl;
+                if (EntityRegisterBase.IsDot(strUserName) == true
+                    && strServerUrl == Program.MainForm.LibraryServerUrl)
+                    strUserName = Program.MainForm.DefaultUserName;
+                else
+                {
+                    // 注: 用户名是跟着 URL 走的。一旦 URL 用了非当前的，则用户名也就无法通过当前缺省确定了
+                    if (EntityRegisterBase.IsDot(strUserName) == true)
+                        strUserName = "";
+                }
+            }
 
             LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
             if ((style & GetChannelStyle.GUI) != 0)

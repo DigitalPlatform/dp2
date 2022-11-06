@@ -1,5 +1,6 @@
 namespace dp2Circulation
 {
+#if REMOVED
     partial class ChargingForm
     {
         /// <summary>
@@ -762,4 +763,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_renew;
     }
+
+#endif
 }

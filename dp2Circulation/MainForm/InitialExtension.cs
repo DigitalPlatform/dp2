@@ -1481,9 +1481,11 @@ MessageBoxDefaultButton.Button1);
                 (object)this.toolStripProgressBar_main);
             // stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
 
+#if REMOVED
             // 公用的 Stop 对象
             this.Stop = new DigitalPlatform.Stop();
             this.Stop.Register(stopManager, true);
+#endif
 
             this.SetMenuItemState();
 
@@ -1543,7 +1545,7 @@ MessageBoxDefaultButton.Button1);
 
             MigratePrintTemplatesDirectory();
 
-            #region 脚本支持
+#region 脚本支持
             ScriptManager.applicationInfo = this.AppInfo;
             // ScriptManager.CfgFilePath = Path.Combine(this.DataDir, "mainform_statis_projects.xml");
             // ScriptManager.DataDir = this.DataDir;
@@ -1565,7 +1567,7 @@ MessageBoxDefaultButton.Button1);
             {
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
-            #endregion
+#endregion
 
             if (this.qrRecognitionControl1 != null)
             {
@@ -1650,7 +1652,7 @@ MessageBoxDefaultButton.Button1);
             StartStatisLogWorker(_cancel.Token);
         }
 
-        #region RFID
+#region RFID
 
         CancellationTokenSource _cancelRfidManager = new CancellationTokenSource();
 
@@ -1733,10 +1735,10 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        #endregion
+#endregion
 
 
-        #region 掌纹 FingerprintManager
+#region 掌纹 FingerprintManager
 
         CancellationTokenSource _cancelPalmManager = new CancellationTokenSource();
 
@@ -2087,9 +2089,9 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");
         }
 
-        #endregion
+#endregion
 
-        #region ProcessManager
+#region ProcessManager
 
         CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
 
@@ -2158,7 +2160,7 @@ MessageBoxDefaultButton.Button1);
         }
         */
 
-        #endregion
+#endregion
 
         // 将 dp2circulation.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         int MoveDp2circulationXml(out string strError)
@@ -2326,7 +2328,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strText);
         }
 
-        #region Background Form
+#region Background Form
 
         void OpenBackgroundForm()
         {
@@ -2449,7 +2451,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        #endregion
+#endregion
 
         // 判断两个文件的版本号是否一致
         static bool VersionChanged(string filename1, string filename2)
@@ -2644,6 +2646,8 @@ MessageBoxDefaultButton.Button1);
                 EnableControls(false);
                 this.MdiClient.Enabled = false;
             }
+
+            var looping = Looping(null);
 
             try
             {
@@ -2988,12 +2992,8 @@ AppInfo.GetString("config",
                 InstallExternalFont(Path.Combine(this.DataDir, "ocr-b.ttf"));
 
 
-#if NO
-                Stop = new DigitalPlatform.Stop();
-                Stop.Register(stopManager, true);	// 和容器关联
-#endif
                 // TODO: 这里有一定问题。最好临时申请一个 stop， 然后用后释放
-                Stop.SetMessage("正在删除以前遗留的临时文件...");
+                looping.stop.SetMessage("正在删除以前遗留的临时文件...");
 
                 /*
 Type: System.UnauthorizedAccessException
@@ -3049,7 +3049,7 @@ Culture=neutral, PublicKeyToken=null
                     return false;
                 }
 
-                Stop.SetMessage("正在复制报表配置文件...");
+                looping.stop.SetMessage("正在复制报表配置文件...");
                 // 拷贝目录
                 nRet = PathUtil.CopyDirectory(Path.Combine(this.DataDir, "report_def"),
                     Path.Combine(this.UserDir, "report_def"),
@@ -3058,7 +3058,7 @@ Culture=neutral, PublicKeyToken=null
                 if (nRet == -1)
                     MessageBox.Show(this, strError);
 
-                Stop.SetMessage("");
+                looping.stop.SetMessage("");
 #if NO
                 if (Stop != null) // 脱离关联
                 {
@@ -3122,6 +3122,8 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+
                 // 然后许可界面
                 if (bFullInitial == true)
                 {
@@ -3178,28 +3180,26 @@ Culture=neutral, PublicKeyToken=null
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
         public int TouchServer(bool bPrepareSearch = true)
         {
+            string strError = "";
         REDO:
-#if NO
-            if (bPrepareSearch == true)
-            {
-                if (PrepareSearch() == 0)
-                    return -1;
-            }
-#endif
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
-            string strError = "";
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在连接服务器 " + channel.Url + " ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "timeout:0:1:0");
+            looping.stop.SetMessage("正在连接服务器 " + channel.Url + " ...");
             try
             {
-                string strTime = "";
-                long lRet = channel.GetClock(Stop,
-                    out strTime,
+                long lRet = channel.GetClock(
+                    looping.stop,
+                    out string strTime,
                     out strError);
                 if (lRet == -1)
                 {
@@ -3213,16 +3213,15 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
-#if NO
-                if (bPrepareSearch == true)
-                    EndSearch();
-#endif
+                */
             }
 
             return 0;
@@ -3297,12 +3296,15 @@ Culture=neutral, PublicKeyToken=null
                 }
             }
 #endif
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在检查服务器 " + channel.Url + " 的版本号, 请稍候 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel);
+            looping.stop.SetMessage("正在检查服务器 " + channel.Url + " 的版本号, 请稍候 ...");
             try
             {
 
@@ -3311,7 +3313,7 @@ Culture=neutral, PublicKeyToken=null
                 return -2;
 #endif
 
-                long lRet = channel.GetVersion(Stop,
+                long lRet = channel.GetVersion(looping.stop,
     out string strVersion,
     out string strUID,
     out strError);
@@ -3396,11 +3398,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -3430,20 +3435,25 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
+            string strError = "";
+
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // TODO: 在函数因为无法获得Channel而返回前，是否要清空相关的检索途径数据结构?
             // this.Update();
-            string strError = "";
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在列检索途径 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在列检索途径 ...");
             try
             {
                 // 获得书目库的检索途径
-                long lRet = channel.ListDbFroms(Stop,
+                long lRet = channel.ListDbFroms(
+                    looping.stop,
                     "biblio",
                     this.Lang,
                     out BiblioDbFromInfo[] infos,
@@ -3459,7 +3469,8 @@ Culture=neutral, PublicKeyToken=null
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
                 {
                     infos = null;
-                    lRet = channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(
+                        looping.stop,
     "authority",
     this.Lang,
     out infos,
@@ -3475,7 +3486,8 @@ Culture=neutral, PublicKeyToken=null
 
                 // 获得读者库的检索途径
                 infos = null;
-                lRet = channel.ListDbFroms(Stop,
+                lRet = channel.ListDbFroms(
+                    looping.stop,
     "reader",
     this.Lang,
     out infos,
@@ -3502,7 +3514,8 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 获得实体库的检索途径
                     infos = null;
-                    lRet = channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(
+                        looping.stop,
         "item",
         this.Lang,
         out infos,
@@ -3516,7 +3529,8 @@ Culture=neutral, PublicKeyToken=null
 
                     // 获得期库的检索途径
                     infos = null;
-                    lRet = channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(
+                        looping.stop,
         "issue",
         this.Lang,
         out infos,
@@ -3530,7 +3544,8 @@ Culture=neutral, PublicKeyToken=null
 
                     // 获得订购库的检索途径
                     infos = null;
-                    lRet = channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(
+                        looping.stop,
         "order",
         this.Lang,
         out infos,
@@ -3544,7 +3559,8 @@ Culture=neutral, PublicKeyToken=null
 
                     // 获得评注库的检索途径
                     infos = null;
-                    lRet = channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(
+                        looping.stop,
         "comment",
         this.Lang,
         out infos,
@@ -3561,7 +3577,8 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 获得发票库的检索途径
                     infos = null;
-                    lRet = channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(
+                        looping.stop,
         "invoice",
         this.Lang,
         out infos,
@@ -3576,7 +3593,8 @@ Culture=neutral, PublicKeyToken=null
 
                     // 获得违约金库的检索途径
                     infos = null;
-                    lRet = channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(
+                        looping.stop,
         "amerce",
         this.Lang,
         out infos,
@@ -3595,7 +3613,8 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 获得预约到书库的检索途径
                     infos = null;
-                    lRet = channel.ListDbFroms(Stop,
+                    lRet = channel.ListDbFroms(
+                        looping.stop,
         "arrived",
         this.Lang,
         out infos,
@@ -3616,11 +3635,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -3652,6 +3674,7 @@ Culture=neutral, PublicKeyToken=null
         //      0   本地已经有文件，并且最后修改时间和服务器的一致，因此不必重新获得了
         //      1   获得了文件内容
         int GetSystemFile(
+            Stop stop,
             LibraryChannel channel,
             string strFileNameParam,
             out string strError)
@@ -3680,17 +3703,16 @@ Culture=neutral, PublicKeyToken=null
 
                     if (string.IsNullOrEmpty(strLastTime) == true)
                     {
-                        Stop.SetMessage("正在获取系统文件 " + strFileName + " 的最后修改时间 ...");
+                        stop?.SetMessage("正在获取系统文件 " + strFileName + " 的最后修改时间 ...");
 
-                        byte[] baContent = null;
                         long lRet = channel.GetFile(
-        Stop,
+        stop,
         "cfgs",
         strFileName,
         -1, // lStart,
         0,  // lLength,
         "gzip",
-        out baContent,
+        out byte[] baContent,
         out strLastTime,
         out strError);
                         if (lRet == -1)
@@ -3710,7 +3732,7 @@ Culture=neutral, PublicKeyToken=null
                 }
 
             REDO:
-                Stop.SetMessage("正在下载系统文件 " + strFileName + " ...");
+                stop?.SetMessage("正在下载系统文件 " + strFileName + " ...");
 
                 string strPrevFileTime = "";
                 long lStart = 0;
@@ -3729,7 +3751,7 @@ Culture=neutral, PublicKeyToken=null
                     // return:
                     //      result.Value    -1 错误；其他 文件的总长度
                     long lRet = channel.GetFile(
-                        Stop,
+                        stop,
                         "cfgs",
                         strFileName,
                         lStart,
@@ -3873,24 +3895,28 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
+            string strError = "";
+            int nRet = 0;
+
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
-            string strError = "";
-            int nRet = 0;
-
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得从服务器映射到本地的配置文件 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得从服务器映射到本地的配置文件 ...");
             try
             {
                 string strServerMappedPath = PathUtil.MergePath(this.DataDir, "servermapped");
                 List<string> fullnames = new List<string>();
 
                 string strValue = "";
-                long lRet = channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "cfgs",
                     StringUtil.CompareVersion(this.ServerVersion, "2.23") >= 0 ? "listFileNamesEx" : "listFileNames",
                     out strValue,
@@ -3915,6 +3941,7 @@ Culture=neutral, PublicKeyToken=null
                         continue;
 
                     nRet = GetSystemFile(
+                        looping.stop,
                         channel,
                         filename,
                         out strError);
@@ -3940,11 +3967,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -3986,23 +4016,26 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
+            string strError = "";
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
-            string strError = "";
-
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得图书馆一般信息 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得图书馆一般信息 ...");
             try
             {
                 this.LibraryName = "";
                 this.ExpireDate = "";
                 this.OpacServerUrl = "";
 
-                long lRet = channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "library",
                     "name",
                     out string strValue,
@@ -4017,7 +4050,8 @@ Culture=neutral, PublicKeyToken=null
 
                 this.SetServerName(channel.Url, this.LibraryName);
 
-                lRet = channel.GetSystemParameter(Stop,
+                lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "system",
                     "expire",
                     out strValue,
@@ -4031,7 +4065,8 @@ Culture=neutral, PublicKeyToken=null
                 this.ExpireDate = strValue;
 
                 // OPAC URL
-                lRet = channel.GetSystemParameter(Stop,
+                lRet = channel.GetSystemParameter(
+                    looping.stop,
     "opac",
     "serverDirectory",
     out strValue,
@@ -4046,11 +4081,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -4095,17 +4133,20 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
+            string strError = "";
+            int nRet = 0;
+
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
-            string strError = "";
-            int nRet = 0;
-
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得普通库属性列表 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得普通库属性列表 ...");
             try
             {
                 this.NormalDbProperties = new List<NormalDbProperty>();
@@ -4253,7 +4294,8 @@ Culture=neutral, PublicKeyToken=null
                     // 先获得时间戳
                     // TODO: 如果文件太多可以分批获取
                     string strValue = "";
-                    long lRet = channel.GetSystemParameter(Stop,
+                    long lRet = channel.GetSystemParameter(
+                        looping.stop,
                         "cfgs/get_res_timestamps",
                         StringUtil.MakePathList(filenames),
                         out strValue,
@@ -4308,7 +4350,7 @@ Culture=neutral, PublicKeyToken=null
                             byte[] baCfgOutputTimestamp = null;
                             nRet = GetCfgFile(
                                 channel,
-                                Stop,
+                                looping.stop,
                                 normal.DbName,
                                 "browse",
                                 ByteArray.GetTimeStampByteArray(strTimestamp),
@@ -4364,16 +4406,14 @@ Culture=neutral, PublicKeyToken=null
 
                         normal.ColumnProperties = new ColumnPropertyCollection();
 
-                        string strContent = "";
-                        byte[] baCfgOutputTimestamp = null;
                         nRet = GetCfgFile(
                             channel,
-                            Stop,
+                            looping.stop,
                             normal.DbName,
                             "browse",
                             null,
-                            out strContent,
-                            out baCfgOutputTimestamp,
+                            out string strContent,
+                            out byte[] baCfgOutputTimestamp,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -4408,11 +4448,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -4487,14 +4530,17 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
-            LibraryChannel channel = this.GetChannel();
-
             string strError = "";
+
+            /*
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得全部数据库定义 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得全部数据库定义 ...");
             try
             {
                 string strValue = "";
@@ -4503,7 +4549,7 @@ Culture=neutral, PublicKeyToken=null
                 this.AllDatabaseDom = null;
 
                 lRet = channel.ManageDatabase(
-    Stop,
+    looping.stop,
     "getinfo",
     "",
     "",
@@ -4537,6 +4583,8 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 if (Stop != null)
                 {
                     Stop.EndLoop();
@@ -4545,6 +4593,7 @@ Culture=neutral, PublicKeyToken=null
                 }
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -4587,17 +4636,20 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
+            string strError = "";
+            int nRet = 0;
+
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
-            string strError = "";
-            int nRet = 0;
-
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在初始化书目库属性列表 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(/*out LibraryChannel channel,*/
+                "正在初始化书目库属性列表 ...");
             try
             {
                 this.BiblioDbProperties = new List<BiblioDbProperty>();
@@ -4654,11 +4706,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -4683,270 +4738,6 @@ Culture=neutral, PublicKeyToken=null
 #endif
         }
 
-
-#if NO
-        // 
-        // return:
-        //      -1  出错，不希望继续以后的操作
-        //      0   成功
-        //      1   出错，但希望继续后面的操作
-        /// <summary>
-        /// 获得编目库属性列表
-        /// </summary>
-        /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
-        public int InitialBiblioDbProperties()
-        {
-        REDO:
-            int nRet = PrepareSearch();
-            if (nRet == 0)
-                return -1;
-
-            // this.Update();
-
-            string strError = "";
-
-            Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在获得书目库属性列表 ...");
-            Stop.BeginLoop();
-
-            try
-            {
-                string strValue = "";
-                long lRet = 0;
-
-                this.BiblioDbProperties = new List<BiblioDbProperty>();
-
-
-                // 新用法：一次性获得全部参数
-                lRet = Channel.GetSystemParameter(Stop,
-                    "system",
-                    "biblioDbGroup",
-                    out strValue,
-                    out strError);
-                if (lRet == -1)
-                {
-                    strError = "针对服务器 " + Channel.Url + " 获得书目库信息过程发生错误：" + strError;
-                    goto ERROR1;
-                }
-
-                if (String.IsNullOrEmpty(strValue) == true)
-                {
-                    // 还是用旧方法
-
-                    lRet = Channel.GetSystemParameter(Stop,
-                        "biblio",
-                        "dbnames",
-                        out strValue,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "针对服务器 " + Channel.Url + " 获得编目库名列表过程发生错误：" + strError;
-                        goto ERROR1;
-                    }
-
-                    string[] biblioDbNames = strValue.Split(new char[] { ',' });
-
-                    for (int i = 0; i < biblioDbNames.Length; i++)
-                    {
-                        BiblioDbProperty property = new BiblioDbProperty();
-                        property.DbName = biblioDbNames[i];
-                        this.BiblioDbProperties.Add(property);
-                    }
-
-
-                    // 获得语法格式
-                    lRet = Channel.GetSystemParameter(Stop,
-                        "biblio",
-                        "syntaxs",
-                        out strValue,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "针对服务器 " + Channel.Url + " 获得编目库数据格式列表过程发生错误：" + strError;
-                        goto ERROR1;
-                    }
-
-                    string[] syntaxs = strValue.Split(new char[] { ',' });
-
-                    if (syntaxs.Length != this.BiblioDbProperties.Count)
-                    {
-                        strError = "针对服务器 " + Channel.Url + " 获得编目库名为 " + this.BiblioDbProperties.Count.ToString() + " 个，而数据格式为 " + syntaxs.Length.ToString() + " 个，数量不一致";
-                        goto ERROR1;
-                    }
-
-                    // 增补数据格式
-                    for (int i = 0; i < this.BiblioDbProperties.Count; i++)
-                    {
-                        this.BiblioDbProperties[i].Syntax = syntaxs[i];
-                    }
-
-                    {
-
-                        // 获得对应的实体库名
-                        lRet = Channel.GetSystemParameter(Stop,
-                            "item",
-                            "dbnames",
-                            out strValue,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            strError = "针对服务器 " + Channel.Url + " 获得实体库名列表过程发生错误：" + strError;
-                            goto ERROR1;
-                        }
-
-                        string[] itemdbnames = strValue.Split(new char[] { ',' });
-
-                        if (itemdbnames.Length != this.BiblioDbProperties.Count)
-                        {
-                            strError = "针对服务器 " + Channel.Url + " 获得编目库名为 " + this.BiblioDbProperties.Count.ToString() + " 个，而实体库名为 " + itemdbnames.Length.ToString() + " 个，数量不一致";
-                            goto ERROR1;
-                        }
-
-                        // 增补数据格式
-                        for (int i = 0; i < this.BiblioDbProperties.Count; i++)
-                        {
-                            this.BiblioDbProperties[i].ItemDbName = itemdbnames[i];
-                        }
-
-                    }
-
-                    {
-
-                        // 获得对应的期库名
-                        lRet = Channel.GetSystemParameter(Stop,
-                            "issue",
-                            "dbnames",
-                            out strValue,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            strError = "针对服务器 " + Channel.Url + " 获得期库名列表过程发生错误：" + strError;
-                            goto ERROR1;
-                        }
-
-                        string[] issuedbnames = strValue.Split(new char[] { ',' });
-
-                        if (issuedbnames.Length != this.BiblioDbProperties.Count)
-                        {
-                            return 0; // TODO: 暂时不警告。等将来所有用户都更换了dp2libraryws 2007/10/19以后的版本后，这里再警告
-                            /*
-                            strError = "针对服务器 " + Channel.Url + " 获得编目库名为 " + this.BiblioDbProperties.Count.ToString() + " 个，而期库名为 " + issuedbnames.Length.ToString() + " 个，数量不一致";
-                            goto ERROR1;
-                             * */
-                        }
-
-                        // 增补数据格式
-                        for (int i = 0; i < this.BiblioDbProperties.Count; i++)
-                        {
-                            this.BiblioDbProperties[i].IssueDbName = issuedbnames[i];
-                        }
-                    }
-
-                    ///////
-
-                    {
-
-                        // 获得对应的订购库名
-                        lRet = Channel.GetSystemParameter(Stop,
-                            "order",
-                            "dbnames",
-                            out strValue,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            strError = "针对服务器 " + Channel.Url + " 获得订购库名列表过程发生错误：" + strError;
-                            goto ERROR1;
-                        }
-
-                        string[] orderdbnames = strValue.Split(new char[] { ',' });
-
-                        if (orderdbnames.Length != this.BiblioDbProperties.Count)
-                        {
-                            return 0; // TODO: 暂时不警告。等将来所有用户都更换了dp2libraryws 2007/11/30以后的版本后，这里再警告
-                            /*
-                            strError = "针对服务器 " + Channel.Url + " 获得编目库名为 " + this.BiblioDbProperties.Count.ToString() + " 个，而订购库名为 " + orderdbnames.Length.ToString() + " 个，数量不一致";
-                            goto ERROR1;
-                             * */
-                        }
-
-                        // 增补数据格式
-                        for (int i = 0; i < this.BiblioDbProperties.Count; i++)
-                        {
-                            this.BiblioDbProperties[i].OrderDbName = orderdbnames[i];
-                        }
-                    }
-
-                }
-                else
-                {
-                    // 新方法
-                    XmlDocument dom = new XmlDocument();
-                    dom.LoadXml("<root />");
-
-                    try
-                    {
-                        dom.DocumentElement.InnerXml = strValue;
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "category=system,name=biblioDbGroup所返回的XML片段在装入InnerXml时出错: " + ex.Message;
-                        goto ERROR1;
-                    }
-
-                    XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
-
-                    for (int i = 0; i < nodes.Count; i++)
-                    {
-                        XmlNode node = nodes[i];
-
-                        BiblioDbProperty property = new BiblioDbProperty();
-                        this.BiblioDbProperties.Add(property);
-                        property.DbName = DomUtil.GetAttr(node, "biblioDbName");
-                        property.ItemDbName = DomUtil.GetAttr(node, "itemDbName");
-                        property.Syntax = DomUtil.GetAttr(node, "syntax");
-                        property.IssueDbName = DomUtil.GetAttr(node, "issueDbName");
-                        property.OrderDbName = DomUtil.GetAttr(node, "orderDbName");
-                        property.CommentDbName = DomUtil.GetAttr(node, "commentDbName");
-                        property.Role = DomUtil.GetAttr(node, "role");
-
-                        bool bValue = true;
-                        nRet = DomUtil.GetBooleanParam(node,
-                            "inCirculation",
-                            true,
-                            out bValue,
-                            out strError);
-                        property.InCirculation = bValue;
-                    }
-                }
-
-                // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-            }
-            finally
-            {
-                Stop.EndLoop();
-                Stop.OnStop -= new StopEventHandler(this.DoStop);
-                Stop.Initial("");
-
-                EndSearch();
-            }
-
-            return 0;
-        ERROR1:
-            DialogResult result = MessageBox.Show(this,
-                strError + "\r\n\r\n是否重试?",
-                "dp2Circulation",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-            if (result == System.Windows.Forms.DialogResult.Yes)
-                goto REDO;
-            if (result == DialogResult.No)
-                return 1;   // 出错，但希望继续后面的操作
-
-            return -1;  // 出错，不希望继续以后的操作
-        }
-
-#endif
 
         string[] m_readerDbNames = null;
 
@@ -4994,15 +4785,18 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
-            LibraryChannel channel = this.GetChannel();
-
             string strError = "";
             int nRet = 0;
+
+            /*
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在初始化读者库属性列表 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(/*out LibraryChannel channel,*/
+                "正在初始化读者库属性列表 ...");
             try
             {
                 this.ReaderDbProperties = new List<ReaderDbProperty>();
@@ -5014,7 +4808,6 @@ Culture=neutral, PublicKeyToken=null
                 XmlNodeList nodes = this.AllDatabaseDom.DocumentElement.SelectNodes("database[@type='reader']");
                 foreach (XmlNode node in nodes)
                 {
-
                     ReaderDbProperty property = new ReaderDbProperty();
                     this.ReaderDbProperties.Add(property);
                     property.DbName = DomUtil.GetAttr(node, "name");
@@ -5033,11 +4826,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -5083,15 +4879,18 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
-            LibraryChannel channel = this.GetChannel();
-
             string strError = "";
             //int nRet = 0;
+
+            /*
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在初始化预约到书库属性列表 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在初始化预约到书库属性列表 ...");
             try
             {
                 this._arrivedDbName = "";
@@ -5102,7 +4901,8 @@ Culture=neutral, PublicKeyToken=null
                 int nRedoCount = 0;
             REDO_GET:
                 string strValue = "";
-                long lRet = channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "arrived",
                     "dbname",
                     out strValue,
@@ -5124,11 +4924,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -5150,138 +4953,6 @@ Culture=neutral, PublicKeyToken=null
             return -1;  // 出错，不希望继续以后的操作
         }
 
-#if NO
-        // 
-        // return:
-        //      -1  出错，不希望继续以后的操作
-        //      0   成功
-        //      1   出错，但希望继续后面的操作
-        /// <summary>
-        /// 获得读者库属性列表
-        /// </summary>
-        /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
-        public int InitialReaderDbProperties()
-        {
-        REDO:
-            int nRet = PrepareSearch();
-            if (nRet == 0)
-                return -1;
-
-            string strError = "";
-
-            Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在获得读者库属性列表 ...");
-            Stop.BeginLoop();
-
-            try
-            {
-                string strValue = "";
-                long lRet = 0;
-
-                this.ReaderDbProperties = new List<ReaderDbProperty>();
-                this.m_readerDbNames = null;
-
-                // 新用法：一次性获得全部参数
-                lRet = Channel.GetSystemParameter(Stop,
-                    "system",
-                    "readerDbGroup",
-                    out strValue,
-                    out strError);
-                if (lRet == -1)
-                {
-                    strError = "针对服务器 " + Channel.Url + " 获得读者库信息过程发生错误：" + strError;
-                    goto ERROR1;
-                }
-
-                if (String.IsNullOrEmpty(strValue) == true)
-                {
-                    // 还是用旧方法
-
-                    lRet = Channel.GetSystemParameter(Stop,
-                        "reader",
-                        "dbnames",
-                        out strValue,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "针对服务器 " + Channel.Url + " 获得读者库名列表过程发生错误：" + strError;
-                        goto ERROR1;
-                    }
-
-                    string[] readerDbNames = strValue.Split(new char[] { ',' });
-
-                    for (int i = 0; i < readerDbNames.Length; i++)
-                    {
-                        ReaderDbProperty property = new ReaderDbProperty();
-                        property.DbName = readerDbNames[i];
-                        this.ReaderDbProperties.Add(property);
-                    }
-                }
-                else
-                {
-                    // 新方法
-                    XmlDocument dom = new XmlDocument();
-                    dom.LoadXml("<root />");
-
-                    try
-                    {
-                        dom.DocumentElement.InnerXml = strValue;
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "category=system,name=readerDbGroup所返回的XML片段在装入InnerXml时出错: " + ex.Message;
-                        goto ERROR1;
-                    }
-
-                    XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
-
-                    for (int i = 0; i < nodes.Count; i++)
-                    {
-                        XmlNode node = nodes[i];
-
-                        ReaderDbProperty property = new ReaderDbProperty();
-                        this.ReaderDbProperties.Add(property);
-                        property.DbName = DomUtil.GetAttr(node, "name");
-                        property.LibraryCode = DomUtil.GetAttr(node, "libraryCode");
-
-                        bool bValue = true;
-                        nRet = DomUtil.GetBooleanParam(node,
-                            "inCirculation",
-                            true,
-                            out bValue,
-                            out strError);
-                        property.InCirculation = bValue;
-                    }
-                }
-
-                // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-            }
-            finally
-            {
-                Stop.EndLoop();
-                Stop.OnStop -= new StopEventHandler(this.DoStop);
-                Stop.Initial("");
-
-                EndSearch();
-            }
-
-            return 0;
-        ERROR1:
-            DialogResult result = MessageBox.Show(this,
-                strError + "\r\n\r\n是否重试?",
-                "dp2Circulation",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-            if (result == System.Windows.Forms.DialogResult.Yes)
-                goto REDO;
-            if (result == DialogResult.No)
-                return 1;   // 出错，但希望继续后面的操作
-
-            return -1;  // 出错，不希望继续以后的操作
-        }
-#endif
-
         // 
         // return:
         //      -1  出错，不希望继续以后的操作
@@ -5302,23 +4973,26 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
+            string strError = "";
+
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // this.Update();   // 优化
 
-            string strError = "";
-
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得前端交费接口配置信息 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得前端交费接口配置信息 ...");
             try
             {
-                string strValue = "";
-                long lRet = channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "circulation",
                     "clientFineInterface",
-                    out strValue,
+                    out string strValue,
                     out strError);
                 if (lRet == -1)
                 {
@@ -5344,15 +5018,17 @@ Culture=neutral, PublicKeyToken=null
                     this.ClientFineInterfaceName = DomUtil.GetAttr(cfg_dom.DocumentElement,
                         "name");
                 }
-
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
@@ -5395,23 +5071,26 @@ Culture=neutral, PublicKeyToken=null
                     return -1;
             }
 #endif
+            string strError = "";
+
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // this.Update();   // 优化
 
-            string strError = "";
-
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得索取号配置信息 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得索取号配置信息 ...");
             try
             {
-                string strValue = "";
-                long lRet = channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "circulation",
                     "callNumber",
-                    out strValue,
+                    out string strValue,
                     out strError);
                 if (lRet == -1)
                 {
@@ -5436,11 +5115,14 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPreareSearch == true)
                     EndSearch();
@@ -5465,26 +5147,29 @@ Culture=neutral, PublicKeyToken=null
             if (StringUtil.CompareVersion(this.ServerVersion, "3.11") < 0)
                 return 0;
 
-            LibraryChannel channel = this.GetChannel();
-
             string strError = "";
+
+            /*
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得 RFID 配置信息 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得 RFID 配置信息 ...");
             try
             {
-                string strValue = "";
-                long lRet = channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "system",
                     "rfid",
-                    out strValue,
+                    out string strValue,
                     out strError);
                 if (lRet == -1)
                 {
                     strError = "针对服务器 " + channel.Url + " 获得 RFID 配置信息过程发生错误：" + strError;
-                    goto ERROR1;
+                    return -1;
                 }
 
                 this.RfidInfo = strValue;
@@ -5498,39 +5183,44 @@ Culture=neutral, PublicKeyToken=null
                 catch (Exception ex)
                 {
                     strError = "load RfidCfgDom OuterXml error: " + ex.Message;
-                    goto ERROR1;
+                    return -1;
                 }
+
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
-
-            return 0;
-        ERROR1:
-            return 1;
         }
 
         public int GetBarcodeValidationInfo()
         {
         REDO:
-            LibraryChannel channel = this.GetChannel();
-
             string strError = "";
+
+            /*
+            LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得条码校验规则 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得条码校验规则 ...");
             try
             {
                 this.BarcodeValidation = "";
 
-                long lRet = channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "circulation",
                     "barcodeValidation",
                     out string strValue,
@@ -5569,17 +5259,19 @@ out strError);
                     }
                 }
 #endif
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
-
-            return 0;
         ERROR1:
             DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
             {
@@ -5624,66 +5316,18 @@ out strError);
 
             //string strError = "";
 
+            /*
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在初始化实用库属性列表 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping("正在初始化实用库属性列表 ...");
             try
             {
                 this.UtilDbProperties = new List<UtilDbProperty>();
 
                 if (this.AllDatabaseDom == null)
                     return 0;
-#if NO
-                string strValue = "";
-                long lRet = Channel.GetSystemParameter(Stop,
-                    "utilDb",
-                    "dbnames",
-                    out strValue,
-                    out strError);
-                if (lRet == -1)
-                {
-                    strError = "针对服务器 " + Channel.Url + " 获得实用库名列表过程发生错误：" + strError;
-                    goto ERROR1;
-                }
-
-                string[] utilDbNames = strValue.Split(new char[] { ',' });
-
-                for (int i = 0; i < utilDbNames.Length; i++)
-                {
-                    UtilDbProperty property = new UtilDbProperty();
-                    property.DbName = utilDbNames[i];
-                    this.UtilDbProperties.Add(property);
-                }
-
-                // 获得类型
-                lRet = Channel.GetSystemParameter(Stop,
-                    "utilDb",
-                    "types",
-                    out strValue,
-                    out strError);
-                if (lRet == -1)
-                {
-                    strError = "针对服务器 " + Channel.Url + " 获得实用库数据格式列表过程发生错误：" + strError;
-                    goto ERROR1;
-                }
-
-                string[] types = strValue.Split(new char[] { ',' });
-
-                if (types.Length != this.UtilDbProperties.Count)
-                {
-                    strError = "针对服务器 " + Channel.Url + " 获得实用库名为 " + this.UtilDbProperties.Count.ToString() + " 个，而类型为 " + types.Length.ToString() + " 个，数量不一致";
-                    goto ERROR1;
-                }
-
-                // 增补数据格式
-                for (int i = 0; i < this.UtilDbProperties.Count; i++)
-                {
-                    this.UtilDbProperties[i].Type = types[i];
-                }
-
-                // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-#endif
 
                 XmlNodeList nodes = this.AllDatabaseDom.DocumentElement.SelectNodes("database");
                 foreach (XmlNode node in nodes)
@@ -5720,22 +5364,22 @@ out strError);
                         property.Type = strType;
                         this.UtilDbProperties.Add(property);
                     }
-
                 }
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
-
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
 #endif
             }
-
-            return 0;
 #if NO
         ERROR1:
             DialogResult result = MessageBox.Show(this,
@@ -5770,6 +5414,7 @@ out strError);
                     return 0;
             }
 #endif
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // this.Update();
@@ -5777,12 +5422,14 @@ out strError);
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得服务器当前时钟 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得服务器当前时钟 ...");
             try
             {
                 string strTime = "";
                 long lRet = channel.GetClock(
-                    Stop,
+                    looping.stop,
                     out strTime,
                     out strError);
                 if (lRet == -1)
@@ -5803,6 +5450,8 @@ out strError);
                         + "\r\n\r\n请用时钟窗仔细核对服务器时钟，如有必要重新设定服务器时钟为正确值。\r\n\r\n注：流通功能均采用服务器时钟，如果服务器时钟正确而本地时钟不正确，一般不会影响流通功能正常进行。";
                     return 1;
                 }
+
+                return 0;
             }
             catch (Exception ex)
             {
@@ -5811,18 +5460,19 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
 #if NO
                 if (bPrepareSearch == true)
                     EndSearch();
 #endif
             }
-
-            return 0;
         }
 
         string _focusLibraryCode = "";
@@ -5944,6 +5594,7 @@ out strError);
             strError = "";
             library_codes = new List<string>();
 
+            /*
             LibraryChannel channel = this.GetChannel();
             if (Stop != null)
             {
@@ -5951,11 +5602,14 @@ out strError);
                 Stop.Initial("正在获得全部馆代码 ...");
                 Stop.BeginLoop();
             }
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获得全部馆代码 ...");
             try
             {
                 string strValue = "";
-                long lRet = channel.GetSystemParameter(Stop,
+                long lRet = channel.GetSystemParameter(
+                    looping.stop,
                     "system",
                     "libraryCodes",
                     out strValue,
@@ -5967,6 +5621,8 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 if (Stop != null)
                 {
                     Stop.EndLoop();
@@ -5975,6 +5631,7 @@ out strError);
                 }
 
                 this.ReturnChannel(channel);
+                */
             }
         }
     }

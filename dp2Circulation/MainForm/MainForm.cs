@@ -50,7 +50,7 @@ namespace dp2Circulation
     /// <summary>
     /// 框架窗口
     /// </summary>
-    public partial class MainForm : Form, IChannelManager
+    public partial class MainForm : Form, IChannelManager, ILoopingHost, IChannelHost, IEnableControl, IChannelLooping
     {
         internal ImageManager _imageManager = null;
 
@@ -329,10 +329,12 @@ namespace dp2Circulation
         public LibraryChannel Channel = new LibraryChannel();
 #endif
 
+        /*
         /// <summary>
         /// 停止控制
         /// </summary>
         public DigitalPlatform.Stop Stop = null;
+        */
 
         /// <summary>
         /// 界面语言代码
@@ -358,6 +360,8 @@ namespace dp2Circulation
         /// </summary>
         public MainForm()
         {
+            this._loopingHost.StopManager = stopManager;
+
             ClientInfo.ProgramName = "dp2circulation";
             FormClientInfo.MainForm = this;
 
@@ -767,6 +771,7 @@ Stack:
             // if (e.CloseReason != CloseReason.ApplicationExitCall)
             if (e.CloseReason == CloseReason.UserClosing)   // 2014/8/13
             {
+#if REMOVED
                 if (this.Stop != null)
                 {
                     if (this.Stop.State == 0)    // 0 表示正在处理
@@ -775,6 +780,13 @@ Stack:
                         e.Cancel = true;
                         return;
                     }
+                }
+#endif
+                if (HasLooping())
+                {
+                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
+                    e.Cancel = true;
+                    return;
                 }
 
                 // 警告关闭
@@ -946,11 +958,13 @@ Stack:
             // 2022/1/24
             ClientInfo.Finish();
 
+#if REMOVED
             if (Stop != null) // 脱离关联
             {
                 Stop.Unregister(true);
                 // Stop = null;
             }
+#endif
 
             if (this._channelPool != null)
             {
@@ -1202,7 +1216,7 @@ Stack:
                 "mainformstate");
         }
 
-        #region 菜单命令
+#region 菜单命令
 
         // 新开日志统计窗
         private void MenuItem_openOperLogStatisForm_Click(object sender, EventArgs e)
@@ -1391,8 +1405,9 @@ Stack:
 
             form.Show();
 #endif
-            OpenWindow<ChargingForm>();
 
+            // OpenWindow<ChargingForm>();
+            MessageBox.Show(this, "ChargingForm 代码已经移除");
         }
 
         private void MenuItem_openQuickChargingForm_Click(object sender, EventArgs e)
@@ -1722,6 +1737,8 @@ Stack:
             if (e.Section == "charging_form"
                 && e.Entry == "no_biblio_and_item_info")
             {
+                MessageBox.Show(this, "ChargingForm 代码已经移除");
+                /*
                 // 遍历当前打开的所有chargingform
                 List<Form> forms = GetChildWindows(typeof(ChargingForm));
                 foreach (Form child in forms)
@@ -1731,6 +1748,7 @@ Stack:
                     chargingform.ClearItemAndBiblioControl();
                     chargingform.ChangeLayout((bool)e.Value);
                 }
+                */
             }
 
             if (e.Section == "cardreader"
@@ -2383,7 +2401,7 @@ false);
             }
         }
 
-        #endregion
+#endregion
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
@@ -3212,10 +3230,28 @@ false);
             GetChannelStyle style,  // = GetChannelStyle.GUI,
             string strClientIP/* = null*/)
         {
+            /*
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
                 strServerUrl = this.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = this.DefaultUserName;
+            */
+
+            // 2022/11/6 改进的逻辑
+            {
+                if (EntityRegisterBase.IsDot(strServerUrl) == true)
+                    strServerUrl = this.LibraryServerUrl;
+
+                if (EntityRegisterBase.IsDot(strUserName) == true
+                    && strServerUrl == this.LibraryServerUrl)
+                    strUserName = this.DefaultUserName;
+                else
+                {
+                    // 注: 用户名是跟着 URL 走的。一旦 URL 用了非当前的，则用户名也就无法通过当前缺省确定了
+                    if (EntityRegisterBase.IsDot(strUserName) == true)
+                        strUserName = "";
+                }
+            }
 
             LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName, null, strClientIP);
             if ((style & GetChannelStyle.GUI) != 0)
@@ -3237,6 +3273,130 @@ false);
             this._channelPool.ReturnChannel(channel);
             _channelList.Remove(channel);
         }
+
+#region looping
+
+        // 三种动作: GetChannel() BeginLoop() 和 EnableControl()
+        // parameters:
+        //          style 可以有如下子参数:
+        //              disableControl
+        //              timeout:hh:mm:ss 确保超时参数在 hh:mm:ss 以长
+        // https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0
+        // [ws][-]{ d | [d.]hh:mm[:ss[.ff]] }[ws]
+        public Looping Looping(
+            out LibraryChannel channel,
+            string text = "",
+            string style = null,
+            StopEventHandler handler = null)
+        {
+            var controlDisabled = StringUtil.IsInList("disableControl", style);
+            var timeout_string = StringUtil.GetParameterByPrefix(style, "timeout"); // 不小于这么多
+            var settimeout_string = StringUtil.GetParameterByPrefix(style, "settimeout");   // 设置为这么多
+
+            var serverUrl = StringUtil.GetParameterByPrefix(style, "serverUrl");
+            if (string.IsNullOrEmpty(serverUrl) == false)
+                serverUrl = StringUtil.UnescapeString(serverUrl);
+            var userName = StringUtil.GetParameterByPrefix(style, "userName");
+
+            channel = this.GetChannel(serverUrl, userName);
+
+            var old_timeout = channel.Timeout;
+            bool timeout_changed = false;
+            if (string.IsNullOrEmpty(timeout_string) == false)
+            {
+                var new_timeout = TimeSpan.Parse(timeout_string);
+                if (new_timeout > old_timeout)
+                {
+                    channel.Timeout = new_timeout;
+                    timeout_changed = true;
+                }
+            }
+            if (string.IsNullOrEmpty(settimeout_string) == false)
+            {
+                var new_timeout = TimeSpan.Parse(settimeout_string);
+                if (new_timeout != old_timeout)
+                {
+                    channel.Timeout = new_timeout;
+                    timeout_changed = true;
+                }
+            }
+
+            var looping = _loopingHost.BeginLoop(
+                handler == null ? this.DoStop : handler,
+                text,
+                style);
+
+            if (controlDisabled)
+                this.EnableControls(false);
+
+            var channel_param = channel;
+            looping.Closed = () =>
+            {
+                if (controlDisabled)
+                    this.EnableControls(true);
+                if (timeout_changed)
+                    channel_param.Timeout = old_timeout;
+                this.ReturnChannel(channel_param);
+            };
+
+            return looping;
+        }
+
+        // 两种动作: BeginLoop() 和 EnableControl()
+        public Looping Looping(string text,
+            string style = null,
+            StopEventHandler handler = null)
+        {
+            var controlDisabled = StringUtil.IsInList("disableControl", style);
+
+            var looping = _loopingHost.BeginLoop(
+                handler == null ? this.DoStop : handler,
+                text,
+                style);
+
+            if (controlDisabled)
+                this.EnableControls(false);
+
+            looping.Closed = () =>
+            {
+                if (controlDisabled)
+                    this.EnableControls(true);
+            };
+
+            return looping;
+        }
+
+
+        internal LoopingHost _loopingHost = new LoopingHost();
+
+        public Looping BeginLoop(StopEventHandler handler,
+string text,
+string style = null)
+        {
+            return _loopingHost.BeginLoop(handler, text, style);
+        }
+
+        public void EndLoop(Looping looping)
+        {
+            _loopingHost.EndLoop(looping);
+        }
+
+        public bool HasLooping()
+        {
+            return _loopingHost.HasLooping();
+        }
+
+        public Looping TopLooping
+        {
+            get
+            {
+                return _loopingHost.TopLooping;
+            }
+        }
+
+#endregion
+
+
 
 #if NO
         int _inPrepareSearch = 0;   // 进入的次数，用以防止嵌套调用
@@ -3308,36 +3468,41 @@ false);
                 return;  // 2009/2/11
             }
 #endif
+            string strError = "";
+
+            /*
             LibraryChannel channel = this.GetChannel();
 
             // this.Update();
 
-            string strError = "";
-
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在登出 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在登出 ...");
             try
             {
-                // string strValue = "";
                 long lRet = channel.Logout(out strError);
                 if (lRet == -1)
                 {
                     strError = "针对服务器 " + channel.Url + " 登出时发生错误：" + strError;
                     goto ERROR1;
                 }
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
                 // EndSearch();
+                */
             }
-            return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -3395,9 +3560,7 @@ false);
             {
                 string strPath = strDbName + "/cfgs/" + strCfgFileName;
 
-                stop.SetMessage("正在下载配置文件 " + strPath + " ...");
-                string strMetaData = "";
-                string strOutputPath = "";
+                stop?.SetMessage("正在下载配置文件 " + strPath + " ...");
 
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
@@ -3407,13 +3570,14 @@ false);
                     strStyle,
                     remote_timestamp,
                     out strContent,
-                    out strMetaData,
+                    out string strMetaData,
                     out baOutputTimestamp,
-                    out strOutputPath,
+                    out string strOutputPath,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
+                return 1;
             }
             finally
             {
@@ -3427,10 +3591,6 @@ false);
 
                 // m_nInGetCfgFile--;
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
 #if NO
@@ -4051,14 +4211,7 @@ Stack:
             if (values != null)
                 return 0;
 
-#if NO
-            int nRet = PrepareSearch();
-            if (nRet == 0)
-            {
-                strError = "PrepareSearch() error";
-                return -1;  // 2009/2/11
-            }
-#endif
+            /*
             LibraryChannel channel = this.GetChannel();
 
             if (Stop == null)
@@ -4069,40 +4222,42 @@ Stack:
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获取值列表 ...");
             Stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取值列表 ...",
+                "timeout:0:0:10");
             try
             {
-                channel.Timeout = new TimeSpan(0, 0, 10);
+                // channel.Timeout = new TimeSpan(0, 0, 10);
                 long lRet = channel.GetValueTable(
-                    Stop,
+                    looping.stop,
                     strTableName,
                     strDbName,
                     out values,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 if (values == null)
                     values = new string[0];
 
                 this.valueTableCache[strName] = values;
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
-                // EndSearch();
+                */
             }
-
-            return 0;
-        ERROR1:
-            return -1;
         }
 
-        #region EnsureXXXForm ...
+#region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4390,20 +4545,22 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-        #endregion
+#endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
             if (this.Urgent == false)
             {
+                /*
                 if (this.ActiveMdiChild != null
                     && this.ActiveMdiChild is ChargingForm)
                 {
                     EnsureChildForm<ChargingForm>().Activate();
                     EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.Borrow;
                 }
-                else if (this.ActiveMdiChild != null
-        && this.ActiveMdiChild is ReaderInfoForm)
+                else */
+                if (this.ActiveMdiChild != null
+ && this.ActiveMdiChild is ReaderInfoForm)
                 {
                     var reader_form = (ReaderInfoForm)this.ActiveMdiChild;
                     var charging_form = EnsureChildForm<QuickChargingForm>();
@@ -4448,6 +4605,7 @@ barcodes[0],
         {
             if (this.Urgent == false)
             {
+                /*
                 if (this.ActiveMdiChild != null
                     && this.ActiveMdiChild is ChargingForm)
                 {
@@ -4455,6 +4613,7 @@ barcodes[0],
                     EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.Return;
                 }
                 else
+                */
                 {
                     EnsureChildForm<QuickChargingForm>().Activate();
                     EnsureChildForm<QuickChargingForm>().SmartFuncState = FuncState.Return;
@@ -4471,6 +4630,7 @@ barcodes[0],
         {
             if (this.Urgent == false)
             {
+                /*
                 if (this.ActiveMdiChild != null
                     && this.ActiveMdiChild is ChargingForm)
                 {
@@ -4478,6 +4638,7 @@ barcodes[0],
                     EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.VerifyReturn;
                 }
                 else
+                */
                 {
                     EnsureChildForm<QuickChargingForm>().Activate();
                     EnsureChildForm<QuickChargingForm>().SmartFuncState = FuncState.VerifyReturn;
@@ -4492,6 +4653,7 @@ barcodes[0],
 
         private void toolButton_renew_Click(object sender, EventArgs e)
         {
+            /*
             if (this.ActiveMdiChild != null
                 && this.ActiveMdiChild is ChargingForm)
             {
@@ -4499,6 +4661,7 @@ barcodes[0],
                 EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.Renew;   // FuncState.VerifyRenew;
             }
             else
+            */
             {
                 EnsureChildForm<QuickChargingForm>().Activate();
                 EnsureChildForm<QuickChargingForm>().SmartFuncState = FuncState.Renew;   // FuncState.VerifyRenew;
@@ -4507,6 +4670,7 @@ barcodes[0],
 
         private void toolButton_lost_Click(object sender, EventArgs e)
         {
+            /*
             if (this.ActiveMdiChild != null
                 && this.ActiveMdiChild is ChargingForm)
             {
@@ -4514,6 +4678,7 @@ barcodes[0],
                 EnsureChildForm<ChargingForm>().SmartFuncState = FuncState.Lost;
             }
             else
+            */
             {
                 EnsureChildForm<QuickChargingForm>().Activate();
                 EnsureChildForm<QuickChargingForm>().SmartFuncState = FuncState.Lost;
@@ -4541,12 +4706,14 @@ barcodes[0],
             {
                 Form active = this.ActiveMdiChild;
 
+                /*
                 if (active is ChargingForm)
                 {
                     ChargingForm form = (ChargingForm)active;
                     form.Print();
                 }
-                else if (active is QuickChargingForm)
+                else */
+                if (active is QuickChargingForm)
                 {
                     QuickChargingForm form = (QuickChargingForm)active;
                     form.Print();
@@ -4780,14 +4947,7 @@ barcodes[0],
 + StringUtil.GetXmlStringSimple(strKey)
 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + strLang + "</lang></target>";
 
-#if NO
-            int nRet = PrepareSearch();
-            if (nRet == 0)
-            {
-                strError = "PrepareSearch() error";
-                return -1;
-            }
-#endif
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
@@ -4795,17 +4955,20 @@ barcodes[0],
             Stop.BeginLoop();
 
             EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索词条 '" + strKey + "' ...",
+                "disableControl");
             try
             {
                 long lRet = channel.Search(
-                    Stop,
+                    looping.stop,
                     strQueryXml,
                     "default",
                     "",
                     out strError);
-
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 string strXml = "";
                 string strRecPath = "";
@@ -4814,7 +4977,7 @@ barcodes[0],
                 {
                     DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
                     lRet = channel.GetSearchResult(
-                        Stop,
+                        looping.stop,
                         "default",
                         0,
                         1,
@@ -4823,7 +4986,7 @@ barcodes[0],
                         out searchresults,
                         out strError);
                     if (lRet == -1)
-                        goto ERROR1;
+                        return -1;
 
                     DigitalPlatform.LibraryClient.localhost.Record record = searchresults[0];
 
@@ -4842,7 +5005,7 @@ barcodes[0],
                     catch (Exception ex)
                     {
                         strError = "XML 装入 DOM 时出错: " + ex.Message;
-                        goto ERROR1;
+                        return -1;
                     }
                 }
                 else
@@ -4892,7 +5055,7 @@ barcodes[0],
                 string strOutputPath = "";
                 // 保存Xml记录。包装版本。用于保存文本类型的资源。
                 lRet = channel.WriteRes(
-                    Stop,
+                    looping.stop,
                     strRecPath,
                     dom.DocumentElement.OuterXml,
                     true,
@@ -4902,12 +5065,14 @@ barcodes[0],
                     out strOutputPath,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 Stop.EndLoop();
@@ -4915,10 +5080,8 @@ barcodes[0],
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
-                // EndSearch();
+                */
             }
-        ERROR1:
-            return -1;
         }
 
         // 检索词典库
@@ -4941,16 +5104,9 @@ barcodes[0],
 + StringUtil.GetXmlStringSimple(strKey)
 + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMaxCount.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
-#if NO
-            int nRet = PrepareSearch();
-            if (nRet == 0)
-            {
-                strError = "PrepareSearch() error";
-                return -1;
-            }
-#endif
             // LibraryChannel channel = this.GetChannel();
 
+            /*
             if (stop == null)
             {
                 stop = Stop;
@@ -4961,7 +5117,7 @@ barcodes[0],
 
                 EnableControls(false);
             }
-
+            */
             try
             {
                 long lRet = channel.Search(
@@ -4986,7 +5142,7 @@ barcodes[0],
                 for (; ; )
                 {
                     lRet = channel.GetSearchResult(
-                        Stop,
+                        stop,
                         "default",
                         lStart,
                         lPerCount,
@@ -5014,6 +5170,7 @@ barcodes[0],
             }
             finally
             {
+                /*
                 if (stop == Stop)
                 {
                     EnableControls(true);
@@ -5022,6 +5179,7 @@ barcodes[0],
                     stop.OnStop -= new StopEventHandler(this.DoStop);
                     stop.Initial("");
                 }
+                */
 
                 // this.ReturnChannel(channel);
                 // EndSearch();
@@ -5029,68 +5187,6 @@ barcodes[0],
         ERROR1:
             return -1;
         }
-
-#if NO
-        // 形式校验条码号
-        // return:
-        //      -2  服务器没有配置校验方法，无法校验
-        //      -1  error
-        //      0   不是合法的条码号
-        //      1   是合法的读者证条码号
-        //      2   是合法的册条码号
-        int VerifyBarcode(
-            string strBarcode,
-            out string strError)
-        {
-            strError = "";
-
-            int nRet = PrepareSearch();
-            if (nRet == 0)
-            {
-                strError = "PrepareSearch() error";
-                return -1;  // 2009/2/11
-            }
-
-            // this.Update();
-
-            Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在校验条码 ...");
-            Stop.BeginLoop();
-
-            /*
-            this.Update();
-            Program.MainForm.Update();
-             * */
-            EnableControls(false);
-
-            try
-            {
-                long lRet = Channel.VerifyBarcode(
-                    Stop,
-                    strBarcode,
-                    out strError);
-                if (lRet == -1)
-                {
-                    if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
-                        return -2;
-                    goto ERROR1;
-                }
-                return (int)lRet;
-            }
-            finally
-            {
-                EnableControls(true);
-
-                Stop.EndLoop();
-                Stop.OnStop -= new StopEventHandler(this.DoStop);
-                Stop.Initial("");
-
-                EndSearch();
-            }
-        ERROR1:
-            return -1;
-        }
-#endif
 
         // 包装后的版本
         // 形式校验条码号
@@ -5107,14 +5203,7 @@ barcodes[0],
         {
             strError = "";
 
-#if NO
-            int nRet = PrepareSearch();
-            if (nRet == 0)
-            {
-                strError = "PrepareSearch() error";
-                return -1;  // 2009/2/11
-            }
-#endif
+            /*
             LibraryChannel channel = this.GetChannel();
 
             if (this.Stop == null)
@@ -5128,11 +5217,13 @@ barcodes[0],
             Stop.BeginLoop();
 
             // EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在验证条码号 " + strBarcode + "...");
             try
             {
                 return VerifyBarcode(
-                    Stop,
+                    looping.stop,
                     channel,
                     strLibraryCodeList,
                     strBarcode,
@@ -5141,6 +5232,8 @@ barcodes[0],
             }
             finally
             {
+                looping.Dispose();
+                /*
                 // EnableControls(true);
 
                 Stop.EndLoop();
@@ -5148,7 +5241,7 @@ barcodes[0],
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
-                // EndSearch();
+                */
             }
         }
 
@@ -5768,11 +5861,7 @@ out strError);
 
             if (nRet == 0)
             {
-#if NO
-                nRet = PrepareSearch(bDisplayProgress);
-                if (nRet == 0)
-                    return "PrepareSearch() error";
-#endif
+                /*
                 LibraryChannel channel = this.GetChannel();
 
                 Stop.OnStop += new StopEventHandler(this.DoStop);
@@ -5781,18 +5870,19 @@ out strError);
                     Stop.Initial("正在获得读者信息 '" + strPatronBarcode + "'...");
                     Stop.BeginLoop();
                 }
-
+                */
+                var looping = Looping(out LibraryChannel channel);
+                if (bDisplayProgress == true)
+                    looping.stop.SetMessage("正在获得读者信息 '" + strPatronBarcode + "'...");
                 try
                 {
-                    string[] results = null;
-                    byte[] baTimestamp = null;
-
-                    long lRet = channel.GetReaderInfo(Stop,
+                    long lRet = channel.GetReaderInfo(
+                        looping.stop,
                         strPatronBarcode,
                         "xml",
-                        out results,
+                        out string[] results,
                         out strOutputPath,
-                        out baTimestamp,
+                        out byte[] baTimestamp,
                         out strError);
                     if (lRet == -1)
                     {
@@ -5820,6 +5910,8 @@ out strError);
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     if (bDisplayProgress == true)
                     {
                         Stop.EndLoop();
@@ -5828,7 +5920,7 @@ out strError);
                     Stop.OnStop -= new StopEventHandler(this.DoStop);
 
                     this.ReturnChannel(channel);
-                    // this.EndSearch();
+                    */
                 }
             }
 
@@ -5903,15 +5995,7 @@ out strError);
                 return 0;
             }
 
-#if NO
-            int nRet = PrepareSearch(bDisplayProgress);
-            if (nRet == 0)
-            {
-                strError = "PrepareSearch() error";
-                strSummary = strError;
-                return -1;  // 2009/2/11
-            }
-#endif
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
@@ -5920,7 +6004,10 @@ out strError);
                 Stop.Initial("MainForm正在获得书目摘要 '" + strItemBarcodeUnionPath + "'...");
                 Stop.BeginLoop();
             }
-
+            */
+            var looping = Looping(out LibraryChannel channel);
+            if (bDisplayProgress == true)
+                looping.stop.SetMessage("MainForm正在获得书目摘要 '" + strItemBarcodeUnionPath + "'...");
             try
             {
                 string strBiblioRecPath = "";
@@ -5930,7 +6017,7 @@ out strError);
                 try
                 {
                     long lRet = channel.GetBiblioSummary(
-                        Stop,
+                        looping.stop,
                         strItemBarcode,
                         strConfirmItemRecPath,
                         null,
@@ -5941,7 +6028,6 @@ out strError);
                     {
                         return -1;
                     }
-
                 }
                 catch
                 {
@@ -5957,10 +6043,12 @@ out strError);
                 // 如果cache中没有，则加入cache
                 item = this.SummaryCache.EnsureItem(strItemBarcodeUnionPath);
                 item.Content = strSummary;
-
+                return 0;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 if (bDisplayProgress == true)
                 {
                     Stop.EndLoop();
@@ -5969,30 +6057,9 @@ out strError);
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
 
                 this.ReturnChannel(channel);
-                // this.EndSearch(bDisplayProgress);   // BUG !!! 2012/3/28前少这一句
+                */
             }
-
-            return 0;
         }
-
-#if NOOOOOOOOOOOOOOO
-        // 已经被stop弄成有显示不出来的毛病
-        public void ShowProgress(bool bVisible)
-        {
-            this.toolStripProgressBar_main.Visible = bVisible;
-        }
-
-        public void SetProgressValue(int nValue)
-        {
-            this.toolStripProgressBar_main.Value = nValue;
-        }
-
-        public void SetProgressRange(int nMax)
-        {
-            this.toolStripProgressBar_main.Minimum = 0;
-            this.toolStripProgressBar_main.Maximum = nMax;
-        }
-#endif
 
         private void MenuItem_about_Click(object sender, EventArgs e)
         {
@@ -6002,7 +6069,6 @@ out strError);
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
         }
-
 
         /// <summary>
         /// 获取或设置框架窗口状态行的文字信息
@@ -6824,6 +6890,14 @@ out strError);
         // 在软件启动的时候调用
         void DeleteAllTempFiles(string strDataDir)
         {
+            using (var looping = Looping(null))
+            {
+                DeleteAllTempFiles(looping.stop, strDataDir);
+            }
+        }
+
+        void DeleteAllTempFiles(Stop stop, string strDataDir)
+        {
             // 出让控制权
             Application.DoEvents();
 
@@ -6852,7 +6926,7 @@ out strError);
                 if (strFileName.Length > 0
                     && strFileName[0] == '~')
                 {
-                    Stop.SetMessage("正在删除 " + fis[i].FullName);
+                    stop.SetMessage("正在删除 " + fis[i].FullName);
                     try
                     {
                         File.Delete(fis[i].FullName);
@@ -6867,7 +6941,7 @@ out strError);
             DirectoryInfo[] dis = di.GetDirectories();
             for (int i = 0; i < dis.Length; i++)
             {
-                DeleteAllTempFiles(dis[i].FullName);
+                DeleteAllTempFiles(stop, dis[i].FullName);
             }
         }
 
@@ -6896,13 +6970,19 @@ out strError);
             {
                 ((EntityForm)this.ActiveMdiChild).Reload();
             }
+            /*
             if (this.ActiveMdiChild is ChargingForm)
             {
                 ((ChargingForm)this.ActiveMdiChild).Reload();
             }
+            */
             if (this.ActiveMdiChild is ItemInfoForm)
             {
                 ((ItemInfoForm)this.ActiveMdiChild).Reload();
+            }
+            if (this.ActiveMdiChild is QuickChargingForm)
+            {
+                // ((QuickChargingForm)this.ActiveMdiChild).Reload();
             }
         }
 
@@ -8160,8 +8240,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
 
         private void tabPage_accept_Enter(object sender, EventArgs e)
         {
+            /*
             if (this._acceptForm != null)
                 this._acceptForm.EnableProgress();
+            */
         }
 
         private void tabPage_accept_Leave(object sender, EventArgs e)
@@ -8203,7 +8285,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-        #region 序列号机制
+#region 序列号机制
 
         bool _testMode = false;
 
@@ -8556,7 +8638,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
 #if REMOVED
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
@@ -8685,7 +8767,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-        #region servers.xml
+#region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -8718,6 +8800,7 @@ Keys keyData)
             strError = "";
             int nRet = 0;
 
+            var looping = Looping(out LibraryChannel channel);
             try
             {
                 XmlDocument dom = new XmlDocument();
@@ -8768,12 +8851,12 @@ Keys keyData)
                                 return -1;
                             }
 #endif
-                            LibraryChannel channel = this.GetChannel();
+                            // LibraryChannel channel = this.GetChannel();
 
                             try
                             {
                                 nRet = EntityRegisterWizard.DetectAccess(channel,
-                    this.Stop,
+                    looping.stop,
                     prop.DbName,
                     prop.Syntax,
                     out strBiblioAccess,
@@ -8787,8 +8870,7 @@ Keys keyData)
                             }
                             finally
                             {
-                                this.ReturnChannel(channel);
-                                // this.EndSearch();
+                                // this.ReturnChannel(channel);
                             }
 
                             database.SetAttribute("name", prop.DbName);
@@ -8802,22 +8884,6 @@ Keys keyData)
                             database.SetAttribute("entityAccess", strEntityAccess);    // "append,overwrite"
                             nCount++;
                         }
-
-#if NO
-                    // 中央库
-                    if ()
-                    {
-                        XmlElement database = dom.CreateElement("database");
-                        server.AppendChild(database);
-
-                        database.SetAttribute("name", prop.DbName);
-                        database.SetAttribute("isTarget", "yes");
-                        database.SetAttribute("access", "append,overwrite");
-
-                        database.SetAttribute("entityAccess", "append,overwrite");
-                        nCount++;
-                    }
-#endif
                     }
 
                     if (nCount == 0)
@@ -8887,6 +8953,10 @@ Keys keyData)
                 strError = "MainForm BuildServersCfgFile() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
+            finally
+            {
+                looping.Dispose();
+            }
         }
 
         // 判断两个 URL 是否指向的是同一个 dp2library 服务器
@@ -8939,6 +9009,7 @@ Keys keyData)
             strError = "";
             strUID = "";
 
+            /*
             LibraryChannel channel = new LibraryChannel();
             try
             {
@@ -8952,6 +9023,20 @@ Keys keyData)
             finally
             {
                 channel.Close();
+            }
+            */
+            // TODO: 需要测试
+            using (var looping = Program.MainForm.Looping(out LibraryChannel channel,
+                null,
+                $"serverUrl:{StringUtil.EscapeString(strURL, ":,")}"))
+            {
+                long lRet = channel.GetVersion(stop,
+                    out string strVersion,
+                    out strUID,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+                return 0;
             }
         }
 
@@ -9026,7 +9111,7 @@ Keys keyData)
             return null;
         }
 
-        #endregion // servers.xml
+#endregion // servers.xml
 
 #if !NEWFINGER
         void EnableFingerprintSendKey(bool enable)
@@ -9185,7 +9270,7 @@ Keys keyData)
 #endif
         }
 
-        #region 消息过滤
+#region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -9215,7 +9300,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名
@@ -9345,6 +9430,7 @@ Keys keyData)
 
             bool bControl = Control.ModifierKeys == Keys.Control;
 
+            /*
             Stop temp_stop = new DigitalPlatform.Stop();
             temp_stop.Register(stopManager, true);	// 和容器关联
 
@@ -9352,7 +9438,10 @@ Keys keyData)
             temp_stop.Initial("正在打包事件日志信息 ...");
             temp_stop.BeginLoop();
             this.EnableControls(false);
-
+            */
+            var looping = Looping("正在打包事件日志信息 ...",
+                "disableControl");
+            var temp_stop = looping.stop;
             try
             {
                 string strTempDir = Path.Combine(this.UserTempDir, "~zip_events");
@@ -9395,9 +9484,12 @@ Keys keyData)
                 {
                     MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
                 }
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
                 temp_stop.EndLoop();
                 temp_stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -9408,8 +9500,8 @@ Keys keyData)
                     temp_stop.Unregister(true);
                     temp_stop = null;
                 }
+                */
             }
-            return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -9690,10 +9782,14 @@ Keys keyData)
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 开始从 Excel 文件导入</div>");
 
+            /*
             LibraryChannel channel = this.GetChannel();
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在导入 Excel 文件 ...");
             Stop.BeginLoop();
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在导入 Excel 文件 ...");
             try
             {
                 // return:
@@ -9710,7 +9806,8 @@ Keys keyData)
                         byte[] timestamp = null;
                         if (string.IsNullOrEmpty(strOrderRecPath) == false)
                         {
-                            long lRet = channel.GetRecord(Stop,
+                            long lRet = channel.GetRecord(
+                                looping.stop,
                                 strOrderRecPath,
                                 out timestamp,
                                 out strOldXml,
@@ -9826,7 +9923,9 @@ Keys keyData)
                         if (nRet == 0 || nRet == -1)
                             throw new Exception("(订购记录 '" + strOrderRecPath + "') " + strError);
 
-                        nRet = SaveItemRecord(channel,
+                        nRet = SaveItemRecord(
+                            looping.stop,
+                            channel,
         strBiblioRecPath,
 "order",
 strOrderRecPath,
@@ -9868,12 +9967,14 @@ out strError);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
-
+                */
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
     + " 结束从 Excel 文件导入</div>");
 
@@ -9921,6 +10022,7 @@ out strError);
 
         // TODO: 移入通道函数库
         public int SaveItemRecord(
+            Stop stop,  // 2022/11/5
     LibraryChannel channel,
     string strBiblioRecPath,
     string strDbType,
@@ -9982,28 +10084,28 @@ out strError);
 
             if (strDbType == "item")
                 lRet = channel.SetEntities(
-                     null,   // this.BiblioStatisForm.stop,
+                     stop,   // this.BiblioStatisForm.stop,
                      strBiblioRecPath,
                      entities,
                      out errorinfos,
                      out strError);
             else if (strDbType == "order")
                 lRet = channel.SetOrders(
-                     null,   // this.BiblioStatisForm.stop,
+                     stop,   // this.BiblioStatisForm.stop,
                      strBiblioRecPath,
                      entities,
                      out errorinfos,
                      out strError);
             else if (strDbType == "issue")
                 lRet = channel.SetIssues(
-                     null,   // this.BiblioStatisForm.stop,
+                     stop,   // this.BiblioStatisForm.stop,
                      strBiblioRecPath,
                      entities,
                      out errorinfos,
                      out strError);
             else if (strDbType == "comment")
                 lRet = channel.SetComments(
-                     null,   // this.BiblioStatisForm.stop,
+                     stop,   // this.BiblioStatisForm.stop,
                      strBiblioRecPath,
                      entities,
                      out errorinfos,

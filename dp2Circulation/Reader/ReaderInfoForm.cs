@@ -220,7 +220,9 @@ namespace dp2Circulation
 
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
 
+#if SUPPORT_OLD_STOP
             this.Channel = null;    // testing 2022/6/14
+#endif
         }
 
         private void ReaderEditControl1_VerifyContent(object sender, VerifyEditEventArgs e)
@@ -3363,7 +3365,7 @@ Program.MainForm.DataDir,
         }
 
 #if NO
-        #region delete
+#region delete
 
         // 删除
         private void button_delete_Click(object sender, EventArgs e)
@@ -3834,7 +3836,7 @@ MessageBoxDefaultButton.Button2);
             dlg.ShowDialog(this);
         }
 
-        #endregion
+#endregion
 
 #endif
 
@@ -5667,7 +5669,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-        #region 指纹登记功能
+#region 指纹登记功能
 
 #if !NEWFINGER
 
@@ -5970,9 +5972,9 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
-        #region 掌纹登记功能
+#region 掌纹登记功能
 
         // 局部更新掌纹信息高速缓存
         // return:
@@ -6135,7 +6137,7 @@ MessageBoxDefaultButton.Button2);
             return result;
         }
 
-        #endregion
+#endregion
 
         private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
@@ -8141,7 +8143,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-        #region 将 dt1000 读者 MARC 记录转换为 dp2 的 XML 格式
+#region 将 dt1000 读者 MARC 记录转换为 dp2 的 XML 格式
 
         public static int ConvertDt1000ReaderMarcToXml(MarcRecord record,
             string path,
@@ -9545,7 +9547,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-        #endregion
+#endregion
 
         private async void toolStripMenuItem_registerFaceByFile_Click(object sender, EventArgs e)
         {

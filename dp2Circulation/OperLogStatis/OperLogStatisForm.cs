@@ -54,6 +54,8 @@ namespace dp2Circulation
         /// </summary>
         public OperLogStatisForm()
         {
+            this.UseLooping = true; // 2022/11/5
+
             InitializeComponent();
         }
 
@@ -63,15 +65,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
 
             ScriptManager.CfgFilePath = Path.Combine(
     Program.MainForm.UserDir,
@@ -142,6 +135,7 @@ namespace dp2Circulation
             // this.Channel = null;    // testing
         }
 
+#if SUPPORT_OLD_STOP
         // 2022/1/10
         public new LibraryChannel Channel
         {
@@ -150,6 +144,7 @@ namespace dp2Circulation
                 throw new Exception("OperLogStatisForm 的 Channel 成员已经废止");
             }
         }
+#endif
 
         private void OperLogStatisForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -306,6 +301,7 @@ namespace dp2Circulation
         {
             strWarning = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -314,6 +310,10 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(
+                "正在执行脚本 ...",
+                "disableControl");
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -404,7 +404,10 @@ namespace dp2Circulation
                 }
 
                 // 循环
-                nRet = DoLoop(DoRecord, out strError);
+                nRet = DoLoop(
+                    looping.stop,
+                    DoRecord,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -436,14 +439,17 @@ namespace dp2Circulation
                 if (objStatis != null)
                     objStatis.FreeResources();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
-                this.AssemblyMain = null;
-
                 EnableControls(true);
+                */
+
+                this.AssemblyMain = null;
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
@@ -539,6 +545,7 @@ namespace dp2Circulation
         //      0   普通返回
         //      1   要全部中断
         int DoLoop(
+            Stop stop,
             OperLogForm.Delegate_doRecord procDoRecord,
             out string strError)
         {
@@ -606,7 +613,7 @@ namespace dp2Circulation
 
                 OperLogLoader loader = new OperLogLoader();
                 loader.Channel = channel;
-                loader.Stop = this.Progress;
+                loader.Stop = stop;
                 loader.Estimate = estimate;
                 loader.Dates = LogFileNames;
                 loader.Level = Program.MainForm.OperLogLevel;
@@ -620,14 +627,14 @@ namespace dp2Circulation
 
                 foreach (OperLogItem item in loader)
                 {
-                    if (_stop != null && _stop.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断";
                         return 1;
                     }
 
-                    if (_stop != null)
-                        _stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+                    if (stop != null)
+                        stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
 
                     if (string.IsNullOrEmpty(item.Xml) == true)
                         continue;
@@ -1073,14 +1080,18 @@ namespace dp2Circulation
             out byte[] baTimestamp,
             out string strError)
         {
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(10);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "timeout:0:0:10");
             try
             {
                 long lRet = channel.GetReaderInfo(
-                    _stop,
+                    looping.stop,
                     strReaderBarcode,
                     strResultTypeList,
                     out results,
@@ -1091,8 +1102,11 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1108,10 +1122,14 @@ namespace dp2Circulation
         public string GetItemSummary(string strItemBarcode,
             int nMaxLength = -1)
         {
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(10);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+    null,
+    "timeout:0:0:10");
             try
             {
                 int nRet = GetBiblioSummary(
@@ -1132,8 +1150,11 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1165,16 +1186,21 @@ namespace dp2Circulation
                 return strSummary;
             }
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(10);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                null,
+                "timeout:0:0:10");
             string strXml = "";
             string[] results = null;
             long lRet = 0;
             try
             {
-                lRet = channel.GetReaderInfo(_stop,
+                lRet = channel.GetReaderInfo(
+                    looping.stop,
                     strPatronBarcode,
                     "xml",
                     out results,
@@ -1182,8 +1208,11 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
             if (lRet == -1)
             {

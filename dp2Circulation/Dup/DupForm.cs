@@ -212,7 +212,9 @@ false);
                     true);
             }
 
+#if SUPPORT_OLD_STOP
             this.Channel = null;
+#endif
 
             // 自动启动查重
             if (this.AutoBeginSearch == true)

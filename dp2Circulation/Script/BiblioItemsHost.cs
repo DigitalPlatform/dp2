@@ -35,7 +35,7 @@ namespace dp2Circulation
 
         #region IDetailHost 接口要求
 
-        public Form Form
+        public MyForm Form
         {
             get;
             set;
@@ -1861,23 +1861,23 @@ namespace dp2Circulation
 #endif
         }
 
+        Looping _looping = null;
+
         /// <summary>
         /// 开始进行 GCAT 通讯操作
         /// </summary>
         /// <param name="strMessage">要在状态行显示的提示信息</param>
         public void BeginGcatLoop(string strMessage)
         {
-            //bMarcEditorFocued = this.DetailForm.MarcEditor.Focused;
-            //this.DetailForm.EnableControls(false);
-
+            /*
             Stop stop = this._detailWindow.Progress;
 
             stop.OnStop += new StopEventHandler(this.DoGcatStop);
             stop.Initial(strMessage);
             stop.BeginLoop();
-
-            //this.DetailForm.Update();
-            //this.DetailForm.MainForm.Update();
+            */
+            Debug.Assert(_looping == null);
+            _looping = this.Form.BeginLoop(this.DoGcatStop, strMessage);
         }
 
         /// <summary>
@@ -1885,14 +1885,14 @@ namespace dp2Circulation
         /// </summary>
         public void EndGcatLoop()
         {
+            /*
             Stop stop = this._detailWindow.Progress;
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoGcatStop);
             stop.Initial("");
-
-            //this.DetailForm.EnableControls(true);
-            //if (bMarcEditorFocued == true)
-            //    this.DetailForm.MarcEditor.Focus();
+            */
+            _looping.Dispose();
+            _looping = null;
         }
 
 
@@ -2055,7 +2055,7 @@ namespace dp2Circulation
                     //      1   succeed
                     long nRet = GetAuthorNumber(
                         ref question_table,
-                        this._detailWindow.Progress,
+                        _looping.stop,  // this._detailWindow.Progress,
                         this._detailWindow.Form,
                         strGcatWebServiceUrl,
                         strAuthor,

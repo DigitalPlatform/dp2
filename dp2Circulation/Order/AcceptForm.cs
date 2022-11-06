@@ -10,14 +10,16 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
     /// <summary>
     /// 图书/期刊(采购)验收窗口
     /// </summary>
-    public partial class AcceptForm : Form
+    public partial class AcceptForm : Form, ILoopingHost, IChannelHost, IEnableControl
     {
+
         /// <summary>
         /// 获取批次号key+count值列表
         /// </summary>
@@ -28,22 +30,20 @@ namespace dp2Circulation
         long m_lLoaded = 0; // 本次已经装入浏览框的条数
         long m_lHitCount = 0;   // 检索命中结果条数
 
+#if REMOVED
         /// <summary>
         /// 通讯通道
         /// </summary>
         public LibraryChannel Channel = new LibraryChannel();
-
+#endif
         /// <summary>
         /// 当前界面语言
         /// </summary>
         public string Lang = "zh";
 
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        // public MainForm MainForm = null;
-
+#if REMOVED
         DigitalPlatform.Stop stop = null;
+#endif
 
         EntityForm m_detailWindow = null;
 
@@ -133,6 +133,8 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
+
+#if REMOVED
             this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -143,6 +145,7 @@ namespace dp2Circulation
 
             stop = new DigitalPlatform.Stop();
             stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+#endif
 
             bool bRet = InitialSizeParam();
             Debug.Assert(bRet == true, "");
@@ -262,12 +265,15 @@ namespace dp2Circulation
 
         void AcceptForm_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
+            using (var looping = Looping(out LibraryChannel channel))
+            {
                 Global.GetBatchNoTable(e,
                     this,
                     this.comboBox_prepare_type.Text,    // 和出版物类型有关
                     "item",
                     looping.stop,
                     channel);
+            }
         }
 
         bool InitialSizeParam()
@@ -296,6 +302,7 @@ namespace dp2Circulation
 
         private void AcceptForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            /*
             if (stop != null)
             {
                 if (stop.State == 0)    // 0 表示正在处理
@@ -305,10 +312,10 @@ namespace dp2Circulation
                     return;
                 }
             }
+            */
 
             // 关闭 关联的EntityForm
             bool bRet = CloseDetailWindow();
-
             // 如果没有关闭成功
             if (bRet == false)
                 e.Cancel = true;
@@ -316,11 +323,13 @@ namespace dp2Circulation
 
         private void AcceptForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+#if REMOVED
             if (stop != null) // 脱离关联
             {
                 stop.Unregister();	// 和容器关联
                 stop = null;
             }
+#endif
 
             // 2017/4/23
             this.m_detailWindow = null;
@@ -332,7 +341,6 @@ namespace dp2Circulation
                 if (Program.MainForm.CurrentAcceptControl == this.panel_main)
                     Program.MainForm.CurrentAcceptControl = null;
             }
-
 
             //
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
@@ -447,6 +455,8 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
         }
 
+#if REMOVED
+
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
             Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
@@ -462,6 +472,14 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (this.Channel != null)
                 this.Channel.Abort();
         }
+#endif
+        public void TryInvoke(Action method)
+        {
+            if (this.InvokeRequired)
+                this.Invoke((Action)(method));
+            else
+                method.Invoke();
+        }
 
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
@@ -469,33 +487,34 @@ this.checkBox_prepare_createCallNumber.Checked);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public void EnableControls(bool bEnable)
         {
-
-            // page prepare
-            this.tabComboBox_prepare_batchNo.Enabled = bEnable;
-            this.comboBox_prepare_type.Enabled = bEnable;
-            this.checkBox_prepare_inputItemBarcode.Enabled = bEnable;
-            this.checkBox_prepare_setProcessingState.Enabled = bEnable;
-            this.checkedListBox_prepare_dbNames.Enabled = bEnable;
-
-            // page accept
-            this.textBox_accept_queryWord.Enabled = bEnable;
-            this.button_accept_searchISBN.Enabled = bEnable;
-            // this.listView_accept_records.Enabled = bEnable;
-
-            this.comboBox_accept_from.Enabled = bEnable;
-            this.comboBox_accept_matchStyle.Enabled = bEnable;
-
-            // page finish
-            this.button_finish_printAcceptList.Enabled = bEnable;
-
-            // next button
-            if (bEnable == true)
+            TryInvoke(() =>
             {
-                SetNextButtonEnable();
-            }
-            else
-                this.button_next.Enabled = false;
+                // page prepare
+                this.tabComboBox_prepare_batchNo.Enabled = bEnable;
+                this.comboBox_prepare_type.Enabled = bEnable;
+                this.checkBox_prepare_inputItemBarcode.Enabled = bEnable;
+                this.checkBox_prepare_setProcessingState.Enabled = bEnable;
+                this.checkedListBox_prepare_dbNames.Enabled = bEnable;
 
+                // page accept
+                this.textBox_accept_queryWord.Enabled = bEnable;
+                this.button_accept_searchISBN.Enabled = bEnable;
+                // this.listView_accept_records.Enabled = bEnable;
+
+                this.comboBox_accept_from.Enabled = bEnable;
+                this.comboBox_accept_matchStyle.Enabled = bEnable;
+
+                // page finish
+                this.button_finish_printAcceptList.Enabled = bEnable;
+
+                // next button
+                if (bEnable == true)
+                {
+                    SetNextButtonEnable();
+                }
+                else
+                    this.button_next.Enabled = false;
+            });
         }
 
         static void SetTabPageEnabled(TabPage page,
@@ -692,12 +711,17 @@ this.checkBox_prepare_createCallNumber.Checked);
             this.m_lHitCount = 0;
             this.m_lLoaded = 0;
 
+            /*
             stop.HideProgress();
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 " + this.textBox_accept_queryWord.Text + " ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在检索 " + this.textBox_accept_queryWord.Text + " ...",
+                "disableControl");
             try
             {
                 if (this.comboBox_accept_from.Text == "")
@@ -763,8 +787,8 @@ this.checkBox_prepare_createCallNumber.Checked);
                     }
                 }
 
-                string strQueryXml = "";
-                long lRet = Channel.SearchBiblio(stop,
+                long lRet = channel.SearchBiblio(
+                    looping.stop,
                     GetDbNameListString(),  // "<全部>",
                     this.textBox_accept_queryWord.Text,
                     1000,   // this.MaxSearchResultCount,  // 1000
@@ -775,10 +799,10 @@ this.checkBox_prepare_createCallNumber.Checked);
                     "",    // strSearchStyle
                     "", // strOutputStyle
                     "",
-                    out strQueryXml,
+                    out string strQueryXml,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
                 if (lRet == 0)
                 {
                     strError = "未命中";
@@ -790,7 +814,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 this.m_lHitCount = lHitCount;
 
                 // 显示前半程
-                stop.SetProgressRange(0, lHitCount * 2);
+                looping.stop.SetProgressRange(0, lHitCount * 2);
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
@@ -803,24 +827,21 @@ this.checkBox_prepare_createCallNumber.Checked);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (looping.Stopped)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            return -1;
-                        }
+                        strError = "用户中断";
+                        return -1;
                     }
 
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     string strStyle = "id,cols";
 
                     if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                         strStyle = "id";
 
-                    lRet = Channel.GetSearchResult(
-                        stop,
+                    lRet = channel.GetSearchResult(
+                        looping.stop,
                         "accept",   // strResultSetName
                         lStart,
                         lPerCount,
@@ -829,7 +850,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         out searchresults,
                         out strError);
                     if (lRet == -1)
-                        goto ERROR1;
+                        return -1;
 
                     if (lRet == 0)
                     {
@@ -891,28 +912,30 @@ this.checkBox_prepare_createCallNumber.Checked);
                         break;
 
                     this.m_lLoaded = lStart;
-                    stop.SetProgressValue(lStart);
+                    looping.stop.SetProgressValue(lStart);
                 }
 
                 // this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录";
+                return (int)lHitCount;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
 
                 this.EnableControls(true);
+                */
             }
-
-            return (int)lHitCount;
-
-        ERROR1:
-            return -1;
         }
 
-        int FilterOneItem(ListViewItem item,
+        int FilterOneItem(
+            Stop stop,
+            LibraryChannel channel,
+            ListViewItem item,
             out string strError)
         {
             strError = "";
@@ -935,7 +958,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             {
                 // 获得998$t
                 string strTargetRecPath = "";
-                long lRet = Channel.GetBiblioInfo(
+                long lRet = channel.GetBiblioInfo(
                     stop,
                     strRecPath,
                     "", // strBiblioXml
@@ -956,7 +979,10 @@ this.checkBox_prepare_createCallNumber.Checked);
                 //      -1  出错
                 //      0   没有(符合要求的)订购信息
                 //      >0  有这么多条符合要求的订购信息
-                nRet = LoadOrderRecords(strRecPath,
+                nRet = LoadOrderRecords(
+                    stop,
+                    channel,
+                    strRecPath,
                     null,   // strSellerList,
                     out strError);
                 if (nRet == -1)
@@ -978,27 +1004,27 @@ this.checkBox_prepare_createCallNumber.Checked);
             strError = "";
             int nRet = 0;
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在过滤记录 ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在过滤记录 ...",
+                "disableControl");
 
             try
             {
                 // 显示后半程
-                stop.SetProgressRange(0, this.listView_accept_records.Items.Count * 2);
+                looping.stop.SetProgressRange(0, this.listView_accept_records.Items.Count * 2);
                 for (int i = 0; i < this.listView_accept_records.Items.Count; i++)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                            return 0;
-                    }
-
+                    if (looping.Stopped)
+                        return 0;
 
                     ListViewItem item = this.listView_accept_records.Items[i];
 
@@ -1055,7 +1081,10 @@ this.checkBox_prepare_createCallNumber.Checked);
                         ListViewUtil.ChangeItemText(item, COLUMN_TARGETRECPATH, strTargetRecPath);
                     }
                      * */
-                    nRet = FilterOneItem(item, out strError);
+                    nRet = FilterOneItem(
+                        looping.stop,
+                        channel,
+                        item, out strError);
                     if (nRet == -1)
                         return -1;
 
@@ -1064,20 +1093,23 @@ this.checkBox_prepare_createCallNumber.Checked);
         COLUMN_ROLE);
                      * */
 
-                    stop.SetProgressValue(this.listView_accept_records.Items.Count + i);
+                    looping.stop.SetProgressValue(this.listView_accept_records.Items.Count + i);
                 }
+                return 1;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.EnableControls(true);
 
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+                */
             }
 
-            return 1;
         }
 
         // 装入订购记录，检查是否有订购信息
@@ -1088,13 +1120,16 @@ this.checkBox_prepare_createCallNumber.Checked);
         //      0   没有(符合要求的)订购信息
         //      >0  有这么多条符合要求的订购信息
         /*public*/
-        int LoadOrderRecords(string strBiblioRecPath,
+        int LoadOrderRecords(
+            Stop stop,
+            LibraryChannel channel,
+            string strBiblioRecPath,
             string strSellerList,
             out string strError)
         {
             int nCount = 0;
 
-            stop.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 下属的订购信息 ...");
+            stop?.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 下属的订购信息 ...");
 
             // string strHtml = "";
             long lStart = 0;
@@ -1104,17 +1139,14 @@ this.checkBox_prepare_createCallNumber.Checked);
             // 2012/5/9 改写为循环方式
             for (; ; )
             {
-
-                EntityInfo[] orders = null;
-
-                long lRet = Channel.GetOrders(
+                long lRet = channel.GetOrders(
                     stop,
                     strBiblioRecPath,
                     lStart,
                     lCount,
                     "",
                     "zh",
-                    out orders,
+                    out EntityInfo[] orders,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -1634,15 +1666,22 @@ this.checkBox_prepare_createCallNumber.Checked);
                 index++;
                 this.listView_accept_records.Items.Insert(index, target_item);
 
-
+                /*
                 this.EnableControls(false);
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在装载记录 '" + strTargetRecPath + "' ...");
                 stop.BeginLoop();
-
+                */
+                var looping = Looping(
+                    out LibraryChannel channel,
+                    "正在装载记录 '" + strTargetRecPath + "' ...",
+                    "disableControl");
                 try
                 {
-                    nRet = RefreshBrowseLine(target_item, out strError);
+                    nRet = RefreshBrowseLine(
+                        looping.stop,
+                        channel,
+                        target_item, out strError);
                     if (nRet == -1)
                     {
                         ListViewUtil.ChangeItemText(target_item, 2, strError);
@@ -1651,10 +1690,13 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     stop.EndLoop();
                     stop.OnStop -= new StopEventHandler(this.DoStop);
                     stop.Initial("");
                     this.EnableControls(true);
+                    */
                 }
 
                 return 2;
@@ -1964,7 +2006,6 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
             }
 
-
             // 把源设置为 e.SourceRecPath
             ListViewItem source_item = ListViewUtil.FindItem(this.listView_accept_records,
                 e.SourceRecPath,
@@ -2010,7 +2051,6 @@ this.checkBox_prepare_createCallNumber.Checked);
                     return;
                 }
             }
-
 
             ListViewItem target_item = ListViewUtil.FindItem(this.listView_accept_records,
                 strTargetRecPath,
@@ -2126,8 +2166,6 @@ this.checkBox_prepare_createCallNumber.Checked);
             // 检查 采购工作库 情况
             if (bSeriesMode == false)
             {
-
-
                 // 源记录来自采购工作库，目标记录和源记录不是同一条
                 if (source_dbinfo.IsOrderWork == true
                     && e.SourceRecPath != e.TargetRecPath)
@@ -2227,10 +2265,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         return;
                     }
                 }
-
-
             }
-
 
             return;
         ERROR1:
@@ -2303,18 +2338,20 @@ this.checkBox_prepare_createCallNumber.Checked);
 #endif
         }
 
+        /*
         public void EnableProgress()
         {
             Program.MainForm.stopManager.Active(this.stop);
         }
+        */
 
         private void AcceptForm_Activated(object sender, EventArgs e)
         {
 #if NO
             // 2009/8/13
             Program.MainForm.stopManager.Active(this.stop);
-#endif
             EnableProgress();
+#endif
 
             if (m_detailWindow != null)
             {
@@ -2491,29 +2528,33 @@ this.checkBox_prepare_createCallNumber.Checked);
         // 刷新所选择的事项
         void menu_refreshSelectedItems_Click(object sender, EventArgs e)
         {
+            /*
             this.EnableControls(false);
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在刷新...");
             stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在刷新...",
+                "disableControl");
             try
             {
                 foreach (ListViewItem item in this.listView_accept_records.SelectedItems)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                            return;
-                    }
+                    if (looping.Stopped)
+                        return;
 
                     // ListViewItem item = this.listView_accept_records.SelectedItems[i];
 
                     string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
                     string strError = "";
-                    int nRet = RefreshBrowseLine(item,
+                    int nRet = RefreshBrowseLine(
+                        looping.stop,
+                        channel,
+                        item,
                         out strError);
                     if (nRet == -1)
                         ListViewUtil.ChangeItemText(item, 2, strError);
@@ -2521,16 +2562,22 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 this.EnableControls(true);
+                */
             }
         }
 
         // 调用前，记录路径列已经有值
         /*public*/
-        int RefreshBrowseLine(ListViewItem item,
+        int RefreshBrowseLine(
+            Stop stop,
+            LibraryChannel channel,
+            ListViewItem item,
             out string strError)
         {
             strError = "";
@@ -2540,8 +2587,8 @@ this.checkBox_prepare_createCallNumber.Checked);
             paths[0] = strRecPath;
             Record[] searchresults = null;
 
-            long lRet = this.Channel.GetBrowseRecords(
-                this.stop,
+            long lRet = channel.GetBrowseRecords(
+                stop,
                 paths,
                 "id,cols",
                 out searchresults,
@@ -2562,7 +2609,11 @@ this.checkBox_prepare_createCallNumber.Checked);
                     searchresults[0].Cols[i]);
             }
 
-            int nRet = FilterOneItem(item, out strError);
+            int nRet = FilterOneItem(
+                stop,
+                channel,
+                item,
+                out strError);
             if (nRet == -1)
                 return -1;
 
@@ -3020,6 +3071,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             strError = "";
 
+            /*
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -3028,11 +3080,14 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             this.Update();
             Program.MainForm.Update();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取全部数据库名 ...",
+                "disableControl");
             try
             {
-                long lRet = Channel.ManageDatabase(
-                    stop,
+                long lRet = channel.ManageDatabase(
+                    looping.stop,
                     "getinfo",
                     "",
                     "",
@@ -3040,20 +3095,20 @@ this.checkBox_prepare_createCallNumber.Checked);
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
-                    goto ERROR1;
+                    return -1;
                 return (int)lRet;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
                 EnableControls(true);
+                */
             }
-
-        ERROR1:
-            return -1;
         }
 
         /// <summary>
@@ -3124,7 +3179,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             MessageBox.Show(this, strError);
         }
 
-        #region source and target 相关
+#region source and target 相关
 
 
         // 自动设置各行的角色
@@ -4060,9 +4115,9 @@ this.checkBox_prepare_createCallNumber.Checked);
             return 1;
         }
 
-        #endregion
+#endregion
 
-        #region drag and drop 相关
+#region drag and drop 相关
 
         private void label_source_DragEnter(object sender, DragEventArgs e)
         {
@@ -4258,97 +4313,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
 
-        #endregion
-
-
-
-        /*
-        // 获得(采购)源数据库名列表
-        // 所谓源数据库就是库组中包含订购库的那些
-        List<string> GetOrderSourceDbNames()
-        {
-            List<string> results = new List<string>();
-            for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
-            {
-                BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
-                if (String.IsNullOrEmpty(property.OrderDbName) == false)
-                    results.Add(property.DbName);
-            }
-
-            return results;
-        }
-
-        // 获得(采购)验收目标数据库名列表
-        // 所谓目标数据库就是库组中包含实体库库的那些
-        // 如果源库已经确定，那么目标库(目前)只能是那些和源库MarcSyntax相同的一部分。
-        List<string> GetOrderTargetDbNames(string strSourceSyntax)
-        {
-            List<string> results = new List<string>();
-            for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
-            {
-                BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
-                if (String.IsNullOrEmpty(property.ItemDbName) == false)
-                {
-                    if (String.IsNullOrEmpty(strSourceSyntax) == false)
-                    {
-                        Debug.Assert(String.IsNullOrEmpty(property.Syntax) == true, "不能出现空值的syntax");
-                        if (property.Syntax.ToLower() == strSourceSyntax.ToLower())
-                            results.Add(property.DbName);
-                    }
-                    else
-                    {
-                        results.Add(property.DbName);
-                    }
-                }
-            }
-
-            return results;
-        }
-         * */
-
-        /*
-        // 获得普通数据库定义
-        public int GetDatabaseInfo(
-            string strDbName,
-            out string strOutputInfo,
-            out string strError)
-        {
-            strError = "";
-
-            EnableControls(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取数据库 " + strDbName + " 的定义...");
-            stop.BeginLoop();
-
-            this.Update();
-            Program.MainForm.Update();
-
-            try
-            {
-                long lRet = Channel.GetSystemParameter(
-                    stop,
-                    "database_def",
-                    strDbName,
-                    out strOutputInfo,
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-                return (int)lRet;
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-
-                EnableControls(true);
-            }
-
-        ERROR1:
-            return -1;
-        }
-         * */
+#endregion
 
         // 获得一个书目记录
         // return:
@@ -4362,10 +4327,13 @@ this.checkBox_prepare_createCallNumber.Checked);
             strError = "";
             strXml = "";
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获取书目记录 ...");
             stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取书目记录 ...");
             try
             {
                 string[] formats = new string[1];
@@ -4375,8 +4343,8 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 Debug.Assert(String.IsNullOrEmpty(strRecPath) == false, "strRecPath值不能为空");
 
-                long lRet = this.Channel.GetBiblioInfos(
-                    stop,
+                long lRet = channel.GetBiblioInfos(
+                    looping.stop,
                     strRecPath,
                     "",
                     formats,
@@ -4402,9 +4370,12 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+                */
             }
         }
 
@@ -4420,10 +4391,13 @@ this.checkBox_prepare_createCallNumber.Checked);
             strError = "";
             strTitle = "";
 
+            /*
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获取书目题名 ...");
             stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取书目题名 ...");
             try
             {
                 string[] formats = new string[1];
@@ -4433,8 +4407,8 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 Debug.Assert(String.IsNullOrEmpty(strRecPath) == false, "strRecPath值不能为空");
 
-                long lRet = this.Channel.GetBiblioInfos(
-                    stop,
+                long lRet = channel.GetBiblioInfos(
+                    looping.stop,
                     strRecPath,
                     "",
                     formats,
@@ -4458,9 +4432,12 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+                */
             }
         }
 
@@ -4684,16 +4661,18 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
+
+            /*
             this.EnableControls(false);
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在装载记录 ...");
             stop.BeginLoop();
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在装载记录 ...",
+                "disableControl");
             try
             {
-
-                // this.listView_accept_records.SelectedItems.Clear();
-
                 string[] lines = strWhole.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                 for (int i = 0; i < lines.Length; i++)
                 {
@@ -4740,7 +4719,11 @@ this.checkBox_prepare_createCallNumber.Checked);
                     SetItemColor(item); //
 
                     string strError = "";
-                    int nRet = RefreshBrowseLine(item, out strError);
+                    int nRet = RefreshBrowseLine(
+                        looping.stop,
+                        channel,
+                        item,
+                        out strError);
                     if (nRet == -1)
                     {
                         ListViewUtil.ChangeItemText(item, 2, strError);
@@ -4751,11 +4734,13 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 this.EnableControls(true);
-
+                */
                 this.Cursor = oldCursor;
             }
 
@@ -5168,6 +5153,184 @@ Keys keyData)
             if (AcceptForm.SetProcessingState != this.checkBox_prepare_setProcessingState.Checked)
                 AcceptForm.SetProcessingState = this.checkBox_prepare_setProcessingState.Checked;
         }
+
+#region 新风格的 ChannelPool
+
+        ChannelList _channelList = new ChannelList();
+
+        // parameters:
+        //      strStyle    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
+        public virtual LibraryChannel GetChannel(string strServerUrl = ".",
+            string strUserName = ".",
+            GetChannelStyle style = GetChannelStyle.GUI,
+            string strClientIP = "")
+        {
+            LibraryChannel channel = Program.MainForm.GetChannel(strServerUrl, strUserName, style, strClientIP);
+            _channelList.AddChannel(channel);
+            // TODO: 检查数组是否溢出
+            return channel;
+        }
+
+        public virtual void ReturnChannel(LibraryChannel channel)
+        {
+            Program.MainForm.ReturnChannel(channel);
+            _channelList.RemoveChannel(channel);
+        }
+
+
+        public void DoStop(object sender, StopEventArgs e)
+        {
+            _channelList.AbortAll();
+        }
+
+        public string CurrentUserName
+        {
+            get
+            {
+                return Program.MainForm?._currentUserName;
+            }
+        }
+
+        // 当前用户能管辖的一个或者多个馆代码
+        public string CurrentLibraryCodeList
+        {
+            get
+            {
+                return Program.MainForm?._currentLibraryCodeList;
+            }
+        }
+
+        public string CurrentRights
+        {
+            get
+            {
+                return Program.MainForm?._currentUserRights;
+            }
+        }
+
+#endregion
+
+#region looping
+
+        // 三种动作: GetChannel() BeginLoop() 和 EnableControl()
+        // parameters:
+        //          style 可以有如下子参数:
+        //              disableControl
+        //              timeout:hh:mm:ss 确保超时参数在 hh:mm:ss 以长
+        // https://learn.microsoft.com/en-us/dotnet/api/system.timespan.parse?view=net-6.0
+        // [ws][-]{ d | [d.]hh:mm[:ss[.ff]] }[ws]
+        public Looping Looping(
+            out LibraryChannel channel,
+            string text = "",
+            string style = null,
+            StopEventHandler handler = null)
+        {
+            var controlDisabled = StringUtil.IsInList("disableControl", style);
+            var timeout_string = StringUtil.GetParameterByPrefix(style, "timeout"); // 不小于这么多
+            var settimeout_string = StringUtil.GetParameterByPrefix(style, "settimeout");   // 设置为这么多
+
+            var serverUrl = StringUtil.GetParameterByPrefix(style, "serverUrl");
+            if (string.IsNullOrEmpty(serverUrl) == false)
+                serverUrl = StringUtil.UnescapeString(serverUrl);
+            var userName = StringUtil.GetParameterByPrefix(style, "userName");
+
+            channel = this.GetChannel(serverUrl, userName);
+
+            var old_timeout = channel.Timeout;
+            bool timeout_changed = false;
+            if (string.IsNullOrEmpty(timeout_string) == false)
+            {
+                var new_timeout = TimeSpan.Parse(timeout_string);
+                if (new_timeout > old_timeout)
+                {
+                    channel.Timeout = new_timeout;
+                    timeout_changed = true;
+                }
+            }
+            if (string.IsNullOrEmpty(settimeout_string) == false)
+            {
+                var new_timeout = TimeSpan.Parse(settimeout_string);
+                if (new_timeout != old_timeout)
+                {
+                    channel.Timeout = new_timeout;
+                    timeout_changed = true;
+                }
+            }
+
+            var looping = _loopingHost.BeginLoop(
+                handler == null ? this.DoStop : handler,
+                text,
+                style);
+
+            if (controlDisabled)
+                this.EnableControls(false);
+
+            var channel_param = channel;
+            looping.Closed = () =>
+            {
+                if (controlDisabled)
+                    this.EnableControls(true);
+                if (timeout_changed)
+                    channel_param.Timeout = old_timeout;
+                this.ReturnChannel(channel_param);
+            };
+
+            return looping;
+        }
+
+        // 两种动作: BeginLoop() 和 EnableControl()
+        public Looping Looping(string text,
+            string style = null,
+            StopEventHandler handler = null)
+        {
+            var controlDisabled = StringUtil.IsInList("disableControl", style);
+
+            var looping = _loopingHost.BeginLoop(
+                handler == null ? this.DoStop : handler,
+                text,
+                style);
+
+            if (controlDisabled)
+                this.EnableControls(false);
+
+            looping.Closed = () =>
+            {
+                if (controlDisabled)
+                    this.EnableControls(true);
+            };
+
+            return looping;
+        }
+
+
+        internal LoopingHost _loopingHost = new LoopingHost();
+
+        public Looping BeginLoop(StopEventHandler handler,
+string text,
+string style = null)
+        {
+            return _loopingHost.BeginLoop(handler, text, style);
+        }
+
+        public void EndLoop(Looping looping)
+        {
+            _loopingHost.EndLoop(looping);
+        }
+
+        public bool HasLooping()
+        {
+            return _loopingHost.HasLooping();
+        }
+
+        public Looping TopLooping
+        {
+            get
+            {
+                return _loopingHost.TopLooping;
+            }
+        }
+
+#endregion
     }
 
 

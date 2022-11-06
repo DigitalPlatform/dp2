@@ -1142,9 +1142,7 @@
     <Compile Include="ChangePasswordForm.Designer.cs">
       <DependentUpon>ChangePasswordForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Charging\ChargingForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Charging\ChargingForm.cs" />
     <Compile Include="Charging\ChargingForm.Designer.cs">
       <DependentUpon>ChargingForm.cs</DependentUpon>
     </Compile>

@@ -312,6 +312,8 @@ namespace dp2Circulation
         /// </summary>
         public PrintOrderForm()
         {
+            this.UseLooping = true; // 2022/11/5
+
             InitializeComponent();
         }
 
@@ -359,7 +361,9 @@ namespace dp2Circulation
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
 
+#if SUPPORT_OLD_STOP
             this.Channel = null;    // testing
+#endif
         }
 
         private void PrintOrderForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -3464,7 +3468,7 @@ out strError);
 
             // 栏目标题行
             {
-                #region 输出 HTML
+#region 输出 HTML
 
                 strTableContent += "<tr class='column'>";
                 strTableContent += "<td class='class'>" + strStatisTypeName + "</td>";
@@ -3482,9 +3486,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>已到码洋</td>";
                 }
 
-                #endregion
+#endregion
 
-                #region 输出 Excel
+#region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3538,7 +3542,7 @@ title_last,
 XLColor.LightGray);
                 }
 
-                #endregion
+#endregion
             }
 
             string strSumPrice = "";
@@ -3609,7 +3613,7 @@ out strError);
                 else
                     strNoSumClass = " sum";
 
-                #region 输出 HTML
+#region 输出 HTML
 
                 strTableContent += "<tr class='content" + HttpUtility.HtmlEncode(strNoSumClass) + "'>";
                 strTableContent += "<td class='class'>" + HttpUtility.HtmlEncode(line.Class) + "</td>";
@@ -3627,9 +3631,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptCurrentFixedPrices) + "</td>";
                 }
 
-                #endregion
+#endregion
 
-                #region 输出 Excel
+#region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3731,7 +3735,7 @@ strAcceptCurrentFixedPrices);
                     nExcelLineIndex++;
                 }
 
-                #endregion
+#endregion
 
                 if (secondary_lines != null
                     && line.InnerLines != null) // 2013/9/11
@@ -3769,7 +3773,7 @@ strCurrentFixedPrices);
             }
 
             // 汇总行
-            #region 输出 HTML
+#region 输出 HTML
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
         out string strOutputPrice,
@@ -3811,9 +3815,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptOutputFixedPrice) + "</td>";
                 }
             }
-            #endregion
+#endregion
 
-            #region 输出 Excel
+#region 输出 Excel
             if (doc != null)
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
@@ -3916,7 +3920,7 @@ strAcceptOutputFixedPrice);
                     "");    // 没有竖线
             }
 
-            #endregion
+#endregion
 
             strTableContent += "</tr>";
             strTableContent += "</table>";
@@ -4068,7 +4072,7 @@ strAcceptOutputFixedPrice);
             }
 
 
-            #region 输出 Excel
+#region 输出 Excel
 
             if (sheet != null)
             {
@@ -4144,7 +4148,7 @@ title_last,
 "",
 XLColor.LightGray);
             }
-            #endregion
+#endregion
 
             List<StatisLine> sum_items = new List<StatisLine>();
 
@@ -4163,7 +4167,7 @@ XLColor.LightGray);
                 strTableContent.Append("<tr class='content" + HttpUtility.HtmlAttributeEncode(strNoSumClass) + "'>");
                 strTableContent.Append("<td class='class'>" + HttpUtility.HtmlEncode(inner_line.Key) + "</td>");
 
-                #region 输出 Excel
+#region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4181,7 +4185,7 @@ inner_line.Key/*,
 true*/);
                 }
 
-                #endregion
+#endregion
 
                 int i = 0;
                 foreach (StatisLine line in inner_line.lines)
@@ -4189,7 +4193,7 @@ true*/);
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
 
-                    #region 输出 Excel
+#region 输出 Excel
 
                     if (sheet != null)
                     {
@@ -4209,7 +4213,7 @@ true*/);
     XLAlignmentHorizontalValues.Right);
                     }
 
-                    #endregion
+#endregion
 
                     // 汇总
                     if (inner_line.AllowSum == true)
@@ -4240,7 +4244,7 @@ true*/);
                 strTableContent.Append("<tr class='totalize'>");
                 strTableContent.Append("<td class='class'>合计</td>");
 
-                #region 输出 Excel
+#region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4255,13 +4259,13 @@ true*/);
 
                 }
 
-                #endregion
+#endregion
 
                 foreach (StatisLine line in sum_items)
                 {
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
-                    #region 输出 Excel
+#region 输出 Excel
                     if (sheet != null)
                     {
                         IXLCell first = WriteExcelCell(
@@ -4283,7 +4287,7 @@ true*/);
                         // second.Style.Border.TopBorder = XLBorderStyleValues.Thin;
 
                     }
-                    #endregion
+#endregion
                 }
                 strTableContent.Append("</tr>");
             }
@@ -5223,7 +5227,7 @@ XLColor.DarkGreen); // 订单
             return 0;
         }
 
-        #region Excel 实用函数
+#region Excel 实用函数
 
         // 合计页的边沿
         public static int SUM_TOP_BLANK_LINES = 2;
@@ -5387,7 +5391,7 @@ long value,
         }
 #endif
 
-        #endregion
+#endregion
 
         int BuildMergedPageTop(PrintOption option,
             Hashtable macro_table,
@@ -6761,11 +6765,7 @@ strContent);
 
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            /*
-            LibraryChannel channel = this.GetChannel();
-            */
-            var looping = Looping(out LibraryChannel channel);
-            try
+            using (var looping = Looping(out LibraryChannel channel))
             {
                 Global.GetBatchNoTable(e,
                     this,
@@ -6774,127 +6774,6 @@ strContent);
                     looping.stop,
                     channel);
             }
-            finally
-            {
-                looping.Dispose();
-                /*
-                this.ReturnChannel(channel);
-                */
-            }
-
-#if NOOOOOOOOOOOOOOOOOOOOOOOOO
-            string strError = "";
-
-            if (e.KeyCounts == null)
-                e.KeyCounts = new List<KeyCount>();
-
-            EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在列出全部订购批次号 ...");
-            stop.BeginLoop();
-
-            try
-            {
-                MainForm.SetProgressRange(100);
-                MainForm.SetProgressValue(0);
-
-                long lRet = Channel.SearchOrder(
-                    stop,
-                    "<all>",
-                    "", // strBatchNo
-                    2000,   // -1,
-                    "批次号",
-                    "left",
-                    this.Lang,
-                    "batchno",   // strResultSetName
-                    "keycount", // strOutputStyle
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-                if (lRet == 0)
-                {
-                    strError = "没有找到任何订购批次号检索点";
-                    return;
-                }
-
-                long lHitCount = lRet;
-
-                long lStart = 0;
-                long lCount = lHitCount;
-                SearchResult[] searchresults = null;
-
-                // 装入浏览格式
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
-                    }
-
-                    lRet = Channel.GetSearchResult(
-                        stop,
-                        "batchno",   // strResultSetName
-                        lStart,
-                        lCount,
-                        "keycount",
-                        this.Lang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "GetSearchResult() error: " + strError;
-                        goto ERROR1;
-                    }
-
-                    if (lRet == 0)
-                    {
-                        // MessageBox.Show(this, "未命中");
-                        return;
-                    }
-
-                    // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        if (searchresults[i].Cols == null)
-                        {
-                            strError = "请更新应用服务器和数据库内核到最新版本";
-                            goto ERROR1;
-                        }
-
-                        KeyCount keycount = new KeyCount();
-                        keycount.Key = searchresults[i].Path;
-                        keycount.Count = Convert.ToInt32(searchresults[i].Cols[0]);
-                        e.KeyCounts.Add(keycount);
-                    }
-
-                    lStart += searchresults.Length;
-                    lCount -= searchresults.Length;
-
-                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
-
-                    if (lStart >= lHitCount || lCount <= 0)
-                        break;
-                }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-
-                EnableControls(true);
-            }
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-#endif
         }
 
         void dlg_GetLocationValueTable(object sender, GetValueTableEventArgs e)
@@ -7518,7 +7397,7 @@ MessageBoxDefaultButton.Button2);
             public OldNewValue FixedPrice { get; set; }
             public OldNewCopy Copy { get; set; }
 
-            #region 扩展的属性
+#region 扩展的属性
 
             // 订购单价
             public string OrderPrice
@@ -7738,7 +7617,7 @@ MessageBoxDefaultButton.Button2);
             }
 
 
-            #endregion
+#endregion
 
             // 对一些值进行填充和调整
             // 返回 LineInfo 类型是为了便于链式调用
@@ -9596,7 +9475,7 @@ MessageBoxDefaultButton.Button2);
                 MERGED_COLUMN_SELLER);
         }
 
-        #region 原始数据
+#region 原始数据
 
         // 打印原始数据
         private void button_print_printOriginList_Click(object sender, EventArgs e)
@@ -10483,7 +10362,7 @@ column.Evalue);
         }
 
 
-        #endregion
+#endregion
 
         // 保存对原始数据的修改
         private void button_saveChange_saveChange_Click(object sender, EventArgs e)
@@ -11800,7 +11679,7 @@ column.Evalue);
             LoadOrderToEntityForm(this.listView_origin);
         }
 
-        #region 到书率分时间片统计
+#region 到书率分时间片统计
 
         // 到货率统计
         private void button_print_arriveRatioStatis_Click(object sender, EventArgs e)
@@ -12831,7 +12710,7 @@ string strFileName)
             return 0;
         }
 
-        #endregion
+#endregion
 
         // 打印订单 -- 输出 Excel 文件
         private void toolStripMenuItem_outputExcel_Click(object sender, EventArgs e)

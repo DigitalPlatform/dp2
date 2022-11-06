@@ -22,7 +22,7 @@ namespace dp2Circulation
         /// <summary>
         /// 关联的 Form
         /// </summary>
-        Form Form { get; set; }
+        MyForm Form { get; set; }
 
         IBiblioItemsWindow DetailWindow
         {
@@ -83,7 +83,7 @@ namespace dp2Circulation
         /// <summary>
         /// 宿主窗口
         /// </summary>
-        Form Form
+        MyForm Form
         {
             get;
         }

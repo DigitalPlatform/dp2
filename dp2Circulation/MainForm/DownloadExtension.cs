@@ -93,6 +93,7 @@ namespace dp2Circulation
         {
             string strError = "";
 
+            /*
             LibraryChannel channel = this.GetChannel();
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
@@ -100,7 +101,10 @@ namespace dp2Circulation
             Stop.BeginLoop();
 
             stopManager.Active(Stop);   // testing
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在验证服务器端文件 " + strServerFilePath + " 的 MD5 校验码 ...",
+                null);
             // Application.DoEvents();
 
             try
@@ -113,7 +117,7 @@ namespace dp2Circulation
                 //      1   文件找到
                 int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                     channel,
-                    Stop,   // this.Stop,
+                    looping.stop,   // this.Stop,
                     strServerFilePath,
                     new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
                     {
@@ -180,12 +184,14 @@ namespace dp2Circulation
             }
             finally
             {
-
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
         }
 
@@ -1640,17 +1646,20 @@ namespace dp2Circulation
 
             List<OperLogFileInfo> results = new List<OperLogFileInfo>();
 
+            /*
             LibraryChannel channel = this.GetChannel();
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获取服务器端日志列表 ...");
             Stop.BeginLoop();
 
             stopManager.Active(Stop);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取服务器端日志列表 ...");
             try
             {
                 FileItemLoader loader = new FileItemLoader(channel,
-                    Stop,
+                    looping.stop,
                     "!operlog",
                     "*.log");
                 foreach (FileItemInfo info in loader)
@@ -1670,11 +1679,14 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+                */
             }
         }
 

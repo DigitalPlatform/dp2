@@ -580,7 +580,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        public Form Form
+        public MyForm Form
         {
             get
             {
@@ -1631,10 +1631,11 @@ false);
         #endregion
 
 
-        #region 针对 dp2library 服务器的检索
+#region 针对 dp2library 服务器的检索
 
-        // LibraryChannel _channel = null;
+// LibraryChannel _channel = null;
 
+#if REMOVED
         // 正在使用中的 LibraryChannel。当正在进行检索的时候，双击浏览列表装入详细记录，可能会新开 Channel，同时使用的 Channel 多于一个
         List<LibraryChannel> _channels = new List<LibraryChannel>();
 
@@ -1655,6 +1656,7 @@ false);
                 }
             }
         }
+#endif
 
         public Looping LoopingEx(
             string serverUrl,
@@ -1998,9 +2000,9 @@ false);
         }
 #endif
 
-        #endregion
+#endregion
 
-        #region 浏览行相关
+#region 浏览行相关
 
         public const int TYPE_ERROR = 2;
         public const int TYPE_INFO = 3;
@@ -2503,10 +2505,27 @@ out strError);
                 string strServerUrl = account.ServerUrl;
                 string strUserName = account.UserName;
 
+                /*
                 if (EntityRegisterBase.IsDot(strServerUrl) == true)
                     strServerUrl = Program.MainForm.LibraryServerUrl;
                 if (EntityRegisterBase.IsDot(strUserName) == true)
                     strUserName = Program.MainForm.DefaultUserName;
+                */
+
+                // 2022/11/6
+                {
+                    if (EntityRegisterBase.IsDot(strServerUrl) == true)
+                        strServerUrl = Program.MainForm.LibraryServerUrl;
+                    if (EntityRegisterBase.IsDot(strUserName) == true
+                        && strServerUrl == Program.MainForm.LibraryServerUrl)
+                        strUserName = Program.MainForm.DefaultUserName;
+                    else
+                    {
+                        // 注: 用户名是跟着 URL 走的。一旦 URL 用了非当前的，则用户名也就无法通过当前缺省确定了
+                        if (EntityRegisterBase.IsDot(strUserName) == true)
+                            strUserName = "";
+                    }
+                }
 
                 EventFilter filter = new EventFilter();
                 // filter.BiblioRegister = biblioRegister;
@@ -2559,7 +2578,7 @@ out strError);
             public string BiblioRecPath = "";   // 书目记录路径
         }
 
-        #endregion
+#endregion
 
         int SetBiblio(RegisterBiblioInfo info,
             bool bAutoSetFocus,
@@ -3156,7 +3175,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        #region 册记录相关
+#region 册记录相关
 
         // 将一条书目记录下属的若干册记录装入列表
         // return:
@@ -3543,9 +3562,9 @@ int nCount)
                 this.flowLayoutPanel1.ScrollControlIntoView(button);
         }
 
-        #endregion
+#endregion
 
-        #region 保存书目记录
+#region 保存书目记录
 
         // 保存书目记录和下属的册记录
         // return:
@@ -4107,9 +4126,9 @@ int nCount)
             return 0;
         }
 
-        #endregion
+#endregion
 
-        #region 删除书目记录
+#region 删除书目记录
 
         // return:
         //      -1  出错
@@ -4312,7 +4331,7 @@ int nCount)
             }
         }
 
-        #endregion
+#endregion
 
         private void flowLayoutPanel1_SizeChanged(object sender, EventArgs e)
         {
@@ -4935,7 +4954,7 @@ MessageBoxDefaultButton.Button2);
             this.DeleteBiblioRecord();
         }
 
-        #region 键盘输入面板
+#region 键盘输入面板
 
         KeyboardForm _keyboardForm = null;
 
@@ -5081,7 +5100,7 @@ MessageBoxDefaultButton.Button2);
             // this.easyMarcControl1.HideSelection = true;
         }
 
-        #endregion
+#endregion
 
         private void EntityRegisterWizard_Move(object sender, EventArgs e)
         {

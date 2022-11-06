@@ -1532,9 +1532,6 @@ false);
             long lLineCount = GetTextLineCount(strFilename,
                 false);
 
-            if (lLineCount != -1)
-                _stop.SetProgressRange(0, lLineCount);
-
             int nCurrentLine = 0;
             StreamReader sr = null;
             try
@@ -1559,6 +1556,9 @@ false);
                     "diableControl");
                 try
                 {
+                    if (lLineCount != -1)
+                        looping.stop.SetProgressRange(0, lLineCount);
+
                     int nRet = 0;
 
                     // 逐行读入文件内容

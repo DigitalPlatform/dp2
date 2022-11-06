@@ -171,8 +171,12 @@ namespace dp2Circulation
                 FillReaderDbFroms();
             }
 
+#if SUPPORT_OLD_STOP
             this.Channel = null;    // testing 2022/6/14
+#endif
         }
+
+#if REMOVED // 这是对 Program.MainForm.FingerprintUserName 的特殊支持
 
         /// <summary>
         /// 重载的 Channel_BeforeLogin()
@@ -321,6 +325,8 @@ namespace dp2Circulation
             return dlg;
         }
 
+#endif
+
         void FillReaderDbFroms()
         {
             this.comboBox_from.Items.Clear();
@@ -345,8 +351,6 @@ namespace dp2Circulation
                 }
 
             }*/
-
-
         }
 
         private void ReaderSearchForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -4577,7 +4581,7 @@ out strError);
             this.textBox_queryWord.Text = dlg.uString;
         }
 
-        #region 指纹缓存相关功能
+#region 指纹缓存相关功能
 
         System.Windows.Forms.Label m_labelPrompt = null;
 
@@ -5516,9 +5520,9 @@ out strFingerprint);
 
 #endif
 
-        #endregion
+#endregion
 
-        #region 属性区有关功能
+#region 属性区有关功能
 
         internal override bool InSearching
         {
@@ -5614,9 +5618,9 @@ out strFingerprint);
             return 0;
         }
 
-        #endregion
+#endregion
 
-        #region C# 脚本程序
+#region C# 脚本程序
 
 
 
@@ -6084,7 +6088,7 @@ out strFingerprint);
             return -1;
         }
 
-        #endregion
+#endregion
 
         // 创建读者详情 Excel 文件。这是便于被外部调用的版本，只需要提供读者 XML 记录即可
         // return:

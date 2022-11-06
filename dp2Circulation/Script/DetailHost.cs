@@ -35,11 +35,11 @@ namespace dp2Circulation
 
         #region IDetailHost 接口要求
 
-        public Form Form
+        public MyForm Form
         {
             get
             {
-                return (this.DetailForm as Form);
+                return (this.DetailForm as MyForm);
             }
             set
             {
@@ -1042,6 +1042,8 @@ namespace dp2Circulation
 
         bool bMarcEditorFocued = false;
 
+        Looping _looping = null;
+
         /// <summary>
         /// 开始进行 GCAT 通讯操作
         /// </summary>
@@ -1049,6 +1051,7 @@ namespace dp2Circulation
         public void BeginGcatLoop(string strMessage)
         {
             bMarcEditorFocued = this.DetailForm.MarcEditor.Focused;
+            /*
             this.DetailForm.EnableControls(false);
 
             Stop stop = this.DetailForm.Progress;
@@ -1059,6 +1062,12 @@ namespace dp2Circulation
 
             this.DetailForm.Update();
             Program.MainForm.Update();
+            */
+            Debug.Assert(_looping == null);
+            _looping = this.DetailForm.Looping(
+                null,
+                "disableControl",
+                this.DoGcatStop);
         }
 
         /// <summary>
@@ -1066,12 +1075,16 @@ namespace dp2Circulation
         /// </summary>
         public void EndGcatLoop()
         {
+            _looping.Dispose();
+            _looping = null;
+            /*
             Stop stop = this.DetailForm.Progress;
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoGcatStop);
             stop.Initial("");
 
             this.DetailForm.EnableControls(true);
+            */
             if (bMarcEditorFocued == true)
                 this.DetailForm.MarcEditor.Focus();
         }
@@ -1465,7 +1478,7 @@ namespace dp2Circulation
                     //      1   succeed
                     long nRet = BiblioItemsHost.GetAuthorNumber(
                         ref question_table,
-                        this.DetailForm.Progress,
+                        _looping.stop,  // this.DetailForm.Progress,
                         this.DetailForm,
                         strGcatWebServiceUrl,
                         strAuthor,

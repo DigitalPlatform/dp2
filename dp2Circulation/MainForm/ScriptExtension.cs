@@ -1114,6 +1114,7 @@ namespace dp2Circulation
     string strProjectLocate,
     out string strError)
         {
+            /*
             EnableControls(false);
 
 #if NO
@@ -1125,6 +1126,8 @@ namespace dp2Circulation
             this.Stop.OnStop += new StopEventHandler(this.DoStop);
             this.Stop.Initial("正在执行脚本 ...");
             this.Stop.BeginLoop();
+            */
+            var looping = Looping("正在执行脚本 ...");
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -1147,7 +1150,7 @@ namespace dp2Circulation
                     out this.objStatis,
                     out strError);
                 if (nRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 objStatis.ProjectDir = strProjectLocate;
                 // objStatis.Console = this.Console;
@@ -1161,9 +1164,6 @@ namespace dp2Circulation
                 }
 
                 return 0;
-            ERROR1:
-                return -1;
-
             }
             catch (Exception ex)
             {
@@ -1172,11 +1172,11 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 this.Stop.EndLoop();
                 this.Stop.OnStop -= new StopEventHandler(this.DoStop);
                 this.Stop.Initial("");
-
-                this.AssemblyMain = null;
 
 #if NO
                 // BUG!!!
@@ -1186,8 +1186,10 @@ namespace dp2Circulation
                     Stop = null;
                 }
 #endif
-
                 EnableControls(true);
+                */
+
+                this.AssemblyMain = null;
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }

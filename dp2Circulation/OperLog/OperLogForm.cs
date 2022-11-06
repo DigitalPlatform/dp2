@@ -124,8 +124,10 @@ namespace dp2Circulation
 "ui_state",
 "");
 
+#if SUPPORT_OLD_STOP
             // 2020/3/30
             this.Channel = null;    // testing
+#endif
         }
 
         /// <summary>
@@ -434,7 +436,7 @@ namespace dp2Circulation
             }));
         }
 
-        #region HTML 解释日志记录
+#region HTML 解释日志记录
 
         // 创建解释日志记录内容的 HTML 字符串
         // return:
@@ -3598,7 +3600,7 @@ out string strError)
             return strResult;
         }
 
-        #endregion
+#endregion
 
         private void listView_records_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -7432,7 +7434,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        #region Roslyn 脚本运行
+#region Roslyn 脚本运行
 
         static Assembly BuildAssembly(string script, out string strError)
         {
@@ -7565,7 +7567,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        #endregion
+#endregion
 
         // 筛选
         void menu_filter_Click(object sender, EventArgs e)
@@ -7846,7 +7848,7 @@ Keys keyData)
         }
 
 
-        #region 改进后的批处理功能
+#region 改进后的批处理功能
 
         // parameters:
         //      bInCacheFile    lHint指示的是否为本地cache文件中的hint
@@ -9074,7 +9076,7 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             return -1;
         }
-        #endregion
+#endregion
 
         public string UiState
         {

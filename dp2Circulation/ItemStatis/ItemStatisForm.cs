@@ -113,6 +113,8 @@ namespace dp2Circulation
         /// </summary>
         public ItemStatisForm()
         {
+            this.UseLooping = true; // 2022/11/5
+
             InitializeComponent();
         }
 
@@ -123,15 +125,6 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
             ScriptManager.CfgFilePath = Path.Combine(
     Program.MainForm.UserDir,
     this.DbType + "_statis_projects.xml");
@@ -579,6 +572,7 @@ namespace dp2Circulation
         {
             strWarning = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -587,6 +581,11 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping(
+                out LibraryChannel channel,
+                "正在执行脚本 ...",
+                "disableControl");
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -670,14 +669,17 @@ namespace dp2Circulation
                 }
 
                 // 循环
-                nRet = DoLoop(out strError);
+                nRet = DoLoop(
+                    looping.stop,
+                    channel,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 if (nRet == 1)
                     goto END1;  // TODO: SkipAll如何执行? 是否连OnEnd也不执行了？
 
-            END1:
+                END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
                 {
@@ -701,13 +703,16 @@ namespace dp2Circulation
                 if (objStatis != null)
                     objStatis.FreeResources();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
-                this.AssemblyMain = null;
-
                 EnableControls(true);
+                */
+
+                this.AssemblyMain = null;
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
@@ -741,20 +746,20 @@ namespace dp2Circulation
 
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.Client.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 									// Environment.CurrentDirectory + "\\digitalplatform.statis.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
@@ -852,19 +857,19 @@ namespace dp2Circulation
 
                 // 一些必要的链接库
                 string[] saAddRef1 = {
-										 Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                          Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
                                          Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 										 // Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 										 Environment.CurrentDirectory + "\\dp2circulation.exe",
-										 strMainCsDllName};
+                                         strMainCsDllName};
 
                 // fltx文件里显式增补的链接库
                 string[] saAdditionalRef = filter.GetRefs();
@@ -947,7 +952,10 @@ namespace dp2Circulation
         // return:
         //      0   普通返回
         //      1   要全部中断
-        int DoLoop(out string strError)
+        int DoLoop(
+            Stop stop,
+            LibraryChannel channel,
+            out string strError)
         {
             strError = "";
             int nRet = 0;
@@ -1001,6 +1009,8 @@ namespace dp2Circulation
                 if (this.InputStyle == ItemStatisInputStyle.BatchNo)
                 {
                     nRet = SearchItemRecPath(
+                        stop,
+                        channel,
                         this.tabComboBox_inputBatchNo.Text,
                         strTempRecPathFilename,
                         out strError);
@@ -1059,27 +1069,24 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (_stop.State != 0)
+                            DialogResult result = MessageBox.Show(this,
+                                "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
+                                this.DbType + "statisform",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button3);
+
+                            if (result == DialogResult.Yes)
                             {
-                                DialogResult result = MessageBox.Show(this,
-                                    "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
-                                    this.DbType + "statisform",
-                                    MessageBoxButtons.YesNoCancel,
-                                    MessageBoxIcon.Question,
-                                    MessageBoxDefaultButton.Button3);
-
-                                if (result == DialogResult.Yes)
-                                {
-                                    strError = "用户中断";
-                                    return -1;
-                                }
-                                if (result == DialogResult.No)
-                                    return 0;   // 假装loop正常结束
-
-                                _stop.Continue(); // 继续循环
+                                strError = "用户中断";
+                                return -1;
                             }
+                            if (result == DialogResult.No)
+                                return 0;   // 假装loop正常结束
+
+                            stop.Continue(); // 继续循环
                         }
 
                         // string strItemBarcode = barcodes[i];
@@ -1093,7 +1100,7 @@ namespace dp2Circulation
 
                         OutputDebugInfo("处理行" + (i + 1).ToString() + " '" + strRecPathOrBarcode + "'");
 
-                        _stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个" + this.DbTypeCaption + "记录，" + strAccessPointName + "为 " + strRecPathOrBarcode);
+                        stop?.SetMessage("正在获取第 " + (i + 1).ToString() + " 个" + this.DbTypeCaption + "记录，" + strAccessPointName + "为 " + strRecPathOrBarcode);
                         this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
                         // 获得册记录
@@ -1124,8 +1131,8 @@ namespace dp2Circulation
                         if (this.DbType == "item")
                         {
                             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
-                            lRet = Channel.GetItemInfo(
-                                _stop,
+                            lRet = channel.GetItemInfo(
+                                stop,
                                 strAccessPoint,
                                 "xml", // strResultType,
                                 out strResult,
@@ -1139,8 +1146,8 @@ namespace dp2Circulation
                         else if (this.DbType == "order")
                         {
                             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
-                            lRet = Channel.GetOrderInfo(
-                                _stop,
+                            lRet = channel.GetOrderInfo(
+                                stop,
                                 strAccessPoint,
                                 "xml", // strResultType,
                                 out strResult,
@@ -1154,8 +1161,8 @@ namespace dp2Circulation
                         else if (this.DbType == "issue")
                         {
                             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
-                            lRet = Channel.GetIssueInfo(
-                                _stop,
+                            lRet = channel.GetIssueInfo(
+                                stop,
                                 strAccessPoint,
                                 "xml", // strResultType,
                                 out strResult,
@@ -1169,8 +1176,8 @@ namespace dp2Circulation
                         else if (this.DbType == "comment")
                         {
                             // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
-                            lRet = Channel.GetCommentInfo(
-                                _stop,
+                            lRet = channel.GetCommentInfo(
+                                stop,
                                 strAccessPoint,
                                 "xml", // strResultType,
                                 out strResult,
@@ -1321,6 +1328,8 @@ namespace dp2Circulation
         // 注意：上级函数RunScript()已经使用了BeginLoop()和EnableControls()
         // 检索获得特定批次号，或者所有册记录路径(输出到文件)
         int SearchItemRecPath(
+            Stop stop,
+            LibraryChannel channel,
             string strBatchNo,
             string strRecPathFilename,
             out string strError)
@@ -1354,7 +1363,8 @@ namespace dp2Circulation
                         if (this.DbType == "item")
                         {
                             // TODO: 是否应该用__id更合适？因为一些记录没有册条码号
-                            lRet = Channel.SearchItem(_stop,
+                            lRet = channel.SearchItem(
+                                stop,
                                 this.comboBox_inputItemDbName.Text,
                                  "",
                                  -1,
@@ -1368,7 +1378,8 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "order")
                         {
-                            lRet = Channel.SearchOrder(_stop,
+                            lRet = channel.SearchOrder(
+                                stop,
                                 this.comboBox_inputItemDbName.Text,
                                  "",
                                  -1,
@@ -1382,7 +1393,8 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "issue")
                         {
-                            lRet = Channel.SearchIssue(_stop,
+                            lRet = channel.SearchIssue(
+                                stop,
                                 this.comboBox_inputItemDbName.Text,
                                  "",
                                  -1,
@@ -1396,7 +1408,8 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "comment")
                         {
-                            lRet = Channel.SearchComment(_stop,
+                            lRet = channel.SearchComment(
+                                stop,
                                 this.comboBox_inputItemDbName.Text,
                                  "",
                                  -1,
@@ -1416,7 +1429,8 @@ namespace dp2Circulation
                         // 指定批次号。特定库。
                         if (this.DbType == "item")
                         {
-                            lRet = Channel.SearchItem(_stop,
+                            lRet = channel.SearchItem(
+                                stop,
                                     this.comboBox_inputItemDbName.Text,
                                     strBatchNo,
                                     -1,
@@ -1430,7 +1444,8 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "order")
                         {
-                            lRet = Channel.SearchOrder(_stop,
+                            lRet = channel.SearchOrder(
+                                stop,
                                     this.comboBox_inputItemDbName.Text,
                                     strBatchNo,
                                     -1,
@@ -1444,7 +1459,8 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "issue")
                         {
-                            lRet = Channel.SearchIssue(_stop,
+                            lRet = channel.SearchIssue(
+                                stop,
                                     this.comboBox_inputItemDbName.Text,
                                     strBatchNo,
                                     -1,
@@ -1458,7 +1474,8 @@ namespace dp2Circulation
                         }
                         else if (this.DbType == "comment")
                         {
-                            lRet = Channel.SearchComment(_stop,
+                            lRet = channel.SearchComment(
+                                stop,
                                     this.comboBox_inputItemDbName.Text,
                                     strBatchNo,
                                     -1,
@@ -1487,18 +1504,15 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null)
-                        {
-                            if (_stop.State != 0)
+                        if (stop != null&&stop.State != 0)
                             {
                                 strError = "用户中断";
                                 goto ERROR1;
                             }
-                        }
 
 
-                        lRet = Channel.GetSearchResult(
-                            _stop,
+                        lRet = channel.GetSearchResult(
+                            stop,
                             null,   // strResultSetName
                             lStart,
                             lCount,
@@ -1530,7 +1544,7 @@ namespace dp2Circulation
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        _stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        stop?.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
@@ -1912,18 +1926,21 @@ namespace dp2Circulation
             out string strBiblio,
             out string strError)
         {
-            strError = "";
-            strBiblio = "";
+            using (var looping = Looping(out LibraryChannel channel))
+            {
+                strError = "";
+                strBiblio = "";
 
-            string strBiblioXml = "";   // 向服务器提供的XML记录
-            long lRet = this.Channel.GetBiblioInfo(
-                null,   // this.stop,
-                strBiblioRecPath,
-                strBiblioXml,
-                strBiblioType,
-                out strBiblio,
-                out strError);
-            return (int)lRet;
+                string strBiblioXml = "";   // 向服务器提供的XML记录
+                long lRet = channel.GetBiblioInfo(
+                    looping.stop,   // this.stop,
+                    strBiblioRecPath,
+                    strBiblioXml,
+                    strBiblioType,
+                    out strBiblio,
+                    out strError);
+                return (int)lRet;
+            }
         }
 
         private void ItemStatisForm_Activated(object sender, EventArgs e)

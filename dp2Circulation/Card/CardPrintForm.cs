@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Linq;
@@ -161,11 +162,7 @@ namespace dp2Circulation
         public int PrintFromCardFile(bool bDisplayPrinterDialog = true)
         {
             string strError = "";
-            int nRet = this.BeginPrint(
-                this.textBox_cardFile_cardFilename.Text,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+
 
             /*
             _stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
@@ -183,103 +180,118 @@ namespace dp2Circulation
 
             try
             {
+                // 注: BeginPrint 会 SetProgressRange()，应当放到 Stop.Initial() 之后执行
+                int nRet = this.BeginPrint(
+    this.textBox_cardFile_cardFilename.Text,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-                // Allow the user to choose the page range he or she would
-                // like to print.
-                printDialog1.AllowSomePages = true;
-
-                // Show the help button.
-                printDialog1.ShowHelp = true;
-
-                // Set the Document property to the PrintDocument for 
-                // which the PrintPage Event has been handled. To display the
-                // dialog, either this property or the PrinterSettings property 
-                // must be set 
-                printDialog1.Document = this.document;
-
-                if (this.PrinterInfo != null)
+                try
                 {
-                    string strPrinterName = document.PrinterSettings.PrinterName;
-                    if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == false
-                        && this.PrinterInfo.PrinterName != strPrinterName)
-                    {
-                        this.document.PrinterSettings.PrinterName = this.PrinterInfo.PrinterName;
-                        if (this.document.PrinterSettings.IsValid == false)
-                        {
-                            MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 当前不可用，请重新选定打印机");
-                            this.document.PrinterSettings.PrinterName = strPrinterName;
-                            this.PrinterInfo.PrinterName = "";
-                            bDisplayPrinterDialog = true;
-                        }
-                    }
+                    // Allow the user to choose the page range he or she would
+                    // like to print.
+                    printDialog1.AllowSomePages = true;
 
-                    PaperSize old_papersize = document.DefaultPageSettings.PaperSize;
-                    if (string.IsNullOrEmpty(this.PrinterInfo.PaperName) == false
-                        && this.PrinterInfo.PaperName != document.DefaultPageSettings.PaperSize.PaperName)
+                    // Show the help button.
+                    printDialog1.ShowHelp = true;
+
+                    // Set the Document property to the PrintDocument for 
+                    // which the PrintPage Event has been handled. To display the
+                    // dialog, either this property or the PrinterSettings property 
+                    // must be set 
+                    printDialog1.Document = this.document;
+
+                    if (this.PrinterInfo != null)
                     {
-                        PaperSize found = null;
-                        foreach (PaperSize ps in this.document.PrinterSettings.PaperSizes)
+                        string strPrinterName = document.PrinterSettings.PrinterName;
+                        if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == false
+                            && this.PrinterInfo.PrinterName != strPrinterName)
                         {
-                            if (ps.PaperName.Equals(this.PrinterInfo.PaperName))
+                            this.document.PrinterSettings.PrinterName = this.PrinterInfo.PrinterName;
+                            if (this.document.PrinterSettings.IsValid == false)
                             {
-                                found = ps;
-                                break;
+                                MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 当前不可用，请重新选定打印机");
+                                this.document.PrinterSettings.PrinterName = strPrinterName;
+                                this.PrinterInfo.PrinterName = "";
+                                bDisplayPrinterDialog = true;
                             }
                         }
 
-                        if (found != null)
-                            this.document.DefaultPageSettings.PaperSize = found;
-                        else
+                        PaperSize old_papersize = document.DefaultPageSettings.PaperSize;
+                        if (string.IsNullOrEmpty(this.PrinterInfo.PaperName) == false
+                            && this.PrinterInfo.PaperName != document.DefaultPageSettings.PaperSize.PaperName)
                         {
-                            MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 的纸张类型 " + this.PrinterInfo.PaperName + " 当前不可用，请重新选定纸张");
-                            document.DefaultPageSettings.PaperSize = old_papersize;
-                            this.PrinterInfo.PaperName = "";
+                            PaperSize found = null;
+                            foreach (PaperSize ps in this.document.PrinterSettings.PaperSizes)
+                            {
+                                if (ps.PaperName.Equals(this.PrinterInfo.PaperName))
+                                {
+                                    found = ps;
+                                    break;
+                                }
+                            }
+
+                            if (found != null)
+                                this.document.DefaultPageSettings.PaperSize = found;
+                            else
+                            {
+                                MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 的纸张类型 " + this.PrinterInfo.PaperName + " 当前不可用，请重新选定纸张");
+                                document.DefaultPageSettings.PaperSize = old_papersize;
+                                this.PrinterInfo.PaperName = "";
+                                bDisplayPrinterDialog = true;
+                            }
+                        }
+
+                        // 只要有一个打印机事项没有确定，就要出现打印机对话框
+                        if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == true
+                            || string.IsNullOrEmpty(this.PrinterInfo.PaperName) == true)
                             bDisplayPrinterDialog = true;
-                        }
                     }
-
-                    // 只要有一个打印机事项没有确定，就要出现打印机对话框
-                    if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == true
-                        || string.IsNullOrEmpty(this.PrinterInfo.PaperName) == true)
+                    else
+                    {
+                        // 没有首选配置的情况下要出现打印对话框
                         bDisplayPrinterDialog = true;
-                }
-                else
-                {
-                    // 没有首选配置的情况下要出现打印对话框
-                    bDisplayPrinterDialog = true;
-                }
+                    }
 
-                DialogResult result = DialogResult.OK;
-                if (bDisplayPrinterDialog == true)
-                {
-                    result = printDialog1.ShowDialog();
-                }
-
-                // If the result is OK then print the document.
-                if (result == DialogResult.OK)
-                {
-                    try
+                    DialogResult result = DialogResult.OK;
+                    if (bDisplayPrinterDialog == true)
                     {
-                        if (bDisplayPrinterDialog == true)
+                        result = printDialog1.ShowDialog();
+                    }
+
+                    // If the result is OK then print the document.
+                    if (result == DialogResult.OK)
+                    {
+                        try
                         {
-                            // 记忆打印参数
-                            if (this.PrinterInfo == null)
-                                this.PrinterInfo = new PrinterInfo();
-                            this.PrinterInfo.PrinterName = document.PrinterSettings.PrinterName;
-                            this.PrinterInfo.PaperName = document.DefaultPageSettings.PaperSize.PaperName;
-                            this.PrinterInfo.Landscape = document.DefaultPageSettings.Landscape;
+                            if (bDisplayPrinterDialog == true)
+                            {
+                                // 记忆打印参数
+                                if (this.PrinterInfo == null)
+                                    this.PrinterInfo = new PrinterInfo();
+                                this.PrinterInfo.PrinterName = document.PrinterSettings.PrinterName;
+                                this.PrinterInfo.PaperName = document.DefaultPageSettings.PaperSize.PaperName;
+                                this.PrinterInfo.Landscape = document.DefaultPageSettings.Landscape;
 
-                            SetTitle();
+                                SetTitle();
+                            }
+
+                            this.document.Print();
                         }
-
-                        this.document.Print();
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "打印过程出错: " + ex.Message;
-                        goto ERROR1;
+                        catch (Exception ex)
+                        {
+                            strError = "打印过程出错: " + ex.Message;
+                            goto ERROR1;
+                        }
                     }
                 }
+                finally
+                {
+                    this.EndPrint();
+                }
+
+                return 0;
             }
             finally
             {
@@ -296,9 +308,6 @@ namespace dp2Circulation
                 this._stop.HideProgress();
                 */
             }
-
-            this.EndPrint();
-            return 0;
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
@@ -488,6 +497,9 @@ namespace dp2Circulation
 
             if (e.Value == -1)
             {
+                Debug.Assert(e.Start <= e.End);
+                Debug.Assert(e.Start >= 0);
+
                 this.estimate.SetRange(e.Start, e.End);
 
                 _looping?.stop?.SetProgressRange(e.Start, e.End);
@@ -500,6 +512,13 @@ namespace dp2Circulation
                 if ((this.m_lCount++ % 10) == 1)
                     _looping?.stop?.SetMessage("剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(e.Value)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
 
+#if DEBUG
+                if (_looping != null && _looping.stop != null)
+                {
+                    Debug.Assert(e.Value >= _looping?.stop?.ProgressMin);
+                    Debug.Assert(e.Value <= _looping?.stop?.ProgressMax);
+                }
+#endif
                 _looping?.stop?.SetProgressValue(e.Value);
                 // this.stop.SetMessage(e.Value.ToString() + " - " + (((double)e.Value / (double)e.End) * 100).ToString() + "%");
 
@@ -617,7 +636,7 @@ namespace dp2Circulation
                 else
                     strXml = strContent;
 
-                this.textBox_cardFile_content.Text = 
+                this.textBox_cardFile_content.Text =
                     (bExceed == true ? "文件尺寸太大，下面只显示了开头部分...\r\n" : "") + strXml;
             }
             else

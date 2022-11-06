@@ -2179,6 +2179,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
         //      false   出现错误
         //      true    成功
         internal bool FillLineByBarcode(
+            Stop stop,
             LibraryChannel channel,
             string strBarcode,
             ListViewItem item)
@@ -2191,7 +2192,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
 
             // 检索册条码号，检索出其从属的书目记录路径。
             int nRet = SearchTwoRecPathByBarcode(
-                null,   // this._stop,
+                stop,   // this._stop,
                 channel,
                 strBarcode,
                 out strItemRecPath,

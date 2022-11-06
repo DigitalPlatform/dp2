@@ -306,13 +306,16 @@ context.ContentEndRow + 1 + 1, context.DistributeEndColumn + 1);
             List<EntityInfo> orders = new List<EntityInfo>();
 
             // 遍历书目记录下属的所有订购记录。按照书商进行筛选
+            /*
             LibraryChannel channel = form.GetChannel();
+            */
+            var looping = form.Looping(out LibraryChannel channel);
             try
             {
                 SubItemLoader sub_loader = new SubItemLoader();
                 sub_loader.BiblioRecPath = strBiblioRecPath;
                 sub_loader.Channel = channel;
-                sub_loader.Stop = form._stop;
+                sub_loader.Stop = looping.stop;
                 sub_loader.DbType = "order";
 
                 sub_loader.Prompt += new MessagePromptEventHandler(form.OnLoaderPrompt);
@@ -354,7 +357,10 @@ context.ContentEndRow + 1 + 1, context.DistributeEndColumn + 1);
             }
             finally
             {
+                looping.Dispose();
+                /*
                 form.ReturnChannel(channel);
+                */
             }
 
             int nOrderCount = 0;

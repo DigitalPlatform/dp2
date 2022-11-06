@@ -32,15 +32,21 @@ namespace dp2Circulation
 
             var items = new List<TransferItem>();
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在执行脚本 ...");
             _stop.BeginLoop();
+            */
+            var looping = Looping("正在执行脚本 ...",
+                "disableControl");
             try
             {
                 // 搜集信息
-                int nRet = DoLoop((string strLogFileName,
+                int nRet = DoLoop(
+                    looping.stop,
+                    (string strLogFileName,
                     string strXml,
                     bool bInCacheFile,
                     long lHint,
@@ -111,12 +117,15 @@ namespace dp2Circulation
             }
             finally
             {
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
 
                 EnableControls(true);
+                */
             }
 
             // 让用户选择需要统计的范围。根据批次号、目标位置来进行选择

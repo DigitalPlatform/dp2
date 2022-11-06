@@ -256,7 +256,9 @@ namespace dp2Circulation
 
             this.SetWindowTitle();
 
+#if SUPPORT_OLD_STOP
             this.Channel = null;    // testing
+#endif
         }
 
         public string UiState
@@ -1288,7 +1290,7 @@ bClearList);
             }
         }
 
-        #region 预约到书库相关
+#region 预约到书库相关
 
         static string[] arrive_froms = {
                 "册条码号",
@@ -1379,7 +1381,7 @@ bClearList);
         }
 #endif
 
-        #endregion
+#endregion
 
         // parameters:
         //          lSkipCount  跳过的总条数
@@ -9052,7 +9054,9 @@ MessageBoxDefaultButton.Button1);
 
                         this.listView_records.Items.Add(item);
 
-                        FillLineByBarcode(channel,
+                        FillLineByBarcode(
+                            looping.stop,
+                            channel,
                             strLine,
                             item);
 
@@ -9199,7 +9203,7 @@ MessageBoxDefaultButton.Button1);
                     // return:
                     //      false   出现错误
                     //      true    成功
-                    if (FillLineByBarcode(channel, strBarcode, item) == true)
+                    if (FillLineByBarcode(looping.stop, channel, strBarcode, item) == true)
                     {
                         this.listView_records.Items.Add(item);
                         items.Add(item);
@@ -9556,7 +9560,9 @@ MessageBoxDefaultButton.Button1);
                     {
                         this.listView_records.Items.Add(item);
 
-                        FillLineByBarcode(channel,
+                        FillLineByBarcode(
+                            looping.stop,
+                            channel,
                             strBarcode,
                             item);
 

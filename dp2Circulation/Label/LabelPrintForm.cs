@@ -8,6 +8,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Xml;
 using System.Web;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -15,7 +16,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Text;
-using System.Threading.Tasks;
 using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
@@ -74,6 +74,8 @@ namespace dp2Circulation
         /// </summary>
         public LabelPrintForm()
         {
+            this.UseLooping = true; // 2022/11/5
+
             InitializeComponent();
 
             _listviewRecords = this.listView_records;
@@ -95,7 +97,7 @@ namespace dp2Circulation
             }
         }
 
-        void prop_CompareColumn(object sender, CompareEventArgs e)
+        new void prop_CompareColumn(object sender, CompareEventArgs e)
         {
             if (e.Column.SortStyle.Name == "call_number")
             {
@@ -164,15 +166,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-#endif
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
             if (string.IsNullOrEmpty(this.textBox_labelFile_labelFilename.Text) == true)
@@ -459,31 +452,18 @@ out string strError);
             strError = "";
             strBiblio = "";
 
-            /*
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在执行脚本 ...");
-            stop.BeginLoop();
-
-            try
-            {*/
-
-            string strBiblioXml = "";   // 向服务器提供的XML记录
-            long lRet = this.Channel.GetBiblioInfo(
-                null,   // this.stop,
-                strBiblioRecPath,
-                strBiblioXml,
-                strBiblioType,
-                out strBiblio,
-                out strError);
-            return (int)lRet;
-            /*
-            }
-            finally
+            using (var looping = Looping(out LibraryChannel channel))
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-            }*/
+                string strBiblioXml = "";   // 向服务器提供的XML记录
+                long lRet = channel.GetBiblioInfo(
+                    looping.stop,   // this.stop,
+                    strBiblioRecPath,
+                    strBiblioXml,
+                    strBiblioType,
+                    out strBiblio,
+                    out strError);
+                return (int)lRet;
+            }
         }
 
         static void WriteErrorText(StreamWriter sw_error, string strText)
@@ -535,12 +515,16 @@ out string strError);
                 }
             }
 
+            /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在获取册记录和创建标签文件 ...");
             _stop.BeginLoop();
 
             EnableControls(false);
-
+            */
+            var looping = Looping(out LibraryChannel channel,
+                "正在获取册记录和创建标签文件 ...",
+                "disableControl");
             try
             {
                 string strAccessNoSource = this.AccessNoSource;
@@ -550,7 +534,7 @@ out string strError);
                 DialogResult result = System.Windows.Forms.DialogResult.No;
 #endif
 
-                _stop.SetProgressRange(0, this.listView_records.Items.Count);
+                looping.stop.SetProgressRange(0, this.listView_records.Items.Count);
 
                 for (int i = 0; i < this.listView_records.Items.Count; i++)
                 {
@@ -568,8 +552,8 @@ out string strError);
                     byte[] baTimestamp = null;
 
                     // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
-                    long lRet = Channel.GetItemInfo(
-                        _stop,
+                    long lRet = channel.GetItemInfo(
+                        looping.stop,
                         strAccessPoint,
                         "xml",   // strResultType
                         out strResult,
@@ -730,8 +714,6 @@ out string strError);
 #endif
                     }
 
-
-
                     string strText = strAccessNo.Replace("/", "\r\n");
 
                     try
@@ -747,11 +729,13 @@ out string strError);
                     nLabelCount++;
 
                     //CONTINUE:
-                    _stop.SetProgressValue(i);
+                    looping.stop.SetProgressValue(i);
                 } // end of for
             }
             finally
             {
+                looping.Dispose();
+                /*
                 EnableControls(true);
 
                 _stop.EndLoop();
@@ -759,13 +743,13 @@ out string strError);
                 _stop.Initial("");
 
                 _stop.HideProgress();
+                */
 
                 if (sw != null)
                     sw.Close();
 
                 if (sw_error != null)
                     sw_error.Close();
-
             }
 
             if (FileUtil.GetFileLength(strOutputErrorFilename) == 0
@@ -2585,7 +2569,8 @@ out string strError);
                     this.listView_records.Items.Add(item);
 
                     FillLineByBarcode(
-                        this.Channel,
+                        looping.stop,
+                        channel,
                         strBarcode,
                         item);
 
@@ -2653,186 +2638,6 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
 
         }
-
-#if NO
-        // 从记录路径文件中导入
-        void menu_importFromRecPathFile_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.Title = "请指定要打开的册记录路径文件名";
-            dlg.FileName = this.m_strUsedRecPathFilename;
-            dlg.Filter = "记录路径文件 (*.txt)|*.txt|All files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            this.m_strUsedRecPathFilename = dlg.FileName;
-
-            StreamReader sr = null;
-            string strError = "";
-
-            try
-            {
-                // TODO: 最好自动探测文件的编码方式?
-                sr = new StreamReader(dlg.FileName, Encoding.UTF8);
-            }
-            catch (Exception ex)
-            {
-                strError = "打开文件 " + dlg.FileName + " 失败: " + ex.Message;
-                goto ERROR1;
-            }
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在导入记录路径 ...");
-            stop.BeginLoop();
-
-
-            try
-            {
-                // 导入的事项是没有序的，因此需要清除已有的排序标志
-                ListViewUtil.ClearSortColumns(this.listView_records);
-
-
-                if (this.listView_records.Items.Count > 0)
-                {
-                    DialogResult result = MessageBox.Show(this,
-                        "导入前是否要清除命中记录列表中的现有的 " + this.listView_records.Items.Count.ToString() + " 行?\r\n\r\n(如果不清除，则新导入的行将追加在已有行后面)\r\n(Yes 清除；No 不清除(追加)；Cancel 放弃导入)",
-                        "LabelPrintForm",
-                        MessageBoxButtons.YesNoCancel,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button1);
-                    if (result == DialogResult.Cancel)
-                        return;
-                    if (result == DialogResult.Yes)
-                    {
-                        ClearListViewItems();
-                    }
-                }
-
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
-                    }
-
-                    string strRecPath = sr.ReadLine();
-
-                    if (strRecPath == null)
-                        break;
-
-                    // TODO: 检查路径的正确性，检查数据库是否为实体库之一
-
-                    ListViewItem item = new ListViewItem();
-                    item.Text = strRecPath;
-
-                    this.listView_records.Items.Add(item);
-                }
-
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                // stop.HideProgress();
-
-                if (sr != null)
-                    sr.Close();
-            }
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-        }
-#endif
-
-#if NO
-        // 导出选择的行中有路径的部分行 的条码栏内容 为条码号文件
-        void menu_exportBarcodeFile_Click(object sender, EventArgs e)
-        {
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要保存的条码号文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = false;
-            dlg.FileName = this.ExportBarcodeFilename;
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "条码号文件 (*.txt)|*.txt|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            this.ExportBarcodeFilename = dlg.FileName;
-
-            bool bAppend = true;
-
-            if (File.Exists(this.ExportBarcodeFilename) == true)
-            {
-                DialogResult result = MessageBox.Show(this,
-                    "条码号文件 '" + this.ExportBarcodeFilename + "' 已经存在。\r\n\r\n本次输出内容是否要追加到该文件尾部? (Yes 追加；No 覆盖；Cancel 放弃导出)",
-                    "LabelPrintForm",
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Cancel)
-                    return;
-                if (result == DialogResult.No)
-                    bAppend = false;
-                else if (result == DialogResult.Yes)
-                    bAppend = true;
-                else
-                {
-                    Debug.Assert(false, "");
-                }
-            }
-            else
-                bAppend = false;
-
-            // 创建文件
-            StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
-                bAppend,	// append
-                System.Text.Encoding.UTF8);
-            try
-            {
-                Cursor oldCursor = this.Cursor;
-                this.Cursor = Cursors.WaitCursor;
-
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
-                {
-                    if (String.IsNullOrEmpty(item.Text) == true)
-                        continue;
-                    string strBarcode = ListViewUtil.GetItemText(item, 1);
-                    if (String.IsNullOrEmpty(strBarcode) == true)
-                        continue;
-                    sw.WriteLine(strBarcode);   // BUG!!!
-                }
-
-                this.Cursor = oldCursor;
-            }
-            finally
-            {
-                if (sw != null)
-                    sw.Close();
-            }
-
-            string strExportStyle = "导出";
-            if (bAppend == true)
-                strExportStyle = "追加";
-
-            Program.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
-        }
-#endif
 
         // 导出选择的行中有路径的部分行 的条码栏内容 为条码号文件
         void menu_exportBarcodeFile_Click(object sender, EventArgs e)

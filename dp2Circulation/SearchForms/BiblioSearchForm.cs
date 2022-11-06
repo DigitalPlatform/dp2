@@ -2332,6 +2332,7 @@ Keys keyData)
 
             string strSearchID = Guid.NewGuid().ToString();
             _searchParam = new SearchParam();
+            _searchParam._looping = BeginLoop(this.DoStop, null);
             _searchParam._searchID = strSearchID;
             _searchParam._searchComplete = false;
             _searchParam._searchCount = 0;
@@ -2394,7 +2395,7 @@ Keys keyData)
                     Thread.Sleep(200);
                     if (DateTime.Now - start_time > timeout)    // 超时
                         break;
-                    if (this.Progress != null && this.Progress.State != 0)
+                    if (_searchParam._looping.Stopped)
                     {
                         strError = "用户中断";
                         return -1;
@@ -2406,11 +2407,15 @@ Keys keyData)
             finally
             {
                 _searchParam._searchID = "";
+                _searchParam._looping?.Dispose();
             }
         }
 
         class SearchParam
         {
+            // 2022/11/5
+            public Looping _looping = null;
+
             public string _searchID = "";
 
             public bool _searchComplete = false;
@@ -4400,6 +4405,8 @@ Keys keyData)
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
         + " 开始导出订购去向 Excel 文件</div>");
+            var looping = Looping(out LibraryChannel channel,
+                "正在导出订购去向 Excel 文件 ...");
             try
             {
                 IXLWorksheet sheet = doc.Worksheets.Add("订购去向分配表");
@@ -4422,10 +4429,11 @@ Keys keyData)
                 List<Order.ColumnProperty> order_title_list = Order.DistributeExcelFile.BuildList(order_column_option);
                 // 附加某些列的值列表
                 {
-                    LibraryChannel channel = this.GetChannel();
+                    // LibraryChannel channel = this.GetChannel();
                     try
                     {
-                        if (Order.ColumnProperty.FillValueList(channel,
+                        if (Order.ColumnProperty.FillValueList(
+                            channel,
                             dlg.LibraryCode,
                             order_title_list,
                             out strError) == -1)
@@ -4433,7 +4441,7 @@ Keys keyData)
                     }
                     finally
                     {
-                        this.ReturnChannel(channel);
+                        // this.ReturnChannel(channel);
                     }
                 }
 
@@ -4596,10 +4604,12 @@ Keys keyData)
                                 // 实际写入订购记录
                                 if (dlg.CreateNewOrderRecord)
                                 {
-                                    LibraryChannel channel = this.GetChannel();
+                                    // LibraryChannel channel = this.GetChannel();
                                     try
                                     {
-                                        nRet = MainForm.SaveItemRecord(channel,
+                                        nRet = MainForm.SaveItemRecord(
+                                            looping.stop,
+                                            channel,
     biblio_recpath,
     "order",
     "", // strOrderRecPath,
@@ -4617,7 +4627,7 @@ Keys keyData)
                                     }
                                     finally
                                     {
-                                        this.ReturnChannel(channel);
+                                        // this.ReturnChannel(channel);
                                     }
                                     nWriteNewOrderCount++;
                                 }
@@ -4665,6 +4675,7 @@ Keys keyData)
             }
             finally
             {
+                looping.Dispose();
                 /*
                 if (_stop != null)
                     _stop.SetMessage("");
@@ -9962,7 +9973,7 @@ message,
 
                         looping.stop.SetMessage("正在获取书目记录 " + strRecPath);
 
-                        long lRet = Channel.GetBiblioInfos(
+                        long lRet = channel.GetBiblioInfos(
                             looping.stop,
                             strRecPath,
                             "",

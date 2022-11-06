@@ -1916,6 +1916,11 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     nCompileCount++;
                 }
             }
+            catch(Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
             finally
             {
                 o.EnableControls(true);
@@ -4530,7 +4535,7 @@ out strError);
                     // return:
                     //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
                     //		0	成功
-                    long lRet = this.Channel.GetRes(
+                    long lRet = channel.GetRes(
                         looping.stop,
                         strServerFilePath,
                         strLocalFilePath,

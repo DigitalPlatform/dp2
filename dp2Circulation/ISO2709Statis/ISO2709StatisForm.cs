@@ -14,6 +14,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -26,13 +27,6 @@ namespace dp2Circulation
         // public HtmlViewerForm ErrorInfoForm = null;
 
         // bool Running = false;   // 正在执行运算
-
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        DigitalPlatform.Stop stop = null;
-#endif
 
         // public ScriptManager ScriptManager = new ScriptManager();
 
@@ -65,6 +59,8 @@ namespace dp2Circulation
         /// </summary>
         public Iso2709StatisForm()
         {
+            this.UseLooping = true;     // 2022/11/5
+
             InitializeComponent();
 
             _openMarcFileDialog = new OpenMarcFileDlg();
@@ -81,18 +77,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-
-
-
-#if NO
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
 
             ScriptManager.CfgFilePath = Path.Combine(
     Program.MainForm.UserDir,
@@ -314,6 +298,7 @@ namespace dp2Circulation
         {
             strWarning = "";
 
+            /*
             EnableControls(false);
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
@@ -322,6 +307,9 @@ namespace dp2Circulation
 
             this.Update();
             Program.MainForm.Update();
+            */
+            var looping = Looping("正在执行脚本 ...",
+                "disableControl");
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -353,7 +341,7 @@ namespace dp2Circulation
                         out objStatis,
                         out strError);
                     if (nRet == -1)
-                        goto ERROR1;
+                        return -1;
                 }
 
                 if (strInitialParamString == "test_compile")
@@ -376,7 +364,7 @@ namespace dp2Circulation
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
-                        goto ERROR1;
+                        return -1;
                     }
                 }
 
@@ -391,19 +379,20 @@ namespace dp2Circulation
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
-                        goto ERROR1;
+                        return -1;
                     }
                 }
 
                 // 循环
-                nRet = DoLoop(out strError);
+                nRet = DoLoop(looping.stop,
+                    out strError);
                 if (nRet == -1)
-                    goto ERROR1;
+                    return -1;
 
                 if (nRet == 1)
                     goto END1;  // TODO: SkipAll如何执行? 是否连OnEnd也不执行了？
 
-            END1:
+                END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
                 {
@@ -412,14 +401,11 @@ namespace dp2Circulation
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
-                        goto ERROR1;
+                        return -1;
                     }
                 }
 
                 return 0;
-
-            ERROR1:
-                return -1;
             }
             catch (Exception ex)
             {
@@ -431,13 +417,16 @@ namespace dp2Circulation
                 if (objStatis != null)
                     objStatis.FreeResources();
 
+                looping.Dispose();
+                /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
-                this.AssemblyMain = null;
-
                 EnableControls(true);
+                */
+
+                this.AssemblyMain = null;
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
@@ -466,17 +455,17 @@ namespace dp2Circulation
                                     "system.windows.forms.dll",
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                                     Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
@@ -542,7 +531,9 @@ namespace dp2Circulation
         // return:
         //      0   普通返回
         //      1   要全部中断
-        int DoLoop(out string strError)
+        int DoLoop(
+            Stop stop,
+            out string strError)
         {
             strError = "";
             // int nRet = 0;
@@ -615,27 +606,24 @@ namespace dp2Circulation
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (_stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (_stop.State != 0)
+                            DialogResult result = MessageBox.Show(this,
+                                "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
+                                "Iso2709StatisForm",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button3);
+
+                            if (result == DialogResult.Yes)
                             {
-                                DialogResult result = MessageBox.Show(this,
-                                    "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
-                                    "Iso2709StatisForm",
-                                    MessageBoxButtons.YesNoCancel,
-                                    MessageBoxIcon.Question,
-                                    MessageBoxDefaultButton.Button3);
-
-                                if (result == DialogResult.Yes)
-                                {
-                                    strError = "用户中断";
-                                    return -1;
-                                }
-                                if (result == DialogResult.No)
-                                    return 0;   // 假装loop正常结束
-
-                                _stop.Continue(); // 继续循环
+                                strError = "用户中断";
+                                return -1;
                             }
+                            if (result == DialogResult.No)
+                                return 0;   // 假装loop正常结束
+
+                            stop.Continue(); // 继续循环
                         }
 
                         // 从ISO2709文件中读入一条MARC记录
@@ -674,7 +662,7 @@ namespace dp2Circulation
                         if (nRet != 0 && nRet != 1)
                             return 0;	// 结束
 
-                        _stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
+                        stop?.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
                         this.progressBar_records.Value = (int)file.Position;
 
                         // 跳过太短的记录
@@ -957,18 +945,21 @@ namespace dp2Circulation
                 out byte[] baNewTimestamp,
                 out string strError)
         {
-            long lRet = Channel.SetBiblioInfo(
-                _stop,
-                strAction,
-                strBiblioRecPath,
-                strBiblioType,
-                strBiblio,
-                timestamp,
-                "",
-                out strOutputBiblioRecPath,
-                out baNewTimestamp,
-                out strError);
-            return (int)lRet;
+            using (var looping = Looping(out LibraryChannel channel))
+            {
+                long lRet = channel.SetBiblioInfo(
+                    looping.stop,
+                    strAction,
+                    strBiblioRecPath,
+                    strBiblioType,
+                    strBiblio,
+                    timestamp,
+                    "",
+                    out strOutputBiblioRecPath,
+                    out baNewTimestamp,
+                    out strError);
+                return (int)lRet;
+            }
         }
 
         // 
@@ -994,77 +985,78 @@ namespace dp2Circulation
         {
             strError = "";
 
-            strNewItemRecPath = "";
-            strNewXml = "";
-            baNewTimestamp = null;
-
-            EntityInfo info = new EntityInfo();
-            info.RefID = Guid.NewGuid().ToString();
-
-            string strTargetBiblioRecID = Global.GetRecordID(strBiblioRecPath);
-
-            XmlDocument item_dom = new XmlDocument();
-            try
+            using (var looping = Looping(out LibraryChannel channel))
             {
-                item_dom.LoadXml(strItemXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "XML装载到DOM时发生错误: " + ex.Message;
-                return -1;
-            }
+                strNewItemRecPath = "";
+                strNewXml = "";
+                baNewTimestamp = null;
 
-            DomUtil.SetElementText(item_dom.DocumentElement,
-                "parent", strTargetBiblioRecID);
+                EntityInfo info = new EntityInfo();
+                info.RefID = Guid.NewGuid().ToString();
 
-            info.Action = "new";
-            info.NewRecPath = "";
-            info.NewRecord = item_dom.OuterXml;
-            info.NewTimestamp = null;
-            info.Style = strStyle;
+                string strTargetBiblioRecID = Global.GetRecordID(strBiblioRecPath);
 
-            // 
-            EntityInfo[] entities = new EntityInfo[1];
-            entities[0] = info;
-
-            EntityInfo[] errorinfos = null;
-
-            long lRet = Channel.SetEntities(
-                _stop,
-                strBiblioRecPath,
-                entities,
-                out errorinfos,
-                out strError);
-            if (lRet == -1)
-                return -1;
-
-            if (errorinfos != null && errorinfos.Length > 0)
-            {
-                int nErrorCount = 0;
-                for (int i = 0; i < errorinfos.Length; i++)
+                XmlDocument item_dom = new XmlDocument();
+                try
                 {
-                    EntityInfo error = errorinfos[i];
-                    if (error.ErrorCode != ErrorCodeValue.NoError)
-                    {
-                        if (String.IsNullOrEmpty(strError) == false)
-                            strError += "; ";
-                        strError += errorinfos[0].ErrorInfo;
-                        nErrorCount++;
-                    }
-                    else
-                    {
-                        strNewItemRecPath = error.NewRecPath;
-                        strNewXml = error.NewRecord;
-                        baNewTimestamp = error.NewTimestamp;
-                    }
+                    item_dom.LoadXml(strItemXml);
                 }
-                if (nErrorCount > 0)
+                catch (Exception ex)
                 {
+                    strError = "XML装载到DOM时发生错误: " + ex.Message;
                     return -1;
                 }
-            }
 
-            return 1;
+                DomUtil.SetElementText(item_dom.DocumentElement,
+                    "parent", strTargetBiblioRecID);
+
+                info.Action = "new";
+                info.NewRecPath = "";
+                info.NewRecord = item_dom.OuterXml;
+                info.NewTimestamp = null;
+                info.Style = strStyle;
+
+                // 
+                EntityInfo[] entities = new EntityInfo[1];
+                entities[0] = info;
+
+                long lRet = channel.SetEntities(
+                    looping.stop,
+                    strBiblioRecPath,
+                    entities,
+                    out EntityInfo[] errorinfos,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (errorinfos != null && errorinfos.Length > 0)
+                {
+                    int nErrorCount = 0;
+                    for (int i = 0; i < errorinfos.Length; i++)
+                    {
+                        EntityInfo error = errorinfos[i];
+                        if (error.ErrorCode != ErrorCodeValue.NoError)
+                        {
+                            if (String.IsNullOrEmpty(strError) == false)
+                                strError += "; ";
+                            strError += errorinfos[0].ErrorInfo;
+                            nErrorCount++;
+                        }
+                        else
+                        {
+                            strNewItemRecPath = error.NewRecPath;
+                            strNewXml = error.NewRecord;
+                            baNewTimestamp = error.NewTimestamp;
+                        }
+                    }
+                    if (nErrorCount > 0)
+                    {
+                        return -1;
+                    }
+                }
+
+                return 1;
+            }
         }
 
         // 
@@ -1090,78 +1082,78 @@ namespace dp2Circulation
         {
             strError = "";
 
-            strNewOrderRecPath = "";
-            strNewXml = "";
-            baNewTimestamp = null;
-
-            EntityInfo info = new EntityInfo();
-            info.RefID = Guid.NewGuid().ToString();
-
-            string strTargetBiblioRecID = Global.GetRecordID(strBiblioRecPath);
-
-            XmlDocument item_dom = new XmlDocument();
-            try
+            using (var looping = Looping(out LibraryChannel channel))
             {
-                item_dom.LoadXml(strOrderXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "XML装载到DOM时发生错误: " + ex.Message;
-                return -1;
-            }
+                strNewOrderRecPath = "";
+                strNewXml = "";
+                baNewTimestamp = null;
 
-            DomUtil.SetElementText(item_dom.DocumentElement,
-                "parent", strTargetBiblioRecID);
+                EntityInfo info = new EntityInfo();
+                info.RefID = Guid.NewGuid().ToString();
 
-            info.Action = "new";
-            info.NewRecPath = "";
-            info.NewRecord = item_dom.OuterXml;
-            info.NewTimestamp = null;
-            info.Style = strStyle;
+                string strTargetBiblioRecID = Global.GetRecordID(strBiblioRecPath);
 
-            // 
-            EntityInfo[] orders = new EntityInfo[1];
-            orders[0] = info;
-
-            EntityInfo[] errorinfos = null;
-
-            long lRet = Channel.SetOrders(
-                _stop,
-                strBiblioRecPath,
-                orders,
-                out errorinfos,
-                out strError);
-            if (lRet == -1)
-                return -1;
-
-            if (errorinfos != null && errorinfos.Length > 0)
-            {
-                int nErrorCount = 0;
-                for (int i = 0; i < errorinfos.Length; i++)
+                XmlDocument item_dom = new XmlDocument();
+                try
                 {
-                    EntityInfo error = errorinfos[i];
-                    if (error.ErrorCode != ErrorCodeValue.NoError)
-                    {
-                        if (String.IsNullOrEmpty(strError) == false)
-                            strError += "; ";
-                        strError += errorinfos[0].ErrorInfo;
-                        nErrorCount++;
-                    }
-                    else
-                    {
-                        strNewOrderRecPath = error.NewRecPath;
-                        strNewXml = error.NewRecord;
-                        baNewTimestamp = error.NewTimestamp;
-                    }
+                    item_dom.LoadXml(strOrderXml);
                 }
-                if (nErrorCount > 0)
+                catch (Exception ex)
                 {
+                    strError = "XML装载到DOM时发生错误: " + ex.Message;
                     return -1;
                 }
+
+                DomUtil.SetElementText(item_dom.DocumentElement,
+                    "parent", strTargetBiblioRecID);
+
+                info.Action = "new";
+                info.NewRecPath = "";
+                info.NewRecord = item_dom.OuterXml;
+                info.NewTimestamp = null;
+                info.Style = strStyle;
+
+                // 
+                EntityInfo[] orders = new EntityInfo[1];
+                orders[0] = info;
+
+                long lRet = channel.SetOrders(
+                    looping.stop,
+                    strBiblioRecPath,
+                    orders,
+                    out EntityInfo[] errorinfos,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (errorinfos != null && errorinfos.Length > 0)
+                {
+                    int nErrorCount = 0;
+                    for (int i = 0; i < errorinfos.Length; i++)
+                    {
+                        EntityInfo error = errorinfos[i];
+                        if (error.ErrorCode != ErrorCodeValue.NoError)
+                        {
+                            if (String.IsNullOrEmpty(strError) == false)
+                                strError += "; ";
+                            strError += errorinfos[0].ErrorInfo;
+                            nErrorCount++;
+                        }
+                        else
+                        {
+                            strNewOrderRecPath = error.NewRecPath;
+                            strNewXml = error.NewRecord;
+                            baNewTimestamp = error.NewTimestamp;
+                        }
+                    }
+                    if (nErrorCount > 0)
+                    {
+                        return -1;
+                    }
+                }
+
+                return 1;
             }
-
-            return 1;
         }
-
     }
 }
