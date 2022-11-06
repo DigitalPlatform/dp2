@@ -18,12 +18,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class HtmlPrintForm : Form
     {
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        // public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
+        private DigitalPlatform.Stop _stop = null;
 
         AutoResetEvent eventPrintComplete = new AutoResetEvent(false);	// true : initial state is signaled 
 
@@ -58,16 +53,16 @@ namespace dp2Circulation
 
             DisplayPageInfoLine();
 
-            stop = new DigitalPlatform.Stop();
-            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+            _stop = new DigitalPlatform.Stop();
+            _stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
         }
 
         private void HtmlPrintForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // 脱离关联
+            if (_stop != null) // 脱离关联
             {
-                stop.Unregister();	// 和容器关联
-                stop = null;
+                _stop.Unregister();	// 和容器关联
+                _stop = null;
             }
         }
 
@@ -172,9 +167,9 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在打印 ...");
-            stop.BeginLoop();
+            _stop.OnStop += new StopEventHandler(this.DoStop);
+            _stop.Initial("正在打印 ...");
+            _stop.BeginLoop();
             this.Update();
             Program.MainForm.Update();
 
@@ -182,7 +177,6 @@ namespace dp2Circulation
 
             try
             {
-
                 this.webBrowser1.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webBrowser1_DocumentCompleted);
                 this.eventPrintComplete.Reset();
 
@@ -190,22 +184,16 @@ namespace dp2Circulation
 
                 for (int c = 0; c < nCopies; c++)
                 {
-
                     // 打印表格各页
                     for (int i = 0; i < this.Filenames.Count; i++)
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-
-                        if (stop != null)
+                        if (_stop != null && _stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                goto ERROR1;
-                            }
+                            strError = "用户中断";
+                            goto ERROR1;
                         }
-
 
                         if (rl == null
                             || rl.IsInRange(i + 1, false) == true)
@@ -213,7 +201,7 @@ namespace dp2Circulation
                             // MessageBox.Show(this, "once");
                             nPrinted++;
 
-                            stop.SetMessage("正在打印第 " + (i + 1).ToString() + " 页...");
+                            _stop.SetMessage("正在打印第 " + (i + 1).ToString() + " 页...");
 
                             this.m_nCurrenPageNo = i;
 
@@ -234,17 +222,17 @@ namespace dp2Circulation
             }
             finally
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("打印完成。共打印 " + nPrinted.ToString() + "页。");
+                _stop.EndLoop();
+                _stop.OnStop -= new StopEventHandler(this.DoStop);
+                _stop.Initial("打印完成。共打印 " + nPrinted.ToString() + "页。");
 
                 EnableControls(true);
             }
 
             if (nPrinted == 0)
             {
-                MessageBox.Show(this, "您所指定的打印页码范围 '" 
-                    +this.textBox_printRange.Text + "' 没有找到匹配的页。");
+                MessageBox.Show(this, "您所指定的打印页码范围 '"
+                    + this.textBox_printRange.Text + "' 没有找到匹配的页。");
             }
 
             return;
@@ -309,7 +297,7 @@ namespace dp2Circulation
 
         void DisplayPageInfoLine()
         {
-            this.label_pageInfo.Text = (this.m_nCurrenPageNo + 1).ToString() 
+            this.label_pageInfo.Text = (this.m_nCurrenPageNo + 1).ToString()
                 + " / "
                 + (this.Filenames == null ? "0" : this.Filenames.Count.ToString());
         }

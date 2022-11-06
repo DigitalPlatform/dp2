@@ -709,7 +709,7 @@ this.InfoDlgOpacity,
                             goto ERROR1;
 
                         long lRet = channel.UrgentRecover(
-                            looping.stop,
+                            looping.Progress,
                             strXml,
                             out strError);
                         if (lRet == -1)

@@ -1821,7 +1821,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             if (stop != null)
                 MainForm.stopManager.Active(this.stop);
             */
-            MainForm.stopManager.Active(this.TopLooping?.stop);
+            MainForm.stopManager.Active(this.TopLooping?.Progress);
 
             MainForm.SetMenuItemState();
 

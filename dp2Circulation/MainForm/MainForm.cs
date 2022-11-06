@@ -4230,7 +4230,7 @@ Stack:
             {
                 // channel.Timeout = new TimeSpan(0, 0, 10);
                 long lRet = channel.GetValueTable(
-                    looping.stop,
+                    looping.Progress,
                     strTableName,
                     strDbName,
                     out values,
@@ -4302,7 +4302,7 @@ Stack:
                 // form.MainForm = this;
                 if (bMinimized == true)
                     form.WindowState = FormWindowState.Minimized;
-                form.Show();
+                form.Show();    // 无模式对话框
 
                 if (top != null && bMinimized == true)
                 {
@@ -4962,7 +4962,7 @@ barcodes[0],
             try
             {
                 long lRet = channel.Search(
-                    looping.stop,
+                    looping.Progress,
                     strQueryXml,
                     "default",
                     "",
@@ -4977,7 +4977,7 @@ barcodes[0],
                 {
                     DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         "default",
                         0,
                         1,
@@ -5055,7 +5055,7 @@ barcodes[0],
                 string strOutputPath = "";
                 // 保存Xml记录。包装版本。用于保存文本类型的资源。
                 lRet = channel.WriteRes(
-                    looping.stop,
+                    looping.Progress,
                     strRecPath,
                     dom.DocumentElement.OuterXml,
                     true,
@@ -5223,7 +5223,7 @@ barcodes[0],
             try
             {
                 return VerifyBarcode(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strLibraryCodeList,
                     strBarcode,
@@ -5873,11 +5873,11 @@ out strError);
                 */
                 var looping = Looping(out LibraryChannel channel);
                 if (bDisplayProgress == true)
-                    looping.stop.SetMessage("正在获得读者信息 '" + strPatronBarcode + "'...");
+                    looping.Progress.SetMessage("正在获得读者信息 '" + strPatronBarcode + "'...");
                 try
                 {
                     long lRet = channel.GetReaderInfo(
-                        looping.stop,
+                        looping.Progress,
                         strPatronBarcode,
                         "xml",
                         out string[] results,
@@ -6007,7 +6007,7 @@ out strError);
             */
             var looping = Looping(out LibraryChannel channel);
             if (bDisplayProgress == true)
-                looping.stop.SetMessage("MainForm正在获得书目摘要 '" + strItemBarcodeUnionPath + "'...");
+                looping.Progress.SetMessage("MainForm正在获得书目摘要 '" + strItemBarcodeUnionPath + "'...");
             try
             {
                 string strBiblioRecPath = "";
@@ -6017,7 +6017,7 @@ out strError);
                 try
                 {
                     long lRet = channel.GetBiblioSummary(
-                        looping.stop,
+                        looping.Progress,
                         strItemBarcode,
                         strConfirmItemRecPath,
                         null,
@@ -6892,11 +6892,13 @@ out strError);
         {
             using (var looping = Looping(null))
             {
-                DeleteAllTempFiles(looping.stop, strDataDir);
+                DeleteAllTempFiles(looping.Progress, strDataDir);
             }
         }
 
-        void DeleteAllTempFiles(Stop stop, string strDataDir)
+        void DeleteAllTempFiles(
+            Stop stop, 
+            string strDataDir)
         {
             // 出让控制权
             Application.DoEvents();
@@ -6926,7 +6928,7 @@ out strError);
                 if (strFileName.Length > 0
                     && strFileName[0] == '~')
                 {
-                    stop.SetMessage("正在删除 " + fis[i].FullName);
+                    stop?.SetMessage("正在删除 " + fis[i].FullName);
                     try
                     {
                         File.Delete(fis[i].FullName);
@@ -8856,7 +8858,7 @@ Keys keyData)
                             try
                             {
                                 nRet = EntityRegisterWizard.DetectAccess(channel,
-                    looping.stop,
+                    looping.Progress,
                     prop.DbName,
                     prop.Syntax,
                     out strBiblioAccess,
@@ -9441,7 +9443,7 @@ Keys keyData)
             */
             var looping = Looping("正在打包事件日志信息 ...",
                 "disableControl");
-            var temp_stop = looping.stop;
+            var temp_stop = looping.Progress;
             try
             {
                 string strTempDir = Path.Combine(this.UserTempDir, "~zip_events");
@@ -9807,7 +9809,7 @@ Keys keyData)
                         if (string.IsNullOrEmpty(strOrderRecPath) == false)
                         {
                             long lRet = channel.GetRecord(
-                                looping.stop,
+                                looping.Progress,
                                 strOrderRecPath,
                                 out timestamp,
                                 out strOldXml,
@@ -9924,7 +9926,7 @@ Keys keyData)
                             throw new Exception("(订购记录 '" + strOrderRecPath + "') " + strError);
 
                         nRet = SaveItemRecord(
-                            looping.stop,
+                            looping.Progress,
                             channel,
         strBiblioRecPath,
 "order",

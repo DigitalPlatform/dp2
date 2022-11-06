@@ -106,7 +106,7 @@ namespace dp2Circulation
 
             try
             {
-                return DoTextLines(looping.stop,
+                return DoTextLines(looping.Progress,
                     channel);
             }
             finally
@@ -141,7 +141,7 @@ namespace dp2Circulation
                 "disableControl");
             try
             {
-                DoFileName(looping.stop,
+                DoFileName(looping.Progress,
                     channel);
             }
             finally
@@ -175,11 +175,11 @@ namespace dp2Circulation
             {
                 if (this.tabControl_input.SelectedTab == this.tabPage_paths)
                 {
-                    DoTextLines(looping.stop, channel);
+                    DoTextLines(looping.Progress, channel);
                 }
                 else if (this.tabControl_input.SelectedTab == this.tabPage_recpathFile)
                 {
-                    DoFileName(looping.stop, channel);
+                    DoFileName(looping.Progress, channel);
                 }
 
             }

@@ -108,7 +108,7 @@ namespace dp2Circulation
             this.comboBox_from.Location = new System.Drawing.Point(156, 87);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(385, 29);
+            this.comboBox_from.Size = new System.Drawing.Size(439, 29);
             this.comboBox_from.TabIndex = 9;
             this.comboBox_from.Text = "册条码";
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
@@ -198,7 +198,7 @@ namespace dp2Circulation
             this.comboBox_entityDbName.Name = "comboBox_entityDbName";
             this.comboBox_entityDbName.Padding = new System.Windows.Forms.Padding(4);
             this.comboBox_entityDbName.ReadOnly = false;
-            this.comboBox_entityDbName.Size = new System.Drawing.Size(389, 32);
+            this.comboBox_entityDbName.Size = new System.Drawing.Size(443, 32);
             this.comboBox_entityDbName.TabIndex = 4;
             this.comboBox_entityDbName.DropDown += new System.EventHandler(this.comboBox_entityDbName_DropDown);
             this.comboBox_entityDbName.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.comboBox_entityDbName_ItemChecked);
@@ -267,7 +267,7 @@ namespace dp2Circulation
             this.comboBox_matchStyle.Location = new System.Drawing.Point(156, 126);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(385, 29);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(439, 29);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "精确一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -287,11 +287,11 @@ namespace dp2Circulation
             this.toolStripSeparator3,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(547, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(601, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.Padding = new System.Windows.Forms.Padding(0, 0, 4, 0);
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(262, 38);
+            this.toolStrip_search.Size = new System.Drawing.Size(208, 38);
             this.toolStrip_search.TabIndex = 12;
             this.toolStrip_search.Text = "检索";
             // 
@@ -434,7 +434,7 @@ namespace dp2Circulation
             this.tabComboBox_queryWord.Location = new System.Drawing.Point(156, 5);
             this.tabComboBox_queryWord.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.tabComboBox_queryWord.Name = "tabComboBox_queryWord";
-            this.tabComboBox_queryWord.Size = new System.Drawing.Size(385, 32);
+            this.tabComboBox_queryWord.Size = new System.Drawing.Size(439, 32);
             this.tabComboBox_queryWord.TabIndex = 13;
             this.tabComboBox_queryWord.DropDown += new System.EventHandler(this.tabComboBox_queryWord_DropDown);
             this.tabComboBox_queryWord.Enter += new System.EventHandler(this.tabComboBox_queryWord_Enter);
@@ -475,6 +475,7 @@ namespace dp2Circulation
             this.listView_records.Location = new System.Drawing.Point(0, 0);
             this.listView_records.Margin = new System.Windows.Forms.Padding(0);
             this.listView_records.Name = "listView_records";
+            this.listView_records.ShowItemToolTips = true;
             this.listView_records.Size = new System.Drawing.Size(829, 388);
             this.listView_records.TabIndex = 10;
             this.listView_records.UseCompatibleStateImageBehavior = false;

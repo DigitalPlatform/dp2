@@ -234,7 +234,7 @@ namespace dp2Circulation
                                 //      0   没有必要处理
                                 //      1   已经处理
                                 int ret = CheckReaderRecord(
-                                    looping.stop,
+                                    looping.Progress,
                                     channel,
                                         record.Path,
                                         record.RecordBody.Xml,
@@ -394,7 +394,7 @@ namespace dp2Circulation
 
                 if (hitcount > 0)
                 {
-                    looping.stop.SetProgressRange(0, hitcount);
+                    looping.Progress.SetProgressRange(0, hitcount);
 
                     // 把超时时间改短一点
                     var timeout0 = channel.Timeout;
@@ -403,7 +403,7 @@ namespace dp2Circulation
                     {
                         // 获取和存储记录
                         ResultSetLoader loader = new ResultSetLoader(channel,
-            looping.stop,
+            looping.Progress,
             resultset_name,
             $"id,xml,timestamp",
             "zh");
@@ -419,13 +419,13 @@ namespace dp2Circulation
                                     ErrorInfo = "用户中断"
                                 };
 
-                            looping.stop.SetMessage($"正在处理 {record.Path} ...");
+                            looping.Progress.SetMessage($"正在处理 {record.Path} ...");
 
                             processRecord?.Invoke(channel, record);
 
                             i++;
 
-                            looping.stop.SetProgressValue(i);
+                            looping.Progress.SetProgressValue(i);
                         }
                     }
                     finally
@@ -1679,7 +1679,7 @@ false);
                                     //      0   没有找到
                                     //      >=1 命中的条数
                                     int nRet = GetItemInfo(
-                                        looping.stop,
+                                        looping.Progress,
                                         channel,
                                         "@path:" + record.Path,
                                         out xml,
@@ -1704,7 +1704,7 @@ false);
                                 // parameters:
                                 //      bAutoRepair 是否同时自动修复
                                 int ret = CheckItemRecord(
-                                    looping.stop,
+                                    looping.Progress,
                                     channel,
                                         record.Path,
                                         xml,  // record.RecordBody.Xml,
@@ -1958,7 +1958,7 @@ false);
 
                     if (hitcount > 0)
                     {
-                        looping.stop.SetProgressRange(0, hitcount);
+                        looping.Progress.SetProgressRange(0, hitcount);
 
                         // string strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/uid";
 
@@ -1971,7 +1971,7 @@ false);
 
                             // 获取和存储记录
                             ResultSetLoader loader = new ResultSetLoader(channel,
-                looping.stop,
+                looping.Progress,
                 resultset_name,
                 format, //$"id,xml",
                 "zh");
@@ -1999,7 +1999,7 @@ false);
                                     };
                                 }
 
-                                looping.stop.SetMessage($"正在处理 {record.Path} ... (实体库 {db_index + 1}/{item_dbnames.Count})");
+                                looping.Progress.SetMessage($"正在处理 {record.Path} ... (实体库 {db_index + 1}/{item_dbnames.Count})");
 
                                 // 
                                 processRecord?.Invoke(channel, record);
@@ -2007,7 +2007,7 @@ false);
                                 i++;
                                 succeed_count++;
 
-                                looping.stop.SetProgressValue(i);
+                                looping.Progress.SetProgressValue(i);
                             }
                         }
                         finally
@@ -3080,7 +3080,7 @@ out strError);
             try
             {
             REDO_GET:
-                long lRet = channel.GetReaderInfo(looping.stop,
+                long lRet = channel.GetReaderInfo(looping.Progress,
         strReaderBarcode,
         "xml",
         out string[] results,
@@ -3115,7 +3115,7 @@ out strError);
                 //      -1  错误。可能有部分册已经修复成功
                 //      其他  共修复多少个册事项
                 return RepairAllErrorFromReaderSide(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strReaderRecPath,
                     strReaderXml,
@@ -3265,7 +3265,7 @@ out strError);
                 string strOutputReaderBarcode = "";
 
                 long lRet = channel.RepairBorrowInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,  // "repairreaderside",
                     strReaderBarcode,
                     strItemBarcode,
@@ -3302,7 +3302,7 @@ out strError);
                                 aDupPath,
                                 "因册条码号发生重复，修复操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
                                 channel0,    // Program.MainForm.Channel,
-                                looping_nest.stop,
+                                looping_nest.Progress,
                                 out strErrorNew);
                             if (nRet == -1)
                             {
@@ -3384,7 +3384,7 @@ out strError);
                 REDO_GET:
                     // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                     long lRet = channel.GetItemInfo(
-                        looping.stop,
+                        looping.Progress,
                         strItemBarcode,
                         "xml",
                         out string strItemXml,
@@ -4063,7 +4063,7 @@ out strError);
             {
             REDO_GET:
                 // 根据册条码号获得册记录
-                long lRet = channel.GetItemInfo(looping.stop,
+                long lRet = channel.GetItemInfo(looping.Progress,
                     strItemBarcode,
                     "xml",
                     out string xml,
@@ -4092,7 +4092,7 @@ out strError);
                 }
 
                 int nRet = CheckItemRecord(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     recpath,
                     xml,
@@ -4240,7 +4240,7 @@ out strError);
             {
             REDO_GET:
                 // 根据证条码号获得读者记录 XML
-                long lRet = channel.GetReaderInfo(looping.stop,
+                long lRet = channel.GetReaderInfo(looping.Progress,
                     strReaderBarcode,
                     "xml,recpaths",
                     out string[] results,
@@ -4266,7 +4266,7 @@ out strError);
                 string recpath = results[1];
 
                 nRet = CheckReaderRecord(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     recpath,
                     xml,

@@ -261,7 +261,7 @@ namespace dp2Circulation
                 string strQueryWord = GetBiblioQueryString();
 
                 string strQueryXml = "";
-                long lRet = channel.SearchBiblio(looping.stop,
+                long lRet = channel.SearchBiblio(looping.Progress,
                     this.GetBiblioDbNames(),    // "<全部>",
                     strQueryWord,   // this.textBox_queryWord.Text,
                     1000,
@@ -305,10 +305,10 @@ namespace dp2Circulation
                         break;  // 已经装入的还在
                     }
 
-                    looping.stop.SetMessage("正在装入书目记录ID " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.Progress.SetMessage("正在装入书目记录ID " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         null,   // strResultSetName
                         lStart,
                         lPerCount,
@@ -349,7 +349,7 @@ namespace dp2Circulation
                 }
 
                 this.SetFloatMessage("waiting", "正在装入册记录 ...");
-                looping.stop.SetProgressRange(0, this._biblioRecPaths.Count);
+                looping.Progress.SetProgressRange(0, this._biblioRecPaths.Count);
                 // 将每条书目记录下属的册记录装入
                 int i = 0;
                 foreach (string strBiblioRecPath in this._biblioRecPaths)
@@ -360,13 +360,13 @@ namespace dp2Circulation
                         break;
 
                     nRet = LoadBiblioSubItems(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         strBiblioRecPath,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
             }

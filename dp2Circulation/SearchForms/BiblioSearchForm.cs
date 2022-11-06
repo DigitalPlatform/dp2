@@ -809,7 +809,7 @@ Keys keyData)
                     goto ERROR1;
 
                 channel.Timeout = new TimeSpan(0, 5, 0);
-                long lRet = channel.Search(looping.stop,
+                long lRet = channel.Search(looping.Progress,
                     strQueryXml,
                     "default",
                     strOutputStyle,
@@ -823,8 +823,8 @@ Keys keyData)
 
                 this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录";
 
-                looping.stop.SetProgressRange(0, lHitCount);
-                looping.stop.Style = StopStyle.EnableHalfStop;
+                looping.Progress.SetProgressRange(0, lHitCount);
+                looping.Progress.Style = StopStyle.EnableHalfStop;
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
@@ -845,7 +845,7 @@ Keys keyData)
                             return;
                         }
 
-                        looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                        looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                         bool bTempQuickLoad = bQuickLoad;
 
@@ -871,7 +871,7 @@ Keys keyData)
                         }
 
                         lRet = channel.GetSearchResult(
-                            looping.stop,
+                            looping.Progress,
                             null,   // strResultSetName
                             lStart,
                             lPerCount,
@@ -950,7 +950,7 @@ Keys keyData)
                             break;
 
                         this.m_lLoaded = lStart;
-                        looping.stop.SetProgressValue(lStart);
+                        looping.Progress.SetProgressValue(lStart);
                     }
                 }
 
@@ -1448,9 +1448,9 @@ Keys keyData)
 
                 if (multiline/*query_words.Count > 1*/)
                 {
-                    looping.stop.SetProgressRange(0, query_words.Count);
+                    looping.Progress.SetProgressRange(0, query_words.Count);
                 }
-                looping.stop.Style = StopStyle.EnableHalfStop;
+                looping.Progress.Style = StopStyle.EnableHalfStop;
 
                 bool zserver_loaded = false;
 
@@ -1467,14 +1467,14 @@ Keys keyData)
 
                     if (multiline/*query_words.Count > 1*/)
                     {
-                        looping.stop?.SetProgressValue(word_index);
-                        looping.stop?.SetMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_words.Count})...");
+                        looping.Progress?.SetProgressValue(word_index);
+                        looping.Progress?.SetMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_words.Count})...");
 
                         this.ShowMessage($"正在检索 '{query_word}' ({word_index + 1}/{query_words.Count})...");
                     }
                     else
                     {
-                        looping.stop?.SetMessage($"正在检索 '{query_word}' ...");
+                        looping.Progress?.SetMessage($"正在检索 '{query_word}' ...");
                         this.ShowMessage($"正在检索 '{query_word}' ...");
                     }
 
@@ -1506,7 +1506,7 @@ Keys keyData)
                     if (multiline)
                         max_count = MultilineMaxSearchResultCount;
 
-                    long lRet = channel.SearchBiblio(looping.stop,
+                    long lRet = channel.SearchBiblio(looping.Progress,
                         this.checkedComboBox_biblioDbNames.Text,
                         query_word, // this.textBox_queryWord.Text,
                         max_count,  // this.MaxSearchResultCount,  // 1000
@@ -1556,8 +1556,8 @@ Keys keyData)
 
                     if (multiline == false/*query_words.Count <= 1*/)
                     {
-                        looping.stop.SetProgressRange(0, lHitCount);
-                        looping.stop.Style = StopStyle.EnableHalfStop;
+                        looping.Progress.SetProgressRange(0, lHitCount);
+                        looping.Progress.Style = StopStyle.EnableHalfStop;
                     }
 
                     /*
@@ -1580,7 +1580,7 @@ Keys keyData)
                         // TODO: 改短一点
                         channel.Timeout = TimeSpan.FromMinutes(15);
                         ResultSetLoader loader = new ResultSetLoader(channel,
-    looping.stop,
+    looping.Progress,
     null,
     strBrowseStyle);
                         if (multiline)
@@ -1594,8 +1594,8 @@ Keys keyData)
 
                             if (multiline == false/*query_words.Count <= 1*/)
                             {
-                                looping.stop.SetMessage("正在装入浏览信息 " + (e1.Start + 1).ToString() + " - " + (e1.Start + e1.PerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
-                                looping.stop.SetProgressValue(e1.Start);
+                                looping.Progress.SetMessage("正在装入浏览信息 " + (e1.Start + 1).ToString() + " - " + (e1.Start + e1.PerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                                looping.Progress.SetProgressValue(e1.Start);
                             }
 
                             // 允许中途(通过感知 Shift 键)改变详略级别
@@ -3213,7 +3213,7 @@ Keys keyData)
                     if (_zsearcher.InSearching == false)
                         break;
 
-                    looping.stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
+                    looping.Progress.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
 
                     var present_result = await Z3950Searcher.FetchRecords(channel,
                         all ? 50 : 10);
@@ -3847,10 +3847,10 @@ Keys keyData)
                 }
                 */
 
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
 
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -3887,7 +3887,7 @@ Keys keyData)
                     }
 
                     nCount++;
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
 
                 return nCount;
@@ -4088,7 +4088,7 @@ Keys keyData)
             this.EnableControls(false);
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -4099,7 +4099,7 @@ Keys keyData)
                     items.Add(item);
                 }
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -4188,7 +4188,7 @@ Keys keyData)
                     }
 
                     nCount++;
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
 
                 return nCount;
@@ -4608,7 +4608,7 @@ Keys keyData)
                                     try
                                     {
                                         nRet = MainForm.SaveItemRecord(
-                                            looping.stop,
+                                            looping.Progress,
                                             channel,
     biblio_recpath,
     "order",
@@ -4787,7 +4787,6 @@ Keys keyData)
                     _stop.SetMessage("");
                 */
 
-
                 this.ClearMessage();
 
                 if (doc != null)
@@ -4877,7 +4876,7 @@ Keys keyData)
             try
             {
                 int nRet = ClosedXmlUtil.ExportToExcel(
-                    looping.stop,
+                    looping.Progress,
                     items,
                     out strError);
                 if (nRet == -1)
@@ -5131,7 +5130,7 @@ Keys keyData)
             this.listView_records.Enabled = false;
             try
             {
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
                     if (looping.Stopped)
@@ -5144,7 +5143,7 @@ Keys keyData)
                     string strRecPath = item.Text;
                     if (string.IsNullOrEmpty(strRecPath) == true)
                     {
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetProgressValue(i);
                         goto CONTINUE;
                     }
 
@@ -5161,12 +5160,12 @@ Keys keyData)
                         goto CONTINUE;
 
 
-                    looping.stop.SetMessage("正在保存书目记录 " + strRecPath);
+                    looping.Progress.SetMessage("正在保存书目记录 " + strRecPath);
 
                     int nRedoCount = 0;
                 REDO_SAVE:
                     long lRet = channel.SetBiblioInfo(
-                        looping.stop,
+                        looping.Progress,
                         "change",
                         strRecPath,
                         "xml",
@@ -5194,7 +5193,7 @@ Keys keyData)
                             // 重新装载书目记录到 OldXml
                             // byte[] baTimestamp = null;
                             lRet = channel.GetBiblioInfos(
-                                looping.stop,
+                                looping.Progress,
                                 strRecPath,
                                 "",
                                 new string[] { "xml" },   // formats
@@ -5264,7 +5263,7 @@ Keys keyData)
                         // 重新装载书目记录到 OldXml
                         // byte[] baTimestamp = null;
                         lRet = channel.GetBiblioInfos(
-                            looping.stop,
+                            looping.Progress,
                             strRecPath,
                             "",
                             new string[] { "xml" },   // formats
@@ -5303,7 +5302,7 @@ Keys keyData)
                     Debug.Assert(this.m_nChangedCount >= 0, "");
 
                 CONTINUE:
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                 }
             }
             finally
@@ -5388,12 +5387,12 @@ Keys keyData)
                     ClearOneChange(item, true);
                 }
 
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, items.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, items.Count);
 
                 BrowseLoader loader = new BrowseLoader();
                 loader.Channel = channel;
-                loader.Stop = looping.stop;
+                loader.Stop = looping.Progress;
                 loader.RecPaths = recpaths;
                 loader.Format = "id,cols";
 
@@ -5410,10 +5409,10 @@ Keys keyData)
 
                     Debug.Assert(record.Path == recpaths[i], "");
 
-                    if (looping.stop != null)
+                    if (looping.Progress != null)
                     {
-                        looping.stop.SetMessage("正在刷新浏览行 " + record.Path + " ...");
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetMessage("正在刷新浏览行 " + record.Path + " ...");
+                        looping.Progress.SetProgressValue(i);
                     }
 
                     // TODO: 注意处理好 record.RecordBody.Result 带有出错信息的情形
@@ -5609,81 +5608,6 @@ Keys keyData)
 
             return false;
         }
-
-#if NO
-        // 刷新所选择的行。也就是重新从数据库中装载浏览列
-        void menu_refreshSelectedItems_Click(object sender, EventArgs e)
-        {
-            string strError = "";
-            int nRet = 0;
-
-            if (this.listView_records.SelectedItems.Count == 0)
-            {
-                strError = "尚未选择要刷新浏览列的事项";
-                goto ERROR1;
-            }
-
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在刷新浏览列 ...");
-            stop.BeginLoop();
-
-            this.EnableControls(false);
-            try
-            {
-                if (stop != null)
-                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
-                int i = 0;
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null
-                        && stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        goto ERROR1;
-                    }
-
-                    if (string.IsNullOrEmpty(item.Text) == true)
-                        continue;
-
-                    if (stop != null)
-                    {
-                        stop.SetMessage("正在刷新浏览行 " + item.Text + " ...");
-                        stop.SetProgressValue(i++);
-                    }
-                    nRet = RefreshOneBrowseLine(item,
-    out strError);
-                    if (nRet == -1)
-                    {
-                        DialogResult result = MessageBox.Show(this,
-                            "刷新浏览内容时出错: " + strError + "。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
-                            "BiblioSearchForm",
-                            MessageBoxButtons.OKCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        if (result == System.Windows.Forms.DialogResult.Cancel)
-                            break;
-                    }
-                }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
-
-                this.EnableControls(true);
-            }
-
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-        }
-#endif
 
         // 在一个新开的书目查询窗内检索key
         async void listView_searchKeysAtNewWindow_Click(object sender, EventArgs e)
@@ -5885,8 +5809,8 @@ Keys keyData)
             this.listView_records.Enabled = false;
             try
             {
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 {
                     host.MainForm = Program.MainForm;
@@ -5941,7 +5865,7 @@ Keys keyData)
                 }
 
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     // items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable
                     this.m_biblioTable);
@@ -5959,7 +5883,7 @@ Keys keyData)
                         goto ERROR1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -6123,283 +6047,6 @@ Keys keyData)
             }
         }
 
-#if NO
-        void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
-        {
-            string strError = "";
-            int nRet = 0;
-
-            if (this.listView_records.SelectedItems.Count == 0)
-            {
-                strError = "尚未选择要执行 MarcQuery 脚本的事项";
-                goto ERROR1;
-            }
-
-            // 书目信息缓存
-            // 如果已经初始化，则保持
-            if (this.m_biblioTable == null)
-                this.m_biblioTable = new Hashtable();
-
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.Title = "请指定 MarcQuery 脚本文件";
-            dlg.FileName = this.m_strUsedMarcQueryFilename;
-            dlg.Filter = "MarcQuery 脚本文件 (*.cs)|*.cs|All files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            this.m_strUsedMarcQueryFilename = dlg.FileName;
-
-            MarcQueryHost host = null;
-            Assembly assembly = null;
-
-            nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
-                out assembly,
-                out host,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在针对书目记录执行 MarcQuery 脚本 ...");
-            stop.BeginLoop();
-
-            this.EnableControls(false);
-
-            this.listView_records.Enabled = false;
-            try
-            {
-                if (stop != null)
-                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
-
-                int i = 0;
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null
-                        && stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        goto ERROR1;
-                    }
-
-                    string strRecPath = item.Text;
-
-                    if (string.IsNullOrEmpty(strRecPath) == true)
-                        continue;
-
-                    if (stop != null)
-                    {
-                        stop.SetMessage("正在获取书目记录 " + strRecPath);
-                        stop.SetProgressValue(i);
-                    }
-
-                    BiblioInfo info = null;
-                    nRet = GetBiblioInfo(
-                        false,
-                        item,
-                        out info,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    if (info == null)
-                        continue;
-#if NO
-                    string[] results = null;
-                    byte[] baTimestamp = null;
-                    // 获得书目记录
-                    long lRet = Channel.GetBiblioInfos(
-                        stop,
-                        strRecPath,
-                    "",
-                        new string[] { "xml" },   // formats
-                        out results,
-                        out baTimestamp,
-                        out strError);
-                    if (lRet == 0)
-                        goto ERROR1;
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (results == null || results.Length == 0)
-                    {
-                        strError = "results error";
-                        goto ERROR1;
-                    }
-
-                    string strXml = results[0];
-
-                    XmlDocument domXmlFragment = null;
-
-                    // 装载书目以外的其它XML片断
-                    nRet = LoadXmlFragment(strXml,
-            out domXmlFragment,
-            out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    string strMARC = "";
-                    string strMarcSyntax = "";
-                    // 将XML格式转换为MARC格式
-                    // 自动从数据记录中获得MARC语法
-                    nRet = MarcUtil.Xml2Marc(strXml,
-                        true,
-                        null,
-                        out strMarcSyntax,
-                        out strMARC,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "XML转换到MARC记录时出错: " + strError;
-                        goto ERROR1;
-                    }
-
-                    // 存储所获得书目记录 XML
-                    BiblioInfo info = null;
-                    if (this.m_biblioTable != null)
-                    {
-                        info = (BiblioInfo)this.m_biblioTable[strRecPath];
-                        if (info == null)
-                        {
-                            info = new BiblioInfo();
-                            info.RecPath = strRecPath;
-                            this.m_biblioTable[strRecPath] = info;
-                        }
-
-                        info.OldXml = strXml;
-                        info.NewXml = "";
-                    }
-#endif
-                    string strMARC = "";
-                    string strMarcSyntax = "";
-                    // 将XML格式转换为MARC格式
-                    // 自动从数据记录中获得MARC语法
-                    nRet = MarcUtil.Xml2Marc(info.OldXml,
-                        true,
-                        null,
-                        out strMarcSyntax,
-                        out strMARC,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "XML转换到MARC记录时出错: " + strError;
-                        goto ERROR1;
-                    }
-
-                    host.MainForm = Program.MainForm;
-                    host.MarcRecord = new MarcRecord(strMARC);
-                    host.MarcSyntax = strMarcSyntax;
-                    host.Changed = false;
-
-                    host.Main();
-
-                    if (host.Changed == true)
-                    {
-                        string strXml = info.OldXml;
-                        nRet = MarcUtil.Marc2XmlEx(host.MarcRecord.Text,
-                            strMarcSyntax,
-                            ref strXml,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-
-#if NO
-                        // 合成其它XML片断
-                        if (domXmlFragment != null
-                            && string.IsNullOrEmpty(domXmlFragment.DocumentElement.InnerXml) == false)
-                        {
-                            XmlDocumentFragment fragment = domMarc.CreateDocumentFragment();
-                            try
-                            {
-                                fragment.InnerXml = domXmlFragment.DocumentElement.InnerXml;
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message;
-                                goto ERROR1;
-                            }
-
-                            domMarc.DocumentElement.AppendChild(fragment);
-                        }
-
-
-                        strXml = domMarc.OuterXml;
-#endif
-
-                        if (info != null)
-                        {
-                            if (string.IsNullOrEmpty(info.NewXml) == true)
-                                this.m_nChangedCount++;
-                            info.NewXml = strXml;
-                        }
-
-                        item.BackColor = SystemColors.Info;
-                        item.ForeColor = SystemColors.InfoText;
-#if NO
-                        byte[] baNewTimestamp = null;
-                        string strOutputPath = "";
-                        lRet = Channel.SetBiblioInfo(
-                            stop,
-                            "change",
-                            strRecPath,
-                            "xml",
-                            strXml,
-                            baTimestamp,
-                            "",
-                            out strOutputPath,
-                            out baNewTimestamp,
-                            out strError);
-                        if (lRet == -1)
-                            goto ERROR1;
-#endif
-                    }
-
-                    Program.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(strRecPath) + "</p>");
-
-                    // 显示为工作单形式
-
-#if NO
-                    if (nRet == -1)
-                    {
-                        DialogResult result = MessageBox.Show(this,
-        "刷新浏览内容时出错: " + strError + "。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
-        "BiblioSearchForm",
-        MessageBoxButtons.OKCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
-                        if (result == System.Windows.Forms.DialogResult.Cancel)
-                            break;
-                    }
-#endif
-                    i++;
-                }
-            }
-            finally
-            {
-                this.listView_records.Enabled = true;
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
-
-                this.EnableControls(true);
-            }
-
-            DoViewComment(false);
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-        }
-#endif
-
-
-
         // 准备脚本环境
         // TODO: 检测同名的 .ref 文件
         int PrepareMarcQuery(string strCsFileName,
@@ -6553,8 +6200,8 @@ Keys keyData)
             this.listView_records.Enabled = false;
             try
             {
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -6566,7 +6213,7 @@ Keys keyData)
                 }
 
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     // items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable
                     this.m_biblioTable);
@@ -6876,8 +6523,8 @@ Keys keyData)
                         return;
                 }
 
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -6893,10 +6540,10 @@ Keys keyData)
                     if (string.IsNullOrEmpty(item.Text) == true)
                         continue;
 
-                    if (looping.stop != null)
+                    if (looping.Progress != null)
                     {
-                        looping.stop.SetMessage("正在刷新浏览行 " + item.Text + " ...");
-                        looping.stop.SetProgressValue(i++);
+                        looping.Progress.SetMessage("正在刷新浏览行 " + item.Text + " ...");
+                        looping.Progress.SetProgressValue(i++);
                     }
 
                     // 2017/3/8
@@ -7042,7 +6689,7 @@ Keys keyData)
             this.listView_records.Enabled = false;
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> moved_items = new List<ListViewItem>();
                 int i = 0;
@@ -7070,7 +6717,7 @@ Keys keyData)
                     byte[] baOutputTimestamp = null;
                     string strOutputBiblio = "";
 
-                    looping.stop.SetMessage("正在" + strActionName + "书目记录 '" + strRecPath + "' 到 '" + dlg.RecPath + "' ...");
+                    looping.Progress.SetMessage("正在" + strActionName + "书目记录 '" + strRecPath + "' 到 '" + dlg.RecPath + "' ...");
 
                     // 2016/3/23
                     channel.Timeout = new TimeSpan(0, 40, 0);   // 复制的时候可能需要复制对象，所需时间一般很长
@@ -7115,7 +6762,7 @@ Keys keyData)
                         if (string.IsNullOrEmpty(strXml) == true)
                             goto CONTINUE;
                         lRet = channel.SetBiblioInfo(
-        looping.stop,
+        looping.Progress,
         "new",
         dlg.RecPath,
         "xml",
@@ -7142,7 +6789,7 @@ Keys keyData)
                         //      0   成功，没有警告信息。
                         //      1   成功，有警告信息。警告信息在 result.ErrorInfo 中
                         lRet = channel.CopyBiblioInfo(
-                            looping.stop,
+                            looping.Progress,
                             strAction,
                             strRecPath,
                             "xml",
@@ -7194,7 +6841,7 @@ Keys keyData)
                         moved_items.Add(item);
 
                     CONTINUE:
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
 
                 foreach (ListViewItem item in moved_items)
@@ -7631,7 +7278,7 @@ Keys keyData)
                 }
 
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
-        looping.stop,
+        looping.Progress,
         items,
         items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -7695,11 +7342,11 @@ Keys keyData)
                     }
 
                 CONTINUE:
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
 
                 nRet = form.FillBiblioSummaryColumn(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     new_items,
                     0,
@@ -7819,7 +7466,7 @@ Keys keyData)
                 System.Text.Encoding.UTF8);
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -7847,7 +7494,7 @@ Keys keyData)
                         //      0   没有装载
                         //      1   已经装载
                         nRet = EntityControl.GetEntityRecPaths(
-                            looping.stop,
+                            looping.Progress,
                             channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
@@ -7862,7 +7509,7 @@ Keys keyData)
                         //      0   没有装载
                         //      1   已经装载
                         nRet = OrderControl.GetOrderRecPaths(
-                            looping.stop,
+                            looping.Progress,
                             channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
@@ -7877,7 +7524,7 @@ Keys keyData)
                         //      0   没有装载
                         //      1   已经装载
                         nRet = IssueControl.GetIssueRecPaths(
-                            looping.stop,
+                            looping.Progress,
                             channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
@@ -7892,7 +7539,7 @@ Keys keyData)
                         //      0   没有装载
                         //      1   已经装载
                         nRet = CommentControl.GetCommentRecPaths(
-                            looping.stop,
+                            looping.Progress,
                             channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
@@ -7907,7 +7554,7 @@ Keys keyData)
                         sw.WriteLine(recpath);
                     }
 
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
             }
             finally
@@ -7976,7 +7623,7 @@ Keys keyData)
 
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -8004,7 +7651,7 @@ Keys keyData)
                         //      0   没有装载
                         //      1   已经装载
                         nRet = EntityControl.GetEntityRecPaths(
-                            looping.stop,
+                            looping.Progress,
                             channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
@@ -8019,7 +7666,7 @@ Keys keyData)
                         //      0   没有装载
                         //      1   已经装载
                         nRet = OrderControl.GetOrderRecPaths(
-                            looping.stop,
+                            looping.Progress,
                             channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
@@ -8034,7 +7681,7 @@ Keys keyData)
                         //      0   没有装载
                         //      1   已经装载
                         nRet = IssueControl.GetIssueRecPaths(
-                            looping.stop,
+                            looping.Progress,
                             channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
@@ -8049,7 +7696,7 @@ Keys keyData)
                         //      0   没有装载
                         //      1   已经装载
                         nRet = CommentControl.GetCommentRecPaths(
-                            looping.stop,
+                            looping.Progress,
                             channel,    // this.Channel,
                             strBiblioRecPath,
                             out recpaths,
@@ -8063,7 +7710,7 @@ Keys keyData)
                         items.Add(item);
                         nCount++;
                     }
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
             }
 
@@ -8141,7 +7788,7 @@ Keys keyData)
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
                 ListViewUtil.ClearSortColumns(this.listView_records);
-                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.Progress.SetProgressRange(0, sr.BaseStream.Length);
 
                 if (this.listView_records.Items.Count > 0)
                 {
@@ -8171,7 +7818,7 @@ Keys keyData)
 
                     string strLine = sr.ReadLine();
 
-                    looping.stop.SetProgressValue(sr.BaseStream.Position);
+                    looping.Progress.SetProgressValue(sr.BaseStream.Position);
 
                     if (strLine == null)
                         break;
@@ -8291,175 +7938,6 @@ Keys keyData)
             strServerName = strRecPath.Substring(nRet + 1).Trim();
             strPath = strRecPath.Substring(0, nRet).Trim();
         }
-#if NO
-        // 从记录路径文件中导入
-        void menu_importFromRecPathFile_Click(object sender, EventArgs e)
-        {
-            int nRet = 0;
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.Title = "请指定要打开的书目记录路径文件名";
-            dlg.FileName = this.m_strUsedRecPathFilename;
-            dlg.Filter = "记录路径文件 (*.txt)|*.txt|All files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            this.m_strUsedRecPathFilename = dlg.FileName;
-
-            StreamReader sr = null;
-            string strError = "";
-            bool bSkipBrowse = false;
-
-            try
-            {
-                // TODO: 最好自动探测文件的编码方式?
-                sr = new StreamReader(dlg.FileName, Encoding.UTF8);
-            }
-            catch (Exception ex)
-            {
-                strError = "打开文件 " + dlg.FileName + " 失败: " + ex.Message;
-                goto ERROR1;
-            }
-
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在导入记录路径 ...");
-            stop.BeginLoop();
-
-            this.EnableControlsInSearching(false);
-
-            try
-            {
-                // 导入的事项是没有序的，因此需要清除已有的排序标志
-                ListViewUtil.ClearSortColumns(this.listView_records);
-                stop.SetProgressRange(0, sr.BaseStream.Length);
-
-                if (this.listView_records.Items.Count > 0)
-                {
-                    DialogResult result = MessageBox.Show(this,
-                        "导入前是否要清除命中记录列表中的现有的 " + this.listView_records.Items.Count.ToString() + " 行?\r\n\r\n(如果不清除，则新导入的行将追加在已有行后面)\r\n\r\n(Yes 清除；No 不清除(追加)；Cancel 放弃导入)",
-                        "BiblioSearchForm",
-                        MessageBoxButtons.YesNoCancel,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button1);
-                    if (result == DialogResult.Cancel)
-                        return;
-                    if (result == DialogResult.Yes)
-                    {
-                        ClearListViewItems();
-                    }
-                }
-
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
-                    }
-
-
-                    string strLine = sr.ReadLine();
-
-                    stop.SetProgressValue(sr.BaseStream.Position);
-
-                    if (strLine == null)
-                        break;
-
-                    string strRecPath = "";
-                    bool bOtherCols = false;
-                    nRet = strLine.IndexOf("\t");
-                    if (nRet == -1)
-                        strRecPath = strLine;
-                    else
-                    {
-                        strRecPath = strLine.Substring(0, nRet);
-                        bOtherCols = true;
-                    }
-
-                    // 检查路径的正确性，检查数据库是否为书目库之一
-                    // 判断它是书目记录路径，还是实体记录路径？
-                    string strDbName = Global.GetDbName(strRecPath);
-                    if (string.IsNullOrEmpty(strDbName) == true)
-                    {
-                        strError = "'" + strRecPath + "' 不是合法的记录路径";
-                        goto ERROR1;
-                    }
-
-                    if (Program.MainForm.IsBiblioDbName(strDbName) == false)
-                    {
-                        strError = "路径 '"+strRecPath+"' 中的数据库名 '" + strDbName + "' 不是合法的书目库名。很可能所指定的文件不是书目库的记录路径文件";
-                        goto ERROR1;
-                    }
-
-                    ListViewItem item = null;
-
-                    if (bOtherCols == true)
-                    {
-                        item = Global.BuildListViewItem(
-                    this.listView_records,
-                    strLine);
-                        this.listView_records.Items.Add(item);
-                    }
-                    else
-                    {
-                        item = new ListViewItem();
-                        item.Text = strRecPath;
-
-                        this.listView_records.Items.Add(item);
-
-                        if (bSkipBrowse == false
-                            && !(Control.ModifierKeys == Keys.Shift))
-                        {
-                            nRet = RefreshOneBrowseLine(item,
-                    out strError);
-                            if (nRet == -1)
-                            {
-                                DialogResult result = MessageBox.Show(this,
-            "获得浏览内容时出错: " + strError + "。\r\n\r\n是否继续获取浏览内容? (Yes 获取；No 不获取；Cancel 放弃导入)",
-            "BiblioSearchForm",
-            MessageBoxButtons.YesNoCancel,
-            MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button1);
-                                if (result == System.Windows.Forms.DialogResult.No)
-                                    bSkipBrowse = true;
-                                if (result == System.Windows.Forms.DialogResult.Cancel)
-                                {
-                                    strError = "已中断";
-                                    break;
-                                }
-                            }
-                        }
-
-                    }
-
-                }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
-
-                this.EnableControlsInSearching(true);
-
-                if (sr != null)
-                    sr.Close();
-            }
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-        }
-#endif
 
         // 兼容以前 API
         public int RefreshBrowseLine(
@@ -8667,7 +8145,7 @@ Keys keyData)
             this.listView_records.Enabled = false;
             try
             {
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
                     if (looping.Stopped)
@@ -8690,13 +8168,13 @@ Keys keyData)
                         formats[0] = "subcount";
                     }
 
-                    looping.stop.SetMessage("正在删除书目记录 " + strRecPath);
+                    looping.Progress.SetMessage("正在删除书目记录 " + strRecPath);
 
                     int nRedoCount = 0;
                 REDO_LOAD:
 
                     long lRet = channel.GetBiblioInfos(
-                        looping.stop,
+                        looping.Progress,
                         strRecPath,
                         "",
                         formats,   // formats
@@ -8789,7 +8267,7 @@ message,
 
                     channel.Timeout = new TimeSpan(0, 5, 0);
                     lRet = channel.SetBiblioInfo(
-                        looping.stop,
+                        looping.Progress,
                         "delete",
                         strRecPath,
                         "xml",
@@ -8871,7 +8349,7 @@ message,
 
                     nDeleteCount++;
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     this.listView_records.Items.Remove(item);
                 }
@@ -9169,7 +8647,7 @@ message,
 
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 writer.Formatting = Formatting.Indented;
                 writer.Indentation = 4;
@@ -9193,7 +8671,7 @@ message,
                 }
 
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -9260,7 +8738,7 @@ message,
                     {
                     REDO_WRITEOBJECTS:
                         // 将书目记录中的对象资源写入外部文件
-                        nRet = WriteObjectFiles(looping.stop,
+                        nRet = WriteObjectFiles(looping.Progress,
                 channel,
                 info.RecPath,
                 ref biblio_dom,
@@ -9319,7 +8797,7 @@ message,
                         {
                             // dprms:orderCollection
                             nRet = OutputEntities(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 item.BiblioInfo.RecPath,
                                 "order",
@@ -9333,7 +8811,7 @@ message,
                         {
                             // dprms:issueCollection
                             nRet = OutputEntities(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 item.BiblioInfo.RecPath,
                                 "issue",
@@ -9347,7 +8825,7 @@ message,
                         {
                             // dprms:itemCollection
                             nRet = OutputEntities(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 item.BiblioInfo.RecPath,
                                 "item",
@@ -9361,7 +8839,7 @@ message,
                         {
                             // dprms:commentCollection
                             nRet = OutputEntities(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 item.BiblioInfo.RecPath,
                                 "comment",
@@ -9396,7 +8874,7 @@ message,
                     // 收尾 dprms:record 元素
                     writer.WriteEndElement();
                 CONTINUE:
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
 
                 writer.WriteEndElement();   // </collection>
@@ -9941,7 +9419,7 @@ message,
             {
                 using (writer = new StreamWriter(dlg.FileName, false, Encoding.UTF8))
                 {
-                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                     List<ListViewItem> items = new List<ListViewItem>();
                     foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -9971,10 +9449,10 @@ message,
                         if (string.IsNullOrEmpty(strRecPath) == true)
                             continue;
 
-                        looping.stop.SetMessage("正在获取书目记录 " + strRecPath);
+                        looping.Progress.SetMessage("正在获取书目记录 " + strRecPath);
 
                         long lRet = channel.GetBiblioInfos(
-                            looping.stop,
+                            looping.Progress,
                             strRecPath,
                             "",
                             new string[] { "table:areas|coverimageurl|summary|subjects|classes" },   // formats
@@ -10020,7 +9498,7 @@ message,
                             }
                         }
 
-                        looping.stop.SetProgressValue(++i);
+                        looping.Progress.SetProgressValue(++i);
                     }
 
                     // writer 收尾
@@ -10198,7 +9676,7 @@ message,
 
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 writer.Formatting = Formatting.Indented;
                 writer.Indentation = 4;
@@ -10222,7 +9700,7 @@ message,
                 }
 
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -10304,7 +9782,7 @@ message,
                         }
                     }
 
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                 }
 
                 writer.WriteEndElement();   // </collection>
@@ -10340,315 +9818,6 @@ message,
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
-#if NO
-        // 2012/2/14
-        // 保存到 MARC 文件
-        void menu_saveToMarcFile_Click(object sender, EventArgs e)
-        {
-            string strError = "";
-            int nRet = 0;
-
-            if (this.listView_records.SelectedItems.Count == 0)
-            {
-                strError = "尚未选定要导出的事项";
-                goto ERROR1;
-            }
-
-            Encoding preferredEncoding = this.CurrentEncoding;
-
-            {
-                // 观察要保存的第一条记录的marc syntax
-            }
-
-            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
-            MainForm.SetControlFont(dlg, this.Font);
-            dlg.IsOutput = true;
-            dlg.AddG01Visible = false;
-            dlg.RuleVisible = true;
-            dlg.Rule = this.LastCatalogingRule;
-            dlg.FileName = this.LastIso2709FileName;
-            dlg.CrLf = this.LastCrLfIso2709;
-            dlg.RemoveField998 = this.LastRemoveField998;
-            dlg.EncodingListItems = Global.GetEncodingList(false);
-            dlg.EncodingName =
-                (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);
-            dlg.EncodingComment = "注: 原始编码方式为 " + Global.GetEncodingName(preferredEncoding);
-            dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
-            dlg.EnableMarcSyntax = false;
-            dlg.ShowDialog(this);
-            if (dlg.DialogResult != DialogResult.OK)
-                return;
-
-            string strCatalogingRule = dlg.Rule;
-            if (strCatalogingRule == "<无限制>")
-                strCatalogingRule = null;
-
-            Encoding targetEncoding = null;
-
-            nRet = Global.GetEncoding(dlg.EncodingName,
-                out targetEncoding,
-                out strError);
-            if (nRet == -1)
-            {
-                goto ERROR1;
-            }
-
-            string strLastFileName = this.LastIso2709FileName;
-            string strLastEncodingName = this.LastEncodingName;
-
-            bool bExist = File.Exists(dlg.FileName);
-            bool bAppend = false;
-
-            if (bExist == true)
-            {
-                DialogResult result = MessageBox.Show(this,
-        "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
-        "BiblioSearchForm",
-        MessageBoxButtons.YesNoCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Yes)
-                    bAppend = true;
-
-                if (result == DialogResult.No)
-                    bAppend = false;
-
-                if (result == DialogResult.Cancel)
-                {
-                    strError = "放弃处理...";
-                    goto ERROR1;
-                }
-            }
-
-            // 检查同一个文件连续存时候的编码方式一致性
-            if (strLastFileName == dlg.FileName
-                && bAppend == true)
-            {
-                if (strLastEncodingName != ""
-                    && strLastEncodingName != dlg.EncodingName)
-                {
-                    DialogResult result = MessageBox.Show(this,
-                        "文件 '" + dlg.FileName + "' 已在先前已经用 " + strLastEncodingName + " 编码方式存储了记录，现在又以不同的编码方式 " + dlg.EncodingName + " 追加记录，这样会造成同一文件中存在不同编码方式的记录，可能会令它无法被正确读取。\r\n\r\n是否继续? (是)追加  (否)放弃操作",
-                        "BiblioSearchForm",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button2);
-                    if (result == DialogResult.No)
-                    {
-                        strError = "放弃处理...";
-                        goto ERROR1;
-                    }
-
-                }
-            }
-
-            this.LastIso2709FileName = dlg.FileName;
-            this.LastCrLfIso2709 = dlg.CrLf;
-            this.LastEncodingName = dlg.EncodingName;
-            this.LastCatalogingRule = dlg.Rule;
-            this.LastRemoveField998 = dlg.RemoveField998;
-
-            this.EnableControls(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在导出到 MARC 文件 ...");
-            stop.BeginLoop();
-
-            Stream s = null;
-
-            try
-            {
-                s = File.Open(this.LastIso2709FileName,
-                     FileMode.OpenOrCreate);
-                if (bAppend == false)
-                    s.SetLength(0);
-                else
-                    s.Seek(0, SeekOrigin.End);
-            }
-            catch (Exception ex)
-            {
-                strError = "打开或创建文件 " + this.LastIso2709FileName + " 失败，原因: " + ex.Message;
-                goto ERROR1;
-            }
-
-            try
-            {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
-
-                int i = 0;
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-                    }
-
-                    string strRecPath = item.Text;
-
-                    if (string.IsNullOrEmpty(strRecPath) == true)
-                        continue;
-
-                    string[] results = null;
-                    byte[] baTimestamp = null;
-
-                    stop.SetMessage("正在获取书目记录 " + strRecPath);
-
-                    long lRet = Channel.GetBiblioInfos(
-                        stop,
-                        strRecPath,
-                        "",
-                        new string[] { "xml" },   // formats
-                        out results,
-                        out baTimestamp,
-                        out strError);
-                    if (lRet == 0)
-                        goto ERROR1;
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (results == null || results.Length == 0)
-                    {
-                        strError = "results error";
-                        goto ERROR1;
-                    }
-
-                    string strXml = results[0];
-
-                    string strMARC = "";
-                    string strMarcSyntax = "";
-                    // 将XML格式转换为MARC格式
-                    // 自动从数据记录中获得MARC语法
-                    nRet = MarcUtil.Xml2Marc(strXml,
-                        true,
-                        null,
-                        out strMarcSyntax,
-                        out strMARC,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "XML转换到MARC记录时出错: " + strError;
-                        goto ERROR1;
-                    }
-
-                    byte[] baTarget = null;
-
-                    Debug.Assert(strMarcSyntax != "", "");
-
-                    // 按照编目规则过滤
-                    // 获得一个特定风格的 MARC 记录
-                    // parameters:
-                    //      strStyle    要匹配的style值。如果为null，表示任何$*值都匹配，实际上效果是去除$*并返回全部字段内容
-                    // return:
-                    //      0   没有实质性修改
-                    //      1   有实质性修改
-                    nRet = MarcUtil.GetMappedRecord(ref strMARC,
-                        strCatalogingRule);
-
-                    if (dlg.RemoveField998 == true)
-                    {
-                        MarcRecord record = new MarcRecord(strMARC);
-                        record.select("field[@name='998']").detach();
-                        strMARC = record.Text;
-                    }
-                    if (dlg.Mode880 == true && strMarcSyntax == "usmarc")
-                    {
-                        MarcRecord record = new MarcRecord(strMARC);
-                        MarcQuery.To880(record);
-                        strMARC = record.Text;
-                    }
-
-                    // 将MARC机内格式转换为ISO2709格式
-                    // parameters:
-                    //      strSourceMARC   [in]机内格式MARC记录。
-                    //      strMarcSyntax   [in]为"unimarc"或"usmarc"
-                    //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
-                    //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
-                    // return:
-                    //      -1  出错
-                    //      0   成功
-                    nRet = MarcUtil.CvtJineiToISO2709(
-                        strMARC,
-                        strMarcSyntax,
-                        targetEncoding,
-                        out baTarget,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    /*
-                    Encoding sourceEncoding = connection.GetRecordsEncoding(
-                        Program.MainForm,
-                        record.m_strSyntaxOID);
-
-
-                    if (sourceEncoding.Equals(targetEncoding) == true)
-                    {
-                        // source和target编码方式相同，不用转换
-                        baTarget = record.m_baRecord;
-                    }
-                    else
-                    {
-                        nRet = ChangeIso2709Encoding(
-                            sourceEncoding,
-                            record.m_baRecord,
-                            targetEncoding,
-                            strMarcSyntax,
-                            out baTarget,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }*/
-
-                    s.Write(baTarget, 0,
-                        baTarget.Length);
-
-                    if (dlg.CrLf == true)
-                    {
-                        byte[] baCrLf = targetEncoding.GetBytes("\r\n");
-                        s.Write(baCrLf, 0,
-                            baCrLf.Length);
-                    }
-
-                    stop.SetProgressValue(++i);
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = "写入文件 " + this.LastIso2709FileName + " 失败，原因: " + ex.Message;
-                goto ERROR1;
-            }
-            finally
-            {
-                s.Close();
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-
-                this.EnableControls(true);
-            }
-
-            // 
-            if (bAppend == true)
-                MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
-                    + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
-            else
-                MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
-                    + "条记录成功保存到新文件 " + this.LastIso2709FileName;
-
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-        }
-#endif
 
         // 2015/10/10
         // 保存到 MARC 文件
@@ -10819,7 +9988,7 @@ message,
 
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -10835,7 +10004,7 @@ message,
                 }
 
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -10933,7 +10102,7 @@ message,
                             record.select("field[@name='906']").detach();
 
                         nRet = OutputEntities(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             info.RecPath,
                             "item",
@@ -10976,7 +10145,7 @@ message,
                             baCrLf.Length);
                     }
 
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                     nCount++;
                 }
             }
@@ -11667,7 +10836,7 @@ message,
             this.EnableControlsInSearching(false);
             try
             {
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
 
                 long lStart = this.listView_records.Items.Count;
                 long lPerCount = Math.Min(50, lHitCount);
@@ -11688,7 +10857,7 @@ message,
                         return;
                     }
 
-                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     /*
                     string strStyle = "id,cols";
@@ -11720,7 +10889,7 @@ message,
 
                     channel.Timeout = new TimeSpan(0, 5, 0);
                     long lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         null,   // strResultSetName
                         lStart,
                         lPerCount,
@@ -11799,7 +10968,7 @@ message,
                         break;
 
                     this.m_lLoaded = lStart;
-                    looping.stop.SetProgressValue(lStart);
+                    looping.Progress.SetProgressValue(lStart);
                 }
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);

@@ -154,7 +154,7 @@ namespace dp2Circulation
                 while (true)
                 {
                     long lRet = channel.GetCalendar(
-                        looping.stop,
+                        looping.Progress,
                         "list",
                         "",
                         nStart,
@@ -233,7 +233,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetCalendar(
-                    looping.stop,
+                    looping.Progress,
                     "get",
                     strName,
                     0,
@@ -312,7 +312,7 @@ namespace dp2Circulation
                 info.Content = strContent;
 
                 long lRet = channel.SetCalendar(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     info,
                     out strError);

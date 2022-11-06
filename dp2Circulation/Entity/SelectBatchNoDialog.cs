@@ -65,12 +65,14 @@ namespace dp2Circulation
             this.Close();
         }
 
+        // 引用。调用本对话框的调主提供
         public LibraryChannel Channel
         {
             get;
             set;
         }
 
+        // 引用。调用本对话框的调主提供
         public Stop Stop
         {
             get;
@@ -141,16 +143,18 @@ namespace dp2Circulation
 
             this.listView_records.Items.Clear();
 
+            /*
             // EnableControls(false);
             stop.OnStop += new StopEventHandler(channel.DoStop);
             stop.Initial("正在列出全部馆藏地 ...");
             stop.BeginLoop();
-
+            */
+            stop?.SetMessage("正在列出全部馆藏地 ...");
             try
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    long lRet = Channel.SearchItem(
+                    long lRet = channel.SearchItem(
         stop,
         "<all>",
         "", // strBatchNo
@@ -238,7 +242,7 @@ namespace dp2Circulation
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        stop.SetMessage("共命中 " + (lTotalCount + lHitCount).ToString() + " 条，已装入 " + (lTotalCount + lStart).ToString() + " 条");
+                        stop?.SetMessage("共命中 " + (lTotalCount + lHitCount).ToString() + " 条，已装入 " + (lTotalCount + lStart).ToString() + " 条");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
@@ -255,11 +259,14 @@ namespace dp2Circulation
             }
             finally
             {
+                stop?.SetMessage("");
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(channel.DoStop);
                 stop.Initial("");
 
                 // EnableControls(true);
+                */
             }
             return 1;
         }
@@ -295,11 +302,13 @@ namespace dp2Circulation
 
             this.listView_records.Items.Clear();
 
+            /*
             // EnableControls(false);
             stop.OnStop += new StopEventHandler(channel.DoStop);
             stop.Initial("正在列出全部批次号 ...");
             stop.BeginLoop();
-
+            */
+            stop?.SetMessage("正在列出全部批次号 ...");
             try
             {
                 // 构造检索式
@@ -430,22 +439,24 @@ namespace dp2Circulation
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    stop?.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                 }
-
+                return 1;
             }
             finally
             {
+                stop?.SetMessage("");
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(channel.DoStop);
                 stop.Initial("");
 
                 // EnableControls(true);
+                */
             }
-            return 1;
         }
 
         List<string> _selectedBatchNo = null;

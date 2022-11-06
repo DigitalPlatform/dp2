@@ -8,8 +8,9 @@ namespace DigitalPlatform
 {
     public class Looping : IDisposable
     {
-        public Stop stop { get; set; }
-        StopEventHandler _handler = null;
+        public Stop Progress { get; set; }
+
+        private StopEventHandler _handler = null;
         // static StopManager _stopManager = null;
 
         // 2022/10/30
@@ -40,15 +41,15 @@ namespace DigitalPlatform
                 Host = null;
             }
 
-            if (stop != null)
+            if (Progress != null)
             {
-                stop.EndLoop();
-                stop.OnStop -= _handler;
-                stop.Initial("");
-                stop.HideProgress();
+                Progress.EndLoop();
+                Progress.OnStop -= _handler;
+                Progress.Initial("");
+                Progress.HideProgress();
 
-                stop.Unregister();	// 和容器解除关联
-                stop = null;
+                Progress.Unregister();	// 和容器解除关联
+                Progress = null;
             }
 
             Closed?.Invoke();
@@ -65,21 +66,21 @@ namespace DigitalPlatform
             if (this.Host.StopManager == null)
                 throw new ArgumentException("尚未初始化 Host.StopManager");
 
-            stop = new Stop();
-            stop.Register(this.Host.StopManager/*_stopManager*/, activate);	// 和容器关联
+            Progress = new Stop();
+            Progress.Register(this.Host.StopManager/*_stopManager*/, activate);	// 和容器关联
 
             _handler = handler;
-            stop.OnStop += handler;
+            Progress.OnStop += handler;
             if (text != null)
-                stop.Initial(text);
-            stop.BeginLoop();
+                Progress.Initial(text);
+            Progress.BeginLoop();
         }
 
         public bool Stopped
         {
             get
             {
-                if (stop != null && stop.State != 0)
+                if (Progress != null && Progress.State != 0)
                     return true;
                 return false;
             }
@@ -132,7 +133,7 @@ namespace DigitalPlatform
             if (style != null)
             {
                 if (isInList("halfstop", style) == true)
-                    looping.stop.Style = StopStyle.EnableHalfStop;
+                    looping.Progress.Style = StopStyle.EnableHalfStop;
             }
 
             // looping.Host = this;
@@ -158,7 +159,7 @@ namespace DigitalPlatform
             {
                 foreach (var looping in _loopings)
                 {
-                    if (looping.stop != null && looping.stop.State == 0)
+                    if (looping.Progress != null && looping.Progress.State == 0)
                         return true;
                 }
                 return false;

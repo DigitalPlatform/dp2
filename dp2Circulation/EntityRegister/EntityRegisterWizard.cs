@@ -861,7 +861,7 @@ MessageBoxDefaultButton.Button1);
                     && Program.MainForm.MessageHub.ShareBiblio == true)
                 {
                     nRet = SearchLineMessage(
-                        looping.stop,
+                        looping.Progress,
                         strQueryWord,
                         strFrom,
                         bAutoSetFocus,
@@ -1787,7 +1787,7 @@ false);
 
                 // 准备服务器信息
                 nRet = _base.GetServerInfo(
-                    looping.stop,
+                    looping.Progress,
                     current_channel,
                     account,
                     out ServerInfo server_info,
@@ -1798,7 +1798,7 @@ false);
                 this.ShowMessage("正在针对 " + account.ServerName + " \r\n检索 " + strQueryWord + " ...",
                     "progress", false);
 
-                long lRet = current_channel.SearchBiblio(looping.stop,
+                long lRet = current_channel.SearchBiblio(looping.Progress,
                     server_info == null ? "<全部>" : server_info.GetBiblioDbNames(),    // "<全部>",
                     strQueryWord,   // this.textBox_queryWord.Text,
                     1000,
@@ -1841,7 +1841,7 @@ false);
                     }
 
                     lRet = current_channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -1870,7 +1870,7 @@ false);
                         BiblioLoader loader = new BiblioLoader
                         {
                             Channel = current_channel,
-                            Stop = looping.stop,
+                            Stop = looping.Progress,
                             Format = "xml",
                             GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp,
                             RecPaths = biblio_recpaths
@@ -2705,7 +2705,7 @@ out strError);
                     if (_zsearcher.InSearching == false)
                         break;
 
-                    looping.stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
+                    looping.Progress.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
 
                     var present_result = await Z3950Searcher.FetchRecords(channel,
                         all ? 50 : 10);
@@ -3134,14 +3134,14 @@ MessageBoxDefaultButton.Button1);
                 "正在下载配置文件 ...");
             try
             {
-                looping.stop.SetMessage("正在下载配置文件 " + strCfgFilePath + " ...");
+                looping.Progress.SetMessage("正在下载配置文件 " + strCfgFilePath + " ...");
                 string strMetaData = "";
                 string strOutputPath = "";
 
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
                 // TODO: 应该按照 URL 区分
-                long lRet = channel.GetRes(looping.stop,
+                long lRet = channel.GetRes(looping.Progress,
                     MainForm.cfgCache,
                     strCfgFilePath,
                     strStyle,
@@ -3260,7 +3260,7 @@ MessageBoxDefaultButton.Button1);
                     EntityInfo[] entities = null;
 
                     long lRet = current_channel.GetEntities(
-             looping.stop,
+             looping.Progress,
              strBiblioRecPath,
              lStart,
              lCount,
@@ -3477,7 +3477,7 @@ MessageBoxDefaultButton.Button1);
                     EntityInfo[] current = GetPart(entities, i * nBatch, nCurrentCount);
 
                     long lRet = current_channel.SetEntities(
-         looping.stop,
+         looping.Progress,
          strBiblioRecPath,
          entities,
          out errorinfos,
@@ -3954,7 +3954,7 @@ int nCount)
 
                 //REDO:
                 long lRet = current_channel.SetBiblioInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strPath,
                     "xml",
@@ -4295,7 +4295,7 @@ int nCount)
                 string strOutputPath = "";
                 //REDO:
                 long lRet = current_channel.SetBiblioInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strPath,
                     "xml",

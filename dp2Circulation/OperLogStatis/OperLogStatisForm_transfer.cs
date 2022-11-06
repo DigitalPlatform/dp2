@@ -45,7 +45,7 @@ namespace dp2Circulation
             {
                 // 搜集信息
                 int nRet = DoLoop(
-                    looping.stop,
+                    looping.Progress,
                     (string strLogFileName,
                     string strXml,
                     bool bInCacheFile,

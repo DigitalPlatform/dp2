@@ -1857,14 +1857,14 @@ bool bChanged)
             Stop.Initial("正在下载对象 " + strResPath);
             Stop.BeginLoop();
 #endif
-            looping?.stop?.Initial("正在下载对象 " + strResPath);
+            looping?.Progress?.Initial("正在下载对象 " + strResPath);
 
             try
             {
                 // EnableControlsInLoading(true);
 
                 long lRet = channel.GetRes(
-                    looping?.stop,
+                    looping?.Progress,
                     strResPath,
                     dlg.FileName,
                     "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip

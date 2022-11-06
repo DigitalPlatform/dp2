@@ -64,7 +64,7 @@ namespace dp2Circulation
                 string[] results = null;
                 byte[] baTimestamp = null;
 
-                stop.SetMessage("正在获取书目记录 " + strBiblioRecPath);
+                stop?.SetMessage("正在获取书目记录 " + strBiblioRecPath);
 
                 long lRet = channel.GetBiblioInfos(
                     stop,

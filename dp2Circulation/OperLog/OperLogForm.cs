@@ -337,7 +337,7 @@ namespace dp2Circulation
             var looping = Looping(out LibraryChannel channel,
                 null,
                 "timeout:0:0:30,disableControl");
-            looping.stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录...");
+            looping.Progress.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录...");
             try
             {
                 List<string> lines = new List<string>();
@@ -350,7 +350,7 @@ namespace dp2Circulation
                     StringUtil.SetInList(ref strStyle, "accessLog", true);
 
                 int nRet = ProcessFiles(this,
-    looping.stop,
+    looping.Progress,
     this.estimate,
     channel,
     lines,
@@ -436,7 +436,7 @@ namespace dp2Circulation
             }));
         }
 
-#region HTML 解释日志记录
+        #region HTML 解释日志记录
 
         // 创建解释日志记录内容的 HTML 字符串
         // return:
@@ -3600,7 +3600,7 @@ out string strError)
             return strResult;
         }
 
-#endregion
+        #endregion
 
         private void listView_records_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -4357,7 +4357,7 @@ FileShare.ReadWrite))
 
             try
             {
-                looping.stop.SetMessage("正在准备日志文件名 ...");
+                looping.Progress.SetMessage("正在准备日志文件名 ...");
                 List<string> lines = new List<string>();
                 for (int i = 0; i < this.textBox_filenames.Lines.Length; i++)
                 {
@@ -4377,7 +4377,7 @@ FileShare.ReadWrite))
                     StringUtil.SetInList(ref strStyle, "accessLog", true);
 
                 nRet = ProcessFiles(this,
-                    looping.stop,
+                    looping.Progress,
                     this.estimate,
                     channel,
                     lines,
@@ -4421,235 +4421,6 @@ FileShare.ReadWrite))
             MessageBox.Show(this, strError);
             return;
         }
-
-#if OLDOLDOLD
-        // 获得一个日志文件的尺寸
-        // return:
-        //      -1  error
-        //      0   file not found
-        //      1   found
-        int GetFileSize(string strLogFileName,
-            out long lTotalSize,
-            out string strError)
-        {
-            strError = "";
-            lTotalSize = 0;
-
-            stop.SetMessage("正获得日志文件 " + strLogFileName + " 的尺寸...");
-
-            string strXml = "";
-            long lAttachmentTotalLength = 0;
-            byte[] attachment_data = null;
-
-            // 获得日志文件尺寸
-            // return:
-            //      -1  error
-            //      0   file not found
-            //      1   succeed
-            //      2   超过范围
-            long lRet = Channel.GetOperLog(
-                stop,
-                strLogFileName,
-                -1,    // lIndex,
-                -1, // lHint,
-                out strXml,
-                out lTotalSize,
-                0,  // lAttachmentFragmentStart,
-                0,  // nAttachmentFramengLength,
-                out attachment_data,
-                out lAttachmentTotalLength,
-                out strError);
-            if (lRet == 0)
-            {
-                lTotalSize = 0;
-                Debug.Assert(lTotalSize == 0, "");
-                return 0;
-            }
-            if (lRet != 1)
-                return -1;
-            Debug.Assert(lTotalSize >= 0, "");
-
-            return 1;
-        }
-
-        // 装入一个日志文件中的若干记录
-        // return:
-        //      -1  error
-        //      0   file not found
-        //      1   found
-        int LoadSomeRecords(string strLogFileName,
-            string strRange,
-            ref long lProgressValue,
-            ref long lSize,
-            out string strError)
-        {
-            strError = "";
-
-            stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录。"
-                + "剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(lProgressValue)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
-
-            string strXml = "";
-            long lAttachmentTotalLength = 0;
-            byte[] attachment_data = null;
-
-            long lFileSize = 0;
-
-            // 获得日志文件尺寸
-            long lRet = Channel.GetOperLog(
-                stop,
-                strLogFileName,
-                -1,    // lIndex,
-                -1, // lHint,
-                out strXml,
-                out lFileSize,
-                0,  // lAttachmentFragmentStart,
-                0,  // nAttachmentFramengLength,
-                out attachment_data,
-                out lAttachmentTotalLength,
-                out strError);
-            // 2010/12/13
-            if (lRet == 0)
-                return 0;
-
-            // stop.SetProgressRange(0, lTotalSize);
-
-            if (String.IsNullOrEmpty(strRange) == true)
-                strRange = "0-9999999999";
-
-            RangeList rl = new RangeList(strRange);
-
-#if DELAY_UPDATE
-            this.listView_records.BeginUpdate();
-#endif
-            try
-            {
-                for (int i = 0; i < rl.Count; i++)
-                {
-                    RangeItem ri = (RangeItem)rl[i];
-
-                    long lHint = -1;
-                    long lHintNext = -1;
-                    for (long lIndex = ri.lStart; lIndex < ri.lStart + ri.lLength; lIndex++)
-                    {
-                        Application.DoEvents();
-
-                        if (stop != null)
-                        {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断1";
-                                goto ERROR1;
-                            }
-                        }
-
-                        lHint = lHintNext;
-
-                        // 获得日志
-                        // result.Value
-                        //      -1  error
-                        //      0   file not found
-                        //      1   succeed
-                        //      2   超过范围
-                        lRet = Channel.GetOperLog(
-                            stop,
-                            strLogFileName,
-                            lIndex,
-                            lHint,
-                            out strXml,
-                            out lHintNext,
-                            0,  // lAttachmentFragmentStart,
-                            0,  // nAttachmentFramengLength,
-                            out attachment_data,
-                            out lAttachmentTotalLength,
-                            out strError);
-                        if (lRet == -1)
-                            goto ERROR1;
-                        if (lRet == 0)
-                            return 0;
-
-                        if (lRet == 2)
-                            break;
-
-#if NO
-                            // 2011/12/30
-                            // 日志记录可能动态地增加了，超过了原先为ProgressBar设置的范围
-                            if (lFizeTotalSize < (int)lHintNext)
-                            {
-                                lFizeTotalSize = lHintNext;
-
-                                stop.SetProgressRange(0, lFizeTotalSize);
-                            }
-#endif
-                        // 校正
-                        if (lProgressValue + lHintNext > lSize)
-                        {
-                            lSize = lProgressValue + lHintNext;
-
-                            stop.SetProgressRange(0, lSize);
-                            this.estimate.SetRange(0, lSize);
-                        }
-
-                            stop.SetProgressValue(lProgressValue + lHintNext);
-
-                        if (lIndex % 100 == 0)
-                        {
-                            stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录 "+lIndex.ToString()+" 。"
-    + "剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(lProgressValue + lHintNext)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
-                        }
-
-                        if (string.IsNullOrEmpty(strXml) == false)
-                        {
-                            OperLogItemInfo info = new OperLogItemInfo();
-
-                            if (this.StoreInTempFile == true)
-                            {
-                                // 创建临时文件
-                                string strTempFileName = Path.GetTempFileName();
-                                Stream stream = File.Create(strTempFileName);
-
-                                // 写入xml内容
-                                byte[] buffer = Encoding.UTF8.GetBytes(strXml);
-                                stream.Write(buffer, 0, buffer.Length);
-
-                                stream.Close();
-
-                                m_tempFileNames.Add(strTempFileName);
-                                info.IndexOfTempFilename = m_tempFileNames.Count - 1;
-                            }
-                            else
-                            {
-                                info.Hint = lHint;
-                            }
-                            ListViewItem item = new ListViewItem(strLogFileName, 0);
-                            item.SubItems.Add(lIndex.ToString());  // 序号从0开始计数
-                            this.listView_records.Items.Add(item);
-                            item.Tag = info;
-
-                            int nRet = FillListViewItem(item,
-                                strXml,
-                                lAttachmentTotalLength,
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                        }
-                    }
-                }
-
-                lProgressValue += lFileSize;
-            }
-            finally
-            {
-#if DELAY_UPDATE
-                this.listView_records.EndUpdate();
-#endif
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-
-#endif
 
         private void button_getSingleLogFilename_Click(object sender, EventArgs e)
         {
@@ -4733,7 +4504,7 @@ FileShare.ReadWrite))
                 "timeout:0:0:30,disableControl");
             try
             {
-                looping.stop.SetMessage("正在准备日志文件名 ...");
+                looping.Progress.SetMessage("正在准备日志文件名 ...");
                 List<string> lines = new List<string>();
                 for (int i = 0; i < this.textBox_filenames.Lines.Length; i++)
                 {
@@ -4756,7 +4527,7 @@ FileShare.ReadWrite))
                     strStyle += ",accessLog";
 
                 nRet = ProcessFiles(this,
-    looping.stop,
+    looping.Progress,
     this.estimate,
     channel,
     lines,
@@ -4845,7 +4616,7 @@ FileShare.ReadWrite))
             try
             {
                 nRet = RepairLogFile(
-                    looping.stop,
+                    looping.Progress,
                     this.textBox_repair_sourceFilename.Text,
                     this.textBox_repair_targetFilename.Text,
                     out strError);
@@ -4935,7 +4706,7 @@ FileShare.ReadWrite))
                 }
 
                 if (stop != null)
-                    stop.SetProgressRange(0, source.Length);
+                    stop?.SetProgressRange(0, source.Length);
 
                 bool bTry = false;
                 // TODO: 要汇报丢弃的段数
@@ -4970,7 +4741,7 @@ FileShare.ReadWrite))
                     }
 
                     if (stop != null)
-                        stop.SetProgressValue(source.Position);
+                        stop?.SetProgressValue(source.Position);
 
                     long lBodyLength = source.Position - lStart;
                     // 写入目标文件
@@ -5416,7 +5187,7 @@ FileShare.ReadWrite))
                 //      -1  运行出错
                 //      >=0 发生错误的文件数。文件名在errorfilenames中
                 nRet = VerifyLogFiles(
-                    looping.stop,
+                    looping.Progress,
                     this.textBox_repair_verifyFolderName.Text,
                     out nFileCount,
                     out errorfilenames,
@@ -5535,9 +5306,8 @@ FileShare.ReadWrite))
                         FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
                         FileShare.ReadWrite))
                 {
-
-                    stop.SetMessage("正在验证日志文件 " + strSourceFilename + " ...");
-                    stop.SetProgressRange(0, source.Length);
+                    stop?.SetMessage("正在验证日志文件 " + strSourceFilename + " ...");
+                    stop?.SetProgressRange(0, source.Length);
 
                     bool bTry = false;
                     // TODO: 要汇报丢弃的段数
@@ -5571,12 +5341,14 @@ FileShare.ReadWrite))
                             bTry = false;
                         }
 
-                        stop.SetProgressValue(source.Position);
+                        stop?.SetProgressValue(source.Position);
 
                         if (source.Position >= source.Length)
                             break;
                     }
                 }
+
+                return nTryCount;
             }
             catch (FileNotFoundException /*ex*/)
             {
@@ -5588,8 +5360,6 @@ FileShare.ReadWrite))
                 strError = "打开源日志文件 '" + strSourceFilename + "' 时发生错误: " + ex.Message;
                 return -1;
             }
-
-            return nTryCount;
         }
 
         private void textBox_filenames_TextChanged(object sender, EventArgs e)
@@ -6048,7 +5818,7 @@ FileShare.ReadWrite))
                 this.DoStopPrint);
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
@@ -6112,7 +5882,7 @@ FileShare.ReadWrite))
                     //      0   没有找到
                     //      1   找到
                     nRet = DetectBiblioRecord(channel,
-                        looping.stop,
+                        looping.Progress,
                 strOldRecPath,
                 out strError);
                     if (nRet == -1)
@@ -6137,14 +5907,14 @@ MessageBoxDefaultButton.Button1);
                             goto CONTINUE;
                     }
 
-                    looping.stop.SetMessage(" " + strOldRecPath + " --> " + strRecPath + " (" + strMergeStyle + ")");
+                    looping.Progress.SetMessage(" " + strOldRecPath + " --> " + strRecPath + " (" + strMergeStyle + ")");
 
                     // return:
                     //      -1  出错
                     //      0   成功，没有警告信息。
                     //      1   成功，有警告信息。警告信息在 strError 中
                     nRet = DoMove(channel,
-                        looping.stop,
+                        looping.Progress,
             strOldRecPath,
             strRecPath,
             strMergeStyle,
@@ -6163,7 +5933,7 @@ MessageBoxDefaultButton.Button1);
                     }
 
                 CONTINUE:
-                    looping.stop.SetProgressValue(i + 1);
+                    looping.Progress.SetProgressValue(i + 1);
                     i++;
                 }
 
@@ -7089,7 +6859,7 @@ MessageBoxDefaultButton.Button1);
                 this.DoStopPrint);
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
@@ -7139,7 +6909,7 @@ MessageBoxDefaultButton.Button1);
                             break;
                     }
 
-                    looping.stop.SetProgressValue(i + 1);
+                    looping.Progress.SetProgressValue(i + 1);
                     i++;
                 }
 
@@ -7211,7 +6981,7 @@ MessageBoxDefaultButton.Button1);
             this.GetSummary += new GetSummaryEventHandler(OperLogForm_GetSummary);
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
@@ -7266,7 +7036,7 @@ MessageBoxDefaultButton.Button1);
                     StreamUtil.WriteText(strFilename,
         "<p class='record_title'>" + strLogFileName + " : " + strIndex + "</p>" + strHtml);
 
-                    looping.stop.SetProgressValue(i + 1);
+                    looping.Progress.SetProgressValue(i + 1);
                     i++;
                 }
             }
@@ -7434,7 +7204,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-#region Roslyn 脚本运行
+        #region Roslyn 脚本运行
 
         static Assembly BuildAssembly(string script, out string strError)
         {
@@ -7567,7 +7337,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-#endregion
+        #endregion
 
         // 筛选
         void menu_filter_Click(object sender, EventArgs e)
@@ -7848,7 +7618,7 @@ Keys keyData)
         }
 
 
-#region 改进后的批处理功能
+        #region 改进后的批处理功能
 
         // parameters:
         //      bInCacheFile    lHint指示的是否为本地cache文件中的hint
@@ -7990,7 +7760,7 @@ Keys keyData)
             long lTotalSize = 0;
             List<string> lines = new List<string>();    // 经过处理后排除了不存在的文件名
             List<long> sizes = new List<long>();
-            stop.SetMessage("正在准备获得日志文件尺寸 ...");
+            stop?.SetMessage("正在准备获得日志文件尺寸 ...");
             foreach (string strLine in filenames)
             {
                 Application.DoEvents();
@@ -8073,8 +7843,7 @@ Keys keyData)
                 sizes.Add(lServerFileSize);
             }
 
-            if (stop != null)
-                stop.SetProgressRange(0, lTotalSize);
+            stop?.SetProgressRange(0, lTotalSize);
 
             estimate.SetRange(0, lTotalSize);
             estimate.StartEstimate();
@@ -8141,11 +7910,8 @@ Keys keyData)
                     out strError);
                 if (nRet == -1)
                 {
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                            return 0;
-                    }
+                    if (stop != null && stop.State != 0)
+                        return 0;
                     // MessageBox.Show(this, strError);
                     DialogResult result = MessageBox.Show(owner,
 strError + "\r\n\r\n是否继续处理?",
@@ -8188,7 +7954,7 @@ MessageBoxDefaultButton.Button1);
             if (fi.Exists == true)
                 lCacheFileSize = fi.Length;
 
-            stop.SetMessage("正获得日志文件 " + strLogFileName + " 的尺寸...");
+            stop?.SetMessage("正获得日志文件 " + strLogFileName + " 的尺寸...");
 
             string strXml = "";
             long lAttachmentTotalLength = 0;
@@ -8748,7 +8514,7 @@ FileShare.ReadWrite);
             int nRet = 0;
             long lRet = 0;
 
-            stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录。"
+            stop?.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录。"
                 + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lProgressValue)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
 
             bool bAccessLog = StringUtil.IsInList("accessLog", strStyle);
@@ -8899,7 +8665,6 @@ FileShare.ReadWrite);
                             if (nRet == -1)
                                 return -1;
                             lHintNext = stream.Position;
-
                         }
                         else
                         {
@@ -8997,16 +8762,16 @@ FileShare.ReadWrite);
                             {
                                 lSize = lProgressValue + lHintNext;
 
-                                stop.SetProgressRange(0, lSize);
+                                stop?.SetProgressRange(0, lSize);
                                 estimate.SetRange(0, lSize);
                             }
 
-                            stop.SetProgressValue(lProgressValue + lHintNext);
+                            stop?.SetProgressValue(lProgressValue + lHintNext);
                         }
 
                         if (lIndex % 100 == 0)
                         {
-                            stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录 " + lIndex.ToString() + " 。"
+                            stop?.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录 " + lIndex.ToString() + " 。"
     + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lProgressValue + lHintNext)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
                         }
 
@@ -9035,7 +8800,6 @@ MessageBoxDefaultButton.Button1);
                             if (nRet == 1)
                                 return 1;
                         }
-
                     }
                 }
 
@@ -9076,7 +8840,7 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             return -1;
         }
-#endregion
+        #endregion
 
         public string UiState
         {
@@ -9132,7 +8896,7 @@ MessageBoxDefaultButton.Button1);
             try
             {
                 nRet = LoadFile(
-                    looping.stop,
+                    looping.Progress,
                     dlg.FileName,
                     out strError);
                 if (nRet == -1)
@@ -9175,7 +8939,7 @@ MessageBoxDefaultButton.Button1);
                         FileShare.ReadWrite))
             {
                 if (stop != null)
-                    stop.SetProgressRange(0, source.Length);
+                    stop?.SetProgressRange(0, source.Length);
 
                 for (int i = 0; ; i++)
                 {
@@ -9198,7 +8962,7 @@ MessageBoxDefaultButton.Button1);
                         return -1;
 
                     if (stop != null)
-                        stop.SetProgressValue(source.Position);
+                        stop?.SetProgressValue(source.Position);
 
                     if (source.Position >= source.Length)
                         break;
@@ -9650,7 +9414,7 @@ MessageBoxDefaultButton.Button1);
                 "disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_restoreList.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_restoreList.SelectedItems.Count);
 
                 bool bDontAsk = false;
                 DialogResult timestamp_result = DialogResult.Yes;
@@ -9739,11 +9503,11 @@ dlg.UiState);
 
                     int nRedoCount = 0;
                 REDO:
-                    looping.stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
+                    looping.Progress.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
                     if (data.DbType == "biblio")
                         lRet = channel.SetBiblioInfo(
-                        looping.stop,
+                        looping.Progress,
                         "change",
                         strBiblioRecPath,
                         "xml",
@@ -9757,7 +9521,7 @@ dlg.UiState);
                     {
                         // TODO: 应该允许在 forcechange 和 change 之间进行选择
                         lRet = channel.SetReaderInfo(
-                            looping.stop,
+                            looping.Progress,
                             "forcechange",
                             strBiblioRecPath,
                             xml,
@@ -9887,7 +9651,7 @@ MessageBoxDefaultButton.Button1);
 
                 CONTINUE:
                     i++;
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                 }
 
                 return;
@@ -9954,7 +9718,7 @@ MessageBoxDefaultButton.Button1);
                 "disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_restoreList.Items.Count);
+                looping.Progress.SetProgressRange(0, this.listView_restoreList.Items.Count);
 
                 writer.Formatting = Formatting.Indented;
                 writer.Indentation = 4;
@@ -9992,7 +9756,7 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
                     }
 
-                    looping.stop.SetMessage("正在保存书目记录 " + strBiblioRecPath + " 到 .bdf 文件");
+                    looping.Progress.SetMessage("正在保存书目记录 " + strBiblioRecPath + " 到 .bdf 文件");
 
                     if (data.Xmls != null)
                         foreach (var xml in data.Xmls)
@@ -10023,7 +9787,7 @@ MessageBoxDefaultButton.Button1);
 
                     CONTINUE:
                     i++;
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                 }
 
                 writer.WriteEndElement();   // </collection>
@@ -10311,7 +10075,7 @@ MessageBoxDefaultButton.Button1);
 
                 OperLogLoader loader = new OperLogLoader();
                 loader.Channel = channel;
-                loader.Stop = looping.stop;
+                loader.Stop = looping.Progress;
                 loader.Estimate = estimate;
                 loader.Dates = dates;
                 loader.Level = 0;   // 2;  // Program.MainForm.OperLogLevel;
@@ -10335,7 +10099,7 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     if (looping != null)
-                        looping.stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+                        looping.Progress.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
 
                     if (string.IsNullOrEmpty(item.Xml) == true)
                         continue;

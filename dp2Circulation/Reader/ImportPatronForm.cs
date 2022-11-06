@@ -147,7 +147,7 @@ namespace dp2Circulation
             ProcessInfo info = new ProcessInfo();
             {
                 info.Channel = channel; // this.GetChannel();
-                info.stop = looping.stop;   // _stop;
+                info.stop = looping.Progress;   // _stop;
                 info.TargetDbName = this.comboBox_targetDbName.Text;
                 info.AppendMode = this.comboBox_appendMode.Text;
                 info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
@@ -227,7 +227,7 @@ namespace dp2Circulation
                 using (XmlTextReader reader = new XmlTextReader(file))
                 {
                     if (looping != null)
-                        looping.stop.SetProgressRange(0, file.Length);
+                        looping.Progress.SetProgressRange(0, file.Length);
 
                     bool bRet = false;
 
@@ -268,7 +268,7 @@ namespace dp2Circulation
                         DoRecord(reader, info);
 
                         if (looping != null)
-                            looping.stop.SetProgressValue(file.Position);
+                            looping.Progress.SetProgressValue(file.Position);
 
                         info.PatronRecCount++;
                     }
@@ -303,93 +303,6 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
-#if NO
-        string CollectRecPath(string strSourceFileName)
-        {
-            this.Invoke((Action)(() =>
-EnableControls(false)
-));
-
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在分析读者记录路径 ...");
-            stop.BeginLoop();
-            try
-            {
-                // 用 FileStream 方式打开，主要是为了能在中途观察进度
-                using (FileStream file = File.Open(strSourceFileName,
-    FileMode.Open,
-    FileAccess.Read))
-                using (XmlTextReader reader = new XmlTextReader(file))
-                {
-                    if (stop != null)
-                        stop.SetProgressRange(0, file.Length);
-
-                    bool bRet = false;
-
-                    // 到根元素
-                    while (true)
-                    {
-                        bRet = reader.Read();
-                        if (bRet == false)
-                            throw new Exception("没有根元素");
-
-                        if (reader.NodeType == XmlNodeType.Element)
-                            break;
-                    }
-
-                    for (; ; )
-                    {
-                        if (stop != null && stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-
-                        // 到下一个 record 元素
-                        while (true)
-                        {
-                            bRet = reader.Read();
-                            if (bRet == false)
-                                break;
-                            if (reader.NodeType == XmlNodeType.Element)
-                                break;
-                        }
-
-                        if (bRet == false)
-                            break;  // 结束
-
-                        DoRecord(reader, info);
-
-                        if (stop != null)
-                            stop.SetProgressValue(file.Position);
-
-                        info.PatronRecCount++;
-                    }
-                }
-                return;
-            }
-            catch (Exception ex)
-            {
-                MainForm.WriteErrorLog($"导入读者 XML 记录时出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                strError = ex.Message;
-                goto ERROR1;
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
-
-                this.Invoke((Action)(() =>
-                    EnableControls(true)
-                    ));
-            }
-        }
-#endif
 
         private void button_stop_Click(object sender, EventArgs e)
         {

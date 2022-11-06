@@ -553,6 +553,7 @@ string style = null)
             OnHelpTriggered();
         }
 
+#if SUPPORT_OLD_STOP
         bool _channelDoEvents = true;
         public bool ChannelDoEvents
         {
@@ -571,6 +572,7 @@ string style = null)
             if (_channelDoEvents)
                 Application.DoEvents();
         }
+#endif
 
         /// <summary>
         /// 窗口 Closing 时被触发
@@ -1223,7 +1225,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 if (UseLooping) // 新的 Looping 风格
                 {
                     // 2022/10/29
-                    Program.MainForm.stopManager?.Active(this.TopLooping?.stop);
+                    Program.MainForm.stopManager?.Active(this.TopLooping?.Progress);
                 }
                 else
                 {
@@ -1292,7 +1294,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             try
             {
                 return Program.MainForm.VerifyBarcode(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strLibraryCodeList,
                     strBarcode,
@@ -1351,274 +1353,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         }
 
 
-        #region 配置文件相关
 
-        // 包装版本
-        // 获得配置文件
-        // parameters:
-        //      
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
-        public int GetCfgFileContent(string strBiblioDbName,
-            string strCfgFileName,
-            out string strContent,
-            out byte[] baOutputTimestamp,
-            out string strError)
-        {
-            return GetCfgFileContent(strBiblioDbName + "/cfgs/" + strCfgFileName,
-            out strContent,
-            out baOutputTimestamp,
-            out strError);
-        }
-
-        int m_nInGetCfgFile = 0;    // 防止GetCfgFile()函数重入 2008/3/6
-
-        // 获得配置文件
-        // parameters:
-        //      
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
-        public int GetCfgFileContent(string strCfgFilePath,
-            out string strContent,
-            out byte[] baOutputTimestamp,
-            out string strError)
-        {
-            baOutputTimestamp = null;
-            strError = "";
-            strContent = "";
-
-            if (m_nInGetCfgFile > 0)
-            {
-                strError = "GetCfgFile() 重入了";
-                return -1;
-            }
-
-            /*
-            LibraryChannel channel = this.GetChannel();
-            string strOldMessage = Progress.Initial("正在下载配置文件 ...");
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 1, 0);
-
-#if NO
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在下载配置文件 ...");
-            Progress.BeginLoop();
-#endif
-            */
-            var looping = Looping(out LibraryChannel channel,
-                "正在下载配置文件 ...",
-                "timeout:0:1:0");
-
-            m_nInGetCfgFile++;
-
-            try
-            {
-                looping.stop.SetMessage("正在下载配置文件 " + strCfgFilePath + " ...");
-                string strMetaData = "";
-                string strOutputPath = "";
-
-                string strStyle = "content,data,metadata,timestamp,outputpath,gzip";
-
-                long lRet = channel.GetRes(looping.stop,
-                    Program.MainForm?.cfgCache,
-                    strCfgFilePath,
-                    strStyle,
-                    null,
-                    out strContent,
-                    out strMetaData,
-                    out baOutputTimestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
-                {
-                    if (channel.ErrorCode == ErrorCode.NotFound)
-                        return 0;
-
-                    goto ERROR1;
-                }
-            }
-            finally
-            {
-                /*
-#if NO
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-#endif
-                Progress.Initial(strOldMessage);
-
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-                */
-                looping.Dispose();
-
-                m_nInGetCfgFile--;
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-
-        // 获得配置文件
-        // parameters:
-        //      
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
-        public int GetCfgFile(string strBiblioDbName,
-            string strCfgFileName,
-            out string strOutputFilename,
-            out byte[] baOutputTimestamp,
-            out string strError)
-        {
-            baOutputTimestamp = null;
-            strError = "";
-            strOutputFilename = "";
-
-            if (m_nInGetCfgFile > 0)
-            {
-                strError = "GetCfgFile() 重入了";
-                return -1;
-            }
-
-            /*
-            LibraryChannel channel = this.GetChannel();
-            string strOldMessage = Progress.Initial("正在下载配置文件 ...");
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 1, 0);
-
-#if NO
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在下载配置文件 ...");
-            Progress.BeginLoop();
-#endif
-            */
-            var looping = Looping(out LibraryChannel channel,
-                "正在下载配置文件 ...",
-                "timeout:0:1:0");
-
-            m_nInGetCfgFile++;
-
-            try
-            {
-                string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
-
-                looping.stop.SetMessage("正在下载配置文件 " + strPath + " ...");
-                string strMetaData = "";
-                string strOutputPath = "";
-
-                string strStyle = "content,data,metadata,timestamp,outputpath";
-
-                long lRet = channel.GetResLocalFile(looping.stop,
-                    Program.MainForm?.cfgCache,
-                    strPath,
-                    strStyle,
-                    out strOutputFilename,
-                    out strMetaData,
-                    out baOutputTimestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
-                {
-                    if (channel.ErrorCode == ErrorCode.NotFound)
-                        return 0;
-
-                    return -1;
-                }
-
-                return 1;
-            }
-            finally
-            {
-                looping.Dispose();
-                /*
-#if NO
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-#endif
-                Progress.Initial(strOldMessage);
-
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-                */
-                m_nInGetCfgFile--;
-            }
-        }
-
-        // 保存配置文件
-        public int SaveCfgFile(string strBiblioDbName,
-            string strCfgFileName,
-            string strContent,
-            byte[] baTimestamp,
-            out string strError)
-        {
-            strError = "";
-
-            /*
-            LibraryChannel channel = this.GetChannel();
-            string strOldMessage = Progress.Initial("正在保存配置文件 ...");
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 1, 0);
-
-#if NO
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在保存配置文件 ...");
-            Progress.BeginLoop();
-#endif
-            */
-            var looping = Looping(out LibraryChannel channel,
-                "正在保存配置文件 ...",
-                "timeout:0:1:0");
-
-            try
-            {
-                string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
-
-                looping.stop.SetMessage("正在保存配置文件 " + strPath + " ...");
-
-                byte[] output_timestamp = null;
-                string strOutputPath = "";
-
-                long lRet = channel.WriteRes(
-                    looping.stop,
-                    strPath,
-                    strContent,
-                    true,
-                    "",	// style
-                    baTimestamp,
-                    out output_timestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
-                    return -1;
-
-                return 1;
-            }
-            finally
-            {
-                looping.Dispose();
-                /*
-#if NO
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-#endif
-                Progress.Initial(strOldMessage);
-
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-                */
-            }
-        }
-
-        #endregion
 
         #region 种次号尾号相关
 
@@ -1680,7 +1415,7 @@ out string strError)
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strArrangeGroupName,
                     strClass,
@@ -1732,11 +1467,10 @@ out string strError)
             var looping = Looping(out LibraryChannel channel,
                 "正在装入书目记录 " + strBiblioRecPath + " 的局部 ...",
                 "timeout:0:0:10");
-
             try
             {
                 long lRet = channel.GetBiblioInfo(
-                    looping.stop,   // Progress.State == 0 ? Progress : null,
+                    looping.Progress,   // Progress.State == 0 ? Progress : null,
                     strBiblioRecPath,
                     strBiblioXml,
                     strPartName,    // 包含'@'符号
@@ -1761,6 +1495,7 @@ out string strError)
             }
         }
 
+#if REMOVED
         // 
         /// <summary>
         /// 获取书目记录的局部
@@ -1789,7 +1524,9 @@ out string strError)
                 out strError);
             return (int)lRet;
         }
+#endif
 
+#if REMOVED
         //
         /// <summary>
         /// 获取书目摘要
@@ -1821,6 +1558,7 @@ out string strError)
                 out strError);
             return (int)lRet;
         }
+#endif
 
         //
         /// <summary>
@@ -1852,7 +1590,7 @@ out string strError)
             try
             {
                 long lRet = channel.GetBiblioSummary(
-                    looping.stop,
+                    looping.Progress,
                     strItemBarcode,
                     strConfirmItemRecPath,
                     strBiblioRecPathExclude,
@@ -1986,7 +1724,7 @@ out string strError)
                 string strBiblioDbName = null;
 
                 long lRet = channel.ListDupProjectInfos(
-                    looping.stop,
+                    looping.Progress,
                     strBiblioDbName,
                     out DupProjectInfo[] dpis,
                     out strError);
@@ -2053,7 +1791,7 @@ out string strError)
                 string strAction = "";
 
                 long lRet = channel.GetUtilInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -2119,7 +1857,7 @@ out string strError)
                 string strAction = "";
 
                 long lRet = channel.SetUtilInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -2184,7 +1922,7 @@ out string strError)
                 string strAction = "";
 
                 long lRet = channel.GetUtilInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -2249,7 +1987,7 @@ out string strError)
                 string strAction = "";
 
                 long lRet = channel.SetUtilInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -3464,7 +3202,7 @@ out string strError)
             try
             {
                 long lRet = channel.GetSystemParameter(
-looping.stop,
+looping.Progress,
 "circulation",
 "locationTypes",
 out strOutputInfo,
@@ -3555,7 +3293,7 @@ out strError);
                 string[] results = null;
                 byte[] baNewTimestamp = null;
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     strRecPath,
                     "",
                     new string[] { strFormat },   // formats

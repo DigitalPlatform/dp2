@@ -414,7 +414,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetReaderInfo(
-                    looping.stop,
+                    looping.Progress,
                     "@path:" + strRecPath,
                     strFormatList,  // "xml,html",
                     out string[] results,

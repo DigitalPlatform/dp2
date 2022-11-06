@@ -178,7 +178,7 @@ namespace dp2Circulation
                     //      1   文件找到
                     int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                         channel,
-                        looping.stop,   // this.Stop,
+                        looping.Progress,   // this.Stop,
                         filepath,
                         prompt,
                         new System.Threading.CancellationToken(),
@@ -810,7 +810,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ClearAllDbs(
-                    looping.stop,
+                    looping.Progress,
                     out strError);
                 if (lRet == -1)
                     return -1;
@@ -989,7 +989,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    looping.stop,
+                    looping.Progress,
                     "getinfo",
                     "",
                     "",
@@ -1154,7 +1154,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    looping.stop,
+                    looping.Progress,
                     bRecreate == false ? "create" : "recreate",
                     "",
                     strDatabaseInfo,
@@ -1214,7 +1214,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    looping.stop,
+                    looping.Progress,
                     "delete",
                     strDatabaseNames,
                     "",
@@ -1278,7 +1278,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    looping.stop,
+                    looping.Progress,
                     "refresh",
                     strDatabaseNames,
                     strDatabaseInfo,
@@ -1338,7 +1338,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    looping.stop,
+                    looping.Progress,
                     "initialize",
                     strDatabaseNames,
                     "",
@@ -1401,7 +1401,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ManageDatabase(
-                    looping.stop,
+                    looping.Progress,
                     "change",
                     strDatabaseNames,
                     strDatabaseInfo,
@@ -3074,7 +3074,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "opac",
                     "databases",
                     out strOutputInfo,
@@ -3122,7 +3122,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "opac",
                     "databases",
                     strDatabaseDef,
@@ -3181,7 +3181,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "database_def",
                     strDbName,
                     out strOutputInfo,
@@ -4261,7 +4261,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "opac",
                     "browseformats",
                     out strOutputInfo,
@@ -4309,7 +4309,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "opac",
                     "browseformats",
                     strDatabaseDef,
@@ -5511,7 +5511,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "locationTypes",
                     out strOutputInfo,
@@ -5560,7 +5560,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "locationTypes",
                     strLocationDef,
@@ -6305,7 +6305,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "valueTables",
                     out strValueTableXml,
@@ -6356,7 +6356,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "valueTables",
                     strValueTableXml,
@@ -6586,7 +6586,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "barcodeValidation",
                     out strXml,
@@ -6644,7 +6644,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "barcodeValidation",
                     strXml,
@@ -6772,7 +6772,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "script",
                     out strScriptXml,
@@ -6823,7 +6823,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "script",
                     strScriptXml,

@@ -348,7 +348,7 @@ out string strError);
                         try
                         {
                             long lRet = channel.GetBiblioSummary(
-        looping.stop,
+        looping.Progress,
         pii,
         null,
         null,
@@ -558,7 +558,7 @@ out string strError);
             var looping = Looping(out LibraryChannel channel);
             try
             {
-                long lRet = channel.GetItemInfo(looping.stop,
+                long lRet = channel.GetItemInfo(looping.Progress,
                     pii,
                     "xml",
                     out string strItemXml,

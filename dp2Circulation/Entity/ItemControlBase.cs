@@ -561,7 +561,7 @@ namespace dp2Circulation
                 // channel = Program.MainForm.GetChannel();
                 looping = Looping(out channel,
                     strMessage);
-                stop = looping.stop;
+                stop = looping.Progress;
             }
             else
                 stop?.SetMessage(strMessage);
@@ -1949,7 +1949,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 //      -2  部分成功，部分失败
                 //      -1  出错
                 //      0   保存成功，没有错误和警告
-                nRet = SaveEntities(looping.stop,
+                nRet = SaveEntities(looping.Progress,
                     channel,
                     entities,
                     out strError);
@@ -2222,7 +2222,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 try
                 {
                     nRet = SearchBiblioRecPath(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         strIndex,
                         out strOutputItemRecPath,
@@ -2377,7 +2377,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
             try
             {
                 int nRet = GetKeys(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strRecPath,
                     strXml,

@@ -868,7 +868,7 @@ namespace dp2Circulation
                     }
 
                     // 设置进度范围
-                    looping.stop.SetProgressRange(0, nLineCount);
+                    looping.Progress.SetProgressRange(0, nLineCount);
                     // sr.Close();
                 }
 
@@ -885,7 +885,7 @@ namespace dp2Circulation
                         string strOrderRecPath = "";
                         strOrderRecPath = sr.ReadLine();
 
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetProgressValue(i);
 
                         if (strOrderRecPath == null)
                             break;
@@ -897,7 +897,7 @@ namespace dp2Circulation
                         if (strOrderRecPath[0] == '#')
                             continue;   // 注释行
 
-                        looping.stop.SetMessage("正在装入路径 " + strOrderRecPath + " 对应的记录...");
+                        looping.Progress.SetMessage("正在装入路径 " + strOrderRecPath + " 对应的记录...");
 
 
                         // 根据记录路径，装入订购记录
@@ -906,7 +906,7 @@ namespace dp2Circulation
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strOrderRecPath,
                             this.listView_origin,
@@ -1113,7 +1113,7 @@ namespace dp2Circulation
                 }
 
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     strBiblioRecPath,
                     "",
                     formats,
@@ -2517,7 +2517,7 @@ out strError);
                         }
 
                         int nRet = PrintMergedList(
-                            looping.stop,
+                            looping.Progress,
                             i,
                             lists[i],
                             ref doc,
@@ -2540,7 +2540,7 @@ out strError);
 
                         // 按渠道打印分类统计页
                         int nRet = PrintClassStatisList(
-                            looping.stop,
+                            looping.Progress,
                             i,
                             "class",
                             lists[i],
@@ -2558,7 +2558,7 @@ out strError);
                         // 按渠道打印出版社统计页
                         temp_filenames = null;
                         nRet = PrintClassStatisList(
-                            looping.stop,
+                            looping.Progress,
                             i,
                             "publisher",
                             lists[i],
@@ -3468,7 +3468,7 @@ out strError);
 
             // 栏目标题行
             {
-#region 输出 HTML
+                #region 输出 HTML
 
                 strTableContent += "<tr class='column'>";
                 strTableContent += "<td class='class'>" + strStatisTypeName + "</td>";
@@ -3486,9 +3486,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>已到码洋</td>";
                 }
 
-#endregion
+                #endregion
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3542,7 +3542,7 @@ title_last,
 XLColor.LightGray);
                 }
 
-#endregion
+                #endregion
             }
 
             string strSumPrice = "";
@@ -3613,7 +3613,7 @@ out strError);
                 else
                     strNoSumClass = " sum";
 
-#region 输出 HTML
+                #region 输出 HTML
 
                 strTableContent += "<tr class='content" + HttpUtility.HtmlEncode(strNoSumClass) + "'>";
                 strTableContent += "<td class='class'>" + HttpUtility.HtmlEncode(line.Class) + "</td>";
@@ -3631,9 +3631,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptCurrentFixedPrices) + "</td>";
                 }
 
-#endregion
+                #endregion
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3735,7 +3735,7 @@ strAcceptCurrentFixedPrices);
                     nExcelLineIndex++;
                 }
 
-#endregion
+                #endregion
 
                 if (secondary_lines != null
                     && line.InnerLines != null) // 2013/9/11
@@ -3773,7 +3773,7 @@ strCurrentFixedPrices);
             }
 
             // 汇总行
-#region 输出 HTML
+            #region 输出 HTML
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
         out string strOutputPrice,
@@ -3815,9 +3815,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptOutputFixedPrice) + "</td>";
                 }
             }
-#endregion
+            #endregion
 
-#region 输出 Excel
+            #region 输出 Excel
             if (doc != null)
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
@@ -3920,7 +3920,7 @@ strAcceptOutputFixedPrice);
                     "");    // 没有竖线
             }
 
-#endregion
+            #endregion
 
             strTableContent += "</tr>";
             strTableContent += "</table>";
@@ -4072,7 +4072,7 @@ strAcceptOutputFixedPrice);
             }
 
 
-#region 输出 Excel
+            #region 输出 Excel
 
             if (sheet != null)
             {
@@ -4148,7 +4148,7 @@ title_last,
 "",
 XLColor.LightGray);
             }
-#endregion
+            #endregion
 
             List<StatisLine> sum_items = new List<StatisLine>();
 
@@ -4167,7 +4167,7 @@ XLColor.LightGray);
                 strTableContent.Append("<tr class='content" + HttpUtility.HtmlAttributeEncode(strNoSumClass) + "'>");
                 strTableContent.Append("<td class='class'>" + HttpUtility.HtmlEncode(inner_line.Key) + "</td>");
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4185,7 +4185,7 @@ inner_line.Key/*,
 true*/);
                 }
 
-#endregion
+                #endregion
 
                 int i = 0;
                 foreach (StatisLine line in inner_line.lines)
@@ -4193,7 +4193,7 @@ true*/);
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
 
-#region 输出 Excel
+                    #region 输出 Excel
 
                     if (sheet != null)
                     {
@@ -4213,7 +4213,7 @@ true*/);
     XLAlignmentHorizontalValues.Right);
                     }
 
-#endregion
+                    #endregion
 
                     // 汇总
                     if (inner_line.AllowSum == true)
@@ -4244,7 +4244,7 @@ true*/);
                 strTableContent.Append("<tr class='totalize'>");
                 strTableContent.Append("<td class='class'>合计</td>");
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4259,13 +4259,13 @@ true*/);
 
                 }
 
-#endregion
+                #endregion
 
                 foreach (StatisLine line in sum_items)
                 {
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
-#region 输出 Excel
+                    #region 输出 Excel
                     if (sheet != null)
                     {
                         IXLCell first = WriteExcelCell(
@@ -4287,7 +4287,7 @@ true*/);
                         // second.Style.Border.TopBorder = XLBorderStyleValues.Thin;
 
                     }
-#endregion
+                    #endregion
                 }
                 strTableContent.Append("</tr>");
             }
@@ -4892,8 +4892,7 @@ nLineIndex++,
 
             if (sheet != null && column_max_chars.Count > 0)
             {
-                if (stop != null)
-                    stop.SetMessage("正在调整列宽度 ...");
+                stop?.SetMessage("正在调整列宽度 ...");
                 Application.DoEvents();
 
                 AdjectColumnWidth(sheet, column_max_chars);
@@ -5227,7 +5226,7 @@ XLColor.DarkGreen); // 订单
             return 0;
         }
 
-#region Excel 实用函数
+        #region Excel 实用函数
 
         // 合计页的边沿
         public static int SUM_TOP_BLANK_LINES = 2;
@@ -5391,7 +5390,7 @@ long value,
         }
 #endif
 
-#endregion
+        #endregion
 
         int BuildMergedPageTop(PrintOption option,
             Hashtable macro_table,
@@ -6614,14 +6613,14 @@ strContent);
                 "disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, 100);
+                looping.Progress.SetProgressRange(0, 100);
 
                 long lRet = 0;
                 if (this.BatchNo == "<不指定>")
                 {
                     // 2013/3/25
                     lRet = channel.SearchOrder(
-        looping.stop,
+        looping.Progress,
         this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
         "", // dlg.BatchNo,
         -1,
@@ -6641,7 +6640,7 @@ strContent);
                 else
                 {
                     lRet = channel.SearchOrder(
-                        looping.stop,
+                        looping.Progress,
                         this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
                         dlg.BatchNo,
                         -1,
@@ -6666,7 +6665,7 @@ strContent);
 
                 long lHitCount = lRet;
 
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -6684,7 +6683,7 @@ strContent);
                     }
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         "batchno",   // strResultSetName
                         lStart,
                         lCount,
@@ -6715,7 +6714,7 @@ strContent);
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strRecPath,
                             this.listView_origin,
@@ -6725,20 +6724,20 @@ strContent);
                         if (nRet == -2)
                             nDupCount++;
 
-                        looping.stop.SetProgressValue(lStart + i + 1);
+                        looping.Progress.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.Progress.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                 }
 
                 // 填充合并后数据列表
-                looping.stop.SetMessage("正在合并数据...");
+                looping.Progress.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -6771,7 +6770,7 @@ strContent);
                     this,
                     this.comboBox_load_type.Text,
                     "order",
-                    looping.stop,
+                    looping.Progress,
                     channel);
             }
         }
@@ -7142,7 +7141,7 @@ MessageBoxDefaultButton.Button2);
                 "disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
 
                 for (int i = 0; i < items.Count; i++)
                 {
@@ -7154,10 +7153,10 @@ MessageBoxDefaultButton.Button2);
 
                     ListViewItem item = items[i];
 
-                    looping.stop.SetMessage("正在刷新 " + item.Text + " ...");
+                    looping.Progress.SetMessage("正在刷新 " + item.Text + " ...");
 
                     int nRet = RefreshOneItem(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         item,
                         out strError);
@@ -7166,10 +7165,10 @@ MessageBoxDefaultButton.Button2);
                         MessageBox.Show(this, strError);
                      * */
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                 }
 
-                looping.stop.SetProgressValue(items.Count);
+                looping.Progress.SetProgressValue(items.Count);
                 return;
             }
             finally
@@ -7397,7 +7396,7 @@ MessageBoxDefaultButton.Button2);
             public OldNewValue FixedPrice { get; set; }
             public OldNewCopy Copy { get; set; }
 
-#region 扩展的属性
+            #region 扩展的属性
 
             // 订购单价
             public string OrderPrice
@@ -7617,7 +7616,7 @@ MessageBoxDefaultButton.Button2);
             }
 
 
-#endregion
+            #endregion
 
             // 对一些值进行填充和调整
             // 返回 LineInfo 类型是为了便于链式调用
@@ -9475,7 +9474,7 @@ MessageBoxDefaultButton.Button2);
                 MERGED_COLUMN_SELLER);
         }
 
-#region 原始数据
+        #region 原始数据
 
         // 打印原始数据
         private void button_print_printOriginList_Click(object sender, EventArgs e)
@@ -10362,7 +10361,7 @@ column.Evalue);
         }
 
 
-#endregion
+        #endregion
 
         // 保存对原始数据的修改
         private void button_saveChange_saveChange_Click(object sender, EventArgs e)
@@ -10489,7 +10488,7 @@ column.Evalue);
                     {
                         // 保存一个批次
                         nRet = SaveOneBatchOrders(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             entity_list,
                             strPrevBiblioRecPath,
@@ -10588,7 +10587,7 @@ column.Evalue);
                 {
                     // 保存一个批次
                     nRet = SaveOneBatchOrders(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         entity_list,
                         strPrevBiblioRecPath,
@@ -11073,7 +11072,7 @@ column.Evalue);
                 // 先检查是否有错误事项，顺便构建item列表
                 List<ListViewItem> items = new List<ListViewItem>();
 
-                looping.stop.SetMessage("正在构造Item列表...");
+                looping.Progress.SetMessage("正在构造Item列表...");
                 for (int i = 0; i < this.listView_merged.Items.Count; i++)
                 {
                     if (looping.Stopped)
@@ -11101,7 +11100,7 @@ column.Evalue);
                     string strOutputFilename = PathUtil.MergePath(strOutputDir, lists[i].Seller + ".xml");
 
                     int nRet = OutputOneOrder(
-                        looping.stop,
+                        looping.Progress,
                         lists[i],
                         strOutputDir,
                         strOutputFilename,
@@ -11326,197 +11325,6 @@ column.Evalue);
             return 0;
         }
 
-        /*
-        // 输出有关一个渠道的订单
-        int OutputOneOrder(NamedListViewItems items,
-            string strOutputFilename,
-            out string strError)
-        {
-            strError = "";
-
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml("<order />");
-
-            string strSeller = items.Seller;
-
-            // 渠道名
-            DomUtil.SetElementText(dom.DocumentElement,
-                "seller", strSeller);
-            // 创建日期
-            DomUtil.SetElementText(dom.DocumentElement,
-                "createDate", DateTime.Now.ToLongDateString());
-            // 批次号
-            DomUtil.SetElementText(dom.DocumentElement, 
-                "batchNo", this.BatchNo);
-            // 记录路径文件名 全路径
-            DomUtil.SetElementText(dom.DocumentElement,
-                "recPathFilename", this.RecPathFilePath);
-
-            // 统计信息
-            {
-                int nItemCount = items.Count;
-                int nTotalCopies = GetMergedTotalCopies(items);
-                int nBiblioCount = GetMergedBiblioCount(items);
-                string strTotalPrice = GetMergedTotalPrice(items);
-
-                // 事项数
-                DomUtil.SetElementText(dom.DocumentElement,
-                    "itemCount", nItemCount.ToString());
-                // 总册数(注意每项可以有多册)
-                DomUtil.SetElementText(dom.DocumentElement,
-                    "totalcopies", nTotalCopies.ToString());
-                // 种数
-                DomUtil.SetElementText(dom.DocumentElement,
-                   "titleCount", nBiblioCount.ToString());
-                // 总价格 可能为多个币种的价格串联形态
-                DomUtil.SetElementText(dom.DocumentElement,
-                   "totalPrice", strTotalPrice);
-            }
-
-            stop.SetProgressRange(0, items.Count);
-
-            // 内容行
-            for (int i = 0; i < items.Count; i++)
-            {
-                if (stop != null)
-                {
-                    if (stop.State != 0)
-                    {
-                        strError = "用户中断2";
-                        return -1;
-                    }
-                }
-
-                ListViewItem item = items[i];
-
-                XmlNode node = dom.CreateElement("item");
-                dom.DocumentElement.AppendChild(node);
-
-                // 序号，从0开始
-                DomUtil.SetAttr(node, "index", i.ToString());
-
-                // catalogNo
-                DomUtil.SetElementText(node,
-                    "catalogNo",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_CATALOGNO));
-
-                // summary
-                DomUtil.SetElementText(node,
-                    "summary",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_SUMMARY));
-
-                // isbn/issn
-                DomUtil.SetElementText(node,
-                    "isbnIssn",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_ISBNISSN));
-
-                // merge comment
-                DomUtil.SetElementText(node,
-                    "mergeComment",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_MERGECOMMENT));
-
-                // range
-                DomUtil.SetElementText(node,
-                    "range",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_RANGE));
-
-                // issue count
-                DomUtil.SetElementText(node,
-                    "issueCount",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_ISSUECOUNT));
-
-                // copy
-                DomUtil.SetElementText(node,
-                    "copy",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_COPY));
-
-                // price
-                DomUtil.SetElementText(node,
-                    "price",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_PRICE));
-                    
-                // total price
-                DomUtil.SetElementText(node,
-                    "totalPrice",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_TOTALPRICE));
-
-                // order time
-                DomUtil.SetElementText(node,
-                    "orderTime",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_ORDERTIME));
-
-                // order ID
-                DomUtil.SetElementText(node,
-                    "orderID",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_ORDERID));
-
-                // distribute
-                DomUtil.SetElementText(node,
-                    "distribute",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_DISTRIBUTE));
-
-                // class
-                DomUtil.SetElementText(node,
-                    "class",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_CLASS));
-
-                // comment
-                DomUtil.SetElementText(node,
-                    "comment",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_COMMENT));
-
-                // biblio recpath
-                DomUtil.SetElementText(node,
-                    "biblioRecpath",
-                    ListViewUtil.GetItemText(item, MERGED_COLUMN_BIBLIORECPATH));
-
-                stop.SetMessage("正在输出事项 " + strSeller + " " + (i + 1).ToString());
-
-                stop.SetProgressValue(i);
-            }
-
-            dom.Save(strOutputFilename);
-
-            // 执行脚本
-            OutputProjectData format = GetFormat(strSeller);
-            if (format == null)
-                return 0;   // 缺省格式。是否还需要对数据进行添加呢？
-
-            // 内置的格式
-            if (format.ProjectName[0] == '<')
-            {
-                if (format.ProjectName == "<default>"
-                    || format.ProjectName == "<缺省>")
-                    return 0;
-
-                strError = "未知的内置格式 '" + format.ProjectName + "'";
-                return -1;
-            }
-
-            // 运行Script
-
-            try
-            {
-                Debug.Assert(format.OutputOrder != null, "");
-                Debug.Assert(format.Assembly != null, "");
-
-                format.OutputOrder.XmlFilename = strOutputFilename;
-                format.OutputOrder.Seller = format.Seller;
-                format.OutputOrder.DataDir = Program.MainForm.DataDir;
-
-                // 执行脚本的Output()
-                format.OutputOrder.Output();
-            }
-            catch (Exception ex)
-            {
-                strError = "脚本执行过程抛出异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                return -1;
-            }
-
-            return 0;
-        }
-         * */
-
         OutputProjectData GetFormat(string strSeller)
         {
             for (int i = 0; i < this.formats.Count; i++)
@@ -11679,7 +11487,7 @@ column.Evalue);
             LoadOrderToEntityForm(this.listView_origin);
         }
 
-#region 到书率分时间片统计
+        #region 到书率分时间片统计
 
         // 到货率统计
         private void button_print_arriveRatioStatis_Click(object sender, EventArgs e)
@@ -11857,7 +11665,7 @@ column.Evalue);
                         }
 
                         int nRet = BuildArriveHtml(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             i,
                             lists[i],
@@ -12710,7 +12518,7 @@ string strFileName)
             return 0;
         }
 
-#endregion
+        #endregion
 
         // 打印订单 -- 输出 Excel 文件
         private void toolStripMenuItem_outputExcel_Click(object sender, EventArgs e)
@@ -12978,13 +12786,13 @@ string strFileName)
                 "timeout:0:2:0,disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, 100);
+                looping.Progress.SetProgressRange(0, 100);
 
                 long lRet = 0;
 
                 // 2013/3/25
                 lRet = channel.SearchOrder(
-    looping.stop,
+    looping.Progress,
     this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
     strQueryWord,   // "", // dlg.BatchNo,
     -1,
@@ -13005,7 +12813,7 @@ string strFileName)
                 }
 
                 ResultSetLoader loader = new ResultSetLoader(channel,
-                    looping.stop,
+                    looping.Progress,
                     "batchno",
                     "id"); // "id,cols"
 
@@ -13013,7 +12821,7 @@ string strFileName)
 
                 long lHitCount = lRet;
 
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
 
                 // DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
@@ -13039,7 +12847,7 @@ string strFileName)
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strRecPath,
                             this.listView_origin,
@@ -13049,15 +12857,15 @@ string strFileName)
                         if (nRet == -2)
                             nDupCount++;
 
-                        looping.stop.SetProgressValue(i + 1);
+                        looping.Progress.SetProgressValue(i + 1);
                     }
 
-                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + (i + 1).ToString() + " 条");
+                    looping.Progress.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + (i + 1).ToString() + " 条");
                     i++;
                 }
 
                 // 填充合并后数据列表
-                looping.stop.SetMessage("正在合并数据...");
+                looping.Progress.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
                 if (nRet == -1)
                     return -1;

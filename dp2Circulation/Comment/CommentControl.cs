@@ -1802,7 +1802,7 @@ namespace dp2Circulation
                 string strOutputBiblioRecPath = "";
 
                 long lRet = channel.GetCommentInfo(
-                    looping.stop,
+                    looping.Progress,
                     strXml,
                     // "",
                     "html",
@@ -2080,7 +2080,7 @@ namespace dp2Circulation
                         //      0   not dup
                         //      1   dup
                         nRet = SearchCommentRefIdDup(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             commentitem.RefID,
                             // this.BiblioRecPath,

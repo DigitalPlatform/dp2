@@ -2276,11 +2276,13 @@ namespace dp2Circulation
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(5);
 
+            /*
             // EnableControls(false);
             stop.OnStop += new StopEventHandler(channel.DoStop);
             stop.Initial("正在列出全部" + strName + "批次号 ...");
             stop.BeginLoop();
-
+            */
+            stop?.SetMessage("正在列出全部" + strName + "批次号 ...");
             try
             {
                 int nPerMax = 2000; // 一次检索命中的最大条数限制
@@ -2311,8 +2313,6 @@ namespace dp2Circulation
                 }
                 else if (strType == "biblio")
                 {
-                    string strQueryXml = "";
-
                     lRet = channel.SearchBiblio(
                         stop,
                         strDbName,  // "<all>",    // 尽管可以用 this.comboBox_inputBiblioDbName.Text, 以便获得和少数书目库相关的批次号实例，但是容易造成误会：因为数据库名列表刷新后，这里却不会刷新？
@@ -2325,12 +2325,11 @@ namespace dp2Circulation
                         "desc",
                         "keycount", // strOutputStyle
                         "",
-                        out strQueryXml,
+                        out string strQueryXml,
                         out strError);
                 }
                 else if (strType == "item")
                 {
-
                     lRet = channel.SearchItem(
                         stop,
                         strDbName,   // "<all>",
@@ -2348,7 +2347,6 @@ namespace dp2Circulation
                 {
                     Debug.Assert(false, "");
                 }
-
 
                 if (lRet == -1)
                     goto ERROR1;
@@ -2415,23 +2413,26 @@ namespace dp2Circulation
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    stop?.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
                 }
+                return;
             }
             finally
             {
+                stop?.SetMessage("");
+                /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(channel.DoStop);
                 stop.Initial("");
 
                 // EnableControls(true);
+                */
 
                 channel.Timeout = old_timeout;
             }
-            return;
         ERROR1:
             MessageBox.Show(owner, strError);
         }

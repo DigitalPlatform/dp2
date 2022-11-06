@@ -808,7 +808,7 @@ namespace dp2Circulation
                 }
 
                 // 设置进度范围
-                looping.stop.SetProgressRange(0, nLineCount);
+                looping.Progress.SetProgressRange(0, nLineCount);
                 // stop.SetProgressValue(0);
 
                 // 逐行处理
@@ -830,7 +830,7 @@ namespace dp2Circulation
                     string strLine = "";
                     strLine = sr.ReadLine();
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     if (strLine == null)
                         break;
@@ -842,7 +842,7 @@ namespace dp2Circulation
                     if (strLine[0] == '#')
                         continue;   // 注释行
 
-                    looping.stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
+                    looping.Progress.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
 
                     // 根据记录路径，装入订购记录
                     // return: 
@@ -850,7 +850,7 @@ namespace dp2Circulation
                     //      -1  出错
                     //      1   成功
                     nRet = LoadOneItem(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         this.comboBox_load_type.Text,
                         strLine,
@@ -4106,7 +4106,7 @@ namespace dp2Circulation
                 "disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, 100);
+                looping.Progress.SetProgressRange(0, 100);
                 // stop.SetProgressValue(0);
 
                 long lRet = 0;
@@ -4114,7 +4114,7 @@ namespace dp2Circulation
                 {
                     // 2013/3/25
                     lRet = channel.SearchItem(
-                        looping.stop,
+                        looping.Progress,
                         this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
                         //"<all>",
                         "", // dlg.BatchNo,
@@ -4135,7 +4135,7 @@ namespace dp2Circulation
                 else
                 {
                     lRet = channel.SearchItem(
-looping.stop,
+looping.Progress,
 this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
 //"<all>",
 dlg.BatchNo,
@@ -4162,7 +4162,7 @@ out strError);
 
                 long lHitCount = lRet;
 
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
                 // stop.SetProgressValue(0);
 
                 // TODO: 下面可以用 ResultSetLoader 改造
@@ -4183,7 +4183,7 @@ out strError);
                     }
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         "batchno",   // strResultSetName
                         lStart,
                         lCount,
@@ -4222,7 +4222,7 @@ out strError);
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             this.comboBox_load_type.Text,
                             strRecPath,
@@ -4230,13 +4230,13 @@ out strError);
                             out strError);
                         if (nRet == -2)
                             nDupCount++;
-                        looping.stop.SetProgressValue(lStart + i + 1);
+                        looping.Progress.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.Progress.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -4246,13 +4246,13 @@ out strError);
                 OutputOriginListErrorToHistory();
 
                 // 检查套内册完整性
-                looping.stop.SetMessage("正在 检查套内册完整性...");
+                looping.Progress.SetMessage("正在 检查套内册完整性...");
                 nRet = CheckSubCopy(out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 // 填充合并后数据列表
-                looping.stop.SetMessage("正在合并数据...");
+                looping.Progress.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -4287,7 +4287,7 @@ out strError);
                     this,
                     this.comboBox_load_type.Text,
                     "item",
-                    looping.stop,
+                    looping.Progress,
                     channel);
             }
         }
@@ -4388,14 +4388,14 @@ out strError);
                 "disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, 100);
+                looping.Progress.SetProgressRange(0, 100);
 
                 long lRet = 0;
                 if (this.BatchNo == "<不指定>")
                 {
                     // 2013/3/27
                     lRet = channel.SearchOrder(
-                    looping.stop,
+                    looping.Progress,
                     this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
                     "", // dlg.BatchNo,
                     -1,
@@ -4415,7 +4415,7 @@ out strError);
                 else
                 {
                     lRet = channel.SearchOrder(
-looping.stop,
+looping.Progress,
 this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
 dlg.BatchNo,
 -1,
@@ -4440,7 +4440,7 @@ out strError);
 
                 long lHitCount = lRet;
 
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
                 // stop.SetProgressValue(0);
 
                 int nOrderRecCount = 0;
@@ -4462,7 +4462,7 @@ out strError);
                     }
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         "batchno",   // strResultSetName
                         lStart,
                         lCount,
@@ -4494,7 +4494,7 @@ out strError);
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOrderItem(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strRecPath,
                             this.listView_origin,
@@ -4506,13 +4506,13 @@ out strError);
                         if (nRet == -2)
                             nDupCount++;
 
-                        looping.stop.SetProgressValue(lStart + i + 1);
+                        looping.Progress.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.Progress.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -4522,13 +4522,13 @@ out strError);
                 OutputOriginListErrorToHistory();
 
                 // 检查套内册完整性
-                looping.stop.SetMessage("正在 检查套内册完整性...");
+                looping.Progress.SetMessage("正在 检查套内册完整性...");
                 nRet = CheckSubCopy(out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 // 填充合并后数据列表
-                looping.stop.SetMessage("正在合并数据...");
+                looping.Progress.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -4849,7 +4849,7 @@ out strError);
                     this,
                     this.comboBox_load_type.Text,
                     "order",
-                    looping.stop,
+                    looping.Progress,
                     channel);
             }
         }
@@ -5293,7 +5293,7 @@ out strError);
                 "disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
 
                 for (int i = 0; i < items.Count; i++)
                 {
@@ -5305,10 +5305,10 @@ out strError);
 
                     ListViewItem item = items[i];
 
-                    looping.stop.SetMessage("正在刷新 " + item.Text + " ...");
+                    looping.Progress.SetMessage("正在刷新 " + item.Text + " ...");
 
                     int nRet = RefreshOneItem(
-                        looping.stop,
+                        looping.Progress,
                         channel, 
                         item, 
                         out strError);
@@ -5317,10 +5317,10 @@ out strError);
                         MessageBox.Show(this, strError);
                      * */
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                 }
 
-                looping.stop.SetProgressValue(items.Count);
+                looping.Progress.SetProgressValue(items.Count);
 
                 return;
             }
@@ -7642,7 +7642,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                     {
                         // 保存一个批次
                         nRet = SaveOneBatchOrders(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             entity_list,
                             strPrevBiblioRecPath,
@@ -7696,7 +7696,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 {
                     // 保存一个批次
                     nRet = SaveOneBatchOrders(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         entity_list,
                         strPrevBiblioRecPath,
@@ -8048,7 +8048,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 }
 
                 PrintExchangeRateList(
-                    looping.stop,
+                    looping.Progress,
                     items,
                     ref doc);
             }

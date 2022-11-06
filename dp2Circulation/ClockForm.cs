@@ -144,7 +144,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                 long lRet = channel.SetClock(
-                    looping.stop,
+                    looping.Progress,
                     this.RFC1123TimeString,
                     out strError);
                 if (lRet == -1)
@@ -205,7 +205,7 @@ MessageBoxDefaultButton.Button2);
 
                 string strTime = "";
                 long lRet = channel.GetClock(
-                    looping.stop,
+                    looping.Progress,
                     out strTime,
                     out strError);
                 if (lRet == -1)
@@ -288,7 +288,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                 long lRet = channel.SetClock(
-                    looping.stop,
+                    looping.Progress,
                     null,
                     out strError);
                 if (lRet == -1)

@@ -2055,7 +2055,7 @@ namespace dp2Circulation
                     //      1   succeed
                     long nRet = GetAuthorNumber(
                         ref question_table,
-                        _looping.stop,  // this._detailWindow.Progress,
+                        _looping.Progress,  // this._detailWindow.Progress,
                         this._detailWindow.Form,
                         strGcatWebServiceUrl,
                         strAuthor,

@@ -106,7 +106,7 @@ namespace dp2Circulation
         /// </summary>
         // public MainForm MainForm = null;
 
-        DigitalPlatform.Stop stop = null;
+        private DigitalPlatform.Stop _stop = null;
 
 #if SINGLE_CHANNEL
         /// <summary>
@@ -171,8 +171,8 @@ namespace dp2Circulation
 
             if (bDisplayMessage == true)
             {
-                stop = new DigitalPlatform.Stop();
-                stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+                _stop = new DigitalPlatform.Stop();
+                _stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
             }
 
             // this.BeginThread();
@@ -211,10 +211,10 @@ namespace dp2Circulation
             CloseAllChannels();
             this.Channels = null;
 #endif
-            if (stop != null) // 脱离关联
+            if (_stop != null) // 脱离关联
             {
-                stop.Unregister();	// 和容器关联
-                stop = null;
+                _stop.Unregister();	// 和容器关联
+                _stop = null;
             }
 
             this.Clear();
@@ -443,11 +443,11 @@ namespace dp2Circulation
 
                 string strError = "";
 
-                if (stop != null)
+                if (_stop != null)
                 {
-                    stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.SetMessage("正在获取册信息 '" + strItemBarcode + "' ...");
-                    stop.BeginLoop();
+                    _stop.OnStop += new StopEventHandler(this.DoStop);
+                    _stop.SetMessage("正在获取册信息 '" + strItemBarcode + "' ...");
+                    _stop.BeginLoop();
                 }
 
                 try
@@ -487,7 +487,7 @@ namespace dp2Circulation
 
                         // this.Channel.Timeout = new TimeSpan(0, 0, 5);
                         long lRet = channel.GetItemInfo(
-                            stop,
+                            _stop,
                             strItemBarcode,
                             "html",
                             out strItemText,
@@ -507,7 +507,7 @@ namespace dp2Circulation
 
                         // this.Channel.Timeout = new TimeSpan(0, 0, 5);
                         lRet = channel.GetItemInfo(
-        stop,
+        _stop,
         strItemBarcode,
         "xml",
         out string strXml,
@@ -540,16 +540,15 @@ namespace dp2Circulation
                 }
                 finally
                 {
-                    if (stop != null)
+                    if (_stop != null)
                     {
-                        stop.EndLoop();
-                        stop.OnStop -= new StopEventHandler(this.DoStop);
-                        stop.Initial("");
+                        _stop.EndLoop();
+                        _stop.OnStop -= new StopEventHandler(this.DoStop);
+                        _stop.Initial("");
                     }
                 }
 
             ERROR1:
-
                 Program.MainForm.DisplayItemProperty("error",
                     strError,
                     "");
@@ -826,7 +825,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 }
             }
 
-            if (this.DisplayMessage == true && stop == null)
+            if (this.DisplayMessage == true && _stop == null)
             {
                 return null;
             }
@@ -847,11 +846,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             try
             {
 #endif
-            if (stop != null)
+            if (_stop != null)
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("正在获取读者照片 '" + strPatronBarcode + "' ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.SetMessage("正在获取读者照片 '" + strPatronBarcode + "' ...");
+                _stop.BeginLoop();
             }
 
             try
@@ -926,7 +925,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                             byte[] baTimestamp = null;
 
                             channel.Timeout = new TimeSpan(0, 0, 5);
-                            lRet = channel.GetReaderInfo(stop,
+                            lRet = channel.GetReaderInfo(_stop,
                                 strPatronBarcode,
                                 "xml",
                                 out results,
@@ -1004,7 +1003,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 
                     channel.Timeout = new TimeSpan(0, 0, 60);
                     lRet = channel.GetRes(
-                        stop,
+                        _stop,
                         strResPath,
                         strTempFilePath,
                         "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
@@ -1035,11 +1034,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             }
             finally
             {
-                if (stop != null)
+                if (_stop != null)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
             }
 
@@ -1073,7 +1072,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             if (this.IsInLoop == false)
                 throw new Exception("已经不在循环中");
 
-            if (this.DisplayMessage == true && stop == null)
+            if (this.DisplayMessage == true && _stop == null)
             {
                 return "channels closed 1...";
             }
@@ -1127,11 +1126,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             try
             {
 #endif
-            if (stop != null)
+            if (_stop != null)
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("正在获取读者摘要 '" + strPatronBarcode + "' ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.SetMessage("正在获取读者摘要 '" + strPatronBarcode + "' ...");
+                _stop.BeginLoop();
             }
 
             try
@@ -1157,7 +1156,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                     string strXml = "";
                     string[] results = null;
                     channel.Timeout = new TimeSpan(0, 0, 5);
-                    long lRet = channel.GetReaderInfo(stop,
+                    long lRet = channel.GetReaderInfo(_stop,
                         strPatronBarcode,
                         "xml",
                         out results,
@@ -1213,11 +1212,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             }
             finally
             {
-                if (stop != null)
+                if (_stop != null)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
             }
             return strSummary;
@@ -1259,7 +1258,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 throw new Exception("已经不在循环中");
             // Debug.WriteLine("id=" + strIdString);
 
-            if (this.DisplayMessage == true && stop == null)
+            if (this.DisplayMessage == true && _stop == null)
             {
                 return "channels closed 1...";
             }
@@ -1331,11 +1330,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             try
             {
 #endif
-            if (stop != null)
+            if (_stop != null)
             {
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("正在获取书目摘要 '" + strItemBarcode + "' ...");
-                stop.BeginLoop();
+                _stop.OnStop += new StopEventHandler(this.DoStop);
+                _stop.SetMessage("正在获取书目摘要 '" + strItemBarcode + "' ...");
+                _stop.BeginLoop();
             }
 
             try
@@ -1364,7 +1363,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                     // 最多重试 n 次
                     for (int i = 0; i < 1; i++)
                     {
-                        if (stop != null && stop.State != 0)
+                        if (_stop != null && _stop.State != 0)
                         {
                             lRet = -1;
                             strError = "中断";
@@ -1382,7 +1381,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                         // 注: Channel.Timeout 在 GetBiblioSummary() 函数中会自动设置
 
                         lRet = channel.GetBiblioSummary(
-                            stop,
+                            _stop,
                             strItemBarcode,
                             strConfirmItemRecPath,
                             bContainCover == false ? null : "coverimage",
@@ -1412,11 +1411,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             }
             finally
             {
-                if (stop != null)
+                if (_stop != null)
                 {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
+                    _stop.EndLoop();
+                    _stop.OnStop -= new StopEventHandler(this.DoStop);
+                    _stop.Initial("");
                 }
             }
 #if USE_LOCK

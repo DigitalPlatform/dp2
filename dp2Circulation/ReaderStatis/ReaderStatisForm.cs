@@ -484,7 +484,7 @@ namespace dp2Circulation
 
                 // 循环
                 nRet = DoLoop(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     out strError);
                 if (nRet == -1)
@@ -1527,7 +1527,7 @@ namespace dp2Circulation
                 string strExistingXml = "";
 
                 long lRet = channel.SetReaderInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strRecPath,
                     strNewXml,

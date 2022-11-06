@@ -1216,7 +1216,7 @@ namespace dp2Catalog
 
                             // MessageBox.Show(this, item.Xml);
                             long lRet = channel.Search(
-                                looping.stop,
+                                looping.Progress,
                                 item.Xml,
                                 "default",
                                 strOutputStyle,
@@ -1230,7 +1230,7 @@ namespace dp2Catalog
                             long lHitCount = lRet;
                             lTotalCount += lRet;
 
-                            looping.stop.SetProgressRange(0, lTotalCount);
+                            looping.Progress.SetProgressRange(0, lTotalCount);
 
                             // textBox_simpleQuery_comment.Text += "命中记录数: " + Convert.ToString(nRet) + "\r\n";
                             this.textBox_resultInfo.Text += "检索词 '" + this.textBox_simple_queryWord.Text + "' 命中 " + lTotalCount.ToString() + " 条记录\r\n";
@@ -1253,10 +1253,10 @@ namespace dp2Catalog
                                     goto ERROR1;
                                 }
 
-                                looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                                looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                                 lRet = channel.GetSearchResult(
-                                    looping.stop,
+                                    looping.Progress,
                                     null,   // strResultSetName
                                     lStart,
                                     lPerCount,
@@ -1289,7 +1289,7 @@ namespace dp2Catalog
                                 if (lStart >= lHitCount || lPerCount <= 0)
                                     break;
 
-                                looping.stop.SetProgressValue(lFillCount);
+                                looping.Progress.SetProgressValue(lFillCount);
                             }
 
                             /// 
@@ -1430,7 +1430,7 @@ namespace dp2Catalog
 
                             string strOutputStyle = "id";
 
-                            long lRet = channel.Search(looping.stop,
+                            long lRet = channel.Search(looping.Progress,
                                 item.QueryXml,
                                 "default",
                                 strOutputStyle,
@@ -1446,7 +1446,7 @@ namespace dp2Catalog
 
                             lTotalHitCount += lHitCount;
 
-                            looping.stop.SetProgressRange(0, lTotalHitCount);
+                            looping.Progress.SetProgressRange(0, lTotalHitCount);
 
                             this.textBox_resultInfo.Text += "已命中 " + lTotalHitCount.ToString() + " 条，检索尚未结束...\r\n";
 
@@ -1468,10 +1468,10 @@ namespace dp2Catalog
                                     goto ERROR1;
                                 }
 
-                                looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                                looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                                 lRet = channel.GetSearchResult(
-                                    looping.stop,
+                                    looping.Progress,
                                     null,   // strResultSetName
                                     lStart,
                                     lPerCount,
@@ -1497,7 +1497,7 @@ namespace dp2Catalog
                                         searchresults[i].Cols);
 
                                     lLoaded++;
-                                    looping.stop.SetProgressValue(lLoaded);
+                                    looping.Progress.SetProgressValue(lLoaded);
                                 }
 
                                 lStart += searchresults.Length;
@@ -1665,7 +1665,7 @@ namespace dp2Catalog
                     }
 
                     string strQueryXml = "";
-                    long lRet = channel.SearchBiblio(looping.stop,
+                    long lRet = channel.SearchBiblio(looping.Progress,
                         strDbName,
                         this.textBox_simple_queryWord.Text,
                         this.SearchMaxCount,    // 1000,
@@ -1688,7 +1688,7 @@ namespace dp2Catalog
 
                     this.textBox_resultInfo.Text += "检索词 '" + this.textBox_simple_queryWord.Text + "' 命中 " + lHitCount.ToString() + " 条记录\r\n";
 
-                    looping.stop.SetProgressRange(0, lHitCount);
+                    looping.Progress.SetProgressRange(0, lHitCount);
 
                     // testing
                     // stop.Name = "test";
@@ -1710,10 +1710,10 @@ namespace dp2Catalog
                             goto ERROR1;
                         }
 
-                        looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                        looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                         lRet = channel.GetSearchResult(
-                            looping.stop,
+                            looping.Progress,
                             null,   // strResultSetName
                             lStart,
                             lPerCount,
@@ -1744,7 +1744,7 @@ namespace dp2Catalog
                         if (lStart >= lHitCount || lPerCount <= 0)
                             break;
 
-                        looping.stop.SetProgressValue(lStart);
+                        looping.Progress.SetProgressValue(lStart);
                     }
 
                     // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
@@ -1915,7 +1915,7 @@ namespace dp2Catalog
                 try
                 {
                     DateTime start_time = DateTime.Now;
-                    looping.stop.SetProgressRange(0, this.textBox_mutiline_queryContent.Lines.Length);
+                    looping.Progress.SetProgressRange(0, this.textBox_mutiline_queryContent.Lines.Length);
 
                     for (int j = 0; j < this.textBox_mutiline_queryContent.Lines.Length; j++)
                     {
@@ -1927,7 +1927,7 @@ namespace dp2Catalog
 
                         string strLine = this.textBox_mutiline_queryContent.Lines[j].Trim();
 
-                        looping.stop.SetProgressValue(j);
+                        looping.Progress.SetProgressValue(j);
 
                         if (String.IsNullOrEmpty(strLine) == true)
                             continue;
@@ -1981,7 +1981,7 @@ namespace dp2Catalog
                             try
                             {
                                 long lRet = channel.Search(
-                    looping.stop,
+                    looping.Progress,
                     item.Xml,
                     "default",
                     "", // strOutputStyle,
@@ -2018,10 +2018,10 @@ namespace dp2Catalog
                                         goto ERROR1;
                                     }
 
-                                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " ('" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录) ...");
+                                    looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " ('" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录) ...");
 
                                     lRet = channel.GetSearchResult(
-                                        looping.stop,
+                                        looping.Progress,
                                         "default",   // strResultSetName
                                         lStart,
                                         lPerCount,
@@ -2305,7 +2305,7 @@ namespace dp2Catalog
 
                     DateTime start_time = DateTime.Now;
 
-                    looping.stop.SetProgressRange(0, this.textBox_mutiline_queryContent.Lines.Length);
+                    looping.Progress.SetProgressRange(0, this.textBox_mutiline_queryContent.Lines.Length);
 
                     for (int j = 0; j < this.textBox_mutiline_queryContent.Lines.Length; j++)
                     {
@@ -2317,13 +2317,13 @@ namespace dp2Catalog
 
                         string strLine = this.textBox_mutiline_queryContent.Lines[j].Trim();
 
-                        looping.stop.SetProgressValue(j);
+                        looping.Progress.SetProgressValue(j);
 
                         if (String.IsNullOrEmpty(strLine) == true)
                             continue;
 
                         string strQueryXml = "";
-                        long lRet = channel.SearchBiblio(looping.stop,
+                        long lRet = channel.SearchBiblio(looping.Progress,
                             strDbName,
                             strLine,
                             this.SearchMaxCount,    // 1000,
@@ -2371,10 +2371,10 @@ namespace dp2Catalog
                                 goto ERROR1;
                             }
 
-                            looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " ('" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录) ...");
+                            looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " ('" + strLine + "' 命中 " + lHitCount.ToString() + " 条记录) ...");
 
                             lRet = channel.GetSearchResult(
-                                looping.stop,
+                                looping.Progress,
                                 null,   // strResultSetName
                                 lStart,
                                 lPerCount,
@@ -2722,7 +2722,7 @@ namespace dp2Catalog
 
             try
             {
-                looping.stop.SetMessage("正在删除书目记录 " + strPurePath + " ...");
+                looping.Progress.SetMessage("正在删除书目记录 " + strPurePath + " ...");
 
                 string[] formats = null;
                 formats = new string[1];
@@ -2734,7 +2734,7 @@ namespace dp2Catalog
                 string strOutputBibilioRecPath = "";
 
                 long lRet = channel.SetBiblioInfo(
-                    looping.stop,
+                    looping.Progress,
                     "delete",
                     strPurePath,
                     "xml",
@@ -3217,7 +3217,7 @@ namespace dp2Catalog
 
             try
             {
-                looping?.stop?.SetMessage("正在装入书目记录 " + strPath + " ...");
+                looping?.Progress?.SetMessage("正在装入书目记录 " + strPath + " ...");
 
                 string[] formats = null;
                 formats = new string[2];
@@ -3234,7 +3234,7 @@ namespace dp2Catalog
                     strCmd += "$" + strDirection;
 
                 long lRet = channel.GetBiblioInfos(
-                    looping == null ? null : looping.stop,   // temp_stop,
+                    looping == null ? null : looping.Progress,   // temp_stop,
                     strCmd,
                     "",
                     formats,
@@ -3846,7 +3846,7 @@ namespace dp2Catalog
 
             try
             {
-                info = this.MainForm.ServerInfos.GetServerInfo(looping?.stop,
+                info = this.MainForm.ServerInfos.GetServerInfo(looping?.Progress,
                     bUseNewChannel,
 #if OLD_CHANNEL
                     this.Channels,
@@ -3924,7 +3924,7 @@ namespace dp2Catalog
             try
             {
                 info = this.MainForm.ServerInfos.GetServerInfo(
-                    looping.stop,
+                    looping.Progress,
                     this.m_bInSearching,
 #if OLD_CHANNEL
                     this.Channels,
@@ -4018,7 +4018,7 @@ namespace dp2Catalog
                 string strAction = "";
 
                 long lRet = channel.GetUtilInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strDbName,
                     "ISBN",
@@ -4105,7 +4105,7 @@ namespace dp2Catalog
                     string strAction = "";
 
                     long lRet = channel.SetUtilInfo(
-                        looping.stop,
+                        looping.Progress,
                         strAction,
                         strDbName,
                         "ISBN",
@@ -4193,7 +4193,7 @@ namespace dp2Catalog
                     string strAction = "";
 
                     long lRet = channel.GetUtilInfo(
-                        looping.stop,
+                        looping.Progress,
                         strAction,
                         strDbName,
                         "ISBN",
@@ -4283,7 +4283,7 @@ namespace dp2Catalog
                     string strAction = "";
 
                     long lRet = channel.SetUtilInfo(
-                        looping.stop,
+                        looping.Progress,
                         strAction,
                         strDbName,
                         "ISBN",
@@ -4686,12 +4686,12 @@ namespace dp2Catalog
                 if (IsAppendRecPath(strPurePath) == true)
                     strAction = "new";
 
-                looping?.stop?.SetMessage("正在保存书目记录 " + strPath + " ...");
+                looping?.Progress?.SetMessage("正在保存书目记录 " + strPath + " ...");
 
                 string strOutputBiblioRecPath = "";
 
                 long lRet = channel.SetBiblioInfo(
-                    looping == null ? null : looping.stop,   // temp_stop,
+                    looping == null ? null : looping.Progress,   // temp_stop,
                     strAction,
                     strPurePath,
                     "xml",
@@ -4802,12 +4802,12 @@ namespace dp2Catalog
                 if (IsAppendRecPath(strPath) == true)
                     strAction = "new";
 
-                looping.stop.SetMessage("正在保存书目记录 " + strPath + " ...");
+                looping.Progress.SetMessage("正在保存书目记录 " + strPath + " ...");
 
                 string strOutputBiblioRecPath = "";
 
                 long lRet = channel.SetBiblioInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strPurePath,
                     "xml",
@@ -4924,13 +4924,13 @@ namespace dp2Catalog
             {
                 // string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
 
-                looping.stop.SetMessage("正在下载配置文件 " + strPurePath + " ...");
+                looping.Progress.SetMessage("正在下载配置文件 " + strPurePath + " ...");
                 string strMetaData = "";
                 string strOutputPath = "";
 
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
-                long lRet = channel.GetRes(looping.stop,    // temp_stop,
+                long lRet = channel.GetRes(looping.Progress,    // temp_stop,
                     MainForm.cfgCache,
                     strPurePath,
                     strStyle,
@@ -5019,13 +5019,13 @@ namespace dp2Catalog
 
             try
             {
-                looping.stop.SetMessage("正在保存配置文件 " + strPurePath + " ...");
+                looping.Progress.SetMessage("正在保存配置文件 " + strPurePath + " ...");
 
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
                 long lRet = channel.WriteRes(
-                    looping.stop,
+                    looping.Progress,
                     strPurePath,
                     strContent,
                     true,
@@ -5141,7 +5141,7 @@ namespace dp2Catalog
                 MainForm.stopManager.Active(this.stop);
             }
             */
-            MainForm.stopManager.Active(this.TopLooping?.stop);
+            MainForm.stopManager.Active(this.TopLooping?.Progress);
 
             MainForm.SetMenuItemState();
 
@@ -5232,7 +5232,7 @@ namespace dp2Catalog
 
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
 
                 using (MarcXmlWriter writer = new MarcXmlWriter(MainForm.LastMarcXmlFileName, Encoding.UTF8))
                 {
@@ -5314,8 +5314,8 @@ namespace dp2Catalog
                         if (nRet == -1)
                             goto ERROR1;
 
-                        looping.stop.SetProgressValue(i + 1);
-                        looping.stop.SetMessage($"正在导出 {strPath}  {i + 1}/{count} ...");
+                        looping.Progress.SetProgressValue(i + 1);
+                        looping.Progress.SetMessage($"正在导出 {strPath}  {i + 1}/{count} ...");
                         i++;
                     }
 
@@ -5438,7 +5438,7 @@ namespace dp2Catalog
 
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
 
                 for (int i = 0; i < this.listView_browse.SelectedItems.Count; i++)
                 {
@@ -5514,7 +5514,7 @@ namespace dp2Catalog
                         sw.WriteLine(line);
                     }
 
-                    looping.stop.SetProgressValue(i + 1);
+                    looping.Progress.SetProgressValue(i + 1);
                 }
             }
             catch (Exception ex)
@@ -5710,7 +5710,7 @@ namespace dp2Catalog
 
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
                 bool bAsked = false;
 
                 int i = 0;
@@ -5866,8 +5866,8 @@ MessageBoxDefaultButton.Button2);
 
                     nCount++;
 
-                    looping.stop.SetProgressValue(i + 1);
-                    looping.stop.SetMessage($"正在导出 {strPath}  {i + 1}/{count} ...");
+                    looping.Progress.SetProgressValue(i + 1);
+                    looping.Progress.SetMessage($"正在导出 {strPath}  {i + 1}/{count} ...");
                     i++;
                 }
             }
@@ -6440,7 +6440,7 @@ MessageBoxDefaultButton.Button2);
             stop.BeginLoop();
             */
             var looping = BeginLoop(this.DoStop, "正在针对书目记录执行 MarcQuery 脚本 ...");
-            looping.stop.Style = StopStyle.EnableHalfStop;
+            looping.Progress.Style = StopStyle.EnableHalfStop;
 
             this.EnableControls(false);
 
@@ -6467,8 +6467,8 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
 
                 {
                     host.RecordPath = "";
@@ -6524,7 +6524,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 Program.MainForm,
                     this.dp2ResTree1.Servers,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     this.m_biblioTable);
 
@@ -6539,7 +6539,7 @@ Program.MainForm,
                         goto ERROR1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -6850,13 +6850,13 @@ Program.MainForm,
             stop.BeginLoop();
             */
             var looping = BeginLoop(this.DoStop, "正在保存书目记录 ...");
-            looping.stop.Style = StopStyle.EnableHalfStop;
+            looping.Progress.Style = StopStyle.EnableHalfStop;
 
             this.EnableControlsInSearching(false);
             this.listView_browse.Enabled = false;
             try
             {
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
                     if (looping.Stopped)
@@ -6869,7 +6869,7 @@ Program.MainForm,
                     string strRecPath = item.Text;
                     if (string.IsNullOrEmpty(strRecPath) == true)
                     {
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetProgressValue(i);
                         goto CONTINUE;
                     }
 
@@ -6880,7 +6880,7 @@ Program.MainForm,
                     if (string.IsNullOrEmpty(info.NewXml) == true)
                         goto CONTINUE;
 
-                    looping.stop.SetMessage("正在保存书目记录 " + strRecPath);
+                    looping.Progress.SetMessage("正在保存书目记录 " + strRecPath);
 
                     // 解析记录路径
                     string strServerName = "";
@@ -6909,7 +6909,7 @@ Program.MainForm,
                         byte[] baNewTimestamp = null;
 
                         long lRet = channel.SetBiblioInfo(
-                            looping.stop,
+                            looping.Progress,
                             "change",
                             strPurePath,
                             "xml",
@@ -6938,7 +6938,7 @@ Program.MainForm,
                                 string[] results = null;
                                 // byte[] baTimestamp = null;
                                 lRet = channel.GetBiblioInfos(
-                                    looping.stop,
+                                    looping.Progress,
                                     strPurePath,
                                     "",
                                     new string[] { "xml" },   // formats
@@ -6983,7 +6983,7 @@ Program.MainForm,
                             string[] results = null;
                             // byte[] baTimestamp = null;
                             lRet = channel.GetBiblioInfos(
-                                looping.stop,
+                                looping.Progress,
                                 strPurePath,
                                 "",
                                 new string[] { "xml" },   // formats
@@ -7028,7 +7028,7 @@ Program.MainForm,
                     }
 
                 CONTINUE:
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                 }
             }
             finally
@@ -7142,7 +7142,7 @@ MessageBoxDefaultButton.Button2);
             stop.BeginLoop();
             */
             var looping = BeginLoop(this.DoStop, "正在删除书目记录 ...");
-            looping.stop.Style = StopStyle.EnableHalfStop;
+            looping.Progress.Style = StopStyle.EnableHalfStop;
 
             this.EnableControlsInSearching(false);
 
@@ -7151,7 +7151,7 @@ MessageBoxDefaultButton.Button2);
             this._processing++;
             try
             {
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
                     if (looping.Stopped)
@@ -7189,10 +7189,10 @@ MessageBoxDefaultButton.Button2);
                         byte[] baTimestamp = null;
                         string strOutputPath = "";
 
-                        looping.stop.SetMessage("正在删除书目记录 " + strPurePath);
+                        looping.Progress.SetMessage("正在删除书目记录 " + strPurePath);
 
                         long lRet = channel.GetBiblioInfos(
-                            looping.stop,
+                            looping.Progress,
                             strPurePath,
                             "",
                             null,   // formats
@@ -7218,7 +7218,7 @@ MessageBoxDefaultButton.Button2);
                         byte[] baNewTimestamp = null;
 
                         lRet = channel.SetBiblioInfo(
-                            looping.stop,
+                            looping.Progress,
                             "delete",
                             strPurePath,
                             "xml",
@@ -7236,7 +7236,7 @@ MessageBoxDefaultButton.Button2);
                         Program.MainForm.ReturnChannel(channel);
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     this.listView_browse.Items.Remove(item);
                 }
@@ -7297,15 +7297,15 @@ MessageBoxDefaultButton.Button2);
             stop.BeginLoop();
             */
             var looping = BeginLoop(this.DoStop, "正在针对书目记录执行 880 模式转换 ...");
-            looping.stop.Style = StopStyle.EnableHalfStop;
+            looping.Progress.Style = StopStyle.EnableHalfStop;
 
             this.EnableControls(false);
 
             this.listView_browse.Enabled = false;
             try
             {
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_browse.SelectedItems)
@@ -7343,7 +7343,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 Program.MainForm,
                     this.dp2ResTree1.Servers,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     this.m_biblioTable);
 
@@ -7358,7 +7358,7 @@ Program.MainForm,
                         goto ERROR1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -7518,7 +7518,7 @@ Program.MainForm,
             stop.BeginLoop();
             */
             var looping = BeginLoop(this.DoStop, "正在从 MARCXML 文件导入 ...");
-            looping.stop.Style = StopStyle.EnableHalfStop;
+            looping.Progress.Style = StopStyle.EnableHalfStop;
 
             this.listView_browse.BeginUpdate();
             try
@@ -7535,7 +7535,7 @@ Program.MainForm,
                 using (var stream = File.OpenRead(dlg.FileName))
                 using (XmlReader reader = XmlReader.Create(stream, settings))
                 {
-                    looping.stop.SetProgressRange(0, stream.Length);
+                    looping.Progress.SetProgressRange(0, stream.Length);
 
                     // 定位到 collection 元素
                     while (true)
@@ -7612,8 +7612,8 @@ Program.MainForm,
                     this.listView_browse,
                     strRecPath,
                     cols);
-                                looping.stop.SetProgressValue(stream.Position);
-                                looping.stop.SetMessage($"正在导入 {i + 1} ...");
+                                looping.Progress.SetProgressValue(stream.Position);
+                                looping.Progress.SetMessage($"正在导入 {i + 1} ...");
                             }
 
                             i++;
@@ -7695,7 +7695,7 @@ Program.MainForm,
             ClearListViewItems();
 
             var looping = BeginLoop(this.DoStop, "正在从 MARC 文件导入 ...");
-            looping.stop.Style = StopStyle.EnableHalfStop;
+            looping.Progress.Style = StopStyle.EnableHalfStop;
 
             this.listView_browse.BeginUpdate();
             try
@@ -7704,7 +7704,7 @@ Program.MainForm,
 
                 using (var stream = File.OpenRead(dlg.FileName))
                 {
-                    looping.stop.SetProgressRange(0, stream.Length);
+                    looping.Progress.SetProgressRange(0, stream.Length);
 
                     bool bEOF = false;
                     for (int i = 0; bEOF == false; i++)
@@ -7817,8 +7817,8 @@ Program.MainForm,
             this.listView_browse,
             strRecPath,
             cols);
-                        looping.stop.SetMessage($"正在导入 {i + 1} ...");
-                        looping.stop.SetProgressValue(stream.Position);
+                        looping.Progress.SetMessage($"正在导入 {i + 1} ...");
+                        looping.Progress.SetProgressValue(stream.Position);
 
                         // 中途刷新一下
                         if ((i % 100) == 0)
@@ -8233,7 +8233,7 @@ out string strError)
             stop.BeginLoop();
             */
             var looping = BeginLoop(this.DoStop, "正在导入记录路径 ...");
-            looping.stop.Style = StopStyle.EnableHalfStop;
+            looping.Progress.Style = StopStyle.EnableHalfStop;
 
             this.m_bInSearching = true; // 防止中间点某行导致 GetBiblioInfo() 和这里的循环冲突
 
@@ -8243,7 +8243,7 @@ out string strError)
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
                 ListViewUtil.ClearSortColumns(this.listView_browse);
-                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.Progress.SetProgressRange(0, sr.BaseStream.Length);
 
                 if (this.listView_browse.Items.Count > 0)
                 {
@@ -8277,7 +8277,7 @@ out string strError)
 
                     string strRecPath = sr.ReadLine();
 
-                    looping.stop.SetProgressValue(sr.BaseStream.Position);
+                    looping.Progress.SetProgressValue(sr.BaseStream.Position);
 
                     if (strRecPath == null)
                         break;
@@ -8328,9 +8328,9 @@ out string strError)
                         dup_table[strRecPath] = true;
 
                     if (nSkipDupCount > 0)
-                        looping.stop.SetMessage("正在导入路径 " + strRecPath + " (已跳过重复记录 " + nSkipDupCount.ToString() + " 条)");
+                        looping.Progress.SetMessage("正在导入路径 " + strRecPath + " (已跳过重复记录 " + nSkipDupCount.ToString() + " 条)");
                     else
-                        looping.stop.SetMessage("正在导入路径 " + strRecPath);
+                        looping.Progress.SetMessage("正在导入路径 " + strRecPath);
 
                     ListViewItem item = new ListViewItem();
                     item.Text = strRecPath;
@@ -8636,8 +8636,8 @@ out string strError)
                         strError = "没有连接的或者打开的DTLP检索窗，无法保存记录";
                         goto ERROR1;
                     }
-                    if (looping.stop != null)
-                        looping.stop.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
+                    if (looping.Progress != null)
+                        looping.Progress.SetProgressRange(0, this.listView_browse.SelectedItems.Count);
 
                     for (int i = 0; i < this.listView_browse.SelectedItems.Count; i++)
                     {
@@ -8699,8 +8699,8 @@ out string strError)
                         if (nRet == -1)
                             goto ERROR1;
 
-                        looping.stop?.SetProgressValue(i + 1);
-                        looping.stop?.SetMessage($"正在保存到 {strOutputPath} ...");
+                        looping.Progress?.SetProgressValue(i + 1);
+                        looping.Progress?.SetMessage($"正在保存到 {strOutputPath} ...");
                     }
 
                     MessageBox.Show(this, "保存成功");
@@ -8709,8 +8709,8 @@ out string strError)
                 else if (strProtocol.ToLower() == "dp2library")
                 {
                     int count = this.listView_browse.SelectedItems.Count;
-                    if (looping.stop != null)
-                        looping.stop.SetProgressRange(0, count);
+                    if (looping.Progress != null)
+                        looping.Progress.SetProgressRange(0, count);
 
                     for (int i = 0; i < this.listView_browse.SelectedItems.Count; i++)
                     {
@@ -8778,8 +8778,8 @@ out string strError)
                         if (nRet == -1)
                             goto ERROR1;
 
-                        looping.stop?.SetProgressValue(i + 1);
-                        looping.stop?.SetMessage($"正在保存到 {strOutputPath} ({i+1}/{count}) ...");
+                        looping.Progress?.SetProgressValue(i + 1);
+                        looping.Progress?.SetMessage($"正在保存到 {strOutputPath} ({i+1}/{count}) ...");
                     }
                     MessageBox.Show(this, "保存成功");
                     return;
@@ -9077,7 +9077,7 @@ out string strError)
             stop.BeginLoop();
             */
             var looping = BeginLoop(this.DoStop, "正在刷新浏览行 ...");
-            looping.stop.Style = StopStyle.EnableHalfStop;
+            looping.Progress.Style = StopStyle.EnableHalfStop;
 
             this.EnableControls(false);
             try
@@ -9094,8 +9094,8 @@ out string strError)
                     ClearOneChange(item, true);
                 }
 
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, items.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, items.Count);
 
                 BrowseLoader loader = new BrowseLoader();
 #if OLD_CHANNEL
@@ -9104,7 +9104,7 @@ out string strError)
                 loader.ChannelManager = Program.MainForm;
 
                 loader.Servers = this.dp2ResTree1.Servers;
-                loader.Stop = looping.stop;
+                loader.Stop = looping.Progress;
                 loader.RecPaths = recpaths;
 
                 int i = 0;
@@ -9120,10 +9120,10 @@ out string strError)
 
                     Debug.Assert(record.Path == recpaths[i], "");
 
-                    if (looping.stop != null)
+                    if (looping.Progress != null)
                     {
-                        looping.stop.SetMessage("正在刷新浏览行 " + record.Path + " ...");
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetMessage("正在刷新浏览行 " + record.Path + " ...");
+                        looping.Progress.SetProgressValue(i);
                     }
 
                     ListViewItem item = items[i];

@@ -503,7 +503,7 @@ namespace dp2Circulation
                     }
                 }
 
-                long lRet = channel.SearchReader(looping.stop,
+                long lRet = channel.SearchReader(looping.Progress,
                     this.comboBox_readerDbName.Text,
                     this.textBox_queryWord.Text,
                     this.MaxSearchResultCount, // -1,
@@ -520,7 +520,7 @@ namespace dp2Circulation
 
                 this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条读者记录";
 
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -547,7 +547,7 @@ namespace dp2Circulation
 
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -591,11 +591,11 @@ namespace dp2Circulation
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.Progress.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
-                    looping.stop.SetProgressValue(lStart);
+                    looping.Progress.SetProgressValue(lStart);
                 }
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
@@ -1507,7 +1507,7 @@ MessageBoxDefaultButton.Button2);
             this.listView_records.Enabled = false;
             try
             {
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
                 for (int i = 0; i < items.Count; i++)
                 {
                     if (looping.Stopped)
@@ -1523,10 +1523,10 @@ MessageBoxDefaultButton.Button2);
                     byte[] baTimestamp = null;
                     string strOutputPath = "";
 
-                    looping.stop.SetMessage("正在删除读者记录 " + strRecPath);
+                    looping.Progress.SetMessage("正在删除读者记录 " + strRecPath);
 
                     long lRet = channel.GetReaderInfo(
-                        looping.stop,
+                        looping.Progress,
                         "@path:" + strRecPath,
                         "",
                         out results,
@@ -1557,7 +1557,7 @@ MessageBoxDefaultButton.Button2);
 
                     // channel.Timeout = new TimeSpan(0, 5, 0);
                     lRet = channel.SetReaderInfo(
-                        looping.stop,
+                        looping.Progress,
                         control ? "forcedelete" : "delete",
                         strRecPath,
                         "", // strNewXml
@@ -1574,7 +1574,7 @@ MessageBoxDefaultButton.Button2);
 
                     nDeleteCount++;
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     this.listView_records.Items.Remove(item);
                 }
@@ -1631,7 +1631,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 int nRet = ClosedXmlUtil.ExportToExcel(
-                    looping.stop,
+                    looping.Progress,
                     items,
                     out strError);
                 if (nRet == -1)
@@ -1692,8 +1692,8 @@ MessageBoxDefaultButton.Button2);
             this.listView_records.Enabled = false;
             try
             {
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -1705,7 +1705,7 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     this.m_biblioTable)
                 {
@@ -1726,7 +1726,7 @@ MessageBoxDefaultButton.Button2);
                         goto ERROR1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -1816,7 +1816,7 @@ MessageBoxDefaultButton.Button2);
                         // <para>1   是合法的读者证条码号</para>
                         // <para>2   是合法的册条码号</para>
                         nRet = Program.MainForm.VerifyBarcode(
-        looping.stop,
+        looping.Progress,
         channel,
         strLibraryCode,
         strBarcode,
@@ -2366,7 +2366,7 @@ TaskScheduler.Default);
                     }
                 }
 
-                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.Progress.SetProgressRange(0, sr.BaseStream.Length);
 
                 List<ListViewItem> items = new List<ListViewItem>();
 
@@ -2382,7 +2382,7 @@ TaskScheduler.Default);
 
                     string strBarcode = sr.ReadLine();
 
-                    looping.stop.SetProgressValue(sr.BaseStream.Position);
+                    looping.Progress.SetProgressValue(sr.BaseStream.Position);
 
 
                     if (strBarcode == null)
@@ -2406,7 +2406,7 @@ TaskScheduler.Default);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     items,
                     "",
@@ -2626,7 +2626,7 @@ TaskScheduler.Default);
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
                 ListViewUtil.ClearSortColumns(this.listView_records);
-                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.Progress.SetProgressRange(0, sr.BaseStream.Length);
 
 
                 if (this.listView_records.Items.Count > 0)
@@ -2658,7 +2658,7 @@ TaskScheduler.Default);
 
                     string strRecPath = sr.ReadLine();
 
-                    looping.stop.SetProgressValue(sr.BaseStream.Position);
+                    looping.Progress.SetProgressValue(sr.BaseStream.Position);
 
                     if (strRecPath == null)
                         break;
@@ -2711,7 +2711,7 @@ TaskScheduler.Default);
                 }
 
                 int nRet = RefreshListViewLines(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     items,
                     "",
@@ -3803,7 +3803,7 @@ MessageBoxDefaultButton.Button1);
             int nCount = 0;
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -3826,11 +3826,11 @@ MessageBoxDefaultButton.Button1);
 
                     string strTargetRecPath = saveto_dlg.RecPath;
 
-                    looping.stop.SetMessage("正在移动读者记录 '" + strCurrentRecPath + "' ...");
+                    looping.Progress.SetMessage("正在移动读者记录 '" + strCurrentRecPath + "' ...");
 
                     byte[] target_timestamp = null;
                     long lRet = channel.MoveReaderInfo(
-        looping.stop,
+        looping.Progress,
         strCurrentRecPath,
         ref strTargetRecPath,
         out target_timestamp,
@@ -3842,7 +3842,7 @@ MessageBoxDefaultButton.Button1);
 
                     item.Text = strTargetRecPath;   // 刷新浏览行的记录路径部分
 
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
                     nCount++;
                 }
             }
@@ -4016,7 +4016,7 @@ MessageBoxDefaultButton.Button2);
 
                             REDO_WRITEOBJECTS:
                             // 将记录中的对象资源写入外部文件
-                            nRet = BiblioSearchForm.WriteObjectFiles(looping.stop,
+                            nRet = BiblioSearchForm.WriteObjectFiles(looping.Progress,
                     channel,
                     strRecPath,
                     ref dom,
@@ -4307,8 +4307,8 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 int i = 0;
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
                     Application.DoEvents();	// 出让界面控制权
@@ -4321,10 +4321,10 @@ MessageBoxDefaultButton.Button2);
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
 
-                    looping.stop.SetMessage("正在通知读者 " + strRecPath);
+                    looping.Progress.SetMessage("正在通知读者 " + strRecPath);
 
                     long lRet = channel.SetReaderInfo(
-looping.stop,
+looping.Progress,
 strAction,
 strRecPath,
 style, // strNewXml,
@@ -4340,7 +4340,7 @@ out strError);
                         goto ERROR1;
 
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"{strRecPath} {strError}") + "</div>");
-                    looping.stop.SetProgressValue(i++);
+                    looping.Progress.SetProgressValue(i++);
                 }
             }
             finally
@@ -4581,7 +4581,7 @@ out strError);
             this.textBox_queryWord.Text = dlg.uString;
         }
 
-#region 指纹缓存相关功能
+        #region 指纹缓存相关功能
 
         System.Windows.Forms.Label m_labelPrompt = null;
 
@@ -5188,7 +5188,7 @@ out strError);
                     lines.CopyTo(paths);
                 REDO_GETRECORDS:
                     long lRet = channel.GetBrowseRecords(
-                        looping.stop,
+                        looping.Progress,
                         paths,
                         "id,cols,format:cfgs/browse_fingerprint",
                         out searchresults,
@@ -5241,7 +5241,7 @@ out strError);
             {
                 // 确保登录一次
                 string strValue = "";
-                long lRet = channel.GetSystemParameter(looping.stop,
+                long lRet = channel.GetSystemParameter(looping.Progress,
         "system",
         "readerDbGroup",
         out strValue,
@@ -5520,9 +5520,9 @@ out strFingerprint);
 
 #endif
 
-#endregion
+        #endregion
 
-#region 属性区有关功能
+        #region 属性区有关功能
 
         internal override bool InSearching
         {
@@ -5618,9 +5618,9 @@ out strFingerprint);
             return 0;
         }
 
-#endregion
+        #endregion
 
-#region C# 脚本程序
+        #region C# 脚本程序
 
 
 
@@ -5771,8 +5771,8 @@ out strFingerprint);
             this.listView_records.Enabled = false;
             try
             {
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 host.CodeFileName = this.m_strUsedMarcQueryFilename;
                 {
@@ -5803,7 +5803,7 @@ out strFingerprint);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
@@ -5822,7 +5822,7 @@ out strFingerprint);
                         goto ERROR1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -6088,7 +6088,7 @@ out strFingerprint);
             return -1;
         }
 
-#endregion
+        #endregion
 
         // 创建读者详情 Excel 文件。这是便于被外部调用的版本，只需要提供读者 XML 记录即可
         // return:
@@ -6158,8 +6158,7 @@ dlg.UiState);
 
             try
             {
-                if (stop != null)
-                    stop.SetProgressRange(0, xmls.Count);
+                stop?.SetProgressRange(0, xmls.Count);
 
                 // 每个列的最大字符数
                 List<int> column_max_chars = new List<int>();
@@ -6297,13 +6296,11 @@ dlg.UiState);
                     nRowIndex++;    // 读者之间的空行
 
                     nReaderIndex++;
-                    if (stop != null)
-                        stop.SetProgressValue(nReaderIndex);
+                    stop?.SetProgressValue(nReaderIndex);
                 }
 
                 {
-                    if (stop != null)
-                        stop.SetMessage("正在调整列宽度 ...");
+                    stop?.SetMessage("正在调整列宽度 ...");
                     Application.DoEvents();
 
                     // 字符数太多的列不要做 width auto adjust
@@ -6394,8 +6391,8 @@ dlg.UiState);
 
             try
             {
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, reader_barcodes.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, reader_barcodes.Count);
 
                 int nReaderIndex = 0;
                 foreach (string strBarcode in reader_barcodes)
@@ -6415,11 +6412,11 @@ dlg.UiState);
                     byte[] baTimestamp = null;
                     string strOutputRecPath = "";
 
-                    looping.stop.SetMessage("正在处理读者记录 " + strBarcode + " ...");
+                    looping.Progress.SetMessage("正在处理读者记录 " + strBarcode + " ...");
 
                     string[] results = null;
                     long lRet = channel.GetReaderInfo(
-                        looping.stop,
+                        looping.Progress,
                         strBarcode,
                         "advancexml",
                         out results,
@@ -6459,7 +6456,7 @@ dlg.UiState);
                     {
                         ChargingHistoryLoader history_loader = new ChargingHistoryLoader();
                         history_loader.Channel = channel;
-                        history_loader.Stop = looping.stop;
+                        history_loader.Stop = looping.Progress;
                         history_loader.PatronBarcode = strBarcode;
                         history_loader.TimeRange = "~"; // strTimeRange;
                         history_loader.Actions = "return,lost";
@@ -6467,7 +6464,7 @@ dlg.UiState);
 
                         ItemBarcodeLoader barcode_loader = new ItemBarcodeLoader();
                         barcode_loader.Channel = channel;
-                        barcode_loader.Stop = looping.stop;
+                        barcode_loader.Stop = looping.Progress;
 
                         if (looping.Stopped)
                         {
@@ -6493,8 +6490,8 @@ dlg.UiState);
                     }
 
                     nReaderIndex++;
-                    if (looping.stop != null)
-                        looping.stop.SetProgressValue(nReaderIndex);
+                    if (looping.Progress != null)
+                        looping.Progress.SetProgressValue(nReaderIndex);
                 }
             }
             finally
@@ -6544,7 +6541,7 @@ dlg.UiState);
             string readerBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
                 "barcode");
 
-            looping?.stop.SetMessage($"正在导出读者 {readerBarcode} 的借阅历史 ...");
+            looping?.Progress.SetMessage($"正在导出读者 {readerBarcode} 的借阅历史 ...");
 
             List<string> barcodes = new List<string>();
             int i = 0;
@@ -6566,13 +6563,13 @@ dlg.UiState);
                 string strReturnDate = item.OperTime;
 #endif
                 if ((i % 100) == 0)
-                    looping?.stop.SetMessage($"正在导出读者 {readerBarcode} 的借阅历史 {strItemBarcode} ...");
+                    looping?.Progress.SetMessage($"正在导出读者 {readerBarcode} 的借阅历史 {strItemBarcode} ...");
 
                 barcodes.Add(strItemBarcode);
                 i++;
             }
 
-            looping?.stop.SetMessage($"正在将读者 {readerBarcode} 的借阅历史册条码号转换为记录路径 ...");
+            looping?.Progress.SetMessage($"正在将读者 {readerBarcode} 的借阅历史册条码号转换为记录路径 ...");
 
             string strTempFileName = Program.MainForm.GetTempFileName("exphis");
             try
@@ -6697,8 +6694,8 @@ dlg.UiState);
             this.listView_records.Enabled = false;
             try
             {
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -6710,7 +6707,7 @@ dlg.UiState);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
@@ -6729,7 +6726,7 @@ dlg.UiState);
                         return -1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 
@@ -6819,8 +6816,8 @@ dlg.UiState);
 
             try
             {
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, reader_barcodes.Count);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, reader_barcodes.Count);
 
                 int nReaderIndex = 0;
                 foreach (string strBarcode in reader_barcodes)
@@ -6840,11 +6837,11 @@ dlg.UiState);
                     byte[] baTimestamp = null;
                     string strOutputRecPath = "";
 
-                    looping.stop.SetMessage("正在处理读者记录 " + strBarcode + " ...");
+                    looping.Progress.SetMessage("正在处理读者记录 " + strBarcode + " ...");
 
                     string[] results = null;
                     long lRet = channel.GetReaderInfo(
-                        looping.stop,
+                        looping.Progress,
                         strBarcode,
                         string.IsNullOrEmpty(strGetReaderInfoStyle) ?
                         "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary"
@@ -6897,8 +6894,8 @@ dlg.UiState);
                     }
 
                     nReaderIndex++;
-                    if (looping.stop != null)
-                        looping.stop.SetProgressValue(nReaderIndex);
+                    if (looping.Progress != null)
+                        looping.Progress.SetProgressValue(nReaderIndex);
                 }
 
                 return nReaderIndex;    // 实际处理的读者记录数
@@ -7016,7 +7013,7 @@ dlg.UiState);
             try
             {
                 int nRet = GetCardPhotoFile(channel,
-looping.stop,
+looping.Progress,
 strObjectPath,
 strLocalFilePath,
 out strError);
@@ -7236,487 +7233,6 @@ dlg.UiState);
             return filename;
         }
 
-#if NO
-        // 创建读者账簿
-        // return:
-        //      -1  出错
-        //      0   用户中断
-        //      1   成功
-        public int CreateReaderSheetExcelFile(List<string> reader_barcodes,
-            bool bLaunchExcel,
-            out string strError)
-        {
-            strError = "";
-            //int nRet = 0;
-
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要输出的 Excel 文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            // dlg.FileName = this.ExportExcelFilename;
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return 0;
-
-            XLWorkbook doc = null;
-            try
-            {
-                doc = new XLWorkbook(XLEventTracking.Disabled);
-                File.Delete(dlg.FileName);
-            }
-            catch (Exception ex)
-            {
-                strError = "ReaderSearchForm new XLWorkbook() {} exception: " + ExceptionUtil.GetAutoText(ex);
-                return -1;
-            }
-
-            IXLWorksheet sheet = null;
-            sheet = doc.Worksheets.Add("表格");
-
-            // 每个列的最大字符数
-            List<int> column_max_chars = new List<int>();
-
-            // TODO: 表的标题，创建时间
-
-            int nRowIndex = 3;  // 空出前两行
-            //int nColIndex = 1;
-
-            int nReaderIndex = 0;
-
-            try
-            {
-                // return:
-                //      -1  出错。包括用户中断的情况
-                //      >=0 实际处理的读者记录数
-                int nRet = this.ProcessPatrons(
-                    reader_barcodes,
-                    "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary", // advancexml_history_bibliosummary
-                    (strRecPath, dom, timestamp) =>
-                    {
-                        this.ShowMessage("正在处理读者记录 " + strRecPath);
-
-                        string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-
-                        OutputReaderSheet2(sheet,
-                dom,
-                nReaderIndex,
-                "barcode",
-                ref nRowIndex,
-                ref column_max_chars);
-
-                        nRowIndex++;    // 读者之间的空行
-
-                        nReaderIndex++;
-                        return true;
-                    },
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                {
-                    if (stop != null)
-                        stop.SetMessage("正在调整列宽度 ...");
-                    Application.DoEvents();
-
-                    //double char_width = GetAverageCharPixelWidth(list);
-
-                    // 字符数太多的列不要做 width auto adjust
-                    foreach (IXLColumn column in sheet.Columns())
-                    {
-                        int MAX_CHARS = 50;   // 60
-
-                        int nIndex = column.FirstCell().Address.ColumnNumber - 1;
-                        if (nIndex >= column_max_chars.Count)
-                            break;
-                        int nChars = column_max_chars[nIndex];
-
-                        if (nIndex == 1)
-                        {
-                            column.Width = 10;
-                            continue;
-                        }
-
-                        if (nIndex == 3)
-                            MAX_CHARS = 50;
-                        else
-                            MAX_CHARS = 24;
-
-                        if (nChars < MAX_CHARS)
-                            column.AdjustToContents();
-                        else
-                            column.Width = Math.Min(MAX_CHARS, nChars);
-
-                        //else
-                        //    column.Width = (double)list.Columns[i].Width / char_width;  // Math.Min(MAX_CHARS, nChars);
-                    }
-                }
-
-                this.ShowMessage("共导出读者记录 " + nReaderIndex + " 个", "green", true);
-            }
-            catch (Exception ex)
-            {
-                strError = "CreateSheetExcelFile() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
-                return -1;
-            }
-            finally
-            {
-                if (stop != null)
-                    stop.SetMessage("");
-
-                if (doc != null)
-                {
-                    doc.SaveAs(dlg.FileName);
-                    doc.Dispose();
-                }
-
-                if (bLaunchExcel)
-                {
-                    try
-                    {
-                        System.Diagnostics.Process.Start(dlg.FileName);
-                    }
-                    catch
-                    {
-
-                    }
-                }
-            }
-
-            // TODO: sheet 可以按照单位来区分。例如按照班级
-            return 1;
-        }
-
-#endif
-
-#if NO
-        // return:
-        //      -1  出错
-        //      0   用户中断
-        //      1   成功
-        public int CreateReaderDetailExcelFile(List<string> reader_barcodes,
-            bool bLaunchExcel,
-            out string strError)
-        {
-            strError = "";
-            //int nRet = 0;
-
-            ExportPatronExcelDialog dlg = new ExportPatronExcelDialog();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.OverwritePrompt = true;
-            dlg.UiState = Program.MainForm.AppInfo.GetString(
-        "ReaderSearchForm",
-        "ExportPatronExcelDialog_uiState",
-        "");
-
-            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderSearchForm_ExportPatronExcelDialog_uiState_state");
-            dlg.ShowDialog(this);
-
-            Program.MainForm.AppInfo.SetString(
-"ReaderSearchForm",
-"ExportPatronExcelDialog_uiState",
-dlg.UiState);
-
-            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-            {
-                strError = "放弃操作";
-                return 0;
-            }
-
-#if NO
-            // 提醒覆盖文件
-            if (File.Exists(dlg.FileName) == true)
-            {
-                DialogResult result = MessageBox.Show(this,
-                    "文件 '" + dlg.FileName + "' 已经存在。继续操作将覆盖此文件。\r\n\r\n请问是否要覆盖此文件? (OK 覆盖；Cancel 放弃操作)",
-                    "ReaderSearchForm",
-                    MessageBoxButtons.OKCancel,
-                    MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Cancel)
-                {
-                    strError = "放弃操作";
-                    return 0;
-                }
-            }
-#endif
-
-            string strTimeRange = "";
-
-            try
-            {
-                strTimeRange = GetTimeRange(dlg.ChargingHistoryDateRange);
-            }
-            catch (Exception ex)
-            {
-                strError = "日期范围字符串 '" + dlg.ChargingHistoryDateRange + "' 格式不合法: " + ex.Message;
-                return -1;
-            }
-
-#if NO
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要输出的 Excel 文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            // dlg.FileName = this.ExportExcelFilename;
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return 0;
-#endif
-
-            XLWorkbook doc = null;
-            try
-            {
-                doc = new XLWorkbook(XLEventTracking.Disabled);
-                File.Delete(dlg.FileName);
-            }
-            catch (Exception ex)
-            {
-                strError = "ReaderSearchForm new XLWorkbook() {39D0940F-33FF-4A10-8F61-1FFFEEBFF4D0} exception: " + ExceptionUtil.GetAutoText(ex);
-                return -1;
-            }
-
-            IXLWorksheet sheet = null;
-            sheet = doc.Worksheets.Add("表格");
-
-            // TODO: sheet 可以按照单位来区分。例如按照班级
-
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("导出读者详情 ...");
-            stop.BeginLoop();
-
-            EnableControls(false);
-            this.listView_records.Enabled = false;
-
-            try
-            {
-                if (stop != null)
-                    stop.SetProgressRange(0, reader_barcodes.Count);
-
-                // 每个列的最大字符数
-                List<int> column_max_chars = new List<int>();
-
-                // TODO: 表的标题，创建时间
-
-                int nRowIndex = 3;  // 空出前两行
-                //int nColIndex = 1;
-
-                int nReaderIndex = 0;
-                foreach (string strBarcode in reader_barcodes)
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null && stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        return 0;
-                    }
-
-                    if (string.IsNullOrEmpty(strBarcode) == true)
-                        continue;
-
-                    // 获得读者记录
-                    byte[] baTimestamp = null;
-                    string strOutputRecPath = "";
-
-                    stop.SetMessage("正在处理读者记录 " + strBarcode + " ...");
-
-                    string[] results = null;
-                    long lRet = Channel.GetReaderInfo(
-                        stop,
-                        strBarcode,
-                        "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary", // advancexml_history_bibliosummary
-                        out results,
-                        out strOutputRecPath,
-                        out baTimestamp,
-                        out strError);
-                    if (lRet == -1)
-                        return -1;
-
-                    if (lRet == 0)
-                        return -1;
-
-                    if (lRet > 1)   // 不可能发生吧?
-                    {
-                        strError = "读者证条码号 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
-                        return -1;
-                    }
-                    if (results == null || results.Length < 1)
-                    {
-                        strError = "返回的results不正常。";
-                        return -1;
-                    }
-                    string strXml = results[0];
-
-                    XmlDocument dom = new XmlDocument();
-                    try
-                    {
-                        dom.LoadXml(strXml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "装载读者记录 XML 到 DOM 时发生错误: " + ex.Message;
-                        return -1;
-                    }
-
-                    // 
-                    if (dlg.ExportReaderInfo)
-                    {
-                        OutputReaderInfo(sheet,
-                dom,
-                nReaderIndex,
-                ref nRowIndex,
-                ref column_max_chars);
-                    }
-
-                    // 输出在借册表格
-                    if (dlg.ExportBorrowInfo)
-                    {
-                        OutputBorrows(sheet,
-                dom,
-                Program.MainForm.GetBiblioSummary,
-                true,
-                ref nRowIndex,
-                ref column_max_chars);
-                    }
-
-                    // 输出违约金表格
-                    if (dlg.ExportOverdueInfo)
-                    {
-                        OutputOverdues(sheet,
-                dom,
-                Program.MainForm.GetBiblioSummary,
-                ref nRowIndex,
-                ref column_max_chars);
-                    }
-
-                    if (dlg.ExportChargingHistory)
-                    {
-                        try
-                        {
-                            ChargingHistoryLoader history_loader = new ChargingHistoryLoader();
-                            history_loader.Channel = this.Channel;
-                            history_loader.Stop = this.stop;
-                            history_loader.PatronBarcode = strBarcode;
-                            history_loader.TimeRange = strTimeRange;
-                            history_loader.Actions = "return,lost";
-                            history_loader.Order = "descending";
-
-                            CacheableBiblioLoader summary_loader = new CacheableBiblioLoader();
-                            summary_loader.Channel = this.Channel;
-                            summary_loader.Stop = this.stop;
-                            summary_loader.Format = "summary";
-                            summary_loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
-                            // summary_loader.RecPaths = biblio_recpaths;
-
-                            // 输出借阅历史表格
-                            OutputBorrowHistory(sheet,
-                    dom,
-                    history_loader,
-                                // Program.MainForm.GetBiblioSummary,
-                    summary_loader,
-                    ref nRowIndex,
-                    ref column_max_chars);
-                        }
-                        catch (Exception ex)
-                        {
-                            strError = "输出借阅历史时出现异常: " + ex.Message;
-                            return -1;
-                        }
-                    }
-
-                    nRowIndex++;    // 读者之间的空行
-
-                    nReaderIndex++;
-                    if (stop != null)
-                        stop.SetProgressValue(nReaderIndex);
-                }
-
-                {
-                    if (stop != null)
-                        stop.SetMessage("正在调整列宽度 ...");
-                    Application.DoEvents();
-
-                    //double char_width = GetAverageCharPixelWidth(list);
-
-                    // 字符数太多的列不要做 width auto adjust
-                    foreach (IXLColumn column in sheet.Columns())
-                    {
-                        int MAX_CHARS = 50;   // 60
-
-                        int nIndex = column.FirstCell().Address.ColumnNumber - 1;
-                        if (nIndex >= column_max_chars.Count)
-                            break;
-                        int nChars = column_max_chars[nIndex];
-
-                        if (nIndex == 1)
-                        {
-                            column.Width = 10;
-                            continue;
-                        }
-
-                        if (nIndex == 3)
-                            MAX_CHARS = 50;
-                        else
-                            MAX_CHARS = 24;
-
-                        if (nChars < MAX_CHARS)
-                            column.AdjustToContents();
-                        else
-                            column.Width = Math.Min(MAX_CHARS, nChars);
-
-                        //else
-                        //    column.Width = (double)list.Columns[i].Width / char_width;  // Math.Min(MAX_CHARS, nChars);
-                    }
-                }
-            }
-            finally
-            {
-                EnableControls(true);
-                this.listView_records.Enabled = true;
-
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
-
-                if (doc != null)
-                {
-                    doc.SaveAs(dlg.FileName);
-                    doc.Dispose();
-                }
-
-                if (bLaunchExcel)
-                {
-                    try
-                    {
-                        System.Diagnostics.Process.Start(dlg.FileName);
-                    }
-                    catch
-                    {
-
-                    }
-                }
-
-            }
-            return 1;
-        }
-
-#endif
-
         // 过滤读者记录
         // parameters:
         //      filtering   过滤特征。空表示不过滤。amerce,borrowing,overdue
@@ -7932,7 +7448,7 @@ dlg.UiState);
                             {
                                 ChargingHistoryLoader history_loader = new ChargingHistoryLoader();
                                 history_loader.Channel = channel;
-                                history_loader.Stop = looping.stop;
+                                history_loader.Stop = looping.Progress;
                                 history_loader.PatronBarcode = strBarcode;
                                 history_loader.TimeRange = strTimeRange;
                                 history_loader.Actions = "return,lost";
@@ -7940,7 +7456,7 @@ dlg.UiState);
 
                                 CacheableBiblioLoader summary_loader = new CacheableBiblioLoader();
                                 summary_loader.Channel = channel;
-                                summary_loader.Stop = looping.stop;
+                                summary_loader.Stop = looping.Progress;
                                 summary_loader.Format = "summary";
                                 summary_loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                                 // summary_loader.RecPaths = biblio_recpaths;
@@ -7980,8 +7496,8 @@ dlg.UiState);
                 }
 
                 {
-                    if (looping.stop != null)
-                        looping.stop.SetMessage("正在调整列宽度 ...");
+                    if (looping.Progress != null)
+                        looping.Progress.SetMessage("正在调整列宽度 ...");
                     Application.DoEvents();
 
                     //double char_width = GetAverageCharPixelWidth(list);
@@ -8025,8 +7541,8 @@ dlg.UiState);
             }
             finally
             {
-                if (looping.stop != null)
-                    looping.stop.SetMessage("");
+                if (looping.Progress != null)
+                    looping.Progress.SetMessage("");
 
                 if (doc != null)
                 {

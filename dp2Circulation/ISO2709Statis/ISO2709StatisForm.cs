@@ -384,7 +384,7 @@ namespace dp2Circulation
                 }
 
                 // 循环
-                nRet = DoLoop(looping.stop,
+                nRet = DoLoop(looping.Progress,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -948,7 +948,7 @@ namespace dp2Circulation
             using (var looping = Looping(out LibraryChannel channel))
             {
                 long lRet = channel.SetBiblioInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,
                     strBiblioRecPath,
                     strBiblioType,
@@ -1021,7 +1021,7 @@ namespace dp2Circulation
                 entities[0] = info;
 
                 long lRet = channel.SetEntities(
-                    looping.stop,
+                    looping.Progress,
                     strBiblioRecPath,
                     entities,
                     out EntityInfo[] errorinfos,
@@ -1118,7 +1118,7 @@ namespace dp2Circulation
                 orders[0] = info;
 
                 long lRet = channel.SetOrders(
-                    looping.stop,
+                    looping.Progress,
                     strBiblioRecPath,
                     orders,
                     out EntityInfo[] errorinfos,

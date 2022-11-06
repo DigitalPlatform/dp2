@@ -838,7 +838,7 @@ namespace dp2Circulation
             using (var looping = Looping(out LibraryChannel channel))
             {
                 return GetSummaries(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     bFillSummaryColumn,
                     summary_col_names,
@@ -1183,7 +1183,7 @@ namespace dp2Circulation
             using (var looping = Looping(out LibraryChannel channel))
             {
                 return LoadOneItem(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                             strPubType,
                             bFillSummaryColumn,
@@ -1815,7 +1815,7 @@ namespace dp2Circulation
             try
             {
                 // if (this.InvokeRequired == false)
-                    looping.stop.SetProgressRange(0, items.Count);
+                    looping.Progress.SetProgressRange(0, items.Count);
 
                 ProgressEstimate estimate = new ProgressEstimate();
                 estimate.SetRange(0, items.Count);
@@ -1838,8 +1838,8 @@ namespace dp2Circulation
 
                     if (this.InvokeRequired == false)
                     {
-                        looping.stop.SetMessage("正在刷新 " + item.Text + " ...");
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetMessage("正在刷新 " + item.Text + " ...");
+                        looping.Progress.SetProgressValue(i);
                     }
 
                     string strRecPath = ListViewUtil.GetItemText(item, nRecPathColumn);
@@ -1854,13 +1854,13 @@ namespace dp2Circulation
                         if (this.InvokeRequired == false)
                         {
                             if (lines.Count > 0)
-                                looping.stop.SetMessage("(" + i.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录。"
+                                looping.Progress.SetMessage("(" + i.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录。"
                                     + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(i)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
                         }
 
                         // 处理一小批记录的装入
                         nRet = DoLoadRecords(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             lines,
                             part_items,
@@ -1880,12 +1880,12 @@ namespace dp2Circulation
                     if (this.InvokeRequired == false)
                     {
                         if (lines.Count > 0)
-                            looping.stop.SetMessage("(" + nLineCount.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录...");
+                            looping.Progress.SetMessage("(" + nLineCount.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录...");
                     }
 
                     // 处理一小批记录的装入
                     nRet = DoLoadRecords(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         lines,
                         part_items,

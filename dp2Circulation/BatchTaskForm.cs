@@ -542,7 +542,7 @@ namespace dp2Circulation
                     //      0   启动成功
                     //      1   调用前任务已经处于执行状态，本次调用激活了这个任务
                     long lRet = channel.BatchTask(
-                        looping.stop,
+                        looping.Progress,
                         strTaskName,
                         "start",
                         param,
@@ -715,7 +715,7 @@ namespace dp2Circulation
                     BatchTaskInfo resultInfo = null;
 
                     long lRet = channel.BatchTask(
-                        looping.stop,
+                        looping.Progress,
                         strTaskName,
                         strAction,  // "stop",
                         param,
@@ -783,7 +783,7 @@ namespace dp2Circulation
                     BatchTaskInfo resultInfo = null;
 
                     long lRet = channel.BatchTask(
-                        looping.stop,
+                        looping.Progress,
                         "",
                         "continue",
                         param,
@@ -855,7 +855,7 @@ namespace dp2Circulation
                     BatchTaskInfo resultInfo = null;
 
                     long lRet = channel.BatchTask(
-                        looping.stop,
+                        looping.Progress,
                         "",
                         "pause",
                         param,
@@ -1045,10 +1045,10 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
 
                         param.ResultOffset = this.CurResultOffs;
 
-                        looping.stop.SetMessage("正在获取任务 '" + MonitorTaskName + "' 的最新信息 (第 " + (i + 1).ToString() + " 批 共10批)...");
+                        looping.Progress.SetMessage("正在获取任务 '" + MonitorTaskName + "' 的最新信息 (第 " + (i + 1).ToString() + " 批 共10批)...");
 
                         long lRet = channel.BatchTask(
-                            looping.stop,
+                            looping.Progress,
                             MonitorTaskName,
                             "getinfo",
                             param,

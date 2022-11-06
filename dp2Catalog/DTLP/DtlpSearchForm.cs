@@ -1008,14 +1008,14 @@ Stack:
                         byte[] baPackage;
                         if (bFirst == true)
                         {
-                            looping.stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath);
+                            looping.Progress.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath);
                             nRet = this.DtlpChannel.Search(strPath,
                                 nStyle,
                                 out baPackage);
                         }
                         else
                         {
-                            looping.stop.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath + " " + encoding.GetString(baNext));
+                            looping.Progress.SetMessage(listView_browse.Items.Count.ToString() + " 去重:" + nDupCount.ToString() + " " + "正在检索 " + strPath + " " + encoding.GetString(baNext));
                             nRet = this.DtlpChannel.Search(strPath,
                                 baNext,
                                 nStyle,
@@ -1229,7 +1229,7 @@ Stack:
             if (stop != null)
                 MainForm.stopManager.Active(this.stop);
             */
-            MainForm.stopManager.Active(this.TopLooping?.stop);
+            MainForm.stopManager.Active(this.TopLooping?.Progress);
 
             MainForm.SetMenuItemState();
 

@@ -2993,7 +2993,7 @@ AppInfo.GetString("config",
 
 
                 // TODO: 这里有一定问题。最好临时申请一个 stop， 然后用后释放
-                looping.stop.SetMessage("正在删除以前遗留的临时文件...");
+                looping.Progress.SetMessage("正在删除以前遗留的临时文件...");
 
                 /*
 Type: System.UnauthorizedAccessException
@@ -3049,7 +3049,7 @@ Culture=neutral, PublicKeyToken=null
                     return false;
                 }
 
-                looping.stop.SetMessage("正在复制报表配置文件...");
+                looping.Progress.SetMessage("正在复制报表配置文件...");
                 // 拷贝目录
                 nRet = PathUtil.CopyDirectory(Path.Combine(this.DataDir, "report_def"),
                     Path.Combine(this.UserDir, "report_def"),
@@ -3058,7 +3058,7 @@ Culture=neutral, PublicKeyToken=null
                 if (nRet == -1)
                     MessageBox.Show(this, strError);
 
-                looping.stop.SetMessage("");
+                looping.Progress.SetMessage("");
 #if NO
                 if (Stop != null) // 脱离关联
                 {
@@ -3194,11 +3194,11 @@ Culture=neutral, PublicKeyToken=null
             var looping = Looping(out LibraryChannel channel,
                 null,
                 "timeout:0:1:0");
-            looping.stop.SetMessage("正在连接服务器 " + channel.Url + " ...");
+            looping.Progress.SetMessage("正在连接服务器 " + channel.Url + " ...");
             try
             {
                 long lRet = channel.GetClock(
-                    looping.stop,
+                    looping.Progress,
                     out string strTime,
                     out strError);
                 if (lRet == -1)
@@ -3304,7 +3304,7 @@ Culture=neutral, PublicKeyToken=null
             Stop.BeginLoop();
             */
             var looping = Looping(out LibraryChannel channel);
-            looping.stop.SetMessage("正在检查服务器 " + channel.Url + " 的版本号, 请稍候 ...");
+            looping.Progress.SetMessage("正在检查服务器 " + channel.Url + " 的版本号, 请稍候 ...");
             try
             {
 
@@ -3313,7 +3313,7 @@ Culture=neutral, PublicKeyToken=null
                 return -2;
 #endif
 
-                long lRet = channel.GetVersion(looping.stop,
+                long lRet = channel.GetVersion(looping.Progress,
     out string strVersion,
     out string strUID,
     out strError);
@@ -3453,7 +3453,7 @@ Culture=neutral, PublicKeyToken=null
             {
                 // 获得书目库的检索途径
                 long lRet = channel.ListDbFroms(
-                    looping.stop,
+                    looping.Progress,
                     "biblio",
                     this.Lang,
                     out BiblioDbFromInfo[] infos,
@@ -3470,7 +3470,7 @@ Culture=neutral, PublicKeyToken=null
                 {
                     infos = null;
                     lRet = channel.ListDbFroms(
-                        looping.stop,
+                        looping.Progress,
     "authority",
     this.Lang,
     out infos,
@@ -3487,7 +3487,7 @@ Culture=neutral, PublicKeyToken=null
                 // 获得读者库的检索途径
                 infos = null;
                 lRet = channel.ListDbFroms(
-                    looping.stop,
+                    looping.Progress,
     "reader",
     this.Lang,
     out infos,
@@ -3515,7 +3515,7 @@ Culture=neutral, PublicKeyToken=null
                     // 获得实体库的检索途径
                     infos = null;
                     lRet = channel.ListDbFroms(
-                        looping.stop,
+                        looping.Progress,
         "item",
         this.Lang,
         out infos,
@@ -3530,7 +3530,7 @@ Culture=neutral, PublicKeyToken=null
                     // 获得期库的检索途径
                     infos = null;
                     lRet = channel.ListDbFroms(
-                        looping.stop,
+                        looping.Progress,
         "issue",
         this.Lang,
         out infos,
@@ -3545,7 +3545,7 @@ Culture=neutral, PublicKeyToken=null
                     // 获得订购库的检索途径
                     infos = null;
                     lRet = channel.ListDbFroms(
-                        looping.stop,
+                        looping.Progress,
         "order",
         this.Lang,
         out infos,
@@ -3560,7 +3560,7 @@ Culture=neutral, PublicKeyToken=null
                     // 获得评注库的检索途径
                     infos = null;
                     lRet = channel.ListDbFroms(
-                        looping.stop,
+                        looping.Progress,
         "comment",
         this.Lang,
         out infos,
@@ -3578,7 +3578,7 @@ Culture=neutral, PublicKeyToken=null
                     // 获得发票库的检索途径
                     infos = null;
                     lRet = channel.ListDbFroms(
-                        looping.stop,
+                        looping.Progress,
         "invoice",
         this.Lang,
         out infos,
@@ -3594,7 +3594,7 @@ Culture=neutral, PublicKeyToken=null
                     // 获得违约金库的检索途径
                     infos = null;
                     lRet = channel.ListDbFroms(
-                        looping.stop,
+                        looping.Progress,
         "amerce",
         this.Lang,
         out infos,
@@ -3614,7 +3614,7 @@ Culture=neutral, PublicKeyToken=null
                     // 获得预约到书库的检索途径
                     infos = null;
                     lRet = channel.ListDbFroms(
-                        looping.stop,
+                        looping.Progress,
         "arrived",
         this.Lang,
         out infos,
@@ -3916,7 +3916,7 @@ Culture=neutral, PublicKeyToken=null
 
                 string strValue = "";
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "cfgs",
                     StringUtil.CompareVersion(this.ServerVersion, "2.23") >= 0 ? "listFileNamesEx" : "listFileNames",
                     out strValue,
@@ -3941,7 +3941,7 @@ Culture=neutral, PublicKeyToken=null
                         continue;
 
                     nRet = GetSystemFile(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         filename,
                         out strError);
@@ -4035,7 +4035,7 @@ Culture=neutral, PublicKeyToken=null
                 this.OpacServerUrl = "";
 
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "library",
                     "name",
                     out string strValue,
@@ -4051,7 +4051,7 @@ Culture=neutral, PublicKeyToken=null
                 this.SetServerName(channel.Url, this.LibraryName);
 
                 lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "system",
                     "expire",
                     out strValue,
@@ -4066,7 +4066,7 @@ Culture=neutral, PublicKeyToken=null
 
                 // OPAC URL
                 lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
     "opac",
     "serverDirectory",
     out strValue,
@@ -4295,7 +4295,7 @@ Culture=neutral, PublicKeyToken=null
                     // TODO: 如果文件太多可以分批获取
                     string strValue = "";
                     long lRet = channel.GetSystemParameter(
-                        looping.stop,
+                        looping.Progress,
                         "cfgs/get_res_timestamps",
                         StringUtil.MakePathList(filenames),
                         out strValue,
@@ -4350,7 +4350,7 @@ Culture=neutral, PublicKeyToken=null
                             byte[] baCfgOutputTimestamp = null;
                             nRet = GetCfgFile(
                                 channel,
-                                looping.stop,
+                                looping.Progress,
                                 normal.DbName,
                                 "browse",
                                 ByteArray.GetTimeStampByteArray(strTimestamp),
@@ -4408,7 +4408,7 @@ Culture=neutral, PublicKeyToken=null
 
                         nRet = GetCfgFile(
                             channel,
-                            looping.stop,
+                            looping.Progress,
                             normal.DbName,
                             "browse",
                             null,
@@ -4549,7 +4549,7 @@ Culture=neutral, PublicKeyToken=null
                 this.AllDatabaseDom = null;
 
                 lRet = channel.ManageDatabase(
-    looping.stop,
+    looping.Progress,
     "getinfo",
     "",
     "",
@@ -4902,7 +4902,7 @@ Culture=neutral, PublicKeyToken=null
             REDO_GET:
                 string strValue = "";
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "arrived",
                     "dbname",
                     out strValue,
@@ -4989,7 +4989,7 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "clientFineInterface",
                     out string strValue,
@@ -5087,7 +5087,7 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "callNumber",
                     out string strValue,
@@ -5161,7 +5161,7 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "system",
                     "rfid",
                     out string strValue,
@@ -5220,7 +5220,7 @@ Culture=neutral, PublicKeyToken=null
                 this.BarcodeValidation = "";
 
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "barcodeValidation",
                     out string strValue,
@@ -5429,7 +5429,7 @@ out strError);
             {
                 string strTime = "";
                 long lRet = channel.GetClock(
-                    looping.stop,
+                    looping.Progress,
                     out strTime,
                     out strError);
                 if (lRet == -1)
@@ -5609,7 +5609,7 @@ out strError);
             {
                 string strValue = "";
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "system",
                     "libraryCodes",
                     out strValue,

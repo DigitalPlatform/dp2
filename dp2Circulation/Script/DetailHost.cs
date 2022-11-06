@@ -1478,7 +1478,7 @@ namespace dp2Circulation
                     //      1   succeed
                     long nRet = BiblioItemsHost.GetAuthorNumber(
                         ref question_table,
-                        _looping.stop,  // this.DetailForm.Progress,
+                        _looping.Progress,  // this.DetailForm.Progress,
                         this.DetailForm,
                         strGcatWebServiceUrl,
                         strAuthor,

@@ -316,7 +316,7 @@ this.checkBox_overwriteByG01.Checked);
                         if (result == DialogResult.No)
                             return new NormalResult();   // 假装loop正常结束
 
-                        looping.stop.Continue(); // 继续循环
+                        looping.Progress.Continue(); // 继续循环
                     }
 
 
@@ -364,11 +364,11 @@ this.checkBox_overwriteByG01.Checked);
 
                     if (range != null && range.IsInRange(i, true) == false)
                     {
-                        looping.stop.SetMessage("跳过第 " + (i + 1).ToString() + " 个 ISO2709 记录");
+                        looping.Progress.SetMessage("跳过第 " + (i + 1).ToString() + " 个 ISO2709 记录");
                         continue;
                     }
                     else
-                        looping.stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
+                        looping.Progress.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
 
                     // 跳过太短的记录
                     if (string.IsNullOrEmpty(strMARC) == true
@@ -440,7 +440,7 @@ out strError);
                         // TODO: 去除记录中的 -01 字段
                         // 从服务器检索 strBiblioRecPath 位置的书目记录
                         lRet = channel.GetBiblioInfos(
-        looping.stop,
+        looping.Progress,
         strBiblioRecPath,
         "",
         new string[] { "xml" },   // formats
@@ -514,7 +514,7 @@ out strError);
                     }
 
                     lRet = channel.SetBiblioInfo(
-                        looping.stop,
+                        looping.Progress,
                         overwrite ? "change" : "new",
                         strBiblioRecPath,
                         "xml",

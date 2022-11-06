@@ -576,7 +576,7 @@ namespace dp2Circulation
                         this,
                         "连续出版物",
                         "item",
-                        looping.stop,
+                        looping.Progress,
                         channel);
                 };
                 dlg.RefDbName = "";
@@ -640,7 +640,7 @@ namespace dp2Circulation
                 _stop.BeginLoop();
                 */
 
-                looping.stop.SetProgressRange(0, 100);
+                looping.Progress.SetProgressRange(0, 100);
                 // stop.SetProgressValue(0);
 
                 long lRet = 0;
@@ -648,7 +648,7 @@ namespace dp2Circulation
                 {
                     // 2013/3/25
                     lRet = channel.SearchItem(
-                    looping.stop,
+                    looping.Progress,
                      // 2010/2/25 changed
                      "<all series>",
                     "", //
@@ -669,7 +669,7 @@ namespace dp2Circulation
                 }
                 else
                     lRet = channel.SearchItem(
-                        looping.stop,
+                        looping.Progress,
                          // 2010/2/25 changed
                          "<all series>",
                         dlg.BatchNo,
@@ -694,8 +694,8 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                looping.stop.SetProgressRange(0, lHitCount);
-                looping.stop.SetProgressValue(0);
+                looping.Progress.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressValue(0);
 
 
                 long lStart = 0;
@@ -714,7 +714,7 @@ namespace dp2Circulation
                     }
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         "batchno",   // strResultSetName
                         lStart,
                         lCount,
@@ -777,7 +777,7 @@ namespace dp2Circulation
                         //      0   因为馆藏地点不匹配，没有加入list中
                         //      1   成功
                         nRet = LoadOneItem(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strBarcode,
                             this.listView_parent,
@@ -792,13 +792,13 @@ namespace dp2Circulation
                             searchresults[i].Path,
                             searchresults[i].Cols);
                          * */
-                        looping.stop.SetProgressValue(lStart + i + 1);
+                        looping.Progress.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.Progress.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -2121,8 +2121,8 @@ strPubType);
                     "disableControl");
                 try
                 {
-                    looping.stop.SetProgressRange(0, this.listView_parent.Items.Count);
-                    looping.stop.SetProgressValue(0);
+                    looping.Progress.SetProgressRange(0, this.listView_parent.Items.Count);
+                    looping.Progress.SetProgressValue(0);
                     for (int i = 0; i < this.listView_parent.Items.Count; i++)
                     {
                         ListViewItem item = this.listView_parent.Items[i];
@@ -2135,7 +2135,7 @@ strPubType);
                         //string strFilename = "";
                         //string strOneWarning = "";
                         nRet = PrintOneBinding(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                                 main_option,
                                 secondary_option,
@@ -2157,7 +2157,7 @@ strPubType);
 
                         filenames.Add(strFilename);
 
-                        looping.stop.SetProgressValue(i + 1);
+                        looping.Progress.SetProgressValue(i + 1);
                     }
                 }
                 finally
@@ -3595,7 +3595,7 @@ strPubType);
                         }
 
                         // 设置进度范围
-                        looping.stop.SetProgressRange(0, nLineCount);
+                        looping.Progress.SetProgressRange(0, nLineCount);
                     }
 
                     using (StreamReader sr = new StreamReader(dlg.FileName))
@@ -3611,7 +3611,7 @@ strPubType);
                             string strLine = "";
                             strLine = sr.ReadLine();
 
-                            looping.stop.SetProgressValue(i);
+                            looping.Progress.SetProgressValue(i);
 
                             if (strLine == null)
                                 break;
@@ -3638,7 +3638,7 @@ strPubType);
                                 GetErrorInfoForm().WriteHtml(strError + "\r\n");
                             }
 
-                            looping.stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
+                            looping.Progress.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
 
 
                             string strOutputItemRecPath = "";
@@ -3648,7 +3648,7 @@ strPubType);
                             //      -1  出错
                             //      1   成功
                             nRet = LoadOneItem(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 "@path:" + strLine,
                                 this.listView_parent,
@@ -3788,7 +3788,7 @@ strPubType);
                         }
 
                         // 设置进度范围
-                        looping.stop.SetProgressRange(0, nLineCount);
+                        looping.Progress.SetProgressRange(0, nLineCount);
                     }
 
                     using (StreamReader sr = new StreamReader(dlg.FileName))
@@ -3804,7 +3804,7 @@ strPubType);
                             string strLine = "";
                             strLine = sr.ReadLine();
 
-                            looping.stop.SetProgressValue(i);
+                            looping.Progress.SetProgressValue(i);
 
                             if (strLine == null)
                                 break;
@@ -3816,7 +3816,7 @@ strPubType);
                             if (strLine[0] == '#')
                                 continue;   // 注释行
 
-                            looping.stop.SetMessage("正在装入册条码号 " + strLine + " 对应的记录...");
+                            looping.Progress.SetMessage("正在装入册条码号 " + strLine + " 对应的记录...");
 
                             string strOutputItemRecPath = "";
                             // 根据册条码号，装入册记录
@@ -3825,7 +3825,7 @@ strPubType);
                             //      -1  出错
                             //      1   成功
                             nRet = LoadOneItem(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 strLine,
                                 this.listView_parent,

@@ -324,7 +324,7 @@ namespace dp2Circulation
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("query");
                 for (int j = 0; j < nLoopTimes; j++)
                 {
-                    looping.stop.SetMessage("循环 " + (j + 1).ToString() + "...");
+                    looping.Progress.SetMessage("循环 " + (j + 1).ToString() + "...");
                     Global.WriteHtml(this.webBrowser1,
         "\r\n循环 " + (j + 1).ToString() + "...\r\n");
 
@@ -363,7 +363,7 @@ namespace dp2Circulation
                                 this.m_nBeforeAbort = Convert.ToInt32(this.textBox_searchBiblio_beforeAbort.Text);
                         }
 
-                        looping.stop.SetMessage("正在检索 '" + strWord + "' ...");
+                        looping.Progress.SetMessage("正在检索 '" + strWord + "' ...");
                         Global.WriteHtml(this.webBrowser1,
             "正在检索 '" + strWord + "' 中断前毫秒数=" + this.m_nBeforeAbort.ToString() + "; " + strComment + "...\r\n");
 
@@ -372,7 +372,7 @@ namespace dp2Circulation
                         DateTime timeStart = DateTime.Now;
 
                         string strQueryXml = "";
-                        long lRet = channel.SearchBiblio(looping.stop,
+                        long lRet = channel.SearchBiblio(looping.Progress,
                             strDbName,
                             strWord,
                             -1,

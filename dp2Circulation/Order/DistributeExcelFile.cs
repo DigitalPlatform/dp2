@@ -315,7 +315,7 @@ context.ContentEndRow + 1 + 1, context.DistributeEndColumn + 1);
                 SubItemLoader sub_loader = new SubItemLoader();
                 sub_loader.BiblioRecPath = strBiblioRecPath;
                 sub_loader.Channel = channel;
-                sub_loader.Stop = looping.stop;
+                sub_loader.Stop = looping.Progress;
                 sub_loader.DbType = "order";
 
                 sub_loader.Prompt += new MessagePromptEventHandler(form.OnLoaderPrompt);

@@ -322,7 +322,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -425,7 +425,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -557,7 +557,7 @@ namespace dp2Circulation
                  * */
 
                 long lRet = channel.Search(
-                    looping.stop,
+                    looping.Progress,
                     strQueryXml,
                     "amerced",
                     "", // strOutputStyle
@@ -578,7 +578,7 @@ namespace dp2Circulation
                 long lPerCount = Math.Min(50, lHitCount);
                 Record[] searchresults = null;
 
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
 
                 // 获得结果集，装入listview
                 for (; ; )
@@ -591,10 +591,10 @@ namespace dp2Circulation
                         goto ERROR1;
                     }
 
-                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         "amerced",   // strResultSetName
                         lStart,
                         lPerCount,
@@ -626,9 +626,9 @@ namespace dp2Circulation
 
                         string strPath = searchresults[i].Path;
 
-                        looping.stop.SetMessage("正在装入违约金记录 " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
+                        looping.Progress.SetMessage("正在装入违约金记录 " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
 
-                        lRet = channel.GetRecord(looping.stop,
+                        lRet = channel.GetRecord(looping.Progress,
                             strPath,
                             out byte[] timestamp,
                             out string strXml,
@@ -643,7 +643,7 @@ namespace dp2Circulation
 
                         int nRet = FillAmercedLine(
                             null,
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strXml,
                             strPath,
@@ -654,7 +654,7 @@ namespace dp2Circulation
 
                         nLoadCount++;
                     CONTINUE:
-                        looping.stop.SetProgressValue(lStart + i + 1);
+                        looping.Progress.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
@@ -915,9 +915,8 @@ namespace dp2Circulation
             if (bFillSummary == true)
             {
                 // stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("正在获取摘要 " + strItemBarcode + " ...");
+                stop?.SetMessage("正在获取摘要 " + strItemBarcode + " ...");
                 // stop.BeginLoop();
-
 
                 try
                 {
@@ -1518,7 +1517,7 @@ namespace dp2Circulation
                 "正在进行" + strOperName + " ...",
                 "disableControl");
 
-            looping.stop.SetProgressRange(0, total_ids.Count);
+            looping.Progress.SetProgressRange(0, total_ids.Count);
             try
             {
                 int nDone = 0;
@@ -1533,7 +1532,7 @@ namespace dp2Circulation
                     total_ids.CopyTo(j * nPerCount, ids, 0, nThisCount);
 
                     long lRet = channel.Settlement(
-                        looping.stop,
+                        looping.Progress,
                         strAction,
                         ids,
                         out strError);
@@ -1543,7 +1542,7 @@ namespace dp2Circulation
 
                     // 刷新
                     int nRet = RefreshAmercedRecords(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         // false,
                         ids,
@@ -1552,7 +1551,7 @@ namespace dp2Circulation
                         goto ERROR1;
 
                     nDone += nThisCount;
-                    looping.stop.SetProgressValue(nDone);
+                    looping.Progress.SetProgressValue(nDone);
                 }
 
             }
@@ -1805,7 +1804,7 @@ namespace dp2Circulation
                     writer.WriteStartDocument();
                     writer.WriteStartElement("dprms", "collection", DpNs.dprms);
 
-                    looping.stop.SetProgressRange(0, items.Count);
+                    looping.Progress.SetProgressRange(0, items.Count);
                     for (int i = 0; i < items.Count; i++)
                     {
                         Application.DoEvents();	// 出让界面控制权
@@ -1816,7 +1815,7 @@ namespace dp2Circulation
                             return -1;
                         }
 
-                        looping.stop.SetMessage("正在导出违约金记录 " + (i + 1).ToString() + " / " + items.Count.ToString() + " ...");
+                        looping.Progress.SetMessage("正在导出违约金记录 " + (i + 1).ToString() + " / " + items.Count.ToString() + " ...");
 
                         ListViewItem item = items[i];
                         string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
@@ -1824,7 +1823,7 @@ namespace dp2Circulation
                         string strXml = "";
                         byte[] timestamp = null;
                         long lRet = channel.GetRecord(
-                            looping.stop,
+                            looping.Progress,
                             strRecPath,
                             out timestamp,
                             out strXml,
@@ -1844,7 +1843,7 @@ namespace dp2Circulation
                         }
                         dom.DocumentElement.WriteTo(writer);
 
-                        looping.stop.SetProgressValue(i + 1);
+                        looping.Progress.SetProgressValue(i + 1);
                     }
 
                     writer.WriteEndElement();

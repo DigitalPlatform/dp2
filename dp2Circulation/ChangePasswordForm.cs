@@ -141,7 +141,7 @@ namespace dp2Circulation
                 //      0   旧密码不正确
                 //      1   旧密码正确,已修改为新密码
                 lRet = channel.ChangeReaderPassword(
-                    looping.stop,
+                    looping.Progress,
                     this.textBox_reader_barcode.Text,
                     bOldPasswordEnabled == false ? null : this.textBox_reader_oldPassword.Text,
                     this.textBox_reader_newPassword.Text,
@@ -281,7 +281,7 @@ namespace dp2Circulation
                         //      -1  出错
                         //      0   成功
                         lRet = channel.ChangeUserPassword(
-                            looping.stop,
+                            looping.Progress,
                             this.textBox_worker_userName.Text,
                             this.textBox_worker_oldPassword.Text,
                             this.textBox_worker_newPassword.Text,
@@ -303,7 +303,7 @@ namespace dp2Circulation
                     info.Password = this.textBox_worker_newPassword.Text;
                     // 当action为"resetpassword"时，则info.ResetPassword状态不起作用，无论怎样都要修改密码。resetpassword并不修改其他信息，也就是说info中除了Password/UserName以外其他成员的值无效。
                     lRet = channel.SetUser(
-                        looping.stop,
+                        looping.Progress,
                         "resetpassword",
                         info,
                         out strError);
@@ -420,7 +420,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ResetPassword(
-                    looping.stop,
+                    looping.Progress,
                     strParameters,
                     "",
                     out string strMessage,
@@ -503,7 +503,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.ResetPassword(
-                    looping.stop,
+                    looping.Progress,
                     strParameters,
                     "",
                     out string strMessage,

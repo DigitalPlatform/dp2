@@ -123,13 +123,13 @@ namespace dp2Circulation
                 "disableControl");
             try
             {
-                looping.stop.SetMessage("正在装入读者记录 " + strUserName + " ...");
+                looping.Progress.SetMessage("正在装入读者记录 " + strUserName + " ...");
 
                 string[] results = null;
                 byte[] baTimestamp = null;
                 string strRecPath = "";
                 long lRet = channel.GetReaderInfo(
-                    looping.stop,
+                    looping.Progress,
                     strUserName,
                     "xml",   // this.RenderFormat, // "html",
                     out results,
@@ -226,7 +226,7 @@ namespace dp2Circulation
     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
 
                 string strOutputStyle = "";
-                long lRet = channel.Search(looping.stop,
+                long lRet = channel.Search(looping.Progress,
                     strQueryXml,
                     "",
                     strOutputStyle,
@@ -238,7 +238,7 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -256,7 +256,7 @@ namespace dp2Circulation
                     }
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -284,18 +284,18 @@ namespace dp2Circulation
                         this._items.Add(item);
 
                         // paths.Add(record.Path);
-                        looping.stop.SetProgressValue(lStart + i);
+                        looping.Progress.SetProgressValue(lStart + i);
                         i++;
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.Progress.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
-                    looping.stop.SetProgressValue(lStart);
+                    looping.Progress.SetProgressValue(lStart);
                 }
             }
             finally
@@ -358,7 +358,7 @@ namespace dp2Circulation
     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
 
                 string strOutputStyle = "";
-                long lRet = channel.Search(looping.stop,
+                long lRet = channel.Search(looping.Progress,
                     strQueryXml,
                     "",
                     strOutputStyle,
@@ -370,7 +370,7 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -388,7 +388,7 @@ namespace dp2Circulation
                     }
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         null,   // strResultSetName
                         lStart,
                         lCount,
@@ -412,18 +412,18 @@ namespace dp2Circulation
                     {
                         // record.RecordBody.Xml;
                         paths.Add(record.Path);
-                        looping.stop.SetProgressValue(lStart + i);
+                        looping.Progress.SetProgressValue(lStart + i);
                         i++;
                     }
 
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    looping.stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+                    looping.Progress.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
-                    looping.stop.SetProgressValue(lStart);
+                    looping.Progress.SetProgressValue(lStart);
                 }
 
                 return 1;

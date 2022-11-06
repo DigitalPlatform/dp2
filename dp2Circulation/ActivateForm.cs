@@ -417,10 +417,10 @@ MessageBoxDefaultButton.Button2);
             {
                 int nRedoCount = 0;
             REDO:
-                looping.stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+                looping.Progress.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                 long lRet = channel.GetReaderInfo(
-                    looping.stop,
+                    looping.Progress,
                     strBarcode,
                     "xml,html",
                     out string[] results,
@@ -722,7 +722,7 @@ MessageBoxDefaultButton.Button2);
                 string strSavedPath = "";
 
                 long lRet = channel.SetReaderInfo(
-                    looping.stop,
+                    looping.Progress,
                     "change",
                     edit.RecPath,
                     strNewXml,
@@ -839,7 +839,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 long lRet = channel.DevolveReaderInfo(
-                    looping.stop,
+                    looping.Progress,
                     strSourceReaderBarcode,
                     strTargetReaderBarcode,
                     out strError);

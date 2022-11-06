@@ -271,7 +271,7 @@ namespace dp2Circulation
                     this,
                     this.comboBox_prepare_type.Text,    // 和出版物类型有关
                     "item",
-                    looping.stop,
+                    looping.Progress,
                     channel);
             }
         }
@@ -788,7 +788,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
 
                 long lRet = channel.SearchBiblio(
-                    looping.stop,
+                    looping.Progress,
                     GetDbNameListString(),  // "<全部>",
                     this.textBox_accept_queryWord.Text,
                     1000,   // this.MaxSearchResultCount,  // 1000
@@ -814,7 +814,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 this.m_lHitCount = lHitCount;
 
                 // 显示前半程
-                looping.stop.SetProgressRange(0, lHitCount * 2);
+                looping.Progress.SetProgressRange(0, lHitCount * 2);
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
@@ -833,7 +833,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         return -1;
                     }
 
-                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     string strStyle = "id,cols";
 
@@ -841,7 +841,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         strStyle = "id";
 
                     lRet = channel.GetSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         "accept",   // strResultSetName
                         lStart,
                         lPerCount,
@@ -912,7 +912,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         break;
 
                     this.m_lLoaded = lStart;
-                    looping.stop.SetProgressValue(lStart);
+                    looping.Progress.SetProgressValue(lStart);
                 }
 
                 // this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录";
@@ -1018,7 +1018,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             try
             {
                 // 显示后半程
-                looping.stop.SetProgressRange(0, this.listView_accept_records.Items.Count * 2);
+                looping.Progress.SetProgressRange(0, this.listView_accept_records.Items.Count * 2);
                 for (int i = 0; i < this.listView_accept_records.Items.Count; i++)
                 {
                     Application.DoEvents();	// 出让界面控制权
@@ -1082,7 +1082,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     }
                      * */
                     nRet = FilterOneItem(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         item, out strError);
                     if (nRet == -1)
@@ -1093,7 +1093,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         COLUMN_ROLE);
                      * */
 
-                    looping.stop.SetProgressValue(this.listView_accept_records.Items.Count + i);
+                    looping.Progress.SetProgressValue(this.listView_accept_records.Items.Count + i);
                 }
                 return 1;
             }
@@ -1679,7 +1679,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 try
                 {
                     nRet = RefreshBrowseLine(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         target_item, out strError);
                     if (nRet == -1)
@@ -2552,7 +2552,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                     string strError = "";
                     int nRet = RefreshBrowseLine(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         item,
                         out strError);
@@ -3087,7 +3087,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             try
             {
                 long lRet = channel.ManageDatabase(
-                    looping.stop,
+                    looping.Progress,
                     "getinfo",
                     "",
                     "",
@@ -4344,7 +4344,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 Debug.Assert(String.IsNullOrEmpty(strRecPath) == false, "strRecPath值不能为空");
 
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     strRecPath,
                     "",
                     formats,
@@ -4408,7 +4408,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 Debug.Assert(String.IsNullOrEmpty(strRecPath) == false, "strRecPath值不能为空");
 
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     strRecPath,
                     "",
                     formats,
@@ -4720,7 +4720,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                     string strError = "";
                     int nRet = RefreshBrowseLine(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         item,
                         out strError);

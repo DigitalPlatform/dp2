@@ -308,8 +308,8 @@ namespace dp2Circulation
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
                     if (stop != null && bDisplayMessage == true)
                     {
-                        stop.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
-                        stop.SetProgressValue(lStartIndex + i);
+                        stop?.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
+                        stop?.SetProgressValue(lStartIndex + i);
                     }
 
                     try
@@ -730,7 +730,7 @@ namespace dp2Circulation
                 }
 
                 // TODO: 如果要优化算法的话，可以建立书目记录和浏览行之间的联系，在书目记录保存成功后才修改 line_info.NewField 和刷新浏览行显示。这样的好处是，一旦中途出错，还有干净重新保存的可能
-                looping.stop.SetProgressRange(0, changed_biblio_recpaths.Count);
+                looping.Progress.SetProgressRange(0, changed_biblio_recpaths.Count);
                 int i = 0;
                 foreach(string strBiblioRecPath in changed_biblio_recpaths)
                 {
@@ -756,10 +756,10 @@ namespace dp2Circulation
                         goto CONTINUE;
                     }
 
-                    looping.stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
+                    looping.Progress.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
                     long lRet = channel.SetBiblioInfo(
-                        looping.stop,
+                        looping.Progress,
                         "change",
                         strBiblioRecPath,
                         "xml",
@@ -786,7 +786,7 @@ namespace dp2Circulation
 
                             // 重新装载书目记录到 OldXml
                             lRet = channel.GetBiblioInfos(
-                                looping.stop,
+                                looping.Progress,
                                 strBiblioRecPath,
                                 "",
                                 new string[] { "xml" },   // formats
@@ -829,7 +829,7 @@ MessageBoxDefaultButton.Button1);
                             goto CONTINUE;
                         // 重新装载书目记录到 OldXml
                         lRet = channel.GetBiblioInfos(
-                            looping.stop,
+                            looping.Progress,
                             strBiblioRecPath,
                             "",
                             new string[] { "xml" },   // formats
@@ -860,7 +860,7 @@ MessageBoxDefaultButton.Button1);
 
                     nSavedCount++;
                 CONTINUE:
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                     i++;
                 }
             }
@@ -1175,7 +1175,7 @@ dlg.UiState);
             int nChangedCount = 0;
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -1221,7 +1221,7 @@ dlg.UiState);
                         return -1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     LineInfo info = (LineInfo)item.Tag;
                     if (info == null)
@@ -1851,7 +1851,10 @@ out string strError)
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.listView_records.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.listView_records.Enabled = bEnable;
+            }));
         }
 
         public string UiState

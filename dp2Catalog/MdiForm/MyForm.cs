@@ -338,7 +338,7 @@ namespace dp2Catalog
             {
                 foreach (var looping in _loopings)
                 {
-                    if (looping.stop != null && looping.stop.State == 0)
+                    if (looping.Progress != null && looping.Progress.State == 0)
                         return true;
                 }
                 return false;

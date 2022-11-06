@@ -284,7 +284,7 @@ namespace dp2Circulation
                 this,
                 "", // 目前不分图书和期刊。 TODO: 其实将来可以把pubtype列表定为3态，其中一个是“书+刊”
                 this.DbType,    // "item",
-                looping.stop,
+                looping.Progress,
                 channel);
             }
         }
@@ -670,7 +670,7 @@ namespace dp2Circulation
 
                 // 循环
                 nRet = DoLoop(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     out strError);
                 if (nRet == -1)
@@ -1343,8 +1343,6 @@ namespace dp2Circulation
 
             try
             {
-
-
                 /*
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在检索 ...");
@@ -1933,7 +1931,7 @@ namespace dp2Circulation
 
                 string strBiblioXml = "";   // 向服务器提供的XML记录
                 long lRet = channel.GetBiblioInfo(
-                    looping.stop,   // this.stop,
+                    looping.Progress,   // this.stop,
                     strBiblioRecPath,
                     strBiblioXml,
                     strBiblioType,

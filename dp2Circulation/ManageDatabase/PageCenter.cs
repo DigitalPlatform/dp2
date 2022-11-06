@@ -58,7 +58,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "center",
                     strAction,
                     strCenterDef,
@@ -214,7 +214,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "center",
                     "def",
                     out strOutputInfo,

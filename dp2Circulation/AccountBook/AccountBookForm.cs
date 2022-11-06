@@ -891,7 +891,7 @@ namespace dp2Circulation
             {
                 // int nDupCount = 0;
                 nRet = LoadFromRecPathFile(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     dlg.FileName,
                     this.comboBox_load_type.Text,
@@ -968,7 +968,7 @@ namespace dp2Circulation
             try
             {
                 nRet = ConvertBarcodeFile(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     dlg.FileName,
                     strRecPathFilename,
@@ -978,7 +978,7 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 nRet = LoadFromRecPathFile(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strRecPathFilename,
                     this.comboBox_load_type.Text,
@@ -2098,7 +2098,7 @@ namespace dp2Circulation
                         nUncheckedCount++;
                 }
 
-                PrintList(looping.stop,
+                PrintList(looping.Progress,
                     this.comboBox_load_type.Text + " 全部事项清单", items);
                 return;
             }
@@ -4755,7 +4755,7 @@ null,
             {
                 // 检索 批次号 和 馆藏地点 将命中的记录路径写入文件
                 int nRet = SearchBatchNoAndLocation(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     this.comboBox_load_type.Text,
                     strBatchNo,
@@ -4766,7 +4766,7 @@ null,
                     goto ERROR1;
 
                 nRet = LoadFromRecPathFile(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strRecPathFilename,
                     this.comboBox_load_type.Text,
@@ -4807,7 +4807,7 @@ null,
                     this,
                     this.comboBox_load_type.Text,
                     "item",
-                    looping.stop,
+                    looping.Progress,
                     channel);
             }
         }
@@ -5218,7 +5218,7 @@ MessageBoxDefaultButton.Button2);
 
                 // 输出到文本文件
                 int nRet = OutputToTextFile(
-                    looping.stop,
+                    looping.Progress,
                     items,
                     sw,
                     ref doc,
@@ -5654,7 +5654,7 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 if (looping != null)
-                    looping.stop.SetProgressRange(0, this.listView_in.Items.Count);
+                    looping.Progress.SetProgressRange(0, this.listView_in.Items.Count);
 
                 {
                     host.AccountBookForm = this;
@@ -5681,7 +5681,7 @@ MessageBoxDefaultButton.Button2);
                         goto ERROR1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
 
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode((i + 1).ToString()) + "</div>");
@@ -5967,7 +5967,7 @@ MessageBoxDefaultButton.Button2);
 
                 // 输出到文本文件
                 int nRet = OutputToTextFile(
-                    looping.stop,
+                    looping.Progress,
                     items,
                     null,
                     ref doc,

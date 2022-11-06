@@ -103,10 +103,10 @@ namespace dp2Circulation
                 string strBiblioDbName = "_测试用中文图书";
 
                 // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-                looping.stop.SetMessage("正在删除测试用书目库 ...");
+                looping.Progress.SetMessage("正在删除测试用书目库 ...");
                 string strOutputInfo = "";
                 long lRet = channel.ManageDatabase(
-    looping.stop,
+    looping.Progress,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -119,7 +119,7 @@ namespace dp2Circulation
                         goto ERROR1;
                 }
 
-                looping.stop.SetMessage("正在创建测试用书目库 ...");
+                looping.Progress.SetMessage("正在创建测试用书目库 ...");
                 // 创建一个书目库
                 // parameters:
                 // return:
@@ -128,7 +128,7 @@ namespace dp2Circulation
                 //      1   成功创建
                 nRet = ManageHelper.CreateBiblioDatabase(
                     channel,
-                    looping.stop,
+                    looping.Progress,
                     strBiblioDbName,
                     "book",
                     "unimarc",
@@ -143,9 +143,9 @@ namespace dp2Circulation
                 {
                     strSeedDbName = "_测试用种次号库";
 
-                    looping.stop.SetMessage("正在删除测试用种次号库 ...");
+                    looping.Progress.SetMessage("正在删除测试用种次号库 ...");
                     lRet = channel.ManageDatabase(
-        looping.stop,
+        looping.Progress,
         "delete",
         strSeedDbName,    // strDatabaseNames,
         "",
@@ -158,7 +158,7 @@ namespace dp2Circulation
                             goto ERROR1;
                     }
 
-                    looping.stop.SetMessage("正在创建测试用种次号库 ...");
+                    looping.Progress.SetMessage("正在创建测试用种次号库 ...");
 
                     // parameters:
                     // return:
@@ -167,7 +167,7 @@ namespace dp2Circulation
                     //      1   成功创建
                     nRet = ManageHelper.CreateSimpleDatabase(
                         channel,
-                        looping.stop,
+                        looping.Progress,
                         strSeedDbName,
                         "zhongcihao",
                         "",
@@ -184,7 +184,7 @@ namespace dp2Circulation
                 // 为系统添加新的馆藏地定义
                 nRet = ManageHelper.AddLocationTypes(
                     channel,
-                    looping.stop,
+                    looping.Progress,
                     "add",
                     items,
                     out strError);
@@ -200,7 +200,7 @@ namespace dp2Circulation
                 string strOldCallNumberDef = "";
                 nRet = ManageHelper.ChangeCallNumberDef(
                     channel,
-                    looping.stop,
+                    looping.Progress,
                     strGroupFragment,
                     out strOldCallNumberDef,
                     out strError);
@@ -235,9 +235,9 @@ UiTest3(strBiblioDbName)
 ));
 
                 // 删除测试用的书目库、排架体系、馆藏地定义
-                looping.stop.SetMessage("正在删除测试用书目库 ...");
+                looping.Progress.SetMessage("正在删除测试用书目库 ...");
                 lRet = channel.ManageDatabase(
-    looping.stop,
+    looping.Progress,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -249,9 +249,9 @@ UiTest3(strBiblioDbName)
 
                 if (string.IsNullOrEmpty(strSeedDbName) == false)
                 {
-                    looping.stop.SetMessage("正在删除测试用种次号库 ...");
+                    looping.Progress.SetMessage("正在删除测试用种次号库 ...");
                     lRet = channel.ManageDatabase(
-        looping.stop,
+        looping.Progress,
         "delete",
         strSeedDbName,    // strDatabaseNames,
         "",
@@ -262,20 +262,20 @@ UiTest3(strBiblioDbName)
                         goto ERROR1;
                 }
 
-                looping.stop.SetMessage("正在复原测试前的排架体系 ...");
+                looping.Progress.SetMessage("正在复原测试前的排架体系 ...");
                 nRet = ManageHelper.RestoreCallNumberDef(
     channel,
-    looping.stop,
+    looping.Progress,
     strOldCallNumberDef,
     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
 
-                looping.stop.SetMessage("正在删除测试用的馆藏地 ...");
+                looping.Progress.SetMessage("正在删除测试用的馆藏地 ...");
                 nRet = ManageHelper.AddLocationTypes(
     channel,
-    looping.stop,
+    looping.Progress,
     "remove",
     items,
     out strError);
@@ -696,10 +696,10 @@ UiTest3(strBiblioDbName)
                 string strBiblioDbName = "_测试用中文图书";
 
                 // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-                looping.stop.SetMessage("正在删除测试用书目库 ...");
+                looping.Progress.SetMessage("正在删除测试用书目库 ...");
                 string strOutputInfo = "";
                 long lRet = channel.ManageDatabase(
-    looping.stop,
+    looping.Progress,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -712,7 +712,7 @@ UiTest3(strBiblioDbName)
                         goto ERROR1;
                 }
 
-                looping.stop.SetMessage("正在创建测试用书目库 ...");
+                looping.Progress.SetMessage("正在创建测试用书目库 ...");
                 // 创建一个书目库
                 // parameters:
                 // return:
@@ -721,7 +721,7 @@ UiTest3(strBiblioDbName)
                 //      1   成功创建
                 nRet = ManageHelper.CreateBiblioDatabase(
                     channel,
-                    looping.stop,
+                    looping.Progress,
                     strBiblioDbName,
                     "book",
                     "unimarc",
@@ -739,7 +739,7 @@ UiTest3(strBiblioDbName)
                 // 为系统添加新的馆藏地定义
                 nRet = ManageHelper.AddLocationTypes(
                     channel,
-                    looping.stop,
+                    looping.Progress,
                     "add",
                     items,
                     out strError);
@@ -833,9 +833,9 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 }
 
                 // 删除测试用的书目库、排架体系、馆藏地定义
-                looping.stop.SetMessage("正在删除测试用书目库 ...");
+                looping.Progress.SetMessage("正在删除测试用书目库 ...");
                 lRet = channel.ManageDatabase(
-    looping.stop,
+    looping.Progress,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
@@ -845,10 +845,10 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 if (lRet == -1)
                     goto ERROR1;
 
-                looping.stop.SetMessage("正在删除测试用的馆藏地 ...");
+                looping.Progress.SetMessage("正在删除测试用的馆藏地 ...");
                 nRet = ManageHelper.AddLocationTypes(
     channel,
-    looping.stop,
+    looping.Progress,
     "remove",
     items,
     out strError);
@@ -1545,7 +1545,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 List<string> format_list = new List<string>();
                 format_list.Add("xml");
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     strBiblioRecPath,
                     "",
                     format_list.ToArray(),
@@ -2040,9 +2040,9 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
                 {
                     strTestDbName = "_测试用盘点库";
-                    looping.stop.SetMessage("正在删除" + strTestDbName + " ...");
+                    looping.Progress.SetMessage("正在删除" + strTestDbName + " ...");
                     lRet = channel.ManageDatabase(
-        looping.stop,
+        looping.Progress,
         "delete",
         strTestDbName,    // strDatabaseNames,
         "",
@@ -2055,7 +2055,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                             goto ERROR1;
                     }
 
-                    looping.stop.SetMessage("正在创建" + strTestDbName + " ...");
+                    looping.Progress.SetMessage("正在创建" + strTestDbName + " ...");
 
                     // parameters:
                     // return:
@@ -2064,7 +2064,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     //      1   成功创建
                     nRet = ManageHelper.CreateSimpleDatabase(
                         channel,
-                        looping.stop,
+                        looping.Progress,
                         strTestDbName,
                         "inventory",
                         "",
@@ -2076,7 +2076,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
                 {
                     List<string> errors = TestWriteXmlRecords(
-looping.stop,
+looping.Progress,
 channel,
 strTestDbName,
 "delete", // "delete,fix",
@@ -2092,7 +2092,7 @@ strTestDbName,
                 // 进行测试
                 {
                     List<string> errors = TestUploadObjectFiles(
-                looping.stop,
+                looping.Progress,
                 channel,
                 strTestDbName,
                 "delete,fix", // "delete,fix",
@@ -2107,7 +2107,7 @@ strTestDbName,
 
                 {
                     List<string> errors = TestUploadObjectFiles(
-    looping.stop,
+    looping.Progress,
     channel,
     strTestDbName,
     "delete", // "delete",
@@ -2122,7 +2122,7 @@ strTestDbName,
 
                 {
                     List<string> errors = TestUploadObjectFiles(
-    looping.stop,
+    looping.Progress,
     channel,
     strTestDbName,
     "delete,reuse_id", // "delete",
@@ -2138,9 +2138,9 @@ strTestDbName,
 
                 if (string.IsNullOrEmpty(strTestDbName) == false)
                 {
-                    looping.stop.SetMessage("正在删除" + strTestDbName + " ...");
+                    looping.Progress.SetMessage("正在删除" + strTestDbName + " ...");
                     lRet = channel.ManageDatabase(
-        looping.stop,
+        looping.Progress,
         "delete",
         strTestDbName,    // strDatabaseNames,
         "",
@@ -2441,7 +2441,7 @@ strTestDbName,
                 strRecordPath = strOutputPath;
                 timestamp = output_timestamp;
 
-                stop.SetMessage("正在测试写入 XML 记录 " + strRecordPath + " length=" + length);
+                stop?.SetMessage("正在测试写入 XML 记录 " + strRecordPath + " length=" + length);
 
                 // TODO: 要测试用多种不同尺寸的 chunksize 来下载
                 // 下载
@@ -2710,7 +2710,7 @@ strTestDbName,
                 if (strAction == "createDatabase")
                 {
                     nRet = TestRecoverCreatingDatabases(
-looping.stop,
+looping.Progress,
 channel,
 strStyle,
 out strError);
@@ -2718,7 +2718,7 @@ out strError);
                 else if (strAction == "deleteBiblioDatabase")
                 {
                     nRet = TestRecoverDeletingBiblioDatabases(
-looping.stop,
+looping.Progress,
 channel,
 strStyle,
 out strError);
@@ -2726,7 +2726,7 @@ out strError);
                 else if (strAction == "deleteSimpleDatabase")
                 {
                     nRet = TestRecoverDeletingSimpleDatabases(
-looping.stop,
+looping.Progress,
 channel,
 strStyle,
 out strError);
@@ -4349,7 +4349,7 @@ out strError);
 
                 param.ResultOffset = currentResultOffs;
 
-                stop.SetMessage("正在获取任务 '" + strTaskName + "' 的最新信息 (第 " + (i + 1).ToString() + " 批)...");
+                stop?.SetMessage("正在获取任务 '" + strTaskName + "' 的最新信息 (第 " + (i + 1).ToString() + " 批)...");
 
                 long lRet = channel.BatchTask(
                     stop,
@@ -4529,14 +4529,14 @@ out strError);
                 for (int i = 0; i < 10; i++)
                 {
                     string strLocalFilePath = Program.MainForm.GetTempFileName("test");
-                    looping.stop.SetMessage(strServerFilePath + "-->" + strLocalFilePath);
+                    looping.Progress.SetMessage(strServerFilePath + "-->" + strLocalFilePath);
                     // parameters:
                     //		strOutputFileName	输出文件名。可以为null。如果调用前文件已经存在, 会被覆盖。
                     // return:
                     //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
                     //		0	成功
                     long lRet = channel.GetRes(
-                        looping.stop,
+                        looping.Progress,
                         strServerFilePath,
                         strLocalFilePath,
                         "content,data,metadata,timestamp,outputpath,gzip",
@@ -4661,7 +4661,7 @@ out strError);
                     //      1   succeed
                     int nRet = BiblioItemsHost.GetAuthorNumber(
                     ref question_table,
-                    looping.stop,
+                    looping.Progress,
                     this,
                     strGcatWebServiceUrl,
                     strAuthor,
@@ -4857,10 +4857,10 @@ out strError);
                     long lRet = 0;
 
                     // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-                    looping.stop.SetMessage("正在借 ...");
+                    looping.Progress.SetMessage("正在借 ...");
                     {
                         lRet = channel.Borrow(
-                            looping.stop,
+                            looping.Progress,
                             false,
                             strReaderBarcode,
                             strItemBarcode,
@@ -4890,7 +4890,7 @@ out strError);
 
                     {
                         nRet = TestChangeReaderRecord(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strReaderBarcode,
                             out strError);
@@ -4901,10 +4901,10 @@ out strError);
 
                     }
 
-                    looping.stop.SetMessage("正在还 ...");
+                    looping.Progress.SetMessage("正在还 ...");
                     {
                         lRet = channel.Return(
-                            looping.stop,
+                            looping.Progress,
                             "return",
                             strReaderBarcode,
                             strItemBarcode,

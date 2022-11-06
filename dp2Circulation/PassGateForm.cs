@@ -390,7 +390,7 @@ namespace dp2Circulation
                     try
                     {
                         string[] results = null;
-                        long lRet = channel.PassGate(looping.stop,
+                        long lRet = channel.PassGate(looping.Progress,
                             strBarcode,
                             this.textBox_gateName.Text, // strGateName
                             strTypeList,

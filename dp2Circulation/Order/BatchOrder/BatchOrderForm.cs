@@ -62,7 +62,7 @@ namespace dp2Circulation
 
         public override void EnableControls(bool bEnable)
         {
-            this.BeginInvoke(new Action(() =>
+            this.TryInvoke((Action)(() =>
             {
                 this.toolStrip1.Enabled = bEnable;
             }));
@@ -119,11 +119,11 @@ namespace dp2Circulation
             try
             {
                 if (looping != null)
-                    looping.stop.SetProgressRange(0, recpaths.Count);
+                    looping.Progress.SetProgressRange(0, recpaths.Count);
 
                 BiblioLoader loader = new BiblioLoader();
                 loader.Channel = channel;
-                loader.Stop = looping.stop;
+                loader.Stop = looping.Progress;
                 loader.RecPaths = recpaths;
                 loader.Format = "table";
 
@@ -149,8 +149,8 @@ namespace dp2Circulation
 
                     if (looping != null)
                     {
-                        looping.stop.SetMessage("正在装载书目信息 " + item.RecPath + " ...");
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetMessage("正在装载书目信息 " + item.RecPath + " ...");
+                        looping.Progress.SetProgressValue(i);
                     }
 
                     BiblioStore line = new BiblioStore();
@@ -164,7 +164,7 @@ namespace dp2Circulation
                     SubItemLoader sub_loader = new SubItemLoader();
                     sub_loader.BiblioRecPath = line.RecPath;
                     sub_loader.Channel = channel;
-                    sub_loader.Stop = looping.stop;
+                    sub_loader.Stop = looping.Progress;
                     sub_loader.DbType = "order";
 
                     sub_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
@@ -1193,7 +1193,7 @@ namespace dp2Circulation
                         continue;
 
                     nRet = SaveEntities(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         biblio,
                         entities,

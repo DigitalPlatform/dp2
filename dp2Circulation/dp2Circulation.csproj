@@ -385,6 +385,7 @@
     <Compile Include="ActivateForm.Designer.cs">
       <DependentUpon>ActivateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="API\LibraryClientExtension.cs" />
     <Compile Include="BiblioStatis\ByjOutputDocxCatalog.cs" />
     <Compile Include="BiblioStatis\GetWordFontsDialog.cs">
       <SubType>Form</SubType>

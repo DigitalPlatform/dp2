@@ -210,7 +210,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "zhongcihao",
                     out strZhongcihaoXml,
@@ -261,7 +261,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "zhongcihao",
                     strZhongcihaoXml,

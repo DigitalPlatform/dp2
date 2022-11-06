@@ -163,7 +163,6 @@ namespace dp2Circulation
         {
             string strError = "";
 
-
             /*
             _stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
             _stop.BeginLoop();
@@ -329,11 +328,6 @@ namespace dp2Circulation
         public int PrintPreviewFromCardFile(bool bDisplayPrinterDialog = false)
         {
             string strError = "";
-            int nRet = this.BeginPrint(
-                this.textBox_cardFile_cardFilename.Text,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
 
             /*
             _stop.OnStop += new DigitalPlatform.StopEventHandler(stop_OnStop);
@@ -345,83 +339,98 @@ namespace dp2Circulation
             this.estimate.StartEstimate();
             try
             {
-                printDialog1.Document = this.document;
+                // 注: BeginPrint 会 SetProgressRange()，应当放到 Stop.Initial() 之后执行
+                int nRet = this.BeginPrint(
+    this.textBox_cardFile_cardFilename.Text,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-                if (this.PrinterInfo != null)
+                try
                 {
-                    string strPrinterName = document.PrinterSettings.PrinterName;
-                    if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == false
-                        && this.PrinterInfo.PrinterName != strPrinterName)
-                    {
-                        this.document.PrinterSettings.PrinterName = this.PrinterInfo.PrinterName;
-                        if (this.document.PrinterSettings.IsValid == false)
-                        {
-                            MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 当前不可用，请重新选定打印机");
-                            this.document.PrinterSettings.PrinterName = strPrinterName;
-                            this.PrinterInfo.PrinterName = "";
-                            bDisplayPrinterDialog = true;
-                        }
-                    }
+                    printDialog1.Document = this.document;
 
-                    PaperSize old_papersize = document.DefaultPageSettings.PaperSize;
-                    if (string.IsNullOrEmpty(this.PrinterInfo.PaperName) == false
-                        && this.PrinterInfo.PaperName != document.DefaultPageSettings.PaperSize.PaperName)
+                    if (this.PrinterInfo != null)
                     {
-                        PaperSize found = null;
-                        foreach (PaperSize ps in this.document.PrinterSettings.PaperSizes)
+                        string strPrinterName = document.PrinterSettings.PrinterName;
+                        if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == false
+                            && this.PrinterInfo.PrinterName != strPrinterName)
                         {
-                            if (ps.PaperName.Equals(this.PrinterInfo.PaperName))
+                            this.document.PrinterSettings.PrinterName = this.PrinterInfo.PrinterName;
+                            if (this.document.PrinterSettings.IsValid == false)
                             {
-                                found = ps;
-                                break;
+                                MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 当前不可用，请重新选定打印机");
+                                this.document.PrinterSettings.PrinterName = strPrinterName;
+                                this.PrinterInfo.PrinterName = "";
+                                bDisplayPrinterDialog = true;
                             }
                         }
 
-                        if (found != null)
-                            this.document.DefaultPageSettings.PaperSize = found;
-                        else
+                        PaperSize old_papersize = document.DefaultPageSettings.PaperSize;
+                        if (string.IsNullOrEmpty(this.PrinterInfo.PaperName) == false
+                            && this.PrinterInfo.PaperName != document.DefaultPageSettings.PaperSize.PaperName)
                         {
-                            MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 的纸张类型 " + this.PrinterInfo.PaperName + " 当前不可用，请重新选定纸张");
-                            document.DefaultPageSettings.PaperSize = old_papersize;
-                            this.PrinterInfo.PaperName = "";
+                            PaperSize found = null;
+                            foreach (PaperSize ps in this.document.PrinterSettings.PaperSizes)
+                            {
+                                if (ps.PaperName.Equals(this.PrinterInfo.PaperName))
+                                {
+                                    found = ps;
+                                    break;
+                                }
+                            }
+
+                            if (found != null)
+                                this.document.DefaultPageSettings.PaperSize = found;
+                            else
+                            {
+                                MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 的纸张类型 " + this.PrinterInfo.PaperName + " 当前不可用，请重新选定纸张");
+                                document.DefaultPageSettings.PaperSize = old_papersize;
+                                this.PrinterInfo.PaperName = "";
+                                bDisplayPrinterDialog = true;
+                            }
+                        }
+
+                        // 只要有一个打印机事项没有确定，就要出现打印机对话框
+                        if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == true
+                            || string.IsNullOrEmpty(this.PrinterInfo.PaperName) == true)
                             bDisplayPrinterDialog = true;
+                    }
+                    else
+                    {
+                        // 没有首选配置的情况下要出现打印对话框
+                        bDisplayPrinterDialog = true;
+                    }
+
+                    DialogResult result = DialogResult.OK;
+                    if (bDisplayPrinterDialog == true)
+                    {
+                        result = printDialog1.ShowDialog();
+
+                        if (result == DialogResult.OK)
+                        {
+                            // 记忆打印参数
+                            if (this.PrinterInfo == null)
+                                this.PrinterInfo = new PrinterInfo();
+                            this.PrinterInfo.PrinterName = document.PrinterSettings.PrinterName;
+                            this.PrinterInfo.PaperName = document.DefaultPageSettings.PaperSize.PaperName;
+                            this.PrinterInfo.Landscape = document.DefaultPageSettings.Landscape;
+                            SetTitle();
                         }
                     }
 
-                    // 只要有一个打印机事项没有确定，就要出现打印机对话框
-                    if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == true
-                        || string.IsNullOrEmpty(this.PrinterInfo.PaperName) == true)
-                        bDisplayPrinterDialog = true;
+                    printPreviewDialog1.Document = this.document;
+
+                    Program.MainForm.AppInfo.LinkFormState(printPreviewDialog1, "labelprintform_printpreviewdialog_state");
+                    printPreviewDialog1.ShowDialog(this);
+                    Program.MainForm.AppInfo.UnlinkFormState(printPreviewDialog1);
                 }
-                else
+                finally
                 {
-                    // 没有首选配置的情况下要出现打印对话框
-                    bDisplayPrinterDialog = true;
+                    this.EndPrint();
                 }
 
-                DialogResult result = DialogResult.OK;
-                if (bDisplayPrinterDialog == true)
-                {
-                    result = printDialog1.ShowDialog();
-
-                    if (result == DialogResult.OK)
-                    {
-                        // 记忆打印参数
-                        if (this.PrinterInfo == null)
-                            this.PrinterInfo = new PrinterInfo();
-                        this.PrinterInfo.PrinterName = document.PrinterSettings.PrinterName;
-                        this.PrinterInfo.PaperName = document.DefaultPageSettings.PaperSize.PaperName;
-                        this.PrinterInfo.Landscape = document.DefaultPageSettings.Landscape;
-                        SetTitle();
-                    }
-                }
-
-                printPreviewDialog1.Document = this.document;
-
-                Program.MainForm.AppInfo.LinkFormState(printPreviewDialog1, "labelprintform_printpreviewdialog_state");
-                printPreviewDialog1.ShowDialog(this);
-                Program.MainForm.AppInfo.UnlinkFormState(printPreviewDialog1);
-
+                return 0;
             }
             finally
             {
@@ -435,9 +444,6 @@ namespace dp2Circulation
                 this._stop.HideProgress();
                 */
             }
-
-            this.EndPrint();
-            return 0;
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
@@ -502,7 +508,7 @@ namespace dp2Circulation
 
                 this.estimate.SetRange(e.Start, e.End);
 
-                _looping?.stop?.SetProgressRange(e.Start, e.End);
+                _looping?.Progress?.SetProgressRange(e.Start, e.End);
 
                 this.progressBar_records.Minimum = (int)e.Start;
                 this.progressBar_records.Maximum = (int)e.End;
@@ -510,16 +516,16 @@ namespace dp2Circulation
             else
             {
                 if ((this.m_lCount++ % 10) == 1)
-                    _looping?.stop?.SetMessage("剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(e.Value)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
+                    _looping?.Progress?.SetMessage("剩余时间 " + ProgressEstimate.Format(this.estimate.Estimate(e.Value)) + " 已经过时间 " + ProgressEstimate.Format(this.estimate.delta_passed));
 
 #if DEBUG
-                if (_looping != null && _looping.stop != null)
+                if (_looping != null && _looping.Progress != null)
                 {
-                    Debug.Assert(e.Value >= _looping?.stop?.ProgressMin);
-                    Debug.Assert(e.Value <= _looping?.stop?.ProgressMax);
+                    Debug.Assert(e.Value >= _looping?.Progress?.ProgressMin);
+                    Debug.Assert(e.Value <= _looping?.Progress?.ProgressMax);
                 }
 #endif
-                _looping?.stop?.SetProgressValue(e.Value);
+                _looping?.Progress?.SetProgressValue(e.Value);
                 // this.stop.SetMessage(e.Value.ToString() + " - " + (((double)e.Value / (double)e.End) * 100).ToString() + "%");
 
                 this.progressBar_records.Value = (int)e.Value;

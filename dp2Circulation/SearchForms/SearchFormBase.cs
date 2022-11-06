@@ -650,7 +650,7 @@ namespace dp2Circulation
                 "disableControl,halfstop"))
             {
                 return RefreshListViewLines(
-looping.stop,
+looping.Progress,
 channel,
 items_param,
 strFormat,
@@ -1170,11 +1170,11 @@ out strError);
                 try
                 {
                     if (dont_enablecontrol == false)
-                        looping?.stop.SetProgressRange(0, items.Count);
+                        looping?.Progress.SetProgressRange(0, items.Count);
 
                     for (int i = 0; i < items.Count; i++)
                     {
-                        if (looping != null && looping.stop.State != 0)
+                        if (looping != null && looping.Progress.State != 0)
                         {
                             strError = "已中断";
                             return -1;
@@ -1185,7 +1185,7 @@ out strError);
                         if (string.IsNullOrEmpty(strRecPath) == true)
                         {
                             if (dont_enablecontrol == false)
-                                looping?.stop.SetProgressValue(i);
+                                looping?.Progress.SetProgressValue(i);
                             goto CONTINUE;
                         }
 
@@ -1198,7 +1198,7 @@ out strError);
 
                         // string strOutputPath = "";
 
-                        looping?.stop.SetMessage("正在保存" + this.DbTypeCaption + "记录 " + strRecPath);
+                        looping?.Progress.SetMessage("正在保存" + this.DbTypeCaption + "记录 " + strRecPath);
 
                         // ErrorCodeValue kernel_errorcode;
 
@@ -1319,7 +1319,7 @@ out strError);
 
                     CONTINUE:
                         if (dont_enablecontrol == false)
-                            looping?.stop.SetProgressValue(i);
+                            looping?.Progress.SetProgressValue(i);
                     }
                 }
                 finally
@@ -1497,7 +1497,7 @@ out strError);
             int nChangedCount = 0;
             try
             {
-                looping.stop.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this._listviewRecords.SelectedItems)
@@ -1534,7 +1534,7 @@ out strError);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     this.m_biblioTable)
                 {
@@ -1557,7 +1557,7 @@ out strError);
                             return new NormalResult { Value = -1, ErrorInfo = strError };
                         }
 
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetProgressValue(i);
 
                         BiblioInfo info = item.BiblioInfo;
 
@@ -1740,7 +1740,7 @@ out strError);
             int nChangedCount = 0;
             try
             {
-                looping.stop.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
 
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this._listviewRecords.SelectedItems)
@@ -1777,7 +1777,7 @@ out strError);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    looping.stop,
+                    looping.Progress,
                     items,
                     this.m_biblioTable)
                 {
@@ -1798,7 +1798,7 @@ out strError);
                         return -1;
                     }
 
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
 
                     BiblioInfo info = item.BiblioInfo;
 

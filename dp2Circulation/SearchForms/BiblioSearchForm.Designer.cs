@@ -117,7 +117,7 @@
             this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(7);
             this.textBox_queryWord.MaxLength = 0;
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(253, 31);
+            this.textBox_queryWord.Size = new System.Drawing.Size(313, 31);
             this.textBox_queryWord.TabIndex = 1;
             this.textBox_queryWord.TextChanged += new System.EventHandler(this.textBox_queryWord_TextChanged);
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
@@ -221,7 +221,7 @@
             this.comboBox_from.Location = new System.Drawing.Point(159, 92);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(253, 32);
+            this.comboBox_from.Size = new System.Drawing.Size(313, 32);
             this.comboBox_from.TabIndex = 6;
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
             // 
@@ -251,7 +251,7 @@
             this.comboBox_matchStyle.Location = new System.Drawing.Point(159, 138);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(253, 29);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(313, 29);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "前方一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -267,7 +267,7 @@
             this.checkedComboBox_biblioDbNames.Name = "checkedComboBox_biblioDbNames";
             this.checkedComboBox_biblioDbNames.Padding = new System.Windows.Forms.Padding(4);
             this.checkedComboBox_biblioDbNames.ReadOnly = false;
-            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(259, 32);
+            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(319, 32);
             this.checkedComboBox_biblioDbNames.TabIndex = 9;
             this.checkedComboBox_biblioDbNames.DropDown += new System.EventHandler(this.checkedComboBox_biblioDbNames_DropDown);
             this.checkedComboBox_biblioDbNames.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_biblioDbNames_ItemChecked);
@@ -288,10 +288,10 @@
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery,
             this.toolStripButton_multiLine});
-            this.toolStrip_search.Location = new System.Drawing.Point(419, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(479, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(314, 45);
+            this.toolStrip_search.Size = new System.Drawing.Size(254, 45);
             this.toolStrip_search.TabIndex = 13;
             this.toolStrip_search.Text = "检索";
             // 
@@ -513,7 +513,7 @@
             // 
             // button_search
             // 
-            this.button_search.Location = new System.Drawing.Point(424, 48);
+            this.button_search.Location = new System.Drawing.Point(484, 48);
             this.button_search.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
@@ -530,7 +530,7 @@
             this.comboBox_location.Location = new System.Drawing.Point(159, 181);
             this.comboBox_location.Margin = new System.Windows.Forms.Padding(7);
             this.comboBox_location.Name = "comboBox_location";
-            this.comboBox_location.Size = new System.Drawing.Size(253, 29);
+            this.comboBox_location.Size = new System.Drawing.Size(313, 29);
             this.comboBox_location.TabIndex = 16;
             // 
             // tableLayoutPanel_main
@@ -644,11 +644,11 @@
             this.listView_records.Location = new System.Drawing.Point(0, 0);
             this.listView_records.Margin = new System.Windows.Forms.Padding(0);
             this.listView_records.Name = "listView_records";
+            this.listView_records.ShowItemToolTips = true;
             this.listView_records.Size = new System.Drawing.Size(887, 250);
             this.listView_records.TabIndex = 0;
             this.listView_records.UseCompatibleStateImageBehavior = false;
             this.listView_records.View = System.Windows.Forms.View.Details;
-            this.listView_records.ShowItemToolTips = true;
             this.listView_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
             this.listView_records.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.listView_records_ItemDrag);
             this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);

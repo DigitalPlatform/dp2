@@ -122,8 +122,6 @@ namespace dp2Circulation
                 "xmlstatisform",
                 "projectname",
                 "");
-
-
         }
 
         private void XmlStatisForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -333,7 +331,7 @@ namespace dp2Circulation
 
                 // 循环
                 nRet = DoLoop(
-                    looping.stop,
+                    looping.Progress,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;

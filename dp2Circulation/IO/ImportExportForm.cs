@@ -254,7 +254,7 @@ strStringTable);
             ProcessInfo info = new ProcessInfo();
             {
                 info.Channel = channel; //  this.GetChannel();
-                info.stop = looping.stop;   // _stop;
+                info.stop = looping.Progress;   // _stop;
 
                 info.TargetBiblioDbName = (string)this.Invoke(new Func<string>(() =>
                 {
@@ -446,7 +446,7 @@ Program.MainForm.ActivateFixPage("history")
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
             */
-            looping.stop.SetMessage(strText);
+            looping.Progress.SetMessage(strText);
 
             // int nBiblioRecordCount = 0;
 
@@ -466,7 +466,7 @@ Program.MainForm.ActivateFixPage("history")
                 using (XmlTextReader reader = new XmlTextReader(file))
                 {
                     if (looping != null)
-                        looping.stop.SetProgressRange(0, file.Length);
+                        looping.Progress.SetProgressRange(0, file.Length);
 
                     // 到根元素
                     while (true)
@@ -505,7 +505,7 @@ Program.MainForm.ActivateFixPage("history")
                         DoRecord(reader, info);
 
                         if (looping != null)
-                            looping.stop.SetProgressValue(file.Position);
+                            looping.Progress.SetProgressValue(file.Position);
 
                         info.BiblioRecCount++;
                     }

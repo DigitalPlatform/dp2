@@ -143,7 +143,7 @@ namespace dp2Circulation
                     ChannelInfo[] contents = null;
 
                     long lRet = channel.GetChannelInfo(
-                        looping.stop,
+                        looping.Progress,
                         strQuery,
                         strStyle,
                         nStart,
@@ -300,7 +300,7 @@ namespace dp2Circulation
 
                     ChannelInfo[] results = null;
                     long lRet = channel.ManageChannel(
-looping.stop,
+looping.Progress,
 "close",
 "",
 requests,

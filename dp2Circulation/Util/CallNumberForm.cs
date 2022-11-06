@@ -547,7 +547,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SearchOneClassCallNumber(
-                    looping.stop,
+                    looping.Progress,
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
@@ -570,7 +570,7 @@ namespace dp2Circulation
                 CallNumberSearchResult[] searchresults = null;
 
                 if (looping != null)
-                    looping.stop.SetProgressRange(0, lHitCount);
+                    looping.Progress.SetProgressRange(0, lHitCount);
 
                 // 装入浏览格式
                 for (; ; )
@@ -594,10 +594,10 @@ namespace dp2Circulation
                         lCurrentPerCount = lPerCount * 10;
                     }
 
-                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetCallNumberSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         GetArrangeGroupName(this.LocationString),
                         // "!" + this.BiblioDbName,
                         "callnumber",   // strResultSetName
@@ -671,7 +671,7 @@ namespace dp2Circulation
 
                         this.listView_number.Items.Add(item);
                         if (looping != null)
-                            looping.stop.SetProgressValue(lStart + i + 1);
+                            looping.Progress.SetProgressValue(lStart + i + 1);
                     }
                     this.listView_number.EndUpdate();
 
@@ -1539,7 +1539,7 @@ COLUMN_CALLNUMBER);
             try
             {
                 long lRet = channel.GetOneClassTailNumber(
-                    looping.stop,
+                    looping.Progress,
                     GetArrangeGroupName(this.LocationString),
                     this.ClassNumber,
                     out strTailNumber,
@@ -1661,7 +1661,7 @@ COLUMN_CALLNUMBER);
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    looping.stop,
+                    looping.Progress,
                     "save",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -1825,7 +1825,7 @@ COLUMN_CALLNUMBER);
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    looping.stop,
+                    looping.Progress,
                     "conditionalpush",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -1885,7 +1885,7 @@ COLUMN_CALLNUMBER);
             try
             {
                 long lRet = channel.SetOneClassTailNumber(
-                    looping.stop,
+                    looping.Progress,
                     "increase",
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -2512,7 +2512,7 @@ COLUMN_CALLNUMBER);
                     string strOutputBiblioRecPath = "";
                     // TODO: 这里要用 CacheableBiblioLoader 重构
                     long lRet = channel.GetBiblioSummary(
-                        looping.stop,
+                        looping.Progress,
                         "@bibliorecpath:" + strBiblioRecPath,
                         "", // strItemRecPath,
                         null,

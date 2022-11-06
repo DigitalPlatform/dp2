@@ -418,7 +418,7 @@ this.checkBox_returnSearchDetail.Checked);
                     strBrowseStyle += ",detail";
 
                 long lRet = channel.SearchDup(
-                    looping.stop,
+                    looping.Progress,
                     strRecPath,
                     strXml,
                     strProjectName,
@@ -437,7 +437,7 @@ this.checkBox_returnSearchDetail.Checked);
                     goto END1;   // 查重发现没有命中
 
                 if (looping != null)
-                    looping.stop.SetProgressRange(0, lHitCount);
+                    looping.Progress.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
@@ -452,10 +452,10 @@ this.checkBox_returnSearchDetail.Checked);
                         return -1;
                     }
 
-                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = channel.GetDupSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         lStart,
                         lPerCount,
                         strBrowseStyle, // "cols,excludecolsoflowthreshold",
@@ -521,7 +521,7 @@ this.checkBox_returnSearchDetail.Checked);
                         }
 
                         if (looping != null)
-                            looping.stop.SetProgressValue(lStart + i + 1);
+                            looping.Progress.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
@@ -943,7 +943,7 @@ this.checkBox_returnSearchDetail.Checked);
                         return -1;
                     }
 
-                    looping.stop.SetMessage("正在装入浏览信息 " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
+                    looping.Progress.SetMessage("正在装入浏览信息 " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
 
                     string[] paths = new string[nCount];
                     pathlist.CopyTo(nStart, paths, 0, nCount);
@@ -951,7 +951,7 @@ this.checkBox_returnSearchDetail.Checked);
                     Record[] searchresults = null;
 
                     long lRet = channel.GetBrowseRecords(
-                        looping.stop,
+                        looping.Progress,
                         paths,
                         "id,cols",
                         out searchresults,

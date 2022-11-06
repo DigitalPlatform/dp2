@@ -2356,7 +2356,7 @@ namespace dp2Circulation
                             //      0   not dup
                             //      1   dup
                             nRet = SearchOrderRefIdDup(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 orderitem.RefID,
                                 // this.BiblioRecPath,

@@ -438,7 +438,7 @@ password);
                 for (; ; )
                 {
                     long lRet = channel.GetUser(
-                        looping.stop,
+                        looping.Progress,
                         "list",
                         "",
                         nStart,
@@ -715,7 +715,7 @@ password);
                 info.SetPassword = true;    // 没有必要
 
                 long lRet = channel.SetUser(
-                    looping.stop,
+                    looping.Progress,
                     "resetpassword",
                     info,
                     out strError);
@@ -764,7 +764,7 @@ password);
             try
             {
                 long lRet = channel.SetUser(
-                    looping.stop,
+                    looping.Progress,
                     strAction,  // "change",
                     info,
                     out strError);
@@ -812,7 +812,7 @@ password);
             try
             {
                 long lRet = channel.SetUser(
-                    looping.stop,
+                    looping.Progress,
                     "new",
                     info,
                     out strError);
@@ -863,7 +863,7 @@ password);
                 info.UserName = strUserName;
 
                 long lRet = channel.SetUser(
-                    looping.stop,
+                    looping.Progress,
                     "delete",
                     info,
                     out strError);
@@ -1087,7 +1087,7 @@ password);
             {
                 string strValue = "";
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "system",
                     "libraryCodes",
                     out strValue,

@@ -109,7 +109,7 @@ namespace dp2Circulation
             using (var looping = this.BiblioStatisForm.Looping(out LibraryChannel channel))
             {
                 return SaveMarcRecord(
-                looping.stop,
+                looping.Progress,
                 channel,
                 strMARC,
                 out strError);
@@ -232,7 +232,7 @@ namespace dp2Circulation
 
                     if (strDbType == "item")
                         lRet = channel.GetEntities(
-                             looping.stop,
+                             looping.Progress,
                              this.CurrentRecPath,
                              lStart,
                              lCount,
@@ -242,7 +242,7 @@ namespace dp2Circulation
                              out strError);
                     else if (strDbType == "order")
                         lRet = channel.GetOrders(
-                             looping.stop,
+                             looping.Progress,
                              this.CurrentRecPath,
                              lStart,
                              lCount,
@@ -252,7 +252,7 @@ namespace dp2Circulation
                              out strError);
                     else if (strDbType == "issue")
                         lRet = channel.GetIssues(
-                             looping.stop,
+                             looping.Progress,
                              this.CurrentRecPath,
                              lStart,
                              lCount,
@@ -262,7 +262,7 @@ namespace dp2Circulation
                              out strError);
                     else if (strDbType == "comment")
                         lRet = channel.GetComments(
-                             looping.stop,
+                             looping.Progress,
                              this.CurrentRecPath,
                              lStart,
                              lCount,
@@ -596,28 +596,28 @@ namespace dp2Circulation
 
                 if (strDbType == "item")
                     lRet = channel.SetEntities(
-                         looping.stop,   // this.BiblioStatisForm.stop,
+                         looping.Progress,   // this.BiblioStatisForm.stop,
                          this.CurrentRecPath,
                          entities,
                          out errorinfos,
                          out strError);
                 else if (strDbType == "order")
                     lRet = channel.SetOrders(
-                         looping.stop,   // this.BiblioStatisForm.stop,
+                         looping.Progress,   // this.BiblioStatisForm.stop,
                          this.CurrentRecPath,
                          entities,
                          out errorinfos,
                          out strError);
                 else if (strDbType == "issue")
                     lRet = channel.SetIssues(
-                         looping.stop,   // this.BiblioStatisForm.stop,
+                         looping.Progress,   // this.BiblioStatisForm.stop,
                          this.CurrentRecPath,
                          entities,
                          out errorinfos,
                          out strError);
                 else if (strDbType == "comment")
                     lRet = channel.SetComments(
-                         looping.stop,   // this.BiblioStatisForm.stop,
+                         looping.Progress,   // this.BiblioStatisForm.stop,
                          this.CurrentRecPath,
                          entities,
                          out errorinfos,
@@ -749,7 +749,7 @@ namespace dp2Circulation
                 {
                     if (this.DbType == "item")
                         lRet = channel.GetItemInfo(
-             looping.stop,
+             looping.Progress,
              strBarcodeOrRecPath,
              "xml",
              out strItemXml,
@@ -761,7 +761,7 @@ namespace dp2Circulation
              out strError);
                     else if (this.DbType == "order")
                         lRet = channel.GetOrderInfo(
-             looping.stop,
+             looping.Progress,
              strBarcodeOrRecPath,
              "xml",
              out strItemXml,
@@ -773,7 +773,7 @@ namespace dp2Circulation
              out strError);
                     else if (this.DbType == "issue")
                         lRet = channel.GetIssueInfo(
-             looping.stop,
+             looping.Progress,
              strBarcodeOrRecPath,
              "xml",
              out strItemXml,
@@ -785,7 +785,7 @@ namespace dp2Circulation
              out strError);
                     else if (this.DbType == "comment")
                         lRet = channel.GetCommentInfo(
-             looping.stop,
+             looping.Progress,
              strBarcodeOrRecPath,
              "xml",
              out strItemXml,

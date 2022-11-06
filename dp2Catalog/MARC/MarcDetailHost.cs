@@ -612,7 +612,7 @@ namespace dp2Catalog
                     //      1   succeed
                     long nRet = GetAuthorNumber(
                         ref question_table,
-                        looping.stop,   // this.DetailForm.stop,
+                        looping.Progress,   // this.DetailForm.stop,
                         this.DetailForm,
                         strGcatWebServiceUrl,
                         strAuthor,

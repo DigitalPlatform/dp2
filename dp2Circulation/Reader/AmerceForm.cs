@@ -745,7 +745,7 @@ this.splitContainer_lists,
                     //      0   not found
                     //      >=1 命中的读者记录条数
                     int nRet = LoadReaderHtmlRecord(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         ref strReaderBarcode,
                         out string strXml,
@@ -854,315 +854,6 @@ this.splitContainer_lists,
             this.commander.AddMessage(WM_LOAD);
         }
 
-#if NO
-        // 从“违约金”库检索出已经交了违约金的记录，并显示在listiview中
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   找到并填入
-        int LoadAmercedRecords(string strReaderBarcode,
-            out string strError)
-        {
-            strError = "";
-
-            this.listView_amerced.Items.Clear();
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在检索已交费用记录 " + strReaderBarcode + " ...");
-            stop.BeginLoop();
-
-            this.Update();
-            Program.MainForm.Update();
-
-
-            try
-            {
-                string strDbName = "违约金";
-                string strFrom = "读者证条码";
-                string strMatchStyle = "exact";
-                string strLang = "zh";
-                string strQueryXml = "";
-
-                long lRet = Channel.GetSystemParameter(
-                    stop,
-                    "amerce",
-                    "dbname",
-                    out strDbName,
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-                // 2010/12/16 change
-                if (lRet == 0 || String.IsNullOrEmpty(strDbName) == true)
-                {
-                    if (String.IsNullOrEmpty(strError) == true)
-                        strError = "违约金库名没有配置。";
-                    goto ERROR1;
-                }
-
-                // 2007/4/5 改造 加上了 GetXmlStringSimple()
-                strQueryXml = "<target list='" + strDbName + ":" + strFrom + "'><item><word>"
-    + StringUtil.GetXmlStringSimple(strReaderBarcode)
-    + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + strLang + "</lang></target>";
-
-                lRet = Channel.Search(
-                    stop,
-                    strQueryXml,
-                    "amerced",
-                    "", // strOutputStyle
-                    out strError);
-                if (lRet == 0)
-                {
-                    strError = "not found";
-                    return 0;   // not found
-                }
-                if (lRet == -1)
-                    goto ERROR1;
-
-                long lHitCount = lRet;
-
-                long lStart = 0;
-                long lPerCount = Math.Min(50, lHitCount);
-                Record[] searchresults = null;
-
-
-                // 获得结果集，装入listview
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-                    }
-
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
-
-                    lRet = Channel.GetSearchResult(
-                        stop,
-                        "amerced",   // strResultSetName
-                        lStart,
-                        lPerCount,
-                        "id",   // "id,cols"
-                        strLang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (lRet == 0)
-                    {
-                        strError = "未命中";
-                        return 0;
-                    }
-
-                    // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        string strPath = searchresults[i].Path;
-
-                        byte[] timestamp = null;
-                        string strXml = "";
-
-                        lRet = Channel.GetRecord(stop,
-                            strPath,
-                            out timestamp,
-                            out strXml,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            goto ERROR1;
-                        }
-
-                        int nRet = FillAmercedLine(
-                            stop,
-                            strXml,
-                            strPath,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-
-                    }
-
-                    lStart += searchresults.Length;
-                    if (lStart >= lHitCount || lPerCount <= 0)
-                        break;
-                }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-
-        // 从“违约金”库检索出部分已经交了违约金的记录，并追加显示在listiview中
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   找到并填入
-        int LoadAmercedRecords(
-            List<string> ids,
-            out string strError)
-        {
-            strError = "";
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("正在获取已交费用记录 ...");
-            stop.BeginLoop();
-
-            this.Update();
-            Program.MainForm.Update();
-
-
-            try
-            {
-                string strDbName = "违约金";
-                string strFrom = "ID";
-                string strMatchStyle = "exact";
-                string strLang = "zh";
-                string strQueryXml = "";
-
-                long lRet = Channel.GetSystemParameter(
-                    stop,
-                    "amerce",
-                    "dbname",
-                    out strDbName,
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-                if (lRet == 0 || String.IsNullOrEmpty(strDbName) == true)
-                {
-                    if (String.IsNullOrEmpty(strError) == true)
-                        strError = "违约金库名没有配置。";
-                    goto ERROR1;
-                }
-
-                strQueryXml = "<target list='" + strDbName + ":" + strFrom + "'>";
-                for (int i = 0; i < ids.Count;i++ )
-                {
-                    string strID = ids[i];
-
-                    if (i > 0)
-                        strQueryXml += "<operator value='OR' />";
-
-                    strQueryXml += "<item><word>"
-        + StringUtil.GetXmlStringSimple(strID)
-        + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + strLang + "</lang>";
-                }
-                strQueryXml += "</target>";
-
-                lRet = Channel.Search(
-                    stop,
-                    strQueryXml,
-                    "amerced",
-                    "", // strOutputStyle
-                    out strError);
-                if (lRet == 0)
-                {
-                    strError = "not found";
-                    return 0;   // not found
-                }
-                if (lRet == -1)
-                    goto ERROR1;
-
-                long lHitCount = lRet;
-
-                long lStart = 0;
-                long lPerCount = Math.Min(50, lHitCount);
-                Record[] searchresults = null;
-
-
-                // 获得结果集，装入listview
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
-                    }
-
-                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
-
-                    lRet = Channel.GetSearchResult(
-                        stop,
-                        "amerced",   // strResultSetName
-                        lStart,
-                        lPerCount,
-                        "id",   // "id,cols"
-                        strLang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (lRet == 0)
-                    {
-                        strError = "未命中";
-                        return 0;
-                    }
-
-                    // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        string strPath = searchresults[i].Path;
-
-                        byte[] timestamp = null;
-                        string strXml = "";
-
-                        lRet = Channel.GetRecord(stop,
-                            strPath,
-                            out timestamp,
-                            out strXml,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            goto ERROR1;
-                        }
-
-                        int nRet = FillAmercedLine(
-                            stop,
-                            strXml,
-                            strPath,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-
-                    }
-
-                    lStart += searchresults.Length;
-                    if (lStart >= lHitCount || lPerCount <= 0)
-                        break;
-                }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-
-#endif
 
         #region 装载已经交费事项的线程
 
@@ -1224,7 +915,7 @@ this.splitContainer_lists,
                 string strLang = "zh";
 
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "amerce",
                     "dbname",
                     out strDbName,
@@ -1287,7 +978,7 @@ this.splitContainer_lists,
 
                 // 开始检索
                 lRet = channel.Search(
-    looping.stop,
+    looping.Progress,
     strQueryXml,
     strResultSetName,
     "", // strOutputStyle
@@ -1304,12 +995,12 @@ this.splitContainer_lists,
                     return;
 
                 long lHitCount = lRet;
-                looping.stop.SetProgressRange(0, lHitCount);
+                looping.Progress.SetProgressRange(0, lHitCount);
 
                 if (lHitCount > 0)
                 {
                     ResultSetLoader loader = new ResultSetLoader(channel,
-                        looping.stop,
+                        looping.Progress,
                         strResultSetName,
                         "id,xml",
                         strLang);
@@ -1325,7 +1016,7 @@ this.splitContainer_lists,
 
                         string strPath = record.Path;
 
-                        looping.stop.SetMessage($"正在装载已交费事项 {strPath} ...");
+                        looping.Progress.SetMessage($"正在装载已交费事项 {strPath} ...");
 
                         /*
                         lRet = channel.GetRecord(looping.stop,
@@ -1360,14 +1051,14 @@ this.splitContainer_lists,
                         }
 
                         int nRet = Safe_fillAmercedLine(
-                            looping.stop,
+                            looping.Progress,
                             strXml,
                             strPath,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
                         i++;
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetProgressValue(i);
                     }
                 }
 #if REMOVED
@@ -1451,7 +1142,7 @@ this.splitContainer_lists,
                 // 第二阶段，填充摘要
                 if (this.FillAmercedParam.FillSummary == true)
                 {
-                    looping.stop.SetMessage("正在装载已交费事项的书目摘要 ...");
+                    looping.Progress.SetMessage("正在装载已交费事项的书目摘要 ...");
 
                     List<ListViewItem> items = GetItemList(this.listView_amerced);
                     //looping.stop.SetProgressRange(0, items.Count);
@@ -1514,22 +1205,22 @@ this.splitContainer_lists,
                     {
                         CacheableBiblioLoader loader = new CacheableBiblioLoader();
                         loader.Channel = channel;   //  this.Channel;
-                        loader.Stop = looping.stop;
+                        loader.Stop = looping.Progress;
                         loader.Format = "summary";
                         loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
                         loader.RecPaths = path_list;
 
-                        looping.stop.SetProgressRange(0, item_list.Count);
-                        looping.stop.SetProgressValue(0);
+                        looping.Progress.SetProgressRange(0, item_list.Count);
+                        looping.Progress.SetProgressValue(0);
                         int j = 0;
                         foreach (BiblioItem summary in loader)
                         {
-                            looping.stop.SetMessage($"正在装载已交费事项的书目摘要 {summary.Content} ...");
+                            looping.Progress.SetMessage($"正在装载已交费事项的书目摘要 {summary.Content} ...");
 
                             var item = item_list[j];
                             ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, summary.Content);
                             j++;
-                            looping.stop.SetProgressValue(j);
+                            looping.Progress.SetProgressValue(j);
                         }
                     }
                 }
@@ -1931,7 +1622,7 @@ this.splitContainer_lists,
                         try
                         {
                             long lRet = channel.GetBiblioSummary(
-                                looping.stop,
+                                looping.Progress,
                                 strItemBarcode,
                                 "", // strItemRecPath,
                                 null,
@@ -1981,138 +1672,6 @@ this.splitContainer_lists,
 
         #endregion
 
-#if NO
-        void StopFillSummary()
-        {
-            // 如果以前在做，立即停止
-            m_bStopFilling = true;
-        }
-
-        void BeginFillSummary()
-        {
-            // 如果以前在做，立即停止
-            m_bStopFilling = true;
-
-            if (this.threadFillSummary != null)
-            {
-                this.threadFillSummary.Abort();
-                this.threadFillSummary = null;
-            }
-
-
-            this.threadFillSummary =
-        new Thread(new ThreadStart(this.ThreadFillSummaryMain));
-            this.threadFillSummary.Start();
-        }
-
-
-        public void ThreadFillSummaryMain()
-        {
-            m_bStopFilling = false;
-
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = Program.MainForm.LibraryServerUrl;
-
-            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            try
-            {
-
-#if NOOOOOOOOO
-                Delegate_FillSummary d = new Delegate_FillSummary(FillSummary);
-                this.Invoke(d, new object[] { this.listView_overdues,
-                channel,
-                COLUMN_AMERCING_ITEMBARCODE,
-                COLUMN_AMERCING_BIBLIOSUMMARY });
-
-
-                if (m_bStopFilling == true)
-                    return;
-#endif
-
-                /*
-                FillSummary(
-                this.listView_amerced,
-                COLUMN_AMERCED_ITEMBARCODE,
-                COLUMN_AMERCED_BIBLIOSUMMARY);
-                 * */
-
-                Delegate_FillSummary d = new Delegate_FillSummary(FillSummary);
-                this.Invoke(d, new object[] { this.listView_amerced,
-                channel,
-                COLUMN_AMERCED_ITEMBARCODE,
-                COLUMN_AMERCED_BIBLIOSUMMARY });
-                m_bStopFilling = true;
-            }
-            finally
-            {
-                channel.Close();
-            }
-        }
-
-        delegate void Delegate_FillSummary(ListView list,
-            LibraryChannel channel,
-            int iColumnBarcode,
-            int iColumnSummary);
-
-        void FillSummary(
-            ListView list,
-            LibraryChannel channel,
-            int iColumnBarcode,
-            int iColumnSummary)
-        {
-            string strError = "";
-
-            for (int i = 0; i < list.Items.Count; i++)
-            {
-                if (m_bStopFilling == true)
-                    return;
-                
-                ListViewItem item = list.Items[i];
-
-                string strSummary = ListViewUtil.GetItemText(item, iColumnSummary);
-                string strItemBarcode = ListViewUtil.GetItemText(item, iColumnBarcode);
-                // string strItemRecPath = ListViewUtil.GetItemText(item, iColumnSummary);
-
-                if (String.IsNullOrEmpty(strSummary) == false)
-                    continue;
-
-                if (String.IsNullOrEmpty(strItemBarcode) == true
-                    /*&& String.IsNullOrEmpty(strItemRecPath) == true*/)
-                    continue;
-
-                this.stop.SetMessage("正在后台获取摘要 " + strItemBarcode + " ...");
-
-                try
-                {
-
-                    string strBiblioRecPath = "";
-                    long lRet = channel.GetBiblioSummary(
-                        null,
-                        strItemBarcode,
-                        "", // strItemRecPath,
-                        null,
-                        out strBiblioRecPath,
-                        out strSummary,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strSummary = strError;  // 2009/3/13 changed
-                        // return -1;
-                    }
-
-                }
-                finally
-                {
-                }
-
-                ListViewUtil.ChangeItemText(item, iColumnSummary, strSummary);
-            }
-
-            this.stop.SetMessage("");
-        }
-#endif
 
         // 填充一个新的amerced行
         // stop已经被外层BeginLoop()了
@@ -2942,7 +2501,7 @@ this.splitContainer_lists,
             try
             {
                 long lRet = channel.Amerce(
-                    looping.stop,
+                    looping.Progress,
                     "amerce",
                     this.textBox_readerBarcode.Text,
                     amerce_items,
@@ -3051,7 +2610,7 @@ this.splitContainer_lists,
                 string strReaderBarcode = this.textBox_readerBarcode.Text;
                 // 刷新html?
                 nRet = LoadReaderHtmlRecord(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     ref strReaderBarcode,
                     out strXml,
@@ -3150,7 +2709,7 @@ this.splitContainer_lists,
             try
             {
                 int nRet = (int)channel.Amerce(
-                    looping.stop,
+                    looping.Progress,
                     "rollback",
                     "", // strReaderBarcode,
                     null,   // amerce_items,
@@ -3179,7 +2738,7 @@ this.splitContainer_lists,
                 string strReaderBarcode = this.textBox_readerBarcode.Text;
                 // 刷新html?
                 nRet = LoadReaderHtmlRecord(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     ref strReaderBarcode,
                     out strXml,
@@ -3403,7 +2962,7 @@ this.splitContainer_lists,
                 amerce_items.CopyTo(amerce_items_param);
 
                 long lRet = channel.Amerce(
-                    looping.stop,
+                    looping.Progress,
                     "undo",
                     this.textBox_readerBarcode.Text,
                     amerce_items_param,
@@ -3484,7 +3043,7 @@ this.splitContainer_lists,
                 string strReaderBarcode = this.textBox_readerBarcode.Text;
                 // 刷新html?
                 nRet = LoadReaderHtmlRecord(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     ref strReaderBarcode,
                     out strXml,
@@ -4069,7 +3628,7 @@ COLUMN_AMERCED_STATE);
                     AmerceItem[] failed_items = null;
 
                     long lRet = channel.Amerce(
-                        looping.stop,
+                        looping.Progress,
                         "modifyprice",
                         this.textBox_readerBarcode.Text,
                         amerce_items_param,
@@ -4110,7 +3669,7 @@ COLUMN_AMERCED_STATE);
                     modifycomment_items.CopyTo(amerce_items_param);
 
                     long lRet = channel.Amerce(
-                        looping.stop,
+                        looping.Progress,
                         "modifycomment",
                         this.textBox_readerBarcode.Text,
                         amerce_items_param,
@@ -4138,7 +3697,7 @@ COLUMN_AMERCED_STATE);
                 string strReaderBarcode = this.textBox_readerBarcode.Text;
                 // 刷新html?
                 nRet = LoadReaderHtmlRecord(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     ref strReaderBarcode,
                     out string strXml,

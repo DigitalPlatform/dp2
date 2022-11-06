@@ -207,7 +207,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "callNumber",
                     out strArrangementXml,
@@ -257,7 +257,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.SetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "circulation",
                     "callNumber",
                     strArrangementXml,

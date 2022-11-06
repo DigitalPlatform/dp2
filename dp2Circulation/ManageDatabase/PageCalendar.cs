@@ -123,7 +123,7 @@ namespace dp2Circulation
                     CalenderInfo[] infos = null;
 
                     long lRet = channel.GetCalendar(
-                        looping.stop,
+                        looping.Progress,
                         (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0 ? "list" : "get"), // "list",
                         "",
                         nStart,
@@ -216,75 +216,6 @@ namespace dp2Circulation
             return 1;
         }
 
-#if NO
-        // 装入全部日历名
-        int GetCalendarNames(out List<string> calendar_names,
-            out string strError)
-        {
-            strError = "";
-            calendar_names = new List<string>();
-
-            EnableControls(false);
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获得全部日历名 ...");
-            stop.BeginLoop();
-
-            try
-            {
-                int nStart = 0;
-                int nCount = 100;
-                List<string> names = new List<string>();
-
-                while (true)
-                {
-                    CalenderInfo[] infos = null;
-
-                    long lRet = Channel.GetCalendar(
-                        stop,
-                        "list",
-                        "",
-                        nStart,
-                        nCount,
-                        out infos,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
-                    if (lRet == 0)
-                        break;
-
-                    // 
-                    for (int i = 0; i < infos.Length; i++)
-                    {
-                        names.Add(infos[i].Name);
-                    }
-
-                    nStart += infos.Length;
-                    if (nStart >= lRet)
-                        break;
-                }
-
-                names.Sort(new CalencarNameComparer());
-                foreach (string s in names)
-                {
-                    calendar_names.Add(s);
-                }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-
-                EnableControls(true);
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-#endif
-
         static void SetCalendarItemState(ListViewItem item, int nImageIndex)
         {
             item.ImageIndex = nImageIndex;
@@ -361,7 +292,7 @@ namespace dp2Circulation
                     }
 
                     long lRet = channel.SetCalendar(
-                        looping.stop,
+                        looping.Progress,
                         strAction,
                         info,
                         out strError);

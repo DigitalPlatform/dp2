@@ -435,7 +435,7 @@ namespace dp2Circulation
                     using (var stream = File.OpenRead(m_strUsedXmlFilename))
                     using (XmlReader reader = XmlReader.Create(stream))
                     {
-                        looping.stop.SetProgressRange(0, stream.Length);
+                        looping.Progress.SetProgressRange(0, stream.Length);
 
                         // 定位到 collection 元素
                         while (true)
@@ -486,7 +486,7 @@ namespace dp2Circulation
                             */
 
                             if (display)
-                                looping.stop.SetProgressValue(stream.Position);
+                                looping.Progress.SetProgressValue(stream.Position);
 
                             // 检查路径的正确性，检查数据库是否为实体库之一
                             string strDbName = Global.GetDbName(strRecPath);
@@ -550,7 +550,7 @@ namespace dp2Circulation
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
-                    looping.stop,
+                    looping.Progress,
                 channel,
                 items,
                 "",
@@ -572,12 +572,12 @@ namespace dp2Circulation
 
                 // 修改记录的 XML
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-    looping.stop,
+    looping.Progress,
     items,
     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -702,7 +702,7 @@ item_recpath);
 
                 CONTINUE:
                     i++;
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                 }
             }
             catch (System.Xml.XPath.XPathException ex)
@@ -1049,7 +1049,7 @@ item_recpath);
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
                 ListViewUtil.ClearSortColumns(this._listviewRecords);
-                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.Progress.SetProgressRange(0, sr.BaseStream.Length);
 
                 List<ListViewItem> items = new List<ListViewItem>();
 
@@ -1095,7 +1095,7 @@ item_recpath);
                         string strRecPath = sr.ReadLine();
 
                         if (display)
-                            looping.stop.SetProgressValue(sr.BaseStream.Position);
+                            looping.Progress.SetProgressValue(sr.BaseStream.Position);
 
                         if (strRecPath == null)
                             break;
@@ -1191,7 +1191,7 @@ item_recpath);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     items,
                     "",
@@ -1206,7 +1206,7 @@ item_recpath);
                 nRet = FillBiblioSummaryColumn(
                     channel,
                     items,
-                    looping.stop,   // false,
+                    looping.Progress,   // false,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1345,13 +1345,13 @@ item_recpath);
                 var looping = BeginLoop(this.DoStop, "正在刷新浏览行的书目摘要 ...", "halfstop");
                 this.EnableControls(false);
 
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
                 try
                 {
                     return FillBiblioSummaryColumn(
     channel,
     items,
-    looping.stop,
+    looping.Progress,
     out strError);
                 }
                 finally
@@ -1540,7 +1540,8 @@ item_recpath);
 
         // TODO: 用 CacheableBiblioLoader 改造
         // parameters:
-        //      lStartIndex 调用前已经做过的事项数。为了准确显示 Progress
+        //      lStartIndex 调用前已经做过的事项数。为了准确显示 Progress。
+        //                  如果为负数(例如 -1)，表示不触发 SetProgressValue
         // return:
         //      -2  获得书目摘要的权限不够
         //      -1  出错
@@ -1712,8 +1713,7 @@ item_recpath);
             {
                 // Application.DoEvents();	// 出让界面控制权
 
-                if (stop != null
-                    && stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断";
                     return 0;
@@ -1722,8 +1722,10 @@ item_recpath);
                 string strRecPath = ListViewUtil.GetItemText(item, 0);
                 if (stop != null /*&& bDisplayMessage == true*/)
                 {
-                    stop.SetMessage("正在刷新浏览行 " + strRecPath + " 的书目摘要 ...");
-                    stop.SetProgressValue(lStartIndex + i);
+                    if ((i % 10) == 0)  // 2022/11/6
+                        stop?.SetMessage("正在获取 " + strRecPath + " 的书目摘要 ...");
+                    if (lStartIndex >= 0)   // 2022/11/6
+                        stop?.SetProgressValue(lStartIndex + i);
                 }
 
                 int nCol = colindex_list[i];

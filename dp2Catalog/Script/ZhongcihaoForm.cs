@@ -838,7 +838,7 @@ namespace dp2Catalog
                 string strQueryXml = "";
 
                 long lRet = Channel.SearchUsedZhongcihao(
-                    looping.stop,
+                    looping.Progress,
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
@@ -859,8 +859,8 @@ namespace dp2Catalog
                 long lPerCount = Math.Min(50, lHitCount);
                 ZhongcihaoSearchResult[] searchresults = null;
 
-                if (looping.stop != null)
-                    looping.stop.SetProgressRange(0, lHitCount);
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, lHitCount);
 
                 // 装入浏览格式
                 for (; ; )
@@ -883,10 +883,10 @@ namespace dp2Catalog
                         lCurrentPerCount = lPerCount * 10;
                     }
 
-                    looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                     lRet = Channel.GetZhongcihaoSearchResult(
-                        looping.stop,
+                        looping.Progress,
                         GetZhongcihaoDbGroupName(this.BiblioDbName),
                         // "!" + this.BiblioDbName,
                         "zhongcihao",   // strResultSetName
@@ -923,8 +923,8 @@ namespace dp2Catalog
                         }
 
                         this.listView_number.Items.Add(item);
-                        if (looping.stop != null)
-                            looping.stop.SetProgressValue(lStart + i + 1);
+                        if (looping.Progress != null)
+                            looping.Progress.SetProgressValue(lStart + i + 1);
                     }
 
                     lStart += searchresults.Length;
@@ -1088,7 +1088,7 @@ namespace dp2Catalog
             try
             {
                 long lRet = Channel.GetZhongcihaoTailNumber(
-                    looping.stop,
+                    looping.Progress,
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
                     this.ClassNumber,
@@ -1161,7 +1161,7 @@ namespace dp2Catalog
                 try
                 {
                     long lRet = Channel.SetZhongcihaoTailNumber(
-                        looping.stop,
+                        looping.Progress,
                         "conditionalpush",
                         GetZhongcihaoDbGroupName(this.BiblioDbName),
                         // "!" + this.BiblioDbName,
@@ -1232,7 +1232,7 @@ namespace dp2Catalog
             try
             {
                 long lRet = Channel.SetZhongcihaoTailNumber(
-                    looping.stop,
+                    looping.Progress,
                     "save",
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,
@@ -1548,7 +1548,7 @@ namespace dp2Catalog
             try
             {
                 info = this.MainForm.ServerInfos.GetServerInfo(
-                    looping.stop,
+                    looping.Progress,
                     false,
 #if OLD_CHANNEL
                     this.Channels,
@@ -1633,7 +1633,7 @@ namespace dp2Catalog
             try
             {
                 long lRet = Channel.SetZhongcihaoTailNumber(
-                    looping.stop,
+                    looping.Progress,
                     "increase",
                     GetZhongcihaoDbGroupName(this.BiblioDbName),
                     // "!" + this.BiblioDbName,

@@ -638,7 +638,7 @@ namespace dp2Circulation
             {
                 // 第一次可能要登录，先不计算时间
                 long lRet = channel.GetVersion(
-    looping.stop,
+    looping.Progress,
     out string strVersion,
     out string strUID,
     out strError);
@@ -657,7 +657,7 @@ namespace dp2Circulation
                         goto ERROR1;
                     }
                     lRet = channel.GetVersion(
-looping.stop,
+looping.Progress,
 out strVersion,
 out strUID,
 out strError);
@@ -793,7 +793,7 @@ out strError);
             try
             {
                 long lRet = channel.GetRes(
-                   looping.stop,
+                   looping.Progress,
                    strServerFilePath,
                    0,
                    0,
@@ -927,13 +927,13 @@ out strError);
                     }
 
                     if (looping != null)
-                        looping.stop.SetMessage("正在上载 " + ranges[j] + "/"
+                        looping.Progress.SetMessage("正在上载 " + ranges[j] + "/"
                             + Convert.ToString(fi.Length)
                             + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
                     int nRedoCount = 0;
                 REDO:
                     long lRet = channel.SaveResObject(
-                        looping.stop,
+                        looping.Progress,
                         strResPath,
                         strClientFilePath,
                         strClientFilePath,
@@ -1094,7 +1094,7 @@ MessageBoxDefaultButton.Button2);
                 //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
                 //		0	成功
                 long lRet = channel.GetRes(
-                    looping.stop,
+                    looping.Progress,
                     this.textBox_serverFilePath.Text,
                     this.textBox_clientFilePath.Text,
                     // "metadata",
@@ -1248,7 +1248,7 @@ MessageBoxDefaultButton.Button2);
 
                     for (int i = 0; ; i++)
                     {
-                        looping.stop.SetMessage("正在转换 " + (i + 1).ToString());
+                        looping.Progress.SetMessage("正在转换 " + (i + 1).ToString());
 
                         Application.DoEvents();	// 出让界面控制权
 
@@ -1445,7 +1445,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 long lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "utility",
                     "getClientIP",
                     out strValue,
@@ -1509,7 +1509,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 int count = this.textBox_textLines_source1.Lines.Length;
-                looping.stop.SetProgressRange(0, count);
+                looping.Progress.SetProgressRange(0, count);
                 int i = 0;
 
                 foreach (string line in this.textBox_textLines_source1.Lines)
@@ -1533,7 +1533,7 @@ MessageBoxDefaultButton.Button2);
 #endif
                     Hashtable question_table = new Hashtable();
 
-                    looping.stop.SetMessage("正在取著者号 '" + strLine + "' ...");
+                    looping.Progress.SetMessage("正在取著者号 '" + strLine + "' ...");
 
                     string strDebugInfo = "";
                     string strAuthorNumber = "";
@@ -1545,7 +1545,7 @@ MessageBoxDefaultButton.Button2);
                     //      1   succeed
                     long nRet = BiblioItemsHost.GetAuthorNumber(
                         ref question_table,
-                        looping.stop,
+                        looping.Progress,
                         this,
                         strGcatWebServiceUrl,
                         strLine,
@@ -1617,7 +1617,7 @@ MessageBoxDefaultButton.Button2);
             {
                 List<string> formats = new List<string> { "table:" + this.textBox_biblioTableStyle.Text.Replace(",", "|") };
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     this.textBox_biblioRecPath.Text,
                     "",
                     formats.ToArray(),
@@ -1823,7 +1823,7 @@ MessageBoxDefaultButton.Button2);
                 long lRet = channel.Logout(out strError);
 
                 lRet = channel.GetSystemParameter(
-                    looping.stop,
+                    looping.Progress,
                     "system",
                     "biblioDbGroup",
                     out string strValue,
@@ -1989,7 +1989,7 @@ MessageBoxDefaultButton.Button2);
                 try
                 {
                     int count = this.textBox_textLines_source1.Lines.Length;
-                    looping.stop.SetProgressRange(0, count);
+                    looping.Progress.SetProgressRange(0, count);
                     int i = 0;
                     foreach (string line in this.textBox_textLines_source1.Lines)
                     {
@@ -1999,7 +1999,7 @@ MessageBoxDefaultButton.Button2);
                             goto ERROR1;
                         }
 
-                        looping.stop.SetProgressValue(i);
+                        looping.Progress.SetProgressValue(i);
 
                         if (string.IsNullOrEmpty(line))
                         {
@@ -2024,10 +2024,10 @@ MessageBoxDefaultButton.Button2);
                             barcode = null;
                         }
 
-                        looping.stop.SetMessage("正在取书目摘要 '" + strLine + "' ...");
+                        looping.Progress.SetMessage("正在取书目摘要 '" + strLine + "' ...");
 
                         long lRet = channel.GetBiblioSummary(
-                            looping.stop,
+                            looping.Progress,
                             barcode,
                             recpath,
                             null,

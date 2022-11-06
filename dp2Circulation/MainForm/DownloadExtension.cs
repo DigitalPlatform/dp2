@@ -117,7 +117,7 @@ namespace dp2Circulation
                 //      1   文件找到
                 int nRet = DynamicDownloader.GetServerFileMD5ByTask(
                     channel,
-                    looping.stop,   // this.Stop,
+                    looping.Progress,   // this.Stop,
                     strServerFilePath,
                     new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
                     {
@@ -1659,7 +1659,7 @@ namespace dp2Circulation
             try
             {
                 FileItemLoader loader = new FileItemLoader(channel,
-                    looping.stop,
+                    looping.Progress,
                     "!operlog",
                     "*.log");
                 foreach (FileItemInfo info in loader)

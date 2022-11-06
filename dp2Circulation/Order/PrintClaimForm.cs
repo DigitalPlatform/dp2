@@ -564,7 +564,8 @@ false);
             {
                 long lRet = 0;
 
-                lRet = channel.SearchOrder(stop,
+                lRet = channel.SearchOrder(
+                    stop,
                      this.comboBox_inputOrderDbName.Text,
                      "",
                      -1,    // nPerMax
@@ -626,7 +627,7 @@ false);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                    stop?.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -801,7 +802,8 @@ false);
                 // 不指定批次号，意味着特定库全部条码
                 if (String.IsNullOrEmpty(strBatchNo) == true)
                 {
-                    lRet = channel.SearchBiblio(stop,
+                    lRet = channel.SearchBiblio(
+                        stop,
                          this.comboBox_inputBiblioDbName.Text,
                          "",
                          -1,    // nPerMax
@@ -820,7 +822,8 @@ false);
                 else
                 {
                     // 指定批次号。特定库。
-                    lRet = channel.SearchBiblio(stop,
+                    lRet = channel.SearchBiblio(
+                        stop,
                          this.comboBox_inputBiblioDbName.Text,
                          strBatchNo,
                          -1,    // nPerMax
@@ -892,7 +895,7 @@ false);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                    stop?.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -1268,7 +1271,7 @@ false);
                 else
                 {
                     nRet = MakeOrderRecPathFile(
-                        looping.stop,
+                        looping.Progress,
                         channel,
             out strTempRecPathFilename,
             out strError);
@@ -1297,13 +1300,13 @@ false);
                 {
                     issue_host = new IssueHost();
                     issue_host.Channel = channel;
-                    issue_host.Stop = looping.stop;
+                    issue_host.Stop = looping.Progress;
                 }
                 else
                 {
                     order_host = new BookHost();
                     order_host.Channel = channel;
-                    order_host.Stop = looping.stop;
+                    order_host.Stop = looping.Progress;
                 }
 
                 /*
@@ -1312,7 +1315,7 @@ false);
                 this.progressBar_records.Value = 0;
                  * */
 
-                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.Progress.SetProgressRange(0, sr.BaseStream.Length);
 
                 try
                 {
@@ -1339,7 +1342,7 @@ false);
                             if (result == DialogResult.No)
                                 return 0;   // 假装loop正常结束
 
-                            looping.stop.Continue(); // 继续循环
+                            looping.Progress.Continue(); // 继续循环
                         }
 
                         string strOrderRecPath = sr.ReadLine();
@@ -1391,9 +1394,9 @@ false);
                             }
                         }
 
-                        looping.stop.SetMessage("正在获取第 " + (nRecord + 1).ToString() + " 个订购记录，" + strAccessPointName + "为 " + strOrderRecPath);
+                        looping.Progress.SetMessage("正在获取第 " + (nRecord + 1).ToString() + " 个订购记录，" + strAccessPointName + "为 " + strOrderRecPath);
 
-                        looping.stop.SetProgressValue(sr.BaseStream.Position);
+                        looping.Progress.SetProgressValue(sr.BaseStream.Position);
                         // this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
                         // 获得书目记录
@@ -1515,7 +1518,7 @@ false);
                             //      0   未处理
                             //      1   已处理
                             nRet = ProcessIssues(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 issue_host,
                                 filter,
@@ -1528,7 +1531,7 @@ false);
                             //      0   未处理
                             //      1   已处理
                             nRet = ProcessBooks(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 order_host,
                                 filter,
@@ -2115,7 +2118,7 @@ false);
                     if (String.IsNullOrEmpty(strBatchNo) == true)
                     {
                         lRet = channel.SearchBiblio(
-                            looping.stop,
+                            looping.Progress,
                             strDbNameList,
                             "",
                             -1,    // nPerMax
@@ -2135,7 +2138,7 @@ false);
                     {
                         // 指定批次号。特定库。
                         lRet = channel.SearchBiblio(
-                            looping.stop,
+                            looping.Progress,
                             strDbNameList,
                             strBatchNo,
                             -1,    // nPerMax
@@ -2172,7 +2175,7 @@ false);
                         }
 
                         lRet = channel.GetSearchResult(
-                            looping.stop,
+                            looping.Progress,
                             null,   // strResultSetName
                             lStart,
                             lCount,
@@ -2202,7 +2205,7 @@ false);
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        looping.stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        looping.Progress.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;

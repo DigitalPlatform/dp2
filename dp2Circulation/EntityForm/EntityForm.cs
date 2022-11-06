@@ -1599,7 +1599,7 @@ true);
                     // 外部调用，设置一个实体记录。
                     // 具体动作有：new change delete neworchange
                     int nRet = this.entityControl1.DoSetEntity(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         true,
                         data.Action,
@@ -1936,7 +1936,7 @@ true);
                     // 外部调用，设置一个实体记录。
                     // 具体动作有：new change delete
                     nRet = form.entityControl1.DoSetEntity(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         false,
                         data.Action,
@@ -2087,7 +2087,7 @@ true);
 
                         // 重新装载评注属性页
                         nRet = form.CommentControl.LoadItemRecords(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             form.BiblioRecPath,
                             null,
@@ -3416,7 +3416,7 @@ out string strErrorCode)
                     bLoadSubrecords = false;
 
                 int nRet = this.LoadBiblioRecord(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strBiblioRecPath,
                     strPrevNextStyle,
@@ -3535,7 +3535,7 @@ out string strErrorCode)
                 {
                     // 装载下级记录
                     nRet = LoadSubRecords(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         strOutputBiblioRecPath,
                         strXml, // 书目记录 XML
@@ -4098,7 +4098,7 @@ out string strErrorCode)
                 string[] results = null;
 
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     strBiblioRecPath,
                     "",
                     formats,
@@ -4754,7 +4754,7 @@ out string strErrorCode)
                     //      1   已经保存
                     //      2   已经保存，但有部分错误
                     nRet = SaveBiblioToDatabase(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         true,
                         out strHtml,
@@ -4806,7 +4806,7 @@ out string strErrorCode)
                 }
 
                 nRet = SaveSubRecords(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     info,
                     null,
@@ -5334,7 +5334,7 @@ out string strErrorCode)
 
                 this.ShowMessage("正在检索 ...");
 
-                this.browseWindow.stop = looping.stop;
+                this.browseWindow.stop = looping.Progress;
                 try
                 {
                     if (this.comboBox_from.Text == "")
@@ -5417,7 +5417,7 @@ out string strErrorCode)
                     }
 
                     string strQueryXml = "";
-                    long lRet = channel.SearchBiblio(looping.stop,
+                    long lRet = channel.SearchBiblio(looping.Progress,
                         this.checkedComboBox_biblioDbNames.Text,    // "<全部>",
                         strQueryWord,   // this.textBox_queryWord.Text,
                         this.MaxSearchResultCount,  // 1000
@@ -5474,10 +5474,10 @@ out string strErrorCode)
                                 break;  // 已经装入的还在
                             }
 
-                            looping.stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                            looping.Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
                             lRet = channel.GetSearchResult(
-                                looping.stop,
+                                looping.Progress,
                                 null,   // strResultSetName
                                 lStart,
                                 lPerCount,
@@ -5590,7 +5590,7 @@ out string strErrorCode)
                         // return:
                         //      -1  出错
                         //      >=0 命中记录个数
-                        nRet = EndSearchShareBiblio(looping.stop, out strError);
+                        nRet = EndSearchShareBiblio(looping.Progress, out strError);
                         if (nRet == -1)
                         {
                             // 显示错误信息
@@ -5763,7 +5763,7 @@ out string strErrorCode)
                     if (_zsearcher.InSearching == false)
                         break;
 
-                    looping.stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
+                    looping.Progress.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
 
                     var present_result = await Z3950Searcher.FetchRecords(channel,
                         all ? 100 : 10);
@@ -7004,7 +7004,7 @@ out strError);
             var looping = Looping(strMessage, "disableControl");
 
             // ??
-            bool bOldNest = looping.stop.SetAllowNest(true);
+            bool bOldNest = looping.Progress.SetAllowNest(true);
             try
             {
                 /*
@@ -7047,7 +7047,7 @@ out strError);
                 this.m_nChannelInUse--;
 #endif
 
-                looping.stop.SetAllowNest(bOldNest);
+                looping.Progress.SetAllowNest(bOldNest);
                 /*
                 this.EnableControls(true);
                 Progress.EndLoop();
@@ -7754,7 +7754,7 @@ out strError);
             //      -1  error
             //      0   not found
             //      1   found
-            nRet = GetCfgFileContent(strBiblioDbName,
+            nRet = this.GetCfgFileContent(strBiblioDbName,
                 "template",
                 out strContent,
                 out baCfgOutputTimestamp,
@@ -9012,7 +9012,7 @@ out strError);
             //      -1  error
             //      0   not found
             //      1   found
-            int nRet = GetCfgFileContent(strBiblioDbName,
+            int nRet = this.GetCfgFileContent(strBiblioDbName,
                 "template",
                 out strContent,
                 out baTimestamp,
@@ -9138,7 +9138,7 @@ out strError);
             string strOutputXml = tempdlg.OutputXml;
 
             // Debug.Assert(false, "");
-            nRet = SaveCfgFile(strBiblioDbName,
+            nRet = this.SaveCfgFile(strBiblioDbName,
                 "template",
                 strOutputXml,
                 baTimestamp,
@@ -9326,7 +9326,7 @@ out strError);
                 byte[] baNewTimestamp = null;
 
                 long lRet = channel.SetBiblioInfo(
-                    looping.stop,
+                    looping.Progress,
                     strAction,  // "delete",
                     strPath,
                     "xml",
@@ -9589,7 +9589,7 @@ out strError);
             //      -1  error
             //      0   not found
             //      1   found
-            nRet = GetCfgFileContent(strBiblioDbName,
+            nRet = this.GetCfgFileContent(strBiblioDbName,
                 strCfgFileName,
                 out strContent,
                 out baCfgOutputTimestamp,
@@ -9663,18 +9663,14 @@ out strError);
                 return;
 
             // 下载配置文件
-            string strContent = "";
-            string strError = "";
-
-            byte[] baCfgOutputTimestamp = null;
             // return:
             //      -1  error
             //      0   not found
             //      1   found
-            nRet = GetCfgFileContent(strCfgFilePath,
-                out strContent,
-                out baCfgOutputTimestamp,
-                out strError);
+            nRet = this.GetCfgFileContent(strCfgFilePath,
+                out string strContent,
+                out byte[] baCfgOutputTimestamp,
+                out string strError);
             if (nRet == -1 || nRet == 0)
             {
                 e.ErrorInfo = "获得配置文件 '" + strCfgFilePath + "' 时出错：" + strError;
@@ -9798,15 +9794,14 @@ out strError);
 
                 string strCfgFileName = "dp2circulation_marc_verify.fltx";
 
-                byte[] baCfgOutputTimestamp = null;
                 // return:
                 //      -1  error
                 //      0   not found
                 //      1   found
-                int nRet = GetCfgFile(strBiblioDbName,
+                int nRet = this.GetCfgFile(strBiblioDbName,
                     strCfgFileName,
                     out strOutputFilename,
-                    out baCfgOutputTimestamp,
+                    out byte[] baCfgOutputTimestamp,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -9818,7 +9813,7 @@ out strError);
                 {
                     // .cs 和 .cs.ref
                     strCfgFileName = "dp2circulation_marc_verify.cs";
-                    nRet = GetCfgFileContent(strBiblioDbName,
+                    nRet = this.GetCfgFileContent(strBiblioDbName,
         strCfgFileName,
         out strCode,
         out baCfgOutputTimestamp,
@@ -9831,7 +9826,7 @@ out strError);
                     if (nRet == -1 || nRet == 0)
                         goto ERROR1;
                     strCfgFileName = "dp2circulation_marc_verify.cs.ref";
-                    nRet = GetCfgFileContent(strBiblioDbName,
+                    nRet = this.GetCfgFileContent(strBiblioDbName,
                         strCfgFileName,
                         out strRef,
                         out baCfgOutputTimestamp,
@@ -10827,7 +10822,7 @@ out strError);
                 {
                     // 保存当前册信息
                     nRet = this.entityControl1.DoSaveItems(
-                        looping.stop,
+                        looping.Progress,
                         channel, 
                         "", 
                         out strError);
@@ -11865,7 +11860,7 @@ out strError);
                 this.m_webExternalHost_biblio.SetHtmlString("(空白)",
                     "entityform_error");
 
-                looping.stop.SetMessage("正在装入目标记录 " + strTargetBiblioRecPath + " ...");
+                looping.Progress.SetMessage("正在装入目标记录 " + strTargetBiblioRecPath + " ...");
 
                 bool bCataloging = this.Cataloging;
 
@@ -11889,7 +11884,7 @@ out strError);
                 byte[] baTimestamp = null;
 
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     strTargetBiblioRecPath,
                     "",
                     formats,
@@ -13425,7 +13420,7 @@ out strError);
                     if (copy_param.CopyChildRecords == false)
                     {
                         nRet = CopyBiblio(
-                            looping.stop,
+                            looping.Progress,
                             channel,
             "onlycopybiblio",
             strTargetRecPathParam,
@@ -13438,7 +13433,7 @@ out strError);
                     else
                     {
                         nRet = CopyBiblio(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             "copy",
                             strTargetRecPathParam,
@@ -13453,7 +13448,7 @@ out strError);
                 if (strAction == "move")
                 {
                     nRet = CopyBiblio(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         "move",
                         strTargetRecPathParam,
@@ -13504,7 +13499,7 @@ out strError);
 
                     LoadSubRecordsInfo load_info = new LoadSubRecordsInfo();
                     nRet = LoadSubRecords(
-                        looping.stop,
+                        looping.Progress,
         channel,
         strOutputBiblioRecPath,
         strXml, // null,   // strXml, // 书目记录 XML
@@ -13524,7 +13519,7 @@ out strError);
                     {
                         // 装载下级记录，为保存下级记录的修改做准备
                         nRet = LoadSubRecords(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strOutputBiblioRecPath,
                             strXml, // null,   // strXml, // 书目记录 XML
@@ -13538,7 +13533,7 @@ out strError);
                     }
 
                     nRet = SaveSubRecords(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         info,
                         strOutputBiblioRecPath,
@@ -14564,7 +14559,7 @@ out strError);
                 string[] results = null;
                 byte[] timestamp = null;
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     strBiblioRecPath,
                     strBiblioXml,
                     formats,
@@ -14623,7 +14618,7 @@ out strError);
                 byte[] timestamp = null;
 
                 long lRet = channel.GetBiblioInfos(
-                    looping.stop,
+                    looping.Progress,
                     this.BiblioRecPath,
                     "",
                     formats.ToArray(),

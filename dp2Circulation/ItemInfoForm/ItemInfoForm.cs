@@ -396,7 +396,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             // this.textBox_message.Text = "";
             this.toolStripLabel_message.Text = "";
 
-            looping.stop.SetMessage("正在装入册记录 " + strItemBarcode + " ...");
+            looping.Progress.SetMessage("正在装入册记录 " + strItemBarcode + " ...");
             try
             {
                 string strItemText = "";
@@ -408,7 +408,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 byte[] item_timestamp = null;
 
                 long lRet = channel.GetItemInfo(
-                    looping.stop,
+                    looping.Progress,
                     strItemBarcode,
                     "html",
                     out strItemText,
@@ -465,7 +465,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
                 // 最后获得item xml
                 lRet = channel.GetItemInfo(
-                    looping.stop,
+                    looping.Progress,
                     strItemBarcode,
                     "xml",
                     out strItemText,
@@ -491,7 +491,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                     {
                         this.binaryResControl1.Clear();
                         int nRet = this.binaryResControl1.LoadObject(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strItemRecPath,
                             this.Xml,
@@ -599,7 +599,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             ClearBorrowHistoryPage();
             SetItemRefID("");
 
-            looping.stop.SetMessage("正在装入" + this.DbTypeCaption + "记录 " + strItemRecPath + " ...");
+            looping.Progress.SetMessage("正在装入" + this.DbTypeCaption + "记录 " + strItemRecPath + " ...");
             try
             {
                 string strItemText = "";
@@ -616,7 +616,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
                 if (this.m_strDbType == "item")
                     lRet = channel.GetItemInfo(
-                         looping.stop,
+                         looping.Progress,
                          strBarcode,
                          "html",
                          out strItemText,
@@ -628,7 +628,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strError);
                 else if (this.m_strDbType == "comment")
                     lRet = channel.GetCommentInfo(
-                         looping.stop,
+                         looping.Progress,
                          strBarcode,    // "@path:" + strItemRecPath,
                                         // "",
                          "html",
@@ -641,7 +641,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strError);
                 else if (this.m_strDbType == "order")
                     lRet = channel.GetOrderInfo(
-                         looping.stop,
+                         looping.Progress,
                          strBarcode,    // "@path:" + strItemRecPath,
                                         // "",
                          "html",
@@ -654,7 +654,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strError);
                 else if (this.m_strDbType == "issue")
                     lRet = channel.GetIssueInfo(
-                         looping.stop,
+                         looping.Progress,
                          strBarcode,    // "@path:" + strItemRecPath,
                                         // "",
                          "html",
@@ -714,7 +714,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 // 最后获得item xml
                 if (this.m_strDbType == "item")
                     lRet = channel.GetItemInfo(
-                        looping.stop,
+                        looping.Progress,
                         "@path:" + strOutputItemRecPath, // strBarcode,
                         "xml",
                         out strItemText,
@@ -726,7 +726,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                         out strError);
                 else if (this.m_strDbType == "comment")
                     lRet = channel.GetCommentInfo(
-                         looping.stop,
+                         looping.Progress,
                          "@path:" + strOutputItemRecPath,
                          // "",
                          "xml",
@@ -739,7 +739,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strError);
                 else if (this.m_strDbType == "order")
                     lRet = channel.GetOrderInfo(
-                         looping.stop,
+                         looping.Progress,
                          "@path:" + strOutputItemRecPath,
                          // "",
                          "xml",
@@ -752,7 +752,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strError);
                 else if (this.m_strDbType == "issue")
                     lRet = channel.GetIssueInfo(
-                         looping.stop,
+                         looping.Progress,
                          "@path:" + strOutputItemRecPath,
                          // "",
                          "xml",
@@ -796,7 +796,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                     {
                         this.binaryResControl1.Clear();
                         int nRet = this.binaryResControl1.LoadObject(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strOutputItemRecPath,
                             this.Xml,
@@ -847,7 +847,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             try
             {
                 int nRet = SaveItemInfo(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strStyle,
                     this.DbType,
@@ -861,7 +861,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 //		-1	error
                 //		>=0 实际上载的资源对象数
                 nRet = this.binaryResControl1.Save(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     Program.MainForm.ServerVersion,
                     out strError);
@@ -1338,7 +1338,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 string strBiblioXml = "";
 
                 nRet = GetExistSubject(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     this.BiblioRecPath,
                     out strBiblioXml,
@@ -1353,7 +1353,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 string strNewSubject = "";
                 byte[] item_timestamp = null;
                 nRet = GetCommentContent(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     this.ItemRecPath,
             out strNewSubject,
@@ -1396,7 +1396,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 byte[] output_timestamp = null;
                 string strOutputBiblioRecPath = "";
                 long lRet = channel.SetBiblioInfo(
-                    looping.stop,
+                    looping.Progress,
                     "change",
                     this.BiblioRecPath,
                     "xml",
@@ -1415,7 +1415,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 //      0   没有发生修改
                 //      1   发生了修改
                 nRet = ChangeCommentState(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     this.BiblioRecPath,
                     this.ItemRecPath,
@@ -2143,11 +2143,13 @@ out strError);
                     nLength = _itemsPerPage;
                 }
 
+#if SUPPORT_OLD_STOP
                 this.ChannelDoEvents = false;
+#endif
                 // this.Channel.Idle += Channel_Idle;  // 防止控制权出让给正在获取摘要的读者信息 HTML 页面
                 try
                 {
-                    lRet = channel.LoadChargingHistory(looping.stop,
+                    lRet = channel.LoadChargingHistory(looping.Progress,
                         strBarcode,
                         "return,lost,read",
                         nPageNo,
@@ -2162,7 +2164,9 @@ out strError);
                 finally
                 {
                     // this.Channel.Idle -= Channel_Idle;
+#if SUPPORT_OLD_STOP
                     this.ChannelDoEvents = true;
+#endif
                 }
 
                 FillBorrowHistoryPage(total_results, nPageNo * _itemsPerPage, (int)lRet);

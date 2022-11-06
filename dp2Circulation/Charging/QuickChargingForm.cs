@@ -98,8 +98,9 @@ namespace dp2Circulation
         {
             // this.Channel.Idle += new IdleEventHandler(Channel_Idle);
             // 被专门的线程使用，因而不需要出让控制权
+#if SUPPORT_OLD_STOP
             this.ChannelDoEvents = false;
-
+#endif
             if (this.DisplayFormat == "卡片")
             {
                 this.splitContainer_main.Panel1.Controls.Remove(this.webBrowser_reader);
@@ -1668,7 +1669,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
         }
 
-        #region IChargingForm 接口相关
+#region IChargingForm 接口相关
 
         // 2008/10/31 
         ChargingInfoHost m_chargingInfoHost = null;
@@ -1796,7 +1797,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
         }
 
-        #endregion
+#endregion
 
         delegate void Delegate_DisplayTask(string strAction,
             ChargingTask task);
@@ -2700,7 +2701,7 @@ false);
             this.FuncState = FuncState.Read;
         }
 
-        #region 各种配置参数
+#region 各种配置参数
 
         // 加快响应的记忆变量
         int _nLogOperTime = 0;  // 0 尚未初始化; -1 false; 1 true
@@ -2885,7 +2886,7 @@ false);
             }
         }
 
-        #endregion
+#endregion
 
 
         FuncState _funcstate = FuncState.Borrow;

@@ -391,7 +391,7 @@ namespace dp2Circulation
                     }
 
                     nRet = DoSave(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         // true,
                         out strError);
@@ -421,7 +421,7 @@ namespace dp2Circulation
             DOLOAD:
 
                 nRet = LoadRecord(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     // true,
                     this.textBox_barcode.Text,
@@ -1033,7 +1033,7 @@ false);
             using (var looping = Looping(out LibraryChannel channel))
             {
                 nRet = DoSave(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     //true,
                     out strError);
@@ -1557,7 +1557,7 @@ false);
                 try
                 {
                     if (lLineCount != -1)
-                        looping.stop.SetProgressRange(0, lLineCount);
+                        looping.Progress.SetProgressRange(0, lLineCount);
 
                     int nRet = 0;
 
@@ -1581,10 +1581,10 @@ false);
                             continue;
 
                         if (strFileType == "barcode")
-                            looping.stop.SetMessage("正在处理册条码号 " + strLine + " 对应的记录...");
+                            looping.Progress.SetMessage("正在处理册条码号 " + strLine + " 对应的记录...");
                         else
-                            looping.stop.SetMessage("正在处理记录路径 " + strLine + " 对应的记录...");
-                        looping.stop.SetProgressValue(nCurrentLine);
+                            looping.Progress.SetMessage("正在处理记录路径 " + strLine + " 对应的记录...");
+                        looping.Progress.SetProgressValue(nCurrentLine);
 
                         nCurrentLine++;
 
@@ -1592,7 +1592,7 @@ false);
                         if (this.entityEditControl1.Changed == true)
                         {
                             nRet = DoSave(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 //false,
                                 out strError);
@@ -1602,7 +1602,7 @@ false);
                         // DOLOAD:
 
                         nRet = LoadRecord(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             //false,
                             strFileType == "barcode" ? strLine : "@path:" + strLine,
@@ -1623,7 +1623,7 @@ false);
                         if (this.entityEditControl1.Changed == true)
                         {
                             nRet = DoSave(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 // false,
                                 out strError);

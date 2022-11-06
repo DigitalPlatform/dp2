@@ -1055,7 +1055,7 @@ this.toolStripButton_autoFixEas.Checked);
                     {
                         token.ThrowIfCancellationRequested();
 
-                        long lRet = channel.GetItemInfo(looping.stop,
+                        long lRet = channel.GetItemInfo(looping.Progress,
                             pii,
                             "xml",
                             out string xml,

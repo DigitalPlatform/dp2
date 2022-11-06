@@ -168,7 +168,7 @@ namespace dp2Circulation
                 this,
                 "", // 不分图书和期刊
                 "biblio",
-                looping.stop,
+                looping.Progress,
                 channel);
             }
         }
@@ -495,7 +495,7 @@ Stack:
 
                 // 循环
                 nRet = DoLoop(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     out strError,
                     out strWarning);
@@ -1221,7 +1221,7 @@ Stack:
                              out strQueryXml,
                              out strError);
                         if (lRet == -1)
-                            goto ERROR1;
+                            return -1;
                     }
                     else
                     {
@@ -1240,7 +1240,7 @@ Stack:
                              out strQueryXml,
                              out strError);
                         if (lRet == -1)
-                            goto ERROR1;
+                            return -1;
                     }
 
                     long lHitCount = lRet;
@@ -1259,7 +1259,7 @@ Stack:
                         if (stop != null && stop.State != 0)
                         {
                             strError = "用户中断";
-                            goto ERROR1;
+                            return -1;
                         }
 
                         lRet = channel.GetSearchResult(
@@ -1272,12 +1272,12 @@ Stack:
                             out searchresults,
                             out strError);
                         if (lRet == -1)
-                            goto ERROR1;
+                            return -1;
 
                         if (lRet == 0)
                         {
                             strError = "未命中";
-                            goto ERROR1;
+                            return -1;
                         }
 
                         Debug.Assert(searchresults != null, "");
@@ -1293,7 +1293,7 @@ Stack:
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        stop.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
+                        stop?.SetMessage("共有记录 " + lHitCount.ToString() + " 个。已获得记录 " + lStart.ToString() + " 个");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
@@ -1310,16 +1310,13 @@ Stack:
                     stop.Initial("");
                      * */
                 }
+                return 0;
             }
             finally
             {
                 if (sw != null)
                     sw.Close();
             }
-
-            return 0;
-        ERROR1:
-            return -1;
         }
 
         private void button_next_Click(object sender, EventArgs e)

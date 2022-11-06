@@ -405,7 +405,7 @@ namespace dp2Circulation
 
                 // 循环
                 nRet = DoLoop(
-                    looping.stop,
+                    looping.Progress,
                     DoRecord,
                     out strError);
                 if (nRet == -1)
@@ -633,8 +633,7 @@ namespace dp2Circulation
                         return 1;
                     }
 
-                    if (stop != null)
-                        stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+                    stop?.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
 
                     if (string.IsNullOrEmpty(item.Xml) == true)
                         continue;
@@ -1091,7 +1090,7 @@ namespace dp2Circulation
             try
             {
                 long lRet = channel.GetReaderInfo(
-                    looping.stop,
+                    looping.Progress,
                     strReaderBarcode,
                     strResultTypeList,
                     out results,
@@ -1111,52 +1110,6 @@ namespace dp2Circulation
         }
 
 
-        // 2012/10/6
-        // 获得册记录的书目摘要
-        /// <summary>
-        /// 获取书目摘要
-        /// </summary>
-        /// <param name="strItemBarcode">册条码号</param>
-        /// <param name="nMaxLength">书目摘要的最大字符数。-1 表示不截断。超过这个字符数的书目摘要被截断，末尾添加"..."</param>
-        /// <returns>书目摘要字符串</returns>
-        public string GetItemSummary(string strItemBarcode,
-            int nMaxLength = -1)
-        {
-            /*
-            LibraryChannel channel = this.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(10);
-            */
-            var looping = Looping(out LibraryChannel channel,
-    null,
-    "timeout:0:0:10");
-            try
-            {
-                int nRet = GetBiblioSummary(
-                    channel,
-                    strItemBarcode,
-                    "",
-                    "",
-                    out string strBiblioRecPath,
-                    out string strSummary,
-                    out string strError);
-                if (nRet == -1)
-                    return strError;
-
-                if (nMaxLength == -1 || strSummary.Length <= nMaxLength)
-                    return strSummary;
-
-                return strSummary.Substring(0, nMaxLength) + "...";
-            }
-            finally
-            {
-                looping.Dispose();
-                /*
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-                */
-            }
-        }
 
         // 2012/10/6
         // 获得读者摘要
@@ -1200,7 +1153,7 @@ namespace dp2Circulation
             try
             {
                 lRet = channel.GetReaderInfo(
-                    looping.stop,
+                    looping.Progress,
                     strPatronBarcode,
                     "xml",
                     out results,
@@ -1271,15 +1224,16 @@ namespace dp2Circulation
             string strResultValue = "";
             int nRet = 0;
 
+            /*
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(10);
-
+            */
             try
             {
                 // 获取书目记录的局部
                 nRet = GetBiblioPart(
-                    channel,
+                    // channel,
                     strBiblioRecPath,
                     "", // strBiblioXml
                     strMacroName,
@@ -1297,8 +1251,10 @@ namespace dp2Circulation
             }
             finally
             {
+                /*
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
             }
         }
 

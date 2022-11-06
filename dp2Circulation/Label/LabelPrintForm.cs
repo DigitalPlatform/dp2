@@ -456,7 +456,7 @@ out string strError);
             {
                 string strBiblioXml = "";   // 向服务器提供的XML记录
                 long lRet = channel.GetBiblioInfo(
-                    looping.stop,   // this.stop,
+                    looping.Progress,   // this.stop,
                     strBiblioRecPath,
                     strBiblioXml,
                     strBiblioType,
@@ -534,7 +534,7 @@ out string strError);
                 DialogResult result = System.Windows.Forms.DialogResult.No;
 #endif
 
-                looping.stop.SetProgressRange(0, this.listView_records.Items.Count);
+                looping.Progress.SetProgressRange(0, this.listView_records.Items.Count);
 
                 for (int i = 0; i < this.listView_records.Items.Count; i++)
                 {
@@ -553,7 +553,7 @@ out string strError);
 
                     // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                     long lRet = channel.GetItemInfo(
-                        looping.stop,
+                        looping.Progress,
                         strAccessPoint,
                         "xml",   // strResultType
                         out strResult,
@@ -729,7 +729,7 @@ out string strError);
                     nLabelCount++;
 
                     //CONTINUE:
-                    looping.stop.SetProgressValue(i);
+                    looping.Progress.SetProgressValue(i);
                 } // end of for
             }
             finally
@@ -1148,7 +1148,8 @@ out string strError);
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印"
                 + (bPrintPreview == true ? "预览" : "")
                 + "</div>");
-
+            var looping = Looping("正在打印标签 ...",
+                "disableControl");
             try
             {
                 nRet = this.BeginPrint(
@@ -1160,7 +1161,7 @@ out string strError);
 
                 this.document.PreviewMode = bPrintPreview;
 
-                this.EnableControls(false);
+                // this.EnableControls(false);
                 Cursor oldCursor = this.Cursor;
                 if (bPrintPreview == false)
                     this.Cursor = Cursors.WaitCursor;
@@ -1372,13 +1373,14 @@ out string strError);
                 {
                     if (bPrintPreview == false)
                         this.Cursor = oldCursor;
-                    this.EnableControls(true);
+                    // this.EnableControls(true);
 
                     this.EndPrint();    // 关闭标签文件。后面才能删除
                 }
             }
             finally
             {
+                looping.Dispose();
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印"
                 + (bPrintPreview == true ? "预览" : "")
                 + "</div>");
@@ -1583,17 +1585,20 @@ out string strError);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_labelFile_labelFilename.Enabled = bEnable;
-            this.button_labelFile_findLabelFilename.Enabled = bEnable;
+            TryInvoke(() =>
+            {
+                this.textBox_labelFile_labelFilename.Enabled = bEnable;
+                this.button_labelFile_findLabelFilename.Enabled = bEnable;
 
-            this.textBox_labelDefFilename.Enabled = bEnable;
-            this.button_findLabelDefFilename.Enabled = bEnable;
+                this.textBox_labelDefFilename.Enabled = bEnable;
+                this.button_findLabelDefFilename.Enabled = bEnable;
 
-            this.button_print.Enabled = bEnable;
-            this.button_printPreview.Enabled = bEnable;
+                this.button_print.Enabled = bEnable;
+                this.button_printPreview.Enabled = bEnable;
 
-            this.toolStrip1.Enabled = bEnable;
-            this.Update();
+                this.toolStrip1.Enabled = bEnable;
+                this.Update();
+            });
         }
 
         // 
@@ -2538,7 +2543,7 @@ out string strError);
                     }
                 }
 
-                looping.stop.SetProgressRange(0, sr.BaseStream.Length);
+                looping.Progress.SetProgressRange(0, sr.BaseStream.Length);
 
                 List<ListViewItem> items = new List<ListViewItem>();
 
@@ -2554,7 +2559,7 @@ out string strError);
 
                     string strBarcode = sr.ReadLine();
 
-                    looping.stop.SetProgressValue(sr.BaseStream.Position);
+                    looping.Progress.SetProgressValue(sr.BaseStream.Position);
 
 
                     if (strBarcode == null)
@@ -2569,7 +2574,7 @@ out string strError);
                     this.listView_records.Items.Add(item);
 
                     FillLineByBarcode(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         strBarcode,
                         item);
@@ -2579,7 +2584,7 @@ out string strError);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     items,
                     "",

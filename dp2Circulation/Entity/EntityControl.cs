@@ -1466,7 +1466,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                             //      0   not dup
                             //      1   dup
                             nRet = SearchEntityBarcodeDup(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 bookitem.Barcode,
                                 bookitem.RecPath,
@@ -1599,7 +1599,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     //      0   not dup
                     //      1   dup
                     nRet = SearchEntityBarcodeDup(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         strBarcode,
                         strOriginRecPath,
@@ -1692,7 +1692,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         //      0   not dup
                         //      1   dup
                         nRet = SearchEntityBarcodeDup(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strBarcode,
                             strOriginRecPath,
@@ -1889,7 +1889,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         if (true)
                         {
                             nRet = SearchEntityBarcode(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 strBarcode,
                                 out string strItemText,
@@ -2486,7 +2486,7 @@ edit.UiState);
                     try
                     {
                         nRet = SearchEntityBarcode(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             strBarcode,
                             out strItemText,

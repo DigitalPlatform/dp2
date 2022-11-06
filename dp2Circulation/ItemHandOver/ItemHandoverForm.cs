@@ -511,7 +511,7 @@ null,
             try
             {
                 nRet = ConvertBarcodeFile(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     dlg.FileName,
                     strRecPathFilename,
@@ -521,7 +521,7 @@ null,
                     goto ERROR1;
 
                 nRet = LoadFromRecPathFile(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strRecPathFilename,
                     this.comboBox_load_type.Text,
@@ -1492,7 +1492,7 @@ null,
                     //      -1  出错
                     //      1   成功
                     nRet = LoadOneItem(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         this.comboBox_load_type.Text,
                         true,
@@ -1747,7 +1747,7 @@ MessageBoxDefaultButton.Button2);
 
                 // 构造html页面
                 int nRet = BuildHtml(
-                    looping.stop,
+                    looping.Progress,
                     items,
                     ref doc,
                     out filenames,
@@ -2212,8 +2212,7 @@ MessageBoxDefaultButton.Button2);
 
                 if (sheet != null && column_max_chars.Count > 0)
                 {
-                    if (stop != null)
-                        stop.SetMessage("正在调整列宽度 ...");
+                    stop?.SetMessage("正在调整列宽度 ...");
                     Application.DoEvents();
 
                     PrintOrderForm.AdjectColumnWidth(sheet, column_max_chars);
@@ -2986,7 +2985,7 @@ null,
             {
                 // 检索 批次号 和 馆藏地点 将命中的记录路径写入文件
                 int nRet = SearchBatchNoAndLocation(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     this.comboBox_load_type.Text,
                     strBatchNo,
@@ -2997,7 +2996,7 @@ null,
                     goto ERROR1;
 
                 nRet = LoadFromRecPathFile(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     strRecPathFilename,
                     this.comboBox_load_type.Text,
@@ -3035,7 +3034,7 @@ null,
                     this,
                     this.comboBox_load_type.Text,
                     "item",
-                    looping.stop,
+                    looping.Progress,
                     channel);
             }
         }
@@ -3860,8 +3859,8 @@ MessageBoxDefaultButton.Button2);
                 "timeout:0:2:0,disableControl");
             try
             {
-                looping.stop.SetProgressRange(0, this.listView_in.Items.Count);
-                looping.stop.SetProgressValue(0);
+                looping.Progress.SetProgressRange(0, this.listView_in.Items.Count);
+                looping.Progress.SetProgressValue(0);
 
                 for (int i = 0; i < items.Count; i++)
                 {
@@ -3886,7 +3885,7 @@ MessageBoxDefaultButton.Button2);
                     //      1	成功转移
                     //      2   canceled
                     int nRet = MoveOneRecord(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         item,
                         out string strNewItemRecPath,
@@ -3928,7 +3927,7 @@ MessageBoxDefaultButton.Button2);
                     nMovedCount++;
                     item.Selected = true;
 
-                    looping.stop.SetProgressValue(i + 1);
+                    looping.Progress.SetProgressValue(i + 1);
                 }
             }
             finally
@@ -5117,7 +5116,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         // 保存一个批次
                         nRet = SaveOneBatchOrders(
-                            looping.stop,
+                            looping.Progress,
                             channel,
                             entity_list,
                             strPrevBiblioRecPath,
@@ -5193,7 +5192,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     // 保存一个批次
                     nRet = SaveOneBatchOrders(
-                        looping.stop,
+                        looping.Progress,
                         channel,
                         entity_list,
                         strPrevBiblioRecPath,
@@ -5455,7 +5454,7 @@ MessageBoxDefaultButton.Button2);
                     byte[] baNewTimestamp = null;
                     string strOutputPath = "";
                     long lRet = channel.SetBiblioInfo(
-                        looping.stop,
+                        looping.Progress,
                         "notifynewbook",
                         strBiblioRecPath,
                         StringUtil.MakePathList(biblio.LibrayCodeList),
@@ -5519,7 +5518,7 @@ null,
             {
                 // int nDupCount = 0;
                 nRet = LoadFromRecPathFile(
-                    looping.stop,
+                    looping.Progress,
                     channel,
                     dlg.FileName,
                     this.comboBox_load_type.Text,
@@ -5889,7 +5888,7 @@ null,
             }
         }
 
-#region 装载 listview_in 事项的线程
+        #region 装载 listview_in 事项的线程
 
         class FillThread : ThreadBase
         {
@@ -5923,7 +5922,7 @@ null,
                             // 转换为记录路径
                             List<string> recpaths = new List<string>();
                             nRet = this.Container.ConvertItemBarcodeToRecPath(
-                                looping.stop,
+                                looping.Progress,
                                 channel,
                                 barcodes,
                                 out recpaths,
@@ -6060,7 +6059,7 @@ null,
 
                 form.SmartFuncState = FuncState.Return;
 
-                looping.stop.SetProgressRange(0, items.Count);
+                looping.Progress.SetProgressRange(0, items.Count);
 
                 int i = 0;
                 foreach (ListViewItem item in items)
@@ -6092,7 +6091,7 @@ null,
                         return -1;
                     }
 
-                    looping.stop.SetProgressValue(++i);
+                    looping.Progress.SetProgressValue(++i);
 
                     nCount++;
                     oper_items.Add(item);
@@ -6134,7 +6133,7 @@ false,
 new string[] { "summary", "@isbnissn", "targetrecpath" });
         }
 
-#endregion
+        #endregion
 
         // 修改全部事项的馆藏地
         private void button_move_changeLocation_Click(object sender, EventArgs e)
