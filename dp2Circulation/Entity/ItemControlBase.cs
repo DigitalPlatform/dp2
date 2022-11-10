@@ -2790,7 +2790,14 @@ size.Height);
 
         public void EnableControls(bool enable)
         {
-            _loopingHost.EnableControls(enable);
+            // _loopingHost.EnableControls(enable);
+            if (this.InvokeRequired)
+                this.Invoke((Action)(() =>
+                {
+                    this.Enabled = enable;
+                }));
+            else
+                this.Enabled = enable;
         }
 
         // 三种动作: GetChannel() BeginLoop() 和 EnableControl()

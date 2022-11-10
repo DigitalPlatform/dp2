@@ -597,7 +597,7 @@ MessageBoxDefaultButton.Button1);
 
             // TODO: 目录名和当前用户相关
             // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
-            string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
+            string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, PathUtil.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
 
             PathUtil.TryCreateDir(Path.GetDirectoryName(strFileName));
 
@@ -635,7 +635,7 @@ MessageBoxDefaultButton.Button1);
         void SaveServerXml()
         {
             // string strError = "";
-            string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
+            string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, PathUtil.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
 
             PathUtil.TryCreateDir(Path.GetDirectoryName(strFileName));
 
@@ -5590,7 +5590,7 @@ out strError);
                 string strError = "";
                 // string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, "servers.xml");
                 // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
-                string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
+                string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, PathUtil.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
                 PathUtil.TryCreateDir(Path.GetDirectoryName(strFileName));
 
                 // 创建 servers.xml 配置文件

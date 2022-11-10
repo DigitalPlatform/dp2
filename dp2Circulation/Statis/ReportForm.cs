@@ -2984,7 +2984,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 // 2016/4/7
                 string strDepartmentName = GetValidDepartmentString(strDepartment);
 
-                string strPureFileName = GetValidPathString(strDepartmentName) + "\\" + GetValidPathString(strReaderBarcode + "_" + strName) + ".rml";
+                string strPureFileName = PathUtil.GetValidPathString(strDepartmentName) + "\\" + PathUtil.GetValidPathString(strReaderBarcode + "_" + strName) + ".rml";
                 string strOutputFileName = "";
 
                 try
@@ -3103,6 +3103,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
             return 0;
         }
 
+#if REMOVED // 移动到了 PathUtil 中
         // 附加的一些文件名非法字符。比如 XP 下 Path.GetInvalidPathChars() 不知何故会遗漏 '*'
         static string spec_invalid_chars = "*?:";
 
@@ -3143,6 +3144,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
             return -1;
         }
+#endif
 
         public static string GetValidDepartmentString(string strText, string strReplaceChar = "_")
         {
@@ -5601,7 +5603,7 @@ out strError);
             Program.MainForm.AppInfo.UnlinkFormState(printform);
         }
 
-        #region 统计结果 HTML 文件管理
+#region 统计结果 HTML 文件管理
         /// <summary>
         /// 输出的 HTML 统计结果文件名集合
         /// </summary>
@@ -5664,7 +5666,7 @@ out strError);
             }
         }
 
-        #endregion
+#endregion
 
         private void listView_libraryConfig_MouseUp(object sender, MouseEventArgs e)
         {
@@ -7368,7 +7370,7 @@ MessageBoxDefaultButton.Button2);
         static string GetBaseDirectory()
         {
             // 2015/6/20 将数据库文件存储在和每个 dp2library 服务器和用户名相关的目录中
-            string strDirectory = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()));
+            string strDirectory = Path.Combine(Program.MainForm.ServerCfgDir, PathUtil.GetValidPathString(Program.MainForm.GetCurrentUserName()));
             PathUtil.TryCreateDir(strDirectory);
             return strDirectory;
         }
@@ -7771,7 +7773,7 @@ out strError);
             return 0;
         }
 
-        #region 日志同步
+#region 日志同步
 
         // 将一条日志记录中的动作兑现到 item reader biblio class_ 表
         // return:
@@ -9401,7 +9403,7 @@ out strError);
             return 0;
         }
 
-        #endregion
+#endregion
 
 #if NO
         // 获得日志文件中记录的总数
@@ -9865,7 +9867,7 @@ Stack:
         }
 
 
-        #region ErrorInfoForm
+#region ErrorInfoForm
 
         /// <summary>
         /// 错误信息窗
@@ -9908,7 +9910,7 @@ Stack:
             }
         }
 
-        #endregion
+#endregion
 
         private void checkBox_start_enableFirst_CheckedChanged(object sender, EventArgs e)
         {
@@ -11035,9 +11037,9 @@ MessageBoxDefaultButton.Button1);
         // 获得和当前服务器、用户相关的报表窗配置 section 名字字符串
         string GetReportSection()
         {
-            string strServerUrl = ReportForm.GetValidPathString(Program.MainForm.LibraryServerUrl.Replace("/", "_"));
+            string strServerUrl = PathUtil.GetValidPathString(Program.MainForm.LibraryServerUrl.Replace("/", "_"));
 
-            return "r_" + strServerUrl + "_" + ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName());
+            return "r_" + strServerUrl + "_" + PathUtil.GetValidPathString(Program.MainForm.GetCurrentUserName());
         }
 
         // 获得即将执行的每日报表的时间范围
@@ -11423,7 +11425,7 @@ MessageBoxDefaultButton.Button1);
             // return Path.Combine(Program.MainForm.UserDir, "reports\\" + GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
 
             // 2015/6/20 将创建好的报表文件存储在和每个 dp2library 服务器和用户名相关的目录中
-            return Path.Combine(GetBaseDirectory(), "reports\\" + GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
+            return Path.Combine(GetBaseDirectory(), "reports\\" + PathUtil.GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
         }
 
         // parameters:
@@ -11445,7 +11447,7 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strHtmlTemplate) == true)
                 strHtmlTemplate = "default";
 
-            string strFileName = Path.Combine(strCssTemplateDir, GetValidPathString(strHtmlTemplate) + ".css");
+            string strFileName = Path.Combine(strCssTemplateDir, PathUtil.GetValidPathString(strHtmlTemplate) + ".css");
             if (File.Exists(strFileName) == false)
             {
                 strError = "CSS 模板文件 '" + strFileName + "' 不存在";
@@ -11615,7 +11617,7 @@ MessageBoxDefaultButton.Button1);
             // string strOutputDir = Path.Combine(strReportsDir, time.Time);
             // 延迟到创建表格的时候创建子目录
 
-            string strOutputDir = Path.Combine(strReportsDir, GetValidPathString(GetSubDirName(time.Time)));
+            string strOutputDir = Path.Combine(strReportsDir, PathUtil.GetValidPathString(GetSubDirName(time.Time)));
 
             // 看看目录是否已经存在
             if (time.Detect)
@@ -12318,7 +12320,7 @@ MessageBoxDefaultButton.Button1);
             return 1;
         }
 
-        #region index.xml
+#region index.xml
 
 #if NO
         XmlDocument _indexDom = null;   // index.xml 文件的 DOM 对象
@@ -12527,7 +12529,7 @@ MessageBoxDefaultButton.Button1);
        =   Equal sign
        !   Exclamation point
        -   Hyphen
-       #   Number sign
+# Number sign
        (   Parenthesis opening
        )   Parenthesis closing
        %   Percent
@@ -12542,7 +12544,7 @@ MessageBoxDefaultButton.Button1);
                 Debug.Assert(strName.IndexOf("|") == -1, "");
                 // 将文件名改名
                 string strFileName1 = Path.Combine(Path.GetDirectoryName(strReportFileName),
-                    GetValidPathString((string.IsNullOrEmpty(strGroupName) == false ? strGroupName + "-" : "") + strName)
+                    PathUtil.GetValidPathString((string.IsNullOrEmpty(strGroupName) == false ? strGroupName + "-" : "") + strName)
                     + Path.GetExtension(strReportFileName));
                 if (File.Exists(strFileName1) == true)
                     File.Delete(strFileName1);
@@ -13100,7 +13102,7 @@ MessageBoxDefaultButton.Button1);
             text.Append("</ul>");
         }
 
-        #endregion
+#endregion
 
         private void toolStripButton_setReportStartDay_Click(object sender, EventArgs e)
         {

@@ -3956,8 +3956,8 @@ Program.MainForm.DataDir,
                 // 自动缩小图像
                 nRet = SetCardPhoto(image,
                     "cardphoto",
-                out strShrinkComment,
-                out strError);
+                    out strShrinkComment,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
@@ -4017,9 +4017,9 @@ Program.MainForm.DataDir,
                         {
                             // 自动缩小图像
                             nRet = SetCardPhoto(image,
-                        "cardphoto",
-                            out strShrinkComment,
-                            out strError);
+                                "cardphoto",
+                                out strShrinkComment,
+                                out strError);
                             if (nRet == -1)
                                 goto ERROR1;
                         }
@@ -4058,9 +4058,9 @@ Program.MainForm.DataDir,
                         {
                             // 自动缩小图像
                             nRet = SetCardPhoto(image,
-                        "cardphoto",
-                            out strShrinkComment,
-                            out strError);
+                                "cardphoto",
+                                out strShrinkComment,
+                                out strError);
                             if (nRet == -1)
                                 goto ERROR1;
                         }
@@ -4306,15 +4306,16 @@ Program.MainForm.DataDir,
             return 0;
         }
 
-        // 
-        /// <summary>
-        /// 标记删除当前记录的证件照片对象
-        /// </summary>
-        public void ClearCardPhoto()
-        {
-            List<ListViewItem> items = this.binaryResControl1.FindItemByUsage("cardphoto");
 
-            this.binaryResControl1.MaskDelete(items);
+        /// <summary>
+        /// 标记删除当前记录的证件照片对象或人脸照片对象
+        /// </summary>
+        public int ClearCardPhoto(string usage = "cardphoto")
+        {
+            List<ListViewItem> items = this.binaryResControl1.FindItemByUsage(usage);
+            if (items.Count > 0)
+                return this.binaryResControl1.MaskDelete(items);
+            return 0;
         }
 
         /// <summary>
@@ -4769,9 +4770,9 @@ Program.MainForm.DataDir,
                     if (image != null)
                     {
                         nRet = SetCardPhoto(image,
-                    "cardphoto",
-        out string strShrinkComment,
-        out strError);
+                            "cardphoto",
+                            out string strShrinkComment,
+                            out strError);
                         if (nRet == -1)
                             return -1;
                         image.Dispose();
@@ -6663,34 +6664,44 @@ MessageBoxDefaultButton.Button1);
                 this.readerEditControl1.Changed = true;
                 AddImportantField("face");
 
-                AddImportantField("face");
+                // AddImportantField("face");
+
+                var savePhoto = Program.MainForm.SavePhotoWhileRegisterFace;
 
                 // TODO: 如果尺寸符合要求，则直接用返回的 jpeg 上载
                 // 设置人脸照片对象
-                using (Image image = FromBytes(/*feature_result.ImageData*/bytes))
-                using (Image image1 = new Bitmap(image))
+                if (savePhoto)
                 {
-                    // 自动缩小图像
-                    int nRet = SetCardPhoto(image1,
-                        "face",
-                        out string strShrinkComment,
-                        out strError);
-                    if (nRet == -1)
-                        return new NormalResult
-                        {
-                            Value = -1,
-                            ErrorInfo = strError,
-                            ErrorCode = "setCardPhotoError"
-                        };
+                    using (Image image = FromBytes(/*feature_result.ImageData*/bytes))
+                    using (Image image1 = new Bitmap(image))
+                    {
+                        // 自动缩小图像
+                        int nRet = SetCardPhoto(image1,
+                            "face",
+                            out string strShrinkComment,
+                            out strError);
+                        if (nRet == -1)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError,
+                                ErrorCode = "setCardPhotoError"
+                            };
+                    }
                 }
+                else
+                {
+                    // 清除 usage 为 "face" 的对象
+                    ClearCardPhoto("face");
+                }
+                return new NormalResult();
+
             }
             finally
             {
                 this.EnableControls(true);
                 this.ClearMessage();
             }
-
-            return new NormalResult();
         }
 
         // 登记人脸。用于人脸识别
@@ -6732,11 +6743,15 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
-            REDO:
+                var savePhoto = Program.MainForm.SavePhotoWhileRegisterFace;
+                string style = "ui,confirmPicture,searchDup";
+                if (savePhoto)
+                    style += ",returnImage";
+                REDO:
                 GetFeatureStringResult result = await ReadFeatureString(
                     null,
                     this.readerEditControl1.Barcode,
-                    "ui,confirmPicture,returnImage,searchDup");
+                    style);
 
                 if (result.ErrorCode == "alreadyExist")
                     result.ErrorInfo = $"登记人脸被拒绝: {result.ErrorInfo}";
@@ -6786,20 +6801,28 @@ MessageBoxDefaultButton.Button1);
                 AddImportantField("face");
 
                 // 2021/7/22
-                AddImportantField("face");
+                // AddImportantField("face");
 
                 // TODO: 如果尺寸符合要求，则直接用返回的 jpeg 上载
                 // 设置人脸照片对象
-                using (Image image = FromBytes(result.ImageData))
-                using (Image image1 = new Bitmap(image))
+                if (savePhoto)
                 {
-                    // 自动缩小图像
-                    int nRet = SetCardPhoto(image1,
-                        "face",
-                        out string strShrinkComment,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                    using (Image image = FromBytes(result.ImageData))
+                    using (Image image1 = new Bitmap(image))
+                    {
+                        // 自动缩小图像
+                        int nRet = SetCardPhoto(image1,
+                            "face",
+                            out string strShrinkComment,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                }
+                else
+                {
+                    // 清除 usage 为 "face" 的对象
+                    ClearCardPhoto("face");
                 }
             }
             finally
@@ -6855,8 +6878,8 @@ MessageBoxDefaultButton.Button1);
                 // 自动缩小图像
                 nRet = SetCardPhoto(image,
                     "cardphoto",
-                out strShrinkComment,
-                out strError);
+                    out strShrinkComment,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }

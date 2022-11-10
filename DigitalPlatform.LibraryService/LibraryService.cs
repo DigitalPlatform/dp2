@@ -24,6 +24,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using Microsoft.SqlServer.Server;
 
 namespace dp2Library
 {
@@ -2494,11 +2495,11 @@ namespace dp2Library
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 BeginSearch();
@@ -2934,11 +2935,11 @@ namespace dp2Library
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 BeginSearch();
@@ -3104,11 +3105,11 @@ namespace dp2Library
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 BeginSearch();
@@ -3213,7 +3214,7 @@ namespace dp2Library
                     string filePath = app.GetMemorySetFilePath(
                         sessioninfo,
                         strResultSetName,
-                        sort_cols.Replace("|", "_"));    // 注: sort_cols 形如 "-1|0|1|2"
+                        strBrowseInfoStyle);    
 
                     BeginSearch();  // 如果创建本地结果集的时间太长，前端可以用 Stop() API 中断
                     channel.Idle += new IdleEventHandler(channel_IdleEvent);
@@ -4876,20 +4877,20 @@ namespace dp2Library
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 BeginSearch();
@@ -5635,11 +5636,11 @@ namespace dp2Library
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 BeginSearch();
@@ -6341,6 +6342,30 @@ namespace dp2Library
                         goto END1;
                     }
 
+                    {
+                        // TODO: 允许 strBiblioType 里面包含多种格式。这时 strBiblio 里面要用 XML 包装返回多个结果
+                        string[] formats = new string[] { strBiblioType };
+                        nRet = app.BuildFormats(
+    sessioninfo,
+    strBiblioRecPath,
+    strBiblioXml,
+    strBiblioRecPath,   // format 为 "outputpath" 所返回的内容
+    strMetaData,
+    timestamp,
+    formats,
+    out List<string> temp_results,
+    out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (temp_results != null && temp_results.Count > 0)
+                            strBiblio = temp_results[0];
+                        else
+                        {
+                            strError = "temp_results is null or empty";
+                            goto ERROR1;
+                        }
+                    }
+#if OLD_CODE
                     // 需要从内核映射过来文件
                     string strLocalPath = "";
 
@@ -6387,6 +6412,8 @@ namespace dp2Library
                     }
                     else
                         strBiblio = "";
+#endif
+
                 }
 
             END1:
@@ -8204,11 +8231,11 @@ namespace dp2Library
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 BeginSearch();
@@ -9286,11 +9313,11 @@ namespace dp2Library
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 BeginSearch();
@@ -15557,11 +15584,11 @@ out strError);
 
                 // 2021/9/12
                 {
-                    string filePath = app.GetMemorySetFilePath(
+                    string filePath = app.GetMemorySetFilePathPrefix(
                         sessioninfo,
                         strResultSetName);
                     // 确保删除本地结果集，为检索后首次 GetSearchResult() 做好准备
-                    app.RemoveMemorySet(filePath);
+                    app.RemoveMemorySetByPrefix(filePath);
                 }
 
                 BeginSearch();

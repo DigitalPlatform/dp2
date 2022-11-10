@@ -327,7 +327,7 @@ namespace DigitalPlatform.LibraryServer
             this.RmsChannels.AskAccountInfo += new AskAccountInfoEventHandle(RmsChannels_AskAccountInfo);
 
             Debug.Assert(this.App != null, "");
-            this.ProgressFileName = this.App.GetTempFileName("batch_progress"); //  Path.GetTempFileName();
+            this.ProgressFileName = this.App.GetTempFileName($"batch_progress_{PathUtil.GetValidPathString(this.Name)}"); //  Path.GetTempFileName();
             try
             {
                 // 如果文件存在，就打开，如果文件不存在，就创建一个新的

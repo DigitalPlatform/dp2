@@ -595,6 +595,13 @@ false);
                 "faceReaderUrl",
                 "");    // 常用值 "ipc://FaceChannel/FaceServer"
 
+            // 2022/11/9
+            this.checkBox_face_savePhotoWhileRegister.Checked =
+                ap.GetBoolean("face",
+                "savePhotoWhileRegister",
+                true);
+
+
             // 指纹代理帐户 用户名
             this.textBox_fingerprint_userName.Text =
     ap.GetString("fingerprint",
@@ -1262,6 +1269,11 @@ false);
                 ap.SetString("face",
                 "faceReaderUrl",
                 this.textBox_face_readerUrl.Text);
+
+                // 2022/11/9
+                ap.SetBoolean("face",
+                "savePhotoWhileRegister",
+                this.checkBox_face_savePhotoWhileRegister.Checked);
 
                 // 指纹代理帐户 用户名
                 ap.SetString("fingerprint",

@@ -3788,6 +3788,7 @@ Keys keyData)
         // parameters:
         //      items   要处理的事项集合。如果为 null，表示要处理当前 ListView 中已选择的行
         int ProcessBiblio(
+            string looping_title,
             List<ListViewItem> items,
             Delegate_processBiblio func,
             out string strError)
@@ -3813,12 +3814,14 @@ Keys keyData)
                 return -1;
             }
 
+#if REMOVED
             // if (_stop != null && _stop.State == 0)    // 0 表示正在处理
             if (HasLooping())
             {
                 strError = "目前有长操作正在进行，无法进行批处理书目记录的操作";
                 return -1;
             }
+#endif
 
             int nCount = 0;
 
@@ -3830,9 +3833,9 @@ Keys keyData)
             _stop.Initial("正在进行批处理书目记录的操作 ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在进行批处理书目记录的操作 ...", "halfstop");
-
-
+            var looping = BeginLoop(this.DoStop,
+                looping_title,  // "正在进行批处理书目记录的操作 ...",
+                "halfstop");
             this.EnableControls(false);
             try
             {
@@ -3849,7 +3852,8 @@ Keys keyData)
 
                 looping.Progress.SetProgressRange(0, items.Count);
 
-                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(
+                    channel, // this.Channel,
                     looping.Progress,
                     items,
                     items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
@@ -4405,7 +4409,8 @@ Keys keyData)
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
         + " 开始导出订购去向 Excel 文件</div>");
-            var looping = Looping(out LibraryChannel channel,
+            var looping = Looping(
+                out LibraryChannel channel,
                 "正在导出订购去向 Excel 文件 ...");
             try
             {
@@ -4478,6 +4483,7 @@ Keys keyData)
                 string strDefaultOrderXml = "";
 
                 nRet = ProcessBiblio(
+                    "正在导出订购去向 Excel 文件 ...",
                     null,
                     (strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
                     {
@@ -4757,6 +4763,7 @@ Keys keyData)
             try
             {
                 int nRet = ProcessBiblio(
+                    "正在导出详情到 Excel 文件",
                     null,
                     (strRecPath, dom, timestamp, item) =>
                     {
@@ -6196,7 +6203,8 @@ Keys keyData)
             var looping = BeginLoop(this.DoStop, "正在针对书目记录执行 .fltx 脚本 ...", "halfstop");
 
             this.EnableControls(false);
-
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始执行 .fltx 脚本</div>");
             this.listView_records.Enabled = false;
             try
             {
@@ -6231,42 +6239,6 @@ Keys keyData)
                         goto ERROR1;
                     }
 
-#if NO
-                    string strRecPath = item.Text;
-
-                    if (string.IsNullOrEmpty(strRecPath) == true)
-                        continue;
-
-                    if (stop != null)
-                    {
-                        stop.SetMessage("正在获取书目记录 " + strRecPath);
-                        stop.SetProgressValue(i);
-                    }
-
-                    string[] results = null;
-                    byte[] baTimestamp = null;
-                    // 获得书目记录
-                    long lRet = Channel.GetBiblioInfos(
-                        stop,
-                        strRecPath,
-                    "",
-                        new string[] { "xml" },   // formats
-                        out results,
-                        out baTimestamp,
-                        out strError);
-                    if (lRet == 0)
-                        goto ERROR1;
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (results == null || results.Length == 0)
-                    {
-                        strError = "results error";
-                        goto ERROR1;
-                    }
-
-                    string strXml = results[0];
-#endif
                     BiblioInfo info = item.BiblioInfo;
 
                     string strXml = "";
@@ -6277,23 +6249,26 @@ Keys keyData)
                             strXml = info.OldXml;
                     }
 
-                    string strMARC = "";
-                    string strMarcSyntax = "";
                     // 将XML格式转换为MARC格式
                     // 自动从数据记录中获得MARC语法
                     nRet = MarcUtil.Xml2Marc(strXml,
                         true,
                         null,
-                        out strMarcSyntax,
-                        out strMARC,
+                        out string strMarcSyntax,
+                        out string strMARC,
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "XML转换到MARC记录时出错: " + strError;
+                        strError = "XML 转换到 MARC 记录时出错: " + strError;
                         goto ERROR1;
                     }
 
                     filter.Host = new ColumnFilterHost();
+                    // 2022/11/10
+                    filter.Host.RecPath = info.RecPath;
+                    filter.Host.HostForm = this;
+                    filter.Host.UiItem = item.ListViewItem;
+                    
                     filter.Host.ColumnTable = new System.Collections.Hashtable();
                     nRet = filter.DoRecord(
         null,
@@ -6304,10 +6279,10 @@ Keys keyData)
                     if (nRet == -1)
                         goto ERROR1;
 
-                    Program.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(item.BiblioInfo.RecPath) + "</p>");    // strRecPath
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(item.BiblioInfo.RecPath) + "</div>");
                     foreach (string key in filter.Host.ColumnTable.Keys)
                     {
-                        string strHtml = "<p>" + HttpUtility.HtmlEncode(key + "=" + (string)filter.Host.ColumnTable[key]) + "</p>";
+                        string strHtml = "<div>" + HttpUtility.HtmlEncode(key + "=" + (string)filter.Host.ColumnTable[key]) + "</div>";
                         Program.MainForm.OperHistory.AppendHtml(strHtml);
                     }
 
@@ -6325,12 +6300,14 @@ Keys keyData)
                     }
 #endif
                     i++;
+                    looping.Progress.SetProgressValue(i);
                 }
             }
             finally
             {
                 this.listView_records.Enabled = true;
-
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束执行 .fltx 脚本</div>");
                 /*
                 _stop.EndLoop();
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -11859,7 +11836,7 @@ message,
             return list.SelectedItems[0];
         }
 
-        #region 停靠
+#region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -11928,7 +11905,7 @@ message,
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-        #endregion
+#endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {
@@ -12148,6 +12125,7 @@ message,
                 ListViewUtil.ClearSelection(this.listView_records);
 
                 int nRet = ProcessBiblio(
+                    "正在筛选书目记录 ...",
                     items,
                     (strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
                     {

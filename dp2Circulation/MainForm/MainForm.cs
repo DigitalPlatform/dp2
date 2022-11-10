@@ -1216,7 +1216,7 @@ Stack:
                 "mainformstate");
         }
 
-#region 菜单命令
+        #region 菜单命令
 
         // 新开日志统计窗
         private void MenuItem_openOperLogStatisForm_Click(object sender, EventArgs e)
@@ -2088,7 +2088,7 @@ false);
         {
             {
                 if (Control.ModifierKeys == Keys.Control
-                    && StringUtil.IsDevelopMode() == true)
+                    /*&& StringUtil.IsDevelopMode() == true*/)
                     OpenWindow<TestingForm>();
                 else
                     OpenWindow<TestForm>();
@@ -2401,7 +2401,7 @@ false);
             }
         }
 
-#endregion
+        #endregion
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
@@ -3274,7 +3274,7 @@ false);
             _channelList.Remove(channel);
         }
 
-#region looping
+        #region looping
 
         // 三种动作: GetChannel() BeginLoop() 和 EnableControl()
         // parameters:
@@ -3394,7 +3394,7 @@ string style = null)
             }
         }
 
-#endregion
+        #endregion
 
 
 
@@ -4257,7 +4257,7 @@ Stack:
             }
         }
 
-#region EnsureXXXForm ...
+        #region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4545,7 +4545,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-#endregion
+        #endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -6897,7 +6897,7 @@ out strError);
         }
 
         void DeleteAllTempFiles(
-            Stop stop, 
+            Stop stop,
             string strDataDir)
         {
             // 出让控制权
@@ -7974,6 +7974,21 @@ value);  // 常用值 "ipc://RfidChannel/RfidServer"
             }
         }
 
+        /// <summary>
+        /// 注册人脸时是否保存照片
+        /// 注: 照片是在读者记录中，用途为 "face" 的对象
+        /// </summary>
+        public bool SavePhotoWhileRegisterFace
+        {
+            get
+            {
+                // 2022/11/9
+                return this.AppInfo.GetBoolean("face",
+                    "savePhotoWhileRegister",
+                    true);
+            }
+        }
+
         // 
         /// <summary>
         /// 指纹代理帐户 用户名
@@ -8287,7 +8302,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-#region 序列号机制
+        #region 序列号机制
 
         bool _testMode = false;
 
@@ -8640,7 +8655,7 @@ Keys keyData)
 
 #endif
 
-#endregion
+        #endregion
 
 #if REMOVED
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
@@ -8769,7 +8784,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-#region servers.xml
+        #region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -9113,7 +9128,7 @@ Keys keyData)
             return null;
         }
 
-#endregion // servers.xml
+        #endregion // servers.xml
 
 #if !NEWFINGER
         void EnableFingerprintSendKey(bool enable)
@@ -9272,7 +9287,7 @@ Keys keyData)
 #endif
         }
 
-#region 消息过滤
+        #region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -9302,7 +9317,7 @@ Keys keyData)
 
 #endif
 
-#endregion
+        #endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名
@@ -9311,7 +9326,7 @@ Keys keyData)
         {
             get
             {
-                string strServerUrl = ReportForm.GetValidPathString(this.LibraryServerUrl.Replace("/", "_"));
+                string strServerUrl = PathUtil.GetValidPathString(this.LibraryServerUrl.Replace("/", "_"));
                 string strDirectory = Path.Combine(this.UserDir, "servers\\" + strServerUrl);
                 PathUtil.TryCreateDir(strDirectory);
                 return strDirectory;

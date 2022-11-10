@@ -1572,5 +1572,44 @@ namespace DigitalPlatform.IO
 
             return shortPath.ToString();
         }
+
+        // 附加的一些文件名非法字符。比如 XP 下 Path.GetInvalidPathChars() 不知何故会遗漏 '*'
+        static string spec_invalid_chars = "*?:";
+
+        public static string GetValidPathString(string strText, string strReplaceChar = "_")
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+
+            char[] invalid_chars = Path.GetInvalidPathChars();
+            StringBuilder result = new StringBuilder();
+            foreach (char c in strText)
+            {
+                if (c == ' ')
+                    continue;
+                if (IndexOf(invalid_chars, c) != -1
+                    || spec_invalid_chars.IndexOf(c) != -1)
+                    result.Append(strReplaceChar);
+                else
+                    result.Append(c);
+            }
+
+            return result.ToString();
+        }
+
+        static int IndexOf(char[] chars, char c)
+        {
+            int i = 0;
+            foreach (char c1 in chars)
+            {
+                if (c1 == c)
+                    return i;
+                i++;
+            }
+
+            return -1;
+        }
+
+
     }
 }

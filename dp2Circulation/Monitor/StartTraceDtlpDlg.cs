@@ -135,7 +135,7 @@ namespace dp2Circulation
                         }
                         catch (Exception)
                         {
-                            MessageBox.Show(this, "记录索引号 '" + this.textBox_startIndex.Text + "' 必须为纯数字");
+                            MessageBox.Show(this, "记录 ID '" + this.textBox_startIndex.Text + "' 必须为纯数字");
                             return;
                         }
                     }

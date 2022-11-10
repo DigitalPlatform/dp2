@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.134.*")]
-[assembly: AssemblyFileVersion("3.134.0.0")]
+[assembly: AssemblyVersion("3.135.*")]
+[assembly: AssemblyFileVersion("3.135.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -350,4 +350,5 @@ ItemCanReturn()
 //		3.133 (2022/10/27) GetSearchResult() API 的 strBrowseInfoStyle 参数中的 sort 子参数不同的情况下重新请求，会按照不同的 sort 子参数重新排序结果集。如果 sort 子参数相同，则重新请求不会导致重新排序，依然是用以前曾经第一次用这个 sort 子参数时候排好的序
 //						此前版本这里的缺陷是 sort 子参数改变后重新请求，因为缓存了上一次曾经排序的结果，不会重新排序
 //		3.134 (2022/10/28) 读者库 keys 配置文件中对 email 检索途径进行了改进，允许 email:xxxx 和 weixinid:xxxx 的同时，也允许直接出现 email 地址(也就是说不带有 email: 前缀)。检索的时候，带不带 email: 前缀都能检索命中
+//		3.135 (2022/11/9) 为 GetItemInfo() API 的 strBiblioType 增加多种格式，和 GetBiblioInfos() 中可以返回的格式相同
 

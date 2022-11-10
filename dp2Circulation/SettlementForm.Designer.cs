@@ -345,7 +345,7 @@ namespace dp2Circulation
             this.radioButton_range_ctlno.Name = "radioButton_range_ctlno";
             this.radioButton_range_ctlno.Size = new System.Drawing.Size(125, 16);
             this.radioButton_range_ctlno.TabIndex = 5;
-            this.radioButton_range_ctlno.Text = "¼ÇÂ¼Ë÷ÒýºÅ·¶Î§(&N)";
+            this.radioButton_range_ctlno.Text = "¼ÇÂ¼ ID ·¶Î§(&N)";
             this.radioButton_range_ctlno.UseVisualStyleBackColor = true;
             this.radioButton_range_ctlno.CheckedChanged += new System.EventHandler(this.radioButton_range_ctlno_CheckedChanged);
             // 

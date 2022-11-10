@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.76.*")]
-[assembly: AssemblyFileVersion("3.76.0.0")]
+[assembly: AssemblyVersion("3.78.*")]
+[assembly: AssemblyFileVersion("3.78.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -160,3 +160,7 @@ using System.Runtime.InteropServices;
 // 3.75 2022/10/25 典藏移交窗修改册记录 location 元素的时候，增加了自动清空 shelfNo 和 currentLocation 元素的能力
 //              导入 MARC 窗增加了“编目批次号”textbox。特殊地，若输入"[清除]"的效果是在导入前删除书目记录的 998$a 子字段
 // 3.76 2022/10/27 读者编辑器里面的 email 字段改为 readonly 状态，右侧增加一个“编辑”按钮，可以点此按钮在编辑对话框里面进行编辑。目前 email 和 weixinid 是合法的子参数名
+// 3.77 2022/11/7 对 stop.BeginLoop() 用 Looping() 类进行替代。有一些统计方案的源代码不再兼容
+// 3.78 2022/11/9 “参数配置”对话框里面为“指纹、掌纹和人脸”属性页增加了 “注册时保留人脸照片”checkbox。
+//              读者窗人脸登记的时候，会根据这个 checkbox 的设定，决定是否在读者记录中保留 face 用途的对象。注意，如果参数为“不保留”，则人脸登记时还会删除以前该读者记录里面残留的 face 用途的对象
+//              async Task<NormalResult> RegisterFaceAsync(string strFaceFileName) 函数也是会按照此 checkbox 决定是否保留 face 用途的对象，此函数被读者窗工具条“用图像文件注册人脸”调用，也有可能被二次开发脚本调用

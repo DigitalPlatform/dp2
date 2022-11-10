@@ -109,7 +109,7 @@ namespace dp2Circulation
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(114, 15);
             this.label2.TabIndex = 2;
-            this.label2.Text = "¼ÇÂ¼Ë÷ÒýºÅ(&I):";
+            this.label2.Text = "¼ÇÂ¼ ID(&I):";
             // 
             // textBox_startFileName
             // 

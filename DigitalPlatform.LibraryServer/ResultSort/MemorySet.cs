@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
@@ -304,6 +305,5 @@ new BinaryWriter(File.Open(FilePath, FileMode.Create)))
     {
         public string Path { get; set; }
         public string[] Cols { get; set; }
-
     }
 }

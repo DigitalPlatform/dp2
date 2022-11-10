@@ -88,7 +88,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(114, 15);
             this.label2.TabIndex = 2;
-            this.label2.Text = "记录索引号(&I):";
+            this.label2.Text = "记录 ID(&I):";
             // 
             // button_Cancel
             // 

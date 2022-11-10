@@ -28,11 +28,22 @@ namespace dp2Circulation
         /// <summary>
         /// 参数表
         /// </summary>
-        public Hashtable ColumnTable = null;// 引用
+        public Hashtable ColumnTable { get; set; }  // 引用
+
+        // 2022/11/10
+        /// <summary>
+        /// 书目记录路径
+        /// </summary>
+        public string RecPath { get; set; }
+
+        /// <summary>
+        /// 宿主 MDI 窗口。例如 BiblioSearchForm
+        /// </summary>
+        public object HostForm { get; set; }
 
         /// <summary>
         /// 视觉事项对象。
         /// </summary>
-        public object UiItem = null;
+        public object UiItem { get; set; }
     }
 }

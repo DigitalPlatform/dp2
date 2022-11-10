@@ -42,8 +42,8 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>305</ApplicationRevision>
-    <ApplicationVersion>3.1.2.%2a</ApplicationVersion>
+    <ApplicationRevision>310</ApplicationRevision>
+    <ApplicationVersion>3.135.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>

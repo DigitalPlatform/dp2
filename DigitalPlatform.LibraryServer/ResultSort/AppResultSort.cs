@@ -34,26 +34,54 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // parameters:
-        //      strSection  用于进一步区分结果集不同特性的名字(2022/10/27)
-        public string GetMemorySetFilePath(SessionInfo sessioninfo,
-            string strResultSetName,
-            string strSection = null)
+        // 获得文件名前缀
+        public string GetMemorySetFilePathPrefix(SessionInfo sessioninfo,
+            string strResultSetName)
         {
             if (string.IsNullOrEmpty(strResultSetName))
                 strResultSetName = "default";
 
-            if (string.IsNullOrEmpty(strSection) == false)
-                strResultSetName = strResultSetName + "_" + strSection;
+            // 全局结果集
+            if (strResultSetName.StartsWith("#"))
+                return Path.Combine(this.TempDir, $"~grs_{strResultSetName}_");
+
+            return Path.Combine(sessioninfo.TempDir,
+$"sort_{strResultSetName}_");
+        }
+
+        // 获得单个精确的文件名
+        // parameters:
+        //      strSection  用于进一步区分结果集不同特性的名字(2022/10/27)
+        public string GetMemorySetFilePath(SessionInfo sessioninfo,
+            string strResultSetName,
+            string strBrowseInfoStyle)
+        {
+            if (string.IsNullOrEmpty(strResultSetName))
+                strResultSetName = "default";
+
+            var sort_cols = StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "sort");
+            var sort_max_count = StringUtil.GetParameterByPrefix(strBrowseInfoStyle, "sortmaxcount");
+
+            // 注: sort_cols 形如 "-1|0|1|2"
+            if (string.IsNullOrEmpty(sort_cols) == false)
+                sort_cols = sort_cols.Replace("|", "_");
+            else
+                sort_cols = "";
+
+            if (string.IsNullOrEmpty(sort_max_count) == false)
+                sort_max_count = "m" + sort_max_count;
+            else
+                sort_max_count = "";
 
             // 全局结果集
             if (strResultSetName.StartsWith("#"))
-                return Path.Combine(this.TempDir, $"~grs_{strResultSetName}");
+                return Path.Combine(this.TempDir, $"~grs_{strResultSetName}_{sort_cols}_{sort_max_count}");
 
             return Path.Combine(sessioninfo.TempDir,
-$"sort_{strResultSetName}");
+$"sort_{strResultSetName}_{sort_cols}_{sort_max_count}");
         }
 
+        // 根据名字精确删除
         public bool RemoveMemorySet(string name)
         {
             lock (_syncRoot_memorySets)
@@ -62,6 +90,45 @@ $"sort_{strResultSetName}");
                     return false;
                 value.DeleteFile();
                 return _memorySets.Remove(name);
+            }
+        }
+
+        // 根据前缀名删除
+        public int RemoveMemorySetByPrefix(string prefix)
+        {
+            lock (_syncRoot_memorySets)
+            {
+                List<string> delete_names = new List<string>();
+                foreach (var name in _memorySets.Keys)
+                {
+                    if (name.StartsWith(prefix))
+                    {
+                        var value = _memorySets[name];
+                        value.DeleteFile();
+                        delete_names.Add(name);
+                    }
+                }
+
+                foreach (var name in delete_names)
+                {
+                    _memorySets.Remove(name);
+                }
+
+                return delete_names.Count;
+            }
+        }
+
+        // 删除全部 MemorySet 对象(和物理文件)
+        public void RemoveAllMemorySet()
+        {
+            lock (_syncRoot_memorySets)
+            {
+                foreach (var name in _memorySets.Keys)
+                {
+                    var value = _memorySets[name];
+                    value.DeleteFile();
+                }
+                _memorySets.Clear();
             }
         }
 
@@ -128,7 +195,7 @@ $"sort_{strResultSetName}");
                         continue;
                     path = path.Replace("/", "\\");
                     if (path.StartsWith(prefix)
-                        && item.Value.LastTime - now > length)
+                        && now - item.Value.LastTime > length)
                         delete_paths.Add(path);
                 }
 
@@ -191,7 +258,19 @@ public static bool IsSessionMemorySetFilePath(
             List<Record> results = new List<Record>();
             // parameters:
             //      length  要读取多少个。-1 表示尽量多地读取
-            var paths = memorySet.GetPaths(lStart, (int)lCount);
+            List<string> paths;
+            try
+            {
+                paths = memorySet.GetPaths(lStart, (int)lCount);
+            }
+            catch (FileNotFoundException ex)
+            {
+                // 删除 memorySet 对象，避免前端再次请求反复报错
+                this.RemoveMemorySet(memorySet.FilePath);
+                strError = $"MemorySet::GetPaths() 没有找到物理文件。详细信息已写入错误日志文件";
+                this.WriteErrorLog($"MemorySet::GetPaths() 没有找到物理文件: {ex.Message}");
+                return -1;
+            }
 
             // TODO: paths 中间有空的路径怎么办?
 

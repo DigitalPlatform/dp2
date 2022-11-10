@@ -670,7 +670,8 @@ namespace DigitalPlatform.LibraryServer
             return nSize;
         }
 
-        int BuildFormats(
+        // 构造各种书目格式
+        public int BuildFormats(
             SessionInfo sessioninfo,
             string strCurrentBiblioRecPath,
             string strBiblioXml,
