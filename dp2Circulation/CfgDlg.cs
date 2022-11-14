@@ -153,6 +153,7 @@ namespace dp2Circulation
                 "occur_per_start",
                 true);
 
+#if REMOVED
             // *** charging
             this.checkBox_charging_force.Checked = ap.GetBoolean(
                     "charging_form",
@@ -172,10 +173,10 @@ namespace dp2Circulation
                 "doubleItemInputAsEnd",
                 false);
 
-            this.comboBox_charging_displayFormat.Text =
-    ap.GetString("charging_form",
-    "display_format",
-    "HTML");
+            this.comboBox_charging_displayFormat.Text = ap.GetString(
+                "charging_form",
+                "display_format",
+                "HTML");
 
             this.checkBox_charging_autoUppercaseBarcode.Checked =
                 ap.GetBoolean(
@@ -251,6 +252,7 @@ namespace dp2Circulation
                 "charging_form",
                 "auto_oper_single_item",
                 false);
+#endif
 
             // *** 快捷出纳
 
@@ -863,6 +865,7 @@ false);
                     "occur_per_start",
                     this.checkBox_defaultAccount_occurPerStart.Checked);
 
+#if REMOVED
                 // charging
                 ap.SetBoolean(
                     "charging_form",
@@ -882,7 +885,8 @@ false);
                     "doubleItemInputAsEnd",
                     this.checkBox_charging_doubleItemInputAsEnd.Checked);
 
-                ap.SetString("charging_form",
+                ap.SetString(
+                    "charging_form",
                     "display_format",
                     this.comboBox_charging_displayFormat.Text);
 
@@ -956,6 +960,7 @@ false);
                     "charging_form",
                     "auto_oper_single_item",
                     this.checkBox_charging_autoOperItemDialogSingleItem.Checked);
+#endif
 
                 // *** 快捷出纳
 
@@ -1630,10 +1635,12 @@ this.checkBox_patron_disableBioKeyboardSimulation.Checked);
 
         private void checkBox_charging_noBiblioAndItem_CheckedChanged(object sender, EventArgs e)
         {
+#if REMOVED
             this.FireParamChanged(
                 "charging_form",
                 "no_biblio_and_item_info",
                 (object)this.checkBox_charging_noBiblioAndItem.Checked);
+#endif
         }
 
         private void textBox_server_circulationServerUrl_TextChanged(object sender, EventArgs e)

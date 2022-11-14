@@ -118,9 +118,11 @@ _cancel.Token,
     AppendString($"{text}\r\n");
 });
 
-            stopManager.Initial(this.toolButton_stop,
-(object)this.toolStripStatusLabel_main,
-(object)this.toolStripProgressBar_main);
+            stopManager.Initial(
+                this,
+                this.toolButton_stop,
+                (object)this.toolStripStatusLabel_main,
+                (object)this.toolStripProgressBar_main);
 
             stop = new DigitalPlatform.Stop();
             stop.Register(stopManager, true);   // 和容器关联

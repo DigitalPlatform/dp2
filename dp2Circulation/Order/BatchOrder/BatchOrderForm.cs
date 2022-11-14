@@ -60,12 +60,9 @@ namespace dp2Circulation
             this.toolStripButton_orderList.Checked = Program.MainForm.AppInfo.GetBoolean("batchOrderForm", "orderListView", true);
         }
 
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.toolStrip1.Enabled = bEnable;
-            }));
+            this.toolStrip1.Enabled = bEnable;
         }
 
         public void BeginLoadLine(List<string> recpaths)
@@ -1537,13 +1534,13 @@ int nCount)
 
         private void ToolStripMenuItem_selectAllOrder_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document ?.InvokeScript("selectAllOrder",
+            webBrowser1.Document?.InvokeScript("selectAllOrder",
                 new object[] { Control.ModifierKeys == Keys.Control ? false : true });
         }
 
         private void toolStripButton_loadBiblio_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document ?.InvokeScript("loadBiblio");
+            webBrowser1.Document?.InvokeScript("loadBiblio");
         }
 
         private void ToolStripMenuItem_quickChange_Click(object sender, EventArgs e)
@@ -1940,7 +1937,7 @@ int nCount)
         {
             if (Control.ModifierKeys == Keys.Control)
             {
-                webBrowser1.Document ?.InvokeScript("clearAllErrorInfo");
+                webBrowser1.Document?.InvokeScript("clearAllErrorInfo");
                 return;
             }
 
@@ -1956,7 +1953,7 @@ int nCount)
         bool VerifyOrders()
         {
             // TODO: 首先清除以前残留的报错信息
-            webBrowser1.Document ?.InvokeScript("clearAllErrorInfo");
+            webBrowser1.Document?.InvokeScript("clearAllErrorInfo");
 
             int nErrorCount = 0;
             foreach (BiblioStore biblio in this._lines)
@@ -1968,7 +1965,7 @@ int nCount)
                     {
                         // 将出错信息显示到 WebControl 页面
                         if (string.IsNullOrEmpty(order.ErrorInfo) == false)
-                            webBrowser1.Document ?.InvokeScript("setErrorInfo", new object[] { order.RefID, order.ErrorInfo });
+                            webBrowser1.Document?.InvokeScript("setErrorInfo", new object[] { order.RefID, order.ErrorInfo });
                     }
                     nErrorCount++;
                 }

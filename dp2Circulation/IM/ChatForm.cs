@@ -421,20 +421,10 @@ namespace dp2Circulation
 
 
 
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            /*
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action<bool>(EnableControls), bEnable);
-                return;
-            }
-            */
-            this.TryInvoke((Action)(() =>
-            {
-                this.textBox_input.Enabled = bEnable;
-                this.button_send.Enabled = bEnable;
-            }));
+            this.textBox_input.Enabled = bEnable;
+            this.button_send.Enabled = bEnable;
         }
 
         void AddInfoLine(string strContent)

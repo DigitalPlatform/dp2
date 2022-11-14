@@ -56,7 +56,7 @@ namespace dp2Circulation
         {
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
                 this.UiState = Program.MainForm.AppInfo.GetString(
-                    "marc856searchform", 
+                    "marc856searchform",
                     "uistate", "");
 
             CreateColumns();
@@ -125,9 +125,9 @@ namespace dp2Circulation
         }
 
         // 设置 ListViewItem 的各列
-        void SetItemColumns(ListViewItem item, 
+        void SetItemColumns(ListViewItem item,
             string strBiblioRecPath,
-            MarcField field, 
+            MarcField field,
             int index)
         {
             // 设置各列内容
@@ -441,7 +441,7 @@ namespace dp2Circulation
             }
 
             DialogResult result = MessageBox.Show(this,
-    "确实要删除所选定 "+this.listView_records.SelectedItems.Count+" 个 856 字段?",
+    "确实要删除所选定 " + this.listView_records.SelectedItems.Count + " 个 856 字段?",
     "Marc856SearchForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -473,7 +473,7 @@ namespace dp2Circulation
             }
 
             DoViewComment(false);
-            strError = "已标记删除 "+nDeleteCount+" 个事项，但并未兑现到书目库。\r\n当保存修改时才会真正从书目库中删除。";
+            strError = "已标记删除 " + nDeleteCount + " 个事项，但并未兑现到书目库。\r\n当保存修改时才会真正从书目库中删除。";
             return 1;
         }
 
@@ -732,7 +732,7 @@ namespace dp2Circulation
                 // TODO: 如果要优化算法的话，可以建立书目记录和浏览行之间的联系，在书目记录保存成功后才修改 line_info.NewField 和刷新浏览行显示。这样的好处是，一旦中途出错，还有干净重新保存的可能
                 looping.Progress.SetProgressRange(0, changed_biblio_recpaths.Count);
                 int i = 0;
-                foreach(string strBiblioRecPath in changed_biblio_recpaths)
+                foreach (string strBiblioRecPath in changed_biblio_recpaths)
                 {
                     BiblioInfo biblio_info = (BiblioInfo)this.m_biblioTable[strBiblioRecPath];
                     if (biblio_info == null)
@@ -908,7 +908,7 @@ MessageBoxDefaultButton.Button1);
         // 同一书目记录下，修改比 item 位置靠后的事项的 Index
         static int ChangeFieldIndex(
             Hashtable relation_table,
-            ListViewItem item, 
+            ListViewItem item,
             int nDelta,
             out string strError)
         {
@@ -918,13 +918,13 @@ MessageBoxDefaultButton.Button1);
             List<ListViewItem> array = (List<ListViewItem>)relation_table[strBiblioRecPath];
             if (array == null)
             {
-                strError = "strBiblioRecPath '"+strBiblioRecPath+"' 的 array 在 relation_table 中没有找到";
+                strError = "strBiblioRecPath '" + strBiblioRecPath + "' 的 array 在 relation_table 中没有找到";
                 return -1;
             }
 
             LineInfo info = (LineInfo)item.Tag;
 
-            foreach(ListViewItem current_item in array)
+            foreach (ListViewItem current_item in array)
             {
                 if (current_item == item)
                     continue;
@@ -944,7 +944,7 @@ MessageBoxDefaultButton.Button1);
         //      -1  出错
         //      0   书目记录没有发生修改
         //      1   书目记录发生了修改
-        int MergeChange(LineInfo line_info, 
+        int MergeChange(LineInfo line_info,
             BiblioInfo biblio_info,
             out string strError)
         {
@@ -1487,7 +1487,7 @@ dlg.UiState);
 
             StringUtil.ParseTwoPart(strPath, ".", out strSubfieldName, out strPartName);
 
-            string strContent = field.select("subfield[@name='"+strSubfieldName+"']").FirstContent;
+            string strContent = field.select("subfield[@name='" + strSubfieldName + "']").FirstContent;
             if (string.IsNullOrEmpty(strPartName) == true)
                 return strContent;
 
@@ -1532,7 +1532,7 @@ dlg.UiState);
             string strPartName = "";
 
             StringUtil.ParseTwoPart(strPath, ".", out strSubfieldName, out strPartName);
-            
+
             MarcNodeList subfields = field.select("subfield[@name='" + strSubfieldName + "']");
             if (subfields.count == 0)
             {
@@ -1639,12 +1639,12 @@ dlg.UiState);
             MarcField field = new MarcField(strField);
             text.Append("指示符1:" + field.Indicator1 + "\r\n");
             text.Append("指示符2:" + field.Indicator2 + "\r\n");
-            foreach(MarcSubfield subfield in field.ChildNodes)
+            foreach (MarcSubfield subfield in field.ChildNodes)
             {
                 if (subfield.Name == "x")
                 {
-                    string [] parts = subfield.Content.Split(new char []{';'});
-                    foreach(string part in parts)
+                    string[] parts = subfield.Content.Split(new char[] { ';' });
+                    foreach (string part in parts)
                     {
                         string left = "";
                         string right = "";
@@ -1692,7 +1692,7 @@ out string strError)
 
             nRet = MarcDiff.DiffOpacHtml(
     BuildOpacText(info.OldField),
-    string.IsNullOrEmpty(info.State) == false? "" : null,
+    string.IsNullOrEmpty(info.State) == false ? "" : null,
     out strHtml2,
     out strError);
             if (nRet == -1)
@@ -1757,8 +1757,8 @@ out string strError)
                     out strXml,
                     out strHtml2,
                     out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+            if (nRet == -1)
+                goto ERROR1;
 
             strHtml = "<html>" +
     GetHeadString() +
@@ -1845,16 +1845,9 @@ out string strError)
             DoViewComment(false);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.listView_records.Enabled = bEnable;
-            }));
+            this.listView_records.Enabled = bEnable;
         }
 
         public string UiState

@@ -40,7 +40,7 @@ namespace dp2Circulation
         bool m_bChanged = false;
 
         string RecPath = "";    // 读者记录路径
-        byte [] Timestamp = null;
+        byte[] Timestamp = null;
         string OldRecord = "";
 
         /// <summary>
@@ -377,25 +377,18 @@ MessageBoxDefaultButton.Button2);
             return -1;
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.textBox_readerBarcode.Enabled = bEnable;
-                this.textBox_operator.Enabled = bEnable;
-                this.textBox_comment.Enabled = bEnable;
+            this.textBox_readerBarcode.Enabled = bEnable;
+            this.textBox_operator.Enabled = bEnable;
+            this.textBox_comment.Enabled = bEnable;
 
-                this.comboBox_operation.Enabled = bEnable;
-                this.tabControl_readerInfo.Enabled = bEnable;
+            this.comboBox_operation.Enabled = bEnable;
+            this.tabControl_readerInfo.Enabled = bEnable;
 
-                // 2008/10/28
-                this.button_save.Enabled = bEnable;
-                this.button_load.Enabled = bEnable;
-            }));
+            // 2008/10/28
+            this.button_save.Enabled = bEnable;
+            this.button_load.Enabled = bEnable;
         }
 
         private void textBox_readerBarcode_Enter(object sender, EventArgs e)
@@ -661,23 +654,23 @@ MessageBoxDefaultButton.Button2);
             switch (m.Msg)
             {
                 case WM_LOAD_RECORD:
-                        if (this.m_webExternalHost.CanCallNew(
-                            this.commander,
-                            m.Msg) == true)
-                        {
-                            string strReaderBarcode = this.textBox_readerBarcode.Text;
-                            this.LoadRecord(ref strReaderBarcode);
-                            if (this.textBox_readerBarcode.Text != strReaderBarcode)
-                                this.textBox_readerBarcode.Text = strReaderBarcode;
-                        }
+                    if (this.m_webExternalHost.CanCallNew(
+                        this.commander,
+                        m.Msg) == true)
+                    {
+                        string strReaderBarcode = this.textBox_readerBarcode.Text;
+                        this.LoadRecord(ref strReaderBarcode);
+                        if (this.textBox_readerBarcode.Text != strReaderBarcode)
+                            this.textBox_readerBarcode.Text = strReaderBarcode;
+                    }
                     return;
                 case WM_SAVE_RECORD:
-                        if (this.m_webExternalHost.CanCallNew(
-                            this.commander,
-                            m.Msg) == true)
-                        {
-                            SaveRecord();
-                        }
+                    if (this.m_webExternalHost.CanCallNew(
+                        this.commander,
+                        m.Msg) == true)
+                    {
+                        SaveRecord();
+                    }
                     return;
             }
             base.DefWndProc(ref m);

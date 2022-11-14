@@ -1176,27 +1176,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
-#if NO
-            if (DetectIE() == false)
-            {
-                MessageBox.Show(this, "IE 浏览器故障，无法启动 dp2circulation。请联系数字平台");
-                Application.Exit();
-                return;
-            }
-#endif
-
             this.SetBevel(false);
-#if NO
-            if (!API.DwmIsCompositionEnabled())
-            {
-                //MessageBox.Show("This demo requires Vista, with Aero enabled.");
-                //Application.Exit();
-            }
-            else
-            {
-                SetGlassRegion();
-            }
-#endif
 
             if (StringUtil.IsDevelopMode() == false)
             {
@@ -1471,12 +1451,13 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-
             // 2021/11/1
             if (this.AppInfo.GetBoolean("palmprint", "palmprintDialogVisible", false))
                 ShowPalmprintDialog();
 
-            stopManager.Initial(this.toolButton_stop,
+            stopManager.Initial(
+                this,
+                this.toolButton_stop,
                 (object)this.toolStripStatusLabel_main,
                 (object)this.toolStripProgressBar_main);
             // stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
@@ -1529,7 +1510,15 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 第一次复制绿色版本
-            _ = Task.Factory.StartNew(() => CopyGreen());
+            _ = Task.Factory.StartNew(
+                () =>
+                {
+                    CopyGreen();
+                },
+    this._cancel.Token,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+            // _ = Task.Factory.StartNew(() => CopyGreen());
 
             StartPrepareNames(true, true);
 
@@ -1545,7 +1534,7 @@ MessageBoxDefaultButton.Button1);
 
             MigratePrintTemplatesDirectory();
 
-#region 脚本支持
+            #region 脚本支持
             ScriptManager.applicationInfo = this.AppInfo;
             // ScriptManager.CfgFilePath = Path.Combine(this.DataDir, "mainform_statis_projects.xml");
             // ScriptManager.DataDir = this.DataDir;
@@ -1567,7 +1556,7 @@ MessageBoxDefaultButton.Button1);
             {
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
-#endregion
+            #endregion
 
             if (this.qrRecognitionControl1 != null)
             {
@@ -1652,7 +1641,7 @@ MessageBoxDefaultButton.Button1);
             StartStatisLogWorker(_cancel.Token);
         }
 
-#region RFID
+        #region RFID
 
         CancellationTokenSource _cancelRfidManager = new CancellationTokenSource();
 
@@ -1735,10 +1724,10 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-#endregion
+        #endregion
 
 
-#region 掌纹 FingerprintManager
+        #region 掌纹 FingerprintManager
 
         CancellationTokenSource _cancelPalmManager = new CancellationTokenSource();
 
@@ -1846,7 +1835,7 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(FingerprintManager.Url) == false)
             {
                 FingerprintManager.GetMessage($"clear,session:{FingerprintManager.SessionID}");
-                Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"清除此前未取的全部{Program.MainForm.GetPalmName()}消息") }</div>");
+                Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{HttpUtility.HtmlEncode($"清除此前未取的全部{Program.MainForm.GetPalmName()}消息")}</div>");
             }
         }
 
@@ -1857,9 +1846,9 @@ MessageBoxDefaultButton.Button1);
             {
                 var result = FingerprintManager.GetState("restart");
                 if (result.Value == -1)
-                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"重启{GetPalmName()}中心出错: {result.ErrorInfo}") }</div>");
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode($"重启{GetPalmName()}中心出错: {result.ErrorInfo}")}</div>");
                 else
-                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{ HttpUtility.HtmlEncode($"重启{GetPalmName()}中心成功。重启完成可能需要一定时间，请耐心等待") }</div>");
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug green'>{HttpUtility.HtmlEncode($"重启{GetPalmName()}中心成功。重启完成可能需要一定时间，请耐心等待")}</div>");
             }
         }
 
@@ -1873,7 +1862,7 @@ MessageBoxDefaultButton.Button1);
                 var result = FingerprintManager.GetVersion();
                 if (result.Value == -1)
                 {
-                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode($"获得{GetPalmName()}中心版本号时出错: {result.ErrorInfo}") }</div>");
+                    Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode($"获得{GetPalmName()}中心版本号时出错: {result.ErrorInfo}")}</div>");
                     return null;
                 }
                 else if (this.IsFingerprint() == false)
@@ -1881,7 +1870,7 @@ MessageBoxDefaultButton.Button1);
                     if (StringUtil.CompareVersion(result.Version, pamcenter_base_version) < 0)
                     {
                         string error = $"当前连接的掌纹中心版本号太低(为 {result.Version})，请升级到 {pamcenter_base_version} 或以上版本";
-                        Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode(error) }</div>");
+                        Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(error)}</div>");
                         /*
                         _ = Task.Run(() =>
                         {
@@ -1900,7 +1889,7 @@ MessageBoxDefaultButton.Button1);
                     if (StringUtil.CompareVersion(result.Version, fingerprint_base_version) < 0)
                     {
                         string error = $"当前连接的指纹中心版本号太低(为 {result.Version})，请升级到 {fingerprint_base_version} 或以上版本";
-                        Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{ HttpUtility.HtmlEncode(error) }</div>");
+                        Program.MainForm?.OperHistory?.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(error)}</div>");
                         /*
                         _ = Task.Run(() =>
                         {
@@ -2009,7 +1998,7 @@ MessageBoxDefaultButton.Button1);
                 return;
             }
             else
-                Program.MainForm.OperHistory?.AppendHtml($"<div class='debug recpath'>{ HttpUtility.HtmlEncode($"{Program.MainForm.GetPalmName()}消息 {e.ToString()}") }</div>");
+                Program.MainForm.OperHistory?.AppendHtml($"<div class='debug recpath'>{HttpUtility.HtmlEncode($"{Program.MainForm.GetPalmName()}消息 {e.ToString()}")}</div>");
 
             // dp2circulation 自己不是在最前面的时候，不进行掌纹 SendKey。这样避免和同时运行的 dp2SSL 冲突(dp2ssl 自己可以轮询掌纹 message)
             if (_isActivated == false)
@@ -2089,9 +2078,9 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.OperHistory?.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text) + "</div>");
         }
 
-#endregion
+        #endregion
 
-#region ProcessManager
+        #region ProcessManager
 
         CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
 
@@ -2160,7 +2149,7 @@ MessageBoxDefaultButton.Button1);
         }
         */
 
-#endregion
+        #endregion
 
         // 将 dp2circulation.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         int MoveDp2circulationXml(out string strError)
@@ -2328,7 +2317,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strText);
         }
 
-#region Background Form
+        #region Background Form
 
         void OpenBackgroundForm()
         {
@@ -2451,7 +2440,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-#endregion
+        #endregion
 
         // 判断两个文件的版本号是否一致
         static bool VersionChanged(string filename1, string filename2)
@@ -2616,10 +2605,20 @@ MessageBoxDefaultButton.Button1);
         {
             if (_initialPropertiesComplete)
                 return true;
+            await Task.Factory.StartNew(
+                () =>
+                {
+                    InitialProperties(false, false);
+                },
+this._cancel.Token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+            /*
             await Task.Run(() =>
             {
                 InitialProperties(false, false);
             });
+            */
             if (_initialPropertiesComplete)
                 return true;
             return false;
@@ -2629,10 +2628,20 @@ MessageBoxDefaultButton.Button1);
         // 重新从 dp2library 服务器装载各种属性参数
         public void BeginRefreshProperties()
         {
+            _ = Task.Factory.StartNew(
+                () =>
+                {
+                    InitialProperties(false, false);
+                },
+this._cancel.Token,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+            /*
             _ = Task.Run(() =>
             {
                 InitialProperties(false, false);
             });
+            */
         }
 
         // 初始化各种参数
@@ -2644,7 +2653,10 @@ MessageBoxDefaultButton.Button1);
             if (bFullInitial == true)
             {
                 EnableControls(false);
-                this.MdiClient.Enabled = false;
+                TryInvoke(() =>
+                {
+                    this.MdiClient.Enabled = false;
+                });
             }
 
             var looping = Looping(null);
@@ -2694,7 +2706,7 @@ MessageBoxDefaultButton.Button1);
                                 // Server 2003.  XP 64-bit will also fall in here.
                             }
 #endif
-                            MessageBox.Show(this, "dp2Circulation 不支持 Windows XP / Windows Server 2003 操作系统版本。请在 Windows Vista 及以上版本安装运行");
+                            MessageBoxShow("dp2Circulation 不支持 Windows XP / Windows Server 2003 操作系统版本。请在 Windows Vista 及以上版本安装运行");
                             if (Control.ModifierKeys != Keys.Control)
                             {
                                 // Application.Exit();
@@ -2707,37 +2719,46 @@ MessageBoxDefaultButton.Button1);
                             // Vista on up
                         }
 
-                        FirstRunDialog first_dialog = new FirstRunDialog();
-                        MainForm.SetControlFont(first_dialog, this.DefaultFont);
-                        // first_dialog.MainForm = this;
-                        first_dialog.StartPosition = FormStartPosition.CenterScreen;
-                        if (first_dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
+                        var ret = (bool)this.Invoke((Func<bool>)(() =>
                         {
-                            // Application.Exit();
-                            Program.PromptAndExit(null, "取消首次设置");
-                            return false;
-                        }
-                        bFirstDialog = true;
+                            using (FirstRunDialog first_dialog = new FirstRunDialog())
+                            {
+                                MainForm.SetControlFont(first_dialog, this.DefaultFont);
+                                // first_dialog.MainForm = this;
+                                first_dialog.StartPosition = FormStartPosition.CenterScreen;
+                                if (first_dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
+                                {
+                                    // Application.Exit();
+                                    Program.PromptAndExit(null, "取消首次设置");
+                                    return false;
+                                }
+                                bFirstDialog = true;
 
-                        // 首次写入 运行模式 信息
-                        this.AppInfo.SetString("main_form", "last_mode", first_dialog.Mode);
-                        if (first_dialog.Mode == "test")
-                        {
-                            this.AppInfo.SetString("sn", "sn", "test");
-                            this.AppInfo.Save();
-                        }
-                        else if (first_dialog.Mode == "community")
-                        {
-                            this.AppInfo.SetString("sn", "sn", "community");
-                            this.AppInfo.Save();
-                        }
+                                // 首次写入 运行模式 信息
+                                this.AppInfo.SetString("main_form", "last_mode", first_dialog.Mode);
+                                if (first_dialog.Mode == "test")
+                                {
+                                    this.AppInfo.SetString("sn", "sn", "test");
+                                    this.AppInfo.Save();
+                                }
+                                else if (first_dialog.Mode == "community")
+                                {
+                                    this.AppInfo.SetString("sn", "sn", "community");
+                                    this.AppInfo.Save();
+                                }
+
+                                return true;
+                            }
+                        }));
+                        if (ret == false)
+                            return false;
                     }
                     else
                     {
                         // 以前已经安装的情况
                         if (Environment.OSVersion.Version.Major == 5)
                         {
-                            MessageBox.Show(this, "尊敬的用户，dp2Circulation 在 2015 年 12 月 31 日以后将不再支持 Windows XP / Windows Server 2003 操作系统版本。请尽快升级您的 Windows 操作系统到 Vista 及以上版本。祝工作顺利。\r\n\r\n数字平台敬上");
+                            MessageBoxShow("尊敬的用户，dp2Circulation 在 2015 年 12 月 31 日以后将不再支持 Windows XP / Windows Server 2003 操作系统版本。请尽快升级您的 Windows 操作系统到 Vista 及以上版本。祝工作顺利。\r\n\r\n数字平台敬上");
                         }
                     }
 #if NO
@@ -2759,6 +2780,7 @@ MessageBoxDefaultButton.Button1);
 #endif
 
 #if SN
+                    TryInvoke(() =>
                     {
                         _verified = false;
                         // return:
@@ -2768,8 +2790,7 @@ MessageBoxDefaultButton.Button1);
                         nRet = this.VerifySerialCode("", false, out strError);
                         if (nRet == 1)
                             _verified = true;
-
-                    }
+                    });
 #else
                     this.MenuItem_resetSerialCode.Visible = false;
 #endif
@@ -2782,13 +2803,16 @@ MessageBoxDefaultButton.Button1);
                         && bFirstDialog == false   // 首次运行的对话框出现后，登录对话框就不必出现了
                         && PrintLabelMode == false)
                     {
-                        SetDefaultAccount(
-                            null,
-                            "登录", // "指定缺省帐户",
-                            "首次登录", // "请指定后面操作中即将用到的缺省帐户信息。",
-                            LoginFailCondition.None,
-                            this,
-                            false);
+                        TryInvoke(() =>
+                        {
+                            SetDefaultAccount(
+                                null,
+                                "登录", // "指定缺省帐户",
+                                "首次登录", // "请指定后面操作中即将用到的缺省帐户信息。",
+                                LoginFailCondition.None,
+                                this,
+                                false);
+                        });
                     }
                     else if (PrintLabelMode == false)
                     {
@@ -2836,7 +2860,7 @@ AppInfo.GetString("config",
                             if (nRet == -2)
                             {
                                 if (string.IsNullOrEmpty(strError) == false)
-                                    MessageBox.Show(this, strError);
+                                    MessageBoxShow(strError);
                                 // Application.Exit();
                                 Program.PromptAndExit(null,
                                     string.IsNullOrEmpty(strError) == false ? strError : "CheckVersion Fail...");
@@ -2844,11 +2868,11 @@ AppInfo.GetString("config",
                             }
                             if (nRet == -1)
                             {
-                                MessageBox.Show(this, strError);
+                                MessageBoxShow(strError);
                                 goto END1;
                             }
                             if (nRet == 0)
-                                MessageBox.Show(this, strError);
+                                MessageBoxShow(strError);
                         }
 
                         // 获得各种类型的数据库的检索途径
@@ -2944,7 +2968,7 @@ AppInfo.GetString("config",
                         //      1   本地时钟和服务器时钟偏差过大，超过10分钟 strError中有报错信息
                         nRet = CheckServerClock(false, out strError);
                         if (nRet != 0)
-                            MessageBox.Show(this, strError);
+                            MessageBoxShow(strError);
 
                         // 2022/3/10
                         ClearValueTableCache();
@@ -3056,7 +3080,7 @@ Culture=neutral, PublicKeyToken=null
                     false,
                     out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                    MessageBoxShow(strError);
 
                 looping.Progress.SetMessage("");
 #if NO
@@ -3069,11 +3093,13 @@ Culture=neutral, PublicKeyToken=null
 
                 // 2013/12/4
                 if (InitialClientScript(out strError) == -1)
-                    MessageBox.Show(this, strError);
+                    MessageBoxShow(strError);
 
                 // 初始化历史对象，包括C#脚本
                 if (this.OperHistory == null)
                 {
+                    looping.Progress.SetMessage("正在初始化操作历史面板 ...");
+                    
                     this.OperHistory = new OperHistory();
                     nRet = this.OperHistory.Initial(// this,
                         this.webBrowser_history,
@@ -3081,7 +3107,7 @@ Culture=neutral, PublicKeyToken=null
                     if (nRet == -1)
                     {
                         this.ReportError("dp2circulation 创建 OperHistory 时出错", strError);
-                        MessageBox.Show(this, "初始化 OperHistory 时出错: " + strError);
+                        MessageBoxShow("初始化 OperHistory 时出错: " + strError);
                     }
                     // this.timer_operHistory.Start();
                 }
@@ -3127,7 +3153,10 @@ Culture=neutral, PublicKeyToken=null
                 // 然后许可界面
                 if (bFullInitial == true)
                 {
-                    this.MdiClient.Enabled = true;
+                    TryInvoke(() =>
+                    {
+                        this.MdiClient.Enabled = true;
+                    });
                     EnableControls(true);
                 }
 
@@ -3148,10 +3177,13 @@ Culture=neutral, PublicKeyToken=null
 
             if (bRestoreLastOpenedWindow == true)
             {
-                if (PrintLabelMode)
-                    OpenWindow<LabelPrintForm>();
-                else
-                    RestoreLastOpenedMdiWindow();
+                TryInvoke(() =>
+                {
+                    if (PrintLabelMode)
+                        OpenWindow<LabelPrintForm>();
+                    else
+                        RestoreLastOpenedMdiWindow();
+                });
             }
 
             if (bFullInitial == true)
@@ -3226,6 +3258,11 @@ Culture=neutral, PublicKeyToken=null
 
             return 0;
         ERROR1:
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -3238,6 +3275,7 @@ Culture=neutral, PublicKeyToken=null
                 return 1;   // 出错，但希望继续后面的操作
 
             return -1;  // 出错，不希望继续以后的操作
+            */
         }
 
         string _serverVersion = "0.0";
@@ -3653,6 +3691,11 @@ Culture=neutral, PublicKeyToken=null
         ERROR1:
             if (this.Visible == false || this.IsDisposed)
                 return -1;
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -3665,6 +3708,7 @@ Culture=neutral, PublicKeyToken=null
                 return 1;   // 出错，但希望继续后面的操作
 
             return -1;  // 出错，不希望继续以后的操作
+            */
         }
 
         // TODO: 代码中 stream 的用法比较含混，建议修改为 using 包围的方式
@@ -3983,6 +4027,11 @@ Culture=neutral, PublicKeyToken=null
 
             return 0;
         ERROR1:
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -3995,6 +4044,7 @@ Culture=neutral, PublicKeyToken=null
                 return 1;   // 出错，但希望继续后面的操作
 
             return -1;  // 出错，不希望继续以后的操作
+            */
         }
 
         // 
@@ -4097,6 +4147,11 @@ Culture=neutral, PublicKeyToken=null
 
             return 0;
         ERROR1:
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -4109,6 +4164,7 @@ Culture=neutral, PublicKeyToken=null
                 return 1;   // 出错，但希望继续后面的操作
 
             return -1;  // 出错，不希望继续以后的操作
+            */
         }
 
         // 
@@ -4464,6 +4520,11 @@ Culture=neutral, PublicKeyToken=null
 
             return 0;
         ERROR1:
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -4476,6 +4537,7 @@ Culture=neutral, PublicKeyToken=null
                 return 1;   // 出错，但希望继续后面的操作
 
             return -1;  // 出错，不希望继续以后的操作
+            */
         }
 
 #if NO
@@ -4602,6 +4664,11 @@ Culture=neutral, PublicKeyToken=null
 
             return 0;
         ERROR1:
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -4610,6 +4677,30 @@ Culture=neutral, PublicKeyToken=null
                 MessageBoxDefaultButton.Button1);
             if (result == System.Windows.Forms.DialogResult.Yes)
                 goto REDO;
+            if (result == DialogResult.No)
+                return 1;   // 出错，但希望继续后面的操作
+
+            return -1;  // 出错，不希望继续以后的操作
+            */
+        }
+
+        // return:
+        //      0   希望 retry
+        //      1   希望返回后继续
+        //      -1  希望返回后中断处理
+        int AskRetry(string strError)
+        {
+            DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+            {
+                return MessageBox.Show(this,
+                strError + "\r\n\r\n是否重试?",
+                "dp2Circulation",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+            }));
+            if (result == System.Windows.Forms.DialogResult.Yes)
+                return 0;
             if (result == DialogResult.No)
                 return 1;   // 出错，但希望继续后面的操作
 
@@ -4939,6 +5030,11 @@ Culture=neutral, PublicKeyToken=null
             }
             return 0;
         ERROR1:
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -4951,6 +5047,7 @@ Culture=neutral, PublicKeyToken=null
                 return 1;   // 出错，但希望继续后面的操作
 
             return -1;  // 出错，不希望继续以后的操作
+            */
         }
 
         // 
@@ -5037,6 +5134,11 @@ Culture=neutral, PublicKeyToken=null
 
             return 0;
         ERROR1:
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",
@@ -5049,6 +5151,7 @@ Culture=neutral, PublicKeyToken=null
                 return 1;   // 出错，但希望继续后面的操作
 
             return -1;  // 出错，不希望继续以后的操作
+            */
         }
 
         // 
@@ -5273,6 +5376,11 @@ out strError);
                 */
             }
         ERROR1:
+            var ret = AskRetry(strError);
+            if (ret == 0)
+                goto REDO;
+            return ret;
+            /*
             DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
             {
                 return MessageBox.Show(this,
@@ -5288,6 +5396,7 @@ out strError);
                 return 1;   // 出错，但希望继续后面的操作
 
             return -1;  // 出错，不希望继续以后的操作
+            */
         }
 
 

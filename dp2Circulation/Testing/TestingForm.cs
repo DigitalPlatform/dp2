@@ -50,16 +50,9 @@ namespace dp2Circulation
 
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.menuStrip1.Enabled = bEnable;
-            }));
+            this.menuStrip1.Enabled = bEnable;
         }
 
         // CancellationTokenSource _cancel = new CancellationTokenSource();
@@ -307,7 +300,7 @@ UiTest3(strBiblioDbName)
                 this.ReturnChannel(channel);
                 */
             }
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }
@@ -338,7 +331,7 @@ UiTest3(strBiblioDbName)
                 if (nRet == -1)
                     goto END1;
                 return;
-                END1:
+            END1:
                 return;
             }
             ));
@@ -880,7 +873,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 this.ReturnChannel(channel);
                 */
             }
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }
@@ -1883,7 +1876,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             else
                 MessageBox.Show(this, "没有编译任何方案");
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1916,7 +1909,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     nCompileCount++;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 return -1;
@@ -2174,7 +2167,7 @@ strTestDbName,
                 this.ReturnChannel(channel);
                 */
             }
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }
@@ -2766,7 +2759,7 @@ out strError);
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 结束日志和恢复的测试</div>");
             }
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.DisplayError(strError);
             this.ShowMessage(strError, "red", true);
@@ -2963,7 +2956,7 @@ out strError);
             if (string.IsNullOrEmpty(strSubType) == true)
                 strSubType = "";    // 完全可能创建没有任何下级数据库的书目库
 
-            DisplayTitle(stop,"=== 创建一个 " + strType + " 类型的数据库 ===");
+            DisplayTitle(stop, "=== 创建一个 " + strType + " 类型的数据库 ===");
 
             string strSingleDbName = "test_" + strType;
 
@@ -2998,7 +2991,7 @@ out strError);
                     if (strSingleDbName == strOldDbName
                         && String.IsNullOrEmpty(strSingleDbName) == false)
                     {
-                        DisplayTitle(stop,"因当前已经存在的同类数据库名正好和测试用临时文件名重复，所以改为不用保护它");
+                        DisplayTitle(stop, "因当前已经存在的同类数据库名正好和测试用临时文件名重复，所以改为不用保护它");
 
                         /*
                         DisplayTitle("拟用于测试的数据库名已经存在，需要删除残留的数据库 '" + strSingleDbName + "'");
@@ -3025,12 +3018,12 @@ out strError);
                 }
             }
             else
-                DisplayTitle(stop,"不保护以前的同类数据库。因为此类数据库是可以重复创建的");
+                DisplayTitle(stop, "不保护以前的同类数据库。因为此类数据库是可以重复创建的");
 
             {
                 // 删除遗留的临时库
                 {
-                    DisplayTitle(stop,"尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
+                    DisplayTitle(stop, "尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
 
                     lRet = channel.ManageDatabase(
                         stop,
@@ -3052,7 +3045,7 @@ out strError);
 
             if (string.IsNullOrEmpty(strOldDbName) == false)
             {
-                DisplayTitle(stop,"保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
+                DisplayTitle(stop, "保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
 
                 // 修改一个简单库
                 // parameters:
@@ -3146,7 +3139,7 @@ out strError);
                     if (strType == "biblio")
                     {
                         // TODO: 图书/连续出版物 MARC格式 都应该组合探索
-                        DisplayTitle(stop,"创建关键日志动作：创建数据库 '" + strSingleDbName + "' usage=" + strUsage + " syntax=" + strSyntax + " subtype=" + strSubType + "。创建动作带有校验功能");
+                        DisplayTitle(stop, "创建关键日志动作：创建数据库 '" + strSingleDbName + "' usage=" + strUsage + " syntax=" + strSyntax + " subtype=" + strSubType + "。创建动作带有校验功能");
                         // 创建一个书目库
                         // parameters:
                         // return:
@@ -3169,7 +3162,7 @@ out strError);
                     }
                     else if (strType == "reader")
                     {
-                        DisplayTitle(stop,"创建关键日志动作：创建数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
+                        DisplayTitle(stop, "创建关键日志动作：创建数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
                         nRet = ManageHelper.CreateReaderDatabase(channel,
             stop,
             strSingleDbName,
@@ -3183,7 +3176,7 @@ out strError);
                     }
                     else
                     {
-                        DisplayTitle(stop,"创建关键日志动作：创建数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
+                        DisplayTitle(stop, "创建关键日志动作：创建数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
                         nRet = ManageHelper.CreateSimpleDatabase(
         channel,
         stop,
@@ -3202,7 +3195,7 @@ out strError);
 
                 // TODO: 此处即可进行一次验证
                 {
-                    DisplayTitle(stop,"验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
+                    DisplayTitle(stop, "验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
 
                     // 验证数据库操作的结果状态
                     nRet = VerifyDatabaseState(stop,
@@ -3234,7 +3227,7 @@ out strError);
 
                 // *** 恢复测试
                 // 从指定偏移位置启动 dp2library 日志恢复后台任务
-                DisplayTitle(stop,"启动 日志恢复 dp2library后台任务");
+                DisplayTitle(stop, "启动 日志恢复 dp2library后台任务");
                 string strTaskName = "日志恢复";
                 nRet = StartBatchTask(
                     stop,
@@ -3246,7 +3239,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                DisplayTitle(stop,"等待后台任务结束 ...");
+                DisplayTitle(stop, "等待后台任务结束 ...");
                 // 等待，直到 dp2library 后台任务结束
                 string strErrorInfo = "";
                 nRet = WaitBatchTaskFinish(
@@ -3265,7 +3258,7 @@ out strError);
 
                 // 验证恢复情况
                 {
-                    DisplayTitle(stop,"验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
+                    DisplayTitle(stop, "验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
 
                     // 验证数据库操作的结果状态
                     nRet = VerifyDatabaseState(stop,
@@ -3298,7 +3291,7 @@ out strError);
                 // 清除残留信息
                 {
                     // 删除测试用的书目库
-                    DisplayTitle(stop,"正在删除测试用的" + strType + "库 '" + strSingleDbName + "'");
+                    DisplayTitle(stop, "正在删除测试用的" + strType + "库 '" + strSingleDbName + "'");
                     lRet = channel.ManageDatabase(
                         stop,
         "delete",
@@ -3322,7 +3315,7 @@ out strError);
                 {
                     Debug.Assert(string.IsNullOrEmpty(strDetachOldDbName) == false, "");
 
-                    DisplayTitle(stop,"(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
+                    DisplayTitle(stop, "(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
                     string strError1 = "";
                     // 修改一个简单库
                     // parameters:
@@ -3349,7 +3342,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3615,13 +3608,13 @@ out strError);
             strError = "";
             int nRet = 0;
 
-            DisplayTitle(stop,"=== 删除一个书目库 ===");
+            DisplayTitle(stop, "=== 删除一个书目库 ===");
 
             string strBiblioDbName = "_测试用中文图书";
 
             // *** 预先准备阶段
             // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-            DisplayTitle(stop,"正在尝试删除以前残留的测试用书目库 ...");
+            DisplayTitle(stop, "正在尝试删除以前残留的测试用书目库 ...");
             long lRet = channel.ManageDatabase(
                 stop,
 "delete",
@@ -3654,7 +3647,7 @@ out strError);
 
             // 创建一个书目库，以便后面进行删除操作
             {
-                DisplayTitle(stop,"创建一个书目库 '" + strBiblioDbName + "'，以前后面能模拟出测试动作(删除) " + strStyleCaption);
+                DisplayTitle(stop, "创建一个书目库 '" + strBiblioDbName + "'，以前后面能模拟出测试动作(删除) " + strStyleCaption);
 
                 // 创建一个书目库
                 // parameters:
@@ -3704,7 +3697,7 @@ out strError);
 
             // 进行删除操作，并记入日志
             {
-                DisplayTitle(stop,"创建关键日志动作：删除数据库 '" + strBiblioDbName + "'。创建动作带有校验功能");
+                DisplayTitle(stop, "创建关键日志动作：删除数据库 '" + strBiblioDbName + "'。创建动作带有校验功能");
 
                 lRet = channel.ManageDatabase(
                     stop,
@@ -3724,7 +3717,7 @@ out strError);
             }
             else
             {
-                DisplayTitle(stop,"准备进行恢复模拟。先创建临时书目库 '" + strBiblioDbName + "' 以作为恢复的准备条件 " + strStyleCaption);
+                DisplayTitle(stop, "准备进行恢复模拟。先创建临时书目库 '" + strBiblioDbName + "' 以作为恢复的准备条件 " + strStyleCaption);
 
                 // 创建书目库，以便在恢复操作前的环境中，先具有这个数据库
                 // 创建一个书目库
@@ -3779,7 +3772,7 @@ out strError);
 
             // 验证删除情况
             {
-                DisplayTitle(stop,"验证数据库 '" + strBiblioDbName + "' 是否确实被删除");
+                DisplayTitle(stop, "验证数据库 '" + strBiblioDbName + "' 是否确实被删除");
 
                 // 验证数据库操作的结果状态
                 nRet = VerifyDatabaseState(stop,
@@ -3807,7 +3800,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -3873,7 +3866,7 @@ out strError);
             int nRet = 0;
             long lRet = 0;
 
-            DisplayTitle(stop,"=== 删除一个简单库 ===");
+            DisplayTitle(stop, "=== 删除一个简单库 ===");
 
             bool bProtect = !StringUtil.IsInList("dont_protect", strStyle);
 
@@ -3886,7 +3879,7 @@ out strError);
 
             string strSingleDbName = "test_" + strType;
 
-            DisplayTitle(stop,"数据库类型 '" + strType + "', 用于测试的数据库名为 '" + strSingleDbName + "'");
+            DisplayTitle(stop, "数据库类型 '" + strType + "', 用于测试的数据库名为 '" + strSingleDbName + "'");
 
             // *** 预先准备阶段
             // 如果测试用的书目库以前就存在，要先保护起来
@@ -3920,7 +3913,7 @@ out strError);
                     if (strSingleDbName == strOldDbName
                         && String.IsNullOrEmpty(strSingleDbName) == false)
                     {
-                        DisplayTitle(stop,"拟用于测试的数据库名已经存在，需要删除残留的数据库 '" + strSingleDbName + "'");
+                        DisplayTitle(stop, "拟用于测试的数据库名已经存在，需要删除残留的数据库 '" + strSingleDbName + "'");
 
                         string strOutputInfo = "";
                         lRet = channel.ManageDatabase(
@@ -3946,10 +3939,10 @@ out strError);
             }
             else
             {
-                DisplayTitle(stop,"不保护以前的同类数据库。因为此类数据库是可以重复创建的");
+                DisplayTitle(stop, "不保护以前的同类数据库。因为此类数据库是可以重复创建的");
                 // 删除遗留的临时库
                 {
-                    DisplayTitle(stop,"尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
+                    DisplayTitle(stop, "尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
 
                     string strOutputInfo = "";
                     lRet = channel.ManageDatabase(
@@ -3972,7 +3965,7 @@ out strError);
 
             if (string.IsNullOrEmpty(strOldDbName) == false)
             {
-                DisplayTitle(stop,"保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
+                DisplayTitle(stop, "保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
 
                 // 修改一个简单库
                 // parameters:
@@ -4000,7 +3993,7 @@ out strError);
 
                 // 创建一个简单库，以便后面进行删除操作
                 {
-                    DisplayTitle(stop,"创建一个临时的简单库 '" + strSingleDbName + "'，以前后面能模拟出测试动作(删除)");
+                    DisplayTitle(stop, "创建一个临时的简单库 '" + strSingleDbName + "'，以前后面能模拟出测试动作(删除)");
 
                     stop?.SetMessage("正在创建测试用简单库 ...");
                     // 创建一个书目库
@@ -4047,7 +4040,7 @@ out strError);
 
                 // 进行删除操作，并记入日志
                 {
-                    DisplayTitle(stop,"创建关键日志动作：删除数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
+                    DisplayTitle(stop, "创建关键日志动作：删除数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
 
                     lRet = channel.ManageDatabase(
                         stop,
@@ -4067,7 +4060,7 @@ out strError);
                 }
                 else
                 {
-                    DisplayTitle(stop,"准备进行恢复模拟。先创建临时数据库 '" + strSingleDbName + "' 以作为恢复的准备条件");
+                    DisplayTitle(stop, "准备进行恢复模拟。先创建临时数据库 '" + strSingleDbName + "' 以作为恢复的准备条件");
                     // 创建简单库，以便在恢复操作前的环境中，先具有这个数据库
                     // parameters:
                     // return:
@@ -4085,7 +4078,7 @@ out strError);
                         goto ERROR1;
                 }
 
-                DisplayTitle(stop,"启动 日志恢复 dp2library后台任务");
+                DisplayTitle(stop, "启动 日志恢复 dp2library后台任务");
                 // *** 恢复测试
                 // 从指定偏移位置启动 dp2library 日志恢复后台任务
                 string strTaskName = "日志恢复";
@@ -4099,7 +4092,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                DisplayTitle(stop,"等待后台任务结束 ...");
+                DisplayTitle(stop, "等待后台任务结束 ...");
                 // 等待，直到 dp2library 后台任务结束
                 string strErrorInfo = "";
                 nRet = WaitBatchTaskFinish(
@@ -4118,7 +4111,7 @@ out strError);
 
                 // 验证删除情况
                 {
-                    DisplayTitle(stop,"验证数据库 '" + strSingleDbName + "' 是否确实被删除");
+                    DisplayTitle(stop, "验证数据库 '" + strSingleDbName + "' 是否确实被删除");
 
                     // 验证数据库操作的结果状态
                     nRet = VerifyDatabaseState(stop,
@@ -4154,7 +4147,7 @@ out strError);
                 {
                     Debug.Assert(string.IsNullOrEmpty(strDetachOldDbName) == false, "");
 
-                    DisplayTitle(stop,"(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
+                    DisplayTitle(stop, "(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
                     string strError1 = "";
                     // 修改一个简单库
                     // parameters:
@@ -4181,7 +4174,7 @@ out strError);
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -4587,7 +4580,7 @@ out strError);
                 */
             }
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4744,7 +4737,7 @@ out strError);
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行测试 " + dlg.FileName + "</div>");
             }
 
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4955,7 +4948,7 @@ out strError);
                 this.ReturnChannel(channel);
                 */
             }
-            ERROR1:
+        ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }

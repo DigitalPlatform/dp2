@@ -278,19 +278,19 @@ namespace dp2Circulation
             switch (m.Msg)
             {
                 case WM_LOAD_OLD_USERINFO:
-                        if (this.m_webExternalHost_old.CanCallNew(
-                            this.commander,
-                            m.Msg) == true)
-                        {
-                            string strReaderBarcode = this.textBox_oldBarcode.Text;
-                            this.LoadRecord(ref strReaderBarcode,
-                                this.readerEditControl_old,
-                                this.m_webExternalHost_old,
-                                // this.webBrowser_oldReaderInfo,
-                                this.webBrowser_oldXml);
-                            if (this.textBox_oldBarcode.Text != strReaderBarcode)
-                                this.textBox_oldBarcode.Text = strReaderBarcode;
-                        }
+                    if (this.m_webExternalHost_old.CanCallNew(
+                        this.commander,
+                        m.Msg) == true)
+                    {
+                        string strReaderBarcode = this.textBox_oldBarcode.Text;
+                        this.LoadRecord(ref strReaderBarcode,
+                            this.readerEditControl_old,
+                            this.m_webExternalHost_old,
+                            // this.webBrowser_oldReaderInfo,
+                            this.webBrowser_oldXml);
+                        if (this.textBox_oldBarcode.Text != strReaderBarcode)
+                            this.textBox_oldBarcode.Text = strReaderBarcode;
+                    }
                     return;
                 case WM_LOAD_NEW_USERINFO:
                     if (this.m_webExternalHost_new.CanCallNew(
@@ -535,29 +535,22 @@ MessageBoxDefaultButton.Button2);
             return -1;
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.textBox_oldBarcode.Enabled = bEnable;
-                this.textBox_newBarcode.Enabled = bEnable;
+            this.textBox_oldBarcode.Enabled = bEnable;
+            this.textBox_newBarcode.Enabled = bEnable;
 
-                this.tabControl_old.Enabled = bEnable;
-                this.tabControl_new.Enabled = bEnable;
+            this.tabControl_old.Enabled = bEnable;
+            this.tabControl_new.Enabled = bEnable;
 
-                this.button_loadOldUserInfo.Enabled = bEnable;
-                this.button_loadNewUserInfo.Enabled = bEnable;
+            this.button_loadOldUserInfo.Enabled = bEnable;
+            this.button_loadNewUserInfo.Enabled = bEnable;
 
-                this.button_devolve.Enabled = bEnable;
-                this.button_activate.Enabled = bEnable;
+            this.button_devolve.Enabled = bEnable;
+            this.button_activate.Enabled = bEnable;
 
-                this.toolStrip_new.Enabled = bEnable;
-                this.toolStrip_old.Enabled = bEnable;
-            }));
+            this.toolStrip_new.Enabled = bEnable;
+            this.toolStrip_old.Enabled = bEnable;
         }
 
         // 转移并激活目标证

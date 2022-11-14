@@ -479,7 +479,9 @@ namespace dp2Manager
                     "mainformstate");
             }
 
-            stopManager.Initial(toolBarButton_stop,
+            stopManager.Initial(
+                this,
+                toolBarButton_stop,
                 this.toolStripStatusLabel_main,
                 this.toolStripProgressBar_main);
             stop = new DigitalPlatform.Stop();

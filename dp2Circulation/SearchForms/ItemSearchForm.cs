@@ -28,6 +28,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
+using DocumentFormat.OpenXml.Math;
 
 
 // 2013/3/16 添加 XML 注释
@@ -902,13 +903,17 @@ namespace dp2Circulation
     ItemQueryParam input_query,
     bool bClearList = true)
         {
-            return Task.Run(() =>
-            {
-                return DoSearch(bOutputKeyCount,
-bOutputKeyID,
-input_query,
-bClearList);
-            });
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    return DoSearch(bOutputKeyCount,
+            bOutputKeyID,
+            input_query,
+            bClearList);
+                },
+                default,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
         }
 
         /// <summary>
@@ -965,6 +970,7 @@ bClearList);
 
             this.LabelMessageText = "";
 
+#if REMOVED
             /*
             if (_stop.IsInLoop == true)
             {
@@ -977,6 +983,7 @@ bClearList);
                 strError = "有长操作正在进行，请先停止长操作后再进行检索";
                 goto ERROR1;
             }
+#endif
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
     + " 开始进行检索</div>");
@@ -1562,7 +1569,7 @@ bClearList);
                 int i = 0;
                 long temp = skip_count;
                 // TODO: 如何让击键或者鼠标动作能得到立即反馈？
-                this.Invoke((Action)(() =>
+                //this.Invoke((Action)(() =>
                 {
                     foreach (var searchresult in records)
                     {
@@ -1579,7 +1586,8 @@ bClearList);
                         // stop.SetProgressValue(lStart + i);
                         func_setProgress?.Invoke(i++);
                     }
-                }));
+                }
+                // ));
                 skip_count = temp;
 
                 if (param.bOutputKeyCount == false
@@ -1596,7 +1604,7 @@ bClearList);
                         param.channel,
                         items,
                         -1, // 0,
-                        // false,
+                            // false,
                         true,   // false,  // bAutoSearch
                         out strError);
                     if (nRet == -1)
@@ -1838,39 +1846,34 @@ out string strError);
         {
             if (this.m_nBiblioSummaryColumn > 0)
                 ListViewUtil.ChangeItemText(item, 1, strError);
-
-            item.BackColor = Color.DarkRed;
-            item.ForeColor = Color.White;
+            TryInvoke(() =>
+            {
+                item.BackColor = Color.DarkRed;
+                item.ForeColor = Color.White;
+            });
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
+            this.button_search.Enabled = bEnable;
+            this.comboBox_from.Enabled = bEnable;
+
+            // 2008/11/21 
+            this.comboBox_entityDbName.Enabled = bEnable;
+            this.comboBox_matchStyle.Enabled = bEnable;
+
+            this.toolStrip_search.Enabled = bEnable;
+
+            if (this.comboBox_matchStyle.Text == "空值")
             {
-                this.button_search.Enabled = bEnable;
-                this.comboBox_from.Enabled = bEnable;
+                this.tabComboBox_queryWord.Enabled = false;
+            }
+            else
+            {
+                this.tabComboBox_queryWord.Enabled = bEnable;
+            }
 
-                // 2008/11/21 
-                this.comboBox_entityDbName.Enabled = bEnable;
-                this.comboBox_matchStyle.Enabled = bEnable;
-
-                this.toolStrip_search.Enabled = bEnable;
-
-                if (this.comboBox_matchStyle.Text == "空值")
-                {
-                    this.tabComboBox_queryWord.Enabled = false;
-                }
-                else
-                {
-                    this.tabComboBox_queryWord.Enabled = bEnable;
-                }
-
-                this.dp2QueryControl1.Enabled = bEnable;
-            }));
+            this.dp2QueryControl1.Enabled = bEnable;
         }
 
         /*
@@ -8178,32 +8181,41 @@ out strError);
             // form.MainForm = Program.MainForm;
             form.Show();
 
-            int i = 0;
-            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            using (var looping = form.Looping(
+                "在新开的查询窗内检索 Key ...",
+                "disableControl"))
             {
-                ItemQueryParam query = (ItemQueryParam)item.Tag;
-                Debug.Assert(query != null, "");
+                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                int i = 0;
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (looping.Stopped)
+                        break;
 
-                ItemQueryParam input_query = new ItemQueryParam();
+                    ItemQueryParam query = (ItemQueryParam)item.Tag;
+                    Debug.Assert(query != null, "");
 
-                input_query.QueryWord = ListViewUtil.GetItemText(item, 1);
-                input_query.DbNames = query.DbNames;
-                input_query.From = query.From;
-                input_query.MatchStyle = "精确一致";
+                    ItemQueryParam input_query = new ItemQueryParam();
 
-                // 2015/1/17
-                if (string.IsNullOrEmpty(input_query.QueryWord) == true)
-                    input_query.MatchStyle = "空值";
-                else
+                    input_query.QueryWord = ListViewUtil.GetItemText(item, 1);
+                    input_query.DbNames = query.DbNames;
+                    input_query.From = query.From;
                     input_query.MatchStyle = "精确一致";
 
+                    // 2015/1/17
+                    if (string.IsNullOrEmpty(input_query.QueryWord) == true)
+                        input_query.MatchStyle = "空值";
+                    else
+                        input_query.MatchStyle = "精确一致";
 
-                // 检索命中记录(而不是key)
-                int nRet = await form.BeginSearch(false, false, input_query, i == 0 ? true : false);
-                if (nRet != 1)
-                    break;
+                    // 检索命中记录(而不是key)
+                    int nRet = await form.BeginSearch(false, false, input_query, i == 0 ? true : false);
+                    if (nRet != 1)
+                        break;
 
-                i++;
+                    i++;
+                    looping.Progress.SetProgressValue(i);
+                }
             }
         }
 
@@ -9966,11 +9978,11 @@ dlg.UiState);
             // 询问文件名
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "请指定要创建的册记录 XML 文件名";
+            dlg.Title = $"请指定要创建的{this.DbTypeCaption}记录 XML 文件名";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = true;
             dlg.FileName = this.ExportXmlFilename;
-            dlg.Filter = "册记录 XML 文件 (*.xml)|*.xml|All files (*.*)|*.*";
+            dlg.Filter = $"{this.DbTypeCaption}记录 XML 文件 (*.xml)|*.xml|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -9978,8 +9990,6 @@ dlg.UiState);
                 return;
 
             this.ExportXmlFilename = dlg.FileName;
-
-            int count = 0;
 
             // if (_stop.IsInLoop == true)
             if (HasLooping())
@@ -9993,13 +10003,14 @@ dlg.UiState);
             _stop.Initial("正在导出册记录 ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在导出册记录 ...");
+            var looping = BeginLoop(this.DoStop, $"正在导出{this.DbTypeCaption}记录 ...");
 
             LibraryChannel channel = this.GetChannel();
             var old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(10);
             try
             {
+                int count = 0;
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
@@ -10026,6 +10037,7 @@ this.m_biblioTable);
                     w.WriteStartElement("dprms", "collection", DpNs.dprms);
                     w.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
 
+                    looping.Progress.SetProgressRange(0, items.Count);
                     int i = 0;
                     foreach (LoaderItem item in loader)
                     {
@@ -10048,7 +10060,7 @@ this.m_biblioTable);
                         }
                         catch (Exception ex)
                         {
-                            strError = "(册记录被跳过)XML 装入 DOM 失败: " + ex.Message;
+                            strError = $"({this.DbTypeCaption}记录被跳过)XML 装入 DOM 失败: " + ex.Message;
                             // goto ERROR1;
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"{info.RecPath} {strError}") + "</div>");
                             goto CONTINUE;
@@ -10066,6 +10078,9 @@ this.m_biblioTable);
                     w.WriteEndElement();
                     w.WriteEndDocument();
                 }
+
+                Program.MainForm.StatusBarMessage = $"已成功导出 {count} 个{this.DbTypeCaption}记录到文件 " + this.ExportXmlFilename;
+                return;
             }
             finally
             {
@@ -10080,9 +10095,6 @@ this.m_biblioTable);
                 */
                 EndLoop(looping);
             }
-
-            Program.MainForm.StatusBarMessage = $"已成功导出 {count} 个册记录到文件 " + this.ExportXmlFilename;
-            return;
         ERROR1:
             ShowMessageBox(strError);
         }
@@ -11514,31 +11526,35 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
         void QueryToPanel(ItemQueryParam query,
             bool bClearList = true)
         {
-            Cursor oldCursor = this.Cursor;
-            this.Cursor = Cursors.WaitCursor;
-            try
+            this.TryInvoke(() =>
             {
-                this.tabComboBox_queryWord.Text = query.QueryWord;
-                this.comboBox_entityDbName.Text = query.DbNames;
-                this.comboBox_from.Text = query.From;
-                this.comboBox_matchStyle.Text = query.MatchStyle;
-
-                if (bClearList == true)
-                    this.ClearListViewItems();
-                this.listView_records.BeginUpdate();
-                for (int i = 0; i < query.Items.Count; i++)
+                Cursor oldCursor = this.Cursor;
+                this.Cursor = Cursors.WaitCursor;
+                try
                 {
-                    this.listView_records.Items.Add(query.Items[i]);
-                }
-                this.listView_records.EndUpdate();
+                    this.tabComboBox_queryWord.Text = query.QueryWord;
+                    this.comboBox_entityDbName.Text = query.DbNames;
+                    this.comboBox_from.Text = query.From;
+                    this.comboBox_matchStyle.Text = query.MatchStyle;
 
-                this.m_bFirstColumnIsKey = query.FirstColumnIsKey;
-                this.ClearListViewPropertyCache();
-            }
-            finally
-            {
-                this.Cursor = oldCursor;
-            }
+                    if (bClearList == true)
+                        this.ClearListViewItems();
+                    this.listView_records.BeginUpdate();
+                    for (int i = 0; i < query.Items.Count; i++)
+                    {
+                        this.listView_records.Items.Add(query.Items[i]);
+                    }
+                    this.listView_records.EndUpdate();
+
+                    this.m_bFirstColumnIsKey = query.FirstColumnIsKey;
+                    this.ClearListViewPropertyCache();
+                }
+                finally
+                {
+                    this.Cursor = oldCursor;
+
+                }
+            });
         }
 
         private void toolStripButton_prevQuery_Click(object sender, EventArgs e)

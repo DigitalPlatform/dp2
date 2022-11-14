@@ -67,6 +67,13 @@ namespace DigitalPlatform.LibraryServer
 
         public int PerTime = 60 * 60 * 1000;	// 1小时
 
+        public TimeSpan PerTimeSpan
+        {
+            get
+            {
+                return TimeSpan.FromMilliseconds(PerTime);
+            }
+        }
 #if NO
         internal List<string> _errors = new List<string>();
         public void AddError(string strText)
@@ -608,31 +615,39 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
+                var next_activate_time = this.NextActivateTime;
+                
                 BatchTaskInfo info = new BatchTaskInfo();
                 info.Name = this.Name;
                 if (this.m_bClosed == false)
+                {
                     info.State = "运行中";
+                    if (next_activate_time != DateTime.MinValue)
+                        info.State += "(休眠)";
+                }
                 else
                     info.State = "停止";
+
 
                 if (this.App.PauseBatchTask == true)
                     info.ProgressText = "[注意：全部批处理任务已经被暂停] " + this.ProgressText;
                 else
                     info.ProgressText = this.ProgressText;
 
-                byte[] baResultText = null;
-                long lOffset = 0;
-                long lTotalLength = 0;
+                // 2022/11/14
+                if (next_activate_time != DateTime.MinValue
+                    && string.IsNullOrEmpty(info.ProgressText))
+                    info.ProgressText = $"任务 {this.Name} 正在休眠，计划于 {next_activate_time} 醒来";
+
                 this.GetResultText(lResultStart,
                     nMaxResultBytes,
-                    out baResultText,
-                    out lOffset,
-                    out lTotalLength);
+                    out byte[] baResultText,
+                    out long lOffset,
+                    out long lTotalLength);
                 info.ResultText = baResultText;
                 info.ResultOffset = lOffset;
                 info.ResultTotalLength = lTotalLength;
                 info.ResultVersion = this.ProgressFileVersion;
-
                 return info;
             }
             finally
@@ -768,6 +783,29 @@ namespace DigitalPlatform.LibraryServer
             return;
         }
 
+        // 下一次激活的时间。如果为 MinValue，表示当前并不在等待激活状态
+        DateTime _nextActivateTime = DateTime.MinValue;
+
+        public DateTime NextActivateTime
+        {
+            get
+            {
+                return _nextActivateTime;
+            }
+        }
+
+        // 记忆下一次激活的时间
+        void MemoryNextActivateTime()
+        {
+            _nextActivateTime = DateTime.Now + this.PerTimeSpan;
+        }
+
+        void ClearNextActivateTime()
+        {
+            _nextActivateTime = DateTime.MinValue;
+        }
+
+
         // 工作线程
         public virtual void ThreadMain()
         {
@@ -783,7 +821,9 @@ namespace DigitalPlatform.LibraryServer
                     int index = 0;
                     try
                     {
+                        MemoryNextActivateTime();
                         index = WaitHandle.WaitAny(events, PerTime, false);
+                        ClearNextActivateTime();
                     }
                     catch (System.Threading.ThreadAbortException /*ex*/)
                     {

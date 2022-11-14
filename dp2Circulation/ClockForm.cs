@@ -346,7 +346,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 catch
                 {
-                    MessageBox.Show(this, "时间字符串 " +value+ "格式不合法" );
+                    MessageBox.Show(this, "时间字符串 " + value + "格式不合法");
                     return;
                 }
 
@@ -413,34 +413,27 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
+            if (this.checkBox_autoGetServerTime.Checked == false)
+                this.dateTimePicker1.Enabled = bEnable;
+            else
+                this.dateTimePicker1.Enabled = false;
+
+            this.button_get.Enabled = bEnable;
+
+            if (this.checkBox_autoGetServerTime.Checked == false)
             {
-                if (this.checkBox_autoGetServerTime.Checked == false)
-                    this.dateTimePicker1.Enabled = bEnable;
-                else
-                    this.dateTimePicker1.Enabled = false;
+                this.button_set.Enabled = bEnable;
+                this.button_reset.Enabled = bEnable;
+            }
+            else
+            {
+                this.button_set.Enabled = false;
+                this.button_reset.Enabled = false;
+            }
 
-                this.button_get.Enabled = bEnable;
-
-                if (this.checkBox_autoGetServerTime.Checked == false)
-                {
-                    this.button_set.Enabled = bEnable;
-                    this.button_reset.Enabled = bEnable;
-                }
-                else
-                {
-                    this.button_set.Enabled = false;
-                    this.button_reset.Enabled = false;
-                }
-
-                this.textBox_time.Enabled = bEnable;
-            }));
+            this.textBox_time.Enabled = bEnable;
         }
 
         private void timer1_Tick(object sender, EventArgs e)

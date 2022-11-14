@@ -127,7 +127,9 @@ namespace dp2Circulation
             }
 #endif
 
-            _stopManager.Initial(this.toolStripButton_stop,
+            _stopManager.Initial(
+                this,
+                this.toolStripButton_stop,
 (object)this.toolStripLabel_message,
 (object)null);
 

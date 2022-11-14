@@ -392,48 +392,47 @@ namespace dp2Circulation
             return -1;
         }
 
-        bool _processing = false;
+        // TODO: 建议改用 base._processing
+        bool _bProcessing = false;
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                _processing = !bEnable;
+            _bProcessing = !bEnable;
+            base.EnableControls(bEnable);
+        }
 
-                this.comboBox_quickSetFilenames.Enabled = bEnable;
+        public override void UpdateEnable(bool bEnable)
+        {
 
-                this.textBox_logFileName.Enabled = bEnable;
+            this.comboBox_quickSetFilenames.Enabled = bEnable;
 
-                this.button_loadFromSingleFile.Enabled = bEnable;
+            this.textBox_logFileName.Enabled = bEnable;
 
-                // 
-                if (String.IsNullOrEmpty(this.textBox_filenames.Text) == true)
-                    this.button_loadLogRecords.Enabled = false;
-                else
-                    this.button_loadLogRecords.Enabled = bEnable;
+            this.button_loadFromSingleFile.Enabled = bEnable;
 
-                this.button_loadFilenams.Enabled = bEnable;
+            // 
+            if (String.IsNullOrEmpty(this.textBox_filenames.Text) == true)
+                this.button_loadLogRecords.Enabled = false;
+            else
+                this.button_loadLogRecords.Enabled = bEnable;
 
-                this.textBox_filenames.Enabled = bEnable;
+            this.button_loadFilenams.Enabled = bEnable;
 
-                // this.splitContainer_logRecords.Enabled = bEnable;
+            this.textBox_filenames.Enabled = bEnable;
 
-                // repair
-                this.button_repair_findSourceFilename.Enabled = bEnable;
-                this.button_repair_findTargetFilename.Enabled = bEnable;
-                this.button_repair_repair.Enabled = bEnable;
+            // this.splitContainer_logRecords.Enabled = bEnable;
 
-                this.textBox_repair_sourceFilename.Enabled = bEnable;
-                this.textBox_repair_targetFilename.Enabled = bEnable;
+            // repair
+            this.button_repair_findSourceFilename.Enabled = bEnable;
+            this.button_repair_findTargetFilename.Enabled = bEnable;
+            this.button_repair_repair.Enabled = bEnable;
 
-                this.textBox_repair_verifyFolderName.Enabled = bEnable;
-                this.button_repair_findVerifyFolderName.Enabled = bEnable;
-                this.button_repair_verify.Enabled = bEnable;
-            }));
+            this.textBox_repair_sourceFilename.Enabled = bEnable;
+            this.textBox_repair_targetFilename.Enabled = bEnable;
+
+            this.textBox_repair_verifyFolderName.Enabled = bEnable;
+            this.button_repair_findVerifyFolderName.Enabled = bEnable;
+            this.button_repair_verify.Enabled = bEnable;
         }
 
         #region HTML 解释日志记录
@@ -5681,14 +5680,14 @@ FileShare.ReadWrite))
             menuItem = new MenuItem("筛选(&I) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_filter_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("智能筛选(&S) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_script_filter_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5707,14 +5706,14 @@ FileShare.ReadWrite))
             menuItem = new MenuItem("导出到 XML 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportXml_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("导出附件(&A) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportAttachment_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5722,21 +5721,21 @@ FileShare.ReadWrite))
             menuItem = new MenuItem("导出 amerce 操作信息到 Excel 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportAmerceExcel_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("导出 RFID 标签写入 操作信息到 Excel 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportRfidWriteExcel_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("导出原始册记录到 XML 文件(&I) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportOriginEntityToXml_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5748,14 +5747,14 @@ FileShare.ReadWrite))
             menuItem = new MenuItem("打印解释内容(&P) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_printHtml_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("补做 SetBiblioInfo-move (&M) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_redoSetBiblioInfoMove_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5766,7 +5765,7 @@ FileShare.ReadWrite))
             menuItem = new MenuItem("移除(&R) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_removeLines_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this._processing == true)
+                || this._bProcessing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 

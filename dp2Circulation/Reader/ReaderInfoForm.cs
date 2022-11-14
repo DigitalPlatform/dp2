@@ -1221,58 +1221,26 @@ Program.MainForm.DataDir,
             // Debug.WriteLine("DeActivated");
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
+            // this.textBox_readerBarcode.Enabled = bEnable;
+            // this.button_load.Enabled = bEnable;
+            this.toolStrip_load.Enabled = bEnable;
+
+            this.readerEditControl1.Enabled = bEnable;
+
+            if (bEnable == false)
+                this.toolStripSplitButton_delete.Enabled = bEnable;
+            else
             {
-                // this.textBox_readerBarcode.Enabled = bEnable;
-                // this.button_load.Enabled = bEnable;
-                this.toolStrip_load.Enabled = bEnable;
-
-                this.readerEditControl1.Enabled = bEnable;
-
-                if (bEnable == false)
-                    this.toolStripSplitButton_delete.Enabled = bEnable;
+                if (string.IsNullOrEmpty(this.readerEditControl1.RecPath) == false)
+                    this.toolStripSplitButton_delete.Enabled = true;  // 只有具备明确的路径的记录，才能被删除
                 else
-                {
-                    if (string.IsNullOrEmpty(this.readerEditControl1.RecPath) == false)
-                        this.toolStripSplitButton_delete.Enabled = true;  // 只有具备明确的路径的记录，才能被删除
-                    else
-                        this.toolStripSplitButton_delete.Enabled = false;
-                }
+                    this.toolStripSplitButton_delete.Enabled = false;
+            }
 
-                EnableToolStripExclude(bEnable,
-                    new ToolStripItem[] { this.toolStripButton_stopSummaryLoop, this.toolStripSplitButton_delete });
-
-                // this.toolStripButton_loadFromIdcard.Enabled = bEnable;
-
-                // this.toolStripDropDownButton_loadBlank.Enabled = bEnable;
-                // this.toolStripButton_loadBlank.Enabled = bEnable;
-
-                // this.toolStripButton_webCamera.Enabled = bEnable;
-                // this.toolStripButton_pasteCardPhoto.Enabled = bEnable;
-
-                // this.toolStripButton_registerFingerprint.Enabled = bEnable;
-                // this.toolStripButton_createMoneyRecord.Enabled = bEnable;
-
-                // this.toolStripButton_saveTo.Enabled = bEnable;
-                //this.toolStripButton_save.Enabled = bEnable;
-                // this.toolStripSplitButton_save.Enabled = bEnable;
-
-                // this.toolStripButton_clearOutofReservationCount.Enabled = bEnable;
-
-                // this.toolStripButton_option.Enabled = bEnable;
-
-                //this.toolStripDropDownButton_otherFunc.Enabled = bEnable;
-
-                // 2008/10/28
-                //this.toolStripButton_next.Enabled = bEnable;
-                //this.toolStripButton_prev.Enabled = bEnable;
-            }));
+            EnableToolStripExclude(bEnable,
+                new ToolStripItem[] { this.toolStripButton_stopSummaryLoop, this.toolStripSplitButton_delete });
         }
 
         private void toolStripTextBox_barcode_KeyDown(object sender, KeyEventArgs e)
@@ -6717,7 +6685,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     strError = version_result.ErrorInfo;
                     if (version_result.ErrorCode == "RequestError")
-                        strError += "。可能是因为 人脸中心(FaceCenter) 模块没有启动";
+                        strError += " 可能是因为 人脸中心(FaceCenter) 模块没有启动";
                     goto ERROR1;
                 }
 

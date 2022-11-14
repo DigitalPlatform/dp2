@@ -96,9 +96,11 @@ namespace dp2Circulation
                 FillListView(results);
             }
 #endif
-            _stopManager.Initial(this.toolStripButton_stop,
-    (object)this.label_message,
-    (object)null);
+            _stopManager.Initial(
+                this,
+                this.toolStripButton_stop,
+                (object)this.label_message,
+                (object)null);
 
             _stop = new DigitalPlatform.Stop();
             _stop.Register(this._stopManager, true);	// 和容器关联

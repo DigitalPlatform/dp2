@@ -519,6 +519,16 @@ namespace dp2Circulation
             this._channelPoolExt.AfterLogin += new AfterLoginEventHandle(ChannelExt_AfterLogin);
 
             this.BeginInvoke(new Action(FirstInitial));
+            /*
+            _ = Task.Factory.StartNew(
+                () =>
+                {
+                    FirstInitial();
+                },
+                this._cancel.Token,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
+            */
         }
 
         /*
@@ -650,7 +660,17 @@ Stack:
             else
                 API.PostMessage(this.Handle, WM_PREPARE, 0, 0);
 #endif
-            this.BeginInvoke(new Func<bool, bool, bool>(InitialProperties), bFullInitial, bRestoreLastOpenedWindow);
+            // this.BeginInvoke(new Func<bool, bool, bool>(InitialProperties), bFullInitial, bRestoreLastOpenedWindow);
+
+            // 2022/11/14 改为在单独线程中执行
+            _ = Task.Factory.StartNew(
+                () =>
+                {
+                    InitialProperties(bFullInitial, bRestoreLastOpenedWindow);
+                },
+    this._cancel.Token,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
         }
 
         void InitialFixedPanel()
@@ -1734,10 +1754,11 @@ Stack:
 
         void CfgDlg_ParamChanged(object sender, ParamChangedEventArgs e)
         {
+#if REMOVED
             if (e.Section == "charging_form"
                 && e.Entry == "no_biblio_and_item_info")
             {
-                MessageBox.Show(this, "ChargingForm 代码已经移除");
+                MessageBox.Show(this, "CfgDlg 中因 ChargingForm 代码已经移除，不再处理 no_biblio_and_item_info 变更");
                 /*
                 // 遍历当前打开的所有chargingform
                 List<Form> forms = GetChildWindows(typeof(ChargingForm));
@@ -1750,6 +1771,7 @@ Stack:
                 }
                 */
             }
+#endif
 
             if (e.Section == "cardreader"
                 && e.Entry == "rfidCenterUrl")
@@ -2401,7 +2423,7 @@ false);
             }
         }
 
-        #endregion
+#endregion
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
@@ -2946,22 +2968,24 @@ false);
         internal void Channel_BeforeLogin(object sender,
             DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
-#if SN
-            if (_expireVersionChecked == false)
+            TryInvoke(() =>
             {
-                string base_version = "2.36";
-                string strExpire = GetExpireParam();
-                if (string.IsNullOrEmpty(strExpire) == false
-                    && StringUtil.CompareVersion(this.ServerVersion, base_version) < 0
-                    && this.ServerVersion != "0.0")
+#if SN
+                if (_expireVersionChecked == false)
                 {
-                    string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
-                    Program.PromptAndExit(this, strError);
-                    e.Cancel = true;
-                    return;
+                    string base_version = "2.36";
+                    string strExpire = GetExpireParam();
+                    if (string.IsNullOrEmpty(strExpire) == false
+                        && StringUtil.CompareVersion(this.ServerVersion, base_version) < 0
+                        && this.ServerVersion != "0.0")
+                    {
+                        string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
+                        Program.PromptAndExit(this, strError);
+                        e.Cancel = true;
+                        return;
+                    }
+                    _expireVersionChecked = true;
                 }
-                _expireVersionChecked = true;
-            }
 #endif
 
 #if NO
@@ -2978,15 +3002,15 @@ false);
                 }
             }
 #endif
-            if (e.FirstTry == true)
-            {
-                string strPhoneNumber = "";
-
+                if (e.FirstTry == true)
                 {
-                    e.UserName = AppInfo.GetString(
-                        "default_account",
-                        "username",
-                        "");
+                    string strPhoneNumber = "";
+
+                    {
+                        e.UserName = AppInfo.GetString(
+                            "default_account",
+                            "username",
+                            "");
 
 #if NO
                     // 2019/4/28
@@ -2997,44 +3021,102 @@ false);
                     }
 #endif
 
-                    e.Password = AppInfo.GetString(
+                        e.Password = AppInfo.GetString(
+                            "default_account",
+                            "password",
+                            "");
+                        e.Password = this.DecryptPasssword(e.Password);
+
+                        strPhoneNumber = AppInfo.GetString(
+            "default_account",
+            "phoneNumber",
+            "");
+
+                        bool bIsReader =
+                            AppInfo.GetBoolean(
+                            "default_account",
+                            "isreader",
+                            false);
+
+                        string strLocation = AppInfo.GetString(
                         "default_account",
-                        "password",
+                        "location",
                         "");
-                    e.Password = this.DecryptPasssword(e.Password);
+                        e.Parameters = "location=" + strLocation;
+                        if (bIsReader == true)
+                            e.Parameters += ",type=reader";
+                    }
 
-                    strPhoneNumber = AppInfo.GetString(
-        "default_account",
-        "phoneNumber",
-        "");
+                    // 2014/9/13
+                    e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
 
-                    bool bIsReader =
-                        AppInfo.GetBoolean(
-                        "default_account",
-                        "isreader",
-                        false);
+#if SN
+                    // 从序列号中获得 expire= 参数值
+                    string strExpire = GetExpireParam();
+                    if (string.IsNullOrEmpty(strExpire) == false)
+                        e.Parameters += ",expire=" + strExpire;
+#endif
 
-                    string strLocation = AppInfo.GetString(
-                    "default_account",
-                    "location",
-                    "");
-                    e.Parameters = "location=" + strLocation;
-                    if (bIsReader == true)
-                        e.Parameters += ",type=reader";
+                    // 2021/2/3
+                    e.Parameters += ",gettoken=day";
+
+                    // 2014/10/23
+                    if (this.TestMode == true)
+                        e.Parameters += ",testmode=true";
+
+                    e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
+
+                    // 以手机短信验证方式登录
+                    if (string.IsNullOrEmpty(strPhoneNumber) == false)
+                        e.Parameters += ",phoneNumber=" + strPhoneNumber;
+
+                    if (String.IsNullOrEmpty(e.UserName) == false)
+                        return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
                 }
+
+                // 
+                IWin32Window owner = null;
+
+                if (sender is IWin32Window)
+                    owner = (IWin32Window)sender;
+                else
+                    owner = this;
+
+                CirculationLoginDlg dlg = null;
+                this.TryInvoke((Action)(() =>
+                {
+                    dlg = SetDefaultAccount(
+                        e.LibraryServerUrl,
+                        null,
+                        e.ErrorInfo,
+                        e.LoginFailCondition,
+                        owner);
+                }
+                ));
+                if (dlg == null)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                e.UserName = dlg.UserName;
+                e.Password = dlg.Password;
+                e.SavePasswordShort = dlg.SavePasswordShort;
+                e.Parameters = "location=" + dlg.OperLocation;
+                if (dlg.IsReader == true)
+                    e.Parameters += ",type=reader";
 
                 // 2014/9/13
                 e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
 
 #if SN
                 // 从序列号中获得 expire= 参数值
-                string strExpire = GetExpireParam();
-                if (string.IsNullOrEmpty(strExpire) == false)
-                    e.Parameters += ",expire=" + strExpire;
+                {
+                    string strExpire = GetExpireParam();
+                    if (string.IsNullOrEmpty(strExpire) == false)
+                        e.Parameters += ",expire=" + strExpire;
+                }
 #endif
-
-                // 2021/2/3
-                e.Parameters += ",gettoken=day";
 
                 // 2014/10/23
                 if (this.TestMode == true)
@@ -3042,77 +3124,20 @@ false);
 
                 e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
 
+                if (string.IsNullOrEmpty(dlg.TempCode) == false)
+                    e.Parameters += ",tempCode=" + dlg.TempCode;
+
                 // 以手机短信验证方式登录
-                if (string.IsNullOrEmpty(strPhoneNumber) == false)
-                    e.Parameters += ",phoneNumber=" + strPhoneNumber;
+                if (string.IsNullOrEmpty(dlg.PhoneNumber) == false)
+                    e.Parameters += ",phoneNumber=" + dlg.PhoneNumber;
 
-                if (String.IsNullOrEmpty(e.UserName) == false)
-                    return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
-            }
-
-            // 
-            IWin32Window owner = null;
-
-            if (sender is IWin32Window)
-                owner = (IWin32Window)sender;
-            else
-                owner = this;
-
-            CirculationLoginDlg dlg = null;
-            this.Invoke((Action)(() =>
-            {
-                dlg = SetDefaultAccount(
-                    e.LibraryServerUrl,
-                    null,
-                    e.ErrorInfo,
-                    e.LoginFailCondition,
-                    owner);
-            }
-            ));
-            if (dlg == null)
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            e.UserName = dlg.UserName;
-            e.Password = dlg.Password;
-            e.SavePasswordShort = dlg.SavePasswordShort;
-            e.Parameters = "location=" + dlg.OperLocation;
-            if (dlg.IsReader == true)
-                e.Parameters += ",type=reader";
-
-            // 2014/9/13
-            e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
-
-#if SN
-            // 从序列号中获得 expire= 参数值
-            {
-                string strExpire = GetExpireParam();
-                if (string.IsNullOrEmpty(strExpire) == false)
-                    e.Parameters += ",expire=" + strExpire;
-            }
-#endif
-
-            // 2014/10/23
-            if (this.TestMode == true)
-                e.Parameters += ",testmode=true";
-
-            e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
-
-            if (string.IsNullOrEmpty(dlg.TempCode) == false)
-                e.Parameters += ",tempCode=" + dlg.TempCode;
-
-            // 以手机短信验证方式登录
-            if (string.IsNullOrEmpty(dlg.PhoneNumber) == false)
-                e.Parameters += ",phoneNumber=" + dlg.PhoneNumber;
-
-            e.SavePasswordLong = dlg.SavePasswordLong;
-            if (e.LibraryServerUrl != dlg.ServerUrl)
-            {
-                e.LibraryServerUrl = dlg.ServerUrl;
-                _expireVersionChecked = false;
-            }
+                e.SavePasswordLong = dlg.SavePasswordLong;
+                if (e.LibraryServerUrl != dlg.ServerUrl)
+                {
+                    e.LibraryServerUrl = dlg.ServerUrl;
+                    _expireVersionChecked = false;
+                }
+            });
         }
 
         bool _virusScanned = false;
@@ -3215,7 +3240,7 @@ false);
 
         public LibraryChannel GetChannel(string strServerUrl = ".",
     string strUserName = ".",
-    GetChannelStyle style = GetChannelStyle.GUI)
+    GetChannelStyle style = GetChannelStyle.None)
         {
             return GetChannel(strServerUrl,
                 strUserName,
@@ -3274,7 +3299,7 @@ false);
             _channelList.Remove(channel);
         }
 
-        #region looping
+#region looping
 
         // 三种动作: GetChannel() BeginLoop() 和 EnableControl()
         // parameters:
@@ -3394,7 +3419,7 @@ string style = null)
             }
         }
 
-        #endregion
+#endregion
 
 
 
@@ -3957,29 +3982,59 @@ string style = null)
             }
         }
 
+        // 用于确保在界面线程调用
+        public void TryInvoke(Action method)
+        {
+            if (this.InvokeRequired)
+                this.Invoke((Action)(method));
+            else
+                method.Invoke();
+        }
+
+
+        public void MessageBoxShow(string strText)
+        {
+            if (this.IsHandleCreated)
+                this.Invoke((Action)(() =>
+                {
+                    try
+                    {
+                        MessageBox.Show(this, strText);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+
+                    }
+                }));
+        }
+
+
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public void EnableControls(bool bEnable)
         {
-            this.menuStrip_main.Enabled = bEnable;
-            this.panel_fixed.Enabled = bEnable;
+            this.TryInvoke((Action)(() =>
+            {
+                this.menuStrip_main.Enabled = bEnable;
+                this.panel_fixed.Enabled = bEnable;
 
-            this.toolStripDropDownButton_barcodeLoadStyle.Enabled = bEnable;
-            this.toolStripTextBox_barcode.Enabled = bEnable;
+                this.toolStripDropDownButton_barcodeLoadStyle.Enabled = bEnable;
+                this.toolStripTextBox_barcode.Enabled = bEnable;
 
-            this.toolButton_amerce.Enabled = bEnable;
-            this.toolButton_borrow.Enabled = bEnable;
-            this.toolButton_lost.Enabled = bEnable;
-            this.toolButton_readerManage.Enabled = bEnable;
-            this.toolButton_renew.Enabled = bEnable;
-            this.toolButton_return.Enabled = bEnable;
-            this.toolButton_verifyReturn.Enabled = bEnable;
-            this.toolButton_print.Enabled = bEnable;
-            this.toolStripButton_loadBarcode.Enabled = bEnable;
+                this.toolButton_amerce.Enabled = bEnable;
+                this.toolButton_borrow.Enabled = bEnable;
+                this.toolButton_lost.Enabled = bEnable;
+                this.toolButton_readerManage.Enabled = bEnable;
+                this.toolButton_renew.Enabled = bEnable;
+                this.toolButton_return.Enabled = bEnable;
+                this.toolButton_verifyReturn.Enabled = bEnable;
+                this.toolButton_print.Enabled = bEnable;
+                this.toolStripButton_loadBarcode.Enabled = bEnable;
 
-            this.toolStripDropDownButton_selectLibraryCode.Enabled = bEnable;
+                this.toolStripDropDownButton_selectLibraryCode.Enabled = bEnable;
+            }));
         }
 
         // 把caption名正规化。
@@ -4257,7 +4312,7 @@ Stack:
             }
         }
 
-        #region EnsureXXXForm ...
+#region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4545,7 +4600,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-        #endregion
+#endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -5703,45 +5758,48 @@ dlg.TempCode);
 
         void AutoStartDp2libraryXE()
         {
-            if (ApplicationDeployment.IsNetworkDeployed == false)
-                return; // TODO: 以后尝试增加自动启动绿色版的方法
+            TryInvoke(() =>
+            {
+                if (ApplicationDeployment.IsNetworkDeployed == false)
+                    return; // TODO: 以后尝试增加自动启动绿色版的方法
 
-            string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2Library XE V3");
-            if (File.Exists(strShortcutFilePath) == false)
-            {
-                // 安装和启动
-                DialogResult result = MessageBox.Show(this,
-"dp2libraryXE V3 在本机尚未安装。\r\ndp2Circulation V3 (内务)即将访问 dp2LibraryXE V3 单机版服务器，需要安装它才能正常使用。\r\n\r\n是否立即从 dp2003.com 下载安装?",
-"dp2Circulation",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                if (result == System.Windows.Forms.DialogResult.Yes)
-                    FormClientUtil.StartDp2libraryXe(
-                        this,
-                        "dp2Circulation",
-                        this.Font,
-                        false);
-            }
-            else
-            {
-                if (FormClientUtil.HasDp2libraryXeStarted() == false)
+                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2Library XE V3");
+                if (File.Exists(strShortcutFilePath) == false)
                 {
-                    FormClientUtil.StartDp2libraryXe(
-                        this,
-                        "dp2Circulation",
-                        this.Font,
-                        true);
+                    // 安装和启动
+                    DialogResult result = MessageBox.Show(this,
+    "dp2libraryXE V3 在本机尚未安装。\r\ndp2Circulation V3 (内务)即将访问 dp2LibraryXE V3 单机版服务器，需要安装它才能正常使用。\r\n\r\n是否立即从 dp2003.com 下载安装?",
+    "dp2Circulation",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                    if (result == System.Windows.Forms.DialogResult.Yes)
+                        FormClientUtil.StartDp2libraryXe(
+                            this,
+                            "dp2Circulation",
+                            this.Font,
+                            false);
                 }
-            }
+                else
+                {
+                    if (FormClientUtil.HasDp2libraryXeStarted() == false)
+                    {
+                        FormClientUtil.StartDp2libraryXe(
+                            this,
+                            "dp2Circulation",
+                            this.Font,
+                            true);
+                    }
+                }
 
-            // 如果当前窗口没有在最前面
-            {
-                if (this.WindowState == FormWindowState.Minimized)
-                    this.WindowState = FormWindowState.Normal;
-                this.Activate();
-                API.SetForegroundWindow(this.Handle);
-            }
+                // 如果当前窗口没有在最前面
+                {
+                    if (this.WindowState == FormWindowState.Minimized)
+                        this.WindowState = FormWindowState.Normal;
+                    this.Activate();
+                    API.SetForegroundWindow(this.Handle);
+                }
+            });
         }
 
         internal string DecryptPasssword(string strEncryptedText)
@@ -6090,10 +6148,10 @@ out strError);
                 if (this.InvokeRequired)
                     this.Invoke((Action)(() =>
                     {
-                        toolStripStatusLabel_main.Text = value;
+                        toolStripStatusLabel_main.Text = value.Replace("\r\n", "");
                     }));
                 else
-                    toolStripStatusLabel_main.Text = value;
+                    toolStripStatusLabel_main.Text = value.Replace("\r\n", "");
             }
         }
 
@@ -8302,7 +8360,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-        #region 序列号机制
+#region 序列号机制
 
         bool _testMode = false;
 
@@ -8655,7 +8713,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
 #if REMOVED
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
@@ -8784,7 +8842,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-        #region servers.xml
+#region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -9128,7 +9186,7 @@ Keys keyData)
             return null;
         }
 
-        #endregion // servers.xml
+#endregion // servers.xml
 
 #if !NEWFINGER
         void EnableFingerprintSendKey(bool enable)
@@ -9287,7 +9345,7 @@ Keys keyData)
 #endif
         }
 
-        #region 消息过滤
+#region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -9317,7 +9375,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名

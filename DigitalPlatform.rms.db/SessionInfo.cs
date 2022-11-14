@@ -10,6 +10,8 @@ using System.IO;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using DigitalPlatform.IO;
+using System.Runtime.Remoting.Messaging;
 
 namespace DigitalPlatform.rms
 {
@@ -201,10 +203,12 @@ namespace DigitalPlatform.rms
             return; // exist_resultset;
         }
 
+        /*
         void resultset_GetTempFilename(object sender, GetTempFilenameEventArgs e)
         {
             e.TempFilename = GetTempFileName();
         }
+        */
 
         public string GetTempFileName()
         {

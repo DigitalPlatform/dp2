@@ -225,8 +225,9 @@ namespace dp2rms
                     "mainformstate");
             }
 
-
-            stopManager.Initial(toolBarButton_stop,
+            stopManager.Initial(
+                this,
+                toolBarButton_stop,
                 (object)this.toolStripStatusLabel_main,
                 (object)this.toolStripProgressBar_main);
 

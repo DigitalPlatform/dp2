@@ -424,38 +424,31 @@ this.splitContainer_inAndOutof,
             base.DefWndProc(ref m);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                // load page
-                this.comboBox_load_type.Enabled = this.ScanMode == true ? false : bEnable;
-                this.button_load_loadFromBatchNo.Enabled = this.ScanMode == true ? false : bEnable;
-                this.button_load_loadFromBarcodeFile.Enabled = this.ScanMode == true ? false : bEnable;
-                this.button_load_loadFromRecPathFile.Enabled = this.ScanMode == true ? false : bEnable;
-                this.button_load_scanBarcode.Enabled = this.ScanMode == true ? false : bEnable;
+            // load page
+            this.comboBox_load_type.Enabled = this.ScanMode == true ? false : bEnable;
+            this.button_load_loadFromBatchNo.Enabled = this.ScanMode == true ? false : bEnable;
+            this.button_load_loadFromBarcodeFile.Enabled = this.ScanMode == true ? false : bEnable;
+            this.button_load_loadFromRecPathFile.Enabled = this.ScanMode == true ? false : bEnable;
+            this.button_load_scanBarcode.Enabled = this.ScanMode == true ? false : bEnable;
 
-                // next button
-                if (bEnable == true)
-                    SetNextButtonEnable();
-                else
-                    this.button_next.Enabled = false;
+            // next button
+            if (bEnable == true)
+                SetNextButtonEnable();
+            else
+                this.button_next.Enabled = false;
 
-                // verify page
-                this.textBox_verify_itemBarcode.Enabled = bEnable;
-                this.button_verify_load.Enabled = bEnable;
-                // this.checkBox_verify_autoUppercaseBarcode.Enabled = bEnable;
+            // verify page
+            this.textBox_verify_itemBarcode.Enabled = bEnable;
+            this.button_verify_load.Enabled = bEnable;
+            // this.checkBox_verify_autoUppercaseBarcode.Enabled = bEnable;
 
-                // print page
-                this.button_print_option.Enabled = bEnable;
-                this.button_print_printCheckedList.Enabled = bEnable;
+            // print page
+            this.button_print_option.Enabled = bEnable;
+            this.button_print_printCheckedList.Enabled = bEnable;
 
-                this.button_print_printNormalList.Enabled = bEnable;
-            }));
+            this.button_print_printNormalList.Enabled = bEnable;
         }
 
         /// <summary>

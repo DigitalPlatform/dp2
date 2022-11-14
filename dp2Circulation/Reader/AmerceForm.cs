@@ -2854,47 +2854,39 @@ this.splitContainer_lists,
             return 1;
         }
 
-
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
+            this.textBox_readerBarcode.Enabled = bEnable;
+            this.button_load.Enabled = bEnable;
+
+            this.listView_overdues.Enabled = bEnable;
+            this.toolStripButton_amercing_selectAll.Enabled = bEnable;
+
+            /*
+            this.button_amercingOverdue_submit.Enabled = bEnable;
+            this.button_amercingOverdue_modifyPrice.Enabled = bEnable;
+             * */
+            if (bEnable == false)
             {
-                this.textBox_readerBarcode.Enabled = bEnable;
-                this.button_load.Enabled = bEnable;
+                this.toolStripButton_submit.Enabled = false;
+                this.toolStripButton_modifyPriceAndComment.Enabled = false;
+            }
+            else
+            {
+                SetOverduesButtonsEnable();
+            }
 
-                this.listView_overdues.Enabled = bEnable;
-                this.toolStripButton_amercing_selectAll.Enabled = bEnable;
+            this.listView_amerced.Enabled = bEnable;
+            this.toolStripButton_amerced_selectAll.Enabled = bEnable;
 
-                /*
-                this.button_amercingOverdue_submit.Enabled = bEnable;
-                this.button_amercingOverdue_modifyPrice.Enabled = bEnable;
-                 * */
-                if (bEnable == false)
-                {
-                    this.toolStripButton_submit.Enabled = false;
-                    this.toolStripButton_modifyPriceAndComment.Enabled = false;
-                }
-                else
-                {
-                    SetOverduesButtonsEnable();
-                }
-
-                this.listView_amerced.Enabled = bEnable;
-                this.toolStripButton_amerced_selectAll.Enabled = bEnable;
-
-                if (bEnable == false)
-                {
-                    this.toolStripButton_undoAmerce.Enabled = false;
-                }
-                else
-                {
-                    SetAmercedButtonsEnable();
-                }
-            }));
+            if (bEnable == false)
+            {
+                this.toolStripButton_undoAmerce.Enabled = false;
+            }
+            else
+            {
+                SetAmercedButtonsEnable();
+            }
         }
 
 

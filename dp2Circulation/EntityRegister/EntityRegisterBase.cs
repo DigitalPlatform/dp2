@@ -212,7 +212,7 @@ false);
 
         public LibraryChannel MyGetChannel(string strServerUrl,
             string strUserName,
-            GetChannelStyle style = GetChannelStyle.GUI)
+            GetChannelStyle style = GetChannelStyle.None)
         {
             /*
             if (EntityRegisterBase.IsDot(strServerUrl) == true)

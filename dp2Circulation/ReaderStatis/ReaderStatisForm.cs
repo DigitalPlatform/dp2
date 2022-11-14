@@ -379,25 +379,18 @@ namespace dp2Circulation
             dlg.ShowDialog(this);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.button_getProjectName.Enabled = bEnable;
+            this.button_getProjectName.Enabled = bEnable;
 
-                this.textBox_createTimeRange.Enabled = bEnable;
-                this.textBox_expireTimeRange.Enabled = bEnable;
+            this.textBox_createTimeRange.Enabled = bEnable;
+            this.textBox_expireTimeRange.Enabled = bEnable;
 
-                this.checkBox_departmentTable.Enabled = bEnable;
+            this.checkBox_departmentTable.Enabled = bEnable;
 
-                this.button_next.Enabled = bEnable;
+            this.button_next.Enabled = bEnable;
 
-                this.button_projectManage.Enabled = bEnable;
-            }));
+            this.button_projectManage.Enabled = bEnable;
         }
 
         public override int RunScript(string strProjectName,
@@ -763,24 +756,24 @@ namespace dp2Circulation
                         Application.DoEvents();	// 出让界面控制权
 
                         if (stop != null && stop.State != 0)
+                        {
+                            DialogResult result = MessageBox.Show(this,
+                                "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
+                                "ReaderStatisForm",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button3);
+
+                            if (result == DialogResult.Yes)
                             {
-                                DialogResult result = MessageBox.Show(this,
-                                    "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
-                                    "ReaderStatisForm",
-                                    MessageBoxButtons.YesNoCancel,
-                                    MessageBoxIcon.Question,
-                                    MessageBoxDefaultButton.Button3);
-
-                                if (result == DialogResult.Yes)
-                                {
-                                    strError = "用户中断";
-                                    return -1;
-                                }
-                                if (result == DialogResult.No)
-                                    return 0;   // 假装loop正常结束
-
-                                stop.Continue(); // 继续循环
+                                strError = "用户中断";
+                                return -1;
                             }
+                            if (result == DialogResult.No)
+                                return 0;   // 假装loop正常结束
+
+                            stop.Continue(); // 继续循环
+                        }
 
                         // string strItemBarcode = barcodes[i];
                         string strRecPathOrBarcode = sr.ReadLine();

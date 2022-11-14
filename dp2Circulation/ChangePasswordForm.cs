@@ -176,38 +176,31 @@ namespace dp2Circulation
             this.textBox_reader_oldPassword.SelectAll();
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.button_reader_changePassword.Enabled = bEnable;
-                this.textBox_reader_barcode.Enabled = bEnable;
-                this.textBox_reader_newPassword.Enabled = bEnable;
-                this.textBox_reader_confirmNewPassword.Enabled = bEnable;
+            this.button_reader_changePassword.Enabled = bEnable;
+            this.textBox_reader_barcode.Enabled = bEnable;
+            this.textBox_reader_newPassword.Enabled = bEnable;
+            this.textBox_reader_confirmNewPassword.Enabled = bEnable;
 
-                bool bReader = Program.MainForm.AppInfo.GetBoolean(
-        "default_account",
-        "isreader",
-        false);
-                if (bReader == false)
-                    this.textBox_reader_oldPassword.Enabled = false;
-                else
-                    this.textBox_reader_oldPassword.Enabled = bEnable;
+            bool bReader = Program.MainForm.AppInfo.GetBoolean(
+    "default_account",
+    "isreader",
+    false);
+            if (bReader == false)
+                this.textBox_reader_oldPassword.Enabled = false;
+            else
+                this.textBox_reader_oldPassword.Enabled = bEnable;
 
-                this.button_worker_changePassword.Enabled = bEnable;
-                this.textBox_worker_userName.Enabled = bEnable;
-                if (this.checkBox_worker_force.Checked == true)
-                    this.textBox_worker_oldPassword.Enabled = false;
-                else
-                    this.textBox_worker_oldPassword.Enabled = bEnable;
-                this.textBox_worker_newPassword.Enabled = bEnable;
-                this.textBox_worker_confirmNewPassword.Enabled = bEnable;
-                this.checkBox_worker_force.Enabled = bEnable;
-            }));
+            this.button_worker_changePassword.Enabled = bEnable;
+            this.textBox_worker_userName.Enabled = bEnable;
+            if (this.checkBox_worker_force.Checked == true)
+                this.textBox_worker_oldPassword.Enabled = false;
+            else
+                this.textBox_worker_oldPassword.Enabled = bEnable;
+            this.textBox_worker_newPassword.Enabled = bEnable;
+            this.textBox_worker_confirmNewPassword.Enabled = bEnable;
+            this.checkBox_worker_force.Enabled = bEnable;
         }
 
         private void button_worker_changePassword_Click(object sender, EventArgs e)

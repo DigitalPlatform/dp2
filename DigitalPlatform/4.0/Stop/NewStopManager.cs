@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,10 @@ using System.Windows.Forms;
 
 namespace DigitalPlatform
 {
-#if OLD_CODE
-    //在父窗口中定义,初始化按钮
     public class StopManager
     {
+        public Control OwnerControl { get; set; }
+
         public event DisplayMessageEventHandler OnDisplayMessage = null;
         public event AskReverseButtonStateEventHandle OnAskReverseButtonState;
 
@@ -37,13 +38,20 @@ namespace DigitalPlatform
 
         double progress_ratio = 1.0;
 
-        public List<Stop> stops = new List<Stop>();
-        bool bMultiple = false;
+        // public List<Stop> stops = new List<Stop>();
+        private List<StopGroup> _groups = new List<StopGroup>();
 
-        // string m_strTipsSave = "";
+        // 显示表面正在显示的 active Stop 对象
+        private Stop _surfaceStop = null;
+
+        // bool bMultiple = false;
 
         List<object> m_reverseButtons = null;	// 当停止按钮Enabled状态变化时，需要和它状态相反的按钮对象数组
         List<int> m_reverseButtonEnableStates = null;   // 0: diabled; 1: eanbled; -1: unknown
+
+        public StopManager()
+        {
+        }
 
         void WriteDebugInfo(string strText)
         {
@@ -64,6 +72,102 @@ namespace DigitalPlatform
                 System.Text.Encoding.UTF8);
             sw.Write(strText);
             sw.Close();
+        }
+
+        // 创建一个 group
+        public StopGroup CreateGroup(string groupName)
+        {
+            if (groupName == null)
+                groupName = "";
+            try
+            {
+                lock (_groups)
+                {
+                    var existing = _groups
+        .Where(o => o.Name == groupName)
+        .FirstOrDefault();
+                    if (existing != null)
+                        throw new Exception($"名为 '{groupName}' 的 Group 对象已经存在");
+
+                    var group = new StopGroup(groupName);
+                    _groups.Add(group);
+                    return group;
+                }
+            }
+            finally
+            {
+                UpdateDisplay();
+            }
+        }
+
+        // 删除一个 group
+        public bool DeleteGroup(string groupName)
+        {
+            bool changed = false;
+            try
+            {
+                lock (_groups)
+                {
+                    var group = _groups
+                        .Where(o => o.Name == groupName)
+                        .FirstOrDefault();
+                    if (group == null)
+                        return false;
+                    _groups.Remove(group);
+                    changed = true;
+                    return true;
+                }
+            }
+            finally
+            {
+                if (changed)
+                    UpdateDisplay();
+            }
+        }
+
+        public StopGroup ActivateGroup(string groupName)
+        {
+            bool found = false;
+            try
+            {
+                lock (_groups)
+                {
+                    var existing = _groups
+                        .Where(o => o.Name == groupName)
+                        .FirstOrDefault();
+                    if (existing == null)
+                        return null;
+                    _groups.Remove(existing);
+                    _groups.Add(existing);
+                    // TODO: 判断一下 existing 是否已经是 active 状态
+                    found = true;
+                    return existing;
+                }
+            }
+            finally
+            {
+                if (found)
+                    UpdateDisplay();
+            }
+        }
+
+        public StopGroup GetActiveGroup()
+        {
+            lock (_groups)
+            {
+                return _groups.LastOrDefault();
+            }
+        }
+
+        // 查找一个 group
+        public StopGroup FindGroup(string groupName)
+        {
+            lock (_groups)
+            {
+                return _groups
+                    .Where(o => o.Name == groupName)
+                    .FirstOrDefault();
+            }
         }
 
         // 2007/8/2
@@ -125,7 +229,6 @@ namespace DigitalPlatform
             }
         }
 
-
         public void LinkReverseButton(object button)
         {
             if ((button is ToolBarButton)
@@ -185,7 +288,6 @@ namespace DigitalPlatform
 #endif
             else if (m_messageBar is Control)
             {
-                // ((TextBox)m_messageBar).Text = strMessage;
                 Safe_SetTextBoxText(((Control)m_messageBar), strMessage);
             }
             else if (m_messageBar is ToolStripStatusLabel)
@@ -210,7 +312,54 @@ namespace DigitalPlatform
             }
         }
 
-        void InternalSetProgressBar(long lStart, long lEnd, long lValue)
+        // 最近一次同步过 Min Max 到 ProgressBar 的 Stop 对象
+        Stop _controlStop = null;
+
+        // parameters:
+        //      stop    用来检查 Stop 的 Min Max 值是否和 ProgressBar 一致。
+        //              如果不一致则需要立即重新设置 ProgressBar 的 Min Max
+        void InternalSetProgressBar(
+            Stop stop,
+            long lStart,
+            long lEnd,
+            long lValue)
+        {
+            Debug.Assert(this.OwnerControl != null);
+            TryInvoke(this.OwnerControl, () =>
+            {
+                if (lStart == lEnd
+                && lStart == lValue
+                && lValue == -1)
+                {
+                    _controlStop = null;
+                }
+                else if (stop != _controlStop)
+                {
+                    /*
+                    Debug.Assert(stop.ProgressMin != -1);
+                    Debug.Assert(stop.ProgressMax != -1);
+
+                    if (stop.ProgressValue < stop.ProgressMin
+                        || stop.ProgressValue > stop.ProgressMax)
+                        throw new Exception($"ProgressValue 越过 ProgressMin 和 ProgressMax 范围");
+                    */
+                    // 补一次设置 Min Max Value
+                    _internalSetProgressBar(stop.ProgressMin,
+                        stop.ProgressMax,
+                        stop.ProgressValue);
+                }
+
+                _internalSetProgressBar(
+                    lStart, lEnd, lValue);
+
+                _controlStop = stop;
+            });
+        }
+
+        void _internalSetProgressBar(
+    long lStart,
+    long lEnd,
+    long lValue)
         {
             if (m_progressBar is ProgressBar)
             {
@@ -232,9 +381,16 @@ namespace DigitalPlatform
         #region StatusStrip
 
         // 线程安全版本
-        string Safe_SetStatusStripText(StatusStrip status_strip,
+        void Safe_SetStatusStripText(StatusStrip status_strip,
             string strText)
         {
+            TryInvoke(status_strip, () =>
+            {
+                status_strip.Text = strText;
+                status_strip.Update();
+            });
+
+#if REMOVED
             if (status_strip.Parent != null && status_strip.Parent.InvokeRequired)
             {
                 Delegate_SetStatusStripText d = new Delegate_SetStatusStripText(SetStatusStripText);
@@ -250,8 +406,10 @@ namespace DigitalPlatform
 
                 return strOldText;
             }
+#endif
         }
 
+#if REMOVED
         delegate string Delegate_SetStatusStripText(StatusStrip status_strip,
             string strText);
 
@@ -266,17 +424,24 @@ namespace DigitalPlatform
 
             return strOldText;
         }
+#endif
 
         #endregion
 
-        // 2015/11/2
-        string Safe_SetToolStripItemText(ToolStripItem status_strip,
+        void Safe_SetToolStripItemText(ToolStripItem status_strip,
 string strText)
         {
             if (status_strip.Owner == null
-                || status_strip.Owner.Parent == null)
-                return null;
+                /*|| status_strip.Owner.Parent == null*/)
+                return /*null*/;
 
+            TryInvoke(status_strip.Owner, () =>
+            {
+                status_strip.Text = strText;
+                status_strip.Owner.Update();
+            });
+
+#if REMOVED
             if (status_strip.Owner != null
                 && status_strip.Owner.Parent != null
                 && status_strip.Owner.Parent.InvokeRequired)
@@ -289,10 +454,38 @@ string strText)
                 status_strip.Text = strText;
                 return strOldText;
             }
+#endif
         }
 
         #region ToolStripStatusLabel
 
+        static void TryInvoke(Control control, Action method)
+        {
+            if (control.InvokeRequired)
+                control.Invoke((Action)(method));
+            else
+                method.Invoke();
+        }
+
+        // 线程安全版本
+        void Safe_SetToolStripStatusLabelText(ToolStripStatusLabel label,
+            string strText)
+        {
+            if (label.Owner == null)
+                return/* ""*/;
+
+            TryInvoke(label.Owner, () =>
+            {
+                // string strOldText = label.Text;
+
+                label.Text = string.IsNullOrEmpty(strText) ? " " : strText; // 在某些情况下，空内容和非空内容会导致 label 高度变化，进而引起整个框架窗口刷新。为避免此情况，特意在空的时候设置一个空格字符。2017/4/24
+
+                label.Owner.Update();    // 2022/11/13 迫使文本立即显示出来
+                // return strOldText;
+            });
+        }
+
+#if REMOVED
         // 线程安全版本
         string Safe_SetToolStripStatusLabelText(ToolStripStatusLabel label,
             string strText)
@@ -311,8 +504,7 @@ string strText)
 
                 label.Text = string.IsNullOrEmpty(strText) ? " " : strText; // 在某些情况下，空内容和非空内容会导致 label 高度变化，进而引起整个框架窗口刷新。为避免此情况，特意在空的时候设置一个空格字符。2017/4/24
 
-                // label.Owner.Update();    // 优化
-
+                label.Owner.Update();    // 2022/11/13 迫使文本立即显示出来
                 return strOldText;
             }
         }
@@ -328,18 +520,26 @@ string strText)
             label.Text = strText;
 
             label.Owner.Update();
-
             return strOldText;
         }
+#endif
 
         #endregion
 
         #region TextBox
 
         // 线程安全版本
-        string Safe_SetTextBoxText(Control textbox,
+        void Safe_SetTextBoxText(Control textbox,
             string strText)
         {
+            Debug.Assert(textbox.Parent != null);
+            TryInvoke(textbox.Parent, () =>
+            {
+                textbox.Text = strText;
+                textbox.Update();
+            });
+
+#if REMOVED
             if (textbox.Parent != null && textbox.Parent.InvokeRequired)
             {
                 Delegate_SetTextBoxText d = new Delegate_SetTextBoxText(SetTextBoxText);
@@ -351,12 +551,12 @@ string strText)
 
                 textbox.Text = strText;
                 textbox.Update();
-
-
                 return strOldText;
             }
+#endif
         }
 
+#if REMOVED
         delegate string Delegate_SetTextBoxText(Control textbox,
             string strText);
 
@@ -370,48 +570,9 @@ string strText)
 
             return strOldText;
         }
-
-        #endregion
-
-#if NO
-        #region Label
-
-        // 线程安全版本
-        string Safe_SetLabelText(Label label,
-            string strText)
-        {
-            if (label.Parent != null && label.Parent.InvokeRequired)
-            {
-                Delegate_SetLabelText d = new Delegate_SetLabelText(SetLabelText);
-                return (string)label.Parent.Invoke(d, new object[] { label, strText });
-            }
-            else
-            {
-                string strOldText = label.Text;
-
-                label.Text = strText;
-                label.Update();
-
-                return strOldText;
-            }
-        }
-
-        delegate string Delegate_SetLabelText(Label label,
-            string strText);
-
-        string SetLabelText(Label label,
-            string strText)
-        {
-            string strOldText = label.Text;
-
-            label.Text = strText;
-            label.Update();
-
-            return strOldText;
-        }
-
-        #endregion
 #endif
+
+        #endregion
 
         #region ProgressBar
 
@@ -421,6 +582,35 @@ string strText)
             long lEnd,
             long lValue)
         {
+            TryInvoke(progressbar, () =>
+            {
+
+                if (lEnd == -1 && lStart == -1 && lValue == -1)
+                {
+                    if (progressbar.Visible != false)   // 2008/3/17
+                        progressbar.Visible = false;
+                    if (lValue == -1)
+                        return;
+                }
+                else
+                {
+                    if (progressbar.Visible == false)
+                        progressbar.Visible = true;
+                }
+
+                if (lEnd >= 0)
+                {
+                    SetRatio(lEnd);
+                    progressbar.Maximum = (int)(this.progress_ratio * (double)lEnd);
+                }
+                if (lStart >= 0)
+                    progressbar.Minimum = (int)(this.progress_ratio * (double)lStart);
+
+                if (lValue >= 0)
+                    progressbar.Value = (int)(this.progress_ratio * (double)lValue);
+            });
+
+#if REMOVED
             if (progressbar.Parent != null && progressbar.Parent.InvokeRequired)
             {
                 Delegate_SetProgressBar d = new Delegate_SetProgressBar(SetProgressBar);
@@ -452,6 +642,7 @@ string strText)
                 if (lValue >= 0)
                     progressbar.Value = (int)(this.progress_ratio * (double)lValue);
             }
+#endif
         }
 
         void SetRatio(long lEnd)
@@ -461,6 +652,7 @@ string strText)
                 this.progress_ratio = 1.0;
         }
 
+#if REMOVED
         delegate void Delegate_SetProgressBar(ProgressBar progressbar,
             long lStart, long lEnd, long lValue);
 
@@ -491,7 +683,7 @@ string strText)
             if (lValue >= 0)
                 progressbar.Value = (int)(this.progress_ratio * (double)lValue);
         }
-
+#endif
 
         #endregion
 
@@ -506,6 +698,36 @@ string strText)
             if (progressbar.Owner == null)
                 return;
 
+            TryInvoke(progressbar.Owner, () =>
+            {
+
+                if (lEnd == -1 && lStart == -1 && lValue == -1)
+                {
+                    if (progressbar.Visible != false)   // 2008/3/17
+                        progressbar.Visible = false;
+
+                    if (lValue == -1)
+                        return;
+                }
+                else
+                {
+                    if (progressbar.Visible == false)
+                        progressbar.Visible = true;
+                }
+
+                if (lEnd >= 0)
+                {
+                    SetRatio(lEnd);
+                    progressbar.Maximum = (int)(this.progress_ratio * (double)lEnd);
+                }
+                if (lStart >= 0)
+                    progressbar.Minimum = (int)(this.progress_ratio * (double)lStart);
+
+                if (lValue >= 0)
+                    progressbar.Value = (int)(this.progress_ratio * (double)lValue);
+            });
+
+#if REMOVED
             if (progressbar.Owner.InvokeRequired)
             {
                 Delegate_SetToolStrupProgressBar d = new Delegate_SetToolStrupProgressBar(SetProgressBar);
@@ -538,8 +760,10 @@ string strText)
                 if (lValue >= 0)
                     progressbar.Value = (int)(this.progress_ratio * (double)lValue);
             }
+#endif
         }
 
+#if REMOVED
         delegate void Delegate_SetToolStrupProgressBar(ToolStripProgressBar progressbar,
             long lStart, long lEnd, long lValue);
 
@@ -570,7 +794,7 @@ string strText)
             if (lValue >= 0)
                 progressbar.Value = (int)(this.progress_ratio * (double)lValue);
         }
-
+#endif
 
         #endregion
 
@@ -675,9 +899,15 @@ string strText)
         #region Button
 
         // 线程安全调用
-        static bool Safe_EnableButton(Button button,
+        static void Safe_EnableButton(Button button,
             bool bEnabled)
         {
+            TryInvoke(button, () =>
+            {
+                button.Enabled = bEnabled;
+            });
+
+#if REMOVED
             if (button.Parent != null && button.Parent.InvokeRequired)
             {
                 Delegate_SetButtonEnable d = new Delegate_SetButtonEnable(SetButtonEnable);
@@ -691,8 +921,10 @@ string strText)
 
                 return bOldState;
             }
+#endif
         }
 
+#if REMOVED
         delegate bool Delegate_SetButtonEnable(Button button,
             bool bEnabled);
 
@@ -707,15 +939,24 @@ string strText)
 
             return bOldState;
         }
+#endif
 
         #endregion
 
         #region ToolBarButton
 
         // 线程安全调用
-        static bool Safe_EnableToolBarButton(ToolBarButton button,
+        static void Safe_EnableToolBarButton(ToolBarButton button,
             bool bEnabled)
         {
+            if (button.Parent == null)
+                return;
+            TryInvoke(button.Parent, () =>
+            {
+                button.Enabled = bEnabled;
+            });
+
+#if REMOVED
             if (button.Parent != null && button.Parent.InvokeRequired)
             {
                 Delegate_SetToolBarButtonEnable d = new Delegate_SetToolBarButtonEnable(SetToolBarButtonEnable);
@@ -729,8 +970,10 @@ string strText)
 
                 return bOldState;
             }
+#endif
         }
 
+#if REMOVED
         delegate bool Delegate_SetToolBarButtonEnable(ToolBarButton button,
             bool bEnabled);
 
@@ -745,19 +988,26 @@ string strText)
 
             return bOldState;
         }
+#endif
 
         #endregion
 
         #region ToolStripButton
 
         // 线程安全调用
-        static bool Safe_EnableToolStripButton(ToolStripButton button,
+        static void Safe_EnableToolStripButton(ToolStripButton button,
             bool bEnabled)
         {
             // 2014/12/26
             if (button.Owner == null)
-                return false;
+                return /*false*/;
 
+            TryInvoke(button.Owner, () =>
+            {
+                button.Enabled = bEnabled;
+            });
+
+#if REMOVED
             if (button.Owner.InvokeRequired)
             {
                 Delegate_SetToolStripButtonEnable d = new Delegate_SetToolStripButtonEnable(SetToolStripButtonEnable);
@@ -769,6 +1019,7 @@ string strText)
                 button.Enabled = bEnabled;
                 return bOldState;
             }
+#endif
         }
 
         delegate bool Delegate_SetToolStripButtonEnable(ToolStripButton button,
@@ -841,59 +1092,45 @@ string strText)
                     }
                 }
 
-
                 bool bOldState = (nOldState == 1 ? true : false);
 
                 object button = m_reverseButtons[i];
                 if (button is Button)
                 {
                     bOldState = ((Button)button).Enabled;
-                    // ((Button)button).Enabled = (bRestore == true ? bOldState : bEnabled);
                     Safe_EnableButton((Button)button,
                         (bRestore == true ? bOldState : bEnableResult));
 
                 }
                 else if (button is ToolBarButton)
                 {
-                    // ((ToolBarButton)button).Enabled = bEnabled;
-
-                    bOldState = Safe_EnableToolBarButton(((ToolBarButton)button),
-                        bRestore == true ? bOldState : bEnableResult);
-                    /*
-                    if (button.Parent.InvokeRequired)
-                    {
-                        Delegate_SetToolBarButtonEnable d = new Delegate_SetToolBarButtonEnable(SetToolBarButtonEnable);
-                        button.Parent.Invoke(d, new object[] { button, bEnabled });
-                    }
-                    else
-                    {
-                        button.Enabled = bEnabled;
-                    }
-                     * */
+                    /*bOldState = */
+                    Safe_EnableToolBarButton(((ToolBarButton)button),
+        bRestore == true ? bOldState : bEnableResult);
                 }
                 else if (button is ToolStripButton)
                 {
-                    // ((ToolStripButton)button).Enabled = bEnabled;
-
-                    bOldState = Safe_EnableToolStripButton(((ToolStripButton)button),
-                        bRestore == true ? bOldState : bEnableResult);
+                    /*bOldState = */
+                    Safe_EnableToolStripButton(((ToolStripButton)button),
+        bRestore == true ? bOldState : bEnableResult);
                 }
 
                 // 主动disable前，记忆以前的状态
                 if (bEnabled == false
                     && bSave == true)
                     m_reverseButtonEnableStates[i] = (bOldState == true ? 1 : 0);
-
             }
         }
 
         // 初始化一个按钮,在父窗口load时调
         // locks: 集合写锁
-        public void Initial(object button,
+        public void Initial(
+            Control owner,
+            object button,
             object statusBar,
             object progressBar)
         {
-
+            this.OwnerControl = owner;
             WriteDebugInfo("collection write lock 1\r\n");
             this.m_collectionlock.AcquireWriterLock(Stop.m_nLockTimeout);
             try
@@ -919,6 +1156,32 @@ string strText)
 
         }
 
+        public void RegisterStop(Stop stop,
+            string groupName = "")
+        {
+            var group = FindGroup(groupName);
+
+            // 临时补充创建一个名字为空的 group
+            if (group == null && string.IsNullOrEmpty(groupName))
+                group = this.CreateGroup("");
+
+            if (group == null)
+            {
+                throw new Exception($"名为 '{groupName}' 的 group 对象不存在，注册 Stop 对象失败");
+            }
+
+            group.Add(stop);
+        }
+
+        public void UnregisterStop(Stop stop)
+        {
+            var group = stop.Group;
+            if (group == null)
+                throw new Exception($"Stop 对象 '{stop.Name}' 尚未加入过 Group，注销 Stop 对象失败");
+            group.Remove(stop);
+        }
+
+#if REMOVED
 
         // 加入一个Stop对象。加入在非活动位置
         // locks: 集合写锁
@@ -940,45 +1203,8 @@ string strText)
             //SetToolTipText();
         }
 
-        /*
-		void SetToolTipText()
-		{
-			if (m_stopToolButton != null) 
-			{
-				string strText = DebugInfo();
-				if (strText != "0")
-					m_stopToolButton.ToolTipText = m_strTipsSave + "\r\n[" + DebugInfo() + "]";
-				else
-					m_stopToolButton.ToolTipText = m_strTipsSave;
-			}
-		}
-         */
-
-
         string DebugInfo()
         {
-            /*
-            string strText = "";
-
-            this.m_lock.AcquireReaderLock(Stop.m_nLockTimeout);
-            try 
-            {
-                for(int i=0;i<stops.Count;i++) 
-                {
-                    Stop temp = (Stop)stops[i];
-                    strText += Convert.ToString(i) + "-" 
-                        + temp.Name + "-["
-                        + Convert.ToString(temp.State())
-                        +"]\r\n";
-                }
-            }
-            finally
-            {
-                this.m_lock.ReleaseReaderLock();
-            }
-
-            return strText;
-            */
             return Convert.ToString(stops.Count);
         }
 
@@ -1006,6 +1232,99 @@ string strText)
             //SetToolTipText();
         }
 
+#endif
+        // 刷新工具条、状态行显示。用于 active group 切换后
+        public void UpdateDisplay()
+        {
+            var activeGroup = GetActiveGroup();
+            if (activeGroup == null)
+            {
+                ClearDisplay();
+                return;
+            }
+
+            // 停止按钮
+            var stop_button_enabled = activeGroup.GetStopButtonEnableState();
+            EnableStopButtons(stop_button_enabled);
+            EnableReverseButtons(!stop_button_enabled, StateParts.None);
+
+            var active_stop = activeGroup.GetActiveStop();
+            if (active_stop == null)
+            {
+                ClearDisplay();
+                return;
+            }
+
+            _surfaceStop = active_stop;
+            // 状态行文本
+            InternalSetMessage(active_stop.Message);
+
+            // 状态行 ProgressBar
+            /*
+            if (active_stop.ProgressMin == -1)
+                throw new Exception("ProgressMin 尚未初始化");
+            if (active_stop.ProgressMax == -1)
+                throw new Exception("ProgressMax 尚未初始化");
+            if (active_stop.ProgressValue < active_stop.ProgressMin
+                || active_stop.ProgressValue > active_stop.ProgressMax)
+                throw new Exception($"ProgressValue 越过 ProgressMin 和 ProgressMax 范围");
+            */
+            InternalSetProgressBar(
+                active_stop,
+                active_stop.ProgressMin,
+                active_stop.ProgressMax,
+                active_stop.ProgressValue);
+
+            // 工具条要综合 active group 中所有 Stop 对象的状态，决定停止按钮和其它按钮的状态
+
+            // 状态行显示 active group 中最顶层 Stop 对象的 progress 和 text
+
+            /* 1) 当 stop.BeginLoop() 和 stop.EndLoop() 调用时
+             *      停止按钮要综合 active group 中的 looping Stop 对象状态，
+             *      让按钮 Enabled 发生变化
+             * 2) stop.SetMessage() 调用时，Stop 对象内部 message 成员要记住最新字符串，
+             *      如果 Stop 对象处在 active group 并且处在最顶层 looping 状态，则会刷新状态行文本显示
+             *      注意，looping level 为 0 的 Stop 对象即便是最顶层也是透明的，不影响显示
+             * 3) stop.SetProgressRange() 和 stop.SetProgressValue() 调用时,
+             *      Stop 对象内部的三个 progress 相关值得要记住最新状态，
+             *      如果 Stop 对象处在 active group 并且处在最顶层 looping 状态，则会刷新状态行的公共 progress 显示
+             *      注意，looping level 为 0 的 Stop 对象即便是最顶层也是透明的，不影响显示
+             * 4) stop.Register() 时，如果注册到一个 active group，它会处在最顶层位置，
+             *      但它的 looping level 为 0，所以相当于透明的，不影响显示
+             * 5) stop.Unregister() 时，如果是从一个 active group 注销，有可能会改变公共显示，
+             *      但一般它早已 EndLoop(), looping level 为 0，所以其实不会影响显示
+             * 6) 首次决定显示公共显示区的时候，要从 active group 中综合提取停止按钮状态，
+             *      从最顶层 looping Stop 对象获得文本和进度刷新显示
+             *      如果 active group 为 null，则显示初始空白状态
+             * 7) 状态行的 Progress 要优化速度，保持一个上次用过的 Stop 对象指针，反复刷新的时候，
+             *      如无必要不修改 Min 和 Max 值
+             * 8) 工具条的按钮，enable 状态如果没有必要改变注意不要发生显示抖动
+             * 9) 将来可以考虑给工具条停止按钮加上一个文字，表示“现在共有多少个 Stop 对象正在 looping”
+             * 
+             * 
+             * */
+
+        }
+
+        void ClearDisplay()
+        {
+            _surfaceStop = null;
+            // 停止按钮 Diabled，其它 Linked 按钮 Enabled
+            EnableStopButtons(false);
+            EnableReverseButtons(true, StateParts.None);
+            // 状态行文本清空
+            InternalSetMessage("");
+            // 状态行 ProgressBar 隐藏
+            InternalSetProgressBar(null, -1, -1, -1);
+        }
+
+        // 新的名字
+        public bool Activate(Stop stop)
+        {
+            return Active(stop);
+        }
+
+#if REMOVED
         // 激活按钮
         // 因为StopManager管辖很多Stop对象, 当一个Stop对象需要处于焦点状态,
         // 需要在StopManager内部数组中把这个Stop对象挪到队列尾部, 也就是相当于堆栈顶部
@@ -1013,8 +1332,33 @@ string strText)
         // Enabled或者Disabled状态, 因为只有这样用户才能触发按钮。
         // StopManager管理了很多Stop状态，Active()函数相当于把某个Stop状态翻到可见的顶部。
         // locks: 集合写锁
+#endif
+        // 激活一个 Stop 对象。
+        // 注意，如果 Stop 对象并不是 active group 中的对象，则不影响显示
         public bool Active(Stop stop)
         {
+            if (stop == null)
+                return false;   // TODO: 是否要抛出异常？
+            /*
+             * 如果 stop.Group 是 active group，会改变 _surfaceStop 值
+             * 
+             * 
+             * */
+            // 已经是顶层 Stop 对象了
+            if (stop == _surfaceStop)
+                return false;
+            // 先在所属的 group 中激活
+            stop.MoveToTop();
+            // 如果 Stop 对象属于 active group，则把它设置为顶层 Stop
+            if (stop.Group == GetActiveGroup())
+            {
+                _surfaceStop = stop;
+                // 刷新显示
+                UpdateDisplay();
+            }
+
+            return true;
+#if REMOVED
             if (stop == null)
             {
                 // 2007/8/1
@@ -1091,8 +1435,10 @@ string strText)
             //SetToolTipText();
 
             return true;
+#endif
         }
 
+#if REMOVED
         // 是否处在当前激活位置?
         public bool IsActive(Stop stop)
         {
@@ -1106,24 +1452,25 @@ string strText)
 
             return false;
         }
+#endif
+        public Stop ActivatedStop
+        {
+            get { return ActiveStop; }
+        }
 
         // 当前激活了的Stop对象
         public Stop ActiveStop
         {
             get
             {
-                if (stops.Count > 0)
-                {
-                    return (Stop)stops[stops.Count - 1];
-                }
-
-                return null;
+                return _surfaceStop;
             }
         }
 
         // 停止当前激活的一个Stop对象。本函数通常被单击停止按钮调
         public void DoStopActive()
         {
+            /*
             if (stops.Count > 0)
             {
                 Stop temp = (Stop)stops[stops.Count - 1];
@@ -1131,42 +1478,32 @@ string strText)
             }
 
             //SetToolTipText();
-
+            */
+            _surfaceStop?.DoStop();
         }
-
-#if NOOOOOOOOOOO
-        // 一半停止当前激活的一个Stop对象。本函数通常被单击停止按钮调
-        public void DoHalfStopActive()
-        {
-            if (stops.Count > 0)
-            {
-                Stop temp = (Stop)stops[stops.Count - 1];
-                temp.DoStop(true);
-            }
-        }
-#endif
 
         // 停止所有Stop对象，但是不停止当前激活的那个Stop按钮。
         // locks: 集合写锁
         public void DoStopAllButActive()
         {
-            WriteDebugInfo("collection write lock 5\r\n");
-            this.m_collectionlock.AcquireWriterLock(Stop.m_nLockTimeout);
+            this.m_collectionlock.AcquireReaderLock(Stop.m_nLockTimeout);
             try
             {
-                for (int i = 0; i < stops.Count - 1; i++)
+                foreach (var group in _groups)
                 {
-                    Stop temp = (Stop)stops[i];
-                    temp.DoStop();
+                    foreach (var stop in group)
+                    {
+                        if (stop == _surfaceStop)
+                            continue;
+                        if (stop.IsInLoop)
+                            stop.DoStop();
+                    }
                 }
             }
             finally
             {
-                this.m_collectionlock.ReleaseWriterLock();
-                WriteDebugInfo("collection write unlock 5\r\n");
+                this.m_collectionlock.ReleaseReaderLock();
             }
-
-            //SetToolTipText();
         }
 
         // 停止所有Stop对象，包括当前激活的Stop对象。这是指stopExclude参数==null
@@ -1174,27 +1511,85 @@ string strText)
         // locks: 集合写锁
         public void DoStopAll(Stop stopExclude)
         {
-            WriteDebugInfo("collection write lock 6\r\n");
-            this.m_collectionlock.AcquireWriterLock(Stop.m_nLockTimeout);
+            this.m_collectionlock.AcquireReaderLock(Stop.m_nLockTimeout);
             try
             {
-                for (int i = 0; i < stops.Count; i++)
+                foreach (var group in _groups)
                 {
-                    Stop temp = (Stop)stops[i];
-                    if (stopExclude != temp)
-                        temp.DoStop();
+                    foreach (var stop in group)
+                    {
+                        if (stop == stopExclude)
+                            continue;
+                        if (stop.IsInLoop)
+                            stop.DoStop();
+                    }
                 }
             }
             finally
             {
-                this.m_collectionlock.ReleaseWriterLock();
-                WriteDebugInfo("collection write unlock 6\r\n");
-
+                this.m_collectionlock.ReleaseReaderLock();
             }
-
-            //SetToolTipText();
         }
 
+        // 更新 Stop 对象的 Message 显示
+        public void UpdateMessage(Stop stop)
+        {
+            /*
+            var active_group = GetActiveGroup();
+            if (active_group == null)
+                return;
+            if (stop.Group != active_group)
+                return;
+            */
+            if (stop == _surfaceStop)
+            {
+                InternalSetMessage(stop.Message);
+            }
+        }
+
+        public void UpdateProgressRange(Stop stop)
+        {
+            if (stop == _surfaceStop)
+            {
+                if (stop.ProgressMin == -1)
+                    throw new Exception("ProgressMin 尚未初始化");
+                if (stop.ProgressMax == -1)
+                    throw new Exception("ProgressMax 尚未初始化");
+                if (stop.ProgressValue < stop.ProgressMin
+                    || stop.ProgressValue > stop.ProgressMax)
+                    throw new Exception($"ProgressValue 越过 ProgressMin 和 ProgressMax 范围");
+
+                InternalSetProgressBar(
+                    stop,
+                    stop.ProgressMin,
+                    stop.ProgressMax,
+                    stop.ProgressValue);
+            }
+        }
+
+        public void UpdateProgressValue(Stop stop)
+        {
+            if (stop == _surfaceStop)
+            {
+                if (stop.ProgressMin == -1)
+                    throw new Exception("ProgressMin 尚未初始化");
+                if (stop.ProgressMax == -1)
+                    throw new Exception("ProgressMax 尚未初始化");
+                if (stop.ProgressValue < stop.ProgressMin
+                    || stop.ProgressValue > stop.ProgressMax)
+                    throw new Exception($"ProgressValue 越过 ProgressMin 和 ProgressMax 范围");
+
+                Debug.Assert(stop.ProgressMin != -1);
+                Debug.Assert(stop.ProgressMax != -1);
+                InternalSetProgressBar(
+                    stop,
+                    -1,
+                    -1,
+                    stop.ProgressValue);
+            }
+        }
+
+#if REMOVED
         // 设状态, 供Stop调
         // locks: 集合读锁(如果bLock == true)
         public void ChangeState(Stop stop,
@@ -1324,7 +1719,8 @@ string strText)
             }
 
         }
+#endif
+
     }
 
-#endif
 }

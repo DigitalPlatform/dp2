@@ -324,33 +324,26 @@ namespace dp2Circulation
             return -1;
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.textBox_barcode.Enabled = bEnable;
-                this.textBox_message.Enabled = bEnable;
+            this.textBox_barcode.Enabled = bEnable;
+            this.textBox_message.Enabled = bEnable;
 
-                this.textBox_barcodeFile.Enabled = bEnable;
-                this.textBox_outputBarcodes.Enabled = bEnable;
+            this.textBox_barcodeFile.Enabled = bEnable;
+            this.textBox_outputBarcodes.Enabled = bEnable;
 
-                this.button_loadBarcode.Enabled = bEnable;
-                this.entityEditControl1.Enabled = bEnable;
+            this.button_loadBarcode.Enabled = bEnable;
+            this.entityEditControl1.Enabled = bEnable;
 
-                this.button_beginByBarcodeFile.Enabled = bEnable;
-                this.button_changeParam.Enabled = bEnable;
-                this.button_file_getBarcodeFilename.Enabled = bEnable;
-                this.button_saveCurrentRecord.Enabled = bEnable;
-                this.button_saveToBarcodeFile.Enabled = bEnable;
+            this.button_beginByBarcodeFile.Enabled = bEnable;
+            this.button_changeParam.Enabled = bEnable;
+            this.button_file_getBarcodeFilename.Enabled = bEnable;
+            this.button_saveCurrentRecord.Enabled = bEnable;
+            this.button_saveToBarcodeFile.Enabled = bEnable;
 
-                this.button_getRecPathFileName.Enabled = bEnable;
-                this.textBox_recPathFile.Enabled = bEnable;
-                this.button_beginByRecPathFile.Enabled = bEnable;
-            }));
+            this.button_getRecPathFileName.Enabled = bEnable;
+            this.textBox_recPathFile.Enabled = bEnable;
+            this.button_beginByRecPathFile.Enabled = bEnable;
         }
 
         // 是否已经提示过修改动作
@@ -1618,7 +1611,13 @@ false);
                         //      0   没有实质性改变
                         //      1   有实质性改变
                         AutoChangeData();
-                        TryWriteToRfidTag();
+                        // TODO: 如何中断处理?
+                        nRet = TryWriteToRfidTag();
+                        if (nRet == 1)
+                        {
+                            Console.Beep();
+                            Program.MainForm.Speak($"标签 {this.textBox_barcode.Text} 写入成功");
+                        }
 
                         if (this.entityEditControl1.Changed == true)
                         {
@@ -1689,7 +1688,6 @@ false);
                 goto ERROR1;
 
             MessageBox.Show(this, "处理完成。共处理记录 " + nRet.ToString() + " 条");
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);

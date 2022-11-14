@@ -1312,16 +1312,9 @@ dlg.UiState);
             }
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                // this.textBox_input.Enabled = bEnable;
-            }));
+            // this.textBox_input.Enabled = bEnable;
         }
 
         /// <summary>
@@ -1669,7 +1662,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
         }
 
-#region IChargingForm 接口相关
+        #region IChargingForm 接口相关
 
         // 2008/10/31 
         ChargingInfoHost m_chargingInfoHost = null;
@@ -1797,7 +1790,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
         }
 
-#endregion
+        #endregion
 
         delegate void Delegate_DisplayTask(string strAction,
             ChargingTask task);
@@ -2701,7 +2694,7 @@ false);
             this.FuncState = FuncState.Read;
         }
 
-#region 各种配置参数
+        #region 各种配置参数
 
         // 加快响应的记忆变量
         int _nLogOperTime = 0;  // 0 尚未初始化; -1 false; 1 true
@@ -2886,7 +2879,7 @@ false);
             }
         }
 
-#endregion
+        #endregion
 
 
         FuncState _funcstate = FuncState.Borrow;

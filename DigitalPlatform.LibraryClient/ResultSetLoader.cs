@@ -187,7 +187,6 @@ namespace DigitalPlatform.LibraryClient
                     yield break;
             }
         }
-
     }
 
 

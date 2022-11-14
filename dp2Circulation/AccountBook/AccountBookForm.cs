@@ -391,47 +391,40 @@ namespace dp2Circulation
             base.DefWndProc(ref m);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                // load page
-                this.button_load_loadFromBatchNo.Enabled = bEnable;
-                this.button_load_loadFromRecPathFile.Enabled = bEnable;
-                this.button_load_loadFromBarcodeFile.Enabled = bEnable;
+            // load page
+            this.button_load_loadFromBatchNo.Enabled = bEnable;
+            this.button_load_loadFromRecPathFile.Enabled = bEnable;
+            this.button_load_loadFromBarcodeFile.Enabled = bEnable;
 
-                this.checkBox_load_fillBiblioSummary.Enabled = bEnable;
-                this.checkBox_load_fillOrderInfo.Enabled = bEnable;
+            this.checkBox_load_fillBiblioSummary.Enabled = bEnable;
+            this.checkBox_load_fillOrderInfo.Enabled = bEnable;
 
-                this.comboBox_load_type.Enabled = bEnable;
+            this.comboBox_load_type.Enabled = bEnable;
 
-                // next button
-                if (bEnable == true)
-                    SetNextButtonEnable();
-                else
-                    this.button_next.Enabled = false;
+            // next button
+            if (bEnable == true)
+                SetNextButtonEnable();
+            else
+                this.button_next.Enabled = false;
 
-                // sort page
-                this.comboBox_sort_sortStyle.Enabled = bEnable;
+            // sort page
+            this.comboBox_sort_sortStyle.Enabled = bEnable;
 
-                // print page
-                this.button_print_optionHTML.Enabled = bEnable;
-                this.button_print_optionText.Enabled = bEnable;
-                this.button_print_optionWordXml.Enabled = bEnable;
+            // print page
+            this.button_print_optionHTML.Enabled = bEnable;
+            this.button_print_optionText.Enabled = bEnable;
+            this.button_print_optionWordXml.Enabled = bEnable;
 
-                this.button_print_outputTextFile.Enabled = bEnable;
-                this.button_print_printNormalList.Enabled = bEnable;
-                this.button_print_outputWordXmlFile.Enabled = bEnable;
+            this.button_print_outputTextFile.Enabled = bEnable;
+            this.button_print_printNormalList.Enabled = bEnable;
+            this.button_print_outputWordXmlFile.Enabled = bEnable;
 
-                this.button_print_outputExcelFile.Enabled = bEnable;
+            this.button_print_outputExcelFile.Enabled = bEnable;
 
-                this.button_print_runScript.Enabled = bEnable;
-                this.button_print_createNewScriptFile.Enabled = bEnable;
-            }));
+            this.button_print_runScript.Enabled = bEnable;
+            this.button_print_createNewScriptFile.Enabled = bEnable;
         }
 
         // 检查路径所从属书目库是否为图书/期刊库？

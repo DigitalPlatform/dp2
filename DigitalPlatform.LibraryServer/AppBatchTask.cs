@@ -255,6 +255,8 @@ namespace DigitalPlatform.LibraryServer
                         task.StartInfo = param.StartInfo;
                     }
 
+                    var old_nextActivateTime = task.NextActivateTime;
+
                     // 激活 2007/10/10
                     task.eventActive.Set();
                     task.ManualStart = true;    // 表示为命令启动
@@ -267,7 +269,10 @@ namespace DigitalPlatform.LibraryServer
     out string strError1);
                     if (nRet == 0)
                     {
-                        strError = "任务 " + task.Name + " 已经在运行中，不能重复启动。本次操作激活了这个任务。";
+                        string comment = "";
+                        if (old_nextActivateTime != DateTime.MinValue)
+                            comment = $"(原本计划休眠到 {old_nextActivateTime.ToString()})";
+                        strError = $"任务 { task.Name} 已经在运行中，不能重复启动。本次操作激活了这个任务。{comment}";
                         return 1;
                     }
 
@@ -475,6 +480,7 @@ out strError);
                 strError = "任务 '" + strName + "' 不存在";
                 return -1;
             }
+
 
             info = task.GetCurrentInfo(param.ResultOffset,
                 param.MaxResultBytes);

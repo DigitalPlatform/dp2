@@ -320,6 +320,9 @@
       <DependentUpon>SelectDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="Stop\Looping.cs" />
+    <Compile Include="Stop\NewStop.cs" />
+    <Compile Include="Stop\NewStopGroup.cs" />
+    <Compile Include="Stop\NewStopManager.cs" />
     <Compile Include="Stop\StopManager.cs" />
     <Compile Include="WebBrowserExtension.cs" />
     <EmbeddedResource Include="..\AutoCloseMessageBox.resx">

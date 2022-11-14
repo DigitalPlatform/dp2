@@ -910,38 +910,30 @@ namespace dp2Circulation
             }
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.comboBox_taskName.Enabled = bEnable;
+            this.comboBox_taskName.Enabled = bEnable;
 
-                if (this.comboBox_taskName.Text != "")
-                    this.toolStripButton_monitoring.Enabled = bEnable;
-                else
-                    this.toolStripButton_monitoring.Enabled = false;
+            if (this.comboBox_taskName.Text != "")
+                this.toolStripButton_monitoring.Enabled = bEnable;
+            else
+                this.toolStripButton_monitoring.Enabled = false;
 
-                this.button_start.Enabled = bEnable;
-                this.button_stop.Enabled = bEnable;
+            this.button_start.Enabled = bEnable;
+            this.button_stop.Enabled = bEnable;
 
-                /*
-                this.button_refresh.Enabled = bEnable;
-                this.button_rewind.Enabled = bEnable;
-                this.button_clear.Enabled = bEnable;
-                 * */
+            /*
+            this.button_refresh.Enabled = bEnable;
+            this.button_rewind.Enabled = bEnable;
+            this.button_clear.Enabled = bEnable;
+             * */
 
-                this.toolStripButton_refresh.Enabled = bEnable;
-                this.toolStripButton_rewind.Enabled = bEnable;
-                this.toolStripButton_clear.Enabled = bEnable;
-                this.toolStripButton_continue.Enabled = bEnable;
-                this.toolStripButton_pauseAll.Enabled = bEnable;
-            }));
+            this.toolStripButton_refresh.Enabled = bEnable;
+            this.toolStripButton_rewind.Enabled = bEnable;
+            this.toolStripButton_clear.Enabled = bEnable;
+            this.toolStripButton_continue.Enabled = bEnable;
+            this.toolStripButton_pauseAll.Enabled = bEnable;
         }
-
 
         string GetResultText(byte[] baResult)
         {

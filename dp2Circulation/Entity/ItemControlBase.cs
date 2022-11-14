@@ -2769,7 +2769,7 @@ size.Height);
 
         public LibraryChannel GetChannel(string strServerUrl = ".",
             string strUserName = ".",
-            GetChannelStyle style = GetChannelStyle.GUI,
+            GetChannelStyle style = GetChannelStyle.None,
             string strClientIP = "")
         {
             return _loopingHost.GetChannel(strServerUrl,

@@ -69,9 +69,11 @@ namespace dp2Circulation
 
         private void SelectPatronDialog_Load(object sender, EventArgs e)
         {
-            stopManager.Initial(this.toolStripButton_stop,
-(object)this.toolStripLabel_message,
-(object)null);
+            stopManager.Initial(
+                this,
+                this.toolStripButton_stop,
+                (object)this.toolStripLabel_message,
+                (object)null);
             // 本窗口独立管理 stopManager
             this._loopingHost.StopManager = stopManager;
             /*
@@ -221,23 +223,16 @@ namespace dp2Circulation
         }
 #endif
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.listView_items.Enabled = bEnable;
+            this.listView_items.Enabled = bEnable;
 
-                if (this.listView_items.SelectedItems.Count == 0)
-                    this.button_OK.Enabled = false;
-                else
-                    this.button_OK.Enabled = bEnable;
+            if (this.listView_items.SelectedItems.Count == 0)
+                this.button_OK.Enabled = false;
+            else
+                this.button_OK.Enabled = bEnable;
 
-                this.button_Cancel.Enabled = bEnable;
-            }));
+            this.button_Cancel.Enabled = bEnable;
         }
 
         class ItemInfo

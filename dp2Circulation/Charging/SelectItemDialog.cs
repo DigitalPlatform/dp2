@@ -88,9 +88,11 @@ namespace dp2Circulation
             this._floatingMessage.RectColor = Color.Purple;
 
             // 把状态条和进度条映射到本对话框内的控件上
-            stopManager.Initial(this.button_stop,
-(object)this.toolStripStatusLabel1,
-(object)this.toolStripProgressBar1);
+            stopManager.Initial(
+                this,
+                this.button_stop,
+                (object)this.toolStripStatusLabel1,
+                (object)this.toolStripProgressBar1);
             // 本窗口独立管理 stopManager
             this._loopingHost.StopManager = stopManager;
             /*
@@ -858,18 +860,11 @@ namespace dp2Circulation
             return strText;
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.comboBox_from.Enabled = bEnable;
-                this.textBox_queryWord.Enabled = bEnable;
-                this.button_search.Enabled = bEnable;
-            }));
+            this.comboBox_from.Enabled = bEnable;
+            this.textBox_queryWord.Enabled = bEnable;
+            this.button_search.Enabled = bEnable;
         }
 
         private void SelectItemDialog_FormClosing(object sender, FormClosingEventArgs e)

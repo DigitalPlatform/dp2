@@ -138,6 +138,7 @@ namespace dp2Circulation
             EnableControlsInSearching(bEnable);
         }
 
+        // TODO: 重构
         void EnableControlsInSearching(bool bEnable)
         {
             this.TryInvoke(() =>

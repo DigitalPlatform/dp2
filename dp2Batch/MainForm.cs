@@ -851,8 +851,9 @@ namespace dp2Batch
                     "mainformstate");
             }
 
-
-            stopManager.Initial(this.toolBarButton_stop,
+            stopManager.Initial(
+                this,
+                this.toolBarButton_stop,
                 this.toolStripStatusLabel_main,
                 this.toolStripProgressBar_main);
             stopManager.LinkReverseButton(this.toolBarButton_begin);

@@ -592,20 +592,13 @@ this.InfoDlgOpacity,
             base.DefWndProc(ref m);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.textBox_itemBarcode.Enabled = bEnable;
-                this.textBox_readerBarcode.Enabled = bEnable;
+            this.textBox_itemBarcode.Enabled = bEnable;
+            this.textBox_readerBarcode.Enabled = bEnable;
 
-                this.button_itemAction.Enabled = bEnable;
-                this.button_loadReader.Enabled = bEnable;
-            }));
+            this.button_itemAction.Enabled = bEnable;
+            this.button_loadReader.Enabled = bEnable;
         }
 
         private void UrgentChargingForm_Activated(object sender, EventArgs e)

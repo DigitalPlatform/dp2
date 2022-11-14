@@ -112,7 +112,9 @@ namespace DigitalPlatform.Library
         public void InitialStopManager(Button buttonStop,
             Label labelMessage)
         {
-            stopManager.Initial(buttonStop,
+            stopManager.Initial(
+                buttonStop.Parent,
+                buttonStop,
                 labelMessage,
                 null);
             stop = new DigitalPlatform.Stop();
@@ -127,7 +129,9 @@ namespace DigitalPlatform.Library
         public void InitialStopManager(ToolBarButton toolbarbuttonstop,
             StatusBar statusbar)
         {
-            stopManager.Initial(toolbarbuttonstop,
+            stopManager.Initial(
+                statusbar.Parent,
+                toolbarbuttonstop,
                 statusbar,
                 null);
             stop = new DigitalPlatform.Stop();

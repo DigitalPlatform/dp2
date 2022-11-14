@@ -144,33 +144,36 @@ namespace dp2Circulation
         /// </summary>
         public void ClearHtml()
         {
-            // string strCssUrl = Program.MainForm.LibraryServerDir + "/history.css";
-            string strCssUrl = PathUtil.MergePath(Program.MainForm.DataDir, "/history.css");
-
-            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
-
-            string strJs = "";
-
-            /*
-            // 2009/2/11
-            if (String.IsNullOrEmpty(Program.MainForm.LibraryServerDir) == false)
-                strJs = "<SCRIPT language='javaSCRIPT' src='" + Program.MainForm.LibraryServerDir + "/getsummary.js" + "'></SCRIPT>";
-            */
-            // strJs = "<SCRIPT language='javaSCRIPT' src='" + PathUtil.MergePath(Program.MainForm.DataDir, "getsummary.js") + "'></SCRIPT>";
-
+            WebBrowser.Invoke((Action)(() =>
             {
-                HtmlDocument doc = WebBrowser.Document;
+                // string strCssUrl = Program.MainForm.LibraryServerDir + "/history.css";
+                string strCssUrl = PathUtil.MergePath(Program.MainForm.DataDir, "/history.css");
 
-                if (doc == null)
+                string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+
+                string strJs = "";
+
+                /*
+                // 2009/2/11
+                if (String.IsNullOrEmpty(Program.MainForm.LibraryServerDir) == false)
+                    strJs = "<SCRIPT language='javaSCRIPT' src='" + Program.MainForm.LibraryServerDir + "/getsummary.js" + "'></SCRIPT>";
+                */
+                // strJs = "<SCRIPT language='javaSCRIPT' src='" + PathUtil.MergePath(Program.MainForm.DataDir, "getsummary.js") + "'></SCRIPT>";
+
                 {
-                    WebBrowser.Navigate("about:blank");
-                    doc = WebBrowser.Document;
-                }
-                doc = doc.OpenNew(true);
-            }
+                    HtmlDocument doc = WebBrowser.Document;
 
-            Global.WriteHtml(this.WebBrowser,
-                "<html><head>" + strLink + strJs + "</head><body>");
+                    if (doc == null)
+                    {
+                        WebBrowser.Navigate("about:blank");
+                        doc = WebBrowser.Document;
+                    }
+                    doc = doc.OpenNew(true);
+                }
+
+                Global.WriteHtml(this.WebBrowser,
+                    "<html><head>" + strLink + strJs + "</head><body>");
+            }));
         }
 
         /// <summary>

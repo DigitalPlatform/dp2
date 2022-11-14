@@ -1579,26 +1579,19 @@ out string strError);
                 PrintFromItemRecords();
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            TryInvoke(() =>
-            {
-                this.textBox_labelFile_labelFilename.Enabled = bEnable;
-                this.button_labelFile_findLabelFilename.Enabled = bEnable;
+            this.textBox_labelFile_labelFilename.Enabled = bEnable;
+            this.button_labelFile_findLabelFilename.Enabled = bEnable;
 
-                this.textBox_labelDefFilename.Enabled = bEnable;
-                this.button_findLabelDefFilename.Enabled = bEnable;
+            this.textBox_labelDefFilename.Enabled = bEnable;
+            this.button_findLabelDefFilename.Enabled = bEnable;
 
-                this.button_print.Enabled = bEnable;
-                this.button_printPreview.Enabled = bEnable;
+            this.button_print.Enabled = bEnable;
+            this.button_printPreview.Enabled = bEnable;
 
-                this.toolStrip1.Enabled = bEnable;
-                this.Update();
-            });
+            this.toolStrip1.Enabled = bEnable;
+            this.Update();
         }
 
         // 
@@ -2552,10 +2545,10 @@ out string strError);
                     Application.DoEvents();	// 出让界面控制权
 
                     if (looping.Stopped)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                    {
+                        MessageBox.Show(this, "用户中断");
+                        return;
+                    }
 
                     string strBarcode = sr.ReadLine();
 

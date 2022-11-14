@@ -96,8 +96,9 @@ namespace UpgradeDt1000ToDp2
                 DataDir = Environment.CurrentDirectory;
             }
 
-
-            stopManager.Initial(this.toolButton_stop,
+            stopManager.Initial(
+                this,
+                this.toolButton_stop,
                 (object)this.toolStripStatusLabel1,
                 (object)this.toolStripProgressBar1);
 

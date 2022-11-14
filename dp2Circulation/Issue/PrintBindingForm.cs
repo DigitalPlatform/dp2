@@ -446,29 +446,22 @@ namespace dp2Circulation
             base.DefWndProc(ref m);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                // load page
-                this.button_load_loadFromBatchNo.Enabled = bEnable;
-                this.button_load_loadFromBarcodeFile.Enabled = bEnable;
-                this.button_load_loadFromRecPathFile.Enabled = bEnable;
+            // load page
+            this.button_load_loadFromBatchNo.Enabled = bEnable;
+            this.button_load_loadFromBarcodeFile.Enabled = bEnable;
+            this.button_load_loadFromRecPathFile.Enabled = bEnable;
 
-                // next button
-                if (bEnable == true)
-                    SetNextButtonEnable();
-                else
-                    this.button_next.Enabled = false;
+            // next button
+            if (bEnable == true)
+                SetNextButtonEnable();
+            else
+                this.button_next.Enabled = false;
 
-                // print page
-                this.button_printOption.Enabled = bEnable;
-                this.button_print_print.Enabled = bEnable;
-            }));
+            // print page
+            this.button_printOption.Enabled = bEnable;
+            this.button_print_print.Enabled = bEnable;
         }
 
         void SetNextButtonEnable()

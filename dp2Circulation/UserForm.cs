@@ -224,61 +224,54 @@ password);
             base.DefWndProc(ref m);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
+            this.textBox_userName.Enabled = bEnable;
+            this.textBox_userRights.Enabled = bEnable;
+            this.textBox_userType.Enabled = bEnable;
+            // this.textBox_libraryCode.Enabled = bEnable;
+            this.checkedComboBox_libraryCode.Enabled = bEnable;
+            this.textBox_access.Enabled = bEnable;
+            this.textBox_binding.Enabled = bEnable;
+            this.textBox_location.Enabled = bEnable;
+            this.textBox_comment.Enabled = bEnable;
+            this.listView_users.Enabled = bEnable;
+
+            this.toolStripButton_listAllUsers.Enabled = bEnable;
+            this.toolStripButton_create.Enabled = bEnable;
+            this.button_editUserRights.Enabled = bEnable;
+
+            this.checkBox_changePassword.Enabled = bEnable;
+
+            if (bEnable == true)
             {
-                this.textBox_userName.Enabled = bEnable;
-                this.textBox_userRights.Enabled = bEnable;
-                this.textBox_userType.Enabled = bEnable;
-                // this.textBox_libraryCode.Enabled = bEnable;
-                this.checkedComboBox_libraryCode.Enabled = bEnable;
-                this.textBox_access.Enabled = bEnable;
-                this.textBox_binding.Enabled = bEnable;
-                this.textBox_location.Enabled = bEnable;
-                this.textBox_comment.Enabled = bEnable;
-                this.listView_users.Enabled = bEnable;
-
-                this.toolStripButton_listAllUsers.Enabled = bEnable;
-                this.toolStripButton_create.Enabled = bEnable;
-                this.button_editUserRights.Enabled = bEnable;
-
-                this.checkBox_changePassword.Enabled = bEnable;
-
-                if (bEnable == true)
-                {
-                    if (this.m_bEditChanged == true)
-                        this.toolStripButton_save.Enabled = true;
-                    else
-                        this.toolStripButton_save.Enabled = false;
-                }
+                if (this.m_bEditChanged == true)
+                    this.toolStripButton_save.Enabled = true;
                 else
-                {
                     this.toolStripButton_save.Enabled = false;
-                }
+            }
+            else
+            {
+                this.toolStripButton_save.Enabled = false;
+            }
 
-                if (this.textBox_userName.Text == "")
-                    this.toolStripButton_delete.Enabled = false;
-                else
-                    this.toolStripButton_delete.Enabled = bEnable;
+            if (this.textBox_userName.Text == "")
+                this.toolStripButton_delete.Enabled = false;
+            else
+                this.toolStripButton_delete.Enabled = bEnable;
 
-                if (this.checkBox_changePassword.Checked == true)
-                {
-                    this.textBox_confirmPassword.Enabled = bEnable;
-                    this.textBox_password.Enabled = bEnable;
-                    this.button_resetPassword.Enabled = bEnable;
-                }
-                else
-                {
-                    this.textBox_confirmPassword.Enabled = false;
-                    this.textBox_password.Enabled = false;
-                    this.button_resetPassword.Enabled = false;
-                }
-            }));
+            if (this.checkBox_changePassword.Checked == true)
+            {
+                this.textBox_confirmPassword.Enabled = bEnable;
+                this.textBox_password.Enabled = bEnable;
+                this.button_resetPassword.Enabled = bEnable;
+            }
+            else
+            {
+                this.textBox_confirmPassword.Enabled = false;
+                this.textBox_password.Enabled = false;
+                this.button_resetPassword.Enabled = false;
+            }
         }
 
         void ClearEdit()
@@ -372,7 +365,10 @@ password);
             }
         }
 
-        public override LibraryChannel GetChannel(string strServerUrl = ".", string strUserName = ".", GetChannelStyle style = GetChannelStyle.GUI, string strClientIP = "")
+        public override LibraryChannel GetChannel(string strServerUrl = ".", 
+            string strUserName = ".",
+            GetChannelStyle style = GetChannelStyle.None,
+            string strClientIP = "")
         {
             if (_channel != null)
                 return _channel;

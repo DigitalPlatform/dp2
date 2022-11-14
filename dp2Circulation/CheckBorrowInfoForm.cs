@@ -321,7 +321,7 @@ namespace dp2Circulation
             var looping = Looping(out LibraryChannel channel,
                 null,
                 "timeout:0:5:0");
-            
+
             try
             {
             // int nRedoCount = 0;
@@ -529,7 +529,7 @@ namespace dp2Circulation
                 // 2022/2/21
                 if (string.IsNullOrEmpty(strReaderBarcode))
                 {
-                    DisplayError($"读者记录 { recpath } 证条码号(barcode 元素)为空，格式不合法。请尽快修正此问题");
+                    DisplayError($"读者记录 {recpath} 证条码号(barcode 元素)为空，格式不合法。请尽快修正此问题");
                     DisplayRecord(null, null, $"<pp>{recpath}<pp>");
                     return -1;
                     /*
@@ -555,7 +555,7 @@ namespace dp2Circulation
 
                     if (dup_count > 1)
                     {
-                        DisplayCheckError($"读者证条码号 { strReaderBarcode } 有重复记录 { dup_count }条。({recpath})");
+                        DisplayCheckError($"读者证条码号 {strReaderBarcode} 有重复记录 {dup_count}条。({recpath})");
                     }
                 }
 
@@ -607,13 +607,13 @@ namespace dp2Circulation
                         if (e.ResultAction == "yes")
                             goto REDO_REPAIR;
 
-                        DisplayError($"检查读者记录 { caption} 时{ strOffsComment }出错: { strError}");
+                        DisplayError($"检查读者记录 {caption} 时{strOffsComment}出错: {strError}");
                         // DisplayError(strError);
                         return -1;
                     }
                     if (lRet == 1)
                     {
-                        DisplayCheckError($"检查读者记录 { caption } 时{ strOffsComment }发现问题: ", PlainText(strError));
+                        DisplayCheckError($"检查读者记录 {caption} 时{strOffsComment}发现问题: ", PlainText(strError));
                         DisplayRecord(strReaderBarcode, null, strError);
                         bFoundError = true;
                     }
@@ -1534,46 +1534,39 @@ false);
         }
 #endif
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.button_beginCheckFromReader.Enabled = bEnable;
-                this.button_beginCheckFromItem.Enabled = bEnable;
-                this.button_clearInfo.Enabled = bEnable;
-                this.button_beginRepairFromItem.Enabled = bEnable;
-                this.button_beginRepairFromReader.Enabled = bEnable;
+            this.button_beginCheckFromReader.Enabled = bEnable;
+            this.button_beginCheckFromItem.Enabled = bEnable;
+            this.button_clearInfo.Enabled = bEnable;
+            this.button_beginRepairFromItem.Enabled = bEnable;
+            this.button_beginRepairFromReader.Enabled = bEnable;
 
-                /*
-                this.button_repairReaderSide.Enabled = bEnable;
-                this.button_repairItemSide.Enabled = bEnable;
-                this.textBox_itemBarcode.Enabled = bEnable;
-                this.textBox_readerBarcode.Enabled = bEnable;
-                */
+            /*
+            this.button_repairReaderSide.Enabled = bEnable;
+            this.button_repairItemSide.Enabled = bEnable;
+            this.textBox_itemBarcode.Enabled = bEnable;
+            this.textBox_readerBarcode.Enabled = bEnable;
+            */
 
-                this.button_batchAddItemPrice.Enabled = bEnable;
+            this.button_batchAddItemPrice.Enabled = bEnable;
 
-                this.checkBox_checkItemBarcodeDup.Enabled = bEnable;
-                this.checkBox_checkReaderBarcodeDup.Enabled = bEnable;
+            this.checkBox_checkItemBarcodeDup.Enabled = bEnable;
+            this.checkBox_checkReaderBarcodeDup.Enabled = bEnable;
 
-                this.checkBox_displayPriceString.Enabled = bEnable;
-                this.checkBox_forceCNY.Enabled = bEnable;
-                this.checkBox_overwriteExistPrice.Enabled = bEnable;
+            this.checkBox_displayPriceString.Enabled = bEnable;
+            this.checkBox_forceCNY.Enabled = bEnable;
+            this.checkBox_overwriteExistPrice.Enabled = bEnable;
 
-                this.textBox_single_readerBarcode.Enabled = bEnable;
-                this.textBox_single_itemBarcode.Enabled = bEnable;
-                this.button_single_checkFromItem.Enabled = bEnable;
-                this.button_single_checkFromReader.Enabled = bEnable;
+            this.textBox_single_readerBarcode.Enabled = bEnable;
+            this.textBox_single_itemBarcode.Enabled = bEnable;
+            this.button_single_checkFromItem.Enabled = bEnable;
+            this.button_single_checkFromReader.Enabled = bEnable;
 
-                this.button_single_repairFromItem.Enabled = bEnable;
-                this.button_single_repairFromReader.Enabled = bEnable;
+            this.button_single_repairFromItem.Enabled = bEnable;
+            this.button_single_repairFromReader.Enabled = bEnable;
 
-                this.checkBox_displayRecords.Enabled = bEnable;
-            }));
+            this.checkBox_displayRecords.Enabled = bEnable;
         }
 
 #if OLD
@@ -2446,7 +2439,7 @@ false);
                     string refID = DomUtil.GetElementText(item_dom.DocumentElement, "refID");
                     if (string.IsNullOrEmpty(refID))
                     {
-                        DisplayError($"册记录 { recpath } 既没有 barcode 元素，也没有 refID 元素，格式不合法。请尽快修正此问题");
+                        DisplayError($"册记录 {recpath} 既没有 barcode 元素，也没有 refID 元素，格式不合法。请尽快修正此问题");
                         DisplayRecord(null, null, $"<ip>{recpath}<ip>");
                         return -1;
                     }
@@ -2472,7 +2465,7 @@ false);
 
                     if (dup_count > 1)
                     {
-                        DisplayCheckError($"册条码号 { strItemBarcode } 有重复记录 { dup_count }条。({recpath})");
+                        DisplayCheckError($"册条码号 {strItemBarcode} 有重复记录 {dup_count}条。({recpath})");
                     }
                 }
 
@@ -2530,7 +2523,7 @@ false);
                         if (e.ResultAction == "yes")
                             goto REDO_REPAIR;
 
-                        DisplayError($"检查册记录 { caption } 时出错: ", PlainText(strError));
+                        DisplayError($"检查册记录 {caption} 时出错: ", PlainText(strError));
                         DisplayRecord(strReaderBarcode, strItemBarcode, strError);
                     }
 
@@ -2607,7 +2600,7 @@ false);
 
                     if (lRet == 1)
                     {
-                        DisplayCheckError($"检查册记录 { caption } 时发现问题: ", PlainText(strError));
+                        DisplayCheckError($"检查册记录 {caption} 时发现问题: ", PlainText(strError));
                         DisplayRecord(strReaderBarcode, strItemBarcode, strError);
 
                         if (bAutoRepair)

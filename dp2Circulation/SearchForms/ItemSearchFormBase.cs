@@ -1387,13 +1387,31 @@ item_recpath);
             strError = "";
             int nRet = 0;
 
+            if (this.DbType == "item"
+                || this.DbType == "order"
+                || this.DbType == "issue"
+                || this.DbType == "comment"
+                || this.DbType == "arrive")
+            {
+
+            }
+            else
+            {
+                strError = $"暂不支持数据库类型 {this.DbType} 调用 FillBiblioSummaryColumn()";
+                return -1;
+            }
+
+            Debug.Assert(this.DbType == "item"
+    || this.DbType == "order"
+    || this.DbType == "issue"
+    || this.DbType == "comment"
+    || this.DbType == "arrive",
+    "");
+
             if (m_nBiblioSummaryColumn == 0)
                 return 0;
 
-            Debug.Assert(this.DbType == "item"
-                || this.DbType == "order"
-                || this.DbType == "issue"
-                || this.DbType == "comment", "");
+
 
 #if REMOEVD
             Looping looping = null;
@@ -1640,6 +1658,8 @@ item_recpath);
                 }
 
                 int nCol = -1;
+
+                // TODO: 如果没有 parent id 列，而有 item barcode 列也可以
                 // 获得事项所从属的书目记录的路径
                 // return:
                 //      -1  出错

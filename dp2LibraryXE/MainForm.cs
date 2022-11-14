@@ -232,9 +232,11 @@ namespace dp2LibraryXE
             this.dp2SiteDir = Path.Combine(this.UserDir, "dp2_site");
             PathUtil.TryCreateDir(this.dp2SiteDir);
 
-            stopManager.Initial(this.toolButton_stop,
-    (object)this.toolStripStatusLabel_main,
-    (object)this.toolStripProgressBar_main);
+            stopManager.Initial(
+                this,
+                this.toolButton_stop,
+                (object)this.toolStripStatusLabel_main,
+                (object)this.toolStripProgressBar_main);
 
             this.AppInfo.LoadFormStates(this,
 "mainformstate",
@@ -5610,7 +5612,11 @@ MessageBoxDefaultButton.Button2);
             }));
 
             StopManager stopManager = new StopManager();
-            stopManager.Initial(dlg.MyCancelButton, dlg.MessageLabel, dlg.ProgressBar);
+            stopManager.Initial(
+                dlg,
+                dlg.MyCancelButton,
+                dlg.MessageLabel,
+                dlg.ProgressBar);
 #if NO
             stopManager.OnDisplayMessage += new DisplayMessageEventHandler((sender, e) => {
                 dlg.SetMessage(e.Message);

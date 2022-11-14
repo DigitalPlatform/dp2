@@ -1259,19 +1259,12 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             MessageBox.Show(this, strError);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.comboBox_from.Enabled = bEnable;
-                this.textBox_queryWord.Enabled = bEnable;
-                this.button_load.Enabled = bEnable;
-                this.toolStrip1.Enabled = bEnable;  // 避免使用工具条上的命令按钮
-            }));
+            this.comboBox_from.Enabled = bEnable;
+            this.textBox_queryWord.Enabled = bEnable;
+            this.button_load.Enabled = bEnable;
+            this.toolStrip1.Enabled = bEnable;  // 避免使用工具条上的命令按钮
         }
 
         private void toolStripButton_prevRecord_Click(object sender, EventArgs e)

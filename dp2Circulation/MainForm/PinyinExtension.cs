@@ -61,7 +61,7 @@ namespace dp2Circulation
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public LibraryChannel GetExtChannel(string strServerUrl,
             string strUserName,
-            GetChannelStyle style = GetChannelStyle.GUI)
+            GetChannelStyle style = GetChannelStyle.None)
         {
             LibraryChannel channel = this._channelPoolExt.GetChannel(strServerUrl, strUserName);
             if ((style & GetChannelStyle.GUI) != 0)

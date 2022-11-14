@@ -46,7 +46,7 @@ namespace DigitalPlatform.LibraryClient
         //      strStyle    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         LibraryChannel GetChannel(string strServerUrl = ".",
             string strUserName = ".",
-            GetChannelStyle style = GetChannelStyle.GUI,
+            GetChannelStyle style = GetChannelStyle.None,
             string strClientIP = "");
 
         void ReturnChannel(LibraryChannel channel);

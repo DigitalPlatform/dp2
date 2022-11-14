@@ -795,8 +795,8 @@ true);
 "itemQuickInputPanel_visibie",
 true);
 
-            // 
-            this.EnableControls(true);  // 促使“保存”按钮状态被设置
+            // this.EnableControls(true);  // 促使“保存”按钮状态被设置
+            SetSaveAllButtonState(!InDisabledState); // 促使“保存”按钮状态被设置
 
             // API.PostMessage(this.Handle, WM_LOADLAYOUT, 0, 0);
 
@@ -2406,7 +2406,7 @@ true);
 
         void binaryResControl1_ContentChanged(object sender, ContentChangedEventArgs e)
         {
-            SetSaveAllButtonState(true);
+            SetSaveAllButtonState(!InDisabledState);
         }
 
         void entityControl1_LoadRecord111(object sender, LoadRecordEventArgs e)
@@ -2451,7 +2451,7 @@ true);
 
         void issueControl1_ContentChanged(object sender, ContentChangedEventArgs e)
         {
-            SetSaveAllButtonState(true);
+            SetSaveAllButtonState(!InDisabledState);
         }
 
         void issueControl1_GetMacroValue(object sender, GetMacroValueEventArgs e)
@@ -4473,8 +4473,8 @@ out string strErrorCode)
             // 2011/11/8
             if (this.m_bDeletedMode == true)
             {
-                this.button_save.Enabled = true;
-                this.toolStripButton_saveAll.Enabled = true;
+                this.button_save.Enabled = bEnable; // true
+                this.toolStripButton_saveAll.Enabled = bEnable; // true
                 return;
             }
 
@@ -4498,104 +4498,71 @@ out string strErrorCode)
 
         int m_nInDisable = 0;
 
-        /*
-        操作类型 crashReport -- 异常报告 
-        主题 dp2circulation 
-        发送者 xxx 
-        媒体类型 text 
-        内容 发生未捕获的界面线程异常: 
-        Type: System.NullReferenceException
-        Message: 未将对象引用设置到对象的实例。
-        Stack:
-        在 System.Windows.Forms.ToolStripControlHost.set_Enabled(Boolean value)
-        在 dp2Circulation.EntityForm.EnableControls(Boolean bEnable)
-        在 dp2Circulation.EntityForm.MoveTo(String strAction, String strTargetRecPathParam, CopyParam copy_param, MergeStyle auto_mergeStyle, String& strError)
-        在 dp2Circulation.EntityForm.MoveTo(String strTargetRecPathParam, String& strError)
-        在 dp2Circulation.EntityForm.toolStripButton_marcEditor_moveTo_Click(Object sender, EventArgs e)
-        在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
-        在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
-        在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
-        在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
-        在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
-        在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
-        在 System.Windows.Forms.Control.WndProc(Message& m)
-        在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
-        在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
-
-        dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, PublicKeyToken=null
-        操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
-        本机 MAC 地址: xxx 
-        操作时间 2019/3/22 16:58:39 (Fri, 22 Mar 2019 16:58:39 +0800) 
-        前端地址 xxx 经由 http://dp2003.com/dp2library 
-        * */
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
+            this.textBox_queryWord.Enabled = bEnable;
+
+            if (this.ItemsPageVisible == false)
             {
-                this.textBox_queryWord.Enabled = bEnable;
+                this.textBox_itemBarcode.Enabled = false;
+                this.button_register.Enabled = false;
+            }
+            else
+            {
+                this.textBox_itemBarcode.Enabled = bEnable;
+                this.button_register.Enabled = bEnable;
+            }
 
-                if (this.ItemsPageVisible == false)
-                {
-                    this.textBox_itemBarcode.Enabled = false;
-                    this.button_register.Enabled = false;
-                }
-                else
-                {
-                    this.textBox_itemBarcode.Enabled = bEnable;
-                    this.button_register.Enabled = bEnable;
-                }
+            /*
+            if (bEnable == false)
+                this.button_save.Enabled = bEnable;
+            else
+                SetSaveAllButtonState(bEnable);
+            */
+            // 2022/11/12
+            SetSaveAllButtonState(bEnable);
 
-                if (bEnable == false)
-                    this.button_save.Enabled = bEnable;
-                else
-                    SetSaveAllButtonState(bEnable);
+            this.button_search.Enabled = bEnable;
 
-                this.button_search.Enabled = bEnable;
+            try
+            {
+                this.toolStripButton_option.Enabled = bEnable;
+            }
+            catch
+            {
 
-                try
-                {
-                    this.toolStripButton_option.Enabled = bEnable;
-                }
-                catch
-                {
+            }
 
-                }
+            this.entityControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+            this.issueControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+            this.orderControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+            this.commentControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+            this.binaryResControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
 
-                this.entityControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
-                this.issueControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
-                this.orderControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
-                this.commentControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
-                this.binaryResControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
+            this.comboBox_from.Enabled = bEnable;
+            this.checkedComboBox_biblioDbNames.Enabled = bEnable;
+            this.comboBox_matchStyle.Enabled = bEnable;
 
-                this.comboBox_from.Enabled = bEnable;
-                this.checkedComboBox_biblioDbNames.Enabled = bEnable;
-                this.comboBox_matchStyle.Enabled = bEnable;
+            // this.checkBox_autoDetectQueryBarcode.Enabled = bEnable;
+            this.checkBox_autoSavePrev.Enabled = bEnable;
 
-                // this.checkBox_autoDetectQueryBarcode.Enabled = bEnable;
-                this.checkBox_autoSavePrev.Enabled = bEnable;
+            this.textBox_biblioRecPath.Enabled = bEnable;
 
-                this.textBox_biblioRecPath.Enabled = bEnable;
+            try
+            {
+                this.toolStripButton_clear.Enabled = bEnable;
 
-                try
-                {
-                    this.toolStripButton_clear.Enabled = bEnable;
+                if (this.toolStrip_marcEditor.Enabled != bEnable)
+                    this.toolStrip_marcEditor.Enabled = bEnable;
+            }
+            catch
+            {
 
-                    if (this.toolStrip_marcEditor.Enabled != bEnable)
-                        this.toolStrip_marcEditor.Enabled = bEnable;
-                }
-                catch
-                {
+            }
 
-                }
-
-                bool bValue = (this.m_bDeletedMode == true) ? false : bEnable;  // 2012/3/19
-                if (this.m_marcEditor.Enabled != bValue)
-                    this.m_marcEditor.Enabled = bValue;
-            }));
+            bool bValue = (this.m_bDeletedMode == true) ? false : bEnable;  // 2012/3/19
+            if (this.m_marcEditor.Enabled != bValue)
+                this.m_marcEditor.Enabled = bValue;
         }
 
         string GetMacroValue(string strMacroName)
@@ -8816,8 +8783,8 @@ out strError);
             {
                 this.m_bDeletedMode = value;
 
-                this.SetSaveAllButtonState(true);
-                this.EnableControls(true);  // 2009/11/11 
+                this.SetSaveAllButtonState(!InDisabledState);
+                // this.EnableControls(true);  // 2009/11/11 
             }
         }
 
@@ -8969,7 +8936,7 @@ out strError);
 
             strMessage += "删除成功";
             Program.MainForm.StatusBarMessage = strMessage;
-            this.SetSaveAllButtonState(true);
+            this.SetSaveAllButtonState(!InDisabledState);
             this.ShowMessage(strMessage, "green", true);
             return;
         ERROR1:
@@ -9519,7 +9486,7 @@ out strError);
             // ****
             this.toolStripButton_marcEditor_save.Enabled = true;
 
-            this.SetSaveAllButtonState(true);
+            this.SetSaveAllButtonState(!InDisabledState);
 
             this._marcEditorVersion++;
         }
@@ -9529,7 +9496,7 @@ out strError);
             // ****
             this.toolStripButton_marcEditor_save.Enabled = true;
 
-            this.SetSaveAllButtonState(true);
+            this.SetSaveAllButtonState(!InDisabledState);
 
             this._templateVersion++;
         }
@@ -9909,7 +9876,7 @@ out strError);
                     bVerifyFail = true;
                 }
 
-                this.SetSaveAllButtonState(true);   // 2009/3/29 
+                this.SetSaveAllButtonState(!InDisabledState);   // 2009/3/29 
                 return bVerifyFail == true ? 2 : 0;
             }
             finally
@@ -10823,8 +10790,8 @@ out strError);
                     // 保存当前册信息
                     nRet = this.entityControl1.DoSaveItems(
                         looping.Progress,
-                        channel, 
-                        "", 
+                        channel,
+                        "",
                         out strError);
                     if (nRet == -1)
                     {
@@ -11550,9 +11517,9 @@ out strError);
             return null;
         }
 
-#region 期 相关功能
+        #region 期 相关功能
 
-#endregion
+        #endregion
 
         /// <summary>
         /// 获得对象资源信息
@@ -12343,7 +12310,7 @@ out strError);
                 this.commentControl1.BiblioRecPath = this.BiblioRecPath;
             }
 
-            SetSaveAllButtonState(true);
+            SetSaveAllButtonState(!InDisabledState);
             return;
         ERROR1:
             MessageBox.Show(this, strError);

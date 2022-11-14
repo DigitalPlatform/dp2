@@ -29,14 +29,18 @@ namespace dp2Circulation
             }
         }
 
+        // 线程安全
         public void AppendHtml(string strText)
         {
-            Global.WriteHtml(this.WebBrowser,
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.WebBrowser,
                 strText);
 
-            // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
-            this.WebBrowser.Document.Window.ScrollTo(0,
-    this.WebBrowser.Document.Body.ScrollRectangle.Height);
+                // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
+                this.WebBrowser.Document.Window.ScrollTo(0,
+        this.WebBrowser.Document.Body.ScrollRectangle.Height);
+            }));
         }
 
         // 线程安全

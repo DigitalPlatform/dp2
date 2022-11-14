@@ -459,26 +459,19 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.comboBox_location.Enabled = bEnable;
-                this.textBox_classNumber.Enabled = bEnable;
-                this.textBox_maxNumber.Enabled = bEnable;
-                this.textBox_tailNumber.Enabled = bEnable;
+            this.comboBox_location.Enabled = bEnable;
+            this.textBox_classNumber.Enabled = bEnable;
+            this.textBox_maxNumber.Enabled = bEnable;
+            this.textBox_tailNumber.Enabled = bEnable;
 
-                this.button_copyMaxNumber.Enabled = bEnable;
-                this.button_getTailNumber.Enabled = bEnable;
-                this.button_pushTailNumber.Enabled = bEnable;
-                this.button_saveTailNumber.Enabled = bEnable;
-                this.button_searchClass.Enabled = bEnable;
-                this.button_searchDouble.Enabled = bEnable;
-            }));
+            this.button_copyMaxNumber.Enabled = bEnable;
+            this.button_getTailNumber.Enabled = bEnable;
+            this.button_pushTailNumber.Enabled = bEnable;
+            this.button_saveTailNumber.Enabled = bEnable;
+            this.button_searchClass.Enabled = bEnable;
+            this.button_searchDouble.Enabled = bEnable;
         }
 
         // 将面板上输入的线索数据库名或者种次号方案名变换为API使用的形态

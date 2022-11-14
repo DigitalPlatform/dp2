@@ -269,34 +269,28 @@ namespace dp2Circulation
             }
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this._chargingForm.MainPanel.Enabled = bEnable;
+            this._chargingForm.MainPanel.Enabled = bEnable;
 
-                this.inventoryBatchNoControl_start_batchNo.Enabled = bEnable;
-                this.textBox_start_locations.Enabled = bEnable;
-                this.button_start_setLocations.Enabled = bEnable;
-                this.button_start_restoreCfgs.Enabled = bEnable;
+            this.inventoryBatchNoControl_start_batchNo.Enabled = bEnable;
+            this.textBox_start_locations.Enabled = bEnable;
+            this.button_start_setLocations.Enabled = bEnable;
+            this.button_start_restoreCfgs.Enabled = bEnable;
 
-                this.textBox_inventoryList_batchNo.Enabled = bEnable;
-                this.button_inventoryList_getBatchNos.Enabled = bEnable;
-                this.button_inventoryList_search.Enabled = bEnable;
+            this.textBox_inventoryList_batchNo.Enabled = bEnable;
+            this.button_inventoryList_getBatchNos.Enabled = bEnable;
+            this.button_inventoryList_search.Enabled = bEnable;
 
-                this.textBox_baseList_locations.Enabled = bEnable;
-                this.button_baseList_getLocations.Enabled = bEnable;
-                this.button_baseList_search.Enabled = bEnable;
+            this.textBox_baseList_locations.Enabled = bEnable;
+            this.button_baseList_getLocations.Enabled = bEnable;
+            this.button_baseList_search.Enabled = bEnable;
 
-                this.textBox_operLog_dateRange.Enabled = bEnable;
-                this.button_operLog_load.Enabled = bEnable;
+            this.textBox_operLog_dateRange.Enabled = bEnable;
+            this.button_operLog_load.Enabled = bEnable;
 
-                this.SetButtonState(bEnable == false ? null : this._statisInfo,
-                    false);   // 只改变 Enabled 状态，不修改按钮文字
+            this.SetButtonState(bEnable == false ? null : this._statisInfo,
+                false);   // 只改变 Enabled 状态，不修改按钮文字
 #if NO
             this.button_getProjectName.Enabled = bEnable;
 
@@ -304,7 +298,6 @@ namespace dp2Circulation
 
             this.button_projectManage.Enabled = bEnable;
 #endif
-            }));
         }
 
         /// <summary>

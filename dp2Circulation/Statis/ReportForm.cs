@@ -195,25 +195,10 @@ namespace dp2Circulation
                 _cfg.Save();
         }
 
-
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            /*
-            if (this.InvokeRequired == true)
-            {
-                this.Invoke(new Action<bool>(EnableControls), bEnable);
-                return;
-            }
-            */
-            this.TryInvoke((Action)(() =>
-            {
-                this.tabControl1.Enabled = bEnable;
-                this.toolStrip_main.Enabled = bEnable;
-            }));
+            this.tabControl1.Enabled = bEnable;
+            this.toolStrip_main.Enabled = bEnable;
         }
 
         string _connectionString = "";
@@ -5603,7 +5588,7 @@ out strError);
             Program.MainForm.AppInfo.UnlinkFormState(printform);
         }
 
-#region 统计结果 HTML 文件管理
+        #region 统计结果 HTML 文件管理
         /// <summary>
         /// 输出的 HTML 统计结果文件名集合
         /// </summary>
@@ -5666,7 +5651,7 @@ out strError);
             }
         }
 
-#endregion
+        #endregion
 
         private void listView_libraryConfig_MouseUp(object sender, MouseEventArgs e)
         {
@@ -7773,7 +7758,7 @@ out strError);
             return 0;
         }
 
-#region 日志同步
+        #region 日志同步
 
         // 将一条日志记录中的动作兑现到 item reader biblio class_ 表
         // return:
@@ -9403,7 +9388,7 @@ out strError);
             return 0;
         }
 
-#endregion
+        #endregion
 
 #if NO
         // 获得日志文件中记录的总数
@@ -9867,7 +9852,7 @@ Stack:
         }
 
 
-#region ErrorInfoForm
+        #region ErrorInfoForm
 
         /// <summary>
         /// 错误信息窗
@@ -9910,7 +9895,7 @@ Stack:
             }
         }
 
-#endregion
+        #endregion
 
         private void checkBox_start_enableFirst_CheckedChanged(object sender, EventArgs e)
         {
@@ -12320,7 +12305,7 @@ MessageBoxDefaultButton.Button1);
             return 1;
         }
 
-#region index.xml
+        #region index.xml
 
 #if NO
         XmlDocument _indexDom = null;   // index.xml 文件的 DOM 对象
@@ -13102,7 +13087,7 @@ MessageBoxDefaultButton.Button1);
             text.Append("</ul>");
         }
 
-#endregion
+        #endregion
 
         private void toolStripButton_setReportStartDay_Click(object sender, EventArgs e)
         {

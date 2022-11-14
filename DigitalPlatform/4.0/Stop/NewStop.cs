@@ -1,27 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform
 {
-#if OLD_CODE
-    /*
-     * 1) stop = new Stop() 
-     * 2) 窗口load阶段 Register()
-     * 3) 窗口closed阶段 Unregister()
-     * 4) 每次循环开始 Initial() 关联delegate
-     *    循环开始时候，BeginLoop() 循环结束后，EndLoop() Initial()撤离和delegate的关联
-     * 5) 在循环执行中，如果用户触发stop button，delegate自然会被调用。或者
-     *    在循环中主动观察stop的State状态，也可以得知按钮是否已经被触发了
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     */
-
-    //在子窗口中定义
     public class Stop
     {
         public long ProgressMin = -1;
@@ -40,11 +26,9 @@ namespace DigitalPlatform
         // public event MessageChangedEventHandler MessageChanged = null;
 
         volatile int nStop = -1;	// -1: 尚未使用 0:正在处理 1:希望停止 2:已经停止，EndLoop()已经调用
-        StopManager m_manager = null;
+        StopManager _manager = null;
 
-        string m_strMessage = "";
-
-        // bool m_bCancel = false;
+        string _message = "";
 
         public string Name = "";
 
@@ -56,25 +40,92 @@ namespace DigitalPlatform
 
         // parameters:
         //      strMessage  要显示的消息。如果为 null，表示不显示消息
-        public string Initial(// Delegate_doStop doStopDelegate,
-            string strMessage)
+        public string Initial(string strMessage)
         {
-            string strOldMessage = m_strMessage;
+            string strOldMessage = _message;
             // m_doStopDelegate = doStopDelegate;
             if (strMessage != null)
             {
-                m_strMessage = strMessage;
-                if (m_manager != null)
-                {
-                    // TODO: 执行多次更新，可能毁掉原来存储的状态
-                    m_manager.ChangeState(this,
-                        StateParts.All,
-                        true);
-                }
+                _message = strMessage;
+
+                _manager.UpdateMessage(this);
+                /*
+                // TODO: 执行多次更新，可能毁掉原来存储的状态
+                _manager?.ChangeState(this,
+                    StateParts.All,
+                    true);
+                */
             }
 
             return strOldMessage;
         }
+
+        #region new
+
+        private StopGroup _group = null;
+
+        public StopGroup Group
+        {
+            get
+            {
+                return _group;
+            }
+            set
+            {
+                _group = value;
+            }
+        }
+
+        public void Register(StopManager manager,
+    string groupName)
+        {
+            _manager = manager;
+            manager.RegisterStop(this, groupName);
+
+            /*
+            // TODO: 为 manager.Add() 增加一个 activate 参数，尽量在同一步完成，这样便于减少加锁时间
+            if (bActive == true)
+                manager.Active(this);
+            */
+        }
+
+        // parameters:
+        //      bActive (此参数已经废止，因为 Unregister 后必定要把某个对象变为激活)是否激活改变后的顶层 Stop 对象
+        public void Unregister()
+        {
+            if (_manager == null)
+                throw new Exception("Stop 对象未曾注册过，所以无法注销");
+            if (_manager != null)
+            {
+                _manager.UnregisterStop(this);
+                _manager = null;
+            }
+        }
+
+        // 当前 Stop 是否处在 Active 状态？
+        // 注意，只有同时 Active 和属于 active group，才会影响显示
+        public bool IsActive()
+        {
+            if (_group == null || _manager == null)
+                return false;
+            return this == _group.GetActiveStop();
+        }
+
+        #endregion
+
+        /* 激活概念：
+         * 每个 MDI 子窗口可以拥有多个 Stop 对象，这些对象在 MDI 子窗口处在激活状态的时候，也应该是激活的。
+         * 也就是说一组一组的 Stop 对象，可以随时激活其中任何一组，其它组就变为非激活状态。
+         * 工具条的 buttons 和状态条，只显示激活的这一组的动态。非激活的不显示
+         * 
+         * 激活状态和 looping 状态叠加，才会被视觉显示。
+         * 只有 looping 状态，那就是后台的被遮挡的 MDI 子窗口的循环操作；
+         * 只有激活状态，说明是前台 MDI 子窗口的 Stop 对象，但还没有开始循环或者循环已经停止
+         * 激活也可以称为“前台”
+         * 
+         * 那当一个 MDI 子窗口新注册 Stop 对象的时候，如果要查询一次自己是否属于前台才能注册 Stop 对象，
+         * 比较麻烦。可以为每个子窗口设定一个“组名”，Stop 对象具有组名，一组 Stop 对象是否应该处在前台，只需要查看组名的激活状态即可。
+         */
 
         // 注册，和管理对象建立联系
         // parameters:
@@ -82,46 +133,27 @@ namespace DigitalPlatform
         public void Register(StopManager manager,
             bool bActive)
         {
-            m_manager = manager;
-            manager.Add(this);
+            _manager = manager;
+            manager.RegisterStop(this);
 
+            // TODO: 为 manager.Add() 增加一个 activate 参数，尽量在同一步完成，这样便于减少加锁时间
             if (bActive == true)
                 manager.Active(this);
         }
 
-        // parameters:
-        //      bActive 是否激活改变后的顶层 Stop 对象
-        public void Unregister(bool bActive = true)
-        {
-            if (m_manager != null)
-            {
-                var old_top = m_manager.ActiveStop;
-
-                m_manager.Remove(this, true);
-
-                // 2022/6/29
-                if (bActive)
-                {
-                    var new_top = m_manager.ActiveStop;
-                    if (new_top != old_top)
-                        m_manager.Active(new_top);
-                }
-
-                m_manager = null;
-            }
-        }
-
-        int _inBeginLoop = 0;
+        // 在循环中的深度
+        int _inLoopingLevel = 0;
 
         // 检查当前是否已经处于 BeginLoop() 之中
         public bool IsInLoop
         {
             get
             {
-                return _inBeginLoop > 0;
+                return _inLoopingLevel > 0;
             }
         }
 
+        // 允许或者禁止嵌套 BeginLoop()
         bool _allowNest = false;
 
         public bool AllowNest
@@ -144,6 +176,15 @@ namespace DigitalPlatform
             return bOldValue;
         }
 
+        /*
+         * BeginLoop() 要做的事情
+         * 1) (因为当前 Stop 对象加入活动状态数组，导致)改变 stop button 和 reverse button 的 enabled 状态
+         *      注意这些 buttons 是数组共有的
+         * 2) (progressbar 为当前 Stop 私有)接管 progress bar 的显示。初始化视觉状态，一般是隐藏 progress bar
+         * 
+         * 这里说明一下，Stop 对象要分为 looping 和 unlooping 两种数组存储，looping 的才会影响到视觉状态，而 unlooping 的相当于隐藏了不显示
+         * */
+
         //准备做事情,被循环调，时面了调了Stopmanager的Enable()函数，修改父窗口的按钮状态
         // return:
         //      true 成功
@@ -151,41 +192,49 @@ namespace DigitalPlatform
         public void BeginLoop()
         {
 #if NO
-            if (_inBeginLoop > 0 
+            if (_inLoopingLevel > 0 
                 && _allowNest == false)
                 throw new Exception("针对同一 Stop 对象，BeginLoop 不能嵌套调用");
 #endif
 
-            int nRet = Interlocked.Increment(ref _inBeginLoop);
+            int nRet = Interlocked.Increment(ref _inLoopingLevel);
             // _inBeginLoop++;
             if (nRet == 1)
             {
                 nStop = 0;	// 正在处理
 
-                if (m_manager != null)
+                if (_manager != null)
                 {
-                    bool bIsActive = m_manager.IsActive(this);
+                    // bool bIsActive = this.IsActive();
 
                     if (this.OnBeginLoop != null)
                     {
                         BeginLoopEventArgs e = new BeginLoopEventArgs();
-                        e.IsActive = bIsActive;
+                        // TODO: 可以考虑取消 e.IsActive。因为使用者可以从 stop.IsActive 自己探测
+                        // e.IsActive = bIsActive;
                         this.OnBeginLoop(this, e);
                     }
 
+                    // 只要 Stop 对象属于 active group，就有可能改变显示状态
+                    var belong_active_group = this.Group == _manager.GetActiveGroup();
+                    if (belong_active_group)
+                        _manager.UpdateDisplay();
+
+#if REMOVED
                     if (bIsActive == true)
                     {
-                        m_manager.ChangeState(this,
+                        _manager.ChangeState(this,
                             StateParts.All | StateParts.SaveEnabledState,
                             true);
                     }
                     else
                     {
                         // 不在激活位置的stop，不要记忆原有的reversebutton状态。因为这样会记忆到别人的状态
-                        m_manager.ChangeState(this,
+                        _manager.ChangeState(this,
                             StateParts.All,
                             true);
                     }
+#endif
                 }
             }
         }
@@ -193,41 +242,53 @@ namespace DigitalPlatform
         //事情做完了，被循环调，里面调了StopManager的Enable()函数，修改按钮为发灰状态
         public void EndLoop()
         {
-            if (_inBeginLoop == 0)
+            if (_inLoopingLevel == 0)
                 throw new Exception("针对同一 Stop 对象，调用 EndLoop() 不应超过 BeginLoop() 调用次数");
 
-            int nRet = Interlocked.Decrement(ref _inBeginLoop);
+            int nRet = Interlocked.Decrement(ref _inLoopingLevel);
 
             if (nRet == 0)
             {
-                nStop = 2;	// 转为 已经停止 状态
+                nStop = 2;  // 转为 已经停止 状态
+                this._message = "";
 
-                if (m_manager != null)
+                if (_manager != null)
                 {
-                    bool bIsActive = m_manager.IsActive(this);
-
-                    this.m_strMessage = "";
+                    // bool bIsActive = this.IsActive();
 
                     if (this.OnEndLoop != null)
                     {
                         EndLoopEventArgs e = new EndLoopEventArgs();
-                        e.IsActive = bIsActive;
+                        // TODO: 可以考虑取消 e.IsActive。因为使用者可以从 stop.IsActive 自己探测
+                        // e.IsActive = bIsActive;
                         this.OnEndLoop(this, e);
                     }
 
+                    // 只要 Stop 对象属于 active group，就有可能改变显示状态
+                    var belong_active_group = this.Group == _manager.GetActiveGroup();
+                    if (belong_active_group)
+                    {
+                        _manager.UpdateDisplay();
+                    }
+
+                    // EndLoop() 以后当前 Stop 对象一定不能是活动的状态了
+                    Debug.Assert(_manager.ActiveStop != this);
+
+#if REMOVED
                     if (bIsActive == true)
                     {
-                        m_manager.ChangeState(this,
+                        _manager.ChangeState(this,
                             StateParts.All | StateParts.RestoreEnabledState,
                             true);
                     }
                     else
                     {
                         // 不在激活位置，不要恢复所谓旧状态
-                        m_manager.ChangeState(this,
+                        _manager.ChangeState(this,
                             StateParts.All,
                             true);
                     }
+#endif
                 }
             }
 
@@ -236,7 +297,7 @@ namespace DigitalPlatform
 
         public void SetMessage(string strMessage)
         {
-            m_strMessage = strMessage;
+            _message = strMessage;
 
 #if REMOVED
             // 2019/6/23
@@ -257,12 +318,15 @@ namespace DigitalPlatform
     }
     );
 
-            if (m_manager != null)
+            if (_manager != null)
             {
+                _manager.UpdateMessage(this);
+                /*
                 // TODO: 只应当改变文本的状态，不应当动按钮的状态
-                m_manager.ChangeState(this,
+                _manager.ChangeState(this,
                     StateParts.Message,
                     true);
+                */
             }
         }
 
@@ -283,11 +347,14 @@ namespace DigitalPlatform
     }
     );
 
-            if (m_manager != null)
+            if (_manager != null)
             {
-                m_manager.ChangeState(this,
+                _manager.UpdateProgressRange(this);
+                /*
+                _manager.ChangeState(this,
                     StateParts.ProgressRange,
                     true);
+                */
             }
         }
 
@@ -307,32 +374,51 @@ namespace DigitalPlatform
                 }
                 );
 
-            if (m_manager != null)
-            {
-                m_manager.ChangeState(this,
-                    StateParts.ProgressValue,
-                    true);
-            }
-
-            // 2014/1/7
             if (lValue > this.ProgressMax)
             {
                 this.ProgressMax = lValue;
-                m_manager.ChangeState(this,
+                _manager.UpdateProgressRange(this);
+
+                /*
+                _manager.ChangeState(this,
     StateParts.ProgressRange,
     true);
+                */
             }
+
+            if (_manager != null)
+            {
+                _manager.UpdateProgressValue(this);
+                /*
+                _manager.ChangeState(this,
+                    StateParts.ProgressValue,
+                    true);
+                */
+            }
+        }
+
+        // 在所属的 group 中激活。
+        // 注：只有当所属的 group 是 active group 时，才会作用到显示
+        public bool MoveToTop()
+        {
+            if (this.Group == null)
+                return false;
+            return this.Group.MoveToTop(this);
+            // 注意本函数的效果是不完满的，建议用 StopManager.Activate(Stop stop) 处理
         }
 
         public void HideProgress()
         {
             this.ProgressValue = -1;
 
-            if (m_manager != null)
+            if (_manager != null)
             {
-                m_manager.ChangeState(this,
+                _manager.UpdateProgressValue(this);
+                /*
+                _manager.ChangeState(this,
                     StateParts.ProgressValue,
                     true);
+                */
             }
         }
 
@@ -405,10 +491,11 @@ namespace DigitalPlatform
         {
             get
             {
-                return m_strMessage;
+                return _message;
             }
         }
     }
+
 
     // Stop事件
     public delegate void StopEventHandler(object sender,
@@ -425,7 +512,7 @@ namespace DigitalPlatform
 
     public class BeginLoopEventArgs : EventArgs
     {
-        public bool IsActive = false;
+        // public bool IsActive = false;
     }
 
     // EndLoop事件
@@ -507,6 +594,4 @@ DisplayMessageEventArgs e);
     {
         public string Message = "";
     }
-
-#endif
 }

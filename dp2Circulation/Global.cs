@@ -2511,6 +2511,14 @@ namespace dp2Circulation
             return 0;
         }
 
+        static void TryInvoke(Control control, Action method)
+        {
+            if (control.InvokeRequired)
+                control.Invoke((Action)(method));
+            else
+                method.Invoke();
+        }
+
         // 在listviewcontrol最前面插入一行
         /// <summary>
         /// 在 ListViewControl1 最前面插入一行
@@ -2531,8 +2539,19 @@ namespace dp2Circulation
 
             ListViewItem item = new ListViewItem(strID, 0);
 
-            list.Items.Insert(insert_pos, item);
+            if (list.InvokeRequired)
+            {
+                list.Invoke((Action)(() =>
+                {
+                    list.Items.Insert(insert_pos, item);
+                }));
+            }
+            else
+            {
+                list.Items.Insert(insert_pos, item);
+            }
 
+            /*
             if (others != null)
             {
                 for (int i = 0; i < others.Length; i++)
@@ -2540,8 +2559,13 @@ namespace dp2Circulation
                     item.SubItems.Add(others[i]);
                 }
             }
+            */
+            AddOthers((ListView)list, item, others);
 
-            list.UpdateItem(insert_pos);
+            TryInvoke(list, () =>
+            {
+                list.UpdateItem(insert_pos);
+            });
             return item;
         }
 
@@ -2563,8 +2587,19 @@ namespace dp2Circulation
 
             ListViewItem item = new ListViewItem(strID, 0);
 
-            list.Items.Add(item);
+            if (list.InvokeRequired)
+            {
+                list.Invoke((Action)(() =>
+                {
+                    list.Items.Add(item);
+                }));
+            }
+            else
+            {
+                list.Items.Add(item);
+            }
 
+            /*
             if (others != null)
             {
                 for (int i = 0; i < others.Length; i++)
@@ -2572,10 +2607,31 @@ namespace dp2Circulation
                     item.SubItems.Add(others[i]);
                 }
             }
+            */
+            AddOthers((ListView)list, item, others);
 
-            list.UpdateItem(list.Items.Count - 1);
-
+            TryInvoke(list, () =>
+            {
+                list.UpdateItem(list.Items.Count - 1);
+            });
             return item;
+        }
+
+        static void AddOthers(
+            ListView list,
+            ListViewItem item,
+            string[] others)
+        {
+            if (others != null)
+            {
+                TryInvoke(list, (Action)(() =>
+                {
+                    foreach (var s in others)
+                    {
+                        item.SubItems.Add(s);
+                    }
+                }));
+            }
         }
 
 
@@ -2599,16 +2655,41 @@ namespace dp2Circulation
 
             ListViewItem item = new ListViewItem(strID, 0);
 
-            list.Items.Insert(insert_pos, item);
-
-            if (others != null)
+            if (list.InvokeRequired)
             {
-                for (int i = 0; i < others.Length; i++)
+                list.Invoke((Action)(() =>
                 {
-                    item.SubItems.Add(others[i]);
-                }
+                    list.Items.Insert(insert_pos, item);
+                }));
+            }
+            else
+            {
+                list.Items.Insert(insert_pos, item);
             }
 
+            /*
+            if (others != null)
+            {
+                if (list.InvokeRequired)
+                {
+                    list.Invoke((Action)(() =>
+                    {
+                        foreach (var s in others)
+                        {
+                            item.SubItems.Add(s);
+                        }
+                    }));
+                }
+                else
+                {
+                    foreach (var s in others)
+                    {
+                        item.SubItems.Add(s);
+                    }
+                }
+            }
+            */
+            AddOthers(list, item, others);
             return item;
         }
 
@@ -2631,16 +2712,39 @@ namespace dp2Circulation
 
             ListViewItem item = new ListViewItem(strID, 0);
 
-            list.Items.Add(item);
+            if (list.InvokeRequired)
+            {
+                list.Invoke((Action)(() =>
+                {
+                    list.Items.Add(item);
+                }));
+            }
+            else
+                list.Items.Add(item);
 
+            /*
             if (others != null)
             {
-                for (int i = 0; i < others.Length; i++)
+                if (list.InvokeRequired)
                 {
-                    item.SubItems.Add(others[i]);
+                    list.Invoke((Action)(() =>
+                    {
+                        foreach (var s in others)
+                        {
+                            item.SubItems.Add(s);
+                        }
+                    }));
+                }
+                else
+                {
+                    foreach (var s in others)
+                    {
+                        item.SubItems.Add(s);
+                    }
                 }
             }
-
+            */
+            AddOthers(list, item, others);
             return item;
         }
 
@@ -2830,7 +2934,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             {
                 strTargetFileName = Path.Combine(strDataDir, "xml.txt");
                 using (StreamWriter sw = new StreamWriter(strTargetFileName,
-    false,	// append
+    false,  // append
     System.Text.Encoding.UTF8))
                 {
                     sw.Write("XML内容装入DOM时出错: " + ex.Message + "\r\n\r\n" + strXml);

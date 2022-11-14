@@ -549,25 +549,18 @@ namespace dp2Circulation
             }
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.textBox_cardFile_cardFilename.Enabled = bEnable;
-                this.button_cardFile_findCardFilename.Enabled = bEnable;
+            this.textBox_cardFile_cardFilename.Enabled = bEnable;
+            this.button_cardFile_findCardFilename.Enabled = bEnable;
 
-                this.button_print.Enabled = bEnable;
-                this.button_printPreview.Enabled = bEnable;
+            this.button_print.Enabled = bEnable;
+            this.button_printPreview.Enabled = bEnable;
 
-                this.checkBox_testingGrid.Enabled = bEnable;
-                this.checkBox_cardFile_indent.Enabled = bEnable;
+            this.checkBox_testingGrid.Enabled = bEnable;
+            this.checkBox_cardFile_indent.Enabled = bEnable;
 
-                this.Update();
-            }));
+            this.Update();
         }
 
         // 在窗口打开前TestingGrid是否设置过

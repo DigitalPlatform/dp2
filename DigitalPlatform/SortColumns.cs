@@ -275,12 +275,14 @@ namespace DigitalPlatform
 
         void DisplayColumnsText(ListView.ColumnHeaderCollection columns)
         {
+            /*
             Debug.WriteLine("***");
             foreach (ColumnHeader column0 in columns)
             {
                 Debug.WriteLine(column0.Text);
             }
             Debug.WriteLine("***");
+            */
         }
 
         // 修改全部列的视觉

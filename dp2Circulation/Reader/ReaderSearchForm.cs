@@ -947,24 +947,17 @@ out strError);
         }
 
         // 注:不包括listview
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.toolStrip_search.Enabled = bEnable;
-                this.comboBox_readerDbName.Enabled = bEnable;
-                this.comboBox_from.Enabled = bEnable;
-                this.comboBox_matchStyle.Enabled = bEnable;
+            this.toolStrip_search.Enabled = bEnable;
+            this.comboBox_readerDbName.Enabled = bEnable;
+            this.comboBox_from.Enabled = bEnable;
+            this.comboBox_matchStyle.Enabled = bEnable;
 
-                if (this.comboBox_matchStyle.Text == "空值")
-                    this.textBox_queryWord.Enabled = false;
-                else
-                    this.textBox_queryWord.Enabled = bEnable;
-            }));
+            if (this.comboBox_matchStyle.Text == "空值")
+                this.textBox_queryWord.Enabled = false;
+            else
+                this.textBox_queryWord.Enabled = bEnable;
         }
 
         private void ReaderSearchForm_Activated(object sender, EventArgs e)

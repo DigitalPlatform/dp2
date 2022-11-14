@@ -791,36 +791,29 @@ namespace dp2Circulation
             return null;    // not found
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.button_next.Enabled = bEnable;
+            this.button_next.Enabled = bEnable;
 
-                /*
-                this.button_settlement.Enabled = bEnable;
-                this.button_undoSettlement.Enabled = bEnable;
-                 * */
-                this.toolStrip_items.Enabled = bEnable;
+            /*
+            this.button_settlement.Enabled = bEnable;
+            this.button_undoSettlement.Enabled = bEnable;
+             * */
+            this.toolStrip_items.Enabled = bEnable;
 
-                /*
-                this.dateControl_start.Enabled = bEnable;
-                this.dateControl_end.Enabled = bEnable;
-                 * 
-                this.textBox_range_startCtlno.Enabled = bEnable;
-                this.textBox_range_endCtlno.Enabled = bEnable;
-                 * */
-                this.radioButton_range_amerceOperTime.Enabled = bEnable;
-                this.radioButton_range_ctlno.Enabled = bEnable;
+            /*
+            this.dateControl_start.Enabled = bEnable;
+            this.dateControl_end.Enabled = bEnable;
+             * 
+            this.textBox_range_startCtlno.Enabled = bEnable;
+            this.textBox_range_endCtlno.Enabled = bEnable;
+             * */
+            this.radioButton_range_amerceOperTime.Enabled = bEnable;
+            this.radioButton_range_ctlno.Enabled = bEnable;
 
-                SetRangeControlsEnabled(bEnable);
+            SetRangeControlsEnabled(bEnable);
 
-                this.comboBox_range_state.Enabled = bEnable;
-            }));
+            this.comboBox_range_state.Enabled = bEnable;
         }
 
         // 获得用于显示用途的状态字符串

@@ -107,26 +107,23 @@ namespace dp2Circulation
             this.textBox_patronXmlFileName.Text = dlg.FileName;
         }
 
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.textBox_patronXmlFileName.Enabled = bEnable;
-                this.comboBox_appendMode.Enabled = bEnable;
-                this.comboBox_targetDbName.Enabled = bEnable;
+            this.textBox_patronXmlFileName.Enabled = bEnable;
+            this.comboBox_appendMode.Enabled = bEnable;
+            this.comboBox_targetDbName.Enabled = bEnable;
 
-                this.checkBox_refreshRefID.Enabled = bEnable;
-                this.checkBox_restoreMode.Enabled = bEnable;
-                this.checkBox_autoPostfix.Enabled = bEnable;
+            this.checkBox_refreshRefID.Enabled = bEnable;
+            this.checkBox_restoreMode.Enabled = bEnable;
+            this.checkBox_autoPostfix.Enabled = bEnable;
 
-                // 2021/12/19
-                this.checkBox_object.Enabled = bEnable;
-                this.textBox_objectDirectoryName.Enabled = bEnable;
-                this.button_getObjectDirectoryName.Enabled = bEnable;
+            // 2021/12/19
+            this.checkBox_object.Enabled = bEnable;
+            this.textBox_objectDirectoryName.Enabled = bEnable;
+            this.button_getObjectDirectoryName.Enabled = bEnable;
 
-                this.button_begin.Enabled = bEnable;
-                this.button_stop.Enabled = !bEnable;
-            }));
+            this.button_begin.Enabled = bEnable;
+            this.button_stop.Enabled = !bEnable;
         }
 
         private void button_begin_Click(object sender, EventArgs e)

@@ -294,7 +294,9 @@ namespace DigitalPlatform.rms.Client
         {
             textBox_url.Text = Url;
             textBox_userName.Text = UserName;
-            stopManager.Initial(button_Cancel,
+            stopManager.Initial(
+                this,
+                button_Cancel,
                 label_message,
                 null);
             stopManager.LinkReverseButton(button_OK);

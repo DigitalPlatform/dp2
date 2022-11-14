@@ -150,17 +150,9 @@ namespace dp2Circulation
                 MessageBox.Show(this, strError);
         }
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public override void EnableControls(bool bEnable)
+        public override void UpdateEnable(bool bEnable)
         {
-            this.TryInvoke((Action)(() =>
-            {
-                this.comboBox_box.Enabled = bEnable;
-            }));
+            this.comboBox_box.Enabled = bEnable;
         }
-
     }
 }

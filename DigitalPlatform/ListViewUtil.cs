@@ -644,15 +644,18 @@ namespace DigitalPlatform.GUI
         // 清除所有留存的排序信息，刷新list的标题栏上的陈旧的排序标志
         public static void ClearSortColumns(ListView list)
         {
-            ListViewProperty prop = GetListViewProperty(list);
+            list.Invoke((Action)(() =>
+            {
+                ListViewProperty prop = GetListViewProperty(list);
 
-            if (prop == null)
-                return;
+                if (prop == null)
+                    return;
 
-            prop.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(list.Columns);
+                prop.SortColumns.Clear();
+                SortColumns.ClearColumnSortDisplay(list.Columns);
 
-            prop.CurrentDbName = "";    // 清除记忆
+                prop.CurrentDbName = "";    // 清除记忆
+            }));
         }
 
         // 获得ListViewProperty对象
@@ -671,15 +674,18 @@ namespace DigitalPlatform.GUI
             string strText,
             int nColumn)
         {
-            for (int i = 0; i < listview.Items.Count; i++)
+            return (ListViewItem)listview.Invoke((Func<ListViewItem>)(() =>
             {
-                ListViewItem item = listview.Items[i];
-                string strThisText = GetItemText(item, nColumn);
-                if (strThisText == strText)
-                    return item;
-            }
+                for (int i = 0; i < listview.Items.Count; i++)
+                {
+                    ListViewItem item = listview.Items[i];
+                    string strThisText = GetItemText(item, nColumn);
+                    if (strThisText == strText)
+                        return item;
+                }
 
-            return null;
+                return null;
+            }));
         }
 
         // 检测一个x位置在何列上。
@@ -714,10 +720,13 @@ namespace DigitalPlatform.GUI
                 string strText = "";
                 // strText = Convert.ToString(i);
 
-                ColumnHeader col = new ColumnHeader();
-                col.Text = strText;
-                col.Width = nInitialWidth;
-                listview.Columns.Add(col);
+                listview.Invoke((Action)(() =>
+                {
+                    ColumnHeader col = new ColumnHeader();
+                    col.Text = strText;
+                    col.Width = nInitialWidth;
+                    listview.Columns.Add(col);
+                }));
             }
         }
 

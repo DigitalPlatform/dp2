@@ -230,7 +230,9 @@ namespace dp2Catalog
             InitialFixedPanel();
 
             // Stop初始化
-            stopManager.Initial(this.toolButton_stop,
+            stopManager.Initial(
+                this,
+                this.toolButton_stop,
                 (object)this.toolStripStatusLabel_main,
                 (object)this.toolStripProgressBar_main);
 
@@ -4982,7 +4984,7 @@ out string strError)
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public LibraryChannel GetChannel(string strServerUrl,
             string strUserName = ".",
-            GetChannelStyle style = GetChannelStyle.GUI)
+            GetChannelStyle style = GetChannelStyle.None)
         {
             if (strUserName == ".")
             {

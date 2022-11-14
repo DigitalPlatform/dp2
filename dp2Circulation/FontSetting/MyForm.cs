@@ -25,6 +25,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
+// using DocumentFormat.OpenXml.Wordprocessing;
 
 // 2013/3/16 添加 XML 注释
 
@@ -74,15 +75,6 @@ namespace dp2Circulation
             {
                 return this.GetType().Name;
             }
-        }
-
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public virtual void EnableControls(bool bEnable)
-        {
-            throw new Exception("尚未实现 EnableControls() ");
         }
 
         public System.Threading.CancellationTokenSource _cancel = new System.Threading.CancellationTokenSource();
@@ -740,7 +732,7 @@ bool bClickClose = false)
         //      strStyle    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public virtual LibraryChannel GetChannel(string strServerUrl = ".",
             string strUserName = ".",
-            GetChannelStyle style = GetChannelStyle.GUI,
+            GetChannelStyle style = GetChannelStyle.None/*2022/11/12 从 GUI 改为 None*/,   // GetChannelStyle.GUI,
             string strClientIP = "")
         {
             LibraryChannel channel = Program.MainForm.GetChannel(strServerUrl, strUserName, style, strClientIP);
@@ -3561,6 +3553,72 @@ Keys keyData)
             if (StringUtil.IsInList("beginLoop", e.Style))
                 e.Looping = BeginLoop(this.DoStop, "");
         }
+
+        #region EnableControls
+
+        // 是否正在 disabled 状态？
+        public bool InDisabledState
+        {
+            get
+            {
+                return _enableControlsLevel > 0;
+            }
+        }
+
+        internal int _enableControlsLevel = 0;
+
+        // 改变变量，并返回“是否有必要更新 Enable 显示状态”
+        public bool NeedUpdateEnable(bool bEnable)
+        {
+            if (bEnable == false)
+            {
+                _enableControlsLevel++;
+                Debug.Assert(_enableControlsLevel >= 0);
+                if (_enableControlsLevel == 1)
+                    return true;
+            }
+            else
+            {
+                _enableControlsLevel--;
+                Debug.Assert(_enableControlsLevel >= 0);
+                if (_enableControlsLevel == 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
+        /// </summary>
+        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
+        public virtual void EnableControls(bool bEnable)
+        {
+            if (NeedUpdateEnable(bEnable) == false)
+                return;
+
+            Exception ex = null;
+            this.TryInvoke((Action)(() =>
+            {
+                try
+                {
+                    UpdateEnable(bEnable);
+                }
+                catch(Exception e)
+                {
+                    ex = e;
+                }
+            }));
+            if (ex != null)
+                throw ex;
+        }
+
+        public virtual void UpdateEnable(bool bEnable)
+        {
+            throw new Exception("尚未实现 UpdateEnable()");
+        }
+
+        #endregion
     }
 
     public class FilterHost
