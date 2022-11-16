@@ -4906,6 +4906,7 @@ false);
 
             string list = this.webBrowser_reader.Document.InvokeScript("getSelectedBarcodes") as string;
 
+            // TODO: 用 MessageDlg 改写，允许 list 内容很多的时候卷滚显示
             DialogResult result = MessageBox.Show(this,
 $"确实要对下列册进行 特殊续借 操作?\r\n\r\n{list}\r\n请仔细核对上述册条码号",
 "QuickChargingForm",

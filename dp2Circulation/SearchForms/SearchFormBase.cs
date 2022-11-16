@@ -850,16 +850,18 @@ out strError);
             else
             {
                 int c = 0;
+                int key_cols = 0;   // (m_bFirstColumnIsKey ? 1 : 0);
+
                 for (; c < cols.Length; c++)
                 {
                     ListViewUtil.ChangeItemText(item,
-                    c + 1,
+                    c + 1 + key_cols,
                     cols[c]);
                 }
 
                 if (bClearRestColumns)
                 {
-                    c++;
+                    c += 1 + key_cols;
                     // 清除余下的列内容
                     for (; c < item.SubItems.Count; c++)
                     {
@@ -1223,8 +1225,9 @@ out strError);
                             DialogResult result = System.Windows.Forms.DialogResult.No;
                             if (bHideMessageBox == false)
                             {
+                                string temp = strError;
                                 result = MessageDialog.Show(this,
-                "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + strError + "。\r\n\r\n请问是否要重试保存此记录? \r\n\r\n([重试] 重试保存；\r\n[跳过] 不保存此记录、但继续处理后面的记录保存; \r\n[取消] 中断整批保存操作)",
+                "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + temp + "。\r\n\r\n请问是否要重试保存此记录? \r\n\r\n([重试] 重试保存；\r\n[跳过] 不保存此记录、但继续处理后面的记录保存; \r\n[取消] 中断整批保存操作)",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxDefaultButton.Button1,
                 "下次遇到同类情况不再出现本对话框",

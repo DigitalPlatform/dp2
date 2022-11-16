@@ -1741,10 +1741,12 @@ out string strError);
             else if (param.bOutputKeyCount == true)
             {
                 // 输出keys
+                /*
                 if (searchresult.Cols == null)
                 {
                     throw new Exception("要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本");
                 }
+                */
                 string[] cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
                 cols[0] = searchresult.Path;
                 if (cols.Length > 1)
@@ -1764,11 +1766,12 @@ out string strError);
             }
             else if (param.bOutputKeyID == true)
             {
+                /*
                 if (searchresult.Cols == null)
                 {
                     throw new Exception("要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本");
                 }
-
+                */
 
 #if NO
                                 string[] cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
@@ -1777,6 +1780,9 @@ out string strError);
                                     Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
 #endif
                 string[] cols = this.m_nBiblioSummaryColumn > 0 ? Global.InsertBlankColumn(searchresult.Cols, m_nBiblioSummaryColumn + 1) : searchresult.Cols;
+                // 2022/11/15
+                if (cols == null)
+                    cols = new string[1];
                 cols[0] = LibraryChannel.BuildDisplayKeyString(searchresult.Keys);
 
                 if (param.bPushFillingBrowse == true)
@@ -5052,9 +5058,7 @@ MessageBoxDefaultButton.Button2);
             if (e.Actions == "yes,no,cancel")
             {
                 bool bHideMessageBox = true;
-                DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
-                {
-                    return MessageDialog.Show(this,
+                DialogResult result = MessageDialog.Show(this,
                     e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
     MessageBoxButtons.YesNoCancel,
     MessageBoxDefaultButton.Button1,
@@ -5062,8 +5066,6 @@ MessageBoxDefaultButton.Button2);
     ref bHideMessageBox,
     new string[] { "重试", "跳过", "放弃" },
     20);
-                }));
-
                 if (result == DialogResult.Cancel)
                     e.ResultAction = "cancel";
                 else if (result == System.Windows.Forms.DialogResult.No)
@@ -12626,7 +12628,7 @@ Keys keyData)
             if ((keyData == Keys.Enter || keyData == Keys.LineFeed)
                 && this.tabControl_query.SelectedTab == this.tabPage_logic)
             {
-                this.DoLogicSearch(false, false, null);
+                _ = this.DoLogicSearch(false, false, null);
                 return true;
             }
 
@@ -12643,9 +12645,32 @@ Keys keyData)
         /// <param name="bOutputKeyCount">是否要输出为 key+count 形态</param>
         /// <param name="bOutputKeyID">是否为 keyid 形态</param>
         /// <param name="input_query">检索式</param>
-        public void DoLogicSearch(bool bOutputKeyCount,
+        public Task DoLogicSearch(bool bOutputKeyCount,
             bool bOutputKeyID,
             ItemQueryParam input_query)
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        _doLogicSearch(bOutputKeyCount,
+                            bOutputKeyID,
+                            input_query);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBoxShow($"DoLogicSearch() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                },
+    default,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+        public void _doLogicSearch(bool bOutputKeyCount,
+    bool bOutputKeyID,
+    ItemQueryParam input_query)
         {
             string strError = "";
 
@@ -12683,12 +12708,15 @@ Keys keyData)
             {
                 if (this.m_nChangedCount > 0)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前命中记录列表中有 " + this.m_nChangedCount.ToString() + " 项修改尚未保存。\r\n\r\n是否继续操作?\r\n\r\n(Yes 清除，然后继续操作；No 放弃操作)",
                         "ItemSearchForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    }));
                     if (result == DialogResult.No)
                         return;
                 }
@@ -12708,7 +12736,7 @@ Keys keyData)
             // if (_stop.IsInLoop == true)
             if (HasLooping())
             {
-                strError = "无法重复进入循环";
+                strError = "不允许重复进入循环";
                 goto ERROR1;
             }
 
@@ -12743,11 +12771,14 @@ Keys keyData)
                 }
 
                 string strQueryXml = "";
-                int nRet = dp2QueryControl1.BuildQueryXml(
+                int nRet = (int)this.Invoke((Func<int>)(() =>
+                {
+                    return dp2QueryControl1.BuildQueryXml(
     this.MaxSearchResultCount,
     "zh",
     out strQueryXml,
     out strError);
+                }));
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -12787,6 +12818,7 @@ Keys keyData)
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
                 this.LabelMessageText = $"检索共命中 {lHitCount} 条(跳过 {lSkipCount} 条)，已全部装入";
+                return;
             }
             finally
             {
@@ -12804,9 +12836,6 @@ Keys keyData)
                 */
                 EndLoop(looping);
             }
-
-            return;
-
         ERROR1:
             ShowMessageBox(strError);
         }
@@ -12816,6 +12845,14 @@ Keys keyData)
             // 获得所有数据库名
             if (string.IsNullOrEmpty(e.Path) == true)
             {
+                // 2022/11/15
+                if (this.DbType == "arrive")
+                {
+                    if (string.IsNullOrEmpty(Program.MainForm.ArrivedDbName) == false)
+                        e.Values.Add(Program.MainForm.ArrivedDbName);
+                    return;
+                }
+
                 if (Program.MainForm.BiblioDbProperties != null)
                 {
                     foreach (var property in Program.MainForm.BiblioDbProperties)
@@ -12844,8 +12881,6 @@ Keys keyData)
                         }
                         else
                             throw new Exception("未知的DbType '" + this.DbType + "'");
-
-
                     }
                 }
             }
@@ -12927,21 +12962,21 @@ out strError);
             e.ContextMenu.MenuItems.Add(menuItem);
         }
 
-        void menu_logicSearch_Click(object sender, EventArgs e)
+        async void menu_logicSearch_Click(object sender, EventArgs e)
         {
-            this.DoLogicSearch(false, false, null);
+            await this.DoLogicSearch(false, false, null);
         }
 
         // 仅获得检索点
-        void menu_logicSearchKeyCount_Click(object sender, EventArgs e)
+        async void menu_logicSearchKeyCount_Click(object sender, EventArgs e)
         {
-            this.DoLogicSearch(true, false, null);
+            await this.DoLogicSearch(true, false, null);
         }
 
         // key + id 检索，带有检索点的检索
-        void menu_logicSearchKeyID_Click(object sender, EventArgs e)
+        async void menu_logicSearchKeyID_Click(object sender, EventArgs e)
         {
-            this.DoLogicSearch(false, true, null);
+            await this.DoLogicSearch(false, true, null);
         }
 
         private void tabComboBox_queryWord_Enter(object sender, EventArgs e)
@@ -13177,7 +13212,6 @@ out strError);
                     List<ListViewItem> items = new List<ListViewItem>();
                     foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
                     {
-
                         // 输出keys
                         if (searchresult.Cols == null)
                         {

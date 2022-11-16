@@ -332,6 +332,8 @@ namespace DigitalPlatform.Drawing
         public void RotateImage(RotateFlipType flip_type)
         {
             Image image = this.pictureBox1.Image;
+            if (image == null)
+                return;
             image.RotateFlip(flip_type);
 
             pictureBox1.Width = image.Width;

@@ -447,6 +447,17 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        // 线程安全版本
+        public static DialogResult Show(Control parent,
+    string strText)
+        {
+            return (DialogResult)parent.Invoke((Func<DialogResult>)(() =>
+            {
+                return MessageDialog.Show((IWin32Window)parent,
+                    strText);
+            }));
+        }
+
         public static DialogResult Show(IWin32Window owner,
             string strText)
         {
@@ -454,13 +465,54 @@ namespace DigitalPlatform.CommonControl
             return Show(owner, strText, (string)null, ref temp);
         }
 
+        // 线程安全版本
+        public static DialogResult Show(Control parent,
+    string strText,
+    string strCheckBoxText,
+    ref bool bCheckBox)
+        {
+            bool temp = bCheckBox;
+            var ret = (DialogResult)parent.Invoke((Func<DialogResult>)(() =>
+            {
+                return MessageDialog.Show((IWin32Window)parent,
+                    strText,
+                    strCheckBoxText,
+                    ref temp);
+            }));
+            bCheckBox = temp;
+            return ret;
+        }
+
         public static DialogResult Show(IWin32Window owner,
             string strText,
             string strCheckBoxText,
             ref bool bCheckBox)
         {
-            return Show(owner, "", strText,
-                strCheckBoxText, ref bCheckBox);
+            return Show(owner,
+                "",
+                strText,
+                strCheckBoxText,
+                ref bCheckBox);
+        }
+
+        // 线程安全版本
+        public static DialogResult Show(Control parent,
+    string strTitle,
+    string strText,
+    string strCheckBoxText,
+    ref bool bCheckBox)
+        {
+            var temp = bCheckBox;
+            var ret = (DialogResult)parent.Invoke((Func<DialogResult>)(() =>
+            {
+                return MessageDialog.Show((IWin32Window)parent,
+                    strTitle,
+                    strText,
+                    strCheckBoxText,
+                    ref temp);
+            }));
+            bCheckBox = temp;
+            return ret;
         }
 
         public static DialogResult Show(IWin32Window owner,
@@ -483,6 +535,32 @@ namespace DigitalPlatform.CommonControl
 
             bCheckBox = dlg.CheckBoxValue;
             return dlg.DialogResult;
+        }
+
+        // 线程安全版本
+        public static DialogResult Show(Control parent,
+    string strText,
+    MessageBoxButtons buttons,
+    MessageBoxDefaultButton defaultbutton,
+    string strCheckBoxText,
+    ref bool bCheckBox,
+    string[] button_texts = null,
+    int nAutoCloseSeconds = 0)
+        {
+            var temp = bCheckBox;
+            var ret = (DialogResult)parent.Invoke((Func<DialogResult>)(() =>
+            {
+                return MessageDialog.Show((IWin32Window)parent,
+                    strText,
+                    buttons,
+                    defaultbutton,
+                    strCheckBoxText,
+                    ref temp,
+                    button_texts,
+                    nAutoCloseSeconds);
+            }));
+            bCheckBox = temp;
+            return ret;
         }
 
         // parameters:

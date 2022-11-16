@@ -77,11 +77,13 @@ namespace dp2Circulation
             {
                 // Image image = (Image)this.pictureBox1.InitialImage.Clone();  // BUG!!!
                 Image image = new Bitmap(this.pictureBox1.InitialImage);    // 2017/2/27 
+                if (image != null)
+                {
+                    image.RotateFlip(type);
+                    // this.pictureBox1.Image = image; // 这里可能有内存泄露?
 
-                image.RotateFlip(type);
-                // this.pictureBox1.Image = image; // 这里可能有内存泄露?
-
-                ImageUtil.SetImage(this.pictureBox1, image);  // 2016/12/28
+                    ImageUtil.SetImage(this.pictureBox1, image);  // 2016/12/28
+                }
             }
         }
 

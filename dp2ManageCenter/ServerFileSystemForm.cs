@@ -254,10 +254,7 @@ out strError);
                 cancel.Dispose();
             }
 
-            this.Invoke((Action)(() =>
-            {
-                MessageDialog.Show(this, StringUtil.MakePathList(lines, "\r\n"));
-            }));
+            MessageDialog.Show(this, StringUtil.MakePathList(lines, "\r\n"));
             return;
         ERROR1:
             ShowMessageBox(strError);

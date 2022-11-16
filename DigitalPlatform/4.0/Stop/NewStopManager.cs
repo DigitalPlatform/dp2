@@ -431,14 +431,15 @@ namespace DigitalPlatform
         void Safe_SetToolStripItemText(ToolStripItem status_strip,
 string strText)
         {
-            if (status_strip.Owner == null
+            var parent = EnsureParent(status_strip.Owner);
+            if (parent == null
                 /*|| status_strip.Owner.Parent == null*/)
                 return /*null*/;
 
-            TryInvoke(status_strip.Owner, () =>
+            TryInvoke(parent, () =>
             {
                 status_strip.Text = strText;
-                status_strip.Owner.Update();
+                status_strip.Owner?.Update();
             });
 
 #if REMOVED
@@ -461,7 +462,7 @@ string strText)
 
         static void TryInvoke(Control control, Action method)
         {
-            if (control.InvokeRequired)
+            if (control != null && control.InvokeRequired)
                 control.Invoke((Action)(method));
             else
                 method.Invoke();
@@ -471,16 +472,16 @@ string strText)
         void Safe_SetToolStripStatusLabelText(ToolStripStatusLabel label,
             string strText)
         {
-            if (label.Owner == null)
+            var parent = EnsureParent(label.Owner);
+            if (parent == null)
                 return/* ""*/;
 
-            TryInvoke(label.Owner, () =>
+            TryInvoke(parent, () =>
             {
                 // string strOldText = label.Text;
 
                 label.Text = string.IsNullOrEmpty(strText) ? " " : strText; // 在某些情况下，空内容和非空内容会导致 label 高度变化，进而引起整个框架窗口刷新。为避免此情况，特意在空的时候设置一个空格字符。2017/4/24
-
-                label.Owner.Update();    // 2022/11/13 迫使文本立即显示出来
+                label.Owner?.Update();    // 2022/11/13 迫使文本立即显示出来
                 // return strOldText;
             });
         }
@@ -528,16 +529,24 @@ string strText)
 
         #region TextBox
 
+        Control EnsureParent(Control parent)
+        {
+            if (parent != null)
+                return parent;
+            return this.OwnerControl;
+        }
+
         // 线程安全版本
         void Safe_SetTextBoxText(Control textbox,
             string strText)
         {
-            Debug.Assert(textbox.Parent != null);
-            TryInvoke(textbox.Parent, () =>
-            {
-                textbox.Text = strText;
-                textbox.Update();
-            });
+            var parent = EnsureParent(textbox.Parent);
+            if (parent != null)
+                TryInvoke(parent, () =>
+                {
+                    textbox.Text = strText;
+                    textbox.Update();
+                });
 
 #if REMOVED
             if (textbox.Parent != null && textbox.Parent.InvokeRequired)
@@ -584,7 +593,6 @@ string strText)
         {
             TryInvoke(progressbar, () =>
             {
-
                 if (lEnd == -1 && lStart == -1 && lValue == -1)
                 {
                     if (progressbar.Visible != false)   // 2008/3/17
@@ -695,12 +703,12 @@ string strText)
             long lEnd,
             long lValue)
         {
-            if (progressbar.Owner == null)
+            var parent = EnsureParent(progressbar.Owner);
+            if (parent == null)
                 return;
 
-            TryInvoke(progressbar.Owner, () =>
+            TryInvoke(parent, () =>
             {
-
                 if (lEnd == -1 && lStart == -1 && lValue == -1)
                 {
                     if (progressbar.Visible != false)   // 2008/3/17
@@ -851,7 +859,6 @@ string strText)
                 Button button = ((Button)this.m_stopButton);
 
                 Safe_EnableButton(button, bEnabled);
-
             }
             else if (this.m_stopButton is ToolBarButton)
             {
@@ -946,12 +953,13 @@ string strText)
         #region ToolBarButton
 
         // 线程安全调用
-        static void Safe_EnableToolBarButton(ToolBarButton button,
+        void Safe_EnableToolBarButton(ToolBarButton button,
             bool bEnabled)
         {
-            if (button.Parent == null)
+            var parent = EnsureParent(button.Parent);
+            if (parent == null)
                 return;
-            TryInvoke(button.Parent, () =>
+            TryInvoke(parent, () =>
             {
                 button.Enabled = bEnabled;
             });
@@ -995,14 +1003,15 @@ string strText)
         #region ToolStripButton
 
         // 线程安全调用
-        static void Safe_EnableToolStripButton(ToolStripButton button,
+        void Safe_EnableToolStripButton(ToolStripButton button,
             bool bEnabled)
         {
+            var parent = EnsureParent(button.Owner);
             // 2014/12/26
-            if (button.Owner == null)
+            if (parent == null)
                 return /*false*/;
 
-            TryInvoke(button.Owner, () =>
+            TryInvoke(parent, () =>
             {
                 button.Enabled = bEnabled;
             });

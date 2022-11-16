@@ -16,6 +16,8 @@ using System.Diagnostics;
 using System.Xml;
 using System.IO;
 using System.Net;   // for WebClient class
+using System.Threading.Tasks;
+using System.Web;
 
 #if GCAT_SERVER
 using DigitalPlatform.GcatClient.gcat_new_ws;
@@ -35,12 +37,11 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
-using System.Threading.Tasks;
-using System.Web;
+
 
 namespace dp2Catalog
 {
-    public partial class MainForm : Form, IChannelManager
+    public partial class MainForm : Form, IChannelManager, ILoopingHost
     {
         // MarcFilter对象缓冲池
         public FilterCollection Filters = new FilterCollection();
@@ -90,7 +91,7 @@ namespace dp2Catalog
         public ApplicationInfo AppInfo = null;  // new ApplicationInfo("dp2catalog.xml");
 
         public DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
-        public DigitalPlatform.Stop Stop = null;
+        // public DigitalPlatform.Stop Stop = null;
 
         public FromCollection Froms = new FromCollection();
 
@@ -115,6 +116,8 @@ namespace dp2Catalog
 
         public MainForm()
         {
+            this._loopingHost.StopManager = stopManager;
+
             InitializeComponent();
 
             /*
@@ -122,7 +125,7 @@ namespace dp2Catalog
                 SetTitle();
             };
             */
-            Looping.Initialize(stopManager);
+            // Looping.Initialize(stopManager);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -3107,17 +3110,27 @@ out string strError)
                             }
 #endif
 
-                            Stop = new DigitalPlatform.Stop();
-                            Stop.Register(stopManager, true);	// 和容器关联
-                            Stop.SetMessage("正在删除以前遗留的临时文件...");
-
-                            DeleteAllTempFiles(this.DataDir);
-
-                            Stop.SetMessage("");
-                            if (Stop != null) // 脱离关联
+                            /*
+                            Stop stop = new DigitalPlatform.Stop();
+                            stop.Register(stopManager, true);	// 和容器关联
+                            stop.SetMessage("正在删除以前遗留的临时文件...");
+                            */
+                            var looping = BeginLoop(this.DoStop, "正在删除以前遗留的临时文件...");
+                            try
                             {
-                                Stop.Unregister();	// 和容器关联
-                                Stop = null;
+                                DeleteAllTempFiles(looping.Progress, this.DataDir);
+                            }
+                            finally
+                            {
+                                looping.Dispose();
+                                /*
+                                stop.SetMessage("");
+                                if (stop != null) // 脱离关联
+                                {
+                                    stop.Unregister();  // 和容器关联
+                                    stop = null;
+                                }
+                                */
                             }
 
                             // 初始化历史对象，包括C#脚本
@@ -3188,7 +3201,7 @@ out string strError)
 
         // 删除数据目录下全部临时文件
         // 在软件启动的时候调用
-        void DeleteAllTempFiles(string strDataDir)
+        void DeleteAllTempFiles(Stop stop, string strDataDir)
         {
             // 出让控制权
             Application.DoEvents();
@@ -3218,7 +3231,7 @@ out string strError)
                 if (strFileName.Length > 0
                     && strFileName[0] == '~')
                 {
-                    Stop.SetMessage("正在删除 " + fis[i].FullName);
+                    stop?.SetMessage("正在删除 " + fis[i].FullName);
                     try
                     {
                         File.Delete(fis[i].FullName);
@@ -3233,7 +3246,7 @@ out string strError)
             DirectoryInfo[] dis = di.GetDirectories();
             for (int i = 0; i < dis.Length; i++)
             {
-                DeleteAllTempFiles(dis[i].FullName);
+                DeleteAllTempFiles(stop, dis[i].FullName);
             }
         }
 
@@ -5309,6 +5322,40 @@ out string strError)
         {
             OpenWindow<SruSearchForm>();
         }
+
+
+        #region ILoopingHost
+
+        internal LoopingHost _loopingHost = new LoopingHost();
+
+        public Looping BeginLoop(StopEventHandler handler,
+string text,
+string style = null)
+        {
+            return _loopingHost.BeginLoop(handler, text, style);
+        }
+
+        public void EndLoop(Looping looping)
+        {
+            _loopingHost.EndLoop(looping);
+        }
+
+        public bool HasLooping()
+        {
+            return _loopingHost.HasLooping();
+        }
+
+        public Looping TopLooping
+        {
+            get
+            {
+                return _loopingHost.TopLooping;
+            }
+        }
+
+        #endregion
+
+
     }
 
     public class EnableState
@@ -5349,8 +5396,6 @@ out string strError)
 
             this.Add(state);
         }
-
-
 
         public void RestoreAll()
         {
@@ -5406,7 +5451,6 @@ out string strError)
 
             return null;    // not found
         }
-
     }
 
 }

@@ -253,17 +253,14 @@ out string alternative)
                         DialogResult result = DialogResult.Yes;
                         if (_hide_dialog == false)
                         {
-                            this.Invoke((Action)(() =>
-                            {
-                                result = MessageDialog.Show(this,
-                            m,
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxDefaultButton.Button1,
-                            "此后不再出现本对话框",
-                            ref _hide_dialog,
-                            buttons,
-                            sec);
-                            }));
+                            result = MessageDialog.Show(this,
+                        m,
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxDefaultButton.Button1,
+                        "此后不再出现本对话框",
+                        ref _hide_dialog,
+                        buttons,
+                        sec);
                             _hide_dialog_count = 0;
                         }
                         else
@@ -356,7 +353,7 @@ TaskScheduler.Default);
                         await Task.Delay(500, token);
                 }
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
 
             }

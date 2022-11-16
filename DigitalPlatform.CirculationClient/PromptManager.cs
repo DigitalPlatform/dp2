@@ -45,18 +45,15 @@ namespace DigitalPlatform.CirculationClient
                 DialogResult result = DialogResult.Yes;
                 if (_hide_dialog == false)
                 {
-                    owner.Invoke((Action)(() =>
-                    {
-                        result = MessageDialog.Show(owner,
-                            e.MessageText +
-                            (e.IncludeOperText == false ? "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理" : ""),
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxDefaultButton.Button1,
-                    "此后不再出现本对话框",
-                    ref _hide_dialog,
-                    e.ButtonCaptions !=null ? e.ButtonCaptions : new string[] { "重试", "跳过", "中断" },
-                    10);
-                    }));
+                    result = MessageDialog.Show(owner,
+                        e.MessageText +
+                        (e.IncludeOperText == false ? "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理" : ""),
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxDefaultButton.Button1,
+                "此后不再出现本对话框",
+                ref _hide_dialog,
+                e.ButtonCaptions != null ? e.ButtonCaptions : new string[] { "重试", "跳过", "中断" },
+                10);
                     _hide_dialog_count = 0;
 
                     if (result == DialogResult.Yes)
@@ -89,18 +86,16 @@ namespace DigitalPlatform.CirculationClient
                 DialogResult result = DialogResult.Yes;
                 if (_hide_dialog == false)
                 {
-                    owner.Invoke((Action)(() =>
-                    {
-                        result = MessageDialog.Show(owner,
-                                    e.MessageText +
-        (e.IncludeOperText == false ? "\r\n\r\n是否跳过本条继续后面操作?\r\n\r\n(跳过: 跳过并继续; 中断: 停止全部操作)" : ""),
-                    MessageBoxButtons.OKCancel,
-                    MessageBoxDefaultButton.Button1,
-                    "此后不再出现本对话框",
-                    ref _hide_dialog,
-                    e.ButtonCaptions != null ? e.ButtonCaptions : new string[] { "跳过", "中断" },
-                    10);
-                    }));
+
+                    result = MessageDialog.Show(owner,
+                        e.MessageText +
+                        (e.IncludeOperText == false ? "\r\n\r\n是否跳过本条继续后面操作?\r\n\r\n(跳过: 跳过并继续; 中断: 停止全部操作)" : ""),
+                MessageBoxButtons.OKCancel,
+                MessageBoxDefaultButton.Button1,
+                "此后不再出现本对话框",
+                ref _hide_dialog,
+                e.ButtonCaptions != null ? e.ButtonCaptions : new string[] { "跳过", "中断" },
+                10);
                     _hide_dialog_count = 0;
 
                     if (result == DialogResult.OK)

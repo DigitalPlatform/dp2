@@ -15,7 +15,7 @@ namespace dp2Catalog
     /// <summary>
     /// 通用的 MDI 子窗口基类。提供了通讯通道和窗口尺寸维持等通用设施
     /// </summary>
-    public class MyForm : Form
+    public class MyForm : Form, ILoopingHost
     {
         internal int _processing = 0;    // 长操作嵌套计数器。如果大于0，表示正在处理，不希望窗口关闭
 
@@ -129,6 +129,8 @@ namespace dp2Catalog
         {
             if (this.MainForm == null)
                 return;
+
+            this._loopingHost.StopManager = this.MainForm.stopManager;
 
 #if USE_STOP
             stop = new DigitalPlatform.Stop();
@@ -309,6 +311,9 @@ namespace dp2Catalog
 
         #endregion
 
+        #region ILoopingHost
+
+#if OLD
         List<Looping> _loopings = new List<Looping>();
         object _syncRoot_loopings = new object();
 
@@ -357,6 +362,36 @@ namespace dp2Catalog
                 }
             }
         }
+#endif
+
+        internal LoopingHost _loopingHost = new LoopingHost();
+
+        public Looping BeginLoop(StopEventHandler handler,
+string text,
+string style = null)
+        {
+            return _loopingHost.BeginLoop(handler, text, style);
+        }
+
+        public void EndLoop(Looping looping)
+        {
+            _loopingHost.EndLoop(looping);
+        }
+
+        public bool HasLooping()
+        {
+            return _loopingHost.HasLooping();
+        }
+
+        public Looping TopLooping
+        {
+            get
+            {
+                return _loopingHost.TopLooping;
+            }
+        }
+
+        #endregion
     }
 
 }

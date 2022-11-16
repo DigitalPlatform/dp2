@@ -382,6 +382,8 @@ namespace DigitalPlatform.Drawing
             RotatePoints();
 
             Image image = this.Image;
+            if (image == null)
+                return;
             image.RotateFlip(flip_type);
 
             //this.Width = image.Width;

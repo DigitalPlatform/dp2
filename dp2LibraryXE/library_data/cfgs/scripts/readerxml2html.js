@@ -88,12 +88,13 @@ function DoHover() {
 
 function getSelectedBarcodes() {
 	var result = "";
-        $(".sel:checked").each(function (index) {
-		var barcode = $(this).data("barcode");
+	// https://errorsandanswers.com/issue-with-jquery-data-treating-string-as-number/
+        	$(".sel:checked").each(function (index) {
+		var barcode = $(this).attr("data-barcode");
 		if (result)
 			result += ",";
 		result += barcode;
-        });
+        	});
 	return result;
 }
 

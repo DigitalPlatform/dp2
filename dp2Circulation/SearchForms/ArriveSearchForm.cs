@@ -52,7 +52,7 @@ namespace dp2Circulation
                     strError = "普通数据库属性尚未初始化。这通常是因为刚进入内务时候初始化阶段出现错误导致的。请退出内务重新进入，并注意正确登录";
                     return -1;
                 }
-                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties("预约到书");
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(/*"预约到书"*/Program.MainForm.ArrivedDbName);
                 if (temp == null)
                 {
                     strError = "没有找到列定义 预约到书";

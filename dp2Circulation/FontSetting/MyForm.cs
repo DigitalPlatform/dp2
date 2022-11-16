@@ -225,10 +225,33 @@ namespace dp2Circulation
                 }));
         }
 
+        public T TryGet<T>(Func<T> func)
+        {
+            if (this.InvokeRequired)
+            {
+                return (T)this.Invoke((Func<T>)(() =>
+                {
+                    return func.Invoke();
+                }));
+            }
+            else
+                return func.Invoke();
+        }
+
         // 用于确保在界面线程调用
         public void TryInvoke(Action method)
         {
             if (this.InvokeRequired)
+                this.Invoke((Action)(method));
+            else
+                method.Invoke();
+        }
+
+        // 根据 uiThread 是否为 true，决定是否要确保在 UI 线程调用
+        public void TryInvoke(bool uiThread,
+            Action method)
+        {
+            if (this.InvokeRequired && uiThread)
                 this.Invoke((Action)(method));
             else
                 method.Invoke();
@@ -3299,9 +3322,7 @@ out strError);
                     // 2021/9/23
                     bool bHideMessageBox = true;
                     string error = strError;
-                    DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
-                    {
-                        return MessageDialog.Show(this,
+                    DialogResult result = MessageDialog.Show(this,
                         error + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
         MessageBoxButtons.YesNoCancel,
         MessageBoxDefaultButton.Button1,
@@ -3309,8 +3330,6 @@ out strError);
         ref bHideMessageBox,
         new string[] { "重试", "跳过", "放弃" },
         20);
-                    }));
-
                     if (result == DialogResult.Cancel)
                         return -1;
                     else if (result == System.Windows.Forms.DialogResult.No)
@@ -3604,7 +3623,7 @@ Keys keyData)
                 {
                     UpdateEnable(bEnable);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     ex = e;
                 }

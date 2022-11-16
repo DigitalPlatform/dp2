@@ -559,7 +559,7 @@ namespace dp2Circulation
                                 {
                                     Value = -1,
                                     ErrorInfo = strError
-                               };
+                                };
                             }
                             if (result.Value == 0)
                             {
@@ -1905,20 +1905,17 @@ namespace dp2Circulation
                     DialogResult result = DialogResult.Yes;
                     if (_hide_dialog == false)
                     {
-                        this.Invoke((Action)(() =>
-                        {
-                            MessageBoxButtons v = MessageBoxButtons.YesNoCancel;
-                            if (buttons.Length == 2)
-                                v = MessageBoxButtons.YesNo;
-                            result = MessageDialog.Show(this,
-                        m,
-                        v,
-                        MessageBoxDefaultButton.Button1,
-                        "此后不再出现本对话框",
-                        ref _hide_dialog,
-                        buttons,    // new string[] { "重试", "中断" },
-                        sec);
-                        }));
+                        MessageBoxButtons v = MessageBoxButtons.YesNoCancel;
+                        if (buttons.Length == 2)
+                            v = MessageBoxButtons.YesNo;
+                        result = MessageDialog.Show(this,
+                    m,
+                    v,
+                    MessageBoxDefaultButton.Button1,
+                    "此后不再出现本对话框",
+                    ref _hide_dialog,
+                    buttons,    // new string[] { "重试", "中断" },
+                    sec);
                         _hide_dialog_count = 0;
                     }
                     else
@@ -1938,7 +1935,7 @@ namespace dp2Circulation
                 out strError);
                     if (nRet == -1)
                     {
-                        strError = $"上传 '{ localfilename}' --> '{ strTargetPath }' 时出错: {strError}";
+                        strError = $"上传 '{localfilename}' --> '{strTargetPath}' 时出错: {strError}";
                         dlg.SetText(strError);
                         goto ERROR1;
                     }

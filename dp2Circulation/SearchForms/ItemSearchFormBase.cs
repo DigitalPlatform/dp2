@@ -1287,14 +1287,16 @@ item_recpath);
                     max_length = cols.Length + 1;
                 */
 
+                int key_cols = (m_bFirstColumnIsKey ? 1 : 0);
+
                 int c = 0;
                 for (; c < cols.Length; c++)
                 {
                     int index = 0;
                     if (this.m_nBiblioSummaryColumn == 0)
-                        index = c + 1;
+                        index = c + 1 + key_cols;
                     else
-                        index = c + (m_nBiblioSummaryColumn + 1);
+                        index = c + key_cols + (m_nBiblioSummaryColumn + 1);
 
                     ListViewUtil.ChangeItemText(item,
                     index,
@@ -1312,9 +1314,9 @@ item_recpath);
                 {
                     // 清除余下的列内容
                     if (this.m_nBiblioSummaryColumn == 0)
-                        c += 1;
+                        c += 1 + key_cols;
                     else
-                        c += m_nBiblioSummaryColumn + 1;
+                        c += key_cols + m_nBiblioSummaryColumn + 1;
 
                     for (; c < item.SubItems.Count; c++)
                     {

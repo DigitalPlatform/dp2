@@ -17,6 +17,19 @@ namespace dp2Circulation
     /// </summary>
     public class MarcQueryHost : MarcQuery
     {
+        // 是否使用 UI 线程
+        private bool _useUiThread = true;
+        public bool UseUiThread
+        {
+            get
+            {
+                return _useUiThread;
+            }
+            set
+            {
+                _useUiThread = value;
+            }
+        }
         /*
         /// <summary>
         /// 框架窗口
@@ -285,7 +298,7 @@ namespace dp2Circulation
         /// <param name="strHtml">要输出的 HTML 字符串</param>
         public void OutputHtml(string strHtml)
         {
-             Program.MainForm.OperHistory.AppendHtml(strHtml);
+            Program.MainForm.OperHistory.AppendHtml(strHtml);
         }
 
         // parameters:
@@ -302,7 +315,7 @@ namespace dp2Circulation
                 strClass = "warning";
             else if (nWarningLevel >= 2)
                 strClass = "error";
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug "+strClass+"'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
     }
 }

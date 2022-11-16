@@ -5228,45 +5228,60 @@ FileShare.ReadWrite))
             errorfilenames = new List<string>();
             nFileCount = 0;
 
-
-            // 列出所有日志文件
-            DirectoryInfo di = new DirectoryInfo(strDirectory);
-
-            FileInfo[] fis = di.GetFiles("*.log");
-
-            Array.Sort(fis, new FileInfoCompare());
-
-            nFileCount = fis.Length;
-
-            for (int i = 0; i < fis.Length; i++)
+            try
             {
-                Application.DoEvents();
 
-                if (stop != null && stop.State != 0)
+                if (Directory.Exists(strDirectory) == false)
                 {
-                    strError = "用户中断1";
+                    strError = $"目录 '{strDirectory}' 不存在";
                     return -1;
                 }
 
-                string strFileName = fis[i].FullName;
+                // 列出所有日志文件
+                DirectoryInfo di = new DirectoryInfo(strDirectory);
 
-                // return:
-                //      -1  出错
-                //      >=0 丢弃的段落数
-                int nRet = VerifyLogFile(
-                    stop,
-                    strFileName,
-                    out strError);
-                if (nRet == -1)
+                FileInfo[] fis = di.GetFiles("*.log");
+
+                Array.Sort(fis, new FileInfoCompare());
+
+                nFileCount = fis.Length;
+
+                for (int i = 0; i < fis.Length; i++)
                 {
-                    strError = "验证日志文件 '" + strFileName + "' 时发生运行错误: " + strError;
-                    return -1;
+                    Application.DoEvents();
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断1";
+                        return -1;
+                    }
+
+                    string strFileName = fis[i].FullName;
+
+                    // return:
+                    //      -1  出错
+                    //      >=0 丢弃的段落数
+                    int nRet = VerifyLogFile(
+                        stop,
+                        strFileName,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "验证日志文件 '" + strFileName + "' 时发生运行错误: " + strError;
+                        return -1;
+                    }
+                    if (nRet > 0)
+                        errorfilenames.Add(strFileName);
                 }
-                if (nRet > 0)
-                    errorfilenames.Add(strFileName);
+
+                return errorfilenames.Count;
             }
-
-            return errorfilenames.Count;
+            catch (Exception ex)
+            {
+                MainForm.WriteErrorLog($"VerifyLogFiles() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                strError = "VerifyLogFiles() 出现异常: " + ex.Message;
+                return -1;
+            }
         }
 
         class FileInfoCompare : IComparer
@@ -10551,17 +10566,14 @@ MessageBoxDefaultButton.Button1);
                 DialogResult result = DialogResult.Yes;
                 if (_hide_dialog == false)
                 {
-                    this.Invoke((Action)(() =>
-                    {
-                        result = MessageDialog.Show(this,
-                    e.MessageText + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxDefaultButton.Button1,
-                    "此后不再出现本对话框",
-                    ref _hide_dialog,
-                    new string[] { "重试", "跳过", "中断" },
-                    10);
-                    }));
+                    result = MessageDialog.Show(this,
+                e.MessageText + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxDefaultButton.Button1,
+                "此后不再出现本对话框",
+                ref _hide_dialog,
+                new string[] { "重试", "跳过", "中断" },
+                10);
                     _hide_dialog_count = 0;
                 }
                 else

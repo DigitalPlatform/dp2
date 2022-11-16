@@ -981,16 +981,13 @@ out strError);
                     if (info.HideBiblioMessageBox == false || nRedoCount > 10)
                     {
                         DialogResult result = System.Windows.Forms.DialogResult.Yes;
-                        this.Invoke((Action)(() =>
-                        {
-                            result = MessageDialog.Show(this,
-                        strError + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
-                        MessageBoxButtons.YesNoCancel,
-                        info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
-                        "此后不再出现本对话框",
-                        ref info.HideBiblioMessageBox,
-                        new string[] { "重试", "跳过", "中断" });
-                        }));
+                        result = MessageDialog.Show(this,
+                    strError + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+                    MessageBoxButtons.YesNoCancel,
+                    info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
+                    "此后不再出现本对话框",
+                    ref info.HideBiblioMessageBox,
+                    new string[] { "重试", "跳过", "中断" });
 
                         info.LastBiblioDialogResult = result;
                         if (result == DialogResult.Yes)
@@ -1244,16 +1241,14 @@ out strError);
                 {
                     DialogResult result = System.Windows.Forms.DialogResult.Yes;
                     string strText = strError;
-                    this.Invoke((Action)(() =>
-{
-    result = MessageDialog.Show(this,
-strText + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
-MessageBoxButtons.YesNoCancel,
-info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
-"此后不再出现本对话框",
-ref info.HideBiblioMessageBox,
-new string[] { "重试", "跳过", "中断" });
-}));
+
+                    result = MessageDialog.Show(this,
+                strText + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+                MessageBoxButtons.YesNoCancel,
+                info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
+                "此后不再出现本对话框",
+                ref info.HideBiblioMessageBox,
+                new string[] { "重试", "跳过", "中断" });
                     info.LastBiblioDialogResult = result;
                     if (result == DialogResult.Yes)
                     {

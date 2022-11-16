@@ -30,7 +30,6 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
-using Microsoft.CodeAnalysis.Operations;
 
 
 namespace dp2Circulation
@@ -2155,11 +2154,13 @@ bQuickLoad);
                     if (bOutputKeyCount == true)
                     {
                         // 输出keys
+                        /*
                         if (searchresult.Cols == null)
                         {
                             strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
                             return -1;
                         }
+                        */
                         cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
                         cols[0] = searchresult.Path;
                         if (cols.Length > 1)
@@ -2181,13 +2182,14 @@ bQuickLoad);
                     else if (bOutputKeyID == true)
                     {
                         // 输出keys
+                        /*
                         if (searchresult.Cols == null
                             && bTempQuickLoad == false)
                         {
                             strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
                             return -1;
                         }
-
+                        */
                         cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
                         cols[0] = LibraryChannel.BuildDisplayKeyString(searchresult.Keys);
                         if (cols.Length > 1)
@@ -5630,7 +5632,7 @@ bQuickLoad);
                         for (int c = 0; c < record.Cols.Length; c++)
                         {
                             ListViewUtil.ChangeItemText(item,
-                            c + 1,
+                            c + 1 + (m_bFirstColumnIsKey ? 1 : 0),
                             record.Cols[c]);
                         }
 
@@ -5792,7 +5794,7 @@ bQuickLoad);
         // 观察一个事项是否在内存中修改过
         bool IsItemChanged(ListViewItem item)
         {
-            string strRecPath = item.Text;
+            string strRecPath = ListViewUtil.GetItemText(item, 0);  //  item.Text;
             if (string.IsNullOrEmpty(strRecPath) == true)
                 return false;
 
@@ -5923,12 +5925,35 @@ bQuickLoad);
 
         int m_nChangedCount = 0;
 
-        void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
+        async void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
+        {
+            await Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        _runMarcQueryScript();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBoxShow($"_runMarcQueryScript() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                },
+                default,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
+        }
+
+        void _runMarcQueryScript()
         {
             string strError = "";
             int nRet = 0;
 
-            if (this.listView_records.SelectedItems.Count == 0)
+            var selected_count = TryGet(() =>
+            {
+                return listView_records.SelectedItems.Count;
+            });
+            if (selected_count == 0)
             {
                 strError = "尚未选择要执行 MarcQuery 脚本的事项";
                 goto ERROR1;
@@ -5941,25 +5966,29 @@ bQuickLoad);
 
             // this.m_biblioTable.Clear();
 
-            OpenFileDialog dlg = new OpenFileDialog
+            OpenFileDialog dlg = TryGet(() =>
             {
-                Title = "请指定 MarcQuery 脚本文件",
-                FileName = this.m_strUsedMarcQueryFilename,
-                Filter = "MarcQuery 脚本文件 (*.cs)|*.cs|All files (*.*)|*.*",
-                RestoreDirectory = true
-            };
+                return new OpenFileDialog
+                {
+                    Title = "请指定 MarcQuery 脚本文件",
+                    FileName = this.m_strUsedMarcQueryFilename,
+                    Filter = "MarcQuery 脚本文件 (*.cs)|*.cs|All files (*.*)|*.*",
+                    RestoreDirectory = true
+                };
+            });
 
-            if (dlg.ShowDialog() != DialogResult.OK)
+            var dialog_result = TryGet(() =>
+            {
+                return dlg.ShowDialog();
+            });
+            if (dialog_result != DialogResult.OK)
                 return;
 
             this.m_strUsedMarcQueryFilename = dlg.FileName;
 
-            MarcQueryHost host = null;
-            Assembly assembly = null;
-
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
-                out assembly,
-                out host,
+                out Assembly assembly,
+                out MarcQueryHost host,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -5975,7 +6004,10 @@ bQuickLoad);
                 host.UiItem = null;
 
                 StatisEventArgs args = new StatisEventArgs();
-                host.OnInitial(this, args);
+                TryInvoke(host.UseUiThread, () =>
+                {
+                    host.OnInitial(this, args);
+                });
                 if (args.Continue == ContinueType.SkipAll)
                     return;
                 if (args.Continue == ContinueType.Error)
@@ -6000,14 +6032,13 @@ bQuickLoad);
             */
             var looping = BeginLoop(this.DoStop, "正在针对书目记录执行 MarcQuery 脚本 ...", "halfstop");
 
-
             this.EnableControls(false);
 
-            this.listView_records.Enabled = false;
+            EnableRecordList(false);
             try
             {
                 if (looping.Progress != null)
-                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                    looping.Progress.SetProgressRange(0, selected_count);
 
                 {
                     host.MainForm = Program.MainForm;
@@ -6018,7 +6049,10 @@ bQuickLoad);
                     host.UiItem = null;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnBegin(this, args);
+                    TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnBegin(this, args);
+                    });
                     if (args.Continue == ContinueType.SkipAll)
                         return;
                     if (args.Continue == ContinueType.Error)
@@ -6028,6 +6062,15 @@ bQuickLoad);
                     }
                 }
 
+                var items = TryGet(() =>
+                {
+                    return this.listView_records.SelectedItems
+                    .Cast<ListViewItem>()
+                    .AsQueryable()
+                    .Where(o => string.IsNullOrEmpty(o.Text) == false)
+                    .ToList();
+                });
+                /*
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
@@ -6036,6 +6079,7 @@ bQuickLoad);
 
                     items.Add(item);
                 }
+                */
 
                 bool bOldSource = true; // 是否要从 OldXml 开始做起
 
@@ -6072,7 +6116,7 @@ bQuickLoad);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents(); // 出让界面控制权
+                    // Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -6127,7 +6171,10 @@ bQuickLoad);
                     host.UiItem = item.ListViewItem;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnRecord(this, args);
+                    TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnRecord(this, args);
+                    });
                     if (args.Continue == ContinueType.SkipAll)
                         break;
                     if (args.Continue == ContinueType.Error)
@@ -6153,8 +6200,11 @@ bQuickLoad);
                             info.NewXml = strXml;
                         }
 
-                        item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
-                        item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
+                        TryInvoke(() =>
+                        {
+                            item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
+                            item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
+                        });
                     }
 
                     // 显示为工作单形式
@@ -6170,7 +6220,10 @@ bQuickLoad);
                     host.UiItem = null;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnEnd(this, args);
+                    TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnEnd(this, args);
+                    });
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
@@ -6180,7 +6233,6 @@ bQuickLoad);
             }
             catch (Exception ex)
             {
-
                 strError = "执行 MarcQuery 脚本的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
                 goto ERROR1;
             }
@@ -6189,7 +6241,7 @@ bQuickLoad);
                 if (host != null)
                     host.FreeResources();
 
-                this.listView_records.Enabled = true;
+                EnableRecordList(true);
 
                 /*
                 _stop.EndLoop();
@@ -6211,7 +6263,7 @@ bQuickLoad);
             RefreshPropertyView(false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
         }
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
@@ -6985,8 +7037,9 @@ bQuickLoad);
                         if (bHideMessageBox == false)
                         {
                             // TODO: 提示中出现书目记录的摘要信息？
+                            string temp = strError;
                             result = MessageDialog.Show(this,
-            "复制或移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "' 时出现错误: " + strError + "。\r\n\r\n是否重试? (Yes 重试；No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
+            "复制或移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "' 时出现错误: " + temp + "。\r\n\r\n是否重试? (Yes 重试；No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
             MessageBoxButtons.YesNoCancel,
             MessageBoxDefaultButton.Button1,
             "不再出现此对话框",
@@ -8263,26 +8316,51 @@ bQuickLoad);
         }
 
         // 删除所选择的书目记录
-        void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
+        async void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
+        {
+            await Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        _deleteSelectedRecords();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBoxShow($"_deleteSelectedRecords() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                },
+    default,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+        void _deleteSelectedRecords()
         {
             string delete_style = "";
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
                 delete_style = "noeventlog";
 
-            DialogResult result = MessageBox.Show(this,
+            DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+            {
+                return MessageBox.Show(this,
         $"确实要从数据库中删除所选定的 {this.listView_records.SelectedItems.Count.ToString()} 个书目记录?\r\n\r\n{(string.IsNullOrEmpty(delete_style) == false ? "style:" + delete_style : "")}\r\n\r\n(警告：书目记录被删除后，无法恢复。如果删除书目记录，则其下属的册、期、订购、评注记录和对象资源会一并删除)\r\n\r\n(OK 删除；Cancel 取消)",
         "BiblioSearchForm",
         MessageBoxButtons.OKCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
+            }));
             if (result == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            TryInvoke(() =>
             {
-                items.Add(item);
-            }
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    items.Add(item);
+                }
+            });
 
             string strError = "";
             int nDeleteCount = 0;
@@ -8309,7 +8387,7 @@ bQuickLoad);
 
 
             this.EnableControlsInSearching(false);
-            this.listView_records.Enabled = false;
+            EnableRecordList(false);
             try
             {
                 looping.Progress.SetProgressRange(0, items.Count);
@@ -8339,7 +8417,6 @@ bQuickLoad);
 
                     int nRedoCount = 0;
                 REDO_LOAD:
-
                     long lRet = channel.GetBiblioInfos(
                         looping.Progress,
                         strRecPath,
@@ -8364,7 +8441,7 @@ bQuickLoad);
                         }
 
                         string message = $"在获得记录 {strRecPath} 时间戳时出错:\r\n{strError}\r\n---\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
-                        dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                        dialog_result = (DialogResult)/*Application.OpenForms[0]*/this.Invoke(new Func<DialogResult>(() =>
                         {
                             // return:
                             //      DialogResult.Retry 表示超时了
@@ -8414,12 +8491,15 @@ message,
                         }
                         else
                         {
-                            result = MessageBox.Show(this,
+                            result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                            {
+                                return MessageBox.Show(this,
         "书目记录 '" + strRecPath + "' 包含 " + strSubCount + " 个下级记录，而当前用户并不具备 client_deletebibliosubrecords 权限，无法删除这条书目记录。\r\n\r\n是否继续后面的操作? \r\n\r\n(Yes 继续；No 终止未完成的全部删除操作)",
         "BiblioSearchForm",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
+                            }));
                             if (result == System.Windows.Forms.DialogResult.No)
                             {
                                 strError = "中断操作";
@@ -8430,8 +8510,6 @@ message,
                     }
 
                 REDO_DELETE:
-                    byte[] baNewTimestamp = null;
-
                     channel.Timeout = new TimeSpan(0, 5, 0);
                     lRet = channel.SetBiblioInfo(
                         looping.Progress,
@@ -8443,7 +8521,7 @@ message,
                         "",
                         delete_style,
                         out strOutputPath,
-                        out baNewTimestamp,
+                        out byte[] baNewTimestamp,
                         out strError);
                     if (lRet == -1)
                     {
@@ -8454,7 +8532,7 @@ message,
                         }
 
                         string message = $"删除书目记录 {strRecPath} 时出错:\r\n{strError}\r\n---\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
-                        dialog_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                        dialog_result = (DialogResult)/*Application.OpenForms[0]*/this.Invoke(new Func<DialogResult>(() =>
                         {
                             // return:
                             //      DialogResult.Retry 表示超时了
@@ -8518,7 +8596,10 @@ message,
 
                     looping.Progress.SetProgressValue(i);
 
-                    this.listView_records.Items.Remove(item);
+                    TryInvoke(() =>
+                    {
+                        this.listView_records.Items.Remove(item);
+                    });
                 }
             }
             finally
@@ -8535,18 +8616,26 @@ message,
                 this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
-                this.listView_records.Enabled = true;
+                EnableRecordList(true);
             }
 
             {
                 string message = "成功删除书目记录 " + nDeleteCount + " 条";
                 if (skipped_recpath.Count > 0)
                     message += $"。但有 {skipped_recpath} 条书目记录跳过了删除";
-                MessageBox.Show(this, message);
+                MessageBoxShow(message);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
+        }
+
+        void EnableRecordList(bool enable)
+        {
+            TryInvoke(() =>
+            {
+                this.listView_records.Enabled = enable;
+            });
         }
 
         // 从窗口中移走所选择的事项
@@ -11623,8 +11712,11 @@ message,
             try
             {
                 ListViewItem item = null;
-                if (this.listView_records.SelectedItems.Count == 1)
-                    item = this.listView_records.SelectedItems[0];
+                TryInvoke(() =>
+                {
+                    if (this.listView_records.SelectedItems.Count == 1)
+                        item = this.listView_records.SelectedItems[0];
+                });
 
                 _doViewProperty(item, bOpenWindow);
             }
@@ -11657,7 +11749,7 @@ message,
 
             Program.MainForm.OpenCommentViewer(bOpenWindow);
 
-            string strRecPath = item.Text;
+            string strRecPath = ListViewUtil.GetItemText(item, 0);  //  item.Text;
             if (string.IsNullOrEmpty(strRecPath) == true)
                 return;
 

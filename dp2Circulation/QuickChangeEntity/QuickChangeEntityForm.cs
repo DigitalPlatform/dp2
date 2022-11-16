@@ -249,24 +249,16 @@ namespace dp2Circulation
 
             try
             {
-                string strItemText = "";
-                string strBiblioText = "";
-
-                string strItemRecPath = "";
-                string strBiblioRecPath = "";
-
-                byte[] item_timestamp = null;
-
                 long lRet = channel.GetItemInfo(
                     stop,
                     strBarcode,
                     "xml",
-                    out strItemText,
-                    out strItemRecPath,
-                    out item_timestamp,
-                    "html",
-                    out strBiblioText,
-                    out strBiblioRecPath,
+                    out string strItemText,
+                    out string strItemRecPath,
+                    out byte[] item_timestamp,
+                    "html", // TODO: 尝试扩展为多种格式，包括 table。XML 用于解析出题名与责任者字段，用于过程显示提示
+                    out string strBiblioText,
+                    out string strBiblioRecPath,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -435,6 +427,12 @@ namespace dp2Circulation
                         Console.Beep();
                         Program.MainForm.Speak($"标签 {this.textBox_barcode.Text} 写入成功");
                     }
+                    // 2022/11/15
+                    if (nRet == -1)
+                    {
+                        MessageBoxAndSpeak(strError);
+                        goto SETFOCUS;
+                    }
                 }
 
                 this.textBox_outputBarcodes.Text += this.textBox_barcode.Text + "\r\n";
@@ -597,6 +595,8 @@ false);
 
                 string pii = EntityEditForm.GetPII(strXml);   // 从修改前的册记录中获得册条码号
 
+                this.ShowMessage($"正在将 PII '{pii}' 写入 RFID 标签");
+
                 // return:
                 //      -1  出错
                 //      0   放弃装载
@@ -608,7 +608,7 @@ false);
                 if (nRet == -1)
                 {
                     DialogResult result = MessageBox.Show(this,
-$"装载标签原有内容发生错误: {strError}。\r\n\r\n是否继续保存新内容到此标签?",
+$"装载标签原有内容发生错误: {strError}。\r\n\r\n是否继续保存新内容(PII '{pii}')到此标签?",
 "QuickChangeEntityForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -618,7 +618,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 if (nRet == 0)
                 {
-                    strError = "已放弃写入 RFID 标签内容";
+                    strError = $"已放弃将 PII '{pii}' 写入 RFID 标签内容";
                     goto CANCEL0;
                 }
 
@@ -650,6 +650,23 @@ MessageBoxDefaultButton.Button2);
             Program.MainForm.Speak(strError);
             this.ShowMessage(strError, "red", true);
             return -1;
+        }
+
+        // return:
+        //      DialogResult.Yes    希望中断批处
+        //      DialogResult.No     不中断
+        DialogResult AskStopAndSpeak(string text)
+        {
+            Program.MainForm.Speak(text);
+            return (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+            {
+                return MessageBox.Show(this,
+text + "\r\n\r\n是否中断批处理?\r\n\r\n[是]中断 [否]不中断，继续处理后面的册记录",
+"QuickChangeEntityForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            }));
         }
 
         LogicChipItem _left = null;
@@ -686,7 +703,13 @@ MessageBoxDefaultButton.Button2);
                     dialog.AutoCloseDialog = auto_close_dialog;
                     dialog.SelectedPII = auto_select_pii;
                     dialog.AutoSelectCondition = "auto_or_blankPII";
-                    dialog.AskTag += Dialog_AskTag;
+                    // dialog.AskTag += Dialog_AskTag;
+                    dialog.AskTag += (o, e) =>
+                    {
+                        Program.MainForm.Speak("请放空白标签");
+                        e.Text = $"准备将 PII '{auto_select_pii}' 写入 RFID 标签，请在读写器上放置贴有标签的图书 ...";
+                    };
+
                     dialog.ProtocolFilter = InventoryInfo.ISO15693;
                     Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                     dialog.ShowDialog(this);
@@ -757,11 +780,13 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        /*
         private void Dialog_AskTag(object sender, AskTagEventArgs e)
         {
             Program.MainForm.Speak("请放空白标签");
             e.Text = "准备写入 RFID 标签，请在读写器上放置贴有标签的图书 ...";
         }
+        */
 
         int SaveNewChip(
             out TagInfo new_tag_info,
@@ -1617,6 +1642,17 @@ false);
                         {
                             Console.Beep();
                             Program.MainForm.Speak($"标签 {this.textBox_barcode.Text} 写入成功");
+                        }
+                        // 2022/11/15
+                        if (nRet == 0 || nRet == -1)
+                        {
+                            var result = AskStopAndSpeak("");
+                            if (result == DialogResult.Yes)
+                            {
+                                strError = "中断批处理";
+                                this.textBox_outputBarcodes.Text += "# " + strLine + " " + strError + "\r\n";
+                                return -1;
+                            }
                         }
 
                         if (this.entityEditControl1.Changed == true)

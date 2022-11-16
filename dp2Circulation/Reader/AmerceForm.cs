@@ -1050,7 +1050,7 @@ this.splitContainer_lists,
                             continue;
                         }
 
-                        int nRet = Safe_fillAmercedLine(
+                        int nRet = FillAmercedLine(
                             looping.Progress,
                             strXml,
                             strPath,
@@ -1226,6 +1226,11 @@ this.splitContainer_lists,
                 }
                 return;
             }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
             finally
             {
                 looping.Dispose();
@@ -1242,6 +1247,7 @@ this.splitContainer_lists,
             // Safe_errorBox(strError);
         }
 
+#if REMOVED
         // FillAmercedLine
         delegate int Delegate_FillAmercedLine(Stop stop,
             string strXml,
@@ -1262,7 +1268,7 @@ this.splitContainer_lists,
             strError = (string)args[3];
             return nRet;
         }
-
+#endif
 
         #endregion
 
@@ -1536,52 +1542,54 @@ this.splitContainer_lists,
                     // TODO: 摘要建议异步作，或者在全部数据装载完成后单独扫描一遍做
                     string strSummary = "";
 
-
                     ListViewItem item = new ListViewItem(strItemBarcode);
 
-                    // 摘要
-                    // item.SubItems.Add(strSummary);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
+                    TryInvoke(() =>
+                    {
+                        // 摘要
+                        // item.SubItems.Add(strSummary);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
 
-                    // 金额
-                    // item.SubItems.Add(strPrice);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_PRICE, strPrice);
+                        // 金额
+                        // item.SubItems.Add(strPrice);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_PRICE, strPrice);
 
-                    // 注释
-                    // item.SubItems.Add(strComment);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_COMMENT, strComment);
+                        // 注释
+                        // item.SubItems.Add(strComment);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_COMMENT, strComment);
 
-                    // 违约原因
-                    // item.SubItems.Add(strReason);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_REASON, strReason);
+                        // 违约原因
+                        // item.SubItems.Add(strReason);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_REASON, strReason);
 
-                    // 借阅日期
-                    // item.SubItems.Add(strBorrowDate);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWDATE, strBorrowDate);
+                        // 借阅日期
+                        // item.SubItems.Add(strBorrowDate);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWDATE, strBorrowDate);
 
-                    // 借阅时限
-                    // item.SubItems.Add(strBorrowPeriod);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWPERIOD, strBorrowPeriod);
+                        // 借阅时限
+                        // item.SubItems.Add(strBorrowPeriod);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWPERIOD, strBorrowPeriod);
 
-                    // 还书日期
-                    // item.SubItems.Add(strReturnDate);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_RETURNDATE, strReturnDate);
+                        // 还书日期
+                        // item.SubItems.Add(strReturnDate);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_RETURNDATE, strReturnDate);
 
-                    // id
-                    // item.SubItems.Add(strID);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_ID, strID);
+                        // id
+                        // item.SubItems.Add(strID);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_ID, strID);
 
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWOPERATOR, strBorrowOperator);
-                    ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_RETURNOPERATOR, strReturnOperator);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_BORROWOPERATOR, strBorrowOperator);
+                        ListViewUtil.ChangeItemText(item, COLUMN_AMERCING_RETURNOPERATOR, strReturnOperator);
 
-                    // 储存原始价格和注释备用
-                    AmercingItemInfo info = new AmercingItemInfo();
-                    info.Price = strPrice;
-                    info.Comment = strComment;
-                    info.Xml = node.OuterXml;
-                    item.Tag = info;
+                        // 储存原始价格和注释备用
+                        AmercingItemInfo info = new AmercingItemInfo();
+                        info.Price = strPrice;
+                        info.Comment = strComment;
+                        info.Xml = node.OuterXml;
+                        item.Tag = info;
 
-                    AddListItem(this.listView_overdues, item);
+                        AddListItem(this.listView_overdues, item);
+                    });
                 }
 
                 /*
@@ -1654,6 +1662,11 @@ this.splitContainer_lists,
 
                 return;
             }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
             finally
             {
                 looping.Dispose();
@@ -1663,7 +1676,6 @@ this.splitContainer_lists,
                 */
                 m_bStopFillAmercing = true;
             }
-
         ERROR1:
             SetError(this.listView_overdues, strError);
             this.ShowMessage(strError, "red", true);    // 2019/9/19
@@ -1685,7 +1697,6 @@ this.splitContainer_lists,
             strError = "";
 
             XmlDocument dom = new XmlDocument();
-
             try
             {
                 dom.LoadXml(strXml);
@@ -1748,58 +1759,60 @@ this.splitContainer_lists,
             item.SubItems.Add(strRecPath);
              * */
 
-            ListViewUtil.ChangeItemText(item,
+            TryInvoke(() =>
+            {
+                ListViewUtil.ChangeItemText(item,
                 COLUMN_AMERCED_BIBLIOSUMMARY,
                 strSummary);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_PRICE,
-                strPrice);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_COMMENT,
-                strComment);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_REASON,
-                strReason);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_BORROWDATE,
-                strBorrowDate);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_BORROWPERIOD,
-                strBorrowPeriod);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_RETURNDATE,
-                strReturnDate);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_ID,
-                strID);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_RETURNOPERATOR,
-                strReturnOperator);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_STATE,
-                strState);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_AMERCEOPERATOR,
-                strAmerceOperator);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_AMERCETIME,
-                strAmerceTime);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_SETTLEMENTOPERATOR,
-                strSettlementOperator);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_SETTLEMENTTIME,
-                strSettlementTime);
-            ListViewUtil.ChangeItemText(item,
-                COLUMN_AMERCED_RECPATH,
-                strRecPath);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_PRICE,
+                    strPrice);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_COMMENT,
+                    strComment);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_REASON,
+                    strReason);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_BORROWDATE,
+                    strBorrowDate);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_BORROWPERIOD,
+                    strBorrowPeriod);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_RETURNDATE,
+                    strReturnDate);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_ID,
+                    strID);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_RETURNOPERATOR,
+                    strReturnOperator);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_STATE,
+                    strState);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_AMERCEOPERATOR,
+                    strAmerceOperator);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_AMERCETIME,
+                    strAmerceTime);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_SETTLEMENTOPERATOR,
+                    strSettlementOperator);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_SETTLEMENTTIME,
+                    strSettlementTime);
+                ListViewUtil.ChangeItemText(item,
+                    COLUMN_AMERCED_RECPATH,
+                    strRecPath);
 
-            // 2012/10/8
-            AmercedItemInfo info = new AmercedItemInfo();
-            info.Xml = strXml;
-            item.Tag = info;
-
-            this.listView_amerced.Items.Add(item);
+                // 2012/10/8
+                AmercedItemInfo info = new AmercedItemInfo();
+                info.Xml = strXml;
+                item.Tag = info;
+                this.listView_amerced.Items.Add(item);
+            });
             return 0;
         }
 

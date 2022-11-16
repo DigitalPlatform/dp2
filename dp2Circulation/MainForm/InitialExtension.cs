@@ -115,7 +115,7 @@ namespace dp2Circulation
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
-                this.DisplayBackgroundText("开始自动更新(ClickOnce安装)\r\n");
+                this.DisplayBackgroundTextLn("开始自动更新(ClickOnce安装)");
                 ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
                 deployment.CheckForUpdateCompleted -= new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
                 deployment.CheckForUpdateCompleted += new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
@@ -129,7 +129,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    this.DisplayBackgroundText("更新操作 (CheckForUpdate) 出现异常: " + ExceptionUtil.GetAutoText(ex));
+                    this.DisplayBackgroundTextLn("更新操作 (CheckForUpdate) 出现异常: " + ExceptionUtil.GetAutoText(ex));
                 }
             }
         }
@@ -162,12 +162,12 @@ namespace dp2Circulation
         {
             if (e.Error != null)
             {
-                this.DisplayBackgroundText("ERROR: Could not retrieve new version of the application. Reason: \n" + e.Error.Message + "\nPlease report this error to the system administrator.");
+                this.DisplayBackgroundTextLn("ERROR: Could not retrieve new version of the application. Reason: \r\n" + e.Error.Message + "\r\nPlease report this error to the system administrator.");
                 return;
             }
             else if (e.Cancelled == true)
             {
-                this.DisplayBackgroundText("The update was cancelled.");
+                this.DisplayBackgroundTextLn("The update was cancelled.");
                 return;
             }
 
@@ -195,7 +195,7 @@ namespace dp2Circulation
             }
             else
             {
-                this.DisplayBackgroundText("当前没有发现新的版本\r\n");
+                this.DisplayBackgroundTextLn("当前没有发现新的版本");
             }
         }
 
@@ -215,7 +215,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                this.DisplayBackgroundText("更新操作 (Update) 出现异常: " + ExceptionUtil.GetAutoText(ex));
+                this.DisplayBackgroundTextLn("更新操作 (Update) 出现异常: " + ExceptionUtil.GetAutoText(ex));
             }
         }
 
@@ -233,12 +233,12 @@ namespace dp2Circulation
 
             if (e.Cancelled)
             {
-                this.DisplayBackgroundText("The update of the application's latest version was cancelled.\r\n");
+                this.DisplayBackgroundTextLn("The update of the application's latest version was cancelled.");
                 return;
             }
             else if (e.Error != null)
             {
-                this.DisplayBackgroundText("ERROR: Could not install the latest version of the application. Reason: \r\n" + e.Error.Message + "\r\nPlease report this error to the system administrator.\r\n");
+                this.DisplayBackgroundTextLn("ERROR: Could not install the latest version of the application. Reason: \r\n" + e.Error.Message + "\r\nPlease report this error to the system administrator.");
                 return;
             }
 
@@ -252,7 +252,7 @@ namespace dp2Circulation
                 Application.Restart();
             }
 #endif
-            this.DisplayBackgroundText("dp2circulation 已经成功更新。重启可立即使用新版本。\r\n");
+            this.DisplayBackgroundTextLn("dp2circulation 已经成功更新。重启可立即使用新版本。");
         }
 
         #endregion
@@ -459,7 +459,7 @@ Stack:
             string strBinDir = GetBinDir();
             string strUtilDir = GetUtilDir();
 
-            this.DisplayBackgroundText("开始自动更新(绿色安装)\r\n这期间，您可继续进行其它操作\r\n");
+            this.DisplayBackgroundTextLn("开始自动更新(绿色安装)\r\n这期间，您可继续进行其它操作");
 
             // 希望下载的文件。纯文件名
             List<string> filenames = new List<string>() {
@@ -509,7 +509,7 @@ Stack:
 
                     if (updated_filenames.IndexOf(filename) != -1)
                     {
-                        this.DisplayBackgroundText("下载 " + strUrl + " 到 " + strLocalFileName + " ...\r\n");
+                        this.DisplayBackgroundTextLn("下载 " + strUrl + " 到 " + strLocalFileName + " ...");
 
                         nRet = DownloadFile(strUrl,
                             strLocalFileName,
@@ -533,7 +533,7 @@ Stack:
                     string strZipFileName = Path.Combine(strBinDir, "greenutility.zip").ToLower();
                     string strTargetDir = strUtilDir;
 
-                    this.DisplayBackgroundText("展开文件 " + strZipFileName + " 到 " + strTargetDir + " ...\r\n");
+                    this.DisplayBackgroundTextLn("展开文件 " + strZipFileName + " 到 " + strTargetDir + " ...");
                     try
                     {
                         using (ZipFile zip = ZipFile.Read(strZipFileName))
@@ -573,9 +573,9 @@ Stack:
                 this._updatedGreenZipFileNames = updated_filenames;
 #endif
                 if (this._updatedGreenZipFileNames.Count > 0)
-                    this.DisplayBackgroundText("dp2circulation 绿色安装包升级文件已经准备就绪。当退出 dp2circulation 时会自动进行安装。\r\n");
+                    this.DisplayBackgroundTextLn("dp2circulation 绿色安装包升级文件已经准备就绪。当退出 dp2circulation 时会自动进行安装。");
                 else
-                    this.DisplayBackgroundText("没有发现更新。\r\n");
+                    this.DisplayBackgroundTextLn("没有发现更新。");
 
                 temp_filepaths.Clear(); // 这样 finally 块就不会删除这些文件了
             }
@@ -590,7 +590,7 @@ Stack:
             return;
         ERROR1:
             // ShowMessageBox(strError);
-            this.DisplayBackgroundText("绿色更新过程出错: " + strError + "\r\n");
+            this.DisplayBackgroundTextLn("绿色更新过程出错: " + strError);
             ReportError("dp2circulation GreenUpdate() 出错", strError);
         }
 
@@ -673,7 +673,7 @@ Stack:
                     string strZipFileName = Path.Combine(strBinDir, "greenutility.zip").ToLower();
                     string strTargetDir = strUtilDir;
 
-                    this.DisplayBackgroundText("展开文件 " + strZipFileName + " 到 " + strTargetDir + " ...\r\n");
+                    this.DisplayBackgroundTextLn("展开文件 " + strZipFileName + " 到 " + strTargetDir + " ...");
                     try
                     {
                         using (ZipFile zip = ZipFile.Read(strZipFileName))
@@ -2238,7 +2238,7 @@ MessageBoxDefaultButton.Button1);
             if (PathUtil.IsEqual(strProgramDir, strTargetDir) == true)
                 return false;
 
-            this.DisplayBackgroundText("正在创建备用绿色安装包 ...\r\n");
+            this.DisplayBackgroundTextLn("正在创建备用绿色安装包 ...");
 
             StringBuilder debugInfo = new StringBuilder();
             // return:
@@ -2256,7 +2256,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
             {
                 ShowMessageBox("创建备用绿色安装包时出错: " + strError);
-                this.DisplayBackgroundText(strError + "\r\n");
+                this.DisplayBackgroundTextLn(strError);
                 // 发送给 dp2003.com
                 ReportError("dp2circulation 创建备用绿色安装包时出错", strError + "\r\n\r\nDebug Info:\r\n" + debugInfo.ToString());
                 _copyGreenError = true;
@@ -2298,10 +2298,10 @@ MessageBoxDefaultButton.Button1);
                 {
                     strError = "dp2circulation 创建备用绿色安装包快捷方式时出现异常: " + ExceptionUtil.GetDebugText(ex);
                     this.ReportError("dp2circulation 创建备用绿色安装包快捷方式时出现异常", "(安静报错)" + strError);
-                    this.DisplayBackgroundText(strError + "\r\n");
+                    this.DisplayBackgroundTextLn(strError);
                 }
 
-                this.DisplayBackgroundText("备用绿色安装包已经成功创建于 " + strTargetDir + "。\r\n");
+                this.DisplayBackgroundTextLn("备用绿色安装包已经成功创建于 " + strTargetDir + "。");
             }
 
             return true;
@@ -2415,16 +2415,29 @@ MessageBoxDefaultButton.Button1);
                 this.m_backgroundForm.ShowProgressMessage(strID, strText);
         }
 
+        // 自动带一个回车
+        void DisplayBackgroundTextLn(string strText)
+        {
+            DisplayBackgroundText(strText + "\r\n");
+        }
+
         void DisplayBackgroundText(string strText)
         {
             if (m_backgroundForm != null)
             {
+                /*
                 if (m_backgroundForm.InvokeRequired)
                 {
                     m_backgroundForm.Invoke(new Action<string>(DisplayBackgroundText), strText);
                     return;
                 }
-                m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>"));
+                */
+                // m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>"));
+                var lines = strText.Replace("\r\n","\n").Split('\n');
+                foreach(var line in lines)
+                {
+                    m_backgroundForm.AppendHtml("<div>" + HttpUtility.HtmlEncode(line) + "</div>");
+                }
             }
         }
 
@@ -2432,11 +2445,14 @@ MessageBoxDefaultButton.Button1);
         {
             if (m_backgroundForm != null)
             {
-                if (e.Message != m_strPrevMessageText)
+                TryInvoke(() =>
                 {
-                    m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(e.Message) + "<br/>");
-                    m_strPrevMessageText = e.Message;
-                }
+                    if (e.Message != m_strPrevMessageText)
+                    {
+                        m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(e.Message) + "<br/>");
+                        m_strPrevMessageText = e.Message;
+                    }
+                });
             }
         }
 
@@ -3099,7 +3115,7 @@ Culture=neutral, PublicKeyToken=null
                 if (this.OperHistory == null)
                 {
                     looping.Progress.SetMessage("正在初始化操作历史面板 ...");
-                    
+
                     this.OperHistory = new OperHistory();
                     nRet = this.OperHistory.Initial(// this,
                         this.webBrowser_history,

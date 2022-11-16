@@ -345,12 +345,15 @@ namespace DigitalPlatform.Drawing
             if (this.tabControl_main.SelectedTab == this.tabPage_result)
             {
                 Image image = this.pictureBox_result.Image;
-                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                ImageUtil.SetImage(this.pictureBox_result, image);  // 2016/12/28
+                if (image != null)
+                {
+                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    ImageUtil.SetImage(this.pictureBox_result, image);  // 2016/12/28
 
-                _resultRotateAngle += 90;
-                if (_resultRotateAngle == 360)
-                    _resultRotateAngle = 0;
+                    _resultRotateAngle += 90;
+                    if (_resultRotateAngle == 360)
+                        _resultRotateAngle = 0;
+                }
             }
         }
 
