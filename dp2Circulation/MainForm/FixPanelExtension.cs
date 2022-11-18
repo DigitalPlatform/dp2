@@ -87,7 +87,10 @@ value);
         /// </summary>
         public void ActivatePropertyPage()
         {
-            this.tabControl_panelFixed.SelectedTab = this.tabPage_property;
+            this.TryInvoke(() =>
+            {
+                this.tabControl_panelFixed.SelectedTab = this.tabPage_property;
+            });
         }
 
         /// <summary>
@@ -146,7 +149,10 @@ value);
         /// </summary>
         public void ActivateAcceptPage()
         {
-            this.tabControl_panelFixed.SelectedTab = this.tabPage_accept;
+            this.TryInvoke(() =>
+            {
+                this.tabControl_panelFixed.SelectedTab = this.tabPage_accept;
+            });
         }
 
         /// <summary>
@@ -188,7 +194,10 @@ value);
         /// </summary>
         public void ActivateVerifyResultPage()
         {
-            this.tabControl_panelFixed.SelectedTab = this.tabPage_verifyResult;
+            this.TryInvoke(() =>
+            {
+                this.tabControl_panelFixed.SelectedTab = this.tabPage_verifyResult;
+            });
         }
 
         /// <summary>
@@ -232,7 +241,10 @@ value);
         /// </summary>
         public void ActivateGenerateDataPage()
         {
-            this.tabControl_panelFixed.SelectedTab = this.tabPage_generateData;
+            this.TryInvoke(() =>
+            {
+                this.tabControl_panelFixed.SelectedTab = this.tabPage_generateData;
+            });
         }
 
         /// <summary>
@@ -287,38 +299,44 @@ value);
 
         public void SetFixPageControl(string strName, Control value)
         {
-            TabPage page = GetFixPage(strName);
-            if (page == null)
-                throw new ArgumentException("名字为 '" + strName + "' 的 fixpage 不存在");
+            this.TryInvoke(() =>
+            {
+                TabPage page = GetFixPage(strName);
+                if (page == null)
+                    throw new ArgumentException("名字为 '" + strName + "' 的 fixpage 不存在");
 
-            // 清除原有控件
+                // 清除原有控件
 #if NO
             while (page.Controls.Count > 0)
             {
                 page.Controls.RemoveAt(0); 可能造成资源泄露！
             }
 #endif
-            page.ClearControls();   // 2015/11/7
+                page.ClearControls();   // 2015/11/7
 
-            if (value != null)
-            {
-                page.Controls.Add(value);
-                // this.tabControl_panelFixed.SelectedTab = this.tabPage_generateData;
+                if (value != null)
+                {
+                    page.Controls.Add(value);
+                    // this.tabControl_panelFixed.SelectedTab = this.tabPage_generateData;
 
-                // 避免出现半截窗口图像的闪动
-                if (this.tabControl_panelFixed.Visible
-                    && this.tabControl_panelFixed.SelectedTab == page)
-                    page.Update();
-            }
+                    // 避免出现半截窗口图像的闪动
+                    if (this.tabControl_panelFixed.Visible
+                        && this.tabControl_panelFixed.SelectedTab == page)
+                        page.Update();
+                }
+            });
         }
 
         public TabPage ActivateFixPage(string strName)
         {
-            TabPage page = GetFixPage(strName);
-            if (page == null)
-                throw new ArgumentException("名字为 '" + strName + "' 的 fixpage 不存在");
-            this.tabControl_panelFixed.SelectedTab = page;
-            return page;
+            return this.TryGet(() =>
+            {
+                TabPage page = GetFixPage(strName);
+                if (page == null)
+                    throw new ArgumentException("名字为 '" + strName + "' 的 fixpage 不存在");
+                this.tabControl_panelFixed.SelectedTab = page;
+                return page;
+            });
         }
 
         public TabPage GetFixPage(string strName)
@@ -347,7 +365,6 @@ value);
         }
 
 
-
         /// <summary>
         /// 固定面板区域是否可见
         /// </summary>
@@ -359,12 +376,14 @@ value);
             }
             set
             {
-                this.panel_fixed.Visible = value;
-                this.splitter_fixed.Visible = value;
+                this.TryInvoke(() =>
+                {
+                    this.panel_fixed.Visible = value;
+                    this.splitter_fixed.Visible = value;
 
-                this.MenuItem_displayFixPanel.Checked = value;
+                    this.MenuItem_displayFixPanel.Checked = value;
+                });
             }
         }
-
     }
 }

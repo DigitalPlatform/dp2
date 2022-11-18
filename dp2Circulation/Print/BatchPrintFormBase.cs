@@ -1927,7 +1927,7 @@ namespace dp2Circulation
             else
                 _stop.SetMessage(strError);
             */
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         #endregion

@@ -3386,6 +3386,8 @@ namespace dp2Circulation
 
             this.Items.MaskDeleteItem(bRemoveDeletedItem,
                 issueitem);
+
+            this.Changed = this.Changed;    // 2022/11/17
             return 1;
         }
 

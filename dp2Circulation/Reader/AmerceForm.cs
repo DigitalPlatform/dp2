@@ -1544,7 +1544,7 @@ this.splitContainer_lists,
 
                     ListViewItem item = new ListViewItem(strItemBarcode);
 
-                    TryInvoke(() =>
+                    this.TryInvoke(() =>
                     {
                         // 摘要
                         // item.SubItems.Add(strSummary);
@@ -1759,7 +1759,7 @@ this.splitContainer_lists,
             item.SubItems.Add(strRecPath);
              * */
 
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 ListViewUtil.ChangeItemText(item,
                 COLUMN_AMERCED_BIBLIOSUMMARY,

@@ -935,7 +935,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 && bIncludeFileID == true)  // 2008/12/3
             {
                 // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
-                nRet = this.binaryResControl1.AddFileFragments(ref dom,
+                nRet = this.binaryResControl1.AddFileFragments(dom,
             out strError);
                 if (nRet == -1)
                     return -1;

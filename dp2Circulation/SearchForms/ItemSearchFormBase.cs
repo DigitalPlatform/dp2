@@ -1088,7 +1088,7 @@ item_recpath);
 
                         if (looping.Stopped)
                         {
-                            MessageBoxShow("用户中断");
+                            this.MessageBoxShow("用户中断");
                             return 0;
                         }
 
@@ -1679,7 +1679,7 @@ item_recpath);
                 {
                     if (bShowed == false)
                     {
-                        MessageBoxShow(strError);
+                        this.MessageBoxShow(strError);
                         bShowed = true;
                     }
                     colindex_list.Add(-1);

@@ -1422,6 +1422,8 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                     return;
                 }
 
+                this.Changed = this.Changed;    // 2022/11/17
+
                 LibraryChannel channel = Program.MainForm.GetChannel();
                 string strMessage = "正在对册条码号 '" + bookitem.Barcode + "' 进行查重 ...";
                 var looping = BeginLoop((s, e) => Program.MainForm.DoStop(s, e),
@@ -1803,9 +1805,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             }
             */
             this.Changed = this.Changed;
-
             return;
-
         ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
@@ -2002,7 +2002,6 @@ edit.UiState);
                     )
                 {
                     this.Items.PhysicalDeleteItem(bookitem);
-
                     this.Changed = this.Changed;
                     return;
                 }
@@ -2043,33 +2042,43 @@ edit.UiState);
             string strStyle,
             out string strError)
         {
+            strError = "";
             // TODO: 是否要先保存以前的选择，功能执行完以后恢复以前的选择?
 
             ListViewUtil.ClearSelection(this.listView);
             // this.listView.SelectedItems.Clear();
 
-            // 如果必要，创建索取号
-            foreach (ListViewItem item in this.listView.Items)
+            var error = strError;
+            var ret0 = this.TryGet(() =>
             {
-                BookItem bookitem = (BookItem)item.Tag;
-                if (bookitem == null)
-                    continue;
-
-                if (StringUtil.HasHead(bookitem.AccessNo, "@accessNo") == true)
+                // 如果必要，创建索取号
+                foreach (ListViewItem item in this.listView.Items)
                 {
-                    item.Selected = true;
-                }
-            }
+                    BookItem bookitem = (BookItem)item.Tag;
+                    if (bookitem == null)
+                        continue;
 
-            if (this.listView.SelectedItems.Count > 0)
-            {
-                GenerateDataEventArgs ret = this.DoGenerateData("CreateCallNumber", false);    // 直接启动CreateCallNumber()函数
-                if (string.IsNullOrEmpty(ret.ErrorInfo) == false)
-                {
-                    strError = "保存册记录前创建索取号失败: " + ret.ErrorInfo + "\r\n\r\n保存没有成功";
-                    return -1;
+                    if (StringUtil.HasHead(bookitem.AccessNo, "@accessNo") == true)
+                    {
+                        item.Selected = true;
+                    }
                 }
-            }
+
+                if (this.listView.SelectedItems.Count > 0)
+                {
+                    GenerateDataEventArgs ret = this.DoGenerateData("CreateCallNumber", false);    // 直接启动CreateCallNumber()函数
+                    if (string.IsNullOrEmpty(ret.ErrorInfo) == false)
+                    {
+                        error = "保存册记录前创建索取号失败: " + ret.ErrorInfo + "\r\n\r\n保存没有成功";
+                        return -1;
+                    }
+                }
+
+                return 0;
+            });
+            strError = error;
+            if (ret0 == -1)
+                return -1;
 
             return base.SaveItems(stop, channel, strStyle, out strError);
         }
@@ -2688,7 +2697,6 @@ edit.UiState);
             List<string> deleted_recpaths = new List<string>();
 
             this.EnableControls(false);
-
             try
             {
                 // 实行删除
@@ -2998,6 +3006,8 @@ edit.UiState);
 
             this.Items.MaskDeleteItem(bRemoveDeletedItem,
                 bookitem);
+
+            this.Changed = this.Changed;    // 2022/11/17
             return 1;
         }
 

@@ -4269,7 +4269,7 @@ out strError);
             }
         ERROR1:
             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)

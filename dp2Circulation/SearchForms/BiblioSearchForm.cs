@@ -686,7 +686,7 @@ this.comboBox_location.Text);
 
         public void ClearListViewItems()
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 this.listView_records.Items.Clear();
 
@@ -745,7 +745,7 @@ Keys keyData)
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxShow($"DoLogicSearch() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                        this.MessageBoxShow($"DoLogicSearch() 异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 },
                 default,
@@ -780,7 +780,7 @@ Keys keyData)
             {
                 if (this.m_nChangedCount > 0)
                 {
-                    DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                    DialogResult result = this.TryGet(() =>
                     {
                         return MessageBox.Show(this,
                         "当前命中记录列表中有 " + this.m_nChangedCount.ToString() + " 项修改尚未保存。\r\n\r\n是否继续操作?\r\n\r\n(Yes 清除，然后继续操作；No 放弃操作)",
@@ -788,7 +788,7 @@ Keys keyData)
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
-                    }));
+                    });
                     if (result == DialogResult.No)
                         return;
                 }
@@ -1040,12 +1040,12 @@ out strError);
                 this.EnableControlsInSearching(true);
             }
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         internal void SetTitle(string text)
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 string title = "书目查询";
                 if (this._dbType == "authority")
@@ -1062,7 +1062,7 @@ out strError);
 
         void QueryToPanel(ItemQueryParam query)
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 Cursor oldCursor = this.Cursor;
                 this.Cursor = Cursors.WaitCursor;
@@ -1123,7 +1123,7 @@ out strError);
             if (query == null)
                 throw new Exception("query值不能为空");
 
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 // 截断尾部多余的
                 if (this.m_nQueryIndex < this.m_queries.Count - 1)
@@ -1381,7 +1381,7 @@ out strError);
             {
                 if (this.m_nChangedCount > 0)
                 {
-                    DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                    DialogResult result = this.TryGet(() =>
                     {
                         return MessageBox.Show(this,
                         "当前命中记录列表中有 " + this.listView_records.Items.Count.ToString() + " 项修改尚未保存。\r\n\r\n是否继续操作?\r\n\r\n(Yes 清除，然后继续操作；No 放弃操作)",
@@ -1389,7 +1389,7 @@ out strError);
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
-                    }));
+                    });
 
                     if (result == DialogResult.No)
                         return;
@@ -1988,7 +1988,7 @@ out strError);
         ERROR1:
             try
             {
-                MessageBoxShow(strError);
+                this.MessageBoxShow(strError);
             }
             catch
             {
@@ -2256,7 +2256,7 @@ bQuickLoad);
 
         void BeginUpdate()
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 this.listView_records.BeginUpdate();
             });
@@ -2264,7 +2264,7 @@ bQuickLoad);
 
         void EndUpdate()
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 this.listView_records.EndUpdate();
             });
@@ -2934,7 +2934,8 @@ bQuickLoad);
                         if (strPath.IndexOf("@") == -1)
                         {
                             form.CloseBrowseWindow();
-                            form.LoadRecordOld(strPath, "", true);
+                            // form.LoadRecordOld(strPath, "", true);
+                            await form.LoadRecordAsync(strPath, "", true);
                         }
                         else
                         {
@@ -2961,11 +2962,20 @@ bQuickLoad);
                             }
 
                             form.CloseBrowseWindow();
+                            /*
                             int nRet = form.LoadRecord(info,
                                 true,
                                 out strError);
                             if (nRet != 1)
                                 goto ERROR1;
+                            */
+                            var result = await form.LoadRecordAsync(info,
+    true);
+                            if (result.Value != 1)
+                            {
+                                strError = result.ErrorInfo;
+                                goto ERROR1;
+                            }
                         }
                     }
                     else
@@ -2974,7 +2984,10 @@ bQuickLoad);
                         Debug.Assert(form != null, "");
 
                         if (strPath.IndexOf("@") == -1)
-                            form.LoadRecordOld(strPath, "", true);
+                        {
+                            // form.LoadRecordOld(strPath, "", true);
+                            await form.LoadRecordAsync(strPath, "", true);
+                        }
                         else
                         {
 #if NO
@@ -2999,11 +3012,20 @@ bQuickLoad);
                                 goto ERROR1;
                             }
 
+                            /*
                             int nRet = form.LoadRecord(info,
                                 true,
                                 out strError);
                             if (nRet != 1)
                                 goto ERROR1;
+                            */
+                            var result = await form.LoadRecordAsync(info,
+                                true);
+                            if (result.Value != 1)
+                            {
+                                strError = result.ErrorInfo;
+                                goto ERROR1;
+                            }
                         }
                     }
                 }
@@ -4744,7 +4766,7 @@ bQuickLoad);
                                     if (nRet == 0)
                                     {
                                         strError = "馆藏去向 '" + strDistribute + "' 越过当前用户的关注范围(馆代码) '" + dlg.LibraryCode + "'。请重新指定馆藏去向";
-                                        MessageBox.Show(this, strError);
+                                        this.MessageBoxShow(strError);
                                         goto REDO;
                                     }
 
@@ -4788,7 +4810,7 @@ bQuickLoad);
                                     if (nRet == 0 || nRet == -1)
                                     {
                                         strError = "校验三个字段关系时发现问题: " + strError + "\r\n\r\n请重新输入。特别注意关注码洋、折扣和单价之间的计算关系";
-                                        MessageBox.Show(this, strError);
+                                        this.MessageBoxShow(strError);
                                         strDefaultOrderXml = "";
                                         goto REDO_0;
                                     }
@@ -4903,7 +4925,7 @@ bQuickLoad);
                 nBiblioCount, nOrderCount, nNewOrderCount, nWriteNewOrderCount));
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 2017/3/17
@@ -5378,12 +5400,16 @@ bQuickLoad);
                     {
                         if (channel.ErrorCode == ErrorCode.TimestampMismatch)
                         {
-                            DialogResult result = MessageBox.Show(this,
-        "保存书目记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
+                            var temp = strError;
+                            DialogResult result = this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
+        "保存书目记录 " + strRecPath + " 时遭遇时间戳不匹配: " + temp + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
         "BiblioSearchForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                            });
                             if (result == System.Windows.Forms.DialogResult.Cancel)
                                 break;
                             if (result == System.Windows.Forms.DialogResult.No)
@@ -5449,12 +5475,15 @@ bQuickLoad);
                     // 检查是否有部分字段被拒绝
                     if (channel.ErrorCode == ErrorCode.PartialDenied)
                     {
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
         "保存书目记录 " + strRecPath + " 时部分字段被拒绝。\r\n\r\n此记录已部分保存成功。\r\n\r\n请问现在是否要顺便重新装载此记录以便观察? \r\n\r\n(Yes 重新装载(到旧记录部分)；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
         "BiblioSearchForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                        });
                         if (result == System.Windows.Forms.DialogResult.Cancel)
                             break;
                         if (result == System.Windows.Forms.DialogResult.No)
@@ -5722,12 +5751,15 @@ bQuickLoad);
 
             if (nChangedCount > 0)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
         "要刷新的 " + this.listView_records.SelectedItems.Count.ToString() + " 个事项中有 " + nChangedCount.ToString() + " 项修改后尚未保存。如果刷新它们，修改内容会丢失。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
         "BiblioSearchForm",
         MessageBoxButtons.OKCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                });
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
             }
@@ -5740,7 +5772,7 @@ bQuickLoad);
             RefreshPropertyView(false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
 
@@ -5936,7 +5968,7 @@ bQuickLoad);
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxShow($"_runMarcQueryScript() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                        this.MessageBoxShow($"_runMarcQueryScript() 异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 },
                 default,
@@ -5949,7 +5981,7 @@ bQuickLoad);
             string strError = "";
             int nRet = 0;
 
-            var selected_count = TryGet(() =>
+            var selected_count = this.TryGet(() =>
             {
                 return listView_records.SelectedItems.Count;
             });
@@ -5966,7 +5998,7 @@ bQuickLoad);
 
             // this.m_biblioTable.Clear();
 
-            OpenFileDialog dlg = TryGet(() =>
+            OpenFileDialog dlg = this.TryGet(() =>
             {
                 return new OpenFileDialog
                 {
@@ -5977,7 +6009,7 @@ bQuickLoad);
                 };
             });
 
-            var dialog_result = TryGet(() =>
+            var dialog_result = this.TryGet(() =>
             {
                 return dlg.ShowDialog();
             });
@@ -6004,7 +6036,7 @@ bQuickLoad);
                 host.UiItem = null;
 
                 StatisEventArgs args = new StatisEventArgs();
-                TryInvoke(host.UseUiThread, () =>
+                this.TryInvoke(host.UseUiThread, () =>
                 {
                     host.OnInitial(this, args);
                 });
@@ -6049,7 +6081,7 @@ bQuickLoad);
                     host.UiItem = null;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    TryInvoke(host.UseUiThread, () =>
+                    this.TryInvoke(host.UseUiThread, () =>
                     {
                         host.OnBegin(this, args);
                     });
@@ -6062,7 +6094,7 @@ bQuickLoad);
                     }
                 }
 
-                var items = TryGet(() =>
+                var items = this.TryGet(() =>
                 {
                     return this.listView_records.SelectedItems
                     .Cast<ListViewItem>()
@@ -6171,7 +6203,7 @@ bQuickLoad);
                     host.UiItem = item.ListViewItem;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    TryInvoke(host.UseUiThread, () =>
+                    this.TryInvoke(host.UseUiThread, () =>
                     {
                         host.OnRecord(this, args);
                     });
@@ -6200,7 +6232,7 @@ bQuickLoad);
                             info.NewXml = strXml;
                         }
 
-                        TryInvoke(() =>
+                        this.TryInvoke(() =>
                         {
                             item.ListViewItem.BackColor = GlobalParameters.ChangedBackColor;    // SystemColors.Info;
                             item.ListViewItem.ForeColor = GlobalParameters.ChangedForeColor;     // SystemColors.InfoText;
@@ -6220,7 +6252,7 @@ bQuickLoad);
                     host.UiItem = null;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    TryInvoke(host.UseUiThread, () =>
+                    this.TryInvoke(host.UseUiThread, () =>
                     {
                         host.OnEnd(this, args);
                     });
@@ -6263,7 +6295,7 @@ bQuickLoad);
             RefreshPropertyView(false);
             return;
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
@@ -6285,10 +6317,13 @@ bQuickLoad);
                 else
                     e.ResultAction = "no";
 #endif
-                DialogResult result = AutoCloseMessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return AutoCloseMessageBox.Show(this,
         e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
         20 * 1000,
         "BiblioSearchForm");
+                });
                 if (result == DialogResult.Cancel)
                     e.ResultAction = "no";
                 else
@@ -6423,7 +6458,6 @@ bQuickLoad);
             ColumnFilterDocument filter = new ColumnFilterDocument();
 
             nRet = PrepareMarcFilter(
-                this,
                 Program.MainForm.DataDir,
                 this.m_strUsedMarcFilterFilename,
                 filter,
@@ -6571,8 +6605,7 @@ bQuickLoad);
         }
 
         // 准备脚本环境
-        static int PrepareMarcFilter(
-            IWin32Window owner,
+        int PrepareMarcFilter(
             string strDataDir,
             string strFilterFileName,
             ColumnFilterDocument filter,
@@ -6642,15 +6675,12 @@ bQuickLoad);
             Array.Copy(saAdditionalRef, 0,
                 saTotalFilterRef, saAddRef1.Length,
                 saAdditionalRef.Length);
-
-            Assembly assemblyFilter = null;
-
             // 创建Script的Assembly
             // 本函数内对saRef不再进行宏替换
             nRet = ScriptManager.CreateAssembly_1(strCode,
                 saTotalFilterRef,
                 strLibPaths,
-                out assemblyFilter,
+                out Assembly assemblyFilter,
                 out strError,
                 out strWarning);
             if (nRet == -2)
@@ -6661,7 +6691,7 @@ bQuickLoad);
                 {
                     goto ERROR1;
                 }
-                MessageBox.Show(owner, strWarning);
+                this.MessageBoxShow(strWarning);
             }
 
             filter.Assembly = assemblyFilter;
@@ -7640,12 +7670,15 @@ bQuickLoad);
 
                 if (File.Exists(this.ExportEntityRecPathFilename) == true)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "记录路径文件 '" + this.ExportEntityRecPathFilename + "' 已经存在。\r\n\r\n本次输出内容是否要追加到该文件尾部? (Yes 追加；No 覆盖；Cancel 放弃导出)",
                         "BiblioSearchForm",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
+                    });
                     if (result == DialogResult.Cancel)
                         return 0;
                     if (result == DialogResult.No)
@@ -8327,7 +8360,7 @@ bQuickLoad);
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxShow($"_deleteSelectedRecords() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                        this.MessageBoxShow($"_deleteSelectedRecords() 异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 },
     default,
@@ -8341,7 +8374,7 @@ bQuickLoad);
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
                 delete_style = "noeventlog";
 
-            DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+            DialogResult result = this.TryGet(()=>
             {
                 return MessageBox.Show(this,
         $"确实要从数据库中删除所选定的 {this.listView_records.SelectedItems.Count.ToString()} 个书目记录?\r\n\r\n{(string.IsNullOrEmpty(delete_style) == false ? "style:" + delete_style : "")}\r\n\r\n(警告：书目记录被删除后，无法恢复。如果删除书目记录，则其下属的册、期、订购、评注记录和对象资源会一并删除)\r\n\r\n(OK 删除；Cancel 取消)",
@@ -8349,12 +8382,12 @@ bQuickLoad);
         MessageBoxButtons.OKCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
-            }));
+            });
             if (result == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
             List<ListViewItem> items = new List<ListViewItem>();
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
@@ -8441,7 +8474,7 @@ bQuickLoad);
                         }
 
                         string message = $"在获得记录 {strRecPath} 时间戳时出错:\r\n{strError}\r\n---\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
-                        dialog_result = (DialogResult)/*Application.OpenForms[0]*/this.Invoke(new Func<DialogResult>(() =>
+                        dialog_result = this.TryGet(() =>
                         {
                             // return:
                             //      DialogResult.Retry 表示超时了
@@ -8451,7 +8484,7 @@ bQuickLoad);
 message,
 20 * 1000,
 "BiblioSearchForm");
-                        }));
+                        });
                         if (dialog_result != DialogResult.Cancel)
                         {
                             // 重试次数太多了还不行，就跳过
@@ -8491,7 +8524,7 @@ message,
                         }
                         else
                         {
-                            result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                            result = this.TryGet(() =>
                             {
                                 return MessageBox.Show(this,
         "书目记录 '" + strRecPath + "' 包含 " + strSubCount + " 个下级记录，而当前用户并不具备 client_deletebibliosubrecords 权限，无法删除这条书目记录。\r\n\r\n是否继续后面的操作? \r\n\r\n(Yes 继续；No 终止未完成的全部删除操作)",
@@ -8499,7 +8532,7 @@ message,
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
-                            }));
+                            });
                             if (result == System.Windows.Forms.DialogResult.No)
                             {
                                 strError = "中断操作";
@@ -8532,7 +8565,7 @@ message,
                         }
 
                         string message = $"删除书目记录 {strRecPath} 时出错:\r\n{strError}\r\n---\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)";
-                        dialog_result = (DialogResult)/*Application.OpenForms[0]*/this.Invoke(new Func<DialogResult>(() =>
+                        dialog_result = this.TryGet(() =>
                         {
                             // return:
                             //      DialogResult.Retry 表示超时了
@@ -8542,7 +8575,7 @@ message,
 message,
 20 * 1000,
 "BiblioSearchForm");
-                        }));
+                        });
                         if (dialog_result != DialogResult.Cancel)
                         {
                             // 重试次数太多了还不行，就跳过
@@ -8596,7 +8629,7 @@ message,
 
                     looping.Progress.SetProgressValue(i);
 
-                    TryInvoke(() =>
+                    this.TryInvoke(() =>
                     {
                         this.listView_records.Items.Remove(item);
                     });
@@ -8623,16 +8656,16 @@ message,
                 string message = "成功删除书目记录 " + nDeleteCount + " 条";
                 if (skipped_recpath.Count > 0)
                     message += $"。但有 {skipped_recpath} 条书目记录跳过了删除";
-                MessageBoxShow(message);
+                this.MessageBoxShow(message);
             }
             return;
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         void EnableRecordList(bool enable)
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 this.listView_records.Enabled = enable;
             });
@@ -9463,12 +9496,16 @@ message,
                         if (stop != null && stop.State != 0)
                             return -1;
 
-                        DialogResult temp_result = MessageBox.Show(this,
-        strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
+                        var temp = strError;
+                        DialogResult temp_result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+        temp + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
         "BiblioSearchForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                        });
                         if (temp_result == System.Windows.Forms.DialogResult.Yes)
                             goto REDO_WRITEOBJECTS;
                         if (temp_result == DialogResult.Cancel)
@@ -11066,7 +11103,7 @@ message,
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxShow($"DoSearch() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                        this.MessageBoxShow($"DoSearch() 异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 },
                 default,
@@ -11141,7 +11178,7 @@ message,
                         looping.Dispose();
                     }
                 ERROR1:
-                    MessageBoxShow(strError);
+                    this.MessageBoxShow(strError);
                 },
     default,
     TaskCreationOptions.LongRunning,
@@ -11409,7 +11446,7 @@ message,
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void dp2QueryControl1_AppendMenu(object sender, AppendMenuEventArgs e)
@@ -11712,7 +11749,7 @@ message,
             try
             {
                 ListViewItem item = null;
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     if (this.listView_records.SelectedItems.Count == 1)
                         item = this.listView_records.SelectedItems[0];
@@ -12115,7 +12152,7 @@ message,
             }
             set
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     this.textBox_queryWord.Text = value;
                 });
@@ -12134,7 +12171,7 @@ message,
             }
             set
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     this.checkedComboBox_biblioDbNames.Text = value;
                 });
@@ -12152,7 +12189,7 @@ message,
             }
             set
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     this.comboBox_from.Text = value;
                 });
@@ -12170,7 +12207,7 @@ message,
             }
             set
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     this.comboBox_matchStyle.Text = value;
                 });
@@ -12189,7 +12226,7 @@ message,
             }
             set
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     this.comboBox_location.Text = value;
                 });
@@ -12208,7 +12245,7 @@ message,
             }
             set
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     this.toolStripButton_multiLine.Checked = value;
                 });
@@ -12226,7 +12263,7 @@ message,
             }
             set
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     this.label_message.Text = value;
                 });
@@ -12717,6 +12754,17 @@ message,
         {
             _idDesc = !_idDesc;
             this.toolStripMenuItem_idOrder.Text = _idDesc ? "降序" : "升序";
+        }
+
+        // Dock 停靠以后，this.Visible == true，只能用 listView_records
+        void TryInvoke(Action method)
+        {
+            this.listView_records.TryInvoke(method);
+        }
+
+        T TryGet<T>(Func<T> func)
+        {
+            return this.listView_records.TryGet(func);
         }
     }
 

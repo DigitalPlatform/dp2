@@ -374,18 +374,21 @@ namespace dp2Circulation
         /// <returns>刚加入的 ListViewItem</returns>
         public ListViewItem AddToListView(ListView list)
         {
-            ListViewItem item = new ListViewItem();
-            item.ImageIndex = 0;
+            return list.TryGet(() =>
+            {
+                ListViewItem item = new ListViewItem();
+                item.ImageIndex = 0;
 
-            list.Items.Add(item);
-            this.ListViewItem = item;
-            this.ListViewItem.Tag = this;   // 将 BookItem 对象引用保存在 ListViewItem 事项中
+                list.Items.Add(item);
+                this.ListViewItem = item;
+                this.ListViewItem.Tag = this;   // 将 BookItem 对象引用保存在 ListViewItem 事项中
 
-            // 2013/1/18
-            SetItemColumns(item);
+                // 2013/1/18
+                SetItemColumns(item);
 
-            this.SetItemBackColor(item);
-            return item;
+                this.SetItemBackColor(item);
+                return item;
+            });
         }
 
         /// <summary>
@@ -397,7 +400,12 @@ namespace dp2Circulation
             {
                 ListView list = this.ListViewItem.ListView;
                 if (list != null)
-                    list.Items.Remove(this.ListViewItem);
+                {
+                    list.TryInvoke(() =>
+                    {
+                        list.Items.Remove(this.ListViewItem);
+                    });
+                }
             }
         }
 
@@ -407,53 +415,56 @@ namespace dp2Circulation
         /// <param name="item">ListViewItem</param>
         void SetItemBackColor(ListViewItem item)
         {
-            if ((this.ItemDisplayState == ItemDisplayState.Normal)
-                && this.Changed == true)
+            item.ListView.TryInvoke(() =>
             {
-                Debug.Assert(false, "ItemDisplayState.Normal状态和Changed == true矛盾了");
-            }
-            else if ((this.ItemDisplayState == ItemDisplayState.Changed)
-                && this.Changed == false) // 2009/3/5
-            {
-                Debug.Assert(false, "ItemDisplayState.Changed状态和Changed == false矛盾了");
-            }
+                if ((this.ItemDisplayState == ItemDisplayState.Normal)
+                    && this.Changed == true)
+                {
+                    Debug.Assert(false, "ItemDisplayState.Normal状态和Changed == true矛盾了");
+                }
+                else if ((this.ItemDisplayState == ItemDisplayState.Changed)
+                    && this.Changed == false) // 2009/3/5
+                {
+                    Debug.Assert(false, "ItemDisplayState.Changed状态和Changed == false矛盾了");
+                }
 
-            if (String.IsNullOrEmpty(this.ErrorInfo) == false)
-            {
-                // 出错的事项
-                item.BackColor = Color.FromArgb(255, 0, 0); // 纯红色
-                item.ForeColor = Color.White;
-            }
-            else if (this.ItemDisplayState == ItemDisplayState.Normal)
-            {
-                item.BackColor = SystemColors.Window;
-                item.ForeColor = SystemColors.WindowText;
-            }
-            else if (this.ItemDisplayState == ItemDisplayState.Changed)
-            {
-                // 修改过的旧事项
-                item.BackColor = Color.FromArgb(100, 255, 100); // 浅绿色
-                item.ForeColor = SystemColors.WindowText;
-            }
-            else if (this.ItemDisplayState == ItemDisplayState.New)
-            {
-                // 新事项
-                item.BackColor = Color.FromArgb(255, 255, 100); // 浅黄色
-                item.ForeColor = SystemColors.WindowText;
-            }
-            else if (this.ItemDisplayState == ItemDisplayState.Deleted)
-            {
-                // 删除的事项
-                item.BackColor = Color.FromArgb(255, 150, 150); // 浅红色
-                item.ForeColor = SystemColors.WindowText;
-            }
-            else // 其他事项
-            {
-                item.BackColor = SystemColors.Window;
-                item.ForeColor = SystemColors.WindowText;
-            }
+                if (String.IsNullOrEmpty(this.ErrorInfo) == false)
+                {
+                    // 出错的事项
+                    item.BackColor = Color.FromArgb(255, 0, 0); // 纯红色
+                    item.ForeColor = Color.White;
+                }
+                else if (this.ItemDisplayState == ItemDisplayState.Normal)
+                {
+                    item.BackColor = SystemColors.Window;
+                    item.ForeColor = SystemColors.WindowText;
+                }
+                else if (this.ItemDisplayState == ItemDisplayState.Changed)
+                {
+                    // 修改过的旧事项
+                    item.BackColor = Color.FromArgb(100, 255, 100); // 浅绿色
+                    item.ForeColor = SystemColors.WindowText;
+                }
+                else if (this.ItemDisplayState == ItemDisplayState.New)
+                {
+                    // 新事项
+                    item.BackColor = Color.FromArgb(255, 255, 100); // 浅黄色
+                    item.ForeColor = SystemColors.WindowText;
+                }
+                else if (this.ItemDisplayState == ItemDisplayState.Deleted)
+                {
+                    // 删除的事项
+                    item.BackColor = Color.FromArgb(255, 150, 150); // 浅红色
+                    item.ForeColor = SystemColors.WindowText;
+                }
+                else // 其他事项
+                {
+                    item.BackColor = SystemColors.Window;
+                    item.ForeColor = SystemColors.WindowText;
+                }
 
-            item.ImageIndex = Convert.ToInt32(this.ItemDisplayState);
+                item.ImageIndex = Convert.ToInt32(this.ItemDisplayState);
+            });
         }
 
         /// <summary>
@@ -532,29 +543,32 @@ namespace dp2Circulation
             if (this.ListViewItem == null)
                 return;
 
-            int nIndex = -1;
             ListView list = this.ListViewItem.ListView;
-            for (int i = 0; i < list.Items.Count; i++)
+            list.TryInvoke(() =>
             {
-                ListViewItem item = list.Items[i];
+                int nIndex = -1;
+                for (int i = 0; i < list.Items.Count; i++)
+                {
+                    ListViewItem item = list.Items[i];
 
-                if (item == this.ListViewItem)
-                {
-                    item.Selected = true;
-                    nIndex = i;
-                }
-                else
-                {
-                    if (bClearOtherHilight == true)
+                    if (item == this.ListViewItem)
                     {
-                        if (item.Selected == true)
-                            item.Selected = false;
+                        item.Selected = true;
+                        nIndex = i;
+                    }
+                    else
+                    {
+                        if (bClearOtherHilight == true)
+                        {
+                            if (item.Selected == true)
+                                item.Selected = false;
+                        }
                     }
                 }
-            }
 
-            if (nIndex != -1)
-                list.EnsureVisible(nIndex);
+                if (nIndex != -1)
+                    list.EnsureVisible(nIndex);
+            });
         }
 
         /// <summary>

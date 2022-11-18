@@ -1292,6 +1292,17 @@ namespace dp2Circulation
                     this._layer.Transparent = false;
             }
         }
+
+        // Dock 停靠以后，this.Visible == true，只能用 ResultControl
+        void TryInvoke(Action method)
+        {
+            this.tableLayoutPanel1.TryInvoke(method);
+        }
+
+        T TryGet<T>(Func<T> func)
+        {
+            return this.tableLayoutPanel1.TryGet(func);
+        }
     }
 
 #if NO

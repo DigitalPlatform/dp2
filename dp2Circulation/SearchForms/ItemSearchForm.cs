@@ -1076,7 +1076,7 @@ namespace dp2Circulation
                             catch (Exception ex)
                             {
                                 MainForm.WriteErrorLog($"按照范围检索册条码号出现异常: {ExceptionUtil.GetDebugText(ex)}");
-                                MessageBoxShow($"按照范围检索册条码号出现异常: {ex.Message}");
+                                this.MessageBoxShow($"按照范围检索册条码号出现异常: {ex.Message}");
                             }
                         });
 
@@ -1852,7 +1852,7 @@ out string strError);
         {
             if (this.m_nBiblioSummaryColumn > 0)
                 ListViewUtil.ChangeItemText(item, 1, strError);
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 item.BackColor = Color.DarkRed;
                 item.ForeColor = Color.White;
@@ -12660,7 +12660,7 @@ Keys keyData)
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxShow($"DoLogicSearch() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                        this.MessageBoxShow($"DoLogicSearch() 异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 },
     default,

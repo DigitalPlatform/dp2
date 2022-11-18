@@ -473,6 +473,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 this.Channel.Abort();
         }
 #endif
+        /*
         public void TryInvoke(Action method)
         {
             if (this.InvokeRequired)
@@ -480,6 +481,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             else
                 method.Invoke();
         }
+        */
 
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
@@ -487,7 +489,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public void EnableControls(bool bEnable)
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 // page prepare
                 this.tabComboBox_prepare_batchNo.Enabled = bEnable;
@@ -5330,7 +5332,18 @@ string style = null)
             }
         }
 
-#endregion
+        #endregion
+
+        // Dock 停靠以后，this.Visible == true，只能用 ResultControl
+        void TryInvoke(Action method)
+        {
+            this.panel_main.TryInvoke(method);
+        }
+
+        T TryGet<T>(Func<T> func)
+        {
+            return this.panel_main.TryGet(func);
+        }
     }
 
 

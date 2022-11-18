@@ -209,54 +209,6 @@ namespace dp2Circulation
                 }));
         }
 
-        public void MessageBoxShow(string strText)
-        {
-            if (this.IsHandleCreated)
-                this.Invoke((Action)(() =>
-                {
-                    try
-                    {
-                        MessageBox.Show(this, strText);
-                    }
-                    catch (ObjectDisposedException)
-                    {
-
-                    }
-                }));
-        }
-
-        public T TryGet<T>(Func<T> func)
-        {
-            if (this.InvokeRequired)
-            {
-                return (T)this.Invoke((Func<T>)(() =>
-                {
-                    return func.Invoke();
-                }));
-            }
-            else
-                return func.Invoke();
-        }
-
-        // 用于确保在界面线程调用
-        public void TryInvoke(Action method)
-        {
-            if (this.InvokeRequired)
-                this.Invoke((Action)(method));
-            else
-                method.Invoke();
-        }
-
-        // 根据 uiThread 是否为 true，决定是否要确保在 UI 线程调用
-        public void TryInvoke(bool uiThread,
-            Action method)
-        {
-            if (this.InvokeRequired && uiThread)
-                this.Invoke((Action)(method));
-            else
-                method.Invoke();
-        }
-
         #region looping
 
 #if REMOVED

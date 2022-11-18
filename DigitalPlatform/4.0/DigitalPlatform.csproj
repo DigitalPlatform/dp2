@@ -309,6 +309,7 @@
     <Compile Include="FileDownloadDialog.Designer.cs">
       <DependentUpon>FileDownloadDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="ControlExtension.cs" />
     <Compile Include="FormProperty.cs" />
     <Compile Include="ProgramUtil.cs" />
     <Compile Include="Result.cs" />

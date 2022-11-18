@@ -31,6 +31,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Z3950;
+// using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 
 namespace dp2Circulation
 {
@@ -193,15 +194,20 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_biblioRecPath.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_biblioRecPath.Text;
+                });
             }
             set
             {
                 string strOldDbName = Global.GetDbName(this.BiblioRecPath);
                 string strNewDbName = Global.GetDbName(value);
 
-
-                this.textBox_biblioRecPath.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_biblioRecPath.Text = value;
+                });
 
                 if (this.entityControl1 != null)
                 {
@@ -235,8 +241,11 @@ namespace dp2Circulation
                 // 迫使获得新的配置文件
                 if (strOldDbName != strNewDbName)
                 {
-                    this.m_marcEditor.MarcDefDom = null;
-                    this.m_marcEditor.Invalidate();   // TODO: ??
+                    this.TryInvoke(() =>
+                    {
+                        this.m_marcEditor.MarcDefDom = null;
+                        this.m_marcEditor.Invalidate();   // TODO: ??
+                    });
                 }
 
                 // 显示Ctrl+A菜单
@@ -250,13 +259,16 @@ namespace dp2Circulation
 
         void SetTitle(string text)
         {
-            string title = "种册";
-            if (this._dbType == "authority")
-                title = "规范";
-            if (string.IsNullOrEmpty(text) == false)
-                this.Text = title + " " + text;
-            else
-                this.Text = title;
+            this.TryInvoke(() =>
+            {
+                string title = "种册";
+                if (this._dbType == "authority")
+                    title = "规范";
+                if (string.IsNullOrEmpty(text) == false)
+                    this.Text = title + " " + text;
+                else
+                    this.Text = title;
+            });
         }
 
         // 2009/2/3 
@@ -348,38 +360,50 @@ namespace dp2Circulation
         // 本功能内会促使两个编辑器同步，然后再获得最新字符串
         public string GetMarc()
         {
-            SynchronizeMarc();
-            return this.m_marcEditor.Marc;
+            return this.TryGet(() =>
+            {
+                SynchronizeMarc();
+                return this.m_marcEditor.Marc;
+            });
         }
 
         // 设置当前窗口的 MARC 字符串
         // 本功能会设置两个编辑器的 MARC 字符串
         public void SetMarc(string strMarc)
         {
-            this.m_marcEditor.Marc = strMarc;
-            this.easyMarcControl1.SetMarc(strMarc);
-            this._marcEditorVersion = 0;
-            this._templateVersion = 0;
+            this.TryInvoke(() =>
+            {
+                this.m_marcEditor.Marc = strMarc;
+                this.easyMarcControl1.SetMarc(strMarc);
+                this._marcEditorVersion = 0;
+                this._templateVersion = 0;
+            });
         }
 
         public void SynchronizeMarc()
         {
-            if (this._marcEditorVersion < this._templateVersion)
+            this.TryInvoke(() =>
             {
-                this.m_marcEditor.Marc = this.easyMarcControl1.GetMarc();
-            }
-            if (this._marcEditorVersion > this._templateVersion)
-            {
-                this.easyMarcControl1.SetMarc(this.m_marcEditor.Marc);
-            }
-            this._marcEditorVersion = 0;
-            this._templateVersion = 0;
+                if (this._marcEditorVersion < this._templateVersion)
+                {
+                    this.m_marcEditor.Marc = this.easyMarcControl1.GetMarc();
+                }
+                if (this._marcEditorVersion > this._templateVersion)
+                {
+                    this.easyMarcControl1.SetMarc(this.m_marcEditor.Marc);
+                }
+                this._marcEditorVersion = 0;
+                this._templateVersion = 0;
+            });
         }
 
         public void SetMarcChanged(bool bChanged)
         {
-            this.m_marcEditor.Changed = bChanged;
-            this.easyMarcControl1.Changed = bChanged;
+            this.TryInvoke(() =>
+            {
+                this.m_marcEditor.Changed = bChanged;
+                this.easyMarcControl1.Changed = bChanged;
+            });
         }
 
         public bool GetMarcChanged()
@@ -462,22 +486,25 @@ namespace dp2Circulation
             TabControl container,
             TabPage page)
         {
-            if (bEnable == true)
+            this.TryInvoke(() =>
             {
-                if (container.TabPages.IndexOf(page) == -1)
+                if (bEnable == true)
                 {
-                    container.TabPages.Add(page);
-                    this.RemoveFreeControl(page);
+                    if (container.TabPages.IndexOf(page) == -1)
+                    {
+                        container.TabPages.Add(page);
+                        this.RemoveFreeControl(page);
+                    }
                 }
-            }
-            else
-            {
-                if (container.TabPages.IndexOf(page) != -1)
+                else
                 {
-                    container.TabPages.Remove(page);
-                    this.AddFreeControl(page);
+                    if (container.TabPages.IndexOf(page) != -1)
+                    {
+                        container.TabPages.Remove(page);
+                        this.AddFreeControl(page);
+                    }
                 }
-            }
+            });
         }
 
         // AppDomain m_scriptDomain = null;
@@ -2494,71 +2521,73 @@ true);
 
         bool LoadActiveItemIssuePage(string strActiveItemIssuePage)
         {
-
-            if (this.AcceptMode == true)
+            return this.TryGet(() =>
             {
-                // 按照优先顺序，激活order page / item page
-                if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_issue) != -1)
-                    this.tabControl_itemAndIssue.SelectedTab = this.tabPage_issue;
-                else if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_order) != -1)
-                    this.tabControl_itemAndIssue.SelectedTab = this.tabPage_order;
-                else if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_item) != -1)
-                    this.tabControl_itemAndIssue.SelectedTab = this.tabPage_item;
-                else if (this.tabControl_itemAndIssue.TabPages.Count > 0)
-                    this.tabControl_itemAndIssue.SelectedTab = this.tabControl_itemAndIssue.TabPages[this.tabControl_itemAndIssue.TabPages.Count - 1];    // 最靠后的一个page
-                return true;
-            }
-
-            // 当前活动的册/期 page
-            if (strActiveItemIssuePage == null)
-            {
-                strActiveItemIssuePage = Program.MainForm.AppInfo.GetString(
-        "entity_form",
-        "active_item_issue_page",
-        "");
-            }
-
-            if (String.IsNullOrEmpty(strActiveItemIssuePage) == false)
-            {
-                if (strActiveItemIssuePage == "item")
+                if (this.AcceptMode == true)
                 {
-                    if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_item) != -1)
-                    {
-                        this.tabControl_itemAndIssue.SelectedTab = this.tabPage_item;
-                        return true;
-                    }
-                }
-                else if (strActiveItemIssuePage == "order")
-                {
-                    if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_order) != -1)
-                    {
-                        this.tabControl_itemAndIssue.SelectedTab = this.tabPage_order;
-                        return true;
-                    }
-                }
-                else if (strActiveItemIssuePage == "issue")
-                {
+                    // 按照优先顺序，激活order page / item page
                     if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_issue) != -1)
-                    {
                         this.tabControl_itemAndIssue.SelectedTab = this.tabPage_issue;
-                        return true;
-                    }
+                    else if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_order) != -1)
+                        this.tabControl_itemAndIssue.SelectedTab = this.tabPage_order;
+                    else if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_item) != -1)
+                        this.tabControl_itemAndIssue.SelectedTab = this.tabPage_item;
+                    else if (this.tabControl_itemAndIssue.TabPages.Count > 0)
+                        this.tabControl_itemAndIssue.SelectedTab = this.tabControl_itemAndIssue.TabPages[this.tabControl_itemAndIssue.TabPages.Count - 1];    // 最靠后的一个page
+                    return true;
                 }
-                else if (strActiveItemIssuePage == "object")
+
+                // 当前活动的册/期 page
+                if (strActiveItemIssuePage == null)
                 {
-                    if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_object) != -1)
-                    {
-                        this.tabControl_itemAndIssue.SelectedTab = this.tabPage_object;
-                        return true;
-                    }
+                    strActiveItemIssuePage = Program.MainForm.AppInfo.GetString(
+            "entity_form",
+            "active_item_issue_page",
+            "");
                 }
 
-            }
+                if (String.IsNullOrEmpty(strActiveItemIssuePage) == false)
+                {
+                    if (strActiveItemIssuePage == "item")
+                    {
+                        if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_item) != -1)
+                        {
+                            this.tabControl_itemAndIssue.SelectedTab = this.tabPage_item;
+                            return true;
+                        }
+                    }
+                    else if (strActiveItemIssuePage == "order")
+                    {
+                        if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_order) != -1)
+                        {
+                            this.tabControl_itemAndIssue.SelectedTab = this.tabPage_order;
+                            return true;
+                        }
+                    }
+                    else if (strActiveItemIssuePage == "issue")
+                    {
+                        if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_issue) != -1)
+                        {
+                            this.tabControl_itemAndIssue.SelectedTab = this.tabPage_issue;
+                            return true;
+                        }
+                    }
+                    else if (strActiveItemIssuePage == "object")
+                    {
+                        if (this.tabControl_itemAndIssue.TabPages.IndexOf(this.tabPage_object) != -1)
+                        {
+                            this.tabControl_itemAndIssue.SelectedTab = this.tabPage_object;
+                            return true;
+                        }
+                    }
 
-            if (this.tabControl_itemAndIssue.TabPages.Count > 0)
-                this.tabControl_itemAndIssue.SelectedTab = this.tabControl_itemAndIssue.TabPages[this.tabControl_itemAndIssue.TabPages.Count - 1];    // 最靠后的一个page
+                }
 
-            return false;
+                if (this.tabControl_itemAndIssue.TabPages.Count > 0)
+                    this.tabControl_itemAndIssue.SelectedTab = this.tabControl_itemAndIssue.TabPages[this.tabControl_itemAndIssue.TabPages.Count - 1];    // 最靠后的一个page
+
+                return false;
+            });
         }
 
         // 获得当前有修改标志的部分的名称
@@ -2980,8 +3009,11 @@ true);
                     this.SetMarcChanged(value);
                 }
 
-                // ****
-                toolStripButton_marcEditor_save.Enabled = value;
+                this.TryInvoke(() =>
+                {
+                    // ****
+                    toolStripButton_marcEditor_save.Enabled = value;
+                });
             }
         }
 
@@ -3035,6 +3067,7 @@ true);
                 MessageBox.Show(this, strError);
         }
 
+        // 尽量不要用这个版本。用 xxxAsync 版本
         /// <summary>
         /// 装载记录，从 BiblioInfo 对象
         /// </summary>
@@ -3054,6 +3087,52 @@ true);
             bool bWarningNotSave = false)
         {
             strTotalError = "";
+            var task = LoadRecordAsync(info,
+            bSetFocus,
+            bWarningNotSave);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            strTotalError = task.Result.ErrorInfo;
+            return task.Result.Value;
+        }
+
+        public Task<NormalResult> LoadRecordAsync(
+            BiblioInfo info,
+            bool bSetFocus,
+            bool bWarningNotSave = false)
+        {
+            return Task.Factory.StartNew<NormalResult>(
+                () =>
+                {
+                    try
+                    {
+                        return _loadRecord(info,
+            bSetFocus,
+            bWarningNotSave);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"_loadRecord() 异常: {ExceptionUtil.GetDebugText(ex)}"
+                        };
+                    }
+                },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+
+        public NormalResult _loadRecord(
+            BiblioInfo info,
+            bool bSetFocus,
+            bool bWarningNotSave = false)
+        {
+            string strTotalError = "";
 
             int nRet = 0;
             if (this.EntitiesChanged == true
@@ -3063,27 +3142,38 @@ true);
     || this.OrdersChanged == true
     || this.CommentsChanged == true)
             {
-                if (this.checkBox_autoSavePrev.Checked == true
+                var auto_save_prev = this.TryGet(() =>
+                {
+                    return this.checkBox_autoSavePrev.Checked;
+                });
+                if (auto_save_prev == true
                     && bWarningNotSave == false)
                 {
-                    nRet = this.DoSaveAll();
+                    nRet = _doSaveAll();    // this.DoSaveAll();
                     if (nRet == -1 || nRet == -2)
                     {
                         // strTotalError = "当前记录尚未保存";  // 2014/7/8
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strTotalError
+                        };
                     }
                 }
                 else
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要装入新内容? ",
                         "EntityForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.No)
-                        return 0;
+                        return new NormalResult();
                 }
             }
 
@@ -3096,7 +3186,10 @@ true);
 
             // 清空4个下属记录的控件
             this.entityControl1.ClearItems();
-            this.textBox_itemBarcode.Text = "";
+            this.TryInvoke(() =>
+            {
+                this.textBox_itemBarcode.Text = "";
+            });
 
             this.issueControl1.ClearItems();
             this.orderControl1.ClearItems();
@@ -3169,7 +3262,11 @@ true);
             if (bError == true)
             {
                 this.ShowMessage(strTotalError, "red", true);
-                return -1;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strTotalError
+                };
             }
 
             this.ShowMessage("书目记录来自\r\n" + info.RecPath, "green", true);
@@ -3181,8 +3278,36 @@ true);
             }
 
             DoViewComment(false);
-            return 1;
+            return new NormalResult
+            {
+                Value = 1,
+            };
         }
+
+        public async Task<int> LoadRecordAsync(string strBiblioRecPath,
+    string strPrevNextStyle,
+    bool bCheckInUse)
+        {
+            var result = await LoadRecordAsync(strBiblioRecPath,
+                strPrevNextStyle,
+                bCheckInUse,
+                true);
+            int nRet = result.Value;
+            string strError = result.ErrorInfo;
+            if (nRet == -1 || nRet == 2)
+            {
+                if (String.IsNullOrEmpty(strError) == false)
+                    this.ShowMessage(strError, "red", true);
+            }
+            else
+            {
+                if (String.IsNullOrEmpty(strError) == false)
+                    this.ShowMessage(strError, "red", true);
+            }
+
+            return nRet;
+        }
+
 
         // 兼容以前习惯的版本
         // return:
@@ -3206,12 +3331,11 @@ true);
             string strPrevNextStyle,
             bool bCheckInUse)
         {
-            string strError = "";
             int nRet = LoadRecord(strBiblioRecPath,
                 strPrevNextStyle,
                 bCheckInUse,
                 true,
-                out strError);
+                out string strError);
             if (nRet == -1 || nRet == 2)
             {
                 if (String.IsNullOrEmpty(strError) == false)
@@ -3331,6 +3455,78 @@ out string strErrorCode)
             out string strTotalError,
             bool bWarningNotSave = false)
         {
+            /*
+            var result = LoadRecordAsync(
+            strBiblioRecPath,
+            strPrevNextStyle,
+            bCheckInUse,
+            bSetFocus,
+            bWarningNotSave).Result;
+            strTotalError = result.ErrorInfo;
+            return result.Value;
+            */
+            var task = LoadRecordAsync(
+            strBiblioRecPath,
+            strPrevNextStyle,
+            bCheckInUse,
+            bSetFocus,
+            bWarningNotSave);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            var result = task.Result;
+            strTotalError = result.ErrorInfo;
+            return result.Value;
+        }
+
+
+        public Task<NormalResult> LoadRecordAsync(
+            string strBiblioRecPath,
+            string strPrevNextStyle,
+            bool bCheckInUse,
+            bool bSetFocus,
+            bool bWarningNotSave = false)
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        int ret = _loadRecord(strBiblioRecPath,
+                    strPrevNextStyle,
+                    bCheckInUse,
+                    bSetFocus,
+                    out string strTotalError,
+                    bWarningNotSave);
+                        return new NormalResult
+                        {
+                            Value = ret,
+                            ErrorInfo = strTotalError
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        // this.MessageBoxShow($"_loadRecord() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"_loadRecord() 异常: {ExceptionUtil.GetDebugText(ex)}"
+                        };
+                    }
+                },
+    default,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+        public int _loadRecord(string strBiblioRecPath,
+    string strPrevNextStyle,
+    bool bCheckInUse,
+    bool bSetFocus,
+    out string strTotalError,
+    bool bWarningNotSave = false)
+        {
             strTotalError = "";
 
 #if REMOVED
@@ -3361,11 +3557,16 @@ out string strErrorCode)
                 || this.OrdersChanged == true
                 || this.CommentsChanged == true)
             {
+                var auto_save_prev = this.TryGet(() =>
+                {
+                    return this.checkBox_autoSavePrev.Checked;
+                });
+
                 // 2008/6/25 
-                if (this.checkBox_autoSavePrev.Checked == true
+                if (auto_save_prev == true
                     && bWarningNotSave == false)
                 {
-                    int nRet = this.DoSaveAll();
+                    int nRet = this._doSaveAll();   // this.DoSaveAll();
                     if (nRet == -1 || nRet == -2)
                     {
                         // strTotalError = "当前记录尚未保存";  // 2014/7/8
@@ -3375,12 +3576,15 @@ out string strErrorCode)
                 else
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要装入新内容? ",
                         "EntityForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.No)
                         return 0;
                 }
@@ -3513,8 +3717,10 @@ out string strErrorCode)
 
                 // 清空4个下属记录的控件
                 this.entityControl1.ClearItems();
-                this.textBox_itemBarcode.Text = ""; // 2009/1/5 
-
+                this.TryInvoke(() =>
+                {
+                    this.textBox_itemBarcode.Text = ""; // 2009/1/5 
+                });
                 this.issueControl1.ClearItems();
                 this.orderControl1.ClearItems();   // 2008/11/2 
                 this.commentControl1.ClearItems();
@@ -3818,7 +4024,6 @@ out string strErrorCode)
                 }
                 else
                 {
-
                     nRet = this.orderControl1.LoadItemRecords(
                         stop,
                         channel,
@@ -3870,7 +4075,6 @@ out string strErrorCode)
                 }
                 else
                 {
-
                     nRet = this.commentControl1.LoadItemRecords(
                         stop,
                         channel,
@@ -3906,33 +4110,38 @@ out string strErrorCode)
             // 接着装入对象资源
             if (strXml != null)
             {
-                nRet = this.binaryResControl1.LoadObject(
-                    stop,
-                    channel,
-                    strOutputBiblioRecPath,    // 2008/11/2 changed
-                    strXml,
-                    Program.MainForm.ServerVersion,
-                    out strError);
-                if (nRet == -1)
+                var temp = strError;
+                this.TryInvoke(() =>
                 {
-                    strError = "装载对象记录时出错: " + strError;
-
-                    if (channel.ErrorCode == ErrorCode.AccessDenied)
+                    nRet = this.binaryResControl1.LoadObject(
+                        stop,
+                        channel,
+                        strOutputBiblioRecPath,    // 2008/11/2 changed
+                        strXml,
+                        Program.MainForm.ServerVersion,
+                        out temp);
+                    if (nRet == -1)
                     {
-                        // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                        this.binaryResControl1.ErrorInfo = strError;
-                    }
-                    else
-                    {
-                        info.TotalError.Add(strError);
+                        temp = "装载对象记录时出错: " + temp;
 
-                        info.bError = true;
-                        // return -1;
-                    }
-                }
+                        if (channel.ErrorCode == ErrorCode.AccessDenied)
+                        {
+                            // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                            this.binaryResControl1.ErrorInfo = temp;
+                        }
+                        else
+                        {
+                            info.TotalError.Add(temp);
 
-                if (nRet == 1)
-                    info.bSubrecordExist = true;
+                            info.bError = true;
+                            // return -1;
+                        }
+                    }
+
+                    if (nRet == 1)
+                        info.bSubrecordExist = true;
+                });
+                strError = temp;
             }
 
             return 0;
@@ -4166,12 +4375,15 @@ out string strErrorCode)
                 && this.BiblioChanged == true)
             {
                 // 警告尚未保存
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
         "当前有编目信息被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要装入新内容? ",
         "EntityForm",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
+                });
                 if (result != DialogResult.Yes)
                 {
                     strError = "放弃装载书目记录";
@@ -4276,12 +4488,12 @@ out string strErrorCode)
                     if (results == null)
                     {
                         strError = "results == null";
-                        goto ERROR1;
+                        return -1;
                     }
                     if (results.Length != format_list.Count)
                     {
                         strError = "result.Length != formats.Length";
-                        goto ERROR1;
+                        return -1;
                     }
 
                     // 没有报错的情况下才刷新时间戳 2008/11/28 changed
@@ -4326,11 +4538,11 @@ out string strErrorCode)
                         int nRet = SetBiblioRecordToMarcEditor(strXml,
                             out strError);
                         if (nRet == -1)
-                            goto ERROR1;
+                            return -1;
 
                         // 2008/11/13 
                         if (nRet == 0)
-                            MessageBox.Show(this, "警告：当前书目记录 '" + strOutputBiblioRecPath + "' 是一条空记录");
+                            this.MessageBoxShow("警告：当前书目记录 '" + strOutputBiblioRecPath + "' 是一条空记录");
 
                         this.BiblioChanged = false;
 
@@ -4342,14 +4554,20 @@ out string strErrorCode)
                             if (this.LinkedRecordReadonly == true)
                             {
                                 // TODO: 装载目标记录，替代当前全部内容(除了998)
-                                this.m_marcEditor.ReadOnly = true;
+                                this.TryInvoke(() =>
+                                {
+                                    this.m_marcEditor.ReadOnly = true;
+                                });
                             }
                         }
                         else
                         {
                             // 如果必要，恢复可编辑状态
                             if (this.m_marcEditor.ReadOnly != false)
-                                this.m_marcEditor.ReadOnly = false;
+                                this.TryInvoke(() =>
+                                {
+                                    this.m_marcEditor.ReadOnly = false;
+                                });
                         }
 
                         // 注：非采购工作库，也可以设定目标记录路径
@@ -4373,8 +4591,10 @@ out string strErrorCode)
                 if (bError == true)
                 {
                     strError = strErrorText;
-                    goto ERROR1;
+                    return -1;
                 }
+
+                return 1;
             }
             finally
             {
@@ -4387,10 +4607,6 @@ out string strErrorCode)
 #endif
                 stop.Initial("");
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         static int IndexOfFormat(List<string> formats, string format)
@@ -4470,30 +4686,33 @@ out string strErrorCode)
         // 改变 全部保存 按钮的状态
         void SetSaveAllButtonState(bool bEnable)
         {
-            // 2011/11/8
-            if (this.m_bDeletedMode == true)
+            this.TryInvoke(() =>
             {
-                this.button_save.Enabled = bEnable; // true
-                this.toolStripButton_saveAll.Enabled = bEnable; // true
-                return;
-            }
+                // 2011/11/8
+                if (this.m_bDeletedMode == true)
+                {
+                    this.button_save.Enabled = bEnable; // true
+                    this.toolStripButton_saveAll.Enabled = bEnable; // true
+                    return;
+                }
 
-            if (this.EntitiesChanged == true
-                || this.IssuesChanged == true
-                || this.BiblioChanged == true
-                || this.ObjectChanged == true
-                || this.OrdersChanged == true
-                || this.CommentsChanged == true
-                )
-            {
-                this.button_save.Enabled = bEnable;
-                this.toolStripButton_saveAll.Enabled = bEnable;
-            }
-            else
-            {
-                this.button_save.Enabled = false;
-                this.toolStripButton_saveAll.Enabled = false;
-            }
+                if (this.EntitiesChanged == true
+                    || this.IssuesChanged == true
+                    || this.BiblioChanged == true
+                    || this.ObjectChanged == true
+                    || this.OrdersChanged == true
+                    || this.CommentsChanged == true
+                    )
+                {
+                    this.button_save.Enabled = bEnable;
+                    this.toolStripButton_saveAll.Enabled = bEnable;
+                }
+                else
+                {
+                    this.button_save.Enabled = false;
+                    this.toolStripButton_saveAll.Enabled = false;
+                }
+            });
         }
 
         int m_nInDisable = 0;
@@ -4662,6 +4881,36 @@ out string strErrorCode)
         /// <param name="strStyle">保存方式。由 displaysuccess / verifydata / searchdup 之一或者逗号间隔组合而成。displaysuccess 显示最后的成功消息在框架窗口的状态条; verifydata 保存成功后发送校验记录的消息(注意是否校验还要取决于配置状态); searchdup 保存成功后发送查重消息</param>
         /// <returns>-1: 有错。此时不排除有些信息保存成功。0: 成功。</returns>
         public int DoSaveAll(string strStyle = "displaysuccess,verifydata,searchdup")
+        {
+            var task = DoSaveAllAsync();
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
+        }
+
+        public Task<int> DoSaveAllAsync(string strStyle = "displaysuccess,verifydata,searchdup")
+        {
+            return Task.Factory.StartNew<int>(
+                () =>
+                {
+                    try
+                    {
+                        return _doSaveAll(strStyle);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.MessageBoxShow($"_doSaveAll() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                        return -1;
+                    }
+                },
+default,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        public int _doSaveAll(string strStyle = "displaysuccess,verifydata,searchdup")
         {
             int nRet = 0;
 
@@ -7597,10 +7846,13 @@ out strError);
 
         void SwitchFocus(int target)
         {
-            API.PostMessage(this.Handle,
-                WM_SWITCH_FOCUS,
-                target,
-                0);
+            this.TryInvoke(() =>
+            {
+                API.PostMessage(this.Handle,
+                    WM_SWITCH_FOCUS,
+                    target,
+                    0);
+            });
         }
 
         // 是否允许编目功能
@@ -7830,12 +8082,18 @@ out strError);
 
             this.BiblioChanged = false;
 
-            // ****
-            this.toolStripButton_marcEditor_save.Enabled = true;
+            this.TryInvoke(() =>
+            {
+                // ****
+                this.toolStripButton_marcEditor_save.Enabled = true;
+            });
 
             // 用模板的时候，无论如何ReadOnly都是false
             if (this.m_marcEditor.ReadOnly == true)
-                this.m_marcEditor.ReadOnly = false;
+                this.TryInvoke(() =>
+                {
+                    this.m_marcEditor.ReadOnly = false;
+                });
 
             // 2008/11/30 
             SwitchFocus(MARC_EDITOR);
@@ -8043,7 +8301,7 @@ out strError);
                 }
 #endif
                 // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
-                nRet = this.binaryResControl1.AddFileFragments(ref domMarc,
+                nRet = this.binaryResControl1.AddFileFragments(domMarc,
             out strError);
                 if (nRet == -1)
                     return -1;
@@ -8288,6 +8546,7 @@ out strError);
         /// <summary>
         /// 保存书目记录到数据库
         /// </summary>
+        /// <param name="stop"></param>
         /// <param name="channel_param">通讯通道。如果为 null，表示函数内使用自动获得的通道</param>
         /// <param name="bIncludeFileID">(书目记录XML)是否要根据当前对象控件内容合成&lt;dprms:file&gt;元素?</param>
         /// <param name="strHtml">返回新记录的 OPAC 格式内容</param>
@@ -8330,7 +8589,9 @@ out strError);
 
                 if (nEntityCount > 0)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
         "如果您用本功能将刚删除的书目记录保存回数据库，那么书目记录下属的 "
         + nEntityCount.ToString()
         + " 条实体记录将不会被保存回实体库。\r\n\r\n如果要在保存书目数据的同时也完整保存这些被删除的实体记录，请先在种册窗工具条上选择“.../使能编辑保存”功能，然后再使用“全部保存”按钮"
@@ -8339,6 +8600,7 @@ out strError);
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.No)
                     {
                         strError = "放弃保存书目记录";
@@ -8350,36 +8612,42 @@ out strError);
             string strTargetPath = this.BiblioRecPath;
             if (string.IsNullOrEmpty(strTargetPath) == true)
             {
-                // 需要询问保存的路径
-                BiblioSaveToDlg dlg = new BiblioSaveToDlg();
-                MainForm.SetControlFont(dlg, this.Font, false);
-
-                // dlg.MainForm = Program.MainForm;
-                dlg.Text = "仅保存书目记录";
-                dlg.MessageText = "请指定新书目记录要保存到的位置";
-                dlg.EnableCopyChildRecords = false;
-
-                dlg.BuildLink = false;
-
-                dlg.CopyChildRecords = false;
-
+                var ret = this.TryGet(() =>
                 {
-                    string strMarcSyntax = this.GetCurrentMarcSyntax();
-                    if (string.IsNullOrEmpty(strMarcSyntax) == true)
-                        strMarcSyntax = this.MarcSyntax;    // 外来数据的 MARC 格式
+                    // 需要询问保存的路径
+                    BiblioSaveToDlg dlg = new BiblioSaveToDlg();
+                    MainForm.SetControlFont(dlg, this.Font, false);
 
-                    dlg.MarcSyntax = strMarcSyntax;
-                }
+                    // dlg.MainForm = Program.MainForm;
+                    dlg.Text = "仅保存书目记录";
+                    dlg.MessageText = "请指定新书目记录要保存到的位置";
+                    dlg.EnableCopyChildRecords = false;
 
-                dlg.CurrentBiblioRecPath = this.BiblioRecPath;
-                Program.MainForm.AppInfo.LinkFormState(dlg, "entityform_BiblioSaveToDlg_state");
-                dlg.ShowDialog(this);
-                // Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                    dlg.BuildLink = false;
 
-                if (dlg.DialogResult != DialogResult.OK)
+                    dlg.CopyChildRecords = false;
+
+                    {
+                        string strMarcSyntax = this.GetCurrentMarcSyntax();
+                        if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                            strMarcSyntax = this.MarcSyntax;    // 外来数据的 MARC 格式
+
+                        dlg.MarcSyntax = strMarcSyntax;
+                    }
+
+                    dlg.CurrentBiblioRecPath = this.BiblioRecPath;
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "entityform_BiblioSaveToDlg_state");
+                    dlg.ShowDialog(this);
+                    // Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                    if (dlg.DialogResult != DialogResult.OK)
+                        return 0;
+
+                    strTargetPath = dlg.RecPath;
+                    return 1;
+                });
+                if (ret == 0)
                     return 0;
-
-                strTargetPath = dlg.RecPath;
             }
 
             // 保存前的准备工作
@@ -8552,7 +8820,12 @@ out strError);
                 {
                     string strTargetBiblioRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
                     if (String.IsNullOrEmpty(strTargetBiblioRecPath) == true)
-                        this.m_marcEditor.ReadOnly = false;
+                    {
+                        this.TryInvoke(() =>
+                        {
+                            this.m_marcEditor.ReadOnly = false;
+                        });
+                    }
                 }
 
                 if (bDisplaySuccess == true)
@@ -13772,56 +14045,62 @@ out strError);
             if (this.m_commentViewer == null
                 || (bOpenWindow == true && this.m_commentViewer.Visible == false))
             {
-                m_commentViewer = new CommentViewerForm();
-                MainForm.SetControlFont(m_commentViewer, this.Font, false);
+                this.TryInvoke(() =>
+                {
+                    m_commentViewer = new CommentViewerForm();
+                    MainForm.SetControlFont(m_commentViewer, this.Font, false);
+                });
                 bNew = true;
             }
 
-            // m_commentViewer.MainForm = Program.MainForm;  // 必须是第一句
-
-            if (bNew == true)
-                m_commentViewer.InitialWebBrowser();
-
-            m_commentViewer.Text = "MARC内容 '" + this.BiblioRecPath + "'";
-            m_commentViewer.HtmlString = strHtml;
-            m_commentViewer.XmlString = strXml;
-            m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
-            m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
-            // Program.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
-            // m_viewer.ShowDialog(this);
-            // Program.MainForm.AppInfo.UnlinkFormState(m_viewer);
-            if (bOpenWindow == true)
+            this.TryInvoke(() =>
             {
-                if (m_commentViewer.Visible == false)
-                {
-                    Program.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
-                    m_commentViewer.Show(this);
-                    m_commentViewer.Activate();
+                // m_commentViewer.MainForm = Program.MainForm;  // 必须是第一句
 
-                    Program.MainForm.CurrentPropertyControl = null;
+                if (bNew == true)
+                    m_commentViewer.InitialWebBrowser();
+
+                m_commentViewer.Text = "MARC内容 '" + this.BiblioRecPath + "'";
+                m_commentViewer.HtmlString = strHtml;
+                m_commentViewer.XmlString = strXml;
+                m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
+                m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
+                // Program.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
+                // m_viewer.ShowDialog(this);
+                // Program.MainForm.AppInfo.UnlinkFormState(m_viewer);
+                if (bOpenWindow == true)
+                {
+                    if (m_commentViewer.Visible == false)
+                    {
+                        Program.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
+                        m_commentViewer.Show(this);
+                        m_commentViewer.Activate();
+
+                        Program.MainForm.CurrentPropertyControl = null;
+                    }
+                    else
+                    {
+                        if (m_commentViewer.WindowState == FormWindowState.Minimized)
+                            m_commentViewer.WindowState = FormWindowState.Normal;
+                        m_commentViewer.Activate();
+                    }
                 }
                 else
                 {
-                    if (m_commentViewer.WindowState == FormWindowState.Minimized)
-                        m_commentViewer.WindowState = FormWindowState.Normal;
-                    m_commentViewer.Activate();
-                }
-            }
-            else
-            {
-                if (m_commentViewer.Visible == true)
-                {
+                    if (m_commentViewer.Visible == true)
+                    {
 
+                    }
+                    else
+                    {
+                        if (Program.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
+                            m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
+                    }
                 }
-                else
-                {
-                    if (Program.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
-                        m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
-                }
-            }
+            });
             return;
         ERROR1:
-            MessageBox.Show(this, "DoViewComment() 出错: " + strError);
+            this.MessageBoxShow("DoViewComment() 出错: " + strError);
         }
 
         void marc_viewer_FormClosed(object sender, FormClosedEventArgs e)

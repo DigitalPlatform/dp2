@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DigitalPlatform.GUI
 {
@@ -25,17 +26,20 @@ namespace DigitalPlatform.GUI
 
         public static int GetColumnHeaderHeight(ListView list)
         {
-            RECT rc = new RECT();
-            IntPtr hwnd = API.SendMessage(list.Handle, API.LVM_GETHEADER, 0, 0);
-            if (hwnd == null)
-                return -1;
-
-            if (API.GetWindowRect(new HandleRef(null, hwnd), out rc))
+            return list.TryGet(() =>
             {
-                return rc.bottom - rc.top;
-            }
+                RECT rc = new RECT();
+                IntPtr hwnd = API.SendMessage(list.Handle, API.LVM_GETHEADER, 0, 0);
+                if (hwnd == null)
+                    return -1;
 
-            return -1;
+                if (API.GetWindowRect(new HandleRef(null, hwnd), out rc))
+                {
+                    return rc.bottom - rc.top;
+                }
+
+                return -1;
+            });
         }
 
         // 2012/5/9
@@ -59,15 +63,18 @@ namespace DigitalPlatform.GUI
         public static string GetItemNameList(ListView list,
             string strSep = ",")
         {
-            StringBuilder strItemNameList = new StringBuilder();
-            foreach (ListViewItem item in list.SelectedItems)
+            return list.TryGet(() =>
             {
-                if (strItemNameList.Length > 0)
-                    strItemNameList.Append(strSep);
-                strItemNameList.Append(item.Text);
-            }
+                StringBuilder strItemNameList = new StringBuilder();
+                foreach (ListViewItem item in list.SelectedItems)
+                {
+                    if (strItemNameList.Length > 0)
+                        strItemNameList.Append(strSep);
+                    strItemNameList.Append(item.Text);
+                }
 
-            return strItemNameList.ToString();
+                return strItemNameList.ToString();
+            });
         }
 
         // 上下移动事项的菜单是否应被使能
@@ -75,48 +82,54 @@ namespace DigitalPlatform.GUI
             ListView list,
             bool bUp)
         {
-            if (list.SelectedItems.Count == 0)
-                return false;
-            int index = list.SelectedIndices[0];
-            if (bUp == true)
+            return list.TryGet(() =>
             {
-                if (index == 0)
+                if (list.SelectedItems.Count == 0)
                     return false;
-                return true;
-            }
-            else
-            {
-                if (index >= list.Items.Count - 1)
-                    return false;
-                return true;
-            }
+                int index = list.SelectedIndices[0];
+                if (bUp == true)
+                {
+                    if (index == 0)
+                        return false;
+                    return true;
+                }
+                else
+                {
+                    if (index >= list.Items.Count - 1)
+                        return false;
+                    return true;
+                }
+            });
         }
 
         public static bool MoveSelectedUpDown(
             ListView list,
             bool bUp)
         {
-            if (list.SelectedItems.Count == 0)
-                return false;
-
-            int index = list.SelectedIndices[0];
-
-            if (bUp)
+            return list.TryGet(() =>
             {
-                index--;
-                if (index < 0)
+                if (list.SelectedItems.Count == 0)
                     return false;
-            }
-            else
-            {
-                index++;
-                if (index >= list.Items.Count)
-                    return false;
-            }
 
-            list.SelectedItems.Clear();
-            list.Items[index].Selected = true;
-            return true;
+                int index = list.SelectedIndices[0];
+
+                if (bUp)
+                {
+                    index--;
+                    if (index < 0)
+                        return false;
+                }
+                else
+                {
+                    index++;
+                    if (index >= list.Items.Count)
+                        return false;
+                }
+
+                list.SelectedItems.Clear();
+                list.Items[index].Selected = true;
+                return true;
+            });
         }
 
         // parameters:
@@ -124,91 +137,102 @@ namespace DigitalPlatform.GUI
         public static int MoveItemUpDown(
             ListView list,
             bool bUp,
-            out List<int> indices,
+            out List<int> indices_param,
             out string strError)
         {
             strError = "";
-            indices = new List<int>();
-            // int nRet = 0;
+            indices_param = new List<int>();
 
-            if (list.SelectedItems.Count == 0)
+            var error = strError;
+            var indices = indices_param;
+            var ret = list.TryGet(() =>
             {
-                strError = "尚未选定要进行上下移动的事项";
-                return -1;
-            }
+                // int nRet = 0;
 
-            // ListViewItem item = list.SelectedItems[0];
-            // int index = list.Items.IndexOf(item);
-            // Debug.Assert(index >= 0 && index <= list.Items.Count - 1, "");
-            int index = list.SelectedIndices[0];
-            ListViewItem item = list.Items[index];
-
-            indices.Add(index);
-
-            bool bChanged = false;
-
-            if (bUp == true)
-            {
-                if (index == 0)
+                if (list.SelectedItems.Count == 0)
                 {
-                    strError = "到头";
+                    error = "尚未选定要进行上下移动的事项";
                     return -1;
                 }
 
-                list.Items.RemoveAt(index);
-                index--;
-                list.Items.Insert(index, item);
+                // ListViewItem item = list.SelectedItems[0];
+                // int index = list.Items.IndexOf(item);
+                // Debug.Assert(index >= 0 && index <= list.Items.Count - 1, "");
+                int index = list.SelectedIndices[0];
+                ListViewItem item = list.Items[index];
+
                 indices.Add(index);
-                list.FocusedItem = item;
 
-                bChanged = true;
-            }
+                bool bChanged = false;
 
-            if (bUp == false)
-            {
-                if (index >= list.Items.Count - 1)
+                if (bUp == true)
                 {
-                    strError = "到尾";
-                    return -1;
+                    if (index == 0)
+                    {
+                        error = "到头";
+                        return -1;
+                    }
+
+                    list.Items.RemoveAt(index);
+                    index--;
+                    list.Items.Insert(index, item);
+                    indices.Add(index);
+                    list.FocusedItem = item;
+
+                    bChanged = true;
                 }
-                list.Items.RemoveAt(index);
-                index++;
-                list.Items.Insert(index, item);
-                indices.Add(index);
-                list.FocusedItem = item;
 
-                bChanged = true;
-            }
+                if (bUp == false)
+                {
+                    if (index >= list.Items.Count - 1)
+                    {
+                        error = "到尾";
+                        return -1;
+                    }
+                    list.Items.RemoveAt(index);
+                    index++;
+                    list.Items.Insert(index, item);
+                    indices.Add(index);
+                    list.FocusedItem = item;
 
-            if (bChanged == true)
-                return 1;
-            return 0;
+                    bChanged = true;
+                }
+
+                if (bChanged == true)
+                    return 1;
+                return 0;
+            });
+            strError = error;
+            indices_param = indices;
+            return ret;
         }
 
         public static void DeleteSelectedItems(ListView list)
         {
-            /*
-            int[] indices = new int[list.SelectedItems.Count];
-            list.SelectedIndices.CopyTo(indices, 0);
-            */
-
-            list.BeginUpdate();
-
-            // 2021/6/11 新方法
-            var indices = list.SelectedIndices.Cast<int>().Reverse();
-            foreach (var index in indices)
+            list.TryInvoke(() =>
             {
-                list.Items.RemoveAt(index);
-            }
+                /*
+                int[] indices = new int[list.SelectedItems.Count];
+                list.SelectedIndices.CopyTo(indices, 0);
+                */
 
-            /*
-            for (int i = indices.Length - 1; i >= 0; i--)
-            {
-                list.Items.RemoveAt(indices[i]);
-            }
-            */
+                list.BeginUpdate();
 
-            list.EndUpdate();
+                // 2021/6/11 新方法
+                var indices = list.SelectedIndices.Cast<int>().Reverse();
+                foreach (var index in indices)
+                {
+                    list.Items.RemoveAt(index);
+                }
+
+                /*
+                for (int i = indices.Length - 1; i >= 0; i--)
+                {
+                    list.Items.RemoveAt(indices[i]);
+                }
+                */
+
+                list.EndUpdate();
 
 #if NO
             for (int i = list.SelectedIndices.Count - 1;
@@ -225,6 +249,7 @@ namespace DigitalPlatform.GUI
                 list.Items.Remove(item);
             }
 #endif
+            });
         }
 
         public static void SelectAllLines(ListView list)
@@ -308,40 +333,46 @@ namespace DigitalPlatform.GUI
         // 获得列标题宽度字符串
         public static string GetColumnWidthListString(ListView list)
         {
-            string strResult = "";
-            for (int i = 0; i < list.Columns.Count; i++)
+            return list.TryGet(() =>
             {
-                ColumnHeader header = list.Columns[i];
-                if (i != 0)
-                    strResult += ",";
-                strResult += header.Width.ToString();
-            }
+                string strResult = "";
+                for (int i = 0; i < list.Columns.Count; i++)
+                {
+                    ColumnHeader header = list.Columns[i];
+                    if (i != 0)
+                        strResult += ",";
+                    strResult += header.Width.ToString();
+                }
 
-            return strResult;
+                return strResult;
+            });
         }
 
         // 获得列标题宽度字符串
         // 扩展功能版本。不包含右边连续的没有标题文字的栏
         public static string GetColumnWidthListStringExt(ListView list)
         {
-            string strResult = "";
-            int nEndIndex = list.Columns.Count;
-            for (int i = list.Columns.Count - 1; i >= 0; i--)
+            return list.TryGet(() =>
             {
-                ColumnHeader header = list.Columns[i];
-                if (String.IsNullOrEmpty(header.Text) == false)
-                    break;
-                nEndIndex = i;
-            }
-            for (int i = 0; i < nEndIndex; i++)
-            {
-                ColumnHeader header = list.Columns[i];
-                if (i != 0)
-                    strResult += ",";
-                strResult += header.Width.ToString();
-            }
+                string strResult = "";
+                int nEndIndex = list.Columns.Count;
+                for (int i = list.Columns.Count - 1; i >= 0; i--)
+                {
+                    ColumnHeader header = list.Columns[i];
+                    if (String.IsNullOrEmpty(header.Text) == false)
+                        break;
+                    nEndIndex = i;
+                }
+                for (int i = 0; i < nEndIndex; i++)
+                {
+                    ColumnHeader header = list.Columns[i];
+                    if (i != 0)
+                        strResult += ",";
+                    strResult += header.Width.ToString();
+                }
 
-            return strResult;
+                return strResult;
+            });
         }
 
         // 设置列标题的宽度
@@ -351,33 +382,34 @@ namespace DigitalPlatform.GUI
             string strWidthList,
             bool bExpandColumnCount)
         {
-            string[] parts = strWidthList.Split(new char[] { ',' });
-
-            if (bExpandColumnCount == true)
-                EnsureColumns(list, parts.Length, 100);
-
-            for (int i = 0; i < parts.Length; i++)
+            list.TryInvoke(() =>
             {
-                if (i >= list.Columns.Count)
-                    break;
+                string[] parts = strWidthList.Split(new char[] { ',' });
 
-                string strValue = parts[i].Trim();
-                int nWidth = -1;
-                try
-                {
-                    nWidth = Convert.ToInt32(strValue);
-                }
-                catch
-                {
-                    break;
-                }
+                if (bExpandColumnCount == true)
+                    EnsureColumns(list, parts.Length, 100);
 
-                if (nWidth != -1)
-                    list.Columns[i].Width = nWidth;
-            }
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    if (i >= list.Columns.Count)
+                        break;
+
+                    string strValue = parts[i].Trim();
+                    int nWidth = -1;
+                    try
+                    {
+                        nWidth = Convert.ToInt32(strValue);
+                    }
+                    catch
+                    {
+                        break;
+                    }
+
+                    if (nWidth != -1)
+                        list.Columns[i].Width = nWidth;
+                }
+            });
         }
-
-
 
         // 响应选择标记发生变化的动作，修改栏目标题文字
         // parameters:
@@ -387,70 +419,72 @@ namespace DigitalPlatform.GUI
             List<int> protect_column_numbers)
         {
             ListViewProperty prop = GetListViewProperty(list);
-
             if (prop == null)
             {
                 throw new Exception("ListView 的 Tag 没有包含 ListViewProperty 对象");
             }
 
-            if (list.SelectedItems.Count == 0)
+            list.TryInvoke(() =>
             {
-                // 清除所有栏目标题为1,2,3...，或者保留以前的残余值?
-                return;
-            }
 
-            ListViewItem item = list.SelectedItems[0];
-            // 获得路径。假定都在第一列？
-            string strRecPath = GetItemText(item, nRecPathColumn);
-
-            ColumnPropertyCollection props = null;
-            string strDbName = "";
-
-            if (String.IsNullOrEmpty(strRecPath) == true)
-            {
-                strDbName = "<blank>";  // 特殊的数据库名，表示第一列空的情况
-                props = prop.GetColumnName(strDbName);
-                goto DO_REFRESH;
-            }
-
-            // 取出数据库名
-            strDbName = prop.ParseDbName(strRecPath);   //  GetDbName(strRecPath);
-
-            if (String.IsNullOrEmpty(strDbName) == true)
-            {
-                return;
-            }
-
-            if (strDbName == prop.CurrentDbName)
-                return; // 没有必要刷新
-
-            props = prop.GetColumnName(strDbName);
-
-        DO_REFRESH:
-
-            if (props == null)
-            {
-                // not found
-
-                // 清除所有栏目标题为1,2,3...，或者保留以前的残余值?
-                props = new ColumnPropertyCollection();
-            }
-
-            // 修改文字
-            int index = 0;
-            for (int i = 0; i < list.Columns.Count; i++)
-            {
-                ColumnHeader header = list.Columns[i];
-
-                if (i == nRecPathColumn)
-                    continue;
-
-                // 越过需要保护的列
-                if (protect_column_numbers != null)
+                if (list.SelectedItems.Count == 0)
                 {
-                    if (protect_column_numbers.IndexOf(i) != -1)
-                        continue;
+                    // 清除所有栏目标题为1,2,3...，或者保留以前的残余值?
+                    return;
                 }
+
+                ListViewItem item = list.SelectedItems[0];
+                // 获得路径。假定都在第一列？
+                string strRecPath = GetItemText(item, nRecPathColumn);
+
+                ColumnPropertyCollection props = null;
+                string strDbName = "";
+
+                if (String.IsNullOrEmpty(strRecPath) == true)
+                {
+                    strDbName = "<blank>";  // 特殊的数据库名，表示第一列空的情况
+                    props = prop.GetColumnName(strDbName);
+                    goto DO_REFRESH;
+                }
+
+                // 取出数据库名
+                strDbName = prop.ParseDbName(strRecPath);   //  GetDbName(strRecPath);
+
+                if (String.IsNullOrEmpty(strDbName) == true)
+                {
+                    return;
+                }
+
+                if (strDbName == prop.CurrentDbName)
+                    return; // 没有必要刷新
+
+                props = prop.GetColumnName(strDbName);
+
+            DO_REFRESH:
+
+                if (props == null)
+                {
+                    // not found
+
+                    // 清除所有栏目标题为1,2,3...，或者保留以前的残余值?
+                    props = new ColumnPropertyCollection();
+                }
+
+                // 修改文字
+                int index = 0;
+                for (int i = 0; i < list.Columns.Count; i++)
+                {
+                    ColumnHeader header = list.Columns[i];
+
+                    if (i == nRecPathColumn)
+                        continue;
+
+                    // 越过需要保护的列
+                    if (protect_column_numbers != null)
+                    {
+                        if (protect_column_numbers.IndexOf(i) != -1)
+                            continue;
+                    }
 
 #if NO
                 if (index < props.Count)
@@ -471,35 +505,36 @@ namespace DigitalPlatform.GUI
                 }
 #endif
 
-                ColumnProperty temp = (ColumnProperty)header.Tag;
+                    ColumnProperty temp = (ColumnProperty)header.Tag;
 
-                if (index < props.Count)
-                {
-                    if (temp != props[index])
+                    if (index < props.Count)
                     {
-                        header.Tag = props[index];
-                        temp = props[index];
+                        if (temp != props[index])
+                        {
+                            header.Tag = props[index];
+                            temp = props[index];
+                        }
                     }
+                    else
+                        temp = null;    // 2013/10/5 多出来找不到定义的列，需要显示为数字
+
+                    if (temp == null)
+                    {
+                        // 如果 header 以前有文字就沿用，没有时才使用编号填充 2014/9/6 消除 BUG
+                        if (string.IsNullOrEmpty(header.Text) == true)
+                            header.Text = i.ToString();
+                    }
+                    else
+                        header.Text = temp.Title;
+
+                    index++;
                 }
-                else
-                    temp = null;    // 2013/10/5 多出来找不到定义的列，需要显示为数字
 
-                if (temp == null)
-                {
-                    // 如果 header 以前有文字就沿用，没有时才使用编号填充 2014/9/6 消除 BUG
-                    if (string.IsNullOrEmpty(header.Text) == true)
-                        header.Text = i.ToString();
-                }
-                else
-                    header.Text = temp.Title;
+                // 刷新排序列的显示。也就是说刷新那些参与了排序的个别列的显示
+                prop.SortColumns.RefreshColumnDisplay(list.Columns);
 
-                index++;
-            }
-
-            // 刷新排序列的显示。也就是说刷新那些参与了排序的个别列的显示
-            prop.SortColumns.RefreshColumnDisplay(list.Columns);
-
-            prop.CurrentDbName = strDbName; // 记忆
+                prop.CurrentDbName = strDbName; // 记忆
+            });
         }
 
         // 响应点击栏目标题的动作，进行排序
@@ -518,37 +553,40 @@ namespace DigitalPlatform.GUI
                 throw new Exception("ListView的Tag没有包含ListViewProperty对象");
             }
 
-            // 2013/3/31
-            // 如果标题栏没有初始化，则需要先初始化
-            if (list.SelectedItems.Count == 0 && list.Items.Count > 0)
+            list.TryInvoke(() =>
             {
-                list.Items[0].Selected = true;
-                OnSelectedIndexChanged(list,
-                    0,
-                    null);
-                list.Items[0].Selected = false;
-            }
-
-            ColumnSortStyle sortStyle = prop.GetSortStyle(list, nClickColumn);
-
-            prop.SortColumns.SetFirstColumn(nClickColumn,
-                sortStyle,
-                list.Columns,
-                true);
-
-            // 排序
-            SortColumnsComparer sorter = new SortColumnsComparer(prop.SortColumns);
-            if (prop.HasCompareColumnEvent() == true)
-            {
-                sorter.EventCompare += (sender1, e1) =>
+                // 2013/3/31
+                // 如果标题栏没有初始化，则需要先初始化
+                if (list.SelectedItems.Count == 0 && list.Items.Count > 0)
                 {
-                    prop.OnCompareColumn(sender1, e1);
-                };
-            }
-            list.ListViewItemSorter = sorter;
+                    list.Items[0].Selected = true;
+                    OnSelectedIndexChanged(list,
+                        0,
+                        null);
+                    list.Items[0].Selected = false;
+                }
 
-            if (bClearSorter == true)
-                list.ListViewItemSorter = null;
+                ColumnSortStyle sortStyle = prop.GetSortStyle(list, nClickColumn);
+
+                prop.SortColumns.SetFirstColumn(nClickColumn,
+                    sortStyle,
+                    list.Columns,
+                    true);
+
+                // 排序
+                SortColumnsComparer sorter = new SortColumnsComparer(prop.SortColumns);
+                if (prop.HasCompareColumnEvent() == true)
+                {
+                    sorter.EventCompare += (sender1, e1) =>
+                    {
+                        prop.OnCompareColumn(sender1, e1);
+                    };
+                }
+                list.ListViewItemSorter = sorter;
+
+                if (bClearSorter == true)
+                    list.ListViewItemSorter = null;
+            });
         }
 
         class SetSortStyleParam
@@ -571,6 +609,8 @@ namespace DigitalPlatform.GUI
                 throw new Exception("ListView的Tag没有包含ListViewProperty对象");
             }
 
+            list.TryInvoke(() =>
+            {
 #if NO
             ColumnSortStyle sortStyle = prop.GetSortStyle(nClickColumn);
             prop.SortColumns.SetFirstColumn(nClickColumn,
@@ -578,38 +618,39 @@ namespace DigitalPlatform.GUI
                 list.Columns,
                 true);
 #endif
-            ContextMenuStrip contextMenu = new ContextMenuStrip();
+                ContextMenuStrip contextMenu = new ContextMenuStrip();
 
-            ToolStripMenuItem menuItem = null;
-            ToolStripMenuItem subMenuItem = null;
+                ToolStripMenuItem menuItem = null;
+                ToolStripMenuItem subMenuItem = null;
 
-            // list.Columns[nClickColumn].Text
-            menuItem = new ToolStripMenuItem("设置排序方式");
-            contextMenu.Items.Add(menuItem);
+                // list.Columns[nClickColumn].Text
+                menuItem = new ToolStripMenuItem("设置排序方式");
+                contextMenu.Items.Add(menuItem);
 
-            ColumnSortStyle sortStyle = prop.GetSortStyle(list, nClickColumn);
-            if (sortStyle == null)
-                sortStyle = ColumnSortStyle.None;
+                ColumnSortStyle sortStyle = prop.GetSortStyle(list, nClickColumn);
+                if (sortStyle == null)
+                    sortStyle = ColumnSortStyle.None;
 
-            List<ColumnSortStyle> all_styles = prop.GetAllSortStyle(list, nClickColumn);
+                List<ColumnSortStyle> all_styles = prop.GetAllSortStyle(list, nClickColumn);
 
-            foreach (ColumnSortStyle style in all_styles)
-            {
-                subMenuItem = new ToolStripMenuItem();
-                subMenuItem.Text = GetSortStyleCaption(style);
-                SetSortStyleParam param = new SetSortStyleParam();
-                param.ColumnIndex = nClickColumn;
-                param.prop = prop;
-                param.Style = style;
-                subMenuItem.Tag = param;
-                subMenuItem.Click += new EventHandler(menu_setSortStyle_Click);
-                if (style == sortStyle)
-                    subMenuItem.Checked = true;
-                menuItem.DropDown.Items.Add(subMenuItem);
-            }
+                foreach (ColumnSortStyle style in all_styles)
+                {
+                    subMenuItem = new ToolStripMenuItem();
+                    subMenuItem.Text = GetSortStyleCaption(style);
+                    SetSortStyleParam param = new SetSortStyleParam();
+                    param.ColumnIndex = nClickColumn;
+                    param.prop = prop;
+                    param.Style = style;
+                    subMenuItem.Tag = param;
+                    subMenuItem.Click += new EventHandler(menu_setSortStyle_Click);
+                    if (style == sortStyle)
+                        subMenuItem.Checked = true;
+                    menuItem.DropDown.Items.Add(subMenuItem);
+                }
 
-            Point p = list.PointToClient(Control.MousePosition);
-            contextMenu.Show(list, p);
+                Point p = list.PointToClient(Control.MousePosition);
+                contextMenu.Show(list, p);
+            });
         }
 
         static string GetSortStyleCaption(ColumnSortStyle style)
@@ -644,7 +685,7 @@ namespace DigitalPlatform.GUI
         // 清除所有留存的排序信息，刷新list的标题栏上的陈旧的排序标志
         public static void ClearSortColumns(ListView list)
         {
-            list.Invoke((Action)(() =>
+            list.TryInvoke(() =>
             {
                 ListViewProperty prop = GetListViewProperty(list);
 
@@ -655,7 +696,7 @@ namespace DigitalPlatform.GUI
                 SortColumns.ClearColumnSortDisplay(list.Columns);
 
                 prop.CurrentDbName = "";    // 清除记忆
-            }));
+            });
         }
 
         // 获得ListViewProperty对象
@@ -674,7 +715,7 @@ namespace DigitalPlatform.GUI
             string strText,
             int nColumn)
         {
-            return (ListViewItem)listview.Invoke((Func<ListViewItem>)(() =>
+            return listview.TryGet(()=>
             {
                 for (int i = 0; i < listview.Items.Count; i++)
                 {
@@ -685,7 +726,7 @@ namespace DigitalPlatform.GUI
                 }
 
                 return null;
-            }));
+            });
         }
 
         // 检测一个x位置在何列上。
@@ -720,13 +761,13 @@ namespace DigitalPlatform.GUI
                 string strText = "";
                 // strText = Convert.ToString(i);
 
-                listview.Invoke((Action)(() =>
+                listview.TryInvoke(() =>
                 {
                     ColumnHeader col = new ColumnHeader();
                     col.Text = strText;
                     col.Width = nInitialWidth;
                     listview.Columns.Add(col);
-                }));
+                });
             }
         }
 
@@ -789,6 +830,7 @@ namespace DigitalPlatform.GUI
             item.SubItems[col].Text = strText;
         }
 
+        // 线程不安全
         // 2009/10/21
         // 获得一个行的值。即把各个单元的值用\t字符连接起来
         public static string GetLineText(ListViewItem item)
@@ -808,22 +850,28 @@ namespace DigitalPlatform.GUI
         // 清除全部选择状态
         public static void ClearSelection(ListView list)
         {
-            list.SelectedItems.Clear();
+            list.TryInvoke(() =>
+            {
+                list.SelectedItems.Clear();
+            });
         }
 
         // 清除全部 Checked 状态
         public static void ClearChecked(ListView list)
         {
-            List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in list.CheckedItems)
+            list.TryInvoke(() =>
             {
-                items.Add(item);
-            }
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in list.CheckedItems)
+                {
+                    items.Add(item);
+                }
 
-            foreach (ListViewItem item in items)
-            {
-                item.Checked = false;
-            }
+                foreach (ListViewItem item in items)
+                {
+                    item.Checked = false;
+                }
+            });
         }
 
         // 选择一行
@@ -834,17 +882,20 @@ namespace DigitalPlatform.GUI
             int nIndex,
             bool bMoveFocus)
         {
-            list.SelectedItems.Clear();
-
-            if (nIndex != -1)
+            list.TryInvoke(() =>
             {
-                list.Items[nIndex].Selected = true;
+                list.SelectedItems.Clear();
 
-                if (bMoveFocus == true)
+                if (nIndex != -1)
                 {
-                    list.Items[nIndex].Focused = true;
+                    list.Items[nIndex].Selected = true;
+
+                    if (bMoveFocus == true)
+                    {
+                        list.Items[nIndex].Focused = true;
+                    }
                 }
-            }
+            });
         }
 
         // 选择一行
@@ -855,58 +906,70 @@ namespace DigitalPlatform.GUI
             bool bMoveFocus)
         {
             Debug.Assert(item != null, "");
-
-            item.ListView.SelectedItems.Clear();
-
-            item.Selected = true;
-
-            if (bMoveFocus == true)
+            var list = item.ListView;
+            list.TryInvoke(() =>
             {
-                item.Focused = true;
-            }
+                list.SelectedItems.Clear();
+
+                item.Selected = true;
+
+                if (bMoveFocus == true)
+                {
+                    item.Focused = true;
+                }
+            });
         }
 
         public static List<int> GetSelectedIndices(ListView list)
         {
-            return new List<int>(list.SelectedIndices.Cast<int>());
+            return list.TryGet(() =>
+            {
+                return new List<int>(list.SelectedIndices.Cast<int>());
+            });
         }
 
         public static void SelectItems(ListView list, List<int> indices)
         {
             ClearSelection(list);
-            foreach(int i in indices)
+            list.TryInvoke(() =>
             {
-                var item = list.Items[i];
-                item.Selected = true;
-            }
+                foreach (int i in indices)
+                {
+                    var item = list.Items[i];
+                    item.Selected = true;
+                }
+            });
         }
 
         // 查找并选中
         public static int FindAndSelect(ListView list, string text)
         {
-            int count = 0;
-            foreach(ListViewItem item in list.Items)
+            return list.TryGet(() =>
             {
-                bool found = false;
-                foreach(ListViewItem.ListViewSubItem subitem in item.SubItems)
+                int count = 0;
+                foreach (ListViewItem item in list.Items)
                 {
-                    if (subitem.Text.Contains(text))
+                    bool found = false;
+                    foreach (ListViewItem.ListViewSubItem subitem in item.SubItems)
                     {
-                        found = true;
-                        break;
+                        if (subitem.Text.Contains(text))
+                        {
+                            found = true;
+                            break;
+                        }
                     }
+
+                    if (found)
+                    {
+                        item.Selected = true;
+                        count++;
+                    }
+                    else
+                        item.Selected = false;
                 }
 
-                if (found)
-                {
-                    item.Selected = true;
-                    count++;
-                }
-                else
-                    item.Selected = false;
-            }
-
-            return count;
+                return count;
+            });
         }
     }
 

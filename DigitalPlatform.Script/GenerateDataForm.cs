@@ -48,18 +48,22 @@ namespace DigitalPlatform.Script
             }
             set
             {
-                this.m_actions = value;
-
-                if (value != null)
+                this.TryInvoke(() =>
                 {
-                    FillList();
-                }
-                else
-                {
-                    this.ActionTable.Rows.Clear();
-                }
+                    this.m_actions = value;
 
-                ActionTable_SelectionChanged(null, null);
+                    if (value != null)
+                    {
+                        _fillList();
+                    }
+                    else
+                    {
+
+                        this.ActionTable.Rows.Clear();
+                    }
+
+                    ActionTable_SelectionChanged(null, null);
+                });
             }
         }
 
@@ -157,7 +161,7 @@ namespace DigitalPlatform.Script
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
         }
 
-        void FillList()
+        void _fillList()
         {
             this.ActionTable.Rows.Clear();
             if (m_actions == null)
@@ -223,48 +227,54 @@ namespace DigitalPlatform.Script
         // 或者用 WebBrowser 控件显示报错信息
         public void DisplayError(string strError)
         {
-            this.ActionTable.Rows.Clear();
-            this.ActionTable.MaxTextHeight = 500;
+            this.TryInvoke(() =>
+            {
+                this.ActionTable.Rows.Clear();
+                this.ActionTable.MaxTextHeight = 500;
 
-            DpRow item = new DpRow();
+                DpRow item = new DpRow();
 
-            DpCell cell = new DpCell("");
-            item.Add(cell);
+                DpCell cell = new DpCell("");
+                item.Add(cell);
 
-            // 快捷键
-            cell = new DpCell();
-            item.Add(cell);
+                // 快捷键
+                cell = new DpCell();
+                item.Add(cell);
 
-            // 说明
-            cell = new DpCell(strError);
-            // cell.Font = new Font(this.ActionTable.Font.FontFamily, this.ActionTable.Font.SizeInPoints * 2, FontStyle.Bold, GraphicsUnit.Point);
-            item.Add(cell);
+                // 说明
+                cell = new DpCell(strError);
+                // cell.Font = new Font(this.ActionTable.Font.FontFamily, this.ActionTable.Font.SizeInPoints * 2, FontStyle.Bold, GraphicsUnit.Point);
+                item.Add(cell);
 
-            item.Tag = new ScriptAction();
-            this.ActionTable.Rows.Add(item);
+                item.Tag = new ScriptAction();
+                this.ActionTable.Rows.Add(item);
+            });
         }
 
         int _processing = 0;    // 是否正在处理中
 
         void EnableControls(bool bEnable)
         {
-            // this.ActionTable.Enabled = bEnable;
-            if (bEnable == true)
-                this.ActionTable.BackColor = SystemColors.Window;
-            else
-                this.ActionTable.BackColor = SystemColors.Control;
-
-            int nCount = this.ActionTable.SelectedRows.Count;
-            if (nCount == 0)
+            this.TryInvoke(() =>
             {
-                this.button_excute.Enabled = false;
-            }
-            else
-            {
-                this.button_excute.Enabled = bEnable;
-            }
+                // this.ActionTable.Enabled = bEnable;
+                if (bEnable == true)
+                    this.ActionTable.BackColor = SystemColors.Window;
+                else
+                    this.ActionTable.BackColor = SystemColors.Control;
 
-            this.checkBox_autoRun.Enabled = bEnable;
+                int nCount = this.ActionTable.SelectedRows.Count;
+                if (nCount == 0)
+                {
+                    this.button_excute.Enabled = false;
+                }
+                else
+                {
+                    this.button_excute.Enabled = bEnable;
+                }
+
+                this.checkBox_autoRun.Enabled = bEnable;
+            });
         }
 
         void BeginProcess()
@@ -333,13 +343,19 @@ namespace DigitalPlatform.Script
         {
             get
             {
-                return this.ActionTable.Rows.Count;
+                return this.TryGet(() =>
+                {
+                    return this.ActionTable.Rows.Count;
+                });
             }
         }
 
         public void Clear()
         {
-            this.ActionTable.Rows.Clear();
+            this.TryInvoke(() =>
+            {
+                this.ActionTable.Rows.Clear();
+            });
         }
 
         public void TriggerMyFormClose()
@@ -417,21 +433,24 @@ namespace DigitalPlatform.Script
 
         public bool TryAutoRun()
         {
-            if ((Control.ModifierKeys & Keys.Alt) == Keys.Alt)
+            return this.TryGet(() =>
             {
-                // 旁路
+                if ((Control.ModifierKeys & Keys.Alt) == Keys.Alt)
+                {
+                    // 旁路
+                    return false;
+                }
+
+                // 自动执行
+                if (this.checkBox_autoRun.Checked == true
+                    && this.ActionTable.SelectedRows.Count == 1)
+                {
+                    ActionTable_DoubleClick(this, null);
+                    return true;
+                }
+
                 return false;
-            }
-
-            // 自动执行
-            if (this.checkBox_autoRun.Checked == true
-                && this.ActionTable.SelectedRows.Count == 1)
-            {
-                ActionTable_DoubleClick(this, null);
-                return true;
-            }
-
-            return false;
+            });
         }
 
         public void RefreshState()
@@ -439,67 +458,70 @@ namespace DigitalPlatform.Script
             if (this.SetMenu == null)
                 return;
 
-            RefreshMenuEventArgs e = new RefreshMenuEventArgs();
-            e.Actions = this.Actions;
-            e.sender = this.sender;
-            e.e = this.e;
-
-            this.SetMenu(this, e);
-
-            DpRow first_selected_row = null;
-            DpRow last_selected_row = null;
-
-            for (int i = 0; i < this.ActionTable.Rows.Count; i++)
+            this.TryInvoke(() =>
             {
-                DpRow row = this.ActionTable.Rows[i];
+                RefreshMenuEventArgs e = new RefreshMenuEventArgs();
+                e.Actions = this.Actions;
+                e.sender = this.sender;
+                e.e = this.e;
 
-                if (row.Style == DpRowStyle.Seperator)
-                    continue;
+                this.SetMenu(this, e);
 
-                ScriptAction action = (ScriptAction)row.Tag;
-                if (action == null)
+                DpRow first_selected_row = null;
+                DpRow last_selected_row = null;
+
+                for (int i = 0; i < this.ActionTable.Rows.Count; i++)
                 {
-                    Debug.Assert(false, "");
-                    continue;
+                    DpRow row = this.ActionTable.Rows[i];
+
+                    if (row.Style == DpRowStyle.Seperator)
+                        continue;
+
+                    ScriptAction action = (ScriptAction)row.Tag;
+                    if (action == null)
+                    {
+                        Debug.Assert(false, "");
+                        continue;
+                    }
+
+                    if (this.Actions == null || this.Actions.IndexOf(action) == -1)
+                    {
+                        row.Selected = false;
+                        continue;
+                    }
+
+                    if (row.Count == 0)
+                        continue;
+
+                    Debug.Assert(row.Count >= 4, "");
+
+                    // 刷新一行
+                    row[0].Text = action.Name;
+                    string strText = "";
+                    if (action.ShortcutKey != (char)0)
+                    {
+                        strText = new string(action.ShortcutKey, 1);
+                        strText = strText.ToUpper();
+                    }
+                    row[1].Text = strText;
+                    row[2].Text = action.Comment;
+                    row[3].Text = action.ScriptEntry;
+
+                    row.Selected = action.Active;
+
+                    if (first_selected_row == null
+                        && row.Selected == true)
+                        first_selected_row = row;
+                    if (row.Selected == true)
+                        last_selected_row = row;
                 }
 
-                if (this.Actions == null || this.Actions.IndexOf(action) == -1)
-                {
-                    row.Selected = false;
-                    continue;
-                }
-
-                if (row.Count == 0)
-                    continue;
-
-                Debug.Assert(row.Count >= 4, "");
-
-                // 刷新一行
-                row[0].Text = action.Name;
-                string strText = "";
-                if (action.ShortcutKey != (char)0)
-                {
-                    strText = new string(action.ShortcutKey, 1);
-                    strText = strText.ToUpper();
-                }
-                row[1].Text = strText;
-                row[2].Text = action.Comment;
-                row[3].Text = action.ScriptEntry;
-
-                row.Selected = action.Active;
-
-                if (first_selected_row == null
-                    && row.Selected == true)
-                    first_selected_row = row;
-                if (row.Selected == true)
-                    last_selected_row = row;
-            }
-
-            if (first_selected_row != null)
-                first_selected_row.EnsureVisible();
-            if (last_selected_row != null
-                && last_selected_row != first_selected_row)
-                last_selected_row.EnsureVisible();
+                if (first_selected_row != null)
+                    first_selected_row.EnsureVisible();
+                if (last_selected_row != null
+                    && last_selected_row != first_selected_row)
+                    last_selected_row.EnsureVisible();
+            });
         }
 
         /// <summary>
@@ -676,6 +698,17 @@ Keys keyData)
 
             if (this.CloseWhenComplete == true)
                 this.Close();
+        }
+
+        // Dock 停靠以后，this.Visible == true，只能用 ActionTable
+        void TryInvoke(Action method)
+        {
+            this.ActionTable.TryInvoke(method);
+        }
+
+        T TryGet<T>(Func<T> func)
+        {
+            return this.ActionTable.TryGet(func);
         }
     }
 

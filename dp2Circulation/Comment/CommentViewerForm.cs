@@ -57,11 +57,13 @@ namespace dp2Circulation
             }
             set
             {
-                lock (this)
+                this.TryInvoke(() =>
                 {
-                    this.webBrowser_html.Stop();
-                    m_strHtmlString = value;
-                    Debug.Assert(Program.MainForm != null, "");
+                    lock (this) // TODO: 似乎可以去掉 lock
+                    {
+                        this.webBrowser_html.Stop();
+                        m_strHtmlString = value;
+                        Debug.Assert(Program.MainForm != null, "");
 
 #if NO
                     Global.SetHtmlString(this.webBrowser_html,
@@ -69,9 +71,10 @@ namespace dp2Circulation
                         Program.MainForm.DataDir,
                         "comment_viewer_html");
 #endif
-                    this.m_webExternalHost.SetHtmlString(value,
-                        "comment_viewer_html");
-                }
+                        this.m_webExternalHost.SetHtmlString(value,
+                            "comment_viewer_html");
+                    }
+                });
             }
         }
 
@@ -88,21 +91,23 @@ namespace dp2Circulation
             }
             set
             {
-                m_strXmlString = value;
+                this.TryInvoke(() =>
+                {
+                    m_strXmlString = value;
 
-                Debug.Assert(Program.MainForm != null, "");
-                /*
-                Global.SetXmlString(this.webBrowser_xml,  // ()
-                    value,
-                    Program.MainForm.DataDir,
-                    "comment_viewer_xml");
-                 * */
-                Global.SetXmlToWebbrowser(this.webBrowser_xml,
-    Program.MainForm.DataDir,
-    "comment_viewer_xml",
-    value
-    );
-
+                    Debug.Assert(Program.MainForm != null, "");
+                    /*
+                    Global.SetXmlString(this.webBrowser_xml,  // ()
+                        value,
+                        Program.MainForm.DataDir,
+                        "comment_viewer_xml");
+                     * */
+                    Global.SetXmlToWebbrowser(this.webBrowser_xml,
+        Program.MainForm.DataDir,
+        "comment_viewer_xml",
+        value
+        );
+                });
             }
         }
 
@@ -120,16 +125,19 @@ namespace dp2Circulation
             }
             set
             {
-                lock (this)
+                this.TryInvoke(() =>
                 {
-                    m_strSubrecordsString = value;
-                    Debug.Assert(Program.MainForm != null, "");
+                    lock (this) // TODO: 似乎可以去掉 lock
+                    {
+                        m_strSubrecordsString = value;
+                        Debug.Assert(Program.MainForm != null, "");
 
-                    Global.SetHtmlString(this.webBrowser_subrecords,
-    value,
-    Program.MainForm.DataDir,
-    "comment_viewer_subrecords");
-                }
+                        Global.SetHtmlString(this.webBrowser_subrecords,
+        value,
+        Program.MainForm.DataDir,
+        "comment_viewer_subrecords");
+                    }
+                });
             }
         }
 
@@ -173,10 +181,13 @@ namespace dp2Circulation
         /// </summary>
         public void StopPrevious()
         {
-            if (this.m_webExternalHost != null)
-                this.m_webExternalHost.StopPrevious();
+            this.TryInvoke(() =>
+            {
+                if (this.m_webExternalHost != null)
+                    this.m_webExternalHost.StopPrevious();
 
-            this.webBrowser_html.Stop();
+                this.webBrowser_html.Stop();
+            });
         }
 
         /// <summary>
@@ -185,8 +196,11 @@ namespace dp2Circulation
         /// <param name="strHtml">HTML 字符串</param>
         public void WriteHtml(string strHtml)
         {
-            Global.WriteHtml(this.webBrowser_html,
+            this.TryInvoke(() =>
+            {
+                Global.WriteHtml(this.webBrowser_html,
                 strHtml);
+            });
         }
 
         /// <summary>
@@ -195,8 +209,11 @@ namespace dp2Circulation
         /// <param name="strXml">XML 字符串</param>
         public void WriteXml(string strXml)
         {
-            Global.WriteHtml(this.webBrowser_xml,
+            this.TryInvoke(() =>
+            {
+                Global.WriteHtml(this.webBrowser_xml,
                 strXml);
+            });
         }
 
         private void toolStripButton_dock_Click(object sender, EventArgs e)
@@ -246,36 +263,45 @@ namespace dp2Circulation
         /// <param name="bShowFixedPanel">是否同时促成显示固定面板</param>
         public void DoDock(bool bShowFixedPanel)
         {
-            // return; // 测试内存泄漏
-            if (Program.MainForm.CurrentPropertyControl != this.tabControl_main)
+            this.TryInvoke(() =>
             {
-                Program.MainForm.CurrentPropertyControl = this.tabControl_main;
-                // 防止内存泄漏
-                ControlExtention.AddFreeControl(_freeControls, this.tabControl_main);
-            }
+                // return; // 测试内存泄漏
+                if (Program.MainForm.CurrentPropertyControl != this.tabControl_main)
+                {
+                    Program.MainForm.CurrentPropertyControl = this.tabControl_main;
+                    // 防止内存泄漏
+                    ControlExtention.AddFreeControl(_freeControls, this.tabControl_main);
+                }
 
-            if (bShowFixedPanel == true
-                && Program.MainForm.PanelFixedVisible == false)
-                Program.MainForm.PanelFixedVisible = true;
+                if (bShowFixedPanel == true
+                    && Program.MainForm.PanelFixedVisible == false)
+                    Program.MainForm.PanelFixedVisible = true;
 
-            this.Docked = true;
-            this.Visible = false;
+                this.Docked = true;
+                this.Visible = false;
+            });
         }
 
         public void HideSubrecords()
         {
-            this.tabControl_main.TabPages.Remove(this.tabPage_subrecords);
-            // 防止内存泄漏
-            ControlExtention.AddFreeControl(_freeControls, this.tabPage_subrecords);
+            this.TryInvoke(() =>
+            {
+                this.tabControl_main.TabPages.Remove(this.tabPage_subrecords);
+                // 防止内存泄漏
+                ControlExtention.AddFreeControl(_freeControls, this.tabPage_subrecords);
+            });
         }
 
         public void ShowSubrecords()
         {
-            if (this.tabControl_main.TabPages.IndexOf(this.tabPage_subrecords) == -1)
+            this.TryInvoke(() =>
             {
-                this.tabControl_main.TabPages.Add(this.tabPage_subrecords);
-                ControlExtention.RemoveFreeControl(_freeControls, this.tabPage_subrecords);
-            }
+                if (this.tabControl_main.TabPages.IndexOf(this.tabPage_subrecords) == -1)
+                {
+                    this.tabControl_main.TabPages.Add(this.tabPage_subrecords);
+                    ControlExtention.RemoveFreeControl(_freeControls, this.tabPage_subrecords);
+                }
+            });
         }
 
         /// <summary>
@@ -294,12 +320,15 @@ namespace dp2Circulation
         /// </summary>
         public void Clear()
         {
-            Global.ClearHtmlPage(this.webBrowser_html,
-                Program.MainForm != null ? Program.MainForm.DataDir : null);
-            Global.ClearHtmlPage(this.webBrowser_xml,
-                Program.MainForm != null ? Program.MainForm.DataDir : null);
-            Global.ClearHtmlPage(this.webBrowser_subrecords,
-                Program.MainForm != null ? Program.MainForm.DataDir : null);
+            this.TryInvoke(() =>
+            {
+                Global.ClearHtmlPage(this.webBrowser_html,
+                    Program.MainForm != null ? Program.MainForm.DataDir : null);
+                Global.ClearHtmlPage(this.webBrowser_xml,
+                    Program.MainForm != null ? Program.MainForm.DataDir : null);
+                Global.ClearHtmlPage(this.webBrowser_subrecords,
+                    Program.MainForm != null ? Program.MainForm.DataDir : null);
+            });
         }
 
         /// <summary>
@@ -307,8 +336,11 @@ namespace dp2Circulation
         /// </summary>
         public void ClearHtml()
         {
-            Global.ClearHtmlPage(this.webBrowser_html,
+            this.TryInvoke(() =>
+            {
+                Global.ClearHtmlPage(this.webBrowser_html,
 Program.MainForm != null ? Program.MainForm.DataDir : null);
+            });
         }
 
         /// <summary>
@@ -316,14 +348,20 @@ Program.MainForm != null ? Program.MainForm.DataDir : null);
         /// </summary>
         public void ClearXml()
         {
-            Global.ClearHtmlPage(this.webBrowser_xml,
+            this.TryInvoke(() =>
+            {
+                Global.ClearHtmlPage(this.webBrowser_xml,
 Program.MainForm != null ? Program.MainForm.DataDir : null);
+            });
         }
 
         public void ClearSubrecords()
         {
-            Global.ClearHtmlPage(this.webBrowser_subrecords,
+            this.TryInvoke(() =>
+            {
+                Global.ClearHtmlPage(this.webBrowser_subrecords,
 Program.MainForm != null ? Program.MainForm.DataDir : null);
+            });
         }
 
         bool m_bSuppressScriptErrors = false;
@@ -370,6 +408,17 @@ Program.MainForm != null ? Program.MainForm.DataDir : null);
         private void webBrowser_subrecords_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             ((WebBrowser)sender).Document.Window.Error += new HtmlElementErrorEventHandler(Window_Error);
+        }
+
+        // Dock 停靠以后，this.Visible == true，只能用 tabControl_main
+        void TryInvoke(Action method)
+        {
+            this.tabControl_main.TryInvoke(method);
+        }
+
+        T TryGet<T>(Func<T> func)
+        {
+            return this.tabControl_main.TryGet(func);
         }
     }
 }

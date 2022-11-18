@@ -94,7 +94,10 @@ namespace DigitalPlatform.Script
 
         public void Clear()
         {
-            this.textBox_verifyResult.Text = "";
+            this.TryInvoke(() =>
+            {
+                this.textBox_verifyResult.Text = "";
+            });
         }
 
         public TextBox ResultControl
@@ -144,6 +147,17 @@ namespace DigitalPlatform.Script
             LocateEventArgs e1 = new LocateEventArgs();
             e1.Location = strLine;
             this.Locate(this, e1);
+        }
+
+        // Dock 停靠以后，this.Visible == true，只能用 ResultControl
+        void TryInvoke(Action method)
+        {
+            this.ResultControl.TryInvoke(method);
+        }
+
+        T TryGet<T>(Func<T> func)
+        {
+            return this.ResultControl.TryGet(func);
         }
     }
 

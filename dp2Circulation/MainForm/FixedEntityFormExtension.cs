@@ -1,4 +1,5 @@
-﻿using DigitalPlatform.Text;
+﻿using DigitalPlatform;
+using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -97,47 +98,52 @@ namespace dp2Circulation
         {
             strError = "";
 
-            BiblioSearchForm search_form = null;
-            if (this.CurrentBrowseControl != null)
-                search_form = GetOwnerBiblioSearchForm(this.CurrentBrowseControl);
-
-            if (search_form == null)
+            var ret = ControlExtension.TryGet(this, () =>
             {
-                search_form = new BiblioSearchForm();
-                search_form.Show();
-                search_form.DoDock(true);
-
+                BiblioSearchForm search_form = null;
                 if (this.CurrentBrowseControl != null)
                     search_form = GetOwnerBiblioSearchForm(this.CurrentBrowseControl);
-            }
-            else
-                search_form.ClearListViewItems();
 
-            var page = this.ActivateFixPage("browse");
-
-            List<string> list = StringUtil.SplitList(strRecPathList);
-            //search_form.EnableControls(false);
-            if (list.Count == 0)
-                search_form.ClearListViewItems();
-            else
-            {
-                foreach (string recpath in list)
+                if (search_form == null)
                 {
-                    search_form.AddLineToBrowseList(recpath);
+                    search_form = new BiblioSearchForm();
+                    search_form.Show();
+                    search_form.DoDock(true);
+
+                    if (this.CurrentBrowseControl != null)
+                        search_form = GetOwnerBiblioSearchForm(this.CurrentBrowseControl);
                 }
-            }
-            //search_form.EnableControls(true);
+                else
+                    search_form.ClearListViewItems();
 
-            if (list.Count > 0)
-            {
-                search_form.RefreshAllLines();
+                var page = this.ActivateFixPage("browse");
 
-                // 2022/1/28
-                // 确保固定面板被显示出来
-                if (this.PanelFixedVisible == false)
-                    this.PanelFixedVisible = true;
-            }
-            return 0;
+                List<string> list = StringUtil.SplitList(strRecPathList);
+                //search_form.EnableControls(false);
+                if (list.Count == 0)
+                    search_form.ClearListViewItems();
+                else
+                {
+                    foreach (string recpath in list)
+                    {
+                        search_form.AddLineToBrowseList(recpath);
+                    }
+                }
+                //search_form.EnableControls(true);
+
+                if (list.Count > 0)
+                {
+                    search_form.RefreshAllLines();
+
+                    // 2022/1/28
+                    // 确保固定面板被显示出来
+                    if (this.PanelFixedVisible == false)
+                        this.PanelFixedVisible = true;
+                }
+                return 0;
+            });
+
+            return ret;
         }
     }
 }

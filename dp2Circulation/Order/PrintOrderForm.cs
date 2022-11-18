@@ -6752,7 +6752,7 @@ strContent);
             }
         ERROR1:
             this.ShowMessage(strError, "red", true);
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)

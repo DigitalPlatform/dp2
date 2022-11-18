@@ -321,12 +321,16 @@ out string strError)
                         return 0;
 #endif
 
-                    DialogResult result = MessageBox.Show(owner,
-    "从服务器 '" + this.PinyinServerUrl + "' 获取拼音的过程出错:\r\n" + strError + "\r\n\r\n是否要临时改为使用本机加拼音功能? \r\n\r\n(注：临时改用本机拼音的状态在程序退出时不会保留。如果要永久改用本机拼音方式，请使用主菜单的“参数配置”命令，将“服务器”属性页的“拼音服务器URL”内容清空)",
+                    var temp = strError;
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(owner,
+    "从服务器 '" + this.PinyinServerUrl + "' 获取拼音的过程出错:\r\n" + temp + "\r\n\r\n是否要临时改为使用本机加拼音功能? \r\n\r\n(注：临时改用本机拼音的状态在程序退出时不会保留。如果要永久改用本机拼音方式，请使用主菜单的“参数配置”命令，将“服务器”属性页的“拼音服务器URL”内容清空)",
     "EntityForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button2);
+                    });
                     if (result == System.Windows.Forms.DialogResult.Yes)
                     {
                         this.ForceUseLocalPinyinFunc = true;
@@ -444,6 +448,8 @@ out string strError)
                             out string strSampleText,
                             out nOffs);
 
+                        string temp = strPinyin;
+                        var ret = this.TryGet(() =>
                         {	// 如果是多个拼音
                             SelPinyinDlg dlg = new SelPinyinDlg();
                             //float ratio_single = dlg.listBox_multiPinyin.Font.SizeInPoints / dlg.Font.SizeInPoints;
@@ -510,13 +516,13 @@ out string strError)
 
                             if (dlg.DialogResult == DialogResult.Cancel)
                             {
-                                SelPinyinDlg.AppendText(ref strPinyin, strHanzi);
+                                SelPinyinDlg.AppendText(ref temp, strHanzi);
                                 //nStatus = 2;
                                 bNotFoundPinyin = true;
                             }
                             else if (dlg.DialogResult == DialogResult.OK)
                             {
-                                SelPinyinDlg.AppendPinyin(ref strPinyin,
+                                SelPinyinDlg.AppendPinyin(ref temp,
                                     SelPinyinDlg.ConvertSinglePinyinByStyle(
                                     dlg.ResultPinyin,
                                     style)
@@ -529,7 +535,11 @@ out string strError)
                             }
 
                             index++;
-                        }
+                            return 1;
+                        });
+                        strPinyin = temp;
+                        if (ret == 0)
+                            return 0;
                     }
                 }
 
@@ -775,58 +785,67 @@ out string strError)
 
                 strResultPinyin = strResultPinyin.Trim();
                 if (strResultPinyin.IndexOf(";", 0) != -1)
-                {	// 如果是多个拼音
-                    SelPinyinDlg dlg = new SelPinyinDlg();
-                    //float ratio_single = dlg.listBox_multiPinyin.Font.SizeInPoints / dlg.Font.SizeInPoints;
-                    //float ratio_sample = dlg.textBox_sampleText.Font.SizeInPoints / dlg.Font.SizeInPoints;
-                    MainForm.SetControlFont(dlg, this.Font, false);
-                    // 维持字体的原有大小比例关系
-                    //dlg.listBox_multiPinyin.Font = new Font(dlg.Font.FontFamily, ratio_single * dlg.Font.SizeInPoints, GraphicsUnit.Point);
-                    //dlg.textBox_sampleText.Font = new Font(dlg.Font.FontFamily, ratio_sample * dlg.Font.SizeInPoints, GraphicsUnit.Point);
-                    // 这个对话框比较特殊 MainForm.SetControlFont(dlg, this.Font, false);
-
-                    dlg.Text = "请选择汉字 '" + strHanzi + "' 的拼音 (来自本机)";
-                    dlg.SampleText = strText;
-                    dlg.Offset = i;
-                    dlg.Pinyins = strResultPinyin;
-                    dlg.Hanzi = strHanzi;
-
-                    if (bFirst == true
-&& string.IsNullOrEmpty(dlg.Pinyins) == false)
+                {
+                    string temp = strPinyin;
+                    var ret = this.TryGet(() =>
                     {
-                        dlg.ResultPinyin = SelPinyinDlg.GetFirstPinyin(dlg.Pinyins);
-                        dlg.DialogResult = DialogResult.OK;
-                    }
-                    else
-                    {
-                        this.AppInfo.LinkFormState(dlg, "SelPinyinDlg_state");
+                        // 如果是多个拼音
+                        SelPinyinDlg dlg = new SelPinyinDlg();
+                        //float ratio_single = dlg.listBox_multiPinyin.Font.SizeInPoints / dlg.Font.SizeInPoints;
+                        //float ratio_sample = dlg.textBox_sampleText.Font.SizeInPoints / dlg.Font.SizeInPoints;
+                        MainForm.SetControlFont(dlg, this.Font, false);
+                        // 维持字体的原有大小比例关系
+                        //dlg.listBox_multiPinyin.Font = new Font(dlg.Font.FontFamily, ratio_single * dlg.Font.SizeInPoints, GraphicsUnit.Point);
+                        //dlg.textBox_sampleText.Font = new Font(dlg.Font.FontFamily, ratio_sample * dlg.Font.SizeInPoints, GraphicsUnit.Point);
+                        // 这个对话框比较特殊 MainForm.SetControlFont(dlg, this.Font, false);
 
-                        dlg.ShowDialog(owner);
+                        dlg.Text = "请选择汉字 '" + strHanzi + "' 的拼音 (来自本机)";
+                        dlg.SampleText = strText;
+                        dlg.Offset = i;
+                        dlg.Pinyins = strResultPinyin;
+                        dlg.Hanzi = strHanzi;
 
-                        this.AppInfo.UnlinkFormState(dlg);
-                    }
+                        if (bFirst == true
+    && string.IsNullOrEmpty(dlg.Pinyins) == false)
+                        {
+                            dlg.ResultPinyin = SelPinyinDlg.GetFirstPinyin(dlg.Pinyins);
+                            dlg.DialogResult = DialogResult.OK;
+                        }
+                        else
+                        {
+                            this.AppInfo.LinkFormState(dlg, "SelPinyinDlg_state");
 
-                    Debug.Assert(DialogResult.Cancel != DialogResult.Abort, "推断");
+                            dlg.ShowDialog(owner);
 
-                    if (dlg.DialogResult == DialogResult.Cancel)
-                    {
-                        strPinyin += strHanzi;
-                        bNotFoundPinyin = true;
-                    }
-                    else if (dlg.DialogResult == DialogResult.OK)
-                    {
-                        strPinyin += SelPinyinDlg.ConvertSinglePinyinByStyle(
-                            dlg.ResultPinyin,
-                            style);
-                    }
-                    else if (dlg.DialogResult == DialogResult.Abort)
-                    {
-                        return 0;   // 用户希望整个中断
-                    }
-                    else
-                    {
-                        Debug.Assert(false, "SelPinyinDlg返回时出现意外的DialogResult值");
-                    }
+                            this.AppInfo.UnlinkFormState(dlg);
+                        }
+
+                        Debug.Assert(DialogResult.Cancel != DialogResult.Abort, "推断");
+
+                        if (dlg.DialogResult == DialogResult.Cancel)
+                        {
+                            temp += strHanzi;
+                            bNotFoundPinyin = true;
+                        }
+                        else if (dlg.DialogResult == DialogResult.OK)
+                        {
+                            temp += SelPinyinDlg.ConvertSinglePinyinByStyle(
+                                dlg.ResultPinyin,
+                                style);
+                        }
+                        else if (dlg.DialogResult == DialogResult.Abort)
+                        {
+                            return 0;   // 用户希望整个中断
+                        }
+                        else
+                        {
+                            Debug.Assert(false, "SelPinyinDlg返回时出现意外的DialogResult值");
+                        }
+                        return 1;
+                    });
+                    strPinyin = temp;
+                    if (ret == 0)
+                        return 0;
                 }
                 else
                 {
@@ -1294,7 +1313,7 @@ out string strError)
             if (string.IsNullOrEmpty(strError) == false)
             {
                 if (strError[0] != ' ')
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
             }
             return -1;
         }
@@ -1410,7 +1429,7 @@ out string strError)
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         #endregion

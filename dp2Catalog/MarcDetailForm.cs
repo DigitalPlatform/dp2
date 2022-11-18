@@ -5921,27 +5921,30 @@ Stack:
 
         void m_genDataViewer_DoDockEvent(object sender, DoDockEventArgs e)
         {
-            if (this.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
-                this.MainForm.CurrentGenerateDataControl = m_genDataViewer.Table;
+            this.TryInvoke(() =>
+            {
+                if (this.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
+                    this.MainForm.CurrentGenerateDataControl = m_genDataViewer.Table;
 
-            if (e.ShowFixedPanel == true
-                && this.MainForm.PanelFixedVisible == false)
-                this.MainForm.PanelFixedVisible = true;
+                if (e.ShowFixedPanel == true
+                    && this.MainForm.PanelFixedVisible == false)
+                    this.MainForm.PanelFixedVisible = true;
 
-            /*
-            this.MainForm.AppInfo.SetBoolean("detailform", "gen_auto_run", m_genDataViewer.AutoRun);
+                /*
+                this.MainForm.AppInfo.SetBoolean("detailform", "gen_auto_run", m_genDataViewer.AutoRun);
 
-            {	// 保存列宽度
-                string strWidths = DpTable.GetColumnWidthListString(m_genDataViewer.ActionTable);
-                this.MainForm.AppInfo.SetString(
-                    "gen_data_dlg",
-                    "column_width",
-                    strWidths);
-            }
-             * */
+                {	// 保存列宽度
+                    string strWidths = DpTable.GetColumnWidthListString(m_genDataViewer.ActionTable);
+                    this.MainForm.AppInfo.SetString(
+                        "gen_data_dlg",
+                        "column_width",
+                        strWidths);
+                }
+                 * */
 
-            m_genDataViewer.Docked = true;
-            m_genDataViewer.Visible = false;
+                m_genDataViewer.Docked = true;
+                m_genDataViewer.Visible = false;
+            });
         }
 
         void m_genDataViewer_SetMenu(object sender, RefreshMenuEventArgs e)

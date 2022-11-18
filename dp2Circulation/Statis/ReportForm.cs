@@ -13996,10 +13996,10 @@ MessageBoxDefaultButton.Button1);
                 */
             }
 
-            MessageBoxShow("成功转换文件 " + nCount.ToString() + " 个");
+            this.MessageBoxShow("成功转换文件 " + nCount.ToString() + " 个");
             return;
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         FileCounting _counting = null;

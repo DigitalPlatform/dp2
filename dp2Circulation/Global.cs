@@ -2511,6 +2511,7 @@ namespace dp2Circulation
             return 0;
         }
 
+        /*
         static void TryInvoke(Control control, Action method)
         {
             if (control.InvokeRequired)
@@ -2518,6 +2519,7 @@ namespace dp2Circulation
             else
                 method.Invoke();
         }
+        */
 
         // 在listviewcontrol最前面插入一行
         /// <summary>
@@ -2562,7 +2564,7 @@ namespace dp2Circulation
             */
             AddOthers((ListView)list, item, others);
 
-            TryInvoke(list, () =>
+            ControlExtension.TryInvoke(list, () =>
             {
                 list.UpdateItem(insert_pos);
             });
@@ -2610,7 +2612,7 @@ namespace dp2Circulation
             */
             AddOthers((ListView)list, item, others);
 
-            TryInvoke(list, () =>
+            ControlExtension.TryInvoke(list, () =>
             {
                 list.UpdateItem(list.Items.Count - 1);
             });
@@ -2624,7 +2626,7 @@ namespace dp2Circulation
         {
             if (others != null)
             {
-                TryInvoke(list, (Action)(() =>
+                ControlExtension.TryInvoke(list, (Action)(() =>
                 {
                     foreach (var s in others)
                     {

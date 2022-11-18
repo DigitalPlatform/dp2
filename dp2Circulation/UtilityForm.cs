@@ -678,7 +678,7 @@ out strError);
             }
         ERROR1:
             this.label_health_message.Text = "";
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         void ConvertISBN(string strAction)
@@ -1115,7 +1115,7 @@ MessageBoxDefaultButton.Button2);
                 */
             }
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         void FillSystemInfo()
@@ -1468,7 +1468,7 @@ MessageBoxDefaultButton.Button2);
                 */
             }
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         // 取 GCAT 著者号
@@ -1842,7 +1842,7 @@ MessageBoxDefaultButton.Button2);
             }
         ERROR1:
             this.label_health_message.Text = strError;
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
         }
 
         public void Health()

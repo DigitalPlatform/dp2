@@ -1957,7 +1957,12 @@ Program.MainForm.DataDir,
         // 为了兼容以前脚本里面的调用。但注意发现这个函数容易引起死锁！
         public int SaveRecord(string strStyle = "displaysuccess,verifybarcode")
         {
-            return SaveRecordAsync(strStyle).Result;
+            var task = SaveRecordAsync(strStyle);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
         }
 
         // return:
@@ -2197,9 +2202,9 @@ Program.MainForm.DataDir,
                                     out strError);
                                     if (nRet == -1)
                                     {
-                                        MessageBoxShow(strError);
+                                        this.MessageBoxShow(strError);
                                     }
-                                    MessageBoxShow("请注意重新保存记录");
+                                    this.MessageBoxShow("请注意重新保存记录");
                                     return -1;
                                 }
                                 return 0;
@@ -2220,12 +2225,12 @@ Program.MainForm.DataDir,
                     if (lRet == 1)
                     {
                         // 部分字段被拒绝
-                        MessageBoxShow(strError);
+                        this.MessageBoxShow(strError);
 
                         if (channel.ErrorCode == ErrorCode.PartialDenied)
                         {
                             // 提醒重新装载?
-                            MessageBoxShow("请重新装载记录, 检查哪些字段内容修改被拒绝。");
+                            this.MessageBoxShow("请重新装载记录, 检查哪些字段内容修改被拒绝。");
                         }
                     }
                     else
@@ -2242,7 +2247,7 @@ Program.MainForm.DataDir,
                             out strError);
                         if (nRet == -1)
                         {
-                            MessageBoxShow(strError);
+                            this.MessageBoxShow(strError);
                         }
                         if (nRet >= 1)
                         {
@@ -2257,7 +2262,7 @@ Program.MainForm.DataDir,
                                 out strError);
                             if (lRet == -1 || lRet == 0)
                             {
-                                MessageBoxShow(strError);
+                                this.MessageBoxShow(strError);
                             }
                         }
 
@@ -2417,7 +2422,7 @@ Program.MainForm.DataDir,
             }
 
         ERROR1:
-            MessageBoxShow(strError);
+            this.MessageBoxShow(strError);
             Program.MainForm.StatusBarMessage = strError;
             return -1;
         }
@@ -2465,7 +2470,7 @@ Program.MainForm.DataDir,
             if (nRet == -2
                 && (this.NeedVerifyBarcode == true && bVerifyBarcode == false))
             {
-                MessageBoxShow("警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
+                this.MessageBoxShow("警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
             }
 
             return 0;
@@ -2583,7 +2588,7 @@ Program.MainForm.DataDir,
                 && bIncludeFileID == true)  // 2008/12/3
             {
                 // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
-                nRet = this.binaryResControl1.AddFileFragments(ref dom,
+                nRet = this.binaryResControl1.AddFileFragments(dom,
             out strError);
                 if (nRet == -1)
                     return -1;

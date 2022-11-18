@@ -1131,6 +1131,18 @@ string strText)
             }
         }
 
+        // 为了兼容以前的脚本中的调用
+        public void Initial(
+    object button,
+    object statusBar,
+    object progressBar)
+        {
+            Initial(Application.OpenForms[0],
+                button, 
+                statusBar,
+                progressBar);
+        }
+
         // 初始化一个按钮,在父窗口load时调
         // locks: 集合写锁
         public void Initial(

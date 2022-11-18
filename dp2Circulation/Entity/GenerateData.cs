@@ -22,7 +22,7 @@ namespace dp2Circulation
     public class GenerateData : IDisposable
     {
         public Type DetailHostType = null;
- 
+
         // 内核数据库下 cfgs 子目录中，脚本文件名
         // 纯文件名
         public string ScriptFileName = "dp2circulation_marc_autogen.cs";
@@ -97,13 +97,23 @@ namespace dp2Circulation
         public void ClearViewer()
         {
             if (this.m_genDataViewer != null)
-                this.m_genDataViewer.Clear();
+            {
+                //this._myForm.TryInvoke(() =>
+                //{
+                    this.m_genDataViewer.Clear();
+                //});
+            }
         }
 
         public void RefreshViewerState()
         {
             if (this.m_genDataViewer != null)
-                this.m_genDataViewer.RefreshState();
+            {
+                //this._myForm.TryInvoke(() =>
+                //{
+                    this.m_genDataViewer.RefreshState();
+                //});
+            }
         }
 
         #region 最新的创建数据脚本功能
@@ -520,7 +530,7 @@ out strError);
                         bDisplayWindow = true;
                     }
 
-                    DisplayAutoGenMenuWindow(bDisplayWindow);   // 可能会改变 .ActionTable以及 .Count
+                    DisplayAutoGenMenuWindow(this._myForm, bDisplayWindow);   // 可能会改变 .ActionTable以及 .Count
                     if (bOnlyFillMenu == false)
                     {
                         if (Program.MainForm.PanelFixedVisible == true
@@ -552,9 +562,12 @@ out strError);
                         this.m_genDataViewer = null;
                     }
 #endif
-                    CloseGenDataViewer();
+                    this._myForm.TryInvoke(() =>
+                    {
+                        CloseGenDataViewer();
+                    });
 
-                    if (this._myForm.Focused == true 
+                    if (this._myForm.Focused == true
                         // || this.m_marcEditor.Focused TODO: 这里要研究一下如何实现
                         )
                         Program.MainForm.CurrentGenerateDataControl = null;
@@ -581,17 +594,20 @@ out strError);
                     {
                         if (this.m_genDataViewer != null)
                         {
-                            // 出现菜单界面
-                            if (this.m_genDataViewer.Count == 0)
-                            {
-                                dynamic o = this.m_detailHostObj;
-                                o.CreateMenu(sender, e);
+                            this._myForm.TryInvoke(() =>
+                            {                            // 出现菜单界面
+                                if (this.m_genDataViewer.Count == 0)
+                                {
 
-                                this.m_genDataViewer.Actions = this.m_detailHostObj.ScriptActions;
-                            }
+                                    dynamic o = this.m_detailHostObj;
+                                    o.CreateMenu(sender, e);
 
-                            // 根据当前插入符位置刷新加亮事项
-                            this.m_genDataViewer.RefreshState();
+                                    this.m_genDataViewer.Actions = this.m_detailHostObj.ScriptActions;
+                                }
+
+                                // 根据当前插入符位置刷新加亮事项
+                                this.m_genDataViewer.RefreshState();
+                            });
                         }
 
                         if (String.IsNullOrEmpty(e.ScriptEntry) == false)
@@ -620,7 +636,7 @@ out strError);
                             }
                         }
                     }
-                    catch (Exception /*ex*/)
+                    catch (Exception ex)
                     {
                         /*
                         // 被迫改用旧的风格
@@ -630,7 +646,7 @@ out strError);
                         this.SetSaveAllButtonState(true);
                         return;
                          * */
-                        throw;
+                        throw ex;
                     }
                 }
                 catch (Exception ex)
@@ -648,7 +664,7 @@ out strError);
             ERROR1:
                 // TODO: 报错是否要直接显示在 dpTable 中?
                 // MessageBox.Show(this._myForm, strError);
-                DisplayAutoGenMenuWindow(false);
+                DisplayAutoGenMenuWindow(this._myForm, false);
                 if (this.m_genDataViewer != null)
                     this.m_genDataViewer.DisplayError(strError);
             }
@@ -658,128 +674,127 @@ out strError);
             }
         }
 
-        void DisplayAutoGenMenuWindow(bool bOpenWindow)
+        void DisplayAutoGenMenuWindow(Control control,
+            bool bOpenWindow)
         {
-            // string strError = "";
-
-
-            // 优化，避免无谓地进行服务器调用
-            if (bOpenWindow == false)
+            control.TryInvoke(() =>
             {
-                if (Program.MainForm.PanelFixedVisible == false
-                    && (m_genDataViewer == null || m_genDataViewer.Visible == false))
-                    return;
-            }
+
+                // 优化，避免无谓地进行服务器调用
+                if (bOpenWindow == false)
+                {
+                    if (Program.MainForm.PanelFixedVisible == false
+                        && (m_genDataViewer == null || m_genDataViewer.Visible == false))
+                        return;
+                }
 
 
-            if (this.m_genDataViewer == null
-                || (bOpenWindow == true && this.m_genDataViewer.Visible == false))
-            {
-                m_genDataViewer = new GenerateDataForm();
+                if (this.m_genDataViewer == null
+                    || (bOpenWindow == true && this.m_genDataViewer.Visible == false))
+                {
+                    m_genDataViewer = new GenerateDataForm();
 
-                m_genDataViewer.AutoRun = Program.MainForm.AppInfo.GetBoolean("detailform", "gen_auto_run", false);
-                // MainForm.SetControlFont(m_genDataViewer, this.Font, false);
+                    m_genDataViewer.AutoRun = Program.MainForm.AppInfo.GetBoolean("detailform", "gen_auto_run", false);
+                    // MainForm.SetControlFont(m_genDataViewer, this.Font, false);
 
-                {	// 恢复列宽度
+                    {   // 恢复列宽度
 
-                    string strWidths = Program.MainForm.AppInfo.GetString(
-                                   "gen_data_dlg",
-                                    "column_width",
-                                   "");
-                    if (String.IsNullOrEmpty(strWidths) == false)
+                        string strWidths = Program.MainForm.AppInfo.GetString(
+                                       "gen_data_dlg",
+                                        "column_width",
+                                       "");
+                        if (String.IsNullOrEmpty(strWidths) == false)
+                        {
+                            DpTable.SetColumnHeaderWidth(m_genDataViewer.ActionTable,
+                                strWidths,
+                                false);
+                        }
+                    }
+
+                    // m_genDataViewer.MainForm = Program.MainForm;  // 必须是第一句
+                    m_genDataViewer.Text = "创建数据";
+
+                    m_genDataViewer.DoDockEvent -= new DoDockEventHandler(m_genDataViewer_DoDockEvent);
+                    m_genDataViewer.DoDockEvent += new DoDockEventHandler(m_genDataViewer_DoDockEvent);
+
+                    m_genDataViewer.SetMenu -= new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
+                    m_genDataViewer.SetMenu += new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
+
+                    m_genDataViewer.TriggerAction -= new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
+                    m_genDataViewer.TriggerAction += new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
+
+                    m_genDataViewer.MyFormClosed -= new EventHandler(m_genDataViewer_MyFormClosed);
+                    m_genDataViewer.MyFormClosed += new EventHandler(m_genDataViewer_MyFormClosed);
+
+                    m_genDataViewer.FormClosed -= new FormClosedEventHandler(m_genDataViewer_FormClosed);
+                    m_genDataViewer.FormClosed += new FormClosedEventHandler(m_genDataViewer_FormClosed);
+                }
+
+                if (bOpenWindow == true)
+                {
+                    if (m_genDataViewer.Visible == false)
                     {
-                        DpTable.SetColumnHeaderWidth(m_genDataViewer.ActionTable,
-                            strWidths,
-                            false);
+                        Program.MainForm.AppInfo.LinkFormState(m_genDataViewer, "autogen_viewer_state");
+                        m_genDataViewer.Show(this._myForm);
+                        m_genDataViewer.Activate();
+
+                        Program.MainForm.CurrentGenerateDataControl = null;
+                    }
+                    else
+                    {
+                        if (m_genDataViewer.WindowState == FormWindowState.Minimized)
+                            m_genDataViewer.WindowState = FormWindowState.Normal;
+                        m_genDataViewer.Activate();
+                    }
+                }
+                else
+                {
+                    if (m_genDataViewer.Visible == true)
+                    {
+
+                    }
+                    else
+                    {
+                        if (Program.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
+                            m_genDataViewer.DoDock(false); // 不会自动显示FixedPanel
                     }
                 }
 
-                // m_genDataViewer.MainForm = Program.MainForm;  // 必须是第一句
-                m_genDataViewer.Text = "创建数据";
-
-                m_genDataViewer.DoDockEvent -= new DoDockEventHandler(m_genDataViewer_DoDockEvent);
-                m_genDataViewer.DoDockEvent += new DoDockEventHandler(m_genDataViewer_DoDockEvent);
-
-                m_genDataViewer.SetMenu -= new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
-                m_genDataViewer.SetMenu += new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
-
-                m_genDataViewer.TriggerAction -= new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
-                m_genDataViewer.TriggerAction += new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
-
-                m_genDataViewer.MyFormClosed -= new EventHandler(m_genDataViewer_MyFormClosed);
-                m_genDataViewer.MyFormClosed += new EventHandler(m_genDataViewer_MyFormClosed);
-
-                m_genDataViewer.FormClosed -= new FormClosedEventHandler(m_genDataViewer_FormClosed);
-                m_genDataViewer.FormClosed += new FormClosedEventHandler(m_genDataViewer_FormClosed);
-            }
-
-            if (bOpenWindow == true)
-            {
-                if (m_genDataViewer.Visible == false)
-                {
-                    Program.MainForm.AppInfo.LinkFormState(m_genDataViewer, "autogen_viewer_state");
-                    m_genDataViewer.Show(this._myForm);
-                    m_genDataViewer.Activate();
-
-                    Program.MainForm.CurrentGenerateDataControl = null;
-                }
-                else
-                {
-                    if (m_genDataViewer.WindowState == FormWindowState.Minimized)
-                        m_genDataViewer.WindowState = FormWindowState.Normal;
-                    m_genDataViewer.Activate();
-                }
-            }
-            else
-            {
-                if (m_genDataViewer.Visible == true)
-                {
-
-                }
-                else
-                {
-                    if (Program.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
-                        m_genDataViewer.DoDock(false); // 不会自动显示FixedPanel
-                }
-            }
-
-            if (this.m_genDataViewer != null)
-                this.m_genDataViewer.CloseWhenComplete = bOpenWindow;
-
-            return;
-            /*
-        ERROR1:
-            MessageBox.Show(this, "DisplayAutoGenMenu() 出错: " + strError);
-             * */
+                if (this.m_genDataViewer != null)
+                    this.m_genDataViewer.CloseWhenComplete = bOpenWindow;
+            });
         }
 
         void m_genDataViewer_DoDockEvent(object sender, DoDockEventArgs e)
         {
-            if (Program.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
+            m_genDataViewer.TryInvoke(() =>
             {
-                Program.MainForm.CurrentGenerateDataControl = m_genDataViewer.Table;
-                // 防止内存泄漏
-                m_genDataViewer.AddFreeControl(m_genDataViewer.Table);
-            }
+                if (Program.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
+                {
+                    Program.MainForm.CurrentGenerateDataControl = m_genDataViewer.Table;
+                    // 防止内存泄漏
+                    m_genDataViewer.AddFreeControl(m_genDataViewer.Table);
+                }
 
-            if (e.ShowFixedPanel == true
-                && Program.MainForm.PanelFixedVisible == false)
-                Program.MainForm.PanelFixedVisible = true;
+                if (e.ShowFixedPanel == true
+                    && Program.MainForm.PanelFixedVisible == false)
+                    Program.MainForm.PanelFixedVisible = true;
 
-            /*
-            Program.MainForm.AppInfo.SetBoolean("detailform", "gen_auto_run", m_genDataViewer.AutoRun);
+                /*
+                Program.MainForm.AppInfo.SetBoolean("detailform", "gen_auto_run", m_genDataViewer.AutoRun);
 
-            {	// 保存列宽度
-                string strWidths = DpTable.GetColumnWidthListString(m_genDataViewer.ActionTable);
-                Program.MainForm.AppInfo.SetString(
-                    "gen_data_dlg",
-                    "column_width",
-                    strWidths);
-            }
-             * */
+                {	// 保存列宽度
+                    string strWidths = DpTable.GetColumnWidthListString(m_genDataViewer.ActionTable);
+                    Program.MainForm.AppInfo.SetString(
+                        "gen_data_dlg",
+                        "column_width",
+                        strWidths);
+                }
+                 * */
 
-            m_genDataViewer.Docked = true;
-            m_genDataViewer.Visible = false;
+                m_genDataViewer.Docked = true;
+                m_genDataViewer.Visible = false;
+            });
         }
 
         void m_genDataViewer_SetMenu(object sender, RefreshMenuEventArgs e)
@@ -872,13 +887,11 @@ out strError);
                         e.e);
 
                     // if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template) TODO: 这里是不是没有必要优化了
-                        this.SynchronizeMarc();
+                    this.SynchronizeMarc();
                 }
 
                 if (this.m_genDataViewer != null)
                     this.m_genDataViewer.RefreshState();
-
-
             }
         }
 
@@ -1014,28 +1027,28 @@ out strError);
                                     "netstandard.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.xmleditor.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.amazoninterface.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe"
-								};
+                                };
 
             if (saAddRef != null)
             {

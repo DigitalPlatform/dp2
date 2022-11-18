@@ -193,5 +193,15 @@ namespace dp2Circulation
             return sheet;
         }
 
+        // Dock 停靠以后，this.Visible == true，只能用 ResultControl
+        void TryInvoke(Action method)
+        {
+            this.tabControl_main.TryInvoke(method);
+        }
+
+        T TryGet<T>(Func<T> func)
+        {
+            return this.tabControl_main.TryGet(func);
+        }
     }
 }

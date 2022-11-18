@@ -2968,7 +2968,7 @@ false);
         internal void Channel_BeforeLogin(object sender,
             DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
 #if SN
                 if (_expireVersionChecked == false)
@@ -3982,6 +3982,7 @@ string style = null)
             }
         }
 
+        /*
         // 用于确保在界面线程调用
         public void TryInvoke(Action method)
         {
@@ -4007,7 +4008,7 @@ string style = null)
                     }
                 }));
         }
-
+        */
 
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
@@ -5758,7 +5759,7 @@ dlg.TempCode);
 
         void AutoStartDp2libraryXE()
         {
-            TryInvoke(() =>
+            this.TryInvoke(() =>
             {
                 if (ApplicationDeployment.IsNetworkDeployed == false)
                     return; // TODO: 以后尝试增加自动启动绿色版的方法
@@ -6608,20 +6609,23 @@ out strError);
             if (fValue == 0)
                 return;
 
-            try
+            this.TryInvoke(() =>
             {
-                container.SplitterDistance = (int)Math.Ceiling(
-                (
-                container.Orientation == Orientation.Horizontal ?
-                (float)container.Height
-                :
-                (float)container.Width
-                )
-                * fValue);
-            }
-            catch
-            {
-            }
+                try
+                {
+                    container.SplitterDistance = (int)Math.Ceiling(
+                    (
+                    container.Orientation == Orientation.Horizontal ?
+                    (float)container.Height
+                    :
+                    (float)container.Width
+                    )
+                    * fValue);
+                }
+                catch
+                {
+                }
+            });
         }
 
         // 出纳借还操作的API是否需要返回item xml数据？

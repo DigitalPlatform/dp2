@@ -2445,7 +2445,7 @@ MessageBoxDefaultButton.Button1);
         {
             if (m_backgroundForm != null)
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     if (e.Message != m_strPrevMessageText)
                     {
@@ -2669,7 +2669,7 @@ TaskScheduler.Default);
             if (bFullInitial == true)
             {
                 EnableControls(false);
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     this.MdiClient.Enabled = false;
                 });
@@ -2722,7 +2722,7 @@ TaskScheduler.Default);
                                 // Server 2003.  XP 64-bit will also fall in here.
                             }
 #endif
-                            MessageBoxShow("dp2Circulation 不支持 Windows XP / Windows Server 2003 操作系统版本。请在 Windows Vista 及以上版本安装运行");
+                            this.MessageBoxShow("dp2Circulation 不支持 Windows XP / Windows Server 2003 操作系统版本。请在 Windows Vista 及以上版本安装运行");
                             if (Control.ModifierKeys != Keys.Control)
                             {
                                 // Application.Exit();
@@ -2774,7 +2774,7 @@ TaskScheduler.Default);
                         // 以前已经安装的情况
                         if (Environment.OSVersion.Version.Major == 5)
                         {
-                            MessageBoxShow("尊敬的用户，dp2Circulation 在 2015 年 12 月 31 日以后将不再支持 Windows XP / Windows Server 2003 操作系统版本。请尽快升级您的 Windows 操作系统到 Vista 及以上版本。祝工作顺利。\r\n\r\n数字平台敬上");
+                            this.MessageBoxShow("尊敬的用户，dp2Circulation 在 2015 年 12 月 31 日以后将不再支持 Windows XP / Windows Server 2003 操作系统版本。请尽快升级您的 Windows 操作系统到 Vista 及以上版本。祝工作顺利。\r\n\r\n数字平台敬上");
                         }
                     }
 #if NO
@@ -2796,7 +2796,7 @@ TaskScheduler.Default);
 #endif
 
 #if SN
-                    TryInvoke(() =>
+                    this.TryInvoke(() =>
                     {
                         _verified = false;
                         // return:
@@ -2819,7 +2819,7 @@ TaskScheduler.Default);
                         && bFirstDialog == false   // 首次运行的对话框出现后，登录对话框就不必出现了
                         && PrintLabelMode == false)
                     {
-                        TryInvoke(() =>
+                        this.TryInvoke(() =>
                         {
                             SetDefaultAccount(
                                 null,
@@ -2876,7 +2876,7 @@ AppInfo.GetString("config",
                             if (nRet == -2)
                             {
                                 if (string.IsNullOrEmpty(strError) == false)
-                                    MessageBoxShow(strError);
+                                    this.MessageBoxShow(strError);
                                 // Application.Exit();
                                 Program.PromptAndExit(null,
                                     string.IsNullOrEmpty(strError) == false ? strError : "CheckVersion Fail...");
@@ -2884,11 +2884,11 @@ AppInfo.GetString("config",
                             }
                             if (nRet == -1)
                             {
-                                MessageBoxShow(strError);
+                                this.MessageBoxShow(strError);
                                 goto END1;
                             }
                             if (nRet == 0)
-                                MessageBoxShow(strError);
+                                this.MessageBoxShow(strError);
                         }
 
                         // 获得各种类型的数据库的检索途径
@@ -2984,7 +2984,7 @@ AppInfo.GetString("config",
                         //      1   本地时钟和服务器时钟偏差过大，超过10分钟 strError中有报错信息
                         nRet = CheckServerClock(false, out strError);
                         if (nRet != 0)
-                            MessageBoxShow(strError);
+                            this.MessageBoxShow(strError);
 
                         // 2022/3/10
                         ClearValueTableCache();
@@ -3096,7 +3096,7 @@ Culture=neutral, PublicKeyToken=null
                     false,
                     out strError);
                 if (nRet == -1)
-                    MessageBoxShow(strError);
+                    this.MessageBoxShow(strError);
 
                 looping.Progress.SetMessage("");
 #if NO
@@ -3109,7 +3109,7 @@ Culture=neutral, PublicKeyToken=null
 
                 // 2013/12/4
                 if (InitialClientScript(out strError) == -1)
-                    MessageBoxShow(strError);
+                    this.MessageBoxShow(strError);
 
                 // 初始化历史对象，包括C#脚本
                 if (this.OperHistory == null)
@@ -3123,7 +3123,7 @@ Culture=neutral, PublicKeyToken=null
                     if (nRet == -1)
                     {
                         this.ReportError("dp2circulation 创建 OperHistory 时出错", strError);
-                        MessageBoxShow("初始化 OperHistory 时出错: " + strError);
+                        this.MessageBoxShow("初始化 OperHistory 时出错: " + strError);
                     }
                     // this.timer_operHistory.Start();
                 }
@@ -3169,7 +3169,7 @@ Culture=neutral, PublicKeyToken=null
                 // 然后许可界面
                 if (bFullInitial == true)
                 {
-                    TryInvoke(() =>
+                    this.TryInvoke(() =>
                     {
                         this.MdiClient.Enabled = true;
                     });
@@ -3193,7 +3193,7 @@ Culture=neutral, PublicKeyToken=null
 
             if (bRestoreLastOpenedWindow == true)
             {
-                TryInvoke(() =>
+                this.TryInvoke(() =>
                 {
                     if (PrintLabelMode)
                         OpenWindow<LabelPrintForm>();

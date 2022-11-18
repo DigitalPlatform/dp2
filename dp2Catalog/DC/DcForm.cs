@@ -991,7 +991,7 @@ channel,
                 DomUtil.SetAttr(node, "id", strID);
             }
 #endif
-            int nRet = this.binaryResControl1.AddFileFragments(ref domDc, out strError);
+            int nRet = this.binaryResControl1.AddFileFragments(domDc, out strError);
             if (nRet == -1)
                 return -1;
 

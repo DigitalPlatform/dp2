@@ -1667,15 +1667,18 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
         public void SetHtmlString(string strHtml,
             string strTempFileType)
         {
-            this.StopPrevious();
-            this.WebBrowser.Stop();
+            this.WebBrowser.TryInvoke(() =>
+            {
+                this.StopPrevious();
+                this.WebBrowser.Stop();
 
-            this.DeleteAllTempFiles();  // 2015/1/4
+                this.DeleteAllTempFiles();  // 2015/1/4
 
-            Global.SetHtmlString(this.WebBrowser,
-                strHtml,
-                Program.MainForm.DataDir,
-                strTempFileType);
+                Global.SetHtmlString(this.WebBrowser,
+                    strHtml,
+                    Program.MainForm.DataDir,
+                    strTempFileType);
+            });
         }
 
         /// <summary>
@@ -1687,19 +1690,21 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
         public void SetTextString(string strText,
             string strTempFileType = "")
         {
-            this.StopPrevious();
-            this.WebBrowser.Stop();
+            this.WebBrowser.TryInvoke(() =>
+            {
+                this.StopPrevious();
+                this.WebBrowser.Stop();
 
-            if (string.IsNullOrEmpty(strTempFileType) == true)
-                strTempFileType = "temp_text";
+                if (string.IsNullOrEmpty(strTempFileType) == true)
+                    strTempFileType = "temp_text";
 
-            string body_backcolor = "#999999";
-            string div_backcolor = "#ffff99";
+                string body_backcolor = "#999999";
+                string div_backcolor = "#ffff99";
 
-            body_backcolor = ColorUtil.Color2String(this.BackColor);
+                body_backcolor = ColorUtil.Color2String(this.BackColor);
 
-            // TODO: 大字居中显示
-            string strHtml = @"<html>
+                // TODO: 大字居中显示
+                string strHtml = @"<html>
 <head>
 <style type='text/css'>
 body {
@@ -1721,12 +1726,13 @@ text-align: center;
 <body style='font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif; font-size=36px;'>
 <div>%text%</div>
 </body</html>";
-            strHtml = strHtml.Replace("%text%", HttpUtility.HtmlEncode(strText));
+                strHtml = strHtml.Replace("%text%", HttpUtility.HtmlEncode(strText));
 
-            Global.SetHtmlString(this.WebBrowser,
-                strHtml,
-                Program.MainForm.DataDir,
-                strTempFileType);
+                Global.SetHtmlString(this.WebBrowser,
+                    strHtml,
+                    Program.MainForm.DataDir,
+                    strTempFileType);
+            });
         }
 
         /// <summary>
@@ -1735,9 +1741,12 @@ text-align: center;
         /// </summary>
         public void ClearHtmlPage()
         {
-            Global.ClearHtmlPage(this.WebBrowser,
+            this.WebBrowser.TryInvoke(() =>
+            {
+                Global.ClearHtmlPage(this.WebBrowser,
                 Program.MainForm.DataDir,
                 this.BackColor);
+            });
         }
 
         Color _backColor = SystemColors.Window;

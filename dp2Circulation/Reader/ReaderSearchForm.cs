@@ -2148,7 +2148,7 @@ MessageBoxDefaultButton.Button2);
                 int nRet = this.ExportChargingHistoryToItemSearchForm(barcodes,
                     out strError);
                 if (nRet != 1)
-                    MessageBoxShow(strError);
+                    this.MessageBoxShow(strError);
             },
 default,
 TaskCreationOptions.LongRunning,

@@ -66,18 +66,21 @@ namespace DigitalPlatform.CirculationClient
             }
             set
             {
-                bool bOldValue = this.m_bChanged;
-
-                this.m_bChanged = value;
-
-                // 触发事件
-                if (bOldValue != value && this.ContentChanged != null)
+                this.TryInvoke(() =>
                 {
-                    ContentChangedEventArgs e = new ContentChangedEventArgs();
-                    e.OldChanged = bOldValue;
-                    e.CurrentChanged = value;
-                    ContentChanged(this, e);
-                }
+                    bool bOldValue = this.m_bChanged;
+
+                    this.m_bChanged = value;
+
+                    // 触发事件
+                    if (bOldValue != value && this.ContentChanged != null)
+                    {
+                        ContentChangedEventArgs e = new ContentChangedEventArgs();
+                        e.OldChanged = bOldValue;
+                        e.CurrentChanged = value;
+                        ContentChanged(this, e);
+                    }
+                });
             }
         }
 
@@ -153,14 +156,19 @@ namespace DigitalPlatform.CirculationClient
         {
             get
             {
-                return this.ListView.Items.Count;
+                return this.TryGet(() =>
+                {
+                    return this.ListView.Items.Count;
+                });
             }
         }
 
         public void Clear()
         {
-            this.ListView.Items.Clear();
-
+            this.TryInvoke(() =>
+            {
+                this.ListView.Items.Clear();
+            });
             this.DeleteTempFiles();
         }
 
@@ -264,10 +272,16 @@ namespace DigitalPlatform.CirculationClient
 
             bool bOldEnabled = this.Enabled;
 
-            this.Enabled = bOldEnabled;
+            this.TryInvoke(() =>
+            {
+                this.Enabled = bOldEnabled;
+            });
             try
             {
-                this.ListView.Items.Clear();
+                this.TryInvoke(() =>
+                {
+                    this.ListView.Items.Clear();
+                });
 
                 List<string> recpaths = new List<string>();
                 List<ListViewItem> items = new List<ListViewItem>();
@@ -290,7 +304,11 @@ namespace DigitalPlatform.CirculationClient
                     ListViewUtil.ChangeItemText(item, COLUMN_USAGE, strUsage);
                     // rights
                     ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, strRights);
-                    this.ListView.Items.Add(item);
+
+                    this.TryInvoke(() =>
+                    {
+                        this.ListView.Items.Add(item);
+                    });
 
                     items.Add(item);
 
@@ -421,7 +439,10 @@ namespace DigitalPlatform.CirculationClient
                             }
                             // item.SubItems.Add(strError);
                             ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
-                            item.ImageIndex = 1;    // error!
+                            this.TryInvoke(() =>
+                            {
+                                item.ImageIndex = 1;    // error!
+                            });
                             continue;
                         }
 
@@ -431,7 +452,10 @@ namespace DigitalPlatform.CirculationClient
                         if (values == null)
                         {
                             ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
-                            item.ImageIndex = 1;    // error!
+                            this.TryInvoke(() =>
+                            {
+                                item.ImageIndex = 1;    // error!
+                            });
                             continue;
                         }
 
@@ -452,14 +476,21 @@ namespace DigitalPlatform.CirculationClient
 
                 this.Changed = false;
 
-                if (this.ListView.Items.Count > 0)
+                var items_count = this.TryGet(() =>
+                {
+                    return this.ListView.Items.Count;
+                });
+                if (items_count > 0)
                     return 1;
 
                 return 0;
             }
             finally
             {
-                this.Enabled = bOldEnabled;
+                this.TryInvoke(() =>
+                {
+                    this.Enabled = bOldEnabled;
+                });
             }
         }
 
@@ -685,45 +716,48 @@ bool bChanged)
             // string strInitialUsage,
             LineState state)
         {
-            if (state == LineState.Normal)
+            this.TryInvoke(() =>
             {
-                ListViewUtil.ChangeItemText(item, 1, CaptionNormal);
-                item.ForeColor = Color.Black;
-                item.BackColor = Color.White;
-            }
-            else if (state == LineState.New)
-            {
-                ListViewUtil.ChangeItemText(item, 1, CaptionNew);
-                item.ForeColor = Color.Black;
-                item.BackColor = Color.LightGreen;
-            }
-            else if (state == LineState.Changed)
-            {
-                ListViewUtil.ChangeItemText(item, 1, CaptionChanged);
-                item.ForeColor = Color.Black;
-                item.BackColor = Color.Yellow;
-            }
-            else if (state == LineState.Deleted)
-            {
-                ListViewUtil.ChangeItemText(item, 1, CaptionDeleted);
-                item.ForeColor = Color.DarkGray;
-                item.BackColor = Color.White;
-            }
-            else if (state == LineState.Error)
-            {
-                ListViewUtil.ChangeItemText(item, 1, CaptionError);
-                item.ForeColor = Color.Red;
-                item.BackColor = Color.White;
-            }
+                if (state == LineState.Normal)
+                {
+                    ListViewUtil.ChangeItemText(item, 1, CaptionNormal);
+                    item.ForeColor = Color.Black;
+                    item.BackColor = Color.White;
+                }
+                else if (state == LineState.New)
+                {
+                    ListViewUtil.ChangeItemText(item, 1, CaptionNew);
+                    item.ForeColor = Color.Black;
+                    item.BackColor = Color.LightGreen;
+                }
+                else if (state == LineState.Changed)
+                {
+                    ListViewUtil.ChangeItemText(item, 1, CaptionChanged);
+                    item.ForeColor = Color.Black;
+                    item.BackColor = Color.Yellow;
+                }
+                else if (state == LineState.Deleted)
+                {
+                    ListViewUtil.ChangeItemText(item, 1, CaptionDeleted);
+                    item.ForeColor = Color.DarkGray;
+                    item.BackColor = Color.White;
+                }
+                else if (state == LineState.Error)
+                {
+                    ListViewUtil.ChangeItemText(item, 1, CaptionError);
+                    item.ForeColor = Color.Red;
+                    item.BackColor = Color.White;
+                }
 
-            LineInfo info = (LineInfo)item.Tag;
-            if (info == null)
-            {
-                info = new LineInfo();
-                item.Tag = info;
-            }
+                LineInfo info = (LineInfo)item.Tag;
+                if (info == null)
+                {
+                    info = new LineInfo();
+                    item.Tag = info;
+                }
 
-            info.LineState = state;
+                info.LineState = state;
+            });
         }
 
 #if NO
@@ -1136,21 +1170,24 @@ bool bChanged)
 
         string GetNewID()
         {
-            List<string> ids = new List<string>();
-            for (int i = 0; i < this.ListView.Items.Count; i++)
+            return this.TryGet(() =>
             {
-                string strCurrentID = ListViewUtil.GetItemText(this.ListView.Items[i], COLUMN_ID);
-                ids.Add(strCurrentID);
-            }
+                List<string> ids = new List<string>();
+                for (int i = 0; i < this.ListView.Items.Count; i++)
+                {
+                    string strCurrentID = ListViewUtil.GetItemText(this.ListView.Items[i], COLUMN_ID);
+                    ids.Add(strCurrentID);
+                }
 
-            int nSeed = 0;
-            string strID = "";
-            for (; ; )
-            {
-                strID = Convert.ToString(nSeed++);
-                if (ids.IndexOf(strID) == -1)
-                    return strID;
-            }
+                int nSeed = 0;
+                string strID = "";
+                for (; ; )
+                {
+                    strID = Convert.ToString(nSeed++);
+                    if (ids.IndexOf(strID) == -1)
+                        return strID;
+                }
+            });
         }
 
         void menu_new_Click(object sender, EventArgs e)
@@ -1190,39 +1227,45 @@ bool bChanged)
         // 按照usage字符串搜寻事项
         public List<ListViewItem> FindItemByUsage(string strUsage)
         {
-            List<ListViewItem> results = new List<ListViewItem>();
-            for (int i = 0; i < this.ListView.Items.Count; i++)
+            return this.TryGet(() =>
             {
-                ListViewItem item = this.ListView.Items[i];
-                string strCurrentUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
-                if (strCurrentUsage == strUsage)
-                    results.Add(item);
-            }
+                List<ListViewItem> results = new List<ListViewItem>();
+                for (int i = 0; i < this.ListView.Items.Count; i++)
+                {
+                    ListViewItem item = this.ListView.Items[i];
+                    string strCurrentUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
+                    if (strCurrentUsage == strUsage)
+                        results.Add(item);
+                }
 
-            return results;
+                return results;
+            });
         }
 
         // 2016/10/17
         public bool MaskDeleteCoverImageObject()
         {
-            List<ListViewItem> results = new List<ListViewItem>();
-            foreach (ListViewItem item in this.ListView.Items)
+            return this.TryGet(() =>
             {
-                string strCurrentUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
+                List<ListViewItem> results = new List<ListViewItem>();
+                foreach (ListViewItem item in this.ListView.Items)
+                {
+                    string strCurrentUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
 
-                // . 分隔 FrontCover.MediumImage
-                if (StringUtil.HasHead(strCurrentUsage, "FrontCover.") == true
-                    || strCurrentUsage == "FrontCover")
-                    results.Add(item);
-            }
+                    // . 分隔 FrontCover.MediumImage
+                    if (StringUtil.HasHead(strCurrentUsage, "FrontCover.") == true
+                        || strCurrentUsage == "FrontCover")
+                        results.Add(item);
+                }
 
-            if (results.Count > 0)
-            {
-                this.MaskDelete(results);
-                return true;
-            }
+                if (results.Count > 0)
+                {
+                    this.MaskDelete(results);
+                    return true;
+                }
 
-            return false;
+                return false;
+            });
         }
 
         // TODO: findItemByRights 可以用一个或者多个 right 值进行搜寻
@@ -1230,47 +1273,56 @@ bool bChanged)
         // 返回全部已经标记删除的事项
         public List<ListViewItem> FindAllMaskDeleteItem()
         {
-            List<ListViewItem> results = new List<ListViewItem>();
-            for (int i = 0; i < this.ListView.Items.Count; i++)
+            return this.TryGet(() =>
             {
-                ListViewItem item = this.ListView.Items[i];
-                LineState old_state = GetLineState(item);
+                List<ListViewItem> results = new List<ListViewItem>();
+                for (int i = 0; i < this.ListView.Items.Count; i++)
+                {
+                    ListViewItem item = this.ListView.Items[i];
+                    LineState old_state = GetLineState(item);
 
-                if (old_state == LineState.Deleted)
-                    results.Add(item);
-            }
+                    if (old_state == LineState.Deleted)
+                        results.Add(item);
+                }
 
-            return results;
+                return results;
+            });
         }
 
         // 按照id字符串搜寻事项
         public List<ListViewItem> FindItemByID(string strID)
         {
-            List<ListViewItem> results = new List<ListViewItem>();
-            for (int i = 0; i < this.ListView.Items.Count; i++)
+            return this.TryGet(() =>
             {
-                ListViewItem item = this.ListView.Items[i];
-                string strCurrentID = ListViewUtil.GetItemText(item, COLUMN_ID);
-                if (strID == "*" || strCurrentID == strID)
-                    results.Add(item);
-            }
+                List<ListViewItem> results = new List<ListViewItem>();
+                for (int i = 0; i < this.ListView.Items.Count; i++)
+                {
+                    ListViewItem item = this.ListView.Items[i];
+                    string strCurrentID = ListViewUtil.GetItemText(item, COLUMN_ID);
+                    if (strID == "*" || strCurrentID == strID)
+                        results.Add(item);
+                }
 
-            return results;
+                return results;
+            });
         }
 
         // 按照尺寸搜寻事项
         public List<ListViewItem> FindItemBySize(string strSize)
         {
-            List<ListViewItem> results = new List<ListViewItem>();
-            for (int i = 0; i < this.ListView.Items.Count; i++)
+            return this.TryGet(() =>
             {
-                ListViewItem item = this.ListView.Items[i];
-                string strCurrentSize = ListViewUtil.GetItemText(item, COLUMN_SIZE);
-                if (strSize == "*" || strCurrentSize == strSize)
-                    results.Add(item);
-            }
+                List<ListViewItem> results = new List<ListViewItem>();
+                for (int i = 0; i < this.ListView.Items.Count; i++)
+                {
+                    ListViewItem item = this.ListView.Items[i];
+                    string strCurrentSize = ListViewUtil.GetItemText(item, COLUMN_SIZE);
+                    if (strSize == "*" || strCurrentSize == strSize)
+                        results.Add(item);
+                }
 
-            return results;
+                return results;
+            });
         }
 
         // 获得一个事项的尚未上载的本地文件名
@@ -1347,62 +1399,68 @@ bool bChanged)
         {
             strError = "";
 
-            if (this.ListView.Items.IndexOf(item) == -1)
+            var error = strError;
+            var ret = this.TryGet(() =>
             {
-                strError = "item不是当前ListView的事项之一";
-                return -1;
-            }
+                if (this.ListView.Items.IndexOf(item) == -1)
+                {
+                    error = "item不是当前ListView的事项之一";
+                    return -1;
+                }
 
-            LineState old_state = GetLineState(item);
-            if (old_state == LineState.Deleted)
-            {
-                strError = "对已经标记删除的行不能进行修改...";
-                return -1;
-            }
-            ResObjectDlg dlg = new ResObjectDlg();
-            dlg.ID = ListViewUtil.GetItemText(item, COLUMN_ID);
+                LineState old_state = GetLineState(item);
+                if (old_state == LineState.Deleted)
+                {
+                    error = "对已经标记删除的行不能进行修改...";
+                    return -1;
+                }
+                ResObjectDlg dlg = new ResObjectDlg();
+                dlg.ID = ListViewUtil.GetItemText(item, COLUMN_ID);
 
-            dlg.State = ListViewUtil.GetItemText(item, COLUMN_STATE);
-            dlg.Mime = ListViewUtil.GetItemText(item, COLUMN_MIME);
-            dlg.LocalPath = ListViewUtil.GetItemText(item, COLUMN_LOCALPATH);
-            dlg.SizeString = ListViewUtil.GetItemText(item, COLUMN_SIZE);
-            dlg.Timestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
-            dlg.Usage = strUsage;
-            dlg.Rights = strRights;
-            dlg.RightsCfgFileName = this.RightsCfgFileName;
+                dlg.State = ListViewUtil.GetItemText(item, COLUMN_STATE);
+                dlg.Mime = ListViewUtil.GetItemText(item, COLUMN_MIME);
+                dlg.LocalPath = ListViewUtil.GetItemText(item, COLUMN_LOCALPATH);
+                dlg.SizeString = ListViewUtil.GetItemText(item, COLUMN_SIZE);
+                dlg.Timestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
+                dlg.Usage = strUsage;
+                dlg.Rights = strRights;
+                dlg.RightsCfgFileName = this.RightsCfgFileName;
 
-            string strOldUsage = dlg.Usage;
-            string strOldRights = dlg.Rights;
+                string strOldUsage = dlg.Usage;
+                string strOldRights = dlg.Rights;
 
-            int nRet = dlg.SetObjectFilePath(strObjectFilePath,
-            out strError);
-            if (nRet == -1)
-                return -1;
+                int nRet = dlg.SetObjectFilePath(strObjectFilePath,
+                out error);
+                if (nRet == -1)
+                    return -1;
 
-            if (old_state != LineState.New)
-            {
-                SetLineInfo(item,
-                    // null, 
-                    LineState.Changed);
-                SetResChanged(item, true);
-            }
-            else
-            {
-                SetResChanged(item, true);
-            }
+                if (old_state != LineState.New)
+                {
+                    SetLineInfo(item,
+                        // null, 
+                        LineState.Changed);
+                    SetResChanged(item, true);
+                }
+                else
+                {
+                    SetResChanged(item, true);
+                }
 
-            if (strOldRights != dlg.Rights
-                || strOldUsage != dlg.Usage)
-                SetXmlChanged(item, true);
+                if (strOldRights != dlg.Rights
+                    || strOldUsage != dlg.Usage)
+                    SetXmlChanged(item, true);
 
-            ListViewUtil.ChangeItemText(item, COLUMN_MIME, dlg.Mime);
-            ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, dlg.LocalPath);
-            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
-            ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, dlg.Timestamp);
-            ListViewUtil.ChangeItemText(item, COLUMN_USAGE, dlg.Usage);
-            ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
-            this.Changed = true;
-            return 0;
+                ListViewUtil.ChangeItemText(item, COLUMN_MIME, dlg.Mime);
+                ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, dlg.LocalPath);
+                ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
+                ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, dlg.Timestamp);
+                ListViewUtil.ChangeItemText(item, COLUMN_USAGE, dlg.Usage);
+                ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
+                this.Changed = true;
+                return 0;
+            });
+            strError = error;
+            return ret;
         }
 
         // 包装后的版本，兼容以前的用法
@@ -1426,50 +1484,58 @@ bool bChanged)
         /// <param name="strObjectFilePath">对象文件名全路径</param>
         /// <param name="strUsage">用途字符串</param>
         /// <param name="strRights">权限</param>
-        /// <param name="item">返回 ListView 中心创建的 ListViewItem 对象</param>
+        /// <param name="item_param">返回 ListView 中心创建的 ListViewItem 对象</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int AppendNewItem(
             string strObjectFilePath,
             string strUsage,
             string strRights,
-            out ListViewItem item,
+            out ListViewItem item_param,
             out string strError)
         {
             strError = "";
-            item = null;
+            item_param = null;
 
-            ResObjectDlg dlg = new ResObjectDlg();
-            dlg.ID = GetNewID();
+            var error = strError;
+            var item = item_param;
+            var ret = this.TryGet(() =>
+            {
+                ResObjectDlg dlg = new ResObjectDlg();
+                dlg.ID = GetNewID();
 
-            dlg.State = "";
-            dlg.Usage = strUsage;
-            dlg.Rights = strRights;
-            dlg.RightsCfgFileName = this.RightsCfgFileName;
+                dlg.State = "";
+                dlg.Usage = strUsage;
+                dlg.Rights = strRights;
+                dlg.RightsCfgFileName = this.RightsCfgFileName;
 
-            int nRet = dlg.SetObjectFilePath(strObjectFilePath,
-                out strError);
-            if (nRet == -1)
-                return -1;
+                int nRet = dlg.SetObjectFilePath(strObjectFilePath,
+                    out error);
+                if (nRet == -1)
+                    return -1;
 
-            item = new ListViewItem();
-            this.ListView.Items.Add(item);
+                item = new ListViewItem();
+                this.ListView.Items.Add(item);
 
-            SetLineInfo(item,
-                // null,
-                LineState.New);
-            SetResChanged(item, true);
-            SetXmlChanged(item, true);
+                SetLineInfo(item,
+                    // null,
+                    LineState.New);
+                SetResChanged(item, true);
+                SetXmlChanged(item, true);
 
-            ListViewUtil.ChangeItemText(item, COLUMN_ID, dlg.ID);
-            ListViewUtil.ChangeItemText(item, COLUMN_MIME, dlg.Mime);
-            ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, dlg.LocalPath);
-            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
-            ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, dlg.Timestamp);
-            ListViewUtil.ChangeItemText(item, COLUMN_USAGE, dlg.Usage);
-            ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
-            this.Changed = true;
-            return 0;
+                ListViewUtil.ChangeItemText(item, COLUMN_ID, dlg.ID);
+                ListViewUtil.ChangeItemText(item, COLUMN_MIME, dlg.Mime);
+                ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, dlg.LocalPath);
+                ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
+                ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, dlg.Timestamp);
+                ListViewUtil.ChangeItemText(item, COLUMN_USAGE, dlg.Usage);
+                ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
+                this.Changed = true;
+                return 0;
+            });
+            strError = error;
+            item_param = item;
+            return ret;
         }
 
         // 设置一行的修改状态
@@ -1499,39 +1565,42 @@ bool bChanged)
         // 标记删除若干事项
         public int MaskDelete(List<ListViewItem> items)
         {
-            //bool bRemoved = false;   // 是否发生过物理删除listview item的情况
-            int nMaskDeleteCount = 0;
-            for (int i = 0; i < items.Count; i++)
+            return this.TryGet(() =>
             {
-                ListViewItem item = items[i];
-
-                LineState state = GetLineState(item);
-
-                // 如果本来就是已经标记删除的事项
-                if (state == LineState.Deleted)
-                    continue;
-
-                // 如果本来就是新增事项，那么彻底从listview中移除
-                if (state == LineState.New)
+                //bool bRemoved = false;   // 是否发生过物理删除listview item的情况
+                int nMaskDeleteCount = 0;
+                for (int i = 0; i < items.Count; i++)
                 {
-                    //bRemoved = true;
-                    this.ListView.Items.Remove(item);
-                    continue;
+                    ListViewItem item = items[i];
+
+                    LineState state = GetLineState(item);
+
+                    // 如果本来就是已经标记删除的事项
+                    if (state == LineState.Deleted)
+                        continue;
+
+                    // 如果本来就是新增事项，那么彻底从listview中移除
+                    if (state == LineState.New)
+                    {
+                        //bRemoved = true;
+                        this.ListView.Items.Remove(item);
+                        continue;
+                    }
+
+                    // 保存旧状态
+                    SetOldLineState(item, state);
+
+                    SetLineInfo(item,
+                        // null, 
+                        LineState.Deleted);
+
+                    this.Changed = true;
+
+                    nMaskDeleteCount++;
                 }
 
-                // 保存旧状态
-                SetOldLineState(item, state);
-
-                SetLineInfo(item,
-                    // null, 
-                    LineState.Deleted);
-
-                this.Changed = true;
-
-                nMaskDeleteCount++;
-            }
-
-            return nMaskDeleteCount;
+                return nMaskDeleteCount;
+            });
         }
 
         void menu_delete_Click(object sender, EventArgs e)
@@ -1893,23 +1962,26 @@ bool bChanged)
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 确认是否还有增删改的事项
         // 而this.Changed不是那么精确的
         bool IsChanged()
         {
-            for (int i = 0; i < this.ListView.Items.Count; i++)
+            return this.TryGet(() =>
             {
-                LineState state = GetLineState(this.ListView.Items[i]);
-                if (state == LineState.Changed
-                    || state == LineState.Deleted
-                    || state == LineState.New)
-                    return true;
-            }
+                for (int i = 0; i < this.ListView.Items.Count; i++)
+                {
+                    LineState state = GetLineState(this.ListView.Items[i]);
+                    if (state == LineState.Changed
+                        || state == LineState.Deleted
+                        || state == LineState.New)
+                        return true;
+                }
 
-            return false;
+                return false;
+            });
         }
 
         private void ListView_DoubleClick(object sender, EventArgs e)
@@ -1922,66 +1994,72 @@ bool bChanged)
         // ID有改变，就需要重新构造biblioxml保存到服务器
         public bool IsIdUsageChanged()
         {
-            for (int i = 0; i < this.ListView.Items.Count; i++)
+            return this.TryGet(() =>
             {
-                ListViewItem item = this.ListView.Items[i];
-
-                LineState state = GetLineState(item);
-
-                if (state == LineState.New
-                    || state == LineState.Deleted)
-                    return true;
-
-                // 观察usage是否改变
-                LineInfo info = (LineInfo)item.Tag;
-                if (info != null)
+                for (int i = 0; i < this.ListView.Items.Count; i++)
                 {
+                    ListViewItem item = this.ListView.Items[i];
+
+                    LineState state = GetLineState(item);
+
+                    if (state == LineState.New
+                        || state == LineState.Deleted)
+                        return true;
+
+                    // 观察usage是否改变
+                    LineInfo info = (LineInfo)item.Tag;
+                    if (info != null)
+                    {
 #if NO
                     string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
                     if (strUsage != info.InitialUsage)
                         return true;
 #endif
-                    if (info.XmlChanged == true)
-                        return true;
+                        if (info.XmlChanged == true)
+                            return true;
+                    }
                 }
-            }
 
-            return false;
+                return false;
+            });
         }
 
         // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
-        public int AddFileFragments(ref XmlDocument domRecord,
+        public int AddFileFragments(XmlDocument domRecord,
             out string strError)
         {
             strError = "";
-            foreach (ListViewItem item in this.ListView.Items)
+            return this.TryGet(() =>
             {
-                string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
+                foreach (ListViewItem item in this.ListView.Items)
+                {
+                    string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
 
-                if (String.IsNullOrEmpty(strID) == true)
-                    continue;
+                    if (String.IsNullOrEmpty(strID) == true)
+                        continue;
 
-                LineState state = GetLineState(item);
-                // 如果是已经标记删除的事项
-                if (state == LineState.Deleted)
-                    continue;
+                    LineState state = GetLineState(item);
+                    // 如果是已经标记删除的事项
+                    if (state == LineState.Deleted)
+                        continue;
 
-                string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
-                string strRights = ListViewUtil.GetItemText(item, COLUMN_RIGHTS);
+                    string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
+                    string strRights = ListViewUtil.GetItemText(item, COLUMN_RIGHTS);
 
-                XmlElement node = domRecord.CreateElement("dprms",
-                    "file",
-                    DpNs.dprms);
-                domRecord.DocumentElement.AppendChild(node);
+                    XmlElement node = domRecord.CreateElement("dprms",
+                        "file",
+                        DpNs.dprms);
+                    domRecord.DocumentElement.AppendChild(node);
 
-                node.SetAttribute("id", strID);
-                if (string.IsNullOrEmpty(strUsage) == false)
-                    node.SetAttribute("usage", strUsage);
-                if (string.IsNullOrEmpty(strRights) == false)
-                    node.SetAttribute("rights", strRights);
-            }
+                    node.SetAttribute("id", strID);
+                    if (string.IsNullOrEmpty(strUsage) == false)
+                        node.SetAttribute("usage", strUsage);
+                    if (string.IsNullOrEmpty(strRights) == false)
+                        node.SetAttribute("rights", strRights);
+                }
 
-            return 0;
+                return 0;
+            });
         }
 
 #if NO
@@ -2061,28 +2139,30 @@ bool bChanged)
         public int DetectChangedCount(out string strError)
         {
             strError = "";
-
-            if (this.ListView.Items.Count == 0)
-                return 0;
-
-            int count = 0;
-            foreach (ListViewItem item in this.ListView.Items)
+            return this.TryGet(() =>
             {
-                LineState state = GetLineState(item);
+                if (this.ListView.Items.Count == 0)
+                    return 0;
 
-                if (state == LineState.Changed ||
-    state == LineState.New)
+                int count = 0;
+                foreach (ListViewItem item in this.ListView.Items)
                 {
-                }
-                else
-                {
-                    continue;
+                    LineState state = GetLineState(item);
+
+                    if (state == LineState.Changed ||
+        state == LineState.New)
+                    {
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    count++;
                 }
 
-                count++;
-            }
-
-            return count;
+                return count;
+            });
         }
 
         // 保存资源到服务器
@@ -2098,10 +2178,10 @@ bool bChanged)
         {
             strError = "";
 
-            var item_count = (int)this.Invoke((Func<int>)(() =>
+            var item_count = this.TryGet(()=>
             {
                 return this.ListView.Items.Count;
-            }));
+            });
 
             if (item_count == 0)
                 return 0;
@@ -2348,18 +2428,24 @@ out strError);
         {
             get
             {
-                return this.Text;
+                return this.TryGet(() =>
+                {
+                    return this.Text;
+                });
             }
             set
             {
-                this.Text = value;
-                if (this.ListView != null)
+                this.TryInvoke(() =>
                 {
-                    if (string.IsNullOrEmpty(value) == true)
-                        this.ListView.Visible = true;
-                    else
-                        this.ListView.Visible = false;
-                }
+                    this.Text = value;
+                    if (this.ListView != null)
+                    {
+                        if (string.IsNullOrEmpty(value) == true)
+                            this.ListView.Visible = true;
+                        else
+                            this.ListView.Visible = false;
+                    }
+                });
             }
         }
 

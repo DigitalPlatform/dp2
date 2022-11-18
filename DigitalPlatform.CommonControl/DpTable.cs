@@ -661,6 +661,7 @@ namespace DigitalPlatform.CommonControl
         // this.Font字体发生了改变
         protected override void OnFontChanged(EventArgs e)
         {
+            // 2022/11/17 commented
             base.OnFontChanged(e);
 
             this.Columns.OnChanged(false);

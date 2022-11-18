@@ -207,11 +207,14 @@ namespace dp2Circulation
         /// </summary>
         public void Clear()
         {
-            this.m_listView.Items.Clear();
+            this.TryInvoke(() =>
+            {
+                this.m_listView.Items.Clear();
 
-            // 2008/11/22
-            this.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(this.m_listView.Columns);
+                // 2008/11/22
+                this.SortColumns.Clear();
+                SortColumns.ClearColumnSortDisplay(this.m_listView.Columns);
+            });
         }
 
         // 清除期有关信息
@@ -239,7 +242,10 @@ namespace dp2Circulation
         /// <returns>数目</returns>
         public int CountOfVisibleItems()
         {
-            return this.m_listView.Items.Count;
+            return this.TryGet(() =>
+            {
+                return this.m_listView.Items.Count;
+            });
         }
 
         // 
@@ -250,15 +256,18 @@ namespace dp2Circulation
         /// <returns>index</returns>
         public int IndexOfVisibleItems(T item)
         {
-            for (int i = 0; i < this.m_listView.Items.Count; i++)
+            return this.TryGet(() =>
             {
-                T cur = (T)this.m_listView.Items[i].Tag;
+                for (int i = 0; i < this.m_listView.Items.Count; i++)
+                {
+                    T cur = (T)this.m_listView.Items[i].Tag;
 
-                if (cur == item)
-                    return i;
-            }
+                    if (cur == item)
+                        return i;
+                }
 
-            return -1;
+                return -1;
+            });
         }
 
         // 根据ListView行index找到一个BookItem对象
@@ -270,7 +279,10 @@ namespace dp2Circulation
         /// <returns>Item对象</returns>
         public T GetVisibleItemAt(int nIndex)
         {
-            return (T)this.m_listView.Items[nIndex].Tag;
+            return this.TryGet(() =>
+            {
+                return (T)this.m_listView.Items[nIndex].Tag;
+            });
         }
 #if NO
         // TODO: 最好删除其中一个函数
@@ -744,7 +756,10 @@ namespace dp2Circulation
             if (entities.Length == 0)
                 return 0;
 
-            this.m_listView.BeginUpdate();
+            this.TryInvoke(() =>
+            {
+                this.m_listView.BeginUpdate();
+            });
             try
             {
                 foreach (EntityInfo entity in entities)
@@ -842,7 +857,10 @@ namespace dp2Circulation
             }
             finally
             {
-                this.m_listView.EndUpdate();
+                this.TryInvoke(() =>
+                {
+                    this.m_listView.EndUpdate();
+                });
             }
         }
 
@@ -1971,54 +1989,57 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         //      bNew    是否新开窗口。==false 表示利用已经打开的同类窗口
         internal void LoadToItemInfoForm(bool bNew)
         {
-            string strError = "";
-
-            if (this.m_listView.SelectedItems.Count == 0)
+            this.TryInvoke(() =>
             {
-                strError = "尚未选定要操作的事项";
-                goto ERROR1;
-            }
+                string strError = "";
 
-            T cur = (T)this.m_listView.SelectedItems[0].Tag;
-
-            if (cur == null)
-            {
-                strError = "item == null";
-                goto ERROR1;
-            }
-
-            string strRecPath = cur.RecPath;
-            if (string.IsNullOrEmpty(strRecPath) == true)
-            {
-                strError = "所选定的" + this.ItemTypeName + "记录路径为空，尚未在数据库中建立";
-                goto ERROR1;
-            }
-
-            if (bNew == true)
-            {
-                ItemInfoForm form = new ItemInfoForm();
-                form.MdiParent = Program.MainForm;
-                form.MainForm = Program.MainForm;
-                form.Show();
-                form.DbType = this.ItemType;
-                form.LoadRecordByRecPath(strRecPath, "");
-            }
-            else
-            {
-                ItemInfoForm form = Program.MainForm.GetTopChildWindow<ItemInfoForm>();
-                if (form == null)
+                if (this.m_listView.SelectedItems.Count == 0)
                 {
-                    strError = "当前并没有已经打开的" + this.ItemTypeName + "窗";
+                    strError = "尚未选定要操作的事项";
                     goto ERROR1;
                 }
-                form.DbType = this.ItemType;
-                Global.Activate(form);
-                form.LoadRecordByRecPath(strRecPath, "");
-            }
 
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+                T cur = (T)this.m_listView.SelectedItems[0].Tag;
+
+                if (cur == null)
+                {
+                    strError = "item == null";
+                    goto ERROR1;
+                }
+
+                string strRecPath = cur.RecPath;
+                if (string.IsNullOrEmpty(strRecPath) == true)
+                {
+                    strError = "所选定的" + this.ItemTypeName + "记录路径为空，尚未在数据库中建立";
+                    goto ERROR1;
+                }
+
+                if (bNew == true)
+                {
+                    ItemInfoForm form = new ItemInfoForm();
+                    form.MdiParent = Program.MainForm;
+                    form.MainForm = Program.MainForm;
+                    form.Show();
+                    form.DbType = this.ItemType;
+                    form.LoadRecordByRecPath(strRecPath, "");
+                }
+                else
+                {
+                    ItemInfoForm form = Program.MainForm.GetTopChildWindow<ItemInfoForm>();
+                    if (form == null)
+                    {
+                        strError = "当前并没有已经打开的" + this.ItemTypeName + "窗";
+                        goto ERROR1;
+                    }
+                    form.DbType = this.ItemType;
+                    Global.Activate(form);
+                    form.LoadRecordByRecPath(strRecPath, "");
+                }
+
+                return;
+            ERROR1:
+                this.MessageBoxShow(strError);
+            });
         }
 
         #endregion
@@ -2076,6 +2097,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
             this.Items.MaskDeleteItem(bRemoveDeletedItem,
                 item);
+
+            this.Changed = this.Changed;    // 2022/11/17
             return 1;
         }
 
@@ -2093,7 +2116,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
             if (bClearOtherSelection == true)
             {
-                this.m_listView.SelectedItems.Clear();
+                SelectedItemsClear();
             }
 
             if (this.Items != null)
@@ -2104,6 +2127,14 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             }
 
             return bookitem;
+        }
+
+        void SelectedItemsClear()
+        {
+            this.TryInvoke(() =>
+            {
+                this.m_listView.SelectedItems.Clear();
+            });
         }
 
         // 
@@ -2120,7 +2151,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
             if (bClearOtherSelection == true)
             {
-                this.m_listView.SelectedItems.Clear();
+                SelectedItemsClear();
             }
 
             if (this.Items != null)
@@ -2672,18 +2703,25 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
         {
             get
             {
-                return this.Text;
+
+                return this.TryGet(() =>
+                {
+                    return this.Text;
+                });
             }
             set
             {
-                this.Text = value;
-                if (this.m_listView != null)
+                this.TryInvoke(() =>
                 {
-                    if (string.IsNullOrEmpty(value) == true)
-                        this.m_listView.Visible = true;
-                    else
-                        this.m_listView.Visible = false;
-                }
+                    this.Text = value;
+                    if (this.m_listView != null)
+                    {
+                        if (string.IsNullOrEmpty(value) == true)
+                            this.m_listView.Visible = true;
+                        else
+                            this.m_listView.Visible = false;
+                    }
+                });
             }
         }
 
