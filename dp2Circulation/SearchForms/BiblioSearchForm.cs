@@ -31,12 +31,12 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.Z3950;
 
-
 namespace dp2Circulation
 {
     /// <summary>
     /// 书目或规范查询窗
     /// </summary>
+    [Serializable]
     public partial class BiblioSearchForm : MyForm
     {
         string _dbType = "biblio";
@@ -5976,6 +5976,7 @@ bQuickLoad);
                 TaskScheduler.Default);
         }
 
+        // https://learn.microsoft.com/en-us/dotnet/standard/assembly/unloadability
         void _runMarcQueryScript()
         {
             string strError = "";
@@ -6018,12 +6019,43 @@ bQuickLoad);
 
             this.m_strUsedMarcQueryFilename = dlg.FileName;
 
+            /*
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
                 out Assembly assembly,
                 out MarcQueryHost host,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var stream = new MemoryStream();
+            nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
+    stream,
+    out MarcQueryHost host,
+    out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+
+            var domain = CreateAppDomain();
+
+            /*
+            _stream = stream;
+            domain.AssemblyResolve += Domain_AssemblyResolve; 
+            */
+
+            String name = Assembly.GetExecutingAssembly().GetName().FullName;
+            var proxy = domain.CreateInstanceAndUnwrap(name, typeof(ScriptProxy).FullName) as ScriptProxy;
+            host = proxy.Initialize(domain, stream);
+            // host = Initialize(domain);
+
+            /*
+            stream.Seek(0, SeekOrigin.Begin);
+            {
+                byte[] buffer = new byte[(int)stream.Length];
+                stream.Read(buffer, 0, (int)stream.Length);
+                domain.Load(buffer);
+            }
+            */
 
             host.CodeFileName = this.m_strUsedMarcQueryFilename;
             {
@@ -6290,12 +6322,32 @@ bQuickLoad);
                 this.EnableControls(true);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
+
+                DestoryAppDomain(domain);
             }
 
             RefreshPropertyView(false);
             return;
         ERROR1:
             this.MessageBoxShow(strError);
+        }
+
+        Stream _stream;
+
+        private Assembly Domain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            return null;
+            Stream stream = _stream;
+            Assembly assembly = null;
+            stream.Seek(0, SeekOrigin.Begin);
+            {
+                byte[] buffer = new byte[(int)stream.Length];
+                stream.Read(buffer, 0, (int)stream.Length);
+                // domain.Load(buffer);
+                assembly = Assembly.Load(buffer);
+            }
+
+            return assembly;
         }
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
@@ -6331,20 +6383,100 @@ bQuickLoad);
             }
         }
 
+        AppDomain CreateAppDomain()
+        {
+            AppDomainSetup objSetup = new AppDomainSetup();
+            objSetup.ApplicationBase = AppDomain.CurrentDomain.BaseDirectory;
+            // 打开 影像复制程序集 功能
+            objSetup.ShadowCopyFiles = "true";
+            // 虽然此方法已经被标记为过时方法， msdn备注也提倡不使用该方法，
+            // 但是 以.net 4.0 + win10环境测试，还必须调用该方法 否则，即便卸载了应用程序域 dll 还是未被解除锁定
+            // AppDomain.CurrentDomain.SetShadowCopyFiles();
+            return AppDomain.CreateDomain("RemoteAppDomain", null, objSetup);
+        }
+
+        void DestoryAppDomain(AppDomain app_domain)
+        {
+            AppDomain.Unload(app_domain);
+        }
+
+        [Serializable]
+        public class ScriptProxy : MarshalByRefObject
+        {
+            private Assembly _assembly;
+
+            public MarcQueryHost Initialize(
+                AppDomain domain)
+            {
+                Type entryClassType = null;
+                // 得到Assembly中Host派生类Type
+                foreach (var assembly in domain.GetAssemblies())
+                {
+                    entryClassType = ScriptManager.GetDerivedClassType(
+                        assembly,
+                        "dp2Circulation.MarcQueryHost");
+                    if (entryClassType != null)
+                        break;
+                }
+                if (entryClassType == null)
+                {
+                    throw new Exception("Assembly 中没有找到 dp2Circulation.MarcQueryHost 派生类");
+                }
+
+                return domain.CreateInstance("dp2Circulation.RemoteAppDomain", entryClassType.FullName).Unwrap() as MarcQueryHost;
+            }
+
+            public MarcQueryHost Initialize(
+    AppDomain domain,
+    Stream stream)
+            {
+                byte[] buffer = new byte[(int)stream.Length];
+                stream.Seek(0, SeekOrigin.Begin);
+                {
+                    stream.Read(buffer, 0, (int)stream.Length);
+                    // domain.Load(buffer);
+                }
+
+                Type entryClassType = null;
+                var assembly = domain.Load(buffer);
+                // 得到Assembly中Host派生类Type
+                entryClassType = ScriptManager.GetDerivedClassType(
+                    assembly,
+                    "dp2Circulation.MarcQueryHost");
+
+                if (entryClassType == null)
+                {
+                    throw new Exception("Assembly 中没有找到 dp2Circulation.MarcQueryHost 派生类");
+                }
+
+                /*
+                var name = assembly.GetName().FullName;
+
+                return domain.CreateInstance(name, entryClassType.FullName).Unwrap() as MarcQueryHost;
+                */
+
+                // new一个Host派生对象
+                return (MarcQueryHost)entryClassType.InvokeMember(null,
+                    BindingFlags.DeclaredOnly |
+                    BindingFlags.Public | BindingFlags.NonPublic |
+                    BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                    null);
+            }
+
+        }
+
+#if OLD
         // 准备脚本环境
         // TODO: 检测同名的 .ref 文件
         int PrepareMarcQuery(string strCsFileName,
-            out Assembly assembly,
-            out MarcQueryHost host,
-            out string strError)
+        out Assembly assembly,
+        out MarcQueryHost host,
+        out string strError)
         {
             assembly = null;
             strError = "";
             host = null;
 
-
-            string strContent = "";
-            Encoding encoding;
             // 能自动识别文件内容的编码方式的读入文本文件内容模块
             // parameters:
             //      lMaxLength  装入的最大长度。如果超过，则超过的部分不装入。如果为-1，表示不限制装入长度
@@ -6355,8 +6487,8 @@ bQuickLoad);
             //      2   读入的内容不是全部
             int nRet = FileUtil.ReadTextFileContent(strCsFileName,
                 -1,
-                out strContent,
-                out encoding,
+                out string strContent,
+                out Encoding encoding,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -6406,6 +6538,8 @@ bQuickLoad);
             if (nRet == -1)
                 goto ERROR1;
 
+            /*
+
             // 得到Assembly中Host派生类Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
                 assembly,
@@ -6422,6 +6556,105 @@ bQuickLoad);
                 BindingFlags.Public | BindingFlags.NonPublic |
                 BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
                 null);
+            */
+
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+#endif
+        static MarcQueryHost Initialize(
+    AppDomain domain)
+        {
+            string assemblyName = "";
+            Type entryClassType = null;
+            // 得到Assembly中Host派生类Type
+            foreach (var assembly in domain.GetAssemblies())
+            {
+                entryClassType = ScriptManager.GetDerivedClassType(
+                    assembly,
+                    "dp2Circulation.MarcQueryHost");
+                if (entryClassType != null)
+                {
+                    assemblyName = assembly.GetName().ToString();
+                    break;
+                }
+            }
+            if (entryClassType == null)
+            {
+                throw new Exception("Assembly 中没有找到 dp2Circulation.MarcQueryHost 派生类");
+            }
+
+            return domain.CreateInstance(assemblyName, entryClassType.FullName).Unwrap() as MarcQueryHost;
+        }
+
+
+        int PrepareMarcQuery(string strCsFileName,
+Stream stream,
+out MarcQueryHost host,
+out string strError)
+        {
+            strError = "";
+            host = null;
+
+            // 能自动识别文件内容的编码方式的读入文本文件内容模块
+            // parameters:
+            //      lMaxLength  装入的最大长度。如果超过，则超过的部分不装入。如果为-1，表示不限制装入长度
+            // return:
+            //      -1  出错 strError中有返回值
+            //      0   文件不存在 strError中有返回值
+            //      1   文件存在
+            //      2   读入的内容不是全部
+            int nRet = FileUtil.ReadTextFileContent(strCsFileName,
+                -1,
+                out string strContent,
+                out Encoding encoding,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            string strWarningInfo = "";
+            string[] saAddRef = {
+                                    // 2011/4/20 增加
+                                    "system.dll",
+                                    "system.drawing.dll",
+                                    "system.windows.forms.dll",
+                                    "system.xml.dll",
+                                    "System.Runtime.Serialization.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+
+                                    Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
+									Environment.CurrentDirectory + "\\digitalplatform.CommonControl.dll",  // 2015/11/20 新增
+									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
+                Environment.CurrentDirectory + "\\dp2circulation.exe",
+            };
+
+            // 2013/12/16
+            nRet = ScriptManager.GetRef(strCsFileName,
+                ref saAddRef,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            nRet = ScriptUtility.CreateAssembly(
+                strContent,
+                saAddRef,
+                stream,
+                out strError,
+                out strWarningInfo);
+            if (nRet == -1)
+                goto ERROR1;
 
             return 0;
         ERROR1:
@@ -8374,7 +8607,7 @@ bQuickLoad);
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
                 delete_style = "noeventlog";
 
-            DialogResult result = this.TryGet(()=>
+            DialogResult result = this.TryGet(() =>
             {
                 return MessageBox.Show(this,
         $"确实要从数据库中删除所选定的 {this.listView_records.SelectedItems.Count.ToString()} 个书目记录?\r\n\r\n{(string.IsNullOrEmpty(delete_style) == false ? "style:" + delete_style : "")}\r\n\r\n(警告：书目记录被删除后，无法恢复。如果删除书目记录，则其下属的册、期、订购、评注记录和对象资源会一并删除)\r\n\r\n(OK 删除；Cancel 取消)",

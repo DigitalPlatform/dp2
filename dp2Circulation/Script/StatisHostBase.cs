@@ -101,6 +101,7 @@ namespace dp2Circulation
     /// <summary>
     /// 统计事件参数
     /// </summary>
+    [Serializable]
     public class StatisEventArgs : EventArgs
     {
         /// <summary>

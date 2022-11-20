@@ -159,6 +159,79 @@ namespace DigitalPlatform
             return null;
         }
 
+        // 2022/11/19
+        // 获得 Stream
+        // 注意使用返回的 Stream 对象，读之前要 Seek(0, Origin.Begin)
+        public static int CreateAssembly(
+            string strCode,
+    string[] refs,
+    Stream stream,
+    out string strError,
+    out string strWarning)
+        {
+            strError = "";
+            strWarning = "";
+
+            try
+            {
+                // 2019/4/5
+                if (refs != null
+                    && Array.IndexOf(refs, "netstandard.dll") == -1)
+                {
+                    List<string> temp = new List<string>(refs);
+                    temp.Add("netstandard.dll");
+                    refs = temp.ToArray();
+                }
+
+                var tree = SyntaxFactory.ParseSyntaxTree(strCode);
+                string fileName = Guid.NewGuid().ToString();
+
+                // 
+                List<MetadataReference> ref_list = GetRefList(refs);
+
+                var compilation = CSharpCompilation.Create(fileName)
+      .WithOptions(
+        new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+      .AddReferences(ref_list.ToArray())
+      .AddSyntaxTrees(tree);
+
+
+                EmitResult compilationResult = compilation.Emit(stream);
+                /*
+                EmitOptions options = new EmitOptions().WithDebugInformationFormat(DebugInformationFormat.Embedded);
+                EmitResult compilationResult = compilation.Emit(stream, null, null, null, null, options);
+                */
+                List<string> errors = new List<string>();
+                List<string> warnings = new List<string>();
+
+                if (compilationResult.Success)
+                {
+                    return 0;
+                }
+                else
+                {
+                    GetErrors(compilationResult,
+errors,
+warnings);
+                }
+
+                if (errors.Count > 0)
+                {
+                    strError = MakePathList(errors, "\r\n");
+                    return -1;
+                }
+
+                strWarning = MakePathList(warnings, "\r\n");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "CreateAssemblyFile() 出错 " + GetDebugText(ex);
+                return -1;
+            }
+        }
+
+
         // result:
         //		-1  出错
         //		0   成功

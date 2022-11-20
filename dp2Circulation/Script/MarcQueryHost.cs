@@ -15,7 +15,8 @@ namespace dp2Circulation
     /// MarcQuery 宿主类。
     /// 继承了MarcQuery类，具有一些全局的函数
     /// </summary>
-    public class MarcQueryHost : MarcQuery
+    [Serializable]
+    public class MarcQueryHost : /*MarcQuery, */ MarshalByRefObject
     {
         // 是否使用 UI 线程
         private bool _useUiThread = true;

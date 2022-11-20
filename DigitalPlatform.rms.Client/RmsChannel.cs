@@ -1552,7 +1552,7 @@ namespace DigitalPlatform.rms.Client
             // DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = null;
             DigitalPlatform.rms.LogicNameItem[] logicnames = null;
 
-            REDO:
+        REDO:
             try
             {
             REDOCREATE:
@@ -4688,21 +4688,21 @@ namespace DigitalPlatform.rms.Client
             strError = "";
             output_timestamp = null;
 
-            /*
-            if (timestamp == null)
-            {
-                Debug.Assert(true, "timestamp参数不能为null");
-                strError = "timestamp参数不能为null";
-                return -1;
-            }
-             */
+        /*
+        if (timestamp == null)
+        {
+            Debug.Assert(true, "timestamp参数不能为null");
+            strError = "timestamp参数不能为null";
+            return -1;
+        }
+         */
 
-            /*
-            int nOldTimeout = this.Timeout;
-            this.Timeout = 20 * 60 * 1000;
-             * */
+        /*
+        int nOldTimeout = this.Timeout;
+        this.Timeout = 20 * 60 * 1000;
+         * */
 
-            // byte[] baOutputTimeStamp = null;
+        // byte[] baOutputTimeStamp = null;
         REDO:
             try
             {
@@ -4797,12 +4797,12 @@ namespace DigitalPlatform.rms.Client
             strError = "";
             strOutputResPath = "";
 
-            /*
-            int nOldTimeout = this.Timeout;
-            this.Timeout = 20 * 60 * 1000;
-            */
+        /*
+        int nOldTimeout = this.Timeout;
+        this.Timeout = 20 * 60 * 1000;
+        */
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginRebuildResKeys(strPath,
@@ -5219,7 +5219,7 @@ ref strNewStyle);	// 不要数据体和metadata
             {
                 DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                REDO:
+            REDO:
                 try
                 {
                     // string strStyle = "content,data";
@@ -5623,9 +5623,9 @@ ref strNewStyle);	// 不要数据体和metadata
                     lTotalLength = result.Value;
 
                     if (StringUtil.IsInList("timestamp", strStyle) == true
-                        /*
-                        && lTotalLength > 0
-                         * */ )    // 2012/1/11
+                         /*
+                         && lTotalLength > 0
+                          * */ )    // 2012/1/11
                     {
                         if (input_timestamp != null)
                         {
@@ -6053,7 +6053,7 @@ lTotalLength,
 strStyle,
 strMetadata,
 strRange,
-file.Position,
+file == null ? 0 : file.Position,   // 2022/11/19
 bTailHint,
 timestamp,
 out output_timestamp,
