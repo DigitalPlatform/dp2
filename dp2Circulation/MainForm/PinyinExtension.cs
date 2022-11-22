@@ -268,7 +268,7 @@ out string strError)
 #endif
             // TODO: 可以用 BeginLoop 改造一下
             Stop new_stop = new DigitalPlatform.Stop();
-            new_stop.Register(this.stopManager, true);	// 和容器关联
+            new_stop.Register(this.stopManager, "");	// 和容器关联
 #if GCAT_SERVER
             new_stop.OnStop += new StopEventHandler(new_stop_OnStop);
 #else

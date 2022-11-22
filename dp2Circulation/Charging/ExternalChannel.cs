@@ -41,7 +41,7 @@ namespace dp2Circulation
             this.Channel.Idle += new IdleEventHandler(Channel_Idle);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+            stop.Register(Program.MainForm.stopManager, "");	// 和容器关联
 
             return;
         }

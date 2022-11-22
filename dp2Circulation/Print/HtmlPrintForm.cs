@@ -54,7 +54,7 @@ namespace dp2Circulation
             DisplayPageInfoLine();
 
             _stop = new DigitalPlatform.Stop();
-            _stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+            _stop.Register(Program.MainForm.stopManager, "");	// 和容器关联
         }
 
         private void HtmlPrintForm_FormClosed(object sender, FormClosedEventArgs e)

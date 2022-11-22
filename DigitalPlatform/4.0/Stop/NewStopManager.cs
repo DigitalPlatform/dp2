@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -151,6 +152,7 @@ namespace DigitalPlatform
             }
         }
 
+        /*
         public StopGroup GetActiveGroup()
         {
             lock (_groups)
@@ -158,6 +160,7 @@ namespace DigitalPlatform
                 return _groups.LastOrDefault();
             }
         }
+        */
 
         // 查找一个 group
         public StopGroup FindGroup(string groupName)
@@ -1254,22 +1257,50 @@ string strText)
         }
 
 #endif
+        // 获得当前处于显示状态的 Stop
+        // 注：如果顶层 group 没有 active stop，则继续找次顶层的
+        Stop GetSurfaceStop()
+        {
+            lock (_groups)
+            {
+                Stop result = null;
+                foreach (var group in _groups)
+                {
+                    var stop = group.GetActiveStop();
+                    if (stop != null)
+                        result = stop;
+                }
+
+                return result;
+            }
+        }
+
+
         // 刷新工具条、状态行显示。用于 active group 切换后
         public void UpdateDisplay()
         {
+            /*
             var activeGroup = GetActiveGroup();
             if (activeGroup == null)
             {
                 ClearDisplay();
                 return;
             }
+            */
+            var active_stop = this.GetSurfaceStop();
+            if (active_stop == null)
+            {
+                ClearDisplay();
+                return;
+            }
 
             // 停止按钮
-            var stop_button_enabled = activeGroup.GetStopButtonEnableState();
+            // var stop_button_enabled = activeGroup.GetStopButtonEnableState();
+            var stop_button_enabled = active_stop.Group.GetStopButtonEnableState();
             EnableStopButtons(stop_button_enabled);
             EnableReverseButtons(!stop_button_enabled, StateParts.None);
 
-            var active_stop = activeGroup.GetActiveStop();
+            // var active_stop = activeGroup.GetActiveStop();
             if (active_stop == null)
             {
                 ClearDisplay();
@@ -1278,7 +1309,7 @@ string strText)
 
             _surfaceStop = active_stop;
             // 状态行文本
-            InternalSetMessage(active_stop.Message);
+            InternalSetMessage(active_stop.DisplayMessage);
 
             // 状态行 ProgressBar
             /*
@@ -1324,7 +1355,6 @@ string strText)
              * 
              * 
              * */
-
         }
 
         void ClearDisplay()
@@ -1354,8 +1384,8 @@ string strText)
         // StopManager管理了很多Stop状态，Active()函数相当于把某个Stop状态翻到可见的顶部。
         // locks: 集合写锁
 #endif
-        // 激活一个 Stop 对象。
-        // 注意，如果 Stop 对象并不是 active group 中的对象，则不影响显示
+        // 把一个 Stop 对象拔高到所在 Group 的顶层 Stop 位置
+        // 由于多个 Group 存在，此操作可能会影响显示，可能也不会影响显示
         public bool Active(Stop stop)
         {
             if (stop == null)
@@ -1370,11 +1400,17 @@ string strText)
                 return false;
             // 先在所属的 group 中激活
             stop.MoveToTop();
+            /*
             // 如果 Stop 对象属于 active group，则把它设置为顶层 Stop
             if (stop.Group == GetActiveGroup())
             {
                 _surfaceStop = stop;
                 // 刷新显示
+                UpdateDisplay();
+            }*/
+            var surface_stop = this.GetSurfaceStop();
+            if (surface_stop != _surfaceStop)   // surface stop 发生变化
+            {
                 UpdateDisplay();
             }
 
@@ -1474,13 +1510,9 @@ string strText)
             return false;
         }
 #endif
-        public Stop ActivatedStop
-        {
-            get { return ActiveStop; }
-        }
 
-        // 当前激活了的Stop对象
-        public Stop ActiveStop
+        // 当前处在显示状态的 Stop 对象
+        public Stop SurfaceStop
         {
             get
             {
@@ -1564,7 +1596,7 @@ string strText)
             */
             if (stop == _surfaceStop)
             {
-                InternalSetMessage(stop.Message);
+                InternalSetMessage(stop.DisplayMessage);
             }
         }
 

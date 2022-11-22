@@ -76,6 +76,7 @@ namespace DigitalPlatform
             }
         }
 
+        // 新版本
         public void Register(StopManager manager,
     string groupName)
         {
@@ -127,6 +128,7 @@ namespace DigitalPlatform
          * 比较麻烦。可以为每个子窗口设定一个“组名”，Stop 对象具有组名，一组 Stop 对象是否应该处在前台，只需要查看组名的激活状态即可。
          */
 
+        // 旧版本，计划逐渐弃用
         // 注册，和管理对象建立联系
         // parameters:
         //      bActive 是否需要立即激活
@@ -215,10 +217,13 @@ namespace DigitalPlatform
                         this.OnBeginLoop(this, e);
                     }
 
+                    /*
                     // 只要 Stop 对象属于 active group，就有可能改变显示状态
                     var belong_active_group = this.Group == _manager.GetActiveGroup();
                     if (belong_active_group)
                         _manager.UpdateDisplay();
+                    */
+                    _manager.UpdateDisplay();
 
 #if REMOVED
                     if (bIsActive == true)
@@ -264,15 +269,18 @@ namespace DigitalPlatform
                         this.OnEndLoop(this, e);
                     }
 
+                    /*
                     // 只要 Stop 对象属于 active group，就有可能改变显示状态
                     var belong_active_group = this.Group == _manager.GetActiveGroup();
                     if (belong_active_group)
                     {
                         _manager.UpdateDisplay();
                     }
+                    */
+                    _manager.UpdateDisplay();
 
                     // EndLoop() 以后当前 Stop 对象一定不能是活动的状态了
-                    Debug.Assert(_manager.ActiveStop != this);
+                    Debug.Assert(_manager.SurfaceStop != this);
 
 #if REMOVED
                     if (bIsActive == true)
@@ -492,6 +500,14 @@ namespace DigitalPlatform
             get
             {
                 return _message;
+            }
+        }
+
+        public string DisplayMessage
+        {
+            get
+            {
+                return /*Group.Name + " " +*/ _message;
             }
         }
     }

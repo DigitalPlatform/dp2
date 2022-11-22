@@ -172,7 +172,7 @@ namespace dp2Circulation
             if (bDisplayMessage == true)
             {
                 _stop = new DigitalPlatform.Stop();
-                _stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+                _stop.Register(Program.MainForm.stopManager, "");	// 和容器关联
             }
 
             // this.BeginThread();

@@ -60,7 +60,7 @@ namespace dp2Circulation
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+            stop.Register(Program.MainForm.stopManager, "");	// 和容器关联
         }
 
 

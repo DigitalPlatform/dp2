@@ -1370,7 +1370,7 @@ ref bHideMessageBox);
         {
 
             _stop = new DigitalPlatform.Stop();
-            _stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+            _stop.Register(Program.MainForm.stopManager, "");	// 和容器关联
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Style = StopStyle.EnableHalfStop;
@@ -1692,7 +1692,7 @@ dlg.UiState);
 
 
                 _stop = new DigitalPlatform.Stop();
-                _stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+                _stop.Register(Program.MainForm.stopManager, "");	// 和容器关联
 
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Style = StopStyle.EnableHalfStop;

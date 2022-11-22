@@ -103,7 +103,7 @@ namespace dp2Circulation
                 (object)null);
 
             _stop = new DigitalPlatform.Stop();
-            _stop.Register(this._stopManager, true);	// 和容器关联
+            _stop.Register(this._stopManager, "");	// 和容器关联
 
 
 #if NO

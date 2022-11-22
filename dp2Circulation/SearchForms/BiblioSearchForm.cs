@@ -36,7 +36,6 @@ namespace dp2Circulation
     /// <summary>
     /// 书目或规范查询窗
     /// </summary>
-    [Serializable]
     public partial class BiblioSearchForm : MyForm
     {
         string _dbType = "biblio";
@@ -6019,14 +6018,13 @@ bQuickLoad);
 
             this.m_strUsedMarcQueryFilename = dlg.FileName;
 
-            /*
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
                 out Assembly assembly,
                 out MarcQueryHost host,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-            */
+#if REMOVED
             var stream = new MemoryStream();
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
     stream,
@@ -6047,15 +6045,7 @@ bQuickLoad);
             var proxy = domain.CreateInstanceAndUnwrap(name, typeof(ScriptProxy).FullName) as ScriptProxy;
             host = proxy.Initialize(domain, stream);
             // host = Initialize(domain);
-
-            /*
-            stream.Seek(0, SeekOrigin.Begin);
-            {
-                byte[] buffer = new byte[(int)stream.Length];
-                stream.Read(buffer, 0, (int)stream.Length);
-                domain.Load(buffer);
-            }
-            */
+#endif
 
             host.CodeFileName = this.m_strUsedMarcQueryFilename;
             {
@@ -6232,8 +6222,10 @@ bQuickLoad);
                     host.MarcRecord = new MarcRecord(strMARC);
                     host.MarcSyntax = strMarcSyntax;
                     host.Changed = false;
-                    host.UiItem = item.ListViewItem;
-
+                    this.TryInvoke(() =>
+                    {
+                        host.UiItem = item.ListViewItem;
+                    });
                     StatisEventArgs args = new StatisEventArgs();
                     this.TryInvoke(host.UseUiThread, () =>
                     {
@@ -6323,7 +6315,9 @@ bQuickLoad);
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
 
+#if REMOVED
                 DestoryAppDomain(domain);
+#endif
             }
 
             RefreshPropertyView(false);
@@ -6382,6 +6376,8 @@ bQuickLoad);
                     e.ResultAction = "yes";
             }
         }
+
+#if REMOVED
 
         AppDomain CreateAppDomain()
         {
@@ -6450,8 +6446,7 @@ bQuickLoad);
                 }
 
                 /*
-                var name = assembly.GetName().FullName;
-
+                var name = assembly.GetName().ToString();
                 return domain.CreateInstance(name, entryClassType.FullName).Unwrap() as MarcQueryHost;
                 */
 
@@ -6464,8 +6459,8 @@ bQuickLoad);
             }
 
         }
+#endif
 
-#if OLD
         // 准备脚本环境
         // TODO: 检测同名的 .ref 文件
         int PrepareMarcQuery(string strCsFileName,
@@ -6538,8 +6533,6 @@ bQuickLoad);
             if (nRet == -1)
                 goto ERROR1;
 
-            /*
-
             // 得到Assembly中Host派生类Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
                 assembly,
@@ -6556,14 +6549,13 @@ bQuickLoad);
                 BindingFlags.Public | BindingFlags.NonPublic |
                 BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
                 null);
-            */
 
             return 0;
         ERROR1:
             return -1;
         }
 
-#endif
+#if REMOVED
         static MarcQueryHost Initialize(
     AppDomain domain)
         {
@@ -6588,7 +6580,6 @@ bQuickLoad);
 
             return domain.CreateInstance(assemblyName, entryClassType.FullName).Unwrap() as MarcQueryHost;
         }
-
 
         int PrepareMarcQuery(string strCsFileName,
 Stream stream,
@@ -6661,6 +6652,7 @@ out string strError)
             return -1;
         }
 
+#endif
 
 
         string m_strUsedMarcFilterFilename = "";
@@ -12574,7 +12566,7 @@ message,
             return list.SelectedItems[0];
         }
 
-        #region 停靠
+#region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -12643,7 +12635,7 @@ message,
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-        #endregion
+#endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {

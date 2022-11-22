@@ -463,6 +463,10 @@ string style = null)
             }
         }
 
+        public string GetGroupName()
+        {
+            return $"{this.GetType().ToString()}_{this.GetHashCode().ToString()}";
+        }
 
         /// <summary>
         /// 窗口 Load 时被触发
@@ -489,8 +493,10 @@ string style = null)
 #endif
             if (this.UseLooping == true)
             {
+                this._loopingHost.GroupName = this.GetGroupName();
                 // 默认使用 MainForm 的 StopManager
                 this._loopingHost.StopManager = Program.MainForm.stopManager;
+                this._loopingHost.StopManager.CreateGroup(this.GetGroupName());
             }
             else
             {
@@ -603,6 +609,10 @@ string style = null)
                 _stop = null;
             }
 #endif
+            if (this.UseLooping == true)
+            {
+                this._loopingHost.StopManager.DeleteGroup(this.GetGroupName());
+            }
 
             // 原来
 
@@ -1191,8 +1201,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             {
                 if (UseLooping) // 新的 Looping 风格
                 {
+                    /*
                     // 2022/10/29
                     Program.MainForm.stopManager?.Active(this.TopLooping?.Progress);
+                    */
+                    var result = this._loopingHost.StopManager.ActivateGroup(this.GetGroupName());
+                    Debug.Assert(result != null);
                 }
                 else
                 {

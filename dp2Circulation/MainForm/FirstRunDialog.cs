@@ -267,7 +267,7 @@ MessageBoxDefaultButton.Button1);
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             Stop = new DigitalPlatform.Stop();
-            Stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
+            Stop.Register(Program.MainForm.stopManager, "");	// 和容器关联
 
             return 1;
         }

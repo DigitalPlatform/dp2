@@ -9731,61 +9731,64 @@ Keys keyData)
         // 打开 CommentViewer 窗口
         public void OpenCommentViewer(bool bOpenWindow)
         {
-            // 优化，避免无谓地进行服务器调用
-            if (bOpenWindow == false)
+            this.TryInvoke(() =>
             {
-                if (this.PanelFixedVisible == false
-                    && (m_commentViewer == null || m_commentViewer.Visible == false))
-                    return;
-                // 2013/3/7
-                if (this.CanDisplayItemProperty() == false)
-                    return;
-            }
-
-            bool bNew = false;
-            if (this.m_commentViewer == null
-                || (bOpenWindow == true && this.m_commentViewer.Visible == false))
-            {
-                bNew = true;
-                m_commentViewer = new CommentViewerForm();
-                // m_commentViewer.MainForm = this;  // 必须是第一句
-
-                m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
-                m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
-
-                MainForm.SetControlFont(m_commentViewer, this.Font, false);
-                m_commentViewer.InitialWebBrowser();
-            }
-
-            if (bOpenWindow == true)
-            {
-                if (m_commentViewer.Visible == false)
+                // 优化，避免无谓地进行服务器调用
+                if (bOpenWindow == false)
                 {
-                    this.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
-                    m_commentViewer.Show(this);
-                    m_commentViewer.Activate();
+                    if (this.PanelFixedVisible == false
+                        && (m_commentViewer == null || m_commentViewer.Visible == false))
+                        return;
+                    // 2013/3/7
+                    if (this.CanDisplayItemProperty() == false)
+                        return;
+                }
 
-                    this.CurrentPropertyControl = null;
+                bool bNew = false;
+                if (this.m_commentViewer == null
+                    || (bOpenWindow == true && this.m_commentViewer.Visible == false))
+                {
+                    bNew = true;
+                    m_commentViewer = new CommentViewerForm();
+                    // m_commentViewer.MainForm = this;  // 必须是第一句
+
+                    m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
+                    m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
+
+                    MainForm.SetControlFont(m_commentViewer, this.Font, false);
+                    m_commentViewer.InitialWebBrowser();
+                }
+
+                if (bOpenWindow == true)
+                {
+                    if (m_commentViewer.Visible == false)
+                    {
+                        this.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
+                        m_commentViewer.Show(this);
+                        m_commentViewer.Activate();
+
+                        this.CurrentPropertyControl = null;
+                    }
+                    else
+                    {
+                        if (m_commentViewer.WindowState == FormWindowState.Minimized)
+                            m_commentViewer.WindowState = FormWindowState.Normal;
+                        m_commentViewer.Activate();
+                    }
                 }
                 else
                 {
-                    if (m_commentViewer.WindowState == FormWindowState.Minimized)
-                        m_commentViewer.WindowState = FormWindowState.Normal;
-                    m_commentViewer.Activate();
-                }
-            }
-            else
-            {
-                if (m_commentViewer.Visible == true)
-                {
+                    if (m_commentViewer.Visible == true)
+                    {
 
+                    }
+                    else
+                    {
+                        if (this.CurrentPropertyControl != m_commentViewer.MainControl)
+                            m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
+                    }
                 }
-                else
-                {
-                    if (this.CurrentPropertyControl != m_commentViewer.MainControl)
-                        m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
-                }
-            }
+            });
         }
 
         void marc_viewer_FormClosed(object sender, FormClosedEventArgs e)

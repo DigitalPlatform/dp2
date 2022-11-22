@@ -60,14 +60,16 @@ namespace DigitalPlatform
             LoopingHost host,
             StopEventHandler handler,
             string text,
-            bool activate = true)
+            // bool activate = true
+            string groupName = "")
         {
             this.Host = host;
             if (this.Host.StopManager == null)
                 throw new ArgumentException("尚未初始化 Host.StopManager");
 
             Progress = new Stop();
-            Progress.Register(this.Host.StopManager/*_stopManager*/, activate);	// 和容器关联
+            // Progress.Register(this.Host.StopManager/*_stopManager*/, activate); // 和容器关联
+            Progress.Register(this.Host.StopManager, groupName);
 
             _handler = handler;
             Progress.OnStop += handler;
@@ -103,6 +105,20 @@ namespace DigitalPlatform
 
     public class LoopingHost : ILoopingHost
     {
+        // BeginLoop() 时所用的 groupName
+        string _groupName = "";
+        public string GroupName
+        {
+            get
+            {
+                return _groupName;
+            }
+            set
+            {
+                _groupName = value;
+            }
+        }
+
         List<Looping> _loopings = new List<Looping>();
         object _syncRoot_loopings = new object();
 
@@ -119,11 +135,12 @@ namespace DigitalPlatform
             }
         }
 
+
         public Looping BeginLoop(StopEventHandler handler,
             string text,
             string style = null)
         {
-            var looping = new Looping(this, handler, text/*, _isActive*/);
+            var looping = new Looping(this, handler, text/*, _isActive*/, this._groupName);
             lock (_syncRoot_loopings)
             {
                 _loopings.Add(looping);
