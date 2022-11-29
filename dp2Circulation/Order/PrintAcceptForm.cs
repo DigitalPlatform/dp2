@@ -24,6 +24,10 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using static DigitalPlatform.CommonControl.OrderDesignControl;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
+using System.Linq;
+using Jint.Parser.Ast;
+using System.Web.UI.HtmlControls;
 
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
@@ -367,7 +371,7 @@ namespace dp2Circulation
             CreateOriginColumnHeader(this.listView_origin);
             CreateMergedColumnHeader(this.listView_merged);
 
-            this.comboBox_load_type.Text = Program.MainForm.AppInfo.GetString(
+            this.PublicationType = Program.MainForm.AppInfo.GetString(
                 "printaccept_form",
                 "publication_type",
                 "图书");
@@ -426,7 +430,7 @@ namespace dp2Circulation
                 Program.MainForm.AppInfo.SetString(
                     "printaccept_form",
                     "publication_type",
-                    this.comboBox_load_type.Text);
+                    this.PublicationType);
             }
 
             SaveSize();
@@ -590,9 +594,12 @@ namespace dp2Circulation
             int nRedCount = 0;
             int nWhiteCount = 0;
 
-            for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            var origin_items = ListViewUtil.GetItems(this.listView_origin);
+
+            // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            foreach (var item in origin_items)
             {
-                ListViewItem item = this.listView_origin.Items[i];
+                // ListViewItem item = this.listView_origin.Items[i];
 
                 if (item.ImageIndex == TYPE_ERROR)
                     nRedCount++;
@@ -629,9 +636,12 @@ namespace dp2Circulation
             int nRedCount = 0;  // 有错误信息的事项
             int nWhiteCount = 0;    // 普通事项
 
-            for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            var origin_items = ListViewUtil.GetItems(this.listView_origin);
+
+            // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            foreach (var item in origin_items)
             {
-                ListViewItem item = this.listView_origin.Items[i];
+                // ListViewItem item = this.listView_origin.Items[i];
 
                 if (item.ImageIndex == TYPE_CHANGED)
                     nYellowCount++;
@@ -651,6 +661,7 @@ namespace dp2Circulation
             return false;
         }
 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         // 从(已验收的)册记录路径文件装载
         // parameters:
         //      bAutoSetSeriesType  是否根据文件第一行中的路径中的数据库名来自动设置出版物类型 Combobox_type
@@ -674,7 +685,42 @@ namespace dp2Circulation
             string strFilename,
             out string strError)
         {
-            strError = "";
+            var task = LoadFromItemRecPathFile(
+bAutoSetSeriesType,
+strFilename);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            var result = task.Result;
+            strError = result.ErrorInfo;
+            return result.Value;
+        }
+
+        public Task<NormalResult> LoadFromItemRecPathFile(
+bool bAutoSetSeriesType,
+string strFilename)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _loadFromItemRecPathFile(
+    bAutoSetSeriesType,
+    strFilename);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // return:
+        //      -1:  出错
+        //      0:   放弃
+        //      1:   装载成功
+        public NormalResult _loadFromItemRecPathFile(
+            bool bAutoSetSeriesType,
+            string strFilename)
+        {
+            string strError = "";
 
             // 2020/7/9
             this.refid_table.Clear();
@@ -715,22 +761,28 @@ namespace dp2Circulation
                     if (this.Changed == true)
                     {
                         // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
                             "当前窗口内有原始信息被修改后尚未保存。若此时为装载新内容而清除原有信息，则未保存信息将丢失。\r\n\r\n确实要装载新内容? ",
                             "PrintAcceptForm",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button2);
+                        });
                         if (result != DialogResult.Yes)
                         {
-                            return 0; // 放弃
+                            return new NormalResult(); // 放弃
                         }
                     }
 
-                    this.listView_origin.Items.Clear();
-                    // 2008/11/22
-                    this.SortColumns_origin.Clear();
-                    SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+                    this.TryInvoke(() =>
+                    {
+                        this.listView_origin.Items.Clear();
+                        // 2008/11/22
+                        this.SortColumns_origin.Clear();
+                        SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+                    });
                 }
 
                 // 逐行读入文件内容
@@ -741,7 +793,11 @@ namespace dp2Circulation
                     if (looping.Stopped)
                     {
                         strError = "用户中断1";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     string strLine = "";
@@ -768,24 +824,32 @@ namespace dp2Circulation
                     if (nRet == -1)
                     {
                         strError = "记录路径 '" + strLine + "' 中的数据库名 '" + strItemDbName + "' 不是实体库名";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     // 自动设置 图书/期刊 类型
                     if (bAutoSetSeriesType == true && nLineCount == 0)
                     {
                         if (nRet == 0)
-                            this.comboBox_load_type.Text = "图书";
+                            this.PublicationType = "图书";
                         else
-                            this.comboBox_load_type.Text = "连续出版物";
+                            this.PublicationType = "连续出版物";
                     }
 
-                    if (this.comboBox_load_type.Text == "图书")
+                    if (this.PublicationType == "图书")
                     {
                         if (nRet != 0)
                         {
                             strError = "记录路径 '" + strLine + "' 中的数据库名 '" + strItemDbName + "' 不是一个图书类型的实体库名";
-                            return -1;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         }
                     }
                     else
@@ -793,7 +857,11 @@ namespace dp2Circulation
                         if (nRet != 1)
                         {
                             strError = "记录路径 '" + strLine + "' 中的数据库名 '" + strItemDbName + "' 不是一个连续出版物类型的实体库名";
-                            return -1;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         }
                     }
 
@@ -817,7 +885,11 @@ namespace dp2Circulation
                     if (looping.Stopped)
                     {
                         strError = "用户中断2";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     string strLine = "";
@@ -845,7 +917,7 @@ namespace dp2Circulation
                     nRet = LoadOneItem(
                         looping.Progress,
                         channel,
-                        this.comboBox_load_type.Text,
+                        this.PublicationType,
                         strLine,
                         this.listView_origin,
                         out strError);
@@ -858,7 +930,11 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 strError = "PrintAcceptForm LoadFromItemRecPathFile() exception: " + ex.Message;
-                return -1;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
             }
             finally
             {
@@ -882,11 +958,14 @@ namespace dp2Circulation
 
             // 记忆文件名
             this.RecPathFilePath = strFilename;
-            this.Text = "打印订单 " + Path.GetFileName(this.RecPathFilePath);
+            this.TryInvoke(() =>
+            {
+                this.Text = "打印订单 " + Path.GetFileName(this.RecPathFilePath);
+            });
 
             if (nDupCount != 0)
             {
-                MessageBox.Show(this, "装入过程中有 " + nDupCount.ToString() + "个重复记录路径的事项被忽略。");
+                this.MessageBoxShow("装入过程中有 " + nDupCount.ToString() + "个重复记录路径的事项被忽略。");
             }
 
             // 在操作历史中列出原始列表红色的行，便于操作者查看
@@ -899,7 +978,11 @@ namespace dp2Circulation
                 nRet = FillMergedList(out strError);
                 //_stop.SetMessage("");
                 if (nRet == -1)
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
             }
 
             // 汇报数据装载情况。
@@ -909,14 +992,20 @@ namespace dp2Circulation
             //      2   虽然装载了数据，但是其中有错误事项
             int nState = ReportLoadState(out strError);
             if (nState != 1)
-                return -1;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
 
-            return 1;
+            return new NormalResult { Value = 1 };
         }
 
         void OutputOriginListErrorToHistory()
         {
-            foreach (ListViewItem item in this.listView_origin.Items)
+            var origin_items = ListViewUtil.GetItems(this.listView_origin);
+            // foreach (ListViewItem item in this.listView_origin.Items)
+            foreach (var item in origin_items)
             {
                 if (item.ImageIndex == TYPE_ERROR)
                 {
@@ -928,7 +1017,7 @@ namespace dp2Circulation
         }
 
         // TODO: 需要检查记录路径是否来自实体库？
-        private void button_load_loadFromRecPathFile_Click(object sender, EventArgs e)
+        private async void button_load_loadFromRecPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -947,6 +1036,7 @@ namespace dp2Circulation
 
             try
             {
+                /*
                 // 从(已验收的)册记录路径文件装载
                 // return:
                 //      -1  出错
@@ -958,17 +1048,30 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                */
+                var result = await LoadFromItemRecPathFile(
+                    true,
+                    dlg.FileName);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
 
                 return;
-            ERROR1:
-                this.Text = "打印验收单";
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
-                MessageBox.Show(this, strError);
             }
             finally
             {
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束装载 " + dlg.FileName + "</div>");
             }
+
+        ERROR1:
+            this.TryInvoke(() =>
+            {
+                this.Text = "打印验收单";
+            });
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+            this.MessageBoxShow(strError);
         }
 
         // 根据记录路径，装入册记录
@@ -1008,20 +1111,24 @@ namespace dp2Circulation
                 out strError);
             if (lRet == -1 || lRet == 0)
             {
-                ListViewItem item = new ListViewItem(strRecPath, 0);
+                string error = strError;
+                this.TryInvoke(() =>
+                {
+                    ListViewItem item = new ListViewItem(strRecPath, 0);
 
-                OriginAcceptItemData data = new OriginAcceptItemData();
-                item.Tag = data;
-                data.Timestamp = item_timestamp;
-                data.Xml = strItemXml;
+                    OriginAcceptItemData data = new OriginAcceptItemData();
+                    item.Tag = data;
+                    data.Timestamp = item_timestamp;
+                    data.Xml = strItemXml;
 
-                item.SubItems.Add(strError);
+                    item.SubItems.Add(error);
 
-                SetItemColor(item, TYPE_ERROR);
-                list.Items.Add(item);
+                    SetItemColor(item, TYPE_ERROR);
+                    list.Items.Add(item);
 
-                // 将新加入的事项滚入视野
-                list.EnsureVisible(list.Items.Count - 1);
+                    // 将新加入的事项滚入视野
+                    list.EnsureVisible(list.Items.Count - 1);
+                });
                 goto ERROR1;
             }
 
@@ -1031,13 +1138,15 @@ namespace dp2Circulation
             string strBiblioSummary = "";
             string strISBnISSN = "";
 
+            var items = ListViewUtil.GetItems(list);
+
             // 看看记录路径是否有重复?
             // 顺便获得同种的事项
-            for (int i = 0; i < list.Items.Count; i++)
+            for (int i = 0; i < /*list.Items*/items.Count; i++)
             {
-                ListViewItem curitem = list.Items[i];
-
-                if (strRecPath == curitem.Text)
+                ListViewItem curitem = items[i];    // list.Items[i];
+                string current_recpath = ListViewUtil.GetItemText(curitem, 0);
+                if (strRecPath == current_recpath)
                 {
                     strError = "记录路径 " + strRecPath + " 发生重复";
                     return -2;
@@ -1113,8 +1222,11 @@ namespace dp2Circulation
                 data.Timestamp = item_timestamp;
                 data.Xml = strItemXml;
 
-                // 将新加入的事项滚入视野
-                list.EnsureVisible(list.Items.Count - 1);
+                this.TryInvoke(() =>
+                {
+                    // 将新加入的事项滚入视野
+                    list.EnsureVisible(list.Items.Count - 1);
+                });
 
                 // 填充需要从订购库获得的栏目信息
                 FillOrderColumns(
@@ -2031,67 +2143,45 @@ namespace dp2Circulation
         }
 
         // 设置事项的背景、前景颜色，和图标
-        static void SetItemColor(ListViewItem item,
+        void SetItemColor(ListViewItem item,
             int nType)
         {
-            item.BackColor = GetItemBackColor(nType);
-            item.ForeColor = GetItemForeColor(nType);
-            item.ImageIndex = nType;
-
-            // 顺便检查调用本函数前的data.Changed值是否正确
-#if DEBUG
+            this.TryInvoke(() =>
             {
-                if (item.Tag is OriginAcceptItemData
-                    && nType != TYPE_ERROR)
+                item.BackColor = GetItemBackColor(nType);
+                item.ForeColor = GetItemForeColor(nType);
+                item.ImageIndex = nType;
+
+                // 顺便检查调用本函数前的data.Changed值是否正确
+#if DEBUG
                 {
-                    OriginAcceptItemData data = (OriginAcceptItemData)item.Tag;
-
-                    Debug.Assert(data != null, "");
-
-                    if (data != null)
+                    if (item.Tag is OriginAcceptItemData
+                        && nType != TYPE_ERROR)
                     {
-                        if (nType == TYPE_CHANGED)
+                        OriginAcceptItemData data = (OriginAcceptItemData)item.Tag;
+
+                        Debug.Assert(data != null, "");
+
+                        if (data != null)
                         {
-                            Debug.Assert(data.Changed == true, "");
-                        }
-                        if (nType == TYPE_NORMAL)
-                        {
-                            Debug.Assert(data.Changed == false, "");
+                            if (nType == TYPE_CHANGED)
+                            {
+                                Debug.Assert(data.Changed == true, "");
+                            }
+                            if (nType == TYPE_NORMAL)
+                            {
+                                Debug.Assert(data.Changed == false, "");
+                            }
                         }
                     }
                 }
-            }
 #endif
-
-            /*
-            if (nType == TYPE_ERROR)
-            {
-                item.ForeColor = Color.White;
-                item.ImageIndex = TYPE_ERROR;
-            }
-            else if (nType == TYPE_CHANGED)
-            {
-                item.BackColor = Color.LightYellow;
-                item.ForeColor = SystemColors.WindowText;
-                item.ImageIndex = TYPE_CHANGED;
-            }
-            else if (nType == TYPE_NORMAL)
-            {
-                item.BackColor = SystemColors.Window;
-                item.ForeColor = SystemColors.WindowText;
-                item.ImageIndex = TYPE_NORMAL;
-            }
-            else
-            {
-                Debug.Assert(false, "未知的image type");
-            }
-             * */
-
+            });
         }
 
         // 把册信息列加入 ListView 创建一个新 ListViewItem
         /*public*/
-        static ListViewItem AddToListView(ListView list,
+        ListViewItem AddToListView(ListView list,
             XmlDocument dom,
             string strRecPath,
             string strBiblioSummary,
@@ -2107,7 +2197,10 @@ namespace dp2Circulation
                 strISBnISSN,
                 strBiblioRecPath,
                 item);
-            list.Items.Add(item);
+            this.TryInvoke(() =>
+            {
+                list.Items.Add(item);
+            });
 
             return item;
         }
@@ -2118,7 +2211,7 @@ namespace dp2Circulation
         // return:
         //      true    成功
         //      false   出错
-        static bool SetListViewItemText(XmlDocument dom,
+        bool SetListViewItemText(XmlDocument dom,
             bool bSetRecPathColumn,
             string strRecPath,
             string strBiblioSummary,
@@ -2226,13 +2319,16 @@ namespace dp2Circulation
                 ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_RECPATH, strRecPath);
             }
 
-            // 加粗字体
-            for (int i = 0; i < textchanged_columns.Count; i++)
+            this.TryInvoke(() =>
             {
-                int index = textchanged_columns[i];
-                item.SubItems[index].Font =
-                    new System.Drawing.Font(item.SubItems[index].Font, FontStyle.Bold);
-            }
+                // 加粗字体
+                for (int i = 0; i < textchanged_columns.Count; i++)
+                {
+                    int index = textchanged_columns[i];
+                    item.SubItems[index].Font =
+                        new System.Drawing.Font(item.SubItems[index].Font, FontStyle.Bold);
+                }
+            });
 
             if (item.ImageIndex == TYPE_NORMAL)
                 SetItemColor(item, TYPE_NORMAL);
@@ -2813,9 +2909,12 @@ namespace dp2Circulation
 
             // 先检查是否有错误事项，顺便构建item列表
             List<ListViewItem> items = new List<ListViewItem>();
-            for (int i = 0; i < this.listView_merged.Items.Count; i++)
+            var merged_items = ListViewUtil.GetItems(this.listView_merged);
+
+            // for (int i = 0; i < this.listView_merged.Items.Count; i++)
+            foreach (var item in merged_items)
             {
-                ListViewItem item = this.listView_merged.Items[i];
+                // ListViewItem item = this.listView_merged.Items[i];
 
                 if (item.ImageIndex == TYPE_ERROR)
                     nErrorCount++;
@@ -2826,7 +2925,7 @@ namespace dp2Circulation
 
             if (nErrorCount != 0)
             {
-                MessageBox.Show(this, "警告：这里打印出的清单，含有 " + nErrorCount.ToString() + " 个包含错误信息的事项。");
+                this.MessageBoxShow("警告：这里打印出的清单，含有 " + nErrorCount.ToString() + " 个包含错误信息的事项。");
             }
 
             string strError = "";
@@ -2909,7 +3008,7 @@ namespace dp2Circulation
             string strNamePath = "printaccept_printoption";
 
             PrintOption option = new PrintAcceptPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
-                this.comboBox_load_type.Text);
+                this.PublicationType);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
@@ -2919,7 +3018,7 @@ namespace dp2Circulation
 
             // dlg.MainForm = Program.MainForm;
             dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
-            dlg.Text = this.comboBox_load_type.Text + " 验收单 打印参数";
+            dlg.Text = this.PublicationType + " 验收单 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -3042,7 +3141,7 @@ namespace dp2Circulation
 
             // 获得打印参数
             PrintOption option = new PrintAcceptPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
-                this.comboBox_load_type.Text);
+                this.PublicationType);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
@@ -3997,17 +4096,18 @@ namespace dp2Circulation
         }
 
         // 根据验收批次号检索装载
-        private void button_load_loadFromAcceptBatchNo_Click(object sender, EventArgs e)
+        private async void button_load_loadFromAcceptBatchNo_Click(object sender, EventArgs e)
         {
-            LoadFromAcceptBatchNo(null);
+            await LoadFromAcceptBatchNoAsync(null);
         }
 
         // 根据订购批次号检索装载
-        private void button_load_loadFromOrderBatchNo_Click(object sender, EventArgs e)
+        private async void button_load_loadFromOrderBatchNo_Click(object sender, EventArgs e)
         {
-            LoadFromOrderBatchNo(null);
+            await LoadFromOrderBatchNoAsync(null);
         }
 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         // 根据验收批次号检索装载数据
         // parameters:
         //      bAutoSetSeriesType  是否根据命中的第一条记录的路径中的数据库名来自东设置Combobox_type
@@ -4020,36 +4120,65 @@ namespace dp2Circulation
             // bool bAutoSetSeriesType,
             string strDefaultBatchNo)
         {
-            SearchByBatchnoForm dlg = new SearchByBatchnoForm();
-            MainForm.SetControlFont(dlg, this.Font, false);
+            var task = LoadFromAcceptBatchNoAsync(strDefaultBatchNo);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+        }
 
-            dlg.CfgSectionName = "PrintAcceptForm_SearchByAcceptBatchnoForm";
-            this.BatchNo = "";
+        public Task LoadFromAcceptBatchNoAsync(
+            string strDefaultBatchNo)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _loadFromAcceptBatchNo(strDefaultBatchNo);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
 
-            if (strDefaultBatchNo != null)
-                dlg.BatchNo = strDefaultBatchNo;
+        void _loadFromAcceptBatchNo(string strDefaultBatchNo)
+        {
+            string batch_no = "";
+            var dialog_result = this.TryGet(() =>
+            {
+                SearchByBatchnoForm dlg = new SearchByBatchnoForm();
+                MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.Text = "根据验收(册)批次号检索出已验收的册记录";
-            dlg.DisplayLocationList = false;
+                dlg.CfgSectionName = "PrintAcceptForm_SearchByAcceptBatchnoForm";
+                this.BatchNo = "";
 
-            dlg.GetLocationValueTable -= new GetValueTableEventHandler(dlg_GetLocationValueTable);
-            dlg.GetLocationValueTable += new GetValueTableEventHandler(dlg_GetLocationValueTable);
+                if (strDefaultBatchNo != null)
+                    dlg.BatchNo = strDefaultBatchNo;
 
-            dlg.GetBatchNoTable -= new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
-            dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
+                dlg.Text = "根据验收(册)批次号检索出已验收的册记录";
+                dlg.DisplayLocationList = false;
 
-            dlg.RefDbName = "";
-            // dlg.MainForm = Program.MainForm;
+                dlg.GetLocationValueTable -= new GetValueTableEventHandler(dlg_GetLocationValueTable);
+                dlg.GetLocationValueTable += new GetValueTableEventHandler(dlg_GetLocationValueTable);
 
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+                dlg.GetBatchNoTable -= new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
+                dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
 
-            if (dlg.DialogResult != DialogResult.OK)
+                dlg.RefDbName = "";
+                // dlg.MainForm = Program.MainForm;
+
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+
+                batch_no = dlg.BatchNo;
+
+                return dlg.DialogResult;
+            });
+
+            if (dialog_result != DialogResult.OK)
                 return;
 
             this.SourceStyle = "batchno";
 
-            this.BatchNo = dlg.BatchNo;
+            this.BatchNo = batch_no;
 
             string strError = "";
             int nRet = 0;
@@ -4062,22 +4191,28 @@ namespace dp2Circulation
                 if (this.Changed == true)
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有原始信息被修改后尚未保存。若此时为装载新内容而清除原有信息，则未保存信息将丢失。\r\n\r\n确实要装载新内容? ",
                         "PrintAcceptForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result != DialogResult.Yes)
                     {
                         return; // 放弃
                     }
                 }
 
-                this.listView_origin.Items.Clear();
-                // 2008/11/22
-                this.SortColumns_origin.Clear();
-                SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+                this.TryInvoke(() =>
+                {
+                    this.listView_origin.Items.Clear();
+                    // 2008/11/22
+                    this.SortColumns_origin.Clear();
+                    SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+                });
 
                 this.refid_table.Clear();
                 this.orderxml_table.Clear();
@@ -4108,7 +4243,7 @@ namespace dp2Circulation
                     // 2013/3/25
                     lRet = channel.SearchItem(
                         looping.Progress,
-                        this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
+                        this.PublicationType == "图书" ? "<all book>" : "<all series>",
                         //"<all>",
                         "", // dlg.BatchNo,
                         -1,
@@ -4121,7 +4256,7 @@ namespace dp2Circulation
                         out strError);
                     if (lRet == 0)
                     {
-                        strError = "检索全部 '" + this.comboBox_load_type.Text + "' 类型的册记录没有命中记录。";
+                        strError = "检索全部 '" + this.PublicationType + "' 类型的册记录没有命中记录。";
                         goto ERROR1;
                     }
                 }
@@ -4129,9 +4264,9 @@ namespace dp2Circulation
                 {
                     lRet = channel.SearchItem(
 looping.Progress,
-this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
+this.PublicationType == "图书" ? "<all book>" : "<all series>",
 //"<all>",
-dlg.BatchNo,
+batch_no,
 -1,
 "批次号",
 "exact",
@@ -4147,7 +4282,7 @@ out strError);
 
                 if (lRet == 0)
                 {
-                    strError = "批次号 '" + dlg.BatchNo + "' 没有命中记录。";
+                    strError = "批次号 '" + batch_no + "' 没有命中记录。";
                     goto ERROR1;
                 }
 
@@ -4167,7 +4302,7 @@ out strError);
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -4193,7 +4328,7 @@ out strError);
 
                     if (lRet == 0)
                     {
-                        MessageBox.Show(this, "未命中");
+                        this.MessageBoxShow("未命中");
                         return;
                     }
 
@@ -4217,7 +4352,7 @@ out strError);
                         nRet = LoadOneItem(
                             looping.Progress,
                             channel,
-                            this.comboBox_load_type.Text,
+                            this.PublicationType,
                             strRecPath,
                             this.listView_origin,
                             out strError);
@@ -4278,7 +4413,7 @@ out strError);
             {
                 Global.GetBatchNoTable(e,
                     this,
-                    this.comboBox_load_type.Text,
+                    this.PublicationType,
                     "item",
                     looping.Progress,
                     channel);
@@ -4298,6 +4433,7 @@ out strError);
             e.values = values;
         }
 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         // 根据订购批次号检索装载数据
         // parameters:
         //      strDefaultBatchNo   缺省的批次号。如果为null，则表示不使用这个参数。
@@ -4307,31 +4443,58 @@ out strError);
         /// <param name="strDefaultBatchNo">缺省的批次号。如果为 null，则表示不使用这个参数</param>
         public void LoadFromOrderBatchNo(string strDefaultBatchNo)
         {
-            SearchByBatchnoForm dlg = new SearchByBatchnoForm();
-            MainForm.SetControlFont(dlg, this.Font, false);
+            var task = LoadFromOrderBatchNoAsync(strDefaultBatchNo);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+        }
 
-            dlg.CfgSectionName = "PrintAcceptForm_SearchByOrderBatchnoForm";
-            this.BatchNo = "";
+        public Task LoadFromOrderBatchNoAsync(string strDefaultBatchNo)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _loadFromOrderBatchNo(strDefaultBatchNo);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
 
-            dlg.Text = "根据订购批次号检索出已验收的册记录";
-            dlg.DisplayLocationList = false;
+        void _loadFromOrderBatchNo(string strDefaultBatchNo)
+        {
+            string batch_no = "";
+            var dialog_result = this.TryGet(() =>
+            {
+                SearchByBatchnoForm dlg = new SearchByBatchnoForm();
+                MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.GetLocationValueTable -= new GetValueTableEventHandler(dlg_GetOrderLocationValueTable);
-            dlg.GetLocationValueTable += new GetValueTableEventHandler(dlg_GetOrderLocationValueTable);
+                dlg.CfgSectionName = "PrintAcceptForm_SearchByOrderBatchnoForm";
+                this.BatchNo = "";
 
-            dlg.GetBatchNoTable -= new GetKeyCountListEventHandler(dlg_GetOrderBatchNoTable);
-            dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetOrderBatchNoTable);
+                dlg.Text = "根据订购批次号检索出已验收的册记录";
+                dlg.DisplayLocationList = false;
 
-            dlg.RefDbName = "";
-            // dlg.MainForm = Program.MainForm;
+                dlg.GetLocationValueTable -= new GetValueTableEventHandler(dlg_GetOrderLocationValueTable);
+                dlg.GetLocationValueTable += new GetValueTableEventHandler(dlg_GetOrderLocationValueTable);
 
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
+                dlg.GetBatchNoTable -= new GetKeyCountListEventHandler(dlg_GetOrderBatchNoTable);
+                dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetOrderBatchNoTable);
 
-            if (dlg.DialogResult != DialogResult.OK)
+                dlg.RefDbName = "";
+                // dlg.MainForm = Program.MainForm;
+
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+
+                batch_no = dlg.BatchNo;
+                return dlg.DialogResult;
+            });
+
+            if (dialog_result != DialogResult.OK)
                 return;
 
-            this.BatchNo = dlg.BatchNo;
+            this.BatchNo = batch_no;
 
             string strError = "";
             int nRet = 0;
@@ -4344,22 +4507,28 @@ out strError);
                 if (this.Changed == true)
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有原始信息被修改后尚未保存。若此时为装载新内容而清除原有信息，则未保存信息将丢失。\r\n\r\n确实要装载新内容? ",
                         "PrintAcceptForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result != DialogResult.Yes)
                     {
                         return; // 放弃
                     }
                 }
 
-                this.listView_origin.Items.Clear();
-                // 2008/11/22
-                this.SortColumns_origin.Clear();
-                SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+                this.TryInvoke(() =>
+                {
+                    this.listView_origin.Items.Clear();
+                    // 2008/11/22
+                    this.SortColumns_origin.Clear();
+                    SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+                });
 
                 this.refid_table.Clear();
                 this.orderxml_table.Clear();
@@ -4389,7 +4558,7 @@ out strError);
                     // 2013/3/27
                     lRet = channel.SearchOrder(
                     looping.Progress,
-                    this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
+                    this.PublicationType == "图书" ? "<all book>" : "<all series>",
                     "", // dlg.BatchNo,
                     -1,
                     "__id",
@@ -4401,7 +4570,7 @@ out strError);
                     out strError);
                     if (lRet == 0)
                     {
-                        strError = "检索全部 '" + this.comboBox_load_type.Text + "' 类型的订购记录没有命中记录。";
+                        strError = "检索全部 '" + this.PublicationType + "' 类型的订购记录没有命中记录。";
                         goto ERROR1;
                     }
                 }
@@ -4409,8 +4578,8 @@ out strError);
                 {
                     lRet = channel.SearchOrder(
 looping.Progress,
-this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
-dlg.BatchNo,
+this.PublicationType == "图书" ? "<all book>" : "<all series>",
+batch_no,
 -1,
 "批次号",
 "exact",
@@ -4425,7 +4594,7 @@ out strError);
 
                 if (lRet == 0)
                 {
-                    strError = "批次号 '" + dlg.BatchNo + "' 没有命中记录。";
+                    strError = "批次号 '" + batch_no + "' 没有命中记录。";
                     goto ERROR1;
                 }
 
@@ -4446,7 +4615,7 @@ out strError);
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -4528,7 +4697,7 @@ out strError);
 
                 if (nItemRecCount == 0)
                 {
-                    MessageBox.Show(this, "未装入任何已验收的册记录 (处理订购记录 " + nOrderRecCount.ToString() + " 条)");
+                    this.MessageBoxShow("未装入任何已验收的册记录 (处理订购记录 " + nOrderRecCount.ToString() + " 条)");
                 }
 
                 return;
@@ -4551,7 +4720,7 @@ out strError);
             }
         ERROR1:
             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 根据记录路径，检索出订购记录，并且装入相关联的已验收册记录
@@ -4626,7 +4795,7 @@ out strError);
 
             List<string> distributes = new List<string>();
 
-            if (this.comboBox_load_type.Text == "连续出版物")
+            if (this.PublicationType == "连续出版物")
             {
                 string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
                 if (string.IsNullOrEmpty(strRefID) == true)
@@ -4799,7 +4968,7 @@ out strError);
                         nRet = LoadOneItem(
                             stop,
                             channel,
-                            this.comboBox_load_type.Text,
+                            this.PublicationType,
                             "@refID:" + strRefID,
                             list,
                             out strError);
@@ -4840,7 +5009,7 @@ out strError);
             {
                 Global.GetBatchNoTable(e,
                     this,
-                    this.comboBox_load_type.Text,
+                    this.PublicationType,
                     "order",
                     looping.Progress,
                     channel);
@@ -4863,27 +5032,23 @@ out strError);
 
         // 根据排序键值的变化分组设置颜色
         // 算法是将原本的背景颜色变深或者浅一点
-        static void SetGroupBackcolor(
+        void SetGroupBackcolor(
             ListView list,
             int nSortColumn)
         {
             string strPrevText = "";
             bool bDark = false;
-            for (int i = 0; i < list.Items.Count; i++)
+
+            var items = ListViewUtil.GetItems(list);
+
+            for (int i = 0; i < items.Count; i++)
             {
-                ListViewItem item = list.Items[i];
+                ListViewItem item = items[i];
 
                 if (item.ImageIndex == TYPE_ERROR)
                     continue;
 
-                string strThisText = "";
-                try
-                {
-                    strThisText = ListViewUtil.GetItemText(item, nSortColumn);
-                }
-                catch
-                {
-                }
+                string strThisText = ListViewUtil.GetItemText(item, nSortColumn);
 
                 if (strThisText != strPrevText)
                 {
@@ -4896,28 +5061,17 @@ out strError);
                     strPrevText = strThisText;
                 }
 
-                if (bDark == true)
+                this.TryInvoke(() =>
                 {
-                    item.BackColor = Global.Dark(GetItemBackColor(item.ImageIndex), 0.05F);
-
-                    /*
-                    item.BackColor = Color.LightGray;
-
-                    if (item.ForeColor == item.BackColor)
-                        item.ForeColor = Color.Black;
-                     * */
-                }
-                else
-                {
-                    item.BackColor = Global.Light(GetItemBackColor(item.ImageIndex), 0.05F);
-
-                    /*
-                    item.BackColor = Color.White;
-
-                    if (item.ForeColor == item.BackColor)
-                        item.ForeColor = Color.Black;
-                     * */
-                }
+                    if (bDark == true)
+                    {
+                        item.BackColor = Global.Dark(GetItemBackColor(item.ImageIndex), 0.05F);
+                    }
+                    else
+                    {
+                        item.BackColor = Global.Light(GetItemBackColor(item.ImageIndex), 0.05F);
+                    }
+                });
             }
         }
 
@@ -5137,7 +5291,7 @@ out strError);
             form.MdiParent = Program.MainForm;
             form.Show();
 
-            if (this.comboBox_load_type.Text == "图书")
+            if (this.PublicationType == "图书")
                 form.LoadOrderByRecPath(strRecPath, false);
             else
                 form.LoadIssueByRecPath(strRecPath, false);
@@ -5441,7 +5595,10 @@ out strError);
 
         int OriginIndex(ListViewItem item)
         {
-            return this.listView_origin.Items.IndexOf(item);
+            return this.TryGet(() =>
+            {
+                return this.listView_origin.Items.IndexOf(item);
+            });
         }
 
         class Tao
@@ -5514,9 +5671,13 @@ out strError);
 
             List<Tao> taos = new List<Tao>();
 
-            for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            var origin_items = ListViewUtil.GetItems(this.listView_origin);
+
+            // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            for (int i = 0; i < origin_items.Count; i++)
             {
-                ListViewItem source = this.listView_origin.Items[i];
+                // ListViewItem source = this.listView_origin.Items[i];
+                ListViewItem source = origin_items[i];
 
                 string strSubCopy = ListViewUtil.GetItemText(source,
                     ORIGIN_COLUMN_ACCEPTSUBCOPY);
@@ -5664,22 +5825,30 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                 DateTime now = DateTime.Now;
                 // int nOrderIdSeed = 1;
 
-                this.listView_merged.Items.Clear();
-                // 2008/11/22
-                this.SortColumns_merged.Clear();
-                SortColumns.ClearColumnSortDisplay(this.listView_merged.Columns);
+                this.TryInvoke(() =>
+                {
+                    this.listView_merged.Items.Clear();
+                    // 2008/11/22
+                    this.SortColumns_merged.Clear();
+                    SortColumns.ClearColumnSortDisplay(this.listView_merged.Columns);
+                });
 
                 // 先将原始数据列表按照 bibliorecpath/seller/price 列排序
                 SortOriginListForMerge();
+
+                var list_origin_items = ListViewUtil.GetItems(this.listView_origin);
 
                 // 只提取一套一册的，和一套的第一册
                 List<ListViewItem> items = new List<ListViewItem>();
                 // 册价格修正表。订购记录路径 --> List<string> 正确的册价格字符串
                 // TODO: 也可以考虑在 Origin ListView 中直接修正，即，把每套第一个册记录的修改为总价，其余册记录修改为 0。不过这样容易让观察者感到迷惑
                 Hashtable item_price_table = new Hashtable();
-                for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                for (int i = 0;
+                    i < /*this.listView_origin.Items*/list_origin_items.Count;
+                    i++)
                 {
-                    ListViewItem source = this.listView_origin.Items[i];
+                    // ListViewItem source = this.listView_origin.Items[i];
+                    ListViewItem source = list_origin_items[i];
 
                     // 1:2/2 表示 第一套内的第二册，(一套)一共二册
                     string strSubCopy = ListViewUtil.GetItemText(source,
@@ -5939,7 +6108,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                         string strCurrentCatalogNo = ListViewUtil.GetItemText(current_source,
                             ORIGIN_COLUMN_CATALOGNO);
 
-                        if (this.comboBox_load_type.Text == "图书")
+                        if (this.PublicationType == "图书")
                         {
                             // 十一元组判断
                             if (strBiblioRecPath != strCurrentBiblioRecPath
@@ -5965,7 +6134,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                         }
                         else
                         {
-                            Debug.Assert(this.comboBox_load_type.Text == "连续出版物", "");
+                            Debug.Assert(this.PublicationType == "连续出版物", "");
                             // 十三元组判断
                             if (strBiblioRecPath != strCurrentBiblioRecPath
                                 || strSeller != strCurrentSeller
@@ -6060,15 +6229,19 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                         nLength++;
                     }
 
-                    ListViewItem target = new ListViewItem();
+                    ListViewItem target = null;
 
-                    if (source.ImageIndex == TYPE_ERROR)
-                        target.ImageIndex = TYPE_ERROR;
-                    else
-                        target.ImageIndex = TYPE_NORMAL;  // 
+                    this.TryInvoke(() =>
+                    {
+                        target = new ListViewItem();
 
-                    // seller
-                    target.Text = strSeller;
+                        if (source.ImageIndex == TYPE_ERROR)
+                            target.ImageIndex = TYPE_ERROR;
+                        else
+                            target.ImageIndex = TYPE_NORMAL;  // 
+                                                              // seller
+                        target.Text = strSeller;
+                    });
 
                     // catalog no 
                     ListViewUtil.ChangeItemText(target, MERGED_COLUMN_CATALOGNO,
@@ -6231,8 +6404,10 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                     // 每个合并后事项的Tag都保留了其来源ListViewItem的列表
                     target.Tag = origin_items;
 
-                    this.listView_merged.Items.Add(target);
-
+                    this.TryInvoke(() =>
+                    {
+                        this.listView_merged.Items.Add(target);
+                    });
                     i = nStart + nLength - 1;
                 }
 
@@ -6247,11 +6422,14 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                 if (null_acceptprice_lineindexs.Count > 0)
                 {
                     ListViewUtil.ClearSelection(this.listView_origin);
-                    for (int i = 0; i < null_acceptprice_lineindexs.Count; i++)
+                    this.TryInvoke(() =>
                     {
-                        this.listView_origin.Items[null_acceptprice_lineindexs[i]].Selected = true;
-                    }
-                    MessageBox.Show(this, "原始数据列表中共有 " + null_acceptprice_lineindexs.Count.ToString() + "  行的到书价为空，已被选定，请注意检查");
+                        for (int i = 0; i < null_acceptprice_lineindexs.Count; i++)
+                        {
+                            this.listView_origin.Items[null_acceptprice_lineindexs[i]].Selected = true;
+                        }
+                    });
+                    this.MessageBoxShow("原始数据列表中共有 " + null_acceptprice_lineindexs.Count.ToString() + "  行的到书价为空，已被选定，请注意检查");
                 }
 
                 return 0;
@@ -6262,7 +6440,10 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
                 // 2020/7/9
                 // 进一步把 merged listview 全部行清空，以防止用户打印输出错误的或者不足的合并数据？
-                this.listView_merged.Items.Clear();
+                this.TryInvoke(() =>
+                {
+                    this.listView_merged.Items.Clear();
+                });
                 return -1;
             }
             catch (Exception ex)
@@ -6273,7 +6454,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
         }
 
         // 设置listview item的changed状态
-        static void SetItemChanged(ListViewItem item,
+        void SetItemChanged(ListViewItem item,
             bool bChanged)
         {
             OriginAcceptItemData data = (OriginAcceptItemData)item.Tag;
@@ -6445,10 +6626,13 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
             column.SortStyle = ColumnSortStyle.LeftAlign;
             sort_columns.Add(column);
 
-            // 排序
-            this.listView_origin.ListViewItemSorter = new SortColumnsComparer(sort_columns);
+            this.TryInvoke(() =>
+            {
+                // 排序
+                this.listView_origin.ListViewItemSorter = new SortColumnsComparer(sort_columns);
 
-            this.listView_origin.ListViewItemSorter = null;
+                this.listView_origin.ListViewItemSorter = null;
+            });
 
             SetGroupBackcolor(
                 this.listView_origin,
@@ -6606,7 +6790,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
             string strNamePath = "printaccept_origin_printoption";
 
             PrintOption option = new AcceptOriginPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
-                this.comboBox_load_type.Text);
+                this.PublicationType);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
@@ -6615,7 +6799,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
             // dlg.MainForm = Program.MainForm;
             dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
-            dlg.Text = this.comboBox_load_type.Text + " 原始数据 打印参数";
+            dlg.Text = this.PublicationType + " 原始数据 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -6727,7 +6911,7 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
 
             // 获得打印参数
             PrintOption option = new AcceptOriginPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
-                this.comboBox_load_type.Text);
+                this.PublicationType);
             option.LoadData(Program.MainForm.AppInfo,
                 "printaccept_origin_printoption");
 
@@ -7607,10 +7791,15 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             try
             {
                 string strPrevBiblioRecPath = "";
+
+                var origin_items = ListViewUtil.GetItems(this.listView_origin);
+
                 List<EntityInfo> entity_list = new List<EntityInfo>();
-                for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                for (int i = 0; i < origin_items.Count; i++)
                 {
-                    ListViewItem item = this.listView_origin.Items[i];
+                    // ListViewItem item = this.listView_origin.Items[i];
+                    ListViewItem item = origin_items[i];
 
                     if (item.ImageIndex == TYPE_ERROR)
                     {
@@ -7798,12 +7987,19 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             out ListViewItem item)
         {
             item = null;
-            for (int i = 0; i < this.listView_origin.Items.Count; i++)
+
+            var origin_items = ListViewUtil.GetItems(this.listView_origin);
+
+            // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            foreach (var current in origin_items)
             {
-                item = this.listView_origin.Items[i];
-                OriginAcceptItemData data = (OriginAcceptItemData)item.Tag;
+                // item = this.listView_origin.Items[i];
+                OriginAcceptItemData data = (OriginAcceptItemData)current.Tag;
                 if (data.RefID == strRefID)
+                {
+                    item = current;
                     return data;
+                }
             }
 
             item = null;
@@ -7817,10 +8013,13 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
         {
             get
             {
-                for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                var origin_items = ListViewUtil.GetItems(this.listView_origin);
+                // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                foreach (var item in origin_items)
                 {
-                    OriginAcceptItemData data = (OriginAcceptItemData)this.listView_origin.Items[i].Tag;
-                    if (data.Changed == true)
+                    // OriginAcceptItemData data = (OriginAcceptItemData)this.listView_origin.Items[i].Tag;
+                    OriginAcceptItemData data = (OriginAcceptItemData)item.Tag;
+                    if (data != null && data.Changed == true)
                         return true;
                 }
 
@@ -7835,7 +8034,10 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
         {
             get
             {
-                return this.comboBox_load_type.Text;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_load_type.Text;
+                });
             }
             set
             {
@@ -7844,7 +8046,10 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                     throw new Exception("不合法的PublicationType值 '" + value + "'。必须为 '图书' 或 '连续出版物'");
                 }
 
-                this.comboBox_load_type.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_load_type.Text = value;
+                });
             }
         }
 
@@ -8024,10 +8229,13 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 "disableControl");
             try
             {
+                var origin_items = ListViewUtil.GetItems(this.listView_origin);
+
                 List<ListViewItem> items = new List<ListViewItem>();
-                for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                foreach (var item in origin_items)
                 {
-                    ListViewItem item = this.listView_origin.Items[i];
+                    // ListViewItem item = this.listView_origin.Items[i];
 
                     items.Add(item);
 
@@ -8037,7 +8245,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
                 if (nErrorCount != 0)
                 {
-                    MessageBox.Show(this, "警告：这里打印出的清单，有包含错误信息的事项。");
+                    this.MessageBoxShow("警告：这里打印出的清单，有包含错误信息的事项。");
                 }
 
                 PrintExchangeRateList(
@@ -8251,7 +8459,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             // 获得打印参数
             string strNamePath = "printaccept_exchangerate_printoption";
             ExchangeRatePrintOption option = new ExchangeRatePrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
-                this.comboBox_load_type.Text);
+                this.PublicationType);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
@@ -8531,7 +8739,7 @@ false);
             string strNamePath = "printaccept_exchangerate_printoption";
 
             PrintOption option = new ExchangeRatePrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
-                this.comboBox_load_type.Text);
+                this.PublicationType);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
@@ -8540,7 +8748,7 @@ false);
 
             // dlg.MainForm = Program.MainForm;
             dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
-            dlg.Text = this.comboBox_load_type.Text + " 汇率表 打印参数";
+            dlg.Text = this.PublicationType + " 汇率表 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
             };

@@ -327,14 +327,21 @@ namespace dp2Circulation
             if (this.m_biblioTable == null)
                 return;
 
-            if (this._listviewRecords.SelectedItems.Count == 0)
+            var selected_item_count = this.TryGet(() =>
+            {
+                return this._listviewRecords.SelectedItems.Count;
+            });
+            if (selected_item_count == 0)
                 return; // 是否要显示一个空画面?
 
-            ListViewItem item = this._listviewRecords.SelectedItems[0];
+            ListViewItem item = this.TryGet(() =>
+            {
+                return this._listviewRecords.SelectedItems[0];
+            });
 
             Program.MainForm.OpenCommentViewer(bOpenWindow);
 
-            string strRecPath = item.Text;
+            string strRecPath = ListViewUtil.GetItemText(item, 0);  // item.Text;
             if (string.IsNullOrEmpty(strRecPath) == true)
                 return;
 
@@ -750,11 +757,12 @@ out strError);
                 List<string> recpaths = new List<string>();
                 foreach (ListViewItem item in items_param)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
+                    var recpath = ListViewUtil.GetItemText(item, 0);
+                    if (string.IsNullOrEmpty(recpath) == true
+                        || recpath.StartsWith("error:"))
                         continue;
                     items.Add(item);
-                    recpaths.Add(item.Text);
+                    recpaths.Add(recpath);
 
                     // TODO: 对出错状态的行不要清除修改状态
                     ClearOneChange(item, true);
@@ -907,7 +915,7 @@ out strError);
         public virtual void ClearOneChange(ListViewItem item,
             bool bClearBiblioInfo = false)
         {
-            string strRecPath = item.Text;
+            string strRecPath = ListViewUtil.GetItemText(item, 0);  // item.Text;
             if (string.IsNullOrEmpty(strRecPath) == true)
                 return;
 
@@ -1042,7 +1050,7 @@ out strError);
         // 保存选定事项的修改
         // parameters:
         //      strStyle force/空
-        public void SaveSelectedChangedRecords(string strStyle)
+        public async Task SaveSelectedChangedRecords(string strStyle)
         {
             // TODO: 确实要?
 
@@ -1067,11 +1075,21 @@ out strError);
                 goto ERROR1;
             }
 
+            /*
             int nRet = SaveChangedRecords(items,
                 strStyle,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var result = await SaveChangedRecordsAsync(
+                items,
+                strStyle);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
 
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
@@ -1084,7 +1102,7 @@ out strError);
         /// <summary>
         /// 保存全部修改事项
         /// </summary>
-        public void SaveAllChangedRecords(string strStyle)
+        public async Task SaveAllChangedRecords(string strStyle)
         {
             // TODO: 确实要?
 
@@ -1109,11 +1127,21 @@ out strError);
                 goto ERROR1;
             }
 
+            /*
             int nRet = SaveChangedRecords(items,
                 strStyle,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var result = await SaveChangedRecordsAsync(
+                items,
+                strStyle);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
 
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
@@ -1122,6 +1150,7 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         /// <summary>
         /// 保存对指定事项的修改
         /// </summary>
@@ -1133,7 +1162,40 @@ out strError);
             string strStyle,
             out string strError)
         {
-            strError = "";
+            var task = SaveChangedRecordsAsync(
+items,
+strStyle);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            var result = task.Result;
+            strError = result.ErrorInfo;
+            return result.Value;
+        }
+
+        public Task<NormalResult> SaveChangedRecordsAsync(
+            List<ListViewItem> items,
+            string strStyle)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _saveChangedRecords(
+    items,
+    strStyle);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // return:
+        //      -1  出错
+        //      0   成功
+        public NormalResult _saveChangedRecords(List<ListViewItem> items,
+            string strStyle)
+        {
+            string strError = "";
             int nRet = 0;
 
             // 保存过程中发生了错误的那些事项
@@ -1179,7 +1241,11 @@ out strError);
                         if (looping != null && looping.Progress.State != 0)
                         {
                             strError = "已中断";
-                            return -1;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         }
 
                         ListViewItem item = items[i];
@@ -1226,7 +1292,9 @@ out strError);
                             if (bHideMessageBox == false)
                             {
                                 string temp = strError;
-                                result = MessageDialog.Show(this,
+                                result = this.TryGet(() =>
+                                {
+                                    return MessageDialog.Show(this,
                 "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + temp + "。\r\n\r\n请问是否要重试保存此记录? \r\n\r\n([重试] 重试保存；\r\n[跳过] 不保存此记录、但继续处理后面的记录保存; \r\n[取消] 中断整批保存操作)",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxDefaultButton.Button1,
@@ -1234,6 +1302,7 @@ out strError);
                 ref bHideMessageBox,
                 new string[] { "重试", "跳过", "取消" },
                 StringUtil.IsInList("auto_retry", strStyle) ? 20 : 0);
+                                });
                             }
                             /*
                             DialogResult result = MessageBox.Show(this,
@@ -1252,7 +1321,11 @@ out strError);
                             if (result == System.Windows.Forms.DialogResult.Cancel)
                             {
                                 Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("放弃保存其余记录") + "</div>");
-                                return -1;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
                             }
                             error_items.Add(item);
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("跳过一条，继续向后处理") + "</div>");
@@ -1296,10 +1369,18 @@ out strError);
                             if (nRet == 0)
                             {
                                 // TODO: 警告后，把 item 行移除？
-                                return -1;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
                             }
                             if (nRet == -1)
-                                return -1;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
 
                             info.OldXml = strXml;
                             info.Timestamp = baNewTimestamp;
@@ -1312,8 +1393,11 @@ out strError);
                         info.OldXml = info.NewXml;
                         info.NewXml = "";
 
-                        item.BackColor = SystemColors.Window;
-                        item.ForeColor = SystemColors.WindowText;
+                        this.TryInvoke(() =>
+                        {
+                            item.BackColor = SystemColors.Window;
+                            item.ForeColor = SystemColors.WindowText;
+                        });
 
                         nSavedCount++;
 
@@ -1368,7 +1452,11 @@ out strError);
                         true,
                         out strError);
                     if (nRet == -1)
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                 }
                 DoViewComment(false);
             }
@@ -1388,7 +1476,7 @@ out strError);
                     strError += " ; ";
                 strError += "有 " + error_items.Count + " 条" + this.DbTypeCaption + "记录在保存时出错(可排除故障后后重新保存)。详情请看固定面板区的“操作历史”属性页";
             }
-            return 0;
+            return new NormalResult();
         }
 
         internal static void ChangeField(ref XmlDocument dom,

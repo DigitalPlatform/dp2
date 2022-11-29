@@ -1141,7 +1141,7 @@ true);
         ERROR1:
             e.ErrorInfo = strError;
             if (e.ShowErrorBox == true)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
             e.Canceled = true;
         }
 
@@ -1731,7 +1731,7 @@ true);
                     // 警告性质
                     // 2012/9/1
                     this.ActivateItemsPage();
-                    MessageBox.Show(this, "警告：创建索取号时发生错误: " + strError);
+                    this.MessageBoxShow("警告：创建索取号时发生错误: " + strError);
                 }
             }
 
@@ -2082,7 +2082,7 @@ true);
                         // 警告性质
                         // 2012/9/1
                         this.ActivateItemsPage();
-                        MessageBox.Show(this, "警告：创建索取号时发生错误: " + strError);
+                        this.MessageBoxShow("警告：创建索取号时发生错误: " + strError);
                     }
                 }
 
@@ -2110,7 +2110,7 @@ true);
                             form.BiblioRecPath,
                             out strError);
                         if (nRet == -1)
-                            MessageBox.Show(this, "警告：移动评注记录(" + this.BiblioRecPath + " --> " + form.BiblioRecPath + ")时发生错误: " + strError);
+                            this.MessageBoxShow("警告：移动评注记录(" + this.BiblioRecPath + " --> " + form.BiblioRecPath + ")时发生错误: " + strError);
 
                         // 重新装载评注属性页
                         nRet = form.CommentControl.LoadItemRecords(
@@ -2121,7 +2121,7 @@ true);
                             "",
                             out strError);
                         if (nRet == -1)
-                            MessageBox.Show(this, "警告：重新装载书目记录 " + form.BiblioRecPath + " 的下属评注记录时发生错误: " + strError);
+                            this.MessageBoxShow("警告：重新装载书目记录 " + form.BiblioRecPath + " 的下属评注记录时发生错误: " + strError);
 
                     }
                 }
@@ -2139,7 +2139,7 @@ true);
                     form.HostObject.Invoke("AfterCreateItems", this, e1);
                     if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                     {
-                        MessageBox.Show(this, "验收中创建册记录的延续工作(AfterCreateItems)失败: " + strError + "\r\n\r\n但保存操作已经成功");
+                        this.MessageBoxShow("验收中创建册记录的延续工作(AfterCreateItems)失败: " + strError + "\r\n\r\n但保存操作已经成功");
                     }
                 }
 
@@ -2683,12 +2683,15 @@ true);
             {
 
                 // 警告尚未保存
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
                     "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
                     "EntityForm",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button2);
+                });
                 if (result != DialogResult.Yes)
                 {
                     e.Cancel = true;
@@ -3064,7 +3067,7 @@ true);
     out strError,
     true);
             if (nRet == -1 /*|| string.IsNullOrEmpty(strError) == false*/)
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow(strError);
         }
 
         // 尽量不要用这个版本。用 xxxAsync 版本
@@ -4956,7 +4959,7 @@ TaskScheduler.Default);
                         nRet = this.VerifyData(this, e1, true);
                         if (nRet == 2)
                         {
-                            MessageBox.Show(this, "MARC 记录经校验发现有错，被拒绝保存。请修改 MARC 记录后重新保存");
+                            this.MessageBoxShow("MARC 记录经校验发现有错，被拒绝保存。请修改 MARC 记录后重新保存");
                             return -1;
                         }
 
@@ -4996,7 +4999,7 @@ TaskScheduler.Default);
                             out string temp_error);
                         if (nRet == -1)
                         {
-                            MessageBox.Show(this, temp_error);
+                            this.MessageBoxShow(temp_error);
                             return -1;
                         }
                         if (nRet == 0)
@@ -5006,12 +5009,15 @@ TaskScheduler.Default);
                         }
                         if (nRet > 0)
                         {
-                            DialogResult result = MessageBox.Show(this,
+                            DialogResult result = this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
             $"是否继续保存下级记录? \r\n\r\n{StringUtil.MakePathList(changed_names, "\r\n")}",
             "EntityForm",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Question,
             MessageBoxDefaultButton.Button2);
+                            });
                             if (result == System.Windows.Forms.DialogResult.No)
                             {
                                 info.ErrorCount = -1;
@@ -5237,7 +5243,7 @@ TaskScheduler.Default);
                 {
                     info.ErrorCount++;
                     info.Errors.Add(strError);
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                     // 2013/1/18
                     // 如果订购信息保存不成功，则不要继续保存后面的其他信息。这主要是为了订购验收环节考虑，避免在订购信息保存失败的情况下继续保存验收所创建的新的册信息
@@ -5263,7 +5269,7 @@ TaskScheduler.Default);
                     info.ErrorCount++;
 
                     info.Errors.Add(strError);
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                     info.bIssueError = true;
 
@@ -5294,7 +5300,7 @@ TaskScheduler.Default);
                     {
                         info.ErrorCount++;
                         info.Errors.Add(strError);
-                        MessageBox.Show(this, strError);
+                        this.MessageBoxShow(strError);
                     }
                 }
 
@@ -5315,7 +5321,7 @@ TaskScheduler.Default);
                 {
                     info.ErrorCount++;
                     info.Errors.Add(strError);
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                 }
 
                 // bool bObjectSaved = false;
@@ -5335,7 +5341,7 @@ TaskScheduler.Default);
                         out strError);
                     if (nRet == -1)
                     {
-                        MessageBox.Show(this, "保存对象信息时出错: " + strError);
+                        this.MessageBoxShow("保存对象信息时出错: " + strError);
                         info.ErrorCount++;
                         info.Errors.Add("保存对象信息时出错: " + strError);
                     }
@@ -5716,7 +5722,7 @@ TaskScheduler.Default);
 
                             if (lRet == 0)
                             {
-                                MessageBox.Show(this, "未命中");
+                                this.MessageBoxShow("未命中");
                                 return;
                             }
 
@@ -5931,7 +5937,7 @@ TaskScheduler.Default);
 
         ERROR1:
             CloseBrowseWindow();
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             // 焦点仍回到种检索词
             /*
             this.textBox_queryWord.Focus();
@@ -7035,7 +7041,7 @@ out strError);
         {
             if (string.IsNullOrEmpty(strItemBarcode) == true)
             {
-                MessageBox.Show(this, "请先输入一个册条码号才能进行检索");
+                this.MessageBoxShow("请先输入一个册条码号才能进行检索");
                 return -1;
             }
 #if NO
@@ -7063,15 +7069,18 @@ out strError);
                     if (bAutoSavePrev == false)
                     {
                         // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
                             "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
                             "EntityForm",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button1);
+                        });
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show(this, "放弃装入册事项 (册条码号为 '" + strItemBarcode + "' )");
+                            this.MessageBoxShow("放弃装入册事项 (册条码号为 '" + strItemBarcode + "' )");
                             return -1;
                         }
                         if (result == DialogResult.Yes)
@@ -7119,7 +7128,7 @@ out strError);
                     string error = $"无法在列表中定位册条码号为 '{this.textBox_itemBarcode.Text}' 的册记录";
                     if (DisplayOtherLibraryItem == false)
                         error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
-                    MessageBox.Show(this, error);
+                    this.MessageBoxShow(error);
                 }
 
                 // 焦点切换到条码输入域
@@ -7181,15 +7190,18 @@ out strError);
                 if (bAutoSavePrev == false)
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
                         "EntityForm",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
+                    });
                     if (result == DialogResult.Cancel)
                     {
-                        MessageBox.Show(this, "放弃装入册事项 (册记录路径为 '" + strItemRecPath + "' )");
+                        this.MessageBoxShow("放弃装入册事项 (册记录路径为 '" + strItemRecPath + "' )");
                         return -1;
                     }
                     if (result == DialogResult.Yes)
@@ -7246,7 +7258,7 @@ out strError);
                     string error = $"无法在列表中定位路径为 {strItemRecPath} 的册记录";
                     if (DisplayOtherLibraryItem == false)
                         error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
-                    MessageBox.Show(this, error);
+                    this.MessageBoxShow(error);
                 }
 
                 if (strItemBarcode != this.textBox_itemBarcode.Text)
@@ -7322,15 +7334,18 @@ out strError);
                     if (bAutoSavePrev == false)
                     {
                         // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
                             "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
                             "EntityForm",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button1);
+                        });
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show(this, "放弃装入册事项 (册记录路径为 '" + strItemRefID + "' )");
+                            this.MessageBoxShow("放弃装入册事项 (册记录路径为 '" + strItemRefID + "' )");
                             return -1;
                         }
                         if (result == DialogResult.Yes)
@@ -7425,15 +7440,18 @@ out strError);
                     if (bAutoSavePrev == false)
                     {
                         // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
                             "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
                             "EntityForm",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button1);
+                        });
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show(this, "放弃装入评注事项 (评注记录路径为 '" + strCommentRecPath + "' )");
+                            this.MessageBoxShow("放弃装入评注事项 (评注记录路径为 '" + strCommentRecPath + "' )");
                             return -1;
                         }
                         if (result == DialogResult.Yes)
@@ -7520,15 +7538,18 @@ out strError);
                     if (bAutoSavePrev == false)
                     {
                         // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
                             "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
                             "EntityForm",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button1);
+                        });
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show(this, "放弃装入订购事项 (订购记录路径为 '" + strOrderRecPath + "' )");
+                            this.MessageBoxShow("放弃装入订购事项 (订购记录路径为 '" + strOrderRecPath + "' )");
                             return -1;
                         }
                         if (result == DialogResult.Yes)
@@ -7620,15 +7641,18 @@ out strError);
                     if (bAutoSavePrev == false)
                     {
                         // 警告尚未保存
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
                             "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
                             "EntityForm",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button1);
+                        });
                         if (result == DialogResult.Cancel)
                         {
-                            MessageBox.Show(this, "放弃装入册事项 (册记录路径为 '" + strIssueRecPath + "' )");
+                            this.MessageBoxShow("放弃装入册事项 (册记录路径为 '" + strIssueRecPath + "' )");
                             return -1;
                         }
                         if (result == DialogResult.Yes)
@@ -7759,12 +7783,15 @@ out strError);
         || this.ObjectChanged == true)
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。若此时清除，现有未保存信息将丢失。\r\n\r\n确实要清除内容? ",
                         "EntityForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.No)
                         return false;   // canceled
                 }
@@ -7906,15 +7933,18 @@ out strError);
                 else
                 {
 
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "装载编目模板前,发现当前窗口中已有 " + GetCurrentChangedPartName() + " 修改后未来得及保存。是否要继续装载编目模板到窗口中(这样将丢失先前修改的内容)?\r\n\r\n(是)继续装载编目模板 (否)不装载编目模板",
                         "EntityForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result != DialogResult.Yes)
                     {
-                        MessageBox.Show(this, "装载编目模板操作被放弃...");
+                        this.MessageBoxShow("装载编目模板操作被放弃...");
                         return 0;
                     }
                 }
@@ -8103,7 +8133,7 @@ out strError);
             }
             return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return -1;
         }
 
@@ -8387,7 +8417,7 @@ out strError);
                         this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
                         if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                         {
-                            MessageBox.Show(this, "保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                            this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
                         }
                     }
                 }
@@ -8491,7 +8521,7 @@ out strError);
                 if (lRet == 1)
                 {
                     // 有警告
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                 }
 
                 return 0;
@@ -8668,7 +8698,7 @@ out strError);
                     this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
                     if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                     {
-                        MessageBox.Show(this, "保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                        this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
                     }
                 }
             }
@@ -8783,7 +8813,7 @@ out strError);
                 }
 
                 if (string.IsNullOrEmpty(strWarning) == false)
-                    MessageBox.Show(this, strWarning);
+                    this.MessageBoxShow(strWarning);
                 if (channel.ErrorCode == ErrorCode.PartialDenied)
                     bPartialDenied = true;
 
@@ -8905,19 +8935,24 @@ out strError);
                             strError = "重新装载书目记录时出错: result.Length[" + results.Length.ToString() + "] 小于 2";
                             goto ERROR1;
                         }
-                        PartialDeniedDialog dlg = new PartialDeniedDialog();
 
-                        MainForm.SetControlFont(dlg, this.Font, false);
-                        dlg.SavingXml = strXmlBody;
-                        Debug.Assert(results.Length >= 2, "");
-                        dlg.SavedXml = results[1];
-                        // dlg.MainForm = Program.MainForm;
+                        var dialog_result = this.TryGet(() =>
+                        {
+                            PartialDeniedDialog dlg = new PartialDeniedDialog();
 
-                        Program.MainForm.AppInfo.LinkFormState(dlg, "PartialDeniedDialog_state");
-                        dlg.ShowDialog(this);
-                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                            MainForm.SetControlFont(dlg, this.Font, false);
+                            dlg.SavingXml = strXmlBody;
+                            Debug.Assert(results.Length >= 2, "");
+                            dlg.SavedXml = results[1];
+                            // dlg.MainForm = Program.MainForm;
 
-                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.OK)
+                            Program.MainForm.AppInfo.LinkFormState(dlg, "PartialDeniedDialog_state");
+                            dlg.ShowDialog(this);
+                            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                            return dlg.DialogResult;
+                        });
+
+                        if (dialog_result == System.Windows.Forms.DialogResult.OK)
                         {
                             string strOutputBiblioRecPath = "";
                             string strXml = "";
@@ -8965,7 +9000,7 @@ out strError);
             }
 
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return -1;
         }
 
@@ -9149,12 +9184,15 @@ out strError);
             strText += " ?";
 
             // 警告删除
-            DialogResult result = MessageBox.Show(this,
+            DialogResult result = this.TryGet(() =>
+            {
+                return MessageBox.Show(this,
                 strText,
                 "EntityForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2);
+            });
             if (result != DialogResult.Yes)
                 return;
 
@@ -9335,7 +9373,7 @@ out strError);
             return;
 
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // return:
@@ -9495,12 +9533,16 @@ out strError);
                     if (strAction == "change" && channel.ErrorCode == ErrorCode.NotFound)
                     {
                         strError = "保存书目记录 '" + strPath + "' 时出错: 原记录已经不存在";
-                        DialogResult result = MessageBox.Show(this,
-        strError + "\r\n\r\n请问是否改为重新创建此记录?",
+                        string error = strError;
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+        error + "\r\n\r\n请问是否改为重新创建此记录?",
         "EntityForm",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                        });
                         if (result == System.Windows.Forms.DialogResult.Yes)
                         {
                             strAction = "new";
@@ -9653,7 +9695,7 @@ out strError);
                     int nRet = this.VerifyData(this, e1, true);
                     if (nRet == 2)
                     {
-                        MessageBox.Show(this, "MARC 记录经校验发现有错，被拒绝保存。请修改 MARC 记录后重新保存");
+                        this.MessageBoxShow("MARC 记录经校验发现有错，被拒绝保存。请修改 MARC 记录后重新保存");
                         return;
                     }
                     bVerifyed = true;
@@ -9750,7 +9792,7 @@ out strError);
             dlg.ShowDialog();   // ?? this
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // MARC编辑器内文字改变
@@ -9780,7 +9822,7 @@ out strError);
         {
             if (this.DeletedMode == false)
             {
-                MessageBox.Show(this, "已经在普通模式");
+                this.MessageBoxShow("已经在普通模式");
                 return;
             }
 
@@ -10157,7 +10199,7 @@ out strError);
                 this._processing--;
             }
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             if (this.m_verifyViewer != null)
                 this.m_verifyViewer.ResultString = strError;
             return 0;
@@ -10740,7 +10782,7 @@ out strError);
             return 1;
         ERROR1:
             this.Activate();
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return -1;
         }
 
@@ -10824,12 +10866,15 @@ out strError);
             string strTargetRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
         "当前窗口内的记录原本是从 '" + strTargetRecPath + "' 复制过来的。是否要复制回原有位置？\r\n\r\nYes: 是; No: 否，继续进行普通复制操作; Cancel: 放弃本次操作",
         "EntityForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                });
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
                 if (result == System.Windows.Forms.DialogResult.Yes)
@@ -10976,12 +11021,15 @@ out strError);
         || this.CommentsChanged == true)
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。仅复制书目的操作不会复制这些下属记录，继续操作会丢弃这些修改。\r\n\r\n请问是否继续进行复制操作？",
                         "EntityForm",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.Cancel)
                     {
                         strError = "复制操作被放弃";
@@ -10995,12 +11043,15 @@ out strError);
                 if (this.ObjectChanged == true)
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n请问要在复制书目记录前立即保存这些修改到源记录么？",
                         "EntityForm",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.OK)
                     {
                         // 提交所有保存请求
@@ -11036,7 +11087,7 @@ out strError);
                 goto ERROR1;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         /// <summary>
@@ -11068,7 +11119,7 @@ out strError);
                         out strError);
                     if (nRet == -1)
                     {
-                        MessageBox.Show(this, strError);
+                        this.MessageBoxShow( strError);
                         return; // 放弃进一步操作
                     }
 
@@ -11116,7 +11167,7 @@ out strError);
 
                     // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
                     if (nRet == -2)
-                        MessageBox.Show(this, "警告：前端开启了校验条码号功能，但是服务器端缺乏相应的脚本函数，无法校验条码号。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
+                        this.MessageBoxShow("警告：前端开启了校验条码号功能，但是服务器端缺乏相应的脚本函数，无法校验条码号。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
 
                 }
 
@@ -11162,7 +11213,7 @@ out strError);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         static bool IsISBnBarcode(string strText)
@@ -11298,7 +11349,7 @@ out strError);
                 SetMarcEditFont();
             else
             {
-                MessageBox.Show(this, "如果要设置 MARC编辑器 的字体，请将输入焦点置于 MARC编辑器 上再使用本功能。\r\n\r\n如果要设置窗口内其它部分的字体，请使用主菜单的“参数配置”命令，在随后出现的对话框中选择“外观”属性页，设置“缺省字体”");
+                this.MessageBoxShow("如果要设置 MARC编辑器 的字体，请将输入焦点置于 MARC编辑器 上再使用本功能。\r\n\r\n如果要设置窗口内其它部分的字体，请使用主菜单的“参数配置”命令，在随后出现的对话框中选择“外观”属性页，设置“缺省字体”");
             }
         }
 
@@ -11721,7 +11772,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow( strError);
 #if NO
             string strError = "";
 
@@ -11879,7 +11930,7 @@ out strError);
                     out strError);
             if (nRet == -1 || nRet == 0)
             {
-                MessageBox.Show(this, strError);
+                this.MessageBoxShow( strError);
                 goto REDO;
             }
 
@@ -11965,12 +12016,15 @@ out strError);
 
             bool bReplaceMarc = true;
             // 警告：当前记录会被目标记录完全替代
-            DialogResult result = MessageBox.Show(this,
+            DialogResult result = this.TryGet(() =>
+            {
+                return MessageBox.Show(this,
                 "当前MARC编辑器内的内容将被来自目标记录的内容完全取代。\r\n\r\n确实要取代? \r\n\r\n是(Yes): 取代；\r\n否(No): 不取代，但是继续设置目标记录路径的操作；\r\n取消(Cancel): 不取代，并且放弃设置目标记录路径的操作",
                 "EntityForm",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button1);
+            });
             if (result == DialogResult.Cancel)
                 return;
             if (result == DialogResult.Yes)
@@ -12033,7 +12087,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow( strError);
         }
 
         // return:
@@ -12193,7 +12247,7 @@ out strError);
 
                         // 2008/11/13 
                         if (nRet == 0)
-                            MessageBox.Show(this, "警告：目标记录 '" + strOutputTargetBiblioRecPath + "' 是一条空记录");
+                            this.MessageBoxShow("警告：目标记录 '" + strOutputTargetBiblioRecPath + "' 是一条空记录");
 
                         this.BiblioChanged = true;
                     }
@@ -12238,7 +12292,7 @@ out strError);
                 true);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         void AddToPendingList(string strBiblioRecPath,
@@ -12466,7 +12520,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 从XML文件中导入全部信息
@@ -12586,7 +12640,7 @@ out strError);
             SetSaveAllButtonState(!InDisabledState);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void ToolStripMenuItem_viewMarcJidaoData_Click(object sender, EventArgs e)
@@ -12634,13 +12688,16 @@ out strError);
 
             if (nRet > 0)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
         "升级后创建的 " + nCount + " 个期记录中有以下已经存在：\r\n" + strError + "\r\n\r\n这些重复的期不能加入期记录列表。\r\n\r\n请问是否继续接受其余 "
         + dlg.Xmls.Count.ToString() + " 个期记录? ",
         "EntityForm",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
+                });
                 if (result == DialogResult.No)
                     return;
             }
@@ -12659,7 +12716,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void toolStripButton_option_Click(object sender, EventArgs e)
@@ -12958,7 +13015,7 @@ out strError);
             this.m_marcEditor.SelectCurEdit(subfield.Offset + 2, 0);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         void m_viewer_FormClosed(object sender, FormClosedEventArgs e)
@@ -13193,7 +13250,7 @@ out strError);
         {
             if (this.DeletedMode == false)
             {
-                MessageBox.Show(this, "已经在普通模式");
+                this.MessageBoxShow("已经在普通模式");
                 return;
             }
 
@@ -13218,12 +13275,15 @@ out strError);
             string strTargetRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
         "当前窗口内的记录原本是从 '" + strTargetRecPath + "' 复制过来的。是否要移动回原有位置？\r\n\r\nYes: 是; No: 否，继续进行普通移动操作; Cancel: 放弃本次操作",
         "EntityForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                });
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
                 if (result == System.Windows.Forms.DialogResult.Yes)
@@ -13292,7 +13352,7 @@ out strError);
                 goto ERROR1;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         public int MoveTo(string strTargetRecPathParam,
@@ -13397,12 +13457,15 @@ out strError);
                 )
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。移动操作前必须先保存当前记录。\r\n\r\n请问要立即保存么？\r\n\r\n(OK: 保存; Cancel: 放弃本次移动操作)",
                         "EntityForm",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.OK)
                     {
                         // 提交所有保存请求
@@ -13583,7 +13646,7 @@ out strError);
                         {
                             // 
                             strError = "无法为记录 '" + strTargetRecPathParam + "' 建立指向 '" + strOldBiblioRecPath + "' 的目标关系：" + strError;
-                            MessageBox.Show(this, strError);
+                            this.MessageBoxShow(strError);
                         }
                         else
                         {
@@ -13831,7 +13894,7 @@ out strError);
         {
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.98") < 0)
             {
-                MessageBox.Show(this, "本功能需要配合 dp2library 2.98 或以上版本才能使用");
+                this.MessageBoxShow("本功能需要配合 dp2library 2.98 或以上版本才能使用");
                 return;
             }
 
@@ -13913,7 +13976,7 @@ out strError);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void ToolStripMenuItem_searchDupInNewWindow_Click(object sender, EventArgs e)
@@ -13945,7 +14008,7 @@ out strError);
             form.Show();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
         string GetHeadString(bool bAjax = true)
         {
@@ -14471,12 +14534,15 @@ out strError);
                         }
                         else if (fields.Count > 1)
                         {
-                            DialogResult result = MessageBox.Show(this,
+                            DialogResult result = this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
                                 "当前 MARC 编辑器中已经存在 " + fields.Count.ToString() + " 个 856 字段其 $" + DetailHost.LinkSubfieldName + " 子字段关联了对象 ID '" + strID + "' ，是否要编辑其中的第一个 856 字段?\r\n\r\n(注：可改在 MARC 编辑器中选中一个具体的 856 字段进行编辑)\r\n\r\n(OK: 编辑其中的第一个 856 字段; Cancel: 取消操作",
                                 "EntityForm",
                                 MessageBoxButtons.OKCancel,
                                 MessageBoxIcon.Question,
                                 MessageBoxDefaultButton.Button2);
+                            });
                             if (result == DialogResult.Cancel)
                                 return;
                             field_856 = fields[0];
@@ -14508,12 +14574,12 @@ out strError);
             if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
                 this.SynchronizeMarc();
 
-            MessageBox.Show(this, "封面图像和856字段已经成功创建。\r\n"
+            this.MessageBoxShow("封面图像和856字段已经成功创建。\r\n"
                 // + strShrinkComment
                 + "\r\n\r\n(但因当前记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前记录。");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 从剪贴板插入封面图像
@@ -14624,12 +14690,15 @@ out strError);
                 }
                 else if (fields.Count > 1)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前 MARC 编辑器中已经存在 " + fields.Count.ToString() + " 个 856 字段其 $" + DetailHost.LinkSubfieldName + " 子字段关联了对象 ID '" + strID + "' ，是否要编辑其中的第一个 856 字段?\r\n\r\n(注：可改在 MARC 编辑器中选中一个具体的 856 字段进行编辑)\r\n\r\n(OK: 编辑其中的第一个 856 字段; Cancel: 取消操作",
                         "EntityForm",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.Cancel)
                         return;
                     field_856 = fields[0];
@@ -14650,12 +14719,12 @@ out strError);
             if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
                 this.SynchronizeMarc();
 
-            MessageBox.Show(this, "封面图像和856字段已经成功创建。\r\n"
+            this.MessageBoxShow("封面图像和856字段已经成功创建。\r\n"
                 // + strShrinkComment
                 + "\r\n\r\n(但因当前记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前记录。");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
 #if NO
@@ -14777,7 +14846,7 @@ out strError);
             dlg.ShowDialog(this);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         int GetKeys(string strBiblioRecPath,
@@ -14915,7 +14984,7 @@ out strError);
             dlg.ShowDialog(this);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 此函数没有用了。table xml 中应该本来“数字资源” line 元素就是元素直接构造的方式(不是 htmlEncode 方式的 value 属性)
@@ -15009,7 +15078,7 @@ out strError);
             if (bChanged == true)
                 this.SetMarc(record.Text);
             else
-                MessageBox.Show(this, "没有发现封面图像的 856 字段");
+                this.MessageBoxShow("没有发现封面图像的 856 字段");
         }
 
         static string GetImageID(string strUri)

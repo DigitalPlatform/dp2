@@ -3214,7 +3214,7 @@ namespace dp2Library
                     string filePath = app.GetMemorySetFilePath(
                         sessioninfo,
                         strResultSetName,
-                        strBrowseInfoStyle);    
+                        strBrowseInfoStyle);
 
                     BeginSearch();  // 如果创建本地结果集的时间太长，前端可以用 Stop() API 中断
                     channel.Idle += new IdleEventHandler(channel_IdleEvent);
@@ -3276,6 +3276,14 @@ namespace dp2Library
                     return result;
                 }
 
+                // 2022/11/29
+                if (searchresults != null
+    && StringUtil.IsInList("keycount", strBrowseInfoStyle) == false)
+                {
+                    FilterResultSet(searchresults,
+                        strBrowseInfoStyle);
+                }
+#if OLD
                 // 2021/7/15
                 // 过滤结果
                 // 对 XML 记录进行过滤或者修改
@@ -3476,6 +3484,8 @@ namespace dp2Library
                         }
                     }
                 }
+#endif
+
 
                 result.Value = lRet;
                 result.ErrorInfo = strError;
@@ -3490,6 +3500,206 @@ namespace dp2Library
                 result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strErrorText;
                 return result;
+            }
+        }
+
+        // 2022/11/29 从 GetSearchResult() 处理中转移到此处。可能和 GetBrowseRecords() 中的旧代码有差异
+        // 对 XML 记录进行过滤或者修改
+        void FilterResultSet(Record[] searchresults,
+            string strBrowseInfoStyle)
+        {
+            // 2012/9/15
+            // 当前用户是否能管辖一个读者库。key 为数据库名，value 为 true 或 false
+            Hashtable table = new Hashtable();  // 加快运算速度
+
+            // return:
+            //      null    没有找到 getreaderinfo 前缀
+            //      ""      找到了前缀，并且 level 部分为空
+            //      其他     返回 level 部分
+            string read_level = LibraryApplication.GetReaderInfoLevel("getreaderinfo", sessioninfo.RightsOrigin);
+            bool bHasGetReaderInfoRight = read_level != null;
+            // bool bHasGetReaderInfoRight = StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin);
+
+            bool bHasGetBiblioInfoRight = StringUtil.IsInList("getbiblioinfo", sessioninfo.RightsOrigin);
+
+            foreach (Record record in searchresults)
+            {
+                string strDbName = ResPath.GetDbName(record.Path);
+
+                bool bIsReader = sessioninfo.UserType == "reader";
+
+                if (app.IsReaderDbName(strDbName))
+                {
+                    // 2021/7/20
+                    // 先检测当前用户是否能管辖读者库 strDbName
+                    bool bChangeable = true;
+
+                    if (bIsReader)
+                    {
+                        // 不是读者自己的读者记录或者下级记录(比如对象记录)
+                        if (sessioninfo.Account == null
+                            || StringUtil.IsEqualOrSubPath(sessioninfo.Account.ReaderDomPath, record.Path) == false)
+                            bChangeable = false;
+                    }
+                    else
+                    {
+                        object o = table[strDbName];
+                        if (o == null)
+                        {
+                            if (app.IsReaderDbName(strDbName,
+                                out bool bReaderDbInCirculation,
+                                out string strLibraryCode) == true)
+                            {
+                                // 检查当前操作者是否管辖这个读者库
+                                // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                                bChangeable = app.IsCurrentChangeableReaderPath(strDbName + "/?",
+                        sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/);
+                            }
+                            table[strDbName] = bChangeable; // 记忆
+                        }
+                        else
+                            bChangeable = (bool)o;
+                    }
+
+                    if (bChangeable == false)
+                    {
+                        // 当前用户不管辖此读者库
+                        ClearRecord(record, $"当前用户不管辖读者库 '{strDbName}'");
+                        record.Path = "";
+                        /*
+                        record.Cols = null;
+                        record.RecordBody = null;
+                        */
+                    }
+                    else
+                    {
+                        // 过滤
+                        FilterPatronRecord(record,
+strDbName,
+read_level,
+strBrowseInfoStyle);
+                    }
+                }
+                else if (app.IsBiblioDbName(strDbName))
+                {
+                    /*
+                    if (bHasGetBiblioInfoRight == false)
+                    {
+                        ClearCols(record, "[滤除]");
+                    }
+                    */
+                    FilterBiblioRecord(record,
+                        strDbName,
+                        bHasGetBiblioInfoRight,
+                        sessioninfo.Access,
+                        strBrowseInfoStyle);
+                }
+                else if (app.IsItemDbName(strDbName))
+                {
+                    if (StringUtil.IsInList("getiteminfo,getentities,order", sessioninfo.RightsOrigin) == false)
+                    {
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                    else
+                        AddItemOI(app, sessioninfo, record, "filter_borrower");
+                }
+                else if (app.IsIssueDbName(strDbName))
+                {
+                    if (StringUtil.IsInList("getissues,getissueinfo,order", sessioninfo.RightsOrigin) == false)
+                    {
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                }
+                else if (app.IsOrderDbName(strDbName))
+                {
+                    if (StringUtil.IsInList("getorders,getorderinfo,order", sessioninfo.RightsOrigin) == false)
+                    {
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                }
+                else if (app.IsCommentDbName(strDbName))
+                {
+                    if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
+                    {
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                }
+                else if (app.ArrivedDbName == strDbName)
+                {
+                    if (StringUtil.IsInList("borrow,return", sessioninfo.RightsOrigin) == true
+                        || read_level == "")
+                    {
+
+                    }
+                    else
+                    {
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                }
+                else if (app.AmerceDbName == strDbName)
+                {
+                    if (StringUtil.IsInList("getrecord", sessioninfo.RightsOrigin) == false
+                        || sessioninfo.UserType == "reader")
+                    {
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                    else
+                        FilterAmerceRecord(record);
+                    // 注: GetRecord() API 可以获取违约金记录
+                    // settlement undosettlement deletesettlement
+                }
+                else if (app.MessageDbName == strDbName)
+                {
+                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                    {
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                }
+                else if (app.PinyinDbName == strDbName
+                    || app.GcatDbName == strDbName
+                    || app.WordDbName == strDbName)
+                {
+                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                    {
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                }
+                else
+                {
+                    // 实用库包括 publisher / zhongcihao / dictionary / inventory 类型
+                    string util_type = ServerDatabaseUtility.GetUtilDbType(app.LibraryCfgDom,
+strDbName);
+                    if (util_type != null)
+                    {
+                        if (util_type == "inventory")
+                        {
+                            // TODO: 盘点操作的用户具有什么权限?
+                            if (StringUtil.IsInList("inventory", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (util_type == "publisher")
+                        {
+                            // 公开
+                        }
+                    }
+                    else
+                    {
+                        // TODO: 根据具体情况再扩展 if
+                        ClearXml(record);
+                        ClearCols(record, LibraryApplication.FILTERED);
+                    }
+                }
             }
         }
 
@@ -4204,6 +4414,13 @@ namespace dp2Library
 
 #endif
 
+                // 2022/11/29
+                if (searchresults != null)
+                {
+                    FilterResultSet(searchresults,
+    strBrowseInfoStyle);
+                }
+#if OLD
                 // 对 XML 记录进行过滤或者修改
                 if (searchresults != null)
                 {
@@ -4291,6 +4508,50 @@ namespace dp2Library
                                 ClearCols(record, LibraryApplication.FILTERED);
                             }
                         }
+                        else if (app.ArrivedDbName == strDbName)
+                        {
+                            if (StringUtil.IsInList("borrow,return", sessioninfo.RightsOrigin) == true
+                                || read_level == "")
+                            {
+
+                            }
+                            else
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.AmerceDbName == strDbName)
+                        {
+                            if (StringUtil.IsInList("getrecord", sessioninfo.RightsOrigin) == false
+                                || sessioninfo.UserType == "reader")
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                            else
+                                FilterAmerceRecord(record);
+                            // 注: GetRecord() API 可以获取违约金记录
+                            // settlement undosettlement deletesettlement
+                        }
+                        else if (app.MessageDbName == strDbName)
+                        {
+                            if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
+                        else if (app.PinyinDbName == strDbName
+                            || app.GcatDbName == strDbName
+                            || app.WordDbName == strDbName)
+                        {
+                            if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                            {
+                                ClearXml(record);
+                                ClearCols(record, LibraryApplication.FILTERED);
+                            }
+                        }
                         else
                         {
                             // TODO: 根据实际需要增补 else if
@@ -4357,8 +4618,10 @@ namespace dp2Library
                     }
                 }
 
-                // 注: 0 并不表示没有命中。命中数要看 searchresults.Length
-                result.Value = lRet;
+#endif
+
+                    // 注: 0 并不表示没有命中。命中数要看 searchresults.Length
+                    result.Value = lRet;
                 result.ErrorInfo = strError;
                 return result;
             }

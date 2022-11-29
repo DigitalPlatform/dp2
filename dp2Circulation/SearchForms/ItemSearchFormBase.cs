@@ -54,7 +54,7 @@ namespace dp2Circulation
             get
             {
                 if (this.DbType == "item")
-                    return "册";
+                    return "实体";
                 else if (this.DbType == "comment")
                     return "评注";
                 else if (this.DbType == "order")
@@ -1056,12 +1056,15 @@ item_recpath);
                 if (this._listviewRecords.Items.Count > 0
                     && StringUtil.IsInList("clear", strStyle) == true)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "导入前是否要清除命中记录列表中的现有的 " + this._listviewRecords.Items.Count.ToString() + " 行?\r\n\r\n(如果不清除，则新导入的行将追加在已有行后面)\r\n(Yes 清除；No 不清除(追加)；Cancel 放弃导入)",
                         this.DbType + "SearchForm",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
+                    });
                     if (result == DialogResult.Cancel)
                         return 0;
                     if (result == DialogResult.Yes)
@@ -1137,6 +1140,14 @@ item_recpath);
                             if (Program.MainForm.IsIssueDbName(strDbName) == false)
                             {
                                 strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的期库名。很可能所指定的文件不是期库的记录路径文件";
+                                goto ERROR1;
+                            }
+                        }
+                        else if (this.DbType == "arrive")
+                        {
+                            if (Program.MainForm.ArrivedDbName != strDbName)
+                            {
+                                strError = $"路径 '{ strRecPath}' 中的数据库名 '{ strDbName}' 不是合法的预约到书库名({Program.MainForm.ArrivedDbName})。很可能所指定的文件不是预约到书库的记录路径文件";
                                 goto ERROR1;
                             }
                         }

@@ -277,7 +277,7 @@ namespace DigitalPlatform.Text
                 return "1.00";
             // TODO: 规整小数点后面的位数。两位小数以内，末尾不足的补充 0；多出来的去掉多余的末尾连续 0
             if (decimal.TryParse(strDiscount, out decimal discount) == false)
-                throw new PositionException("折扣值 '' 不合法。应为一个小数", strPosition);
+                throw new PositionException($"折扣值 '{strDiscount}' 不合法。应为一个小数", strPosition);
             return discount.ToString(CurrencyItem.fmt);
         }
 

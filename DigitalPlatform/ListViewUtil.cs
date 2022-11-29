@@ -14,6 +14,23 @@ namespace DigitalPlatform.GUI
 {
     public class ListViewUtil
     {
+        // 2022/11/29
+        public static List<ListViewItem> GetItems(ListView list)
+        {
+            return list.TryGet(() =>
+            {
+                return list.Items.Cast<ListViewItem>().ToList();
+            });
+        }
+
+        public static List<ListViewItem> GetSelectedItems(ListView list)
+        {
+            return list.TryGet(() =>
+            {
+                return list.SelectedItems.Cast<ListViewItem>().ToList();
+            });
+        }
+
         public static void BeginSelectItem(Control control, ListViewItem item)
         {
             control.BeginInvoke(new Action<ListViewItem>(

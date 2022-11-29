@@ -29,6 +29,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using DocumentFormat.OpenXml.Math;
+using System.Linq;
 
 
 // 2013/3/16 添加 XML 注释
@@ -6416,10 +6417,11 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
         }
 
         // 调用打印订单窗口 [验收情况]
-        void menu_printOrderFormAccept_Click(object sender, EventArgs e)
+        async void menu_printOrderFormAccept_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strFilename = PathUtil.MergePath(Program.MainForm.DataDir, "~orderrecpath.txt");
+            /*
             bool bAppend = false;   // 不希望出现询问追加的对话框，直接覆盖
             // 导出到订购记录路径文件
             // return:
@@ -6432,11 +6434,20 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
-            if (nRet == 0)
+            */
             {
-                strError = "所指定的订购记录中没有包含任何已验收的册记录信息";
-                goto ERROR1;
+                var result = await ExportToRecPathFile(strFilename, false);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                if (result.Value == 0)
+                {
+                    strError = "所指定的订购记录中没有包含任何已验收的册记录信息";
+                    goto ERROR1;
+                }
             }
 
             PrintOrderForm form = new PrintOrderForm();
@@ -6446,6 +6457,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
 
             form.AcceptCondition = true;
 
+            /*
             // 从(已验收的)册记录路径文件装载
             // return:
             //      -1  出错
@@ -6457,6 +6469,17 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            {
+                var result = await form.LoadFromOrderRecPathFile(
+                    true,
+                    strFilename);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+            }
 
             return;
         ERROR1:
@@ -6465,10 +6488,11 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
 
 
         // 调用打印订单窗口
-        void menu_printOrderForm_Click(object sender, EventArgs e)
+        async void menu_printOrderForm_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strFilename = PathUtil.MergePath(Program.MainForm.DataDir, "~orderrecpath.txt");
+            /*
             bool bAppend = false;   // 不希望出现询问追加的对话框，直接覆盖
             // 导出到订购记录路径文件
             // return:
@@ -6481,31 +6505,52 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
-            if (nRet == 0)
+            */
             {
-                strError = "所指定的订购记录中没有包含任何已验收的册记录信息";
-                goto ERROR1;
+                var result = await ExportToRecPathFile(strFilename,
+                    false);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                if (result.Value == 0)
+                {
+                    strError = "所指定的订购记录中没有包含任何已验收的册记录信息";
+                    goto ERROR1;
+                }
             }
 
             PrintOrderForm form = new PrintOrderForm();
-            // form.MainForm = Program.MainForm;
             form.MdiParent = Program.MainForm;
             form.Show();
 
             form.AcceptCondition = false;
 
+            /*
             // 从(已验收的)册记录路径文件装载
             // return:
             //      -1  出错
             //      0   放弃
             //      1   装载成功
-            nRet = form.LoadFromOrderRecPathFile(
+            int nRet = form.LoadFromOrderRecPathFile(
                 true,
                 strFilename,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            {
+                var result = await form.LoadFromOrderRecPathFile(
+    true,
+    strFilename);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+            }
 
             return;
         ERROR1:
@@ -7299,11 +7344,13 @@ out strError);
 
 
         // 调用打印验收单窗口
-        void menu_printAcceptForm_Click(object sender, EventArgs e)
+        async void menu_printAcceptForm_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strFilename = PathUtil.MergePath(Program.MainForm.DataDir, "~itemrecpath.txt");
             bool bAppend = false;   // 不希望出现询问追加的对话框，直接覆盖
+
+            /*
             // 导出到(已验收的)册记录路径文件
             // return:
             //      -1  出错
@@ -7315,11 +7362,23 @@ out strError);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
-            if (nRet == 0)
+            */
             {
-                strError = "所指定的订购记录中没有包含任何已验收的册记录信息";
-                goto ERROR1;
+                var result = await ExportToItemRecPathFile(
+                    strFilename,
+                    bAppend);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+                bAppend = result.Append;
+
+                if (result.Value == 0)
+                {
+                    strError = "所指定的订购记录中没有包含任何已验收的册记录信息";
+                    goto ERROR1;
+                }
             }
 
             PrintAcceptForm form = new PrintAcceptForm();
@@ -7327,17 +7386,29 @@ out strError);
             form.MdiParent = Program.MainForm;
             form.Show();
 
+            /*
             // 从(已验收的)册记录路径文件装载
             // return:
             //      -1  出错
             //      0   放弃
             //      1   装载成功
-            nRet = form.LoadFromItemRecPathFile(
+            int nRet = form.LoadFromItemRecPathFile(
                 true,
                 strFilename,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            {
+                var result = await form.LoadFromItemRecPathFile(
+                true,
+                strFilename);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+            }
 
             return;
         ERROR1:
@@ -7345,7 +7416,7 @@ out strError);
         }
 
         // 导出到(已验收的)册记录路径文件
-        void menu_saveToAcceptItemRecordPathFile_Click(object sender, EventArgs e)
+        async void menu_saveToAcceptItemRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -7368,6 +7439,8 @@ out strError);
             this.ExportItemRecPathFilename = dlg.FileName;
 
             bool bAppend = true;    // 希望出现对话框询问追加，如果文件已经存在的话
+
+            /*
             // 导出到(已验收的)册记录路径文件
             // return:
             //      -1  出错
@@ -7379,6 +7452,16 @@ out strError);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var result = await ExportToItemRecPathFile(
+                this.ExportItemRecPathFilename,
+                bAppend);
+            if (result.Value == -1)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+            bAppend = result.Append;
 
             string strExportStyle = "导出";
             if (bAppend == true)
@@ -7390,6 +7473,7 @@ out strError);
             ShowMessageBox(strError);
         }
 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         // 导出到(已验收的)册记录路径文件
         // parameters:
         //      bAppend [in]如果可能的话是否尽量追加到已经存在的文件末尾 [out]实际采用的是否为追加方式
@@ -7402,19 +7486,61 @@ out strError);
             ref bool bAppend,
             out string strError)
         {
-            strError = "";
+            var task = ExportToItemRecPathFile(
+strFilename,
+bAppend);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            var result = task.Result;
+            bAppend = result.Append;
+            strError = result.ErrorInfo;
+            return result.Value;
+        }
+
+        public Task<ExportToRecPathFileResult> ExportToItemRecPathFile(
+    string strFilename,
+    bool bAppend)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _exportToItemRecPathFile(
+    strFilename,
+    bAppend);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // 导出到(已验收的)册记录路径文件
+        // parameters:
+        //      bAppend [in]如果可能的话是否尽量追加到已经存在的文件末尾 [out]实际采用的是否为追加方式
+        // return:
+        //      -1  出错
+        //      0   放弃导出
+        //      >0  导出成功，数字是已经导出的条数
+        ExportToRecPathFileResult _exportToItemRecPathFile(
+            string strFilename,
+            bool bAppend)
+        {
+            string strError = "";
             int nCount = 0;
 
             if (File.Exists(strFilename) == true && bAppend == true)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
                     "册记录路径文件 '" + strFilename + "' 已经存在。\r\n\r\n本次输出内容是否要追加到该文件尾部? (Yes 追加；No 覆盖；Cancel 放弃导出)",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button1);
+                });
                 if (result == DialogResult.Cancel)
-                    return 0;
+                    return new ExportToRecPathFileResult();
                 if (result == DialogResult.No)
                     bAppend = false;
                 else if (result == DialogResult.Yes)
@@ -7436,7 +7562,12 @@ out strError);
                 if (HasLooping())
                 {
                     strError = "无法重复进入循环";
-                    return -1;
+                    return new ExportToRecPathFileResult
+                    {
+                        Value = -1,
+                        Append = bAppend,
+                        ErrorInfo = strError
+                    };
                 }
 
                 /*
@@ -7444,21 +7575,24 @@ out strError);
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Initial("正在导出已验收的册记录路径 ...");
                 _stop.BeginLoop();
-                */
-                var looping = BeginLoop(this.DoStop, "正在导出已验收的册记录路径 ...", "halfstop");
-
                 LibraryChannel channel = this.GetChannel();
 
                 this.EnableControls(false);
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在导出已验收的册记录路径 ...",
+                    "disableControl,halfstop");
                 try
                 {
-                    foreach (ListViewItem item in this.listView_records.SelectedItems)
+                    var selected_items = ListViewUtil.GetSelectedItems(this.listView_records);
+                    // foreach (ListViewItem item in this.listView_records.SelectedItems)
+                    foreach(var item in selected_items)
                     {
-                        if (String.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
-                            continue;
+                        string item_text = ListViewUtil.GetItemText(item, 0);
 
-                        List<string> itemrecpaths = null;
+                        if (String.IsNullOrEmpty(item_text) == true
+                        || item_text.StartsWith("error:"))
+                            continue;
 
                         // 根据订购记录路径，检索出订购记录，并且获得相关联的已验收册记录路径
                         // parameters:
@@ -7469,10 +7603,15 @@ out strError);
                             looping.Progress,
                             channel,
                             item.Text,
-                            out itemrecpaths,
+                            out List<string> itemrecpaths,
                             out strError);
                         if (nRet == -1)
-                            return -1;
+                            return new ExportToRecPathFileResult
+                            {
+                                Value = -1,
+                                Append = bAppend,
+                                ErrorInfo = strError
+                            };
 
                         foreach (string strPath in itemrecpaths)
                         {
@@ -7480,24 +7619,30 @@ out strError);
                             nCount++;
                         }
                     }
+
+                    return new ExportToRecPathFileResult
+                    {
+                        Value = nCount,
+                        Append = bAppend,
+                    };
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
+                    EndLoop(looping);
                     this.EnableControls(true);
 
                     this.ReturnChannel(channel);
 
-                    /*
                     _stop.EndLoop();
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
                     _stop.HideProgress();
                     _stop.Style = StopStyle.None;
                     */
-                    EndLoop(looping);
                 }
             }
-            return nCount;
         }
 
         // 根据订购记录路径，检索出订购记录，并且获得相关联的已验收册记录路径
@@ -11124,6 +11269,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
             ShowMessageBox(strError);
         }
 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         // 导出到记录路径文件。和当前窗口的类型有关
         // parameters:
         //      bAppend [in]如果可能的话是否尽量追加到已经存在的文件末尾 [out]实际采用的是否为追加方式
@@ -11142,19 +11288,62 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
             ref bool bAppend,
             out string strError)
         {
-            strError = "";
+            var task = ExportToRecPathFile(
+    strFilename,
+    bAppend);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            var result = task.Result;
+            bAppend = result.Append;
+            strError = result.ErrorInfo;
+            return result.Value;
+        }
+
+        public class ExportToRecPathFileResult : NormalResult
+        {
+            public bool Append { get; set; }    // [out]
+        }
+
+        public Task<ExportToRecPathFileResult> ExportToRecPathFile(
+            string strFilename,
+            bool bAppend)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _exportToRecPathFile(
+    strFilename,
+    bAppend);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        ExportToRecPathFileResult _exportToRecPathFile(
+            string strFilename,
+            bool bAppend)
+        {
+            string strError = "";
             int nCount = 0;
 
             if (File.Exists(this.ExportRecPathFilename) == true && bAppend == true)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
                     "记录路径文件 '" + this.ExportRecPathFilename + "' 已经存在。\r\n\r\n本次输出内容是否要追加到该文件尾部? (Yes 追加；No 覆盖；Cancel 放弃导出)",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button1);
+                });
                 if (result == DialogResult.Cancel)
-                    return 0;
+                    return new ExportToRecPathFileResult
+                    {
+                        Value = 0
+                    };
                 if (result == DialogResult.No)
                     bAppend = false;
                 else if (result == DialogResult.Yes)
@@ -11176,7 +11365,12 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 if (HasLooping())
                 {
                     strError = "无法重复进入循环";
-                    return -1;
+                    return new ExportToRecPathFileResult
+                    {
+                        Value = -1,
+                        Append = bAppend,
+                        ErrorInfo = strError
+                    };
                 }
 
                 /*
@@ -11185,23 +11379,42 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 _stop.Initial("正在导出记录路径 ...");
                 _stop.BeginLoop();
                 */
+                /*
                 var looping = BeginLoop(this.DoStop, "正在导出记录路径 ...", "halfstop");
 
                 this.EnableControls(false);
+                */
+                var looping = Looping("正在导出记录路径 ...", "disableControl,halfstop");
                 try
                 {
-                    foreach (ListViewItem item in this.listView_records.SelectedItems)
+                    var items = this.TryGet(() =>
                     {
-                        if (String.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
+                        return this.listView_records.SelectedItems.Cast<ListViewItem>().ToList();
+                    });
+                    foreach (ListViewItem item in items)
+                    {
+                        string recpath = ListViewUtil.GetItemText(item, 0);
+
+                        if (String.IsNullOrEmpty(recpath) == true
+                        || recpath.StartsWith("error:"))
                             continue;
-                        sw.WriteLine(item.Text);
+                        sw.WriteLine(recpath);
                         nCount++;
                     }
+
+                    return new ExportToRecPathFileResult
+                    {
+                        Value = nCount,
+                        Append = bAppend,
+                    };
                 }
                 finally
                 {
+                    looping.Dispose();
+                    /*
                     this.EnableControls(true);
+                    EndLoop(looping);
+                    */
 
                     /*
                     _stop.EndLoop();
@@ -11210,15 +11423,12 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                     _stop.HideProgress();
                     _stop.Style = StopStyle.None;
                     */
-                    EndLoop(looping);
                 }
             }
-
-            return nCount;
         }
 
         // 保存选择的行中的有路径的部分行 到记录路径文件
-        void menu_saveToRecordPathFile_Click(object sender, EventArgs e)
+        async void menu_saveToRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -11241,6 +11451,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
 
             bool bAppend = true;
 
+            /*
             // return:
             //      -1  出错
             //      0   放弃导出
@@ -11251,12 +11462,23 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            */
+            var result = await ExportToRecPathFile(
+                this.ExportRecPathFilename,
+                bAppend);
+            if (result.Value == -1 && result.Value == 0)
+            {
+                strError = result.ErrorInfo;
+                goto ERROR1;
+            }
+
+            bAppend = result.Append;
 
             string strExportStyle = "导出";
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            Program.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
+            Program.MainForm.StatusBarMessage = "册记录路径 " + result.Value.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
             return;
         ERROR1:
             ShowMessageBox(strError);
@@ -12129,15 +12351,15 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
         }
 
         // 保存选定事项的修改
-        void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
+        async void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
         {
-            SaveSelectedChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
+            await SaveSelectedChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
         // 保存全部修改事项
-        void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
+        async void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
         {
-            SaveAllChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
+            await SaveAllChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
         // 创建一个新的 C# 脚本文件
@@ -12171,6 +12393,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
             try
             {
                 ItemHost.CreateStartCsFile(dlg.FileName, this.DbType, this.DbTypeCaption);
+                System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
             }
             catch (Exception ex)
             {
@@ -12178,12 +12401,10 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 return;
             }
 
-            System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
-
             this.m_strUsedMarcQueryFilename = dlg.FileName;
         }
 
-        void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
+        async void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -12432,25 +12653,20 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                         {
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode($"{info.RecPath} 修改后立即保存") + "</div>");
 
+                            /*
                             // REDO_SAVE:
                             nRet = SaveChangedRecords(new List<ListViewItem> { item.ListViewItem },
     save_style,
     out strError);
                             if (nRet == -1)
+                                goto ERROR1;
+                            */
+                            var result = await SaveChangedRecordsAsync(
+                                new List<ListViewItem> { item.ListViewItem },
+                                save_style);
+                            if (result.Value == -1)
                             {
-#if NO
-                                // TODO: 检查事件处理过程里面，是否有自动延时重试机制
-                                // 也可以考虑给 SaveChangedRecords 函数内部增加重试机制
-                                MessagePromptEventArgs e1 = new MessagePromptEventArgs();
-                                e1.MessageText = "保存修改内容时发生错误： " + strError;
-                                e1.Actions = "yes,no,cancel";
-                                loader_Prompt(this, e1);
-                                if (e1.ResultAction == "cancel")
-                                    goto ERROR1;
-                                else if (e1.ResultAction == "yes")
-                                    goto REDO_SAVE;
-                                continue;
-#endif
+                                strError = result.ErrorInfo;
                                 goto ERROR1;
                             }
                         }

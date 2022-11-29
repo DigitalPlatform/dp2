@@ -6097,7 +6097,7 @@ MessageBoxDefaultButton.Button2);
             */
             var looping = Looping(out LibraryChannel channel,
                 "正在计划任务 ...",
-                "disableControl");
+                "disableControl,timeout:0:5:0");
             try
             {
                 task_dom = new XmlDocument();
@@ -6520,7 +6520,7 @@ MessageBoxDefaultButton.Button2);
             */
             var looping = Looping(out LibraryChannel channel,
                 "正在创建本地存储 ...",
-                "disableControl");
+                "disableControl,timeout:0:5:0");
 
             try
             {
@@ -7013,7 +7013,7 @@ MessageBoxDefaultButton.Button2);
         // TODO: 中间从服务器复制表的阶段，也应该可以中断，以后可以从断点继续。会出现一个对话框，询问是否继续
         private void button_start_createLocalStorage_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => CreateLocalStorage(),
+            _ = Task.Factory.StartNew(() => CreateLocalStorage(),
                 CancellationToken.None,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);

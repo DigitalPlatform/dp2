@@ -1901,6 +1901,7 @@ false);
             this.Close();
         }
 
+        // TODO: 线程安全??
         // 获得当前正在编辑、已经修改尚未保存的记录路径集合
         public List<RecordForm> GetChangedRecords(string strStyle)
         {

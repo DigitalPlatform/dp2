@@ -5690,6 +5690,7 @@ out strFingerprint);
             this.m_strUsedMarcQueryFilename = dlg.FileName;
         }
 
+        // TODO: 独立线程改造
         void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5904,7 +5905,7 @@ out strFingerprint);
             DoViewComment(false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 丢弃选定的修改
@@ -5972,17 +5973,17 @@ out strFingerprint);
         }
 
         // 保存选定事项的修改
-        void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
+        async void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
         {
             // this._forceSave = Control.ModifierKeys == Keys.Control;
-            SaveSelectedChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
+            await SaveSelectedChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
         // 保存全部修改事项
-        void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
+        async void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
         {
             // this._forceSave = Control.ModifierKeys == Keys.Control;
-            SaveAllChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
+            await SaveAllChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
 

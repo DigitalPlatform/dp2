@@ -959,13 +959,12 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (image_index == 0 || image_index == 2)
             {
                 // 获得998$t
-                string strTargetRecPath = "";
                 long lRet = channel.GetBiblioInfo(
                     stop,
                     strRecPath,
                     "", // strBiblioXml
                     "targetrecpath",   // strResultType
-                    out strTargetRecPath,
+                    out string strTargetRecPath,
                     out strError);
                 ListViewUtil.ChangeItemText(item, COLUMN_TARGETRECPATH, strTargetRecPath);
             }
@@ -1663,11 +1662,17 @@ this.checkBox_prepare_createCallNumber.Checked);
                 // 插入一行，在源记录行以后
                 target_item = new ListViewItem();
                 ListViewUtil.ChangeItemText(target_item, COLUMN_RECPATH, strTargetRecPath);
-                int index = this.listView_accept_records.Items.IndexOf(source_item);
+                int index = this.TryGet(() =>
+                {
+                    return this.listView_accept_records.Items.IndexOf(source_item);
+                });
                 Debug.Assert(index != -1, "");
                 index++;
-                this.listView_accept_records.Items.Insert(index, target_item);
 
+                this.TryInvoke(() =>
+                {
+                    this.listView_accept_records.Items.Insert(index, target_item);
+                });
                 /*
                 this.EnableControls(false);
                 stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1683,7 +1688,8 @@ this.checkBox_prepare_createCallNumber.Checked);
                     nRet = RefreshBrowseLine(
                         looping.Progress,
                         channel,
-                        target_item, out strError);
+                        target_item,
+                        out strError);
                     if (nRet == -1)
                     {
                         ListViewUtil.ChangeItemText(target_item, 2, strError);
@@ -3181,7 +3187,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             MessageBox.Show(this, strError);
         }
 
-#region source and target 相关
+        #region source and target 相关
 
 
         // 自动设置各行的角色
@@ -4117,9 +4123,9 @@ this.checkBox_prepare_createCallNumber.Checked);
             return 1;
         }
 
-#endregion
+        #endregion
 
-#region drag and drop 相关
+        #region drag and drop 相关
 
         private void label_source_DragEnter(object sender, DragEventArgs e)
         {
@@ -4315,7 +4321,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
 
-#endregion
+        #endregion
 
         // 获得一个书目记录
         // return:
@@ -4541,7 +4547,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             this.SetNextButtonEnable();
         }
 
-        private void button_finish_printAcceptList_Click(object sender, EventArgs e)
+        private async void button_finish_printAcceptList_Click(object sender, EventArgs e)
         {
             PrintAcceptForm print_form = Program.MainForm.EnsurePrintAcceptForm();
 
@@ -4555,8 +4561,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             // 根据批次号检索装载数据
             // parameters:
             //      strDefaultBatchNo   缺省的批次号。如果为null，则表示不使用这个参数。
-            print_form.LoadFromAcceptBatchNo(this.tabComboBox_prepare_batchNo.Text);
-
+            await print_form.LoadFromAcceptBatchNoAsync(this.tabComboBox_prepare_batchNo.Text);
         }
 
         private void tabComboBox_prepare_batchNo_TextChanged(object sender, EventArgs e)
@@ -5156,7 +5161,7 @@ Keys keyData)
                 AcceptForm.SetProcessingState = this.checkBox_prepare_setProcessingState.Checked;
         }
 
-#region 新风格的 ChannelPool
+        #region 新风格的 ChannelPool
 
         ChannelList _channelList = new ChannelList();
 
@@ -5210,9 +5215,9 @@ Keys keyData)
             }
         }
 
-#endregion
+        #endregion
 
-#region looping
+        #region looping
 
         // 三种动作: GetChannel() BeginLoop() 和 EnableControl()
         // parameters:
