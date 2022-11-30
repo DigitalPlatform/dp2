@@ -2819,6 +2819,7 @@ namespace dp2Circulation
                 "name");
         }
 
+        // 注意：因本函数只是启动了装载，临时文件名建议不要重复使用
         /// <summary>
         /// 对浏览器控件设置 HTML 字符串
         /// </summary>
@@ -2903,6 +2904,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             Navigate(webBrowser, strTempFilename);  // 2015/7/28
         }
 
+        // 注意：因本函数只是启动了装载，临时文件名建议不要重复使用
         // 把 XML 字符串装入一个Web浏览器控件
         // 这个函数能够适应"<root ... />"这样的没有prolog的XML内容
         /// <summary>
@@ -2997,16 +2999,19 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             string strDataDir,
             Color backColor)
         {
-            StopWebBrowser(webBrowser);
-
-            if (String.IsNullOrEmpty(strDataDir) == true)
+            webBrowser.TryInvoke(() =>
             {
-                webBrowser.DocumentText = "(空)";
-                return;
-            }
-            string strImageUrl = PathUtil.MergePath(strDataDir, "page_blank_128.png");
-            string strHtml = "<html><body style='background-color:" + ColorUtil.Color2String(backColor) + ";'><img src='" + strImageUrl + "' width='64' height='64' alt='空'></body></html>";
-            webBrowser.DocumentText = strHtml;
+                StopWebBrowser(webBrowser);
+
+                if (String.IsNullOrEmpty(strDataDir) == true)
+                {
+                    webBrowser.DocumentText = "(空)";
+                    return;
+                }
+                string strImageUrl = PathUtil.MergePath(strDataDir, "page_blank_128.png");
+                string strHtml = "<html><body style='background-color:" + ColorUtil.Color2String(backColor) + ";'><img src='" + strImageUrl + "' width='64' height='64' alt='空'></body></html>";
+                webBrowser.DocumentText = strHtml;
+            });
         }
 
         /// <summary>
@@ -3031,8 +3036,10 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             doc = doc.OpenNew(true);
             doc.Write(strHtml);
              * */
-
-            webBrowser.DocumentText = strHtml;
+            webBrowser.TryInvoke(() =>
+            {
+                webBrowser.DocumentText = strHtml;
+            });
         }
 
         // 不支持异步调用

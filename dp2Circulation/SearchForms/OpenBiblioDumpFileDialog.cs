@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
@@ -27,14 +28,18 @@ namespace dp2Circulation
             set
             {
                 _createMode = value;
-                if (value == true)
+
+                this.TryInvoke(() =>
                 {
-                    this.Text = "创建书目转储文件";
-                }
-                else
-                {
-                    this.Text = "打开书目转储文件";
-                }
+                    if (value == true)
+                    {
+                        this.Text = "创建书目转储文件";
+                    }
+                    else
+                    {
+                        this.Text = "打开书目转储文件";
+                    }
+                });
             }
         }
 
@@ -157,7 +162,6 @@ namespace dp2Circulation
                 this.label_objectDirectoryName.Enabled = true;
 
                 AutoBuildObjectDirectoryName(true);
-
             }
             else
             {
@@ -174,11 +178,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_biblioDumpFileName.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_biblioDumpFileName.Text;
+                });
             }
             set
             {
-                this.textBox_biblioDumpFileName.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_biblioDumpFileName.Text = value;
+                });
             }
         }
 
@@ -186,11 +196,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_objectDirectoryName.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_objectDirectoryName.Text;
+                });
             }
             set
             {
-                this.textBox_biblioDumpFileName.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_biblioDumpFileName.Text = value;
+                });
             }
         }
 
@@ -198,11 +214,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_includeEntities.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_includeEntities.Checked;
+                });
             }
             set
             {
-                this.checkBox_includeEntities.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_includeEntities.Checked = value;
+                });
             }
         }
 
@@ -210,11 +232,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_includeIssues.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_includeIssues.Checked;
+                });
             }
             set
             {
-                this.checkBox_includeIssues.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_includeIssues.Checked = value;
+                });
             }
         }
 
@@ -222,11 +250,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_includeOrders.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_includeOrders.Checked;
+                });
             }
             set
             {
-                this.checkBox_includeOrders.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_includeOrders.Checked = value;
+                });
             }
         }
 
@@ -234,11 +268,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_includeComments.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_includeComments.Checked;
+                });
             }
             set
             {
-                this.checkBox_includeComments.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_includeComments.Checked = value;
+                });
             }
         }
 
@@ -246,11 +286,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_includeObjectFile.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_includeObjectFile.Checked;
+                });
             }
             set
             {
-                this.checkBox_includeObjectFile.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_includeObjectFile.Checked = value;
+                });
             }
         }
 

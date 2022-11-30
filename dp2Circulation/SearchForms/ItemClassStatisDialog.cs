@@ -9,9 +9,10 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Text;
+using DigitalPlatform;
 using DigitalPlatform.IO;
+using DigitalPlatform.Text;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -79,7 +80,6 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -112,11 +112,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_outputExcelFileName.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_outputExcelFileName.Text;
+                });
             }
             set
             {
-                this.textBox_outputExcelFileName.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_outputExcelFileName.Text = value;
+                });
             }
         }
 
@@ -124,11 +130,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_price.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_price.Checked;
+                });
             }
             set
             {
-                this.checkBox_price.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_price.Checked = value;
+                });
             }
         }
 
@@ -136,11 +148,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.comboBox_classType.Text;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_classType.Text;
+                });
             }
             set
             {
-                this.comboBox_classType.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_classType.Text = value;
+                });
             }
         }
 
@@ -339,7 +357,10 @@ Z";
         {
             get
             {
-                return this.textBox_classTitle.Lines.ToList();
+                return this.TryGet(() =>
+                {
+                    return this.textBox_classTitle.Lines.ToList();
+                });
             }
         }
 
@@ -470,6 +491,5 @@ Z";
 
             return true;
         }
-
     }
 }

@@ -1658,6 +1658,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 
         #endregion
 
+        // 注意：因本函数只是启动了装载，临时文件名建议不要重复使用
         /// <summary>
         /// 设置 HTML 页内容
         /// 自动停止先前的异步处理

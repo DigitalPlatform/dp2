@@ -29,8 +29,8 @@ namespace dp2Circulation
         //      0   中断处理
         //      1   正常结束处理
         public static int Dump(
-            LibraryChannel channel,
             Stop stop,
+            LibraryChannel channel,
             string strDbType,
             List<string> biblioRecPathList,
             Hashtable groupTable,
@@ -45,7 +45,6 @@ namespace dp2Circulation
 
             foreach (string strBiblioRecPath in biblioRecPathList)
             {
-                // Application.DoEvents();
                 if (idle != null)
                 {
                     if (idle() == false)
@@ -61,9 +60,6 @@ namespace dp2Circulation
                     return 0;
                 }
 
-                string[] results = null;
-                byte[] baTimestamp = null;
-
                 stop?.SetMessage("正在获取书目记录 " + strBiblioRecPath);
 
                 long lRet = channel.GetBiblioInfos(
@@ -71,8 +67,8 @@ namespace dp2Circulation
                     strBiblioRecPath,
                     "",
                     new string[] { "xml" },   // formats
-                    out results,
-                    out baTimestamp,
+                    out string[] results,
+                    out byte[] baTimestamp,
                     out strError);
                 if (lRet == 0)
                     return -1;

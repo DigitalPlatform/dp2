@@ -35,20 +35,24 @@ namespace DigitalPlatform.Marc
             set
             {
                 this.m_bIsOutput = value;
-                if (value == true)
-                {
-                    // 改为用EnableMarcSyntax成员控制
-                    // this.comboBox_marcSyntax.Enabled = false;
-                    this.checkBox_880.Text = "转换为 880 模式(&C)";
-                }
-                else
-                {
-                    this.checkBox_880.Text = "转换为平行模式(&C)";
 
-                    this.checkBox_crLf.Visible = false;
-                    this.checkBox_addG01Field.Visible = false;
-                    this.checkBox_removeField998.Visible = false;
-                }
+                this.TryInvoke(() =>
+                {
+                    if (value == true)
+                    {
+                        // 改为用EnableMarcSyntax成员控制
+                        // this.comboBox_marcSyntax.Enabled = false;
+                        this.checkBox_880.Text = "转换为 880 模式(&C)";
+                    }
+                    else
+                    {
+                        this.checkBox_880.Text = "转换为平行模式(&C)";
+
+                        this.checkBox_crLf.Visible = false;
+                        this.checkBox_addG01Field.Visible = false;
+                        this.checkBox_removeField998.Visible = false;
+                    }
+                });
             }
         }
         // public bool DisableOutputMarcSyntax = true; 
@@ -412,7 +416,7 @@ namespace DigitalPlatform.Marc
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -509,14 +513,20 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.textBox_filename.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_filename.Text;
+                });
             }
             set
             {
-                this.textBox_filename.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_filename.Text = value;
 
-                // 自动显示文件的第一条
-                DisplayFirstRecord(value, this.Encoding);
+                    // 自动显示文件的第一条
+                    DisplayFirstRecord(value, this.Encoding);
+                });
             }
         }
 
@@ -527,11 +537,17 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.comboBox_marcSyntax.Text.ToLower();
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_marcSyntax.Text.ToLower();
+                });
             }
             set
             {
-                this.comboBox_marcSyntax.Text = value.ToUpper();
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_marcSyntax.Text = value.ToUpper();
+                });
             }
         }
 
@@ -543,27 +559,30 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                // 2014/3/10
-                if (string.IsNullOrEmpty(this.comboBox_encoding.Text) == true)
-                    return null;
-
-                if (StringUtil.IsNumber(this.comboBox_encoding.Text) == true)
-                    return Encoding.GetEncoding(Convert.ToInt32(this.comboBox_encoding.Text));
-
-                if (this.GetEncoding != null)
+                return this.TryGet(() =>
                 {
-                    GetEncodingEventArgs e = new GetEncodingEventArgs();
-                    e.EncodingName = this.comboBox_encoding.Text;
+                    // 2014/3/10
+                    if (string.IsNullOrEmpty(this.comboBox_encoding.Text) == true)
+                        return null;
 
-                    this.GetEncoding(this, e);
+                    if (StringUtil.IsNumber(this.comboBox_encoding.Text) == true)
+                        return Encoding.GetEncoding(Convert.ToInt32(this.comboBox_encoding.Text));
 
-                    if (string.IsNullOrEmpty(e.ErrorInfo) == false)
-                        throw new Exception(e.ErrorInfo);
+                    if (this.GetEncoding != null)
+                    {
+                        GetEncodingEventArgs e = new GetEncodingEventArgs();
+                        e.EncodingName = this.comboBox_encoding.Text;
 
-                    return e.Encoding;
-                }
-                else
-                    return Encoding.GetEncoding(this.comboBox_encoding.Text);
+                        this.GetEncoding(this, e);
+
+                        if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                            throw new Exception(e.ErrorInfo);
+
+                        return e.Encoding;
+                    }
+                    else
+                        return Encoding.GetEncoding(this.comboBox_encoding.Text);
+                });
             }
         }
 
@@ -574,21 +593,27 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.comboBox_encoding.Text;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_encoding.Text;
+                });
             }
             set
             {
-                this.comboBox_encoding.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_encoding.Text = value;
 
-                // 自动显示文件的第一条
-                try
-                {
-                    DisplayFirstRecord(this.FileName, this.Encoding);
-                }
-                catch
-                {
-                    this.ClearHtml();
-                }
+                    // 自动显示文件的第一条
+                    try
+                    {
+                        DisplayFirstRecord(this.FileName, this.Encoding);
+                    }
+                    catch
+                    {
+                        this.ClearHtml();
+                    }
+                });
             }
         }
 
@@ -599,11 +624,17 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.checkBox_crLf.Visible;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_crLf.Visible;
+                });
             }
             set
             {
-                this.checkBox_crLf.Visible = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_crLf.Visible = value;
+                });
             }
         }
 
@@ -615,14 +646,20 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                // 2020/3/9
-                if (CrLfVisible == false)
-                    return false;
-                return this.checkBox_crLf.Checked;
+                return this.TryGet(() =>
+                {
+                    // 2020/3/9
+                    if (CrLfVisible == false)
+                        return false;
+                    return this.checkBox_crLf.Checked;
+                });
             }
             set
             {
-                this.checkBox_crLf.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_crLf.Checked = value;
+                });
             }
         }
 
@@ -633,11 +670,17 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.checkBox_addG01Field.Visible;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_addG01Field.Visible;
+                });
             }
             set
             {
-                this.checkBox_addG01Field.Visible = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_addG01Field.Visible = value;
+                });
             }
         }
 
@@ -649,11 +692,17 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.checkBox_addG01Field.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_addG01Field.Checked;
+                });
             }
             set
             {
-                this.checkBox_addG01Field.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_addG01Field.Checked = value;
+                });
             }
         }
 
@@ -664,11 +713,17 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.checkBox_removeField998.Visible;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_removeField998.Visible;
+                });
             }
             set
             {
-                this.checkBox_removeField998.Visible = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_removeField998.Visible = value;
+                });
             }
         }
 
@@ -679,11 +734,17 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.checkBox_removeField998.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_removeField998.Checked;
+                });
             }
             set
             {
-                this.checkBox_removeField998.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_removeField998.Checked = value;
+                });
             }
         }
 
@@ -694,12 +755,18 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.comboBox_catalogingRule.Visible;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_catalogingRule.Visible;
+                });
             }
             set
             {
-                this.comboBox_catalogingRule.Visible = value;
-                this.label_catalogingRule.Visible = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_catalogingRule.Visible = value;
+                    this.label_catalogingRule.Visible = value;
+                });
             }
         }
 
@@ -710,11 +777,17 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.comboBox_catalogingRule.Text;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_catalogingRule.Text;
+                });
             }
             set
             {
-                this.comboBox_catalogingRule.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_catalogingRule.Text = value;
+                });
             }
         }
 
@@ -725,21 +798,27 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                List<string> result = new List<string>();
-                for (int i = 0; i < this.comboBox_encoding.Items.Count; i++)
+                return this.TryGet(() =>
                 {
-                    result.Add((string)this.comboBox_encoding.Items[i]);
-                }
+                    List<string> result = new List<string>();
+                    for (int i = 0; i < this.comboBox_encoding.Items.Count; i++)
+                    {
+                        result.Add((string)this.comboBox_encoding.Items[i]);
+                    }
 
-                return result;
+                    return result;
+                });
             }
             set
             {
-                this.comboBox_encoding.Items.Clear();
-                for (int i = 0; i < value.Count; i++)
+                this.TryInvoke(() =>
                 {
-                    this.comboBox_encoding.Items.Add(value[i]);
-                }
+                    this.comboBox_encoding.Items.Clear();
+                    for (int i = 0; i < value.Count; i++)
+                    {
+                        this.comboBox_encoding.Items.Add(value[i]);
+                    }
+                });
             }
 
         }
@@ -754,12 +833,18 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.comboBox_marcSyntax.Enabled;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_marcSyntax.Enabled;
+                });
             }
             set
             {
-                this.comboBox_marcSyntax.Enabled = value;
-                this.comboBox_marcSyntax.Select(0, 0);
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_marcSyntax.Enabled = value;
+                    this.comboBox_marcSyntax.Select(0, 0);
+                });
             }
         }
 
@@ -771,11 +856,17 @@ namespace DigitalPlatform.Marc
         {
             get
             {
-                return this.label_encodingComment.Text;
+                return this.TryGet(() =>
+                {
+                    return this.label_encodingComment.Text;
+                });
             }
             set
             {
-                this.label_encodingComment.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.label_encodingComment.Text = value;
+                });
             }
         }
 
@@ -909,7 +1000,7 @@ TABLE.marc SPAN.fieldend
                 ShowMessageTip();
             }
             return;
-            ERROR1:
+        ERROR1:
             ClearHtml();
         }
 
@@ -1057,14 +1148,19 @@ TABLE.marc SPAN.fieldend
         {
             get
             {
-                if (this.m_bMode880Visible == false)
-                    return false;
-                return this.checkBox_880.Checked;
+                return this.TryGet(() =>
+                {
+                    if (this.m_bMode880Visible == false)
+                        return false;
+                    return this.checkBox_880.Checked;
+                });
             }
             set
             {
-                this.checkBox_880.Checked = value;
-
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_880.Checked = value;
+                });
             }
         }
 
@@ -1078,9 +1174,12 @@ TABLE.marc SPAN.fieldend
             }
             set
             {
-                this.m_bMode880Visible = value;
+                this.TryInvoke(() =>
+                {
+                    this.m_bMode880Visible = value;
 
-                comboBox_marcSyntax_TextChanged(this, null);
+                    comboBox_marcSyntax_TextChanged(this, null);
+                });
             }
         }
 
@@ -1088,11 +1187,17 @@ TABLE.marc SPAN.fieldend
         {
             get
             {
-                return this.checkBox_unimarc_modify_100.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_unimarc_modify_100.Checked;
+                });
             }
             set
             {
-                this.checkBox_unimarc_modify_100.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_unimarc_modify_100.Checked = value;
+                });
             }
         }
 

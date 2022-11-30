@@ -17,6 +17,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.Drawing;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -103,7 +104,10 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         {
             get
             {
-                return this.textBox_editor.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_editor.Text;
+                });
             }
             set
             {
@@ -118,21 +122,24 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                         value = strXml;
                 }
 
-                this.textBox_editor.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_editor.Text = value;
 
-                this.ItemXmlChanged = true;
-                /*
-SetXmlToWebbrowser(this.webBrowser_itemXml,
-    strItemText);
- * */
-                // 把 XML 字符串装入一个Web浏览器控件
-                // 这个函数能够适应"<root ... />"这样的没有prolog的XML内容
-                Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
-                    Program.MainForm.DataDir,
-                    "xml",
-                    value);
+                    this.ItemXmlChanged = true;
+                    /*
+    SetXmlToWebbrowser(this.webBrowser_itemXml,
+        strItemText);
+     * */
+                    // 把 XML 字符串装入一个Web浏览器控件
+                    // 这个函数能够适应"<root ... />"这样的没有prolog的XML内容
+                    Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
+                        Program.MainForm.DataDir,
+                        "xml",
+                        value);
 
-                SetItemRefID(value);
+                    SetItemRefID(value);
+                });
             }
         }
 
@@ -147,7 +154,10 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             {
                 _itemXmlChanged = value;
 
-                this.toolStripButton_save.Enabled = _itemXmlChanged || this.ObjectChanged;
+                this.TryInvoke(() =>
+                {
+                    this.toolStripButton_save.Enabled = _itemXmlChanged || this.ObjectChanged;
+                });
             }
         }
 
@@ -359,7 +369,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             return LoadRecordByRecPath(this.ItemRecPath, "");
         }
 
-        // 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         /// <summary>
         /// 根据册条码号，装入册记录和书目记录
         /// 本方式只能当 DbType 为 "item" 时调用
@@ -368,17 +378,34 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         /// <returns>-1: 出错; 1: 成功</returns>
         public int LoadRecord(string strItemBarcode)
         {
+            var task = LoadRecordAsync(strItemBarcode);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
+        }
+
+        public Task<int> LoadRecordAsync(string strItemBarcode)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _loadRecord(strItemBarcode);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // return:
+        //      -1  出错
+        //      1   成功
+        int _loadRecord(string strItemBarcode)
+        {
             Debug.Assert(this.m_strDbType == "item", "");
 
             string strError = "";
 
-            /*
-            EnableControls(false);
-
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在装载册信息 ...");
-            _stop.BeginLoop();
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在装载册信息 ...",
                 "disableControl");
@@ -393,8 +420,10 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             ClearBorrowHistoryPage();
             SetItemRefID("");
 
-            // this.textBox_message.Text = "";
-            this.toolStripLabel_message.Text = "";
+            this.TryInvoke(() =>
+            {
+                this.toolStripLabel_message.Text = "";
+            });
 
             looping.Progress.SetMessage("正在装入册记录 " + strItemBarcode + " ...");
             try
@@ -426,19 +455,16 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
                 if (lRet > 1)
                 {
-                    this.textBox_queryWord.Text = strItemBarcode;
-                    this.comboBox_from.Text = "册条码";
+                    this.TryInvoke(() =>
+                    {
+                        this.textBox_queryWord.Text = strItemBarcode;
+                        this.comboBox_from.Text = "册条码";
+                    });
 
                     strError = "册条码号 '" + strItemBarcode + "' 检索命中" + lRet.ToString() + " 条册记录，它们的路径如下：" + strItemRecPath + "；装入操作被放弃。\r\n\r\n这是一个严重的错误，请尽快联系系统管理员解决此问题。\r\n\r\n如要装入其中的任何一条，请采用记录路径方式装入。";
                     goto ERROR1;
                 }
 
-#if NO
-                Global.SetHtmlString(this.webBrowser_itemHTML,
-                    strItemText,
-                    Program.MainForm.DataDir,
-                    "iteminfoform_item");
-#endif
                 this.m_webExternalHost_item.SetHtmlString(strItemText,
                     "iteminfoform_item");
 
@@ -447,21 +473,17 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                         "(书目记录 '" + strBiblioRecPath + "' 不存在)");
                 else
                 {
-#if NO
-                    Global.SetHtmlString(this.webBrowser_biblio,
-                        strBiblioText,
-                        Program.MainForm.DataDir,
-                        "iteminfoform_biblio");
-#endif
                     this.m_webExternalHost_biblio.SetHtmlString(strBiblioText,
                         "iteminfoform_biblio");
                 }
 
-                // this.textBox_message.Text = "册记录路径: " + strItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
-                this.toolStripLabel_message.Text = this.DbTypeCaption + "记录路径: " + strItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
+                this.TryInvoke(() =>
+                {
+                    this.toolStripLabel_message.Text = this.DbTypeCaption + "记录路径: " + strItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
 
-                this.textBox_queryWord.Text = strItemBarcode;
-                this.comboBox_from.Text = "册条码号";
+                    this.textBox_queryWord.Text = strItemBarcode;
+                    this.comboBox_from.Text = "册条码号";
+                });
 
                 // 最后获得item xml
                 lRet = channel.GetItemInfo(
@@ -499,30 +521,30 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                             out strError);
                         if (nRet == -1)
                         {
-                            MessageBox.Show(this, strError);
+                            this.MessageBoxShow(strError);
                         }
                     }
                 }
+
+                this.TryInvoke(() =>
+                {
+                    tabControl_item_SelectedIndexChanged(this, new EventArgs());
+                });
+                return 1;
             }
             finally
             {
                 looping.Dispose();
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
 
-                EnableControls(true);
-                */
-
-                this.textBox_queryWord.SelectAll();
-                this.textBox_queryWord.Focus();
+                this.TryInvoke(() =>
+                {
+                    this.textBox_queryWord.SelectAll();
+                    this.textBox_queryWord.Focus();
+                });
             }
 
-            tabControl_item_SelectedIndexChanged(this, new EventArgs());
-            return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return -1;
         }
 
@@ -546,7 +568,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             }
         }
 
-        // 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         /// <summary>
         /// 根据册/订购/期/评注记录路径，装入事项记录和书目记录
         /// </summary>
@@ -554,6 +576,34 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         /// <param name="strPrevNextStyle">前后翻动风格</param>
         /// <returns>-1: 出错; 1: 成功</returns>
         public int LoadRecordByRecPath(string strItemRecPath,
+            string strPrevNextStyle)
+        {
+            var task = LoadRecordByRecPathAsync(
+strItemRecPath,
+strPrevNextStyle);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
+        }
+
+        public Task<int> LoadRecordByRecPathAsync(
+            string strItemRecPath,
+            string strPrevNextStyle)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _loadRecordByRecPath(
+                    strItemRecPath,
+                    strPrevNextStyle);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        int _loadRecordByRecPath(string strItemRecPath,
             string strPrevNextStyle)
         {
             string strError = "";
@@ -585,15 +635,18 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
             if (bPrevNext == false)
             {
-                Global.ClearHtmlPage(this.webBrowser_itemHTML,
-                    Program.MainForm.DataDir);
-                Global.ClearHtmlPage(this.webBrowser_itemXml,
-                    Program.MainForm.DataDir);
-                Global.ClearHtmlPage(this.webBrowser_biblio,
-                    Program.MainForm.DataDir);
+                this.TryInvoke(() =>
+                {
+                    Global.ClearHtmlPage(this.webBrowser_itemHTML,
+                        Program.MainForm.DataDir);
+                    Global.ClearHtmlPage(this.webBrowser_itemXml,
+                        Program.MainForm.DataDir);
+                    Global.ClearHtmlPage(this.webBrowser_biblio,
+                        Program.MainForm.DataDir);
 
-                // this.textBox_message.Text = "";
-                this.toolStripLabel_message.Text = "";
+                    // this.textBox_message.Text = "";
+                    this.toolStripLabel_message.Text = "";
+                });
             }
 
             ClearBorrowHistoryPage();
@@ -706,10 +759,13 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                         "iteminfoform_biblio");
                 }
 
-                // this.textBox_message.Text = "册记录路径: " + strOutputItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
-                this.toolStripLabel_message.Text = this.DbTypeCaption + "记录路径: " + strOutputItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
-                this.textBox_queryWord.Text = this.ItemRecPath; // strItemRecPath;
-                this.comboBox_from.Text = this.DbTypeCaption + "记录路径";
+                this.TryInvoke(() =>
+                {
+                    // this.textBox_message.Text = "册记录路径: " + strOutputItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
+                    this.toolStripLabel_message.Text = this.DbTypeCaption + "记录路径: " + strOutputItemRecPath + " ；其从属的种(书目)记录路径: " + strBiblioRecPath;
+                    this.textBox_queryWord.Text = this.ItemRecPath; // strItemRecPath;
+                    this.comboBox_from.Text = this.DbTypeCaption + "记录路径";
+                });
 
                 // 最后获得item xml
                 if (this.m_strDbType == "item")
@@ -804,10 +860,16 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                             out strError);
                         if (nRet == -1)
                         {
-                            MessageBox.Show(this, strError);
+                            this.MessageBoxShow(strError);
                         }
                     }
                 }
+
+                this.TryInvoke(() =>
+                {
+                    tabControl_item_SelectedIndexChanged(this, new EventArgs());
+                });
+                return 1;
             }
             finally
             {
@@ -821,10 +883,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 */
             }
 
-            tabControl_item_SelectedIndexChanged(this, new EventArgs());
-            return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return -1;
         }
 
@@ -1140,7 +1200,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                             this.commander,
                             m.Msg) == true)
                         {
-                            DoLoadRecord();
+                            _ = DoLoadRecord();
                         }
                     }
                     finally
@@ -1159,7 +1219,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                             this.commander,
                             m.Msg) == true)
                         {
-                            LoadRecordByRecPath(this.ItemRecPath, "prev");
+                            // LoadRecordByRecPath(this.ItemRecPath, "prev");
+                            _ = LoadRecordByRecPathAsync(this.ItemRecPath, "prev");
                         }
                     }
                     finally
@@ -1178,7 +1239,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                             this.commander,
                             m.Msg) == true)
                         {
-                            LoadRecordByRecPath(this.ItemRecPath, "next");
+                            // LoadRecordByRecPath(this.ItemRecPath, "next");
+                            _ = LoadRecordByRecPathAsync(this.ItemRecPath, "next");
                         }
                     }
                     finally
@@ -1210,7 +1272,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             this.commander.AddMessage(WM_LOAD_RECORD);
         }
 
-        private void DoLoadRecord()
+        private async Task DoLoadRecord()
         {
             string strError;
             if (this.textBox_queryWord.Text == "")
@@ -1231,10 +1293,10 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 if (nRet != -1)
                 {
                     strError = "您输入的检索词似乎为一个记录路径，而不是册条码号";
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                 }
 
-                LoadRecord(this.textBox_queryWord.Text);
+                await LoadRecordAsync(this.textBox_queryWord.Text);
             }
             else if (this.comboBox_from.Text == this.DbTypeCaption + "记录路径")
             {
@@ -1242,11 +1304,11 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 if (nRet == -1)
                 {
                     strError = "您输入的检索词似乎为一个册条码号，而不是" + this.DbTypeCaption + "记录路径";
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                 }
 
                 // LoadRecord("@path:" + this.textBox_queryWord.Text);
-                LoadRecordByRecPath(this.textBox_queryWord.Text, "");
+                await LoadRecordByRecPathAsync(this.textBox_queryWord.Text, "");
             }
             else
             {
@@ -1256,7 +1318,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         public override void UpdateEnable(bool bEnable)
@@ -2312,23 +2374,26 @@ out strError);
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
-            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
-            string strJs = "";
-
+            this.TryInvoke(() =>
             {
-                HtmlDocument doc = this.webBrowser_borrowHistory.Document;
+                string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
+                string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+                string strJs = "";
 
-                if (doc == null)
                 {
-                    this.webBrowser_borrowHistory.Navigate("about:blank");
-                    doc = this.webBrowser_borrowHistory.Document;
-                }
-                doc = doc.OpenNew(true);
-            }
+                    HtmlDocument doc = this.webBrowser_borrowHistory.Document;
 
-            Global.WriteHtml(this.webBrowser_borrowHistory,
-                "<html><head>" + strLink + strJs + "</head><body>");
+                    if (doc == null)
+                    {
+                        this.webBrowser_borrowHistory.Navigate("about:blank");
+                        doc = this.webBrowser_borrowHistory.Document;
+                    }
+                    doc = doc.OpenNew(true);
+                }
+
+                Global.WriteHtml(this.webBrowser_borrowHistory,
+                    "<html><head>" + strLink + strJs + "</head><body>");
+            });
         }
 
         /// <summary>

@@ -108,7 +108,7 @@ namespace dp2Circulation
                 // 这个实体库没有在 browse 文件中 册条码号 列
                 strError = "警告：实体库 '" + strItemDbName + "' 的 browse 配置文件中没有定义 type 为 item_barcode 的列。请注意刷新或修改此配置文件";
                 if (bWarning == true)
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                 nCol = 0;   // 这个大部分情况能奏效
 
@@ -123,44 +123,10 @@ namespace dp2Circulation
 
             strBarcode = ListViewUtil.GetItemText(item, nCol);
             return 0;
-#if NO
-            int nCol = -1;
-            object o = m_tableBarcodeColIndex[strItemDbName];
-            if (o == null)
-            {
-                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
-                nCol = temp.FindColumnByType("item_barcode");
-                if (nCol == -1)
-                {
-                    // 这个实体库没有在 browse 文件中 册条码号 列
-                    strError = "警告：实体库 '" + strItemDbName + "' 的 browse 配置文件中没有定义 type 为 item_barcode 的列。请注意刷新或修改此配置文件";
-                    if (bWarning == true)
-                        MessageBox.Show(this, strError);
-
-                    nCol = 0;   // 这个大部分情况能奏效
-                }
-                if (m_bBiblioSummaryColumn == false)
-                    nCol += 1;
-                else
-                    nCol += 2;
-
-                if (this.m_bFirstColumnIsKey == true)
-                    nCol++; // 2013/11/12
-
-                m_tableBarcodeColIndex[strItemDbName] = nCol;   // 储存起来
-            }
-            else
-                nCol = (int)o;
-
-            Debug.Assert(nCol > 0, "");
-
-            strBarcode = ListViewUtil.GetItemText(item, nCol);
-            return 0;
-#endif
         }
 
 #if NO
-                int GetBarcodeColumnIndex(string strItemDbName)
+        int GetBarcodeColumnIndex(string strItemDbName)
         {
             int nCol = -1;
             object o = m_tableBarcodeColIndex[strItemDbName];
@@ -2178,6 +2144,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
 
             // 获得 parent id
             string strText = ListViewUtil.GetItemText(item, nCol);
+            // 2022/11/30
+            if (strText.StartsWith("error:"))
+            {
+                strError = $"浏览行 '{GetSummaryText(item)}' 记录路径列内容为错误信息('{strRecPath}')，无法获得书目记录路径";
+                return -1;
+            }
 
             if (string.IsNullOrEmpty(strText) == false)
             {

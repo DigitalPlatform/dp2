@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DigitalPlatform
 {
@@ -59,8 +60,8 @@ namespace DigitalPlatform
             // 
             // label_title
             // 
-            this.label_title.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.label_title.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_title.Location = new System.Drawing.Point(12, 11);
             this.label_title.Name = "label_title";
@@ -71,7 +72,7 @@ namespace DigitalPlatform
             // 
             // textBox_value
             // 
-            this.textBox_value.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_value.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_value.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_value.Location = new System.Drawing.Point(13, 72);
@@ -133,6 +134,24 @@ namespace DigitalPlatform
         }
         #endregion
 
+        // 2022/11/30
+        public static string GetInput(
+    Control owner,
+    string strDlgTitle,
+    string strTitle,
+    string strDefaultValue,
+    Font font = null)
+        {
+            return owner.TryGet(() =>
+            {
+                return GetInput(
+                    (IWin32Window)owner,
+                    strDlgTitle,
+                    strTitle,
+                    strDefaultValue,
+                    font);
+            });
+        }
 
         // return:
         //      null    用户取消对话框
@@ -169,6 +188,32 @@ namespace DigitalPlatform
                 return null;
 
             return dlg.textBox_value.Text;
+        }
+
+        // 2022/11/30
+        public static string GetInput(
+    Control owner,
+    string strDlgTitle,
+    string strTitle,
+    string strDefaultValue,
+    string strCheckBoxText,
+    ref bool bCheckBox,
+    Font font = null)
+        {
+            bool temp = bCheckBox;
+            var result = owner.TryGet(() =>
+            {
+                return GetInput(
+    (IWin32Window)owner,
+    strDlgTitle,
+    strTitle,
+    strDefaultValue,
+    strCheckBoxText,
+    ref temp,
+    font);
+            });
+            bCheckBox = temp;
+            return result;
         }
 
         // return:

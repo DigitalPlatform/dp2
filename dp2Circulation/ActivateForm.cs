@@ -376,7 +376,6 @@ MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.Yes)
                     return 0;   // cancelled
-
             }
 
             /*
@@ -498,7 +497,7 @@ MessageBoxDefaultButton.Button2);
                      * */
                     Global.SetXmlToWebbrowser(webbXml,
                         Program.MainForm.DataDir,
-                        "xml",
+                        "activateform_xml" + Guid.NewGuid().ToString(),
                         strXml);
                 }
 
@@ -515,7 +514,9 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                 if (external_html != null)
-                    external_html.SetHtmlString(strHtml, "activateform_html");
+                    external_html.SetHtmlString(
+                        strHtml,
+                        "activateform_html" + Guid.NewGuid().ToString());
             }
             finally
             {
@@ -581,18 +582,22 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             // 刷新
-            string strReaderBarcode = this.textBox_oldBarcode.Text;
-            this.LoadRecord(ref strReaderBarcode,
-                this.readerEditControl_old,
-                this.m_webExternalHost_old,
-                // this.webBrowser_oldReaderInfo,
-                this.webBrowser_oldXml);
-            strReaderBarcode = this.textBox_newBarcode.Text;
-            this.LoadRecord(ref strReaderBarcode,
-                this.readerEditControl_new,
-                this.m_webExternalHost_new,
-                // this.webBrowser_newReaderInfo,
-                this.webBrowser_newXml);
+            {
+                string strReaderBarcode = this.textBox_oldBarcode.Text;
+                this.LoadRecord(ref strReaderBarcode,
+                    this.readerEditControl_old,
+                    this.m_webExternalHost_old,
+                    // this.webBrowser_oldReaderInfo,
+                    this.webBrowser_oldXml);
+            }
+            {
+                string strReaderBarcode = this.textBox_newBarcode.Text;
+                this.LoadRecord(ref strReaderBarcode,
+                    this.readerEditControl_new,
+                    this.m_webExternalHost_new,
+                    // this.webBrowser_newReaderInfo,
+                    this.webBrowser_newXml);
+            }
 
             bool bZhuxiao = false;
 
@@ -629,7 +634,6 @@ MessageBoxDefaultButton.Button2);
                         // this.webBrowser_oldReaderInfo,
                         this.webBrowser_oldXml);
                 }
-
             }
 
             // 把新证的状态修改为可用
@@ -661,9 +665,7 @@ MessageBoxDefaultButton.Button2);
                         // this.webBrowser_newReaderInfo,
                         this.webBrowser_newXml);
                 }
-
             }
-
 
             MessageBox.Show(this, "转移并激活目标证操作完成");
             return;

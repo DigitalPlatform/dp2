@@ -9067,50 +9067,66 @@ message,
         static int MAX_CACHE_ITEMS = 10000; // 批处理中，缓存最多的事项数。多于这个数，就不再使用缓存
 
         // 导出到书目转储文件
-        void menu_saveToBiblioDumpFile_Click(object sender, EventArgs e)
+        async void menu_saveToBiblioDumpFile_Click(object sender, EventArgs e)
+        {
+            await ExportSelectedToBiblioDumpFileAsync();
+        }
+
+        public Task ExportSelectedToBiblioDumpFileAsync()
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        _exportSelectedToBiblioDumpFile();
+                    }
+                    catch (Exception ex)
+                    {
+                        this.MessageBoxShow($"_exportSelectedToBiblioDumpFile() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                },
+    this.CancelToken,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+        void _exportSelectedToBiblioDumpFile()
         {
             string strError = "";
             int nRet = 0;
 
-            if (this.listView_records.SelectedItems.Count == 0)
+            var selected_items = ListViewUtil.GetSelectedItems(this.listView_records);
+
+            if (selected_items.Count == 0)
             {
                 strError = "尚未选定要导出的事项";
                 goto ERROR1;
             }
 
-#if NO
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
+            OpenBiblioDumpFileDialog dlg = null;
+            var dialog_result = this.TryGet(() =>
+            {
+                dlg = new OpenBiblioDumpFileDialog();
+                MainForm.SetControlFont(dlg, this.Font);
+                dlg.CreateMode = true;
 
-            dlg.Title = "请指定要创建的书目转储文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            dlg.FileName = "";
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "书目转储文件 (*.bdf)|*.bdf|All files (*.*)|*.*";
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+            "BiblioSearchForm",
+            "OpenBiblioDumpFileDialog_uiState",
+            "");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_OpenBiblioDumpFileDialog");
+                dlg.ShowDialog(this);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-            dlg.RestoreDirectory = true;
+                Program.MainForm.AppInfo.SetString(
+            "BiblioSearchForm",
+            "OpenBiblioDumpFileDialog_uiState",
+            dlg.UiState);
 
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-#endif
-            OpenBiblioDumpFileDialog dlg = new OpenBiblioDumpFileDialog();
-            MainForm.SetControlFont(dlg, this.Font);
-            dlg.CreateMode = true;
-
-            dlg.UiState = Program.MainForm.AppInfo.GetString(
-        "BiblioSearchForm",
-        "OpenBiblioDumpFileDialog_uiState",
-        "");
-            Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_OpenBiblioDumpFileDialog");
-            dlg.ShowDialog(this);
-            Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
-            Program.MainForm.AppInfo.SetString(
-        "BiblioSearchForm",
-        "OpenBiblioDumpFileDialog_uiState",
-        dlg.UiState);
-            if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
+                return dlg.DialogResult;
+            });
+            if (dialog_result != System.Windows.Forms.DialogResult.OK)
                 return;
 
             bool bControl = (Control.ModifierKeys & Keys.Control) != 0;
@@ -9120,15 +9136,33 @@ message,
             {
                 if (ExistFiles(dlg.ObjectDirectoryName) == true)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
         "您选定的对象文件夹 " + dlg.ObjectDirectoryName + " 内已经存在一些文件。若用它来保存对象文件，则新旧文件会混杂在一起。\r\n\r\n要继续处理么? (是：继续; 否: 放弃处理)",
         "BiblioSearchForm",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == System.Windows.Forms.DialogResult.No)
                         return;
                 }
+            }
+
+            if (File.Exists(dlg.FileName))
+            {
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
+    "文件 " + dlg.FileName + " 已经存在，本次导出会覆盖它原有的内容。\r\n\r\n要继续处理么? (是：继续，会覆盖它原有内容; 否: 放弃处理)",
+    "BiblioSearchForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                });
+                if (result == System.Windows.Forms.DialogResult.No)
+                    return;
             }
 
             int nProcessRemoteRecord = 0;   // 0: 本变量尚未使用; 1: 处理外部记录; -1: 跳过外部记录
@@ -9161,7 +9195,7 @@ message,
 
             try
             {
-                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, selected_items.Count);
 
                 writer.Formatting = Formatting.Indented;
                 writer.Indentation = 4;
@@ -9176,9 +9210,10 @@ message,
 #endif
 
                 List<ListViewItem> items = new List<ListViewItem>();
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                foreach (ListViewItem item in selected_items)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    string recpath = ListViewUtil.GetItemText(item, 0);
+                    if (string.IsNullOrEmpty(recpath) == true)
                         continue;
 
                     items.Add(item);
@@ -9194,7 +9229,7 @@ message,
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents(); // 出让界面控制权
+                    // Application.DoEvents(); // 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -9233,12 +9268,15 @@ message,
                     bool bRemote = info.RecPath.IndexOf("@") != -1;
                     if (bRemote == true && nProcessRemoteRecord == 0)
                     {
-                        DialogResult temp_result = MessageBox.Show(this,
+                        DialogResult temp_result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
         "发现一些书目记录是来自共享检索的外部书目记录，是否要处理它们? (是: 处理它们; 否: 跳过它们)",
         "BiblioSearchForm",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                        });
                         if (temp_result == System.Windows.Forms.DialogResult.Yes)
                             nProcessRemoteRecord = 1;
                         else
@@ -9264,12 +9302,15 @@ message,
                             if (looping.Stopped)
                                 goto ERROR1;
 
-                            DialogResult temp_result = MessageBox.Show(this,
+                            DialogResult temp_result = this.TryGet(() =>
+                            {
+                                return MessageBox.Show(this,
         strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
         "BiblioSearchForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
+                            });
                             if (temp_result == System.Windows.Forms.DialogResult.Yes)
                                 goto REDO_WRITEOBJECTS;
                             if (temp_result == DialogResult.Cancel)
@@ -9319,6 +9360,8 @@ message,
                                 dlg,
                                 bControl ? "opac" : "",
                                 out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
                         }
                         if (string.IsNullOrEmpty(prop.IssueDbName) == false
                             && dlg.IncludeIssues)
@@ -9333,6 +9376,8 @@ message,
                                 dlg,
                                 bControl ? "opac" : "",
                                 out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
                         }
                         if (string.IsNullOrEmpty(prop.ItemDbName) == false
                             && dlg.IncludeEntities)
@@ -9347,6 +9392,8 @@ message,
                                 dlg,
                                 bControl ? "opac" : "",
                                 out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
                         }
                         if (string.IsNullOrEmpty(prop.CommentDbName) == false
                             && dlg.IncludeComments)
@@ -9361,8 +9408,11 @@ message,
                                 dlg,
                                 bControl ? "opac" : "",
                                 out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
                         }
 
+#if REMOVED
                         if (nRet == -1)
                         {
                             if (looping.Stopped)
@@ -9383,6 +9433,7 @@ message,
                             */
                             goto ERROR1;
                         }
+#endif
                     }
 
                     // 收尾 dprms:record 元素
@@ -9417,11 +9468,11 @@ message,
                 this.EnableControls(true);
             }
 
-            MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
+            MainForm.StatusBarMessage = selected_items.Count.ToString()
                 + "条记录成功保存到文件 " + dlg.FileName;
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 将 XML 记录中的对象资源写入外部文件
@@ -9703,7 +9754,35 @@ message,
                 }
 
                 XmlDocument item_dom = new XmlDocument();
-                item_dom.LoadXml(info.OldRecord);
+                try
+                {
+                    item_dom.LoadXml(info.OldRecord);
+                }
+                catch(Exception ex)
+                {
+                    strError = "路径为 '" + info.OldRecPath + "' 的册记录 XML 装载到 XMLDOM 中时发生错误: " + ex.Message;
+
+                    if (stop != null && stop.State != 0)
+                        return -1;
+
+                    // 2022/11/30
+                    var temp = strError;
+                    DialogResult temp_result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
+    temp + "\r\n\r\n是否跳过这条册记录继续后面处理?\r\n\r\n(Yes: 放弃导出本条册记录，但继续后面的处理; No: 放弃全部处理)",
+    "BiblioSearchForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                    });
+                    if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                        continue;
+                    if (temp_result == DialogResult.No)
+                        return -1;
+
+                    return -1;
+                }
 
                 if (dlg.IncludeObjectFile)
                 {

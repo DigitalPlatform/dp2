@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
@@ -37,11 +38,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_905.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_905.Checked;
+                });
             }
             set
             {
-                this.checkBox_905.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_905.Checked = value;
+                });
             }
         }
 
@@ -49,11 +56,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_removeOld905.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_removeOld905.Checked;
+                });
             }
             set
             {
-                this.checkBox_removeOld905.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_removeOld905.Checked = value;
+                });
             }
         }
 
@@ -62,11 +75,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.comboBox_905_style.Text;
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_905_style.Text;
+                });
             }
             set
             {
-                this.comboBox_905_style.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_905_style.Text = value;
+                });
             }
         }
 
@@ -74,11 +93,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_906.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_906.Checked;
+                });
             }
             set
             {
-                this.checkBox_906.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_906.Checked = value;
+                });
             }
         }
 

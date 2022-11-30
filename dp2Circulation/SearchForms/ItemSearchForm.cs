@@ -30,6 +30,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using DocumentFormat.OpenXml.Math;
 using System.Linq;
+using System.Web.UI.HtmlControls;
 
 
 // 2013/3/16 添加 XML 注释
@@ -2082,7 +2083,7 @@ out string strError);
 
         }
 
-        private void listView_records_DoubleClick(object sender, EventArgs e)
+        private async void listView_records_DoubleClick(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
@@ -2103,7 +2104,7 @@ out string strError);
 
                 if (bLoadToItemWindow == true || this.DbType == "arrive")
                 {
-                    LoadRecord("ItemInfoForm",
+                    await LoadRecordAsync("ItemInfoForm",
                         "recpath",
                         strOpenStyle);
                     return;
@@ -2114,13 +2115,13 @@ out string strError);
                 //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
                 //      strIdType   标识类型 "barcode" "recpath"
                 //      strOpenType 打开窗口的方式 "new" "exist"
-                LoadRecord("EntityForm",
+                await LoadRecordAsync("EntityForm",
                     "recpath",
                     strOpenStyle);
             }
             else if (strFirstColumn.StartsWith("error:"))
             {
-                MessageBox.Show(this, $"{strFirstColumn} 无法进行装载");
+                this.MessageBoxShow($"{strFirstColumn} 无法进行装载");
             }
             else
             {
@@ -2160,7 +2161,7 @@ out string strError);
         //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
         //      strIdType   标识类型 "barcode" "recpath"
         //      strOpenType 打开窗口的方式 "new" "exist"
-        void LoadRecord(string strTargetFormType,
+        async Task LoadRecordAsync(string strTargetFormType,
             string strIdType,
             string strOpenType)
         {
@@ -2169,11 +2170,20 @@ out string strError);
             if (strTargetFormType == "ItemInfoForm")
                 strTargetFormName = "实体窗";
 
-            if (this.listView_records.SelectedItems.Count == 0)
+            var selected_item_count = this.TryGet(() =>
+            {
+                return this.listView_records.SelectedItems.Count;
+            });
+            if (selected_item_count == 0)
             {
                 ShowMessageBox("尚未在列表中选定要装入" + strTargetFormName + "的行");
                 return;
             }
+
+            var first_item = this.TryGet(() =>
+            {
+                return this.listView_records.SelectedItems[0];
+            });
 
             string strBarcodeOrRecPath = "";
 
@@ -2184,7 +2194,7 @@ out string strError);
                 string strError = "";
                 // 根据 ListViewItem 对象，获得册条码号列的内容
                 int nRet = GetItemBarcodeOrRefID(
-                    this.listView_records.SelectedItems[0],
+                    first_item,
                     true,
                     out strBarcodeOrRecPath,
                     out strError);
@@ -2220,9 +2230,12 @@ out string strError);
 
                 if (strOpenType == "exist")
                 {
-                    form = MainForm.GetTopChildWindow<EntityForm>();
-                    if (form != null)
-                        Global.Activate(form);
+                    this.TryInvoke(() =>
+                    {
+                        form = MainForm.GetTopChildWindow<EntityForm>();
+                        if (form != null)
+                            Global.Activate(form);
+                    });
                 }
                 else
                 {
@@ -2231,12 +2244,13 @@ out string strError);
 
                 if (form == null)
                 {
-                    form = new EntityForm();
-
-                    form.MdiParent = Program.MainForm;
-
-                    form.MainForm = Program.MainForm;
-                    form.Show();
+                    this.TryInvoke(() =>
+                    {
+                        form = new EntityForm();
+                        form.MdiParent = Program.MainForm;
+                        form.MainForm = Program.MainForm;
+                        form.Show();
+                    });
                 }
 
                 if (strIdType == "barcode")
@@ -2282,9 +2296,12 @@ out string strError);
 
                 if (strOpenType == "exist")
                 {
-                    form = MainForm.GetTopChildWindow<ItemInfoForm>();
-                    if (form != null)
-                        Global.Activate(form);
+                    this.TryInvoke(() =>
+                    {
+                        form = MainForm.GetTopChildWindow<ItemInfoForm>();
+                        if (form != null)
+                            Global.Activate(form);
+                    });
                 }
                 else
                 {
@@ -2293,12 +2310,13 @@ out string strError);
 
                 if (form == null)
                 {
-                    form = new ItemInfoForm();
-
-                    form.MdiParent = Program.MainForm;
-
-                    form.MainForm = Program.MainForm;
-                    form.Show();
+                    this.TryInvoke(() =>
+                    {
+                        form = new ItemInfoForm();
+                        form.MdiParent = Program.MainForm;
+                        form.MainForm = Program.MainForm;
+                        form.Show();
+                    });
                 }
 
                 if (this.DbType == "arrive")
@@ -2309,77 +2327,77 @@ out string strError);
                 if (strIdType == "barcode")
                 {
                     Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
-                    form.LoadRecord(strBarcodeOrRecPath);
+                    await form.LoadRecordAsync(strBarcodeOrRecPath);
                 }
                 else
                 {
                     Debug.Assert(strIdType == "recpath", "");
 
                     // TODO: 需要改造为适应多种记录
-                    form.LoadRecordByRecPath(strBarcodeOrRecPath, "");
+                    await form.LoadRecordByRecPathAsync(strBarcodeOrRecPath, "");
                 }
             }
         }
 
-        void menu_itemInfoForm_recPath_newly_Click(object sender, EventArgs e)
+        async void menu_itemInfoForm_recPath_newly_Click(object sender, EventArgs e)
         {
-            LoadRecord("ItemInfoForm",
+            await LoadRecordAsync("ItemInfoForm",
                 "recpath",
                 "new");
             this.LoadToItemWindow = true;
         }
 
-        void menu_itemInfoForm_barcode_newly_Click(object sender, EventArgs e)
+        async void menu_itemInfoForm_barcode_newly_Click(object sender, EventArgs e)
         {
-            LoadRecord("ItemInfoForm",
+            await LoadRecordAsync("ItemInfoForm",
                 "barcode",
                 "new");
             this.LoadToItemWindow = true;
         }
 
-        void menu_entityForm_recPath_newly_Click(object sender, EventArgs e)
+        async void menu_entityForm_recPath_newly_Click(object sender, EventArgs e)
         {
-            LoadRecord("EntityForm",
+            await LoadRecordAsync("EntityForm",
                 "recpath",
                 "new");
             this.LoadToItemWindow = false;
         }
 
-        void menu_entityForm_barcode_newly_Click(object sender, EventArgs e)
+        async void menu_entityForm_barcode_newly_Click(object sender, EventArgs e)
         {
-            LoadRecord("EntityForm",
+            await LoadRecordAsync("EntityForm",
                 "barcode",
                 "new");
             this.LoadToItemWindow = false;
         }
 
-        void menu_itemInfoForm_recPath_exist_Click(object sender, EventArgs e)
+        async void menu_itemInfoForm_recPath_exist_Click(object sender, EventArgs e)
         {
-            LoadRecord("ItemInfoForm",
+            await LoadRecordAsync("ItemInfoForm",
                 "recpath",
                 "exist");
             this.LoadToItemWindow = true;
         }
 
-        void menu_itemInfoForm_barcode_exist_Click(object sender, EventArgs e)
+        async void menu_itemInfoForm_barcode_exist_Click(object sender, EventArgs e)
         {
-            LoadRecord("ItemInfoForm",
+            await LoadRecordAsync("ItemInfoForm",
                 "barcode",
                 "exist");
             this.LoadToItemWindow = true;
         }
 
-        void menu_entityForm_recPath_exist_Click(object sender, EventArgs e)
+        async void menu_entityForm_recPath_exist_Click(object sender, EventArgs e)
         {
-            LoadRecord("EntityForm",
+            await LoadRecordAsync("EntityForm",
                 "recpath",
                 "exist");
             this.LoadToItemWindow = false;
         }
 
-        void menu_entityForm_barcode_exist_Click(object sender, EventArgs e)
+        async void menu_entityForm_barcode_exist_Click(object sender, EventArgs e)
         {
-            LoadRecord("EntityForm",
+            await LoadRecordAsync("EntityForm",
                 "barcode",
                 "exist");
             this.LoadToItemWindow = false;
@@ -3460,12 +3478,16 @@ dlg.UiState);
                     catch (Exception ex)
                     {
                         strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
-                        DialogResult result = MessageBox.Show(this,
-strError + "\r\n\r\n是否跳过此条记录继续处理?\r\n\r\n(Yes 跳过；No 中断处理)",
+                        string error = strError;
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+error + "\r\n\r\n是否跳过此条记录继续处理?\r\n\r\n(Yes 跳过；No 中断处理)",
 "ItemSearchForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
+                        });
                         if (result == DialogResult.No)
                         {
                             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
@@ -7586,7 +7608,7 @@ TaskScheduler.Default);
                 {
                     var selected_items = ListViewUtil.GetSelectedItems(this.listView_records);
                     // foreach (ListViewItem item in this.listView_records.SelectedItems)
-                    foreach(var item in selected_items)
+                    foreach (var item in selected_items)
                     {
                         string item_text = ListViewUtil.GetItemText(item, 0);
 
@@ -9597,7 +9619,23 @@ TaskScheduler.Default);
         }
 
         // 分类统计
-        void menu_classStatis_Click(object sender, EventArgs e)
+        async void menu_classStatis_Click(object sender, EventArgs e)
+        {
+            await ClassStatisAsync();
+        }
+
+        public Task ClassStatisAsync()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _classStatis();
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        void _classStatis()
         {
             string strError = "";
             int nRet = 0;
@@ -9612,7 +9650,6 @@ TaskScheduler.Default);
 
             Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
 
-
             // if (_stop.IsInLoop == true)
             if (HasLooping())
             {
@@ -9620,42 +9657,31 @@ TaskScheduler.Default);
                 goto ERROR1;
             }
 
-#if NO
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要输出的 Excel 文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            // dlg.FileName = this.ExportExcelFilename;
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-#endif
-
             // 询问统计参数。按照什么分类法统计？统计表中的分类号截断为多少字符？是否有预置的分类表?
 
-            ItemClassStatisDialog dlg = new ItemClassStatisDialog();
-            MainForm.SetControlFont(dlg, Program.MainForm.Font, false);
-            dlg.ClassListFileName = Path.Combine(Program.MainForm.UserDir, "class_list.xml");
-            dlg.UiState = Program.MainForm.AppInfo.GetString(
-        "ItemSearchForm_" + this.DbType,
-        "ItemClassStatisDialog_uiState",
-        "");
+            ItemClassStatisDialog dlg = null;
 
-            Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_ItemClassStatisDialog_uiState_state");
-            dlg.ShowDialog(Program.MainForm);
+            var dialog_result = this.TryGet(() =>
+            {
+                dlg = new ItemClassStatisDialog();
+                MainForm.SetControlFont(dlg, Program.MainForm.Font, false);
+                dlg.ClassListFileName = Path.Combine(Program.MainForm.UserDir, "class_list.xml");
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+            "ItemSearchForm_" + this.DbType,
+            "ItemClassStatisDialog_uiState",
+            "");
 
-            Program.MainForm.AppInfo.SetString(
-        "ItemSearchForm_" + this.DbType,
-"ItemClassStatisDialog_uiState",
-dlg.UiState);
+                Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_ItemClassStatisDialog_uiState_state");
+                dlg.ShowDialog(Program.MainForm);
 
-            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                Program.MainForm.AppInfo.SetString(
+                    "ItemSearchForm_" + this.DbType,
+                    "ItemClassStatisDialog_uiState",
+                    dlg.UiState);
+                return dlg.DialogResult;
+            });
+
+            if (dialog_result == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
             string strFileName = dlg.FileName;
@@ -9685,6 +9711,7 @@ dlg.UiState);
                 looping.Progress.SetMessage("正在汇总书目和册记录路径 ...");
 
                 nRet = GetSelectedBiblioRecPath(
+                    looping.Progress,
                     channel,
                     ref biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
                     ref groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
@@ -9739,14 +9766,12 @@ dlg.UiState);
                             i++;
                             looping.Progress.SetProgressValue(i);
                         }
-
                     }
                     finally
                     {
                         item_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                     }
                 }
-
 
                 looping.Progress.SetProgressRange(0, biblioRecPathList.Count);
                 looping.Progress.SetMessage("正在获取书目记录 ...");
@@ -9774,7 +9799,7 @@ dlg.UiState);
                     int i = 0;
                     foreach (DigitalPlatform.LibraryClient.localhost.Record item in loader)
                     {
-                        Application.DoEvents();
+                        // Application.DoEvents();
 
                         if (looping.Stopped)
                         {
@@ -9785,51 +9810,6 @@ dlg.UiState);
                         // stop.SetMessage("正在获取书目记录 " + item.Path);
                         // Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(item.Path) + "</div>");
 
-#if NO
-                    bool bNullBiblio = false;   // 书目记录是否为空
-                    string strXml = item.Content;
-                    if (string.IsNullOrEmpty(strXml))
-                    {
-                        strXml = "<root />";
-                        bNullBiblio = true;
-                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("书目记录 " + item.RecPath + " 不存在。被当作空记录继续处理了") + "</div>");
-                    }
-
-                    string strMARC = "";
-                    string strMarcSyntax = "";
-                    // 将XML格式转换为MARC格式
-                    // 自动从数据记录中获得MARC语法
-                    nRet = MarcUtil.Xml2Marc(strXml,
-                        true,
-                        null,
-                        out strMarcSyntax,
-                        out strMARC,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "XML 转换到 MARC 记录时出错: " + strError;
-                        goto ERROR1;
-                    }
-
-                    if (bNullBiblio == true && string.IsNullOrEmpty(strMarcSyntax))
-                        strMarcSyntax = "unimarc";
-
-                    // 获得分类号
-                    string strFieldName = "";
-                    string strSubfieldName = "";
-
-                    nRet = GetCallNumberClassSource(
-                        strClassType,
-                        strMarcSyntax,
-            out strFieldName,
-            out strSubfieldName,
-            out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    MarcRecord record = new MarcRecord(strMARC);
-                    string strClass = record.select("field[@name='" + strFieldName + "']/subfield[@name='" + strSubfieldName + "']").FirstContent;
-#endif
                         string strClass = "";
 
                         bool bNullBiblio = false;   // 书目记录是否为空
@@ -9980,9 +9960,7 @@ dlg.UiState);
             config.StartCol = 1;
             config.StartRow = 1;
 
-
             XLWorkbook doc = null;
-
             try
             {
                 doc = new XLWorkbook(XLEventTracking.Disabled);
@@ -10006,7 +9984,6 @@ dlg.UiState);
                 out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
 
                 doc.SaveAs(dlg.FileName);
             }
@@ -10046,6 +10023,7 @@ dlg.UiState);
 
         // 注: 本函数中要修改 stop 的 ProgressRange
         int GetSelectedBiblioRecPath(
+            Stop stop,
             LibraryChannel channel,
             ref List<string> biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
             ref Hashtable groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
@@ -10053,49 +10031,69 @@ dlg.UiState);
         {
             strError = "";
 
-            var looping = BeginLoop(this.DoStop, "正在 GetSelectedBiblioRecPath ...");
+            // var looping = BeginLoop(this.DoStop, "正在 GetSelectedBiblioRecPath ...");
             try
             {
                 int nRet = 0;
 
-                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                var selected_items = ListViewUtil.GetSelectedItems(this.listView_records);
+
+                stop?.SetProgressRange(0, selected_items.Count);
 
                 int i = 0;
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                foreach (ListViewItem item in selected_items)
                 {
-                    looping.Progress.SetProgressValue(i++);
+                    stop?.SetProgressValue(i++);
 
                     Application.DoEvents(); // 出让界面控制权
 
-                    if (looping.Stopped)
+                    if (stop != null && stop.IsStopped)
                     {
                         strError = "用户中断";
                         return -1;
                     }
 
-                    if (string.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
+                    string recpath = ListViewUtil.GetItemText(item, 0);
+                    if (string.IsNullOrEmpty(recpath) == true
+                        || recpath.StartsWith("error:"))
                         continue;
 
-                    int nCol = -1;
-                    string strBiblioRecPath = "";
                     // 获得事项所从属的书目记录的路径
                     // return:
                     //      -1  出错
                     //      0   相关数据库没有配置 parent id 浏览列
                     //      1   找到
                     nRet = GetBiblioRecPath(
-                        looping.Progress,
+                        stop,
                         channel,
                         item,
                         true,
-                        out nCol,
-                        out strBiblioRecPath,
+                        out int nCol,
+                        out string strBiblioRecPath,
                         out strError);
-                    if (nRet == -1)
+                    // 2022/11/30
+                    if (nRet == 1 && string.IsNullOrEmpty(strBiblioRecPath))
+                    {
+                        nRet = -1;
+                        strError = $"册 '{recpath}' 行书目记录路径为空: {strError}";
+                    }
+                    // 2022/11/30
+                    if (nRet == -1 || nRet == 0)
+                    {
+                        string error = strError;
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+error + "\r\n\r\n是否跳过此条记录继续处理?\r\n\r\n(Yes 跳过；No 中断处理)",
+"ItemSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                        });
+                        if (result == DialogResult.Yes)
+                            continue;
                         return -1;
-                    if (nRet == 0)
-                        return -1;
+                    }
 
                     List<string> item_recpaths = (List<string>)groupTable[strBiblioRecPath];
                     if (item_recpaths == null)
@@ -10112,7 +10110,7 @@ dlg.UiState);
             }
             finally
             {
-                EndLoop(looping);
+                // EndLoop(looping);
             }
         }
 
@@ -10248,32 +10246,34 @@ this.m_biblioTable);
 
         // 保存选择的行中的有路径的部分行 到书目转储文件
         // 需要先将册记录按照书目记录路径聚集
-        void menu_exportBiblioDumpFile_Click(object sender, EventArgs e)
+        async void menu_exportBiblioDumpFile_Click(object sender, EventArgs e)
+        {
+            await ExportSelectedToBiblioDumpFileAsync();
+        }
+
+        public Task ExportSelectedToBiblioDumpFileAsync()
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    try
+                    {
+                        _exportSelectedToBiblioDumpFile();
+                    }
+                    catch (Exception ex)
+                    {
+                        this.MessageBoxShow($"_exportSelectedToBiblioDumpFile() 异常: {ExceptionUtil.GetDebugText(ex)}");
+                    }
+                },
+    this.CancelToken,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+        void _exportSelectedToBiblioDumpFile()
         {
             string strError = "";
             int nRet = 0;
-
-            List<string> biblioRecPathList = new List<string>();   // 按照出现先后的顺序存储书目记录路径
-
-            Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
-
-
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要创建的书目转储文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            dlg.FileName = this.ExportBiblioDumpFilename;
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "书目转储文件 (*.bdf)|*.bdf|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            this.ExportBiblioDumpFilename = dlg.FileName;
 
             // if (_stop.IsInLoop == true)
             if (HasLooping())
@@ -10282,16 +10282,48 @@ this.m_biblioTable);
                 goto ERROR1;
             }
 
+            List<string> biblioRecPathList = new List<string>();   // 按照出现先后的顺序存储书目记录路径
+
+            Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
+
+            string output_filename = "";
+            var dialog_result = this.TryGet(() =>
+            {
+                // 询问文件名
+                SaveFileDialog dlg = new SaveFileDialog();
+
+                dlg.Title = "请指定要创建的书目转储文件名";
+                dlg.CreatePrompt = false;
+                dlg.OverwritePrompt = true;
+                dlg.FileName = this.ExportBiblioDumpFilename;
+                // dlg.InitialDirectory = Environment.CurrentDirectory;
+                dlg.Filter = "书目转储文件 (*.bdf)|*.bdf|All files (*.*)|*.*";
+
+                dlg.RestoreDirectory = true;
+
+                var result = dlg.ShowDialog();
+                output_filename = dlg.FileName;
+                return result;
+            });
+
+            if (dialog_result != DialogResult.OK)
+                return;
+
+            this.ExportBiblioDumpFilename = output_filename;    //  dlg.FileName;
+
             /*
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Initial("正在导出书目转储记录 ...");
             _stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在导出书目转储记录 ...");
-
+            var looping = Looping(out LibraryChannel channel,
+                "正在导出书目转储记录 ...",
+                "disableControl,timeout:0:0:10");
+            /*
             LibraryChannel channel = this.GetChannel();
             var old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(10);
+            */
             try
             {
                 using (XmlTextWriter w = new XmlTextWriter(
@@ -10305,6 +10337,7 @@ this.m_biblioTable);
                     w.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
 
                     nRet = GetSelectedBiblioRecPath(
+                        looping.Progress,
                         channel,
                         ref biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
                         ref groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
@@ -10317,16 +10350,13 @@ this.m_biblioTable);
                     int i = 0;
                     foreach (string strBiblioRecPath in biblioRecPathList)
                     {
-                        Application.DoEvents();
+                        // Application.DoEvents();
 
                         if (looping.Stopped)
                         {
                             strError = "用户中断";
                             goto ERROR1;
                         }
-
-                        string[] results = null;
-                        byte[] baTimestamp = null;
 
                         looping.Progress.SetMessage("正在获取书目记录 " + strBiblioRecPath);
                     REDO_GETBIBLIOINFO:
@@ -10335,14 +10365,15 @@ this.m_biblioTable);
                             strBiblioRecPath,
                             "",
                             new string[] { "xml" },   // formats
-                            out results,
-                            out baTimestamp,
+                            out string[] results,
+                            out byte[] baTimestamp,
                             out strError);
                         if (lRet == 0)
                         {
                             // goto ERROR1;
 
                             // TODO: 是否允许没有书目记录的册记录导出？
+                            // TODO: 显示到操作历史中
                             MainForm.WriteErrorLog($"获得书目记录 '{strBiblioRecPath}' 时没有找到: {strError}");
                             goto CONTINUE;
                         }
@@ -10353,12 +10384,29 @@ this.m_biblioTable);
                                 goto ERROR1;
 
                             // TODO: 有没有办法选择“跳过此条继续处理后面的记录”？
-                            DialogResult result = AutoCloseMessageBox.Show(this,
-strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                            string error = strError;
+                            DialogResult result = this.TryGet(() =>
+                            {
+                                // return:
+                                //      DialogResult.Retry 表示超时了
+                                //      DialogResult.OK 表示点了 OK 按钮
+                                //      DialogResult.Cancel 表示点了右上角的 Close 按钮
+                                //      DialogResult.Ignore 表示点了 跳过 按钮
+                                return AutoCloseMessageBox.ShowIgnore(this,
+error + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
 20 * 1000,
 "ItemSearchForm");
+                            });
                             if (result == DialogResult.Cancel)
                                 goto ERROR1;
+                            // 2022/11/30
+                            if (result == DialogResult.Ignore)
+                            {
+                                // TODO: 是否允许没有书目记录的册记录导出？
+                                // TODO: 显示到操作历史中
+                                MainForm.WriteErrorLog($"获得书目记录 '{strBiblioRecPath}' 时出错(已经选择跳过此条记录处理): {strError}");
+                                goto CONTINUE;
+                            }
                             goto REDO_GETBIBLIOINFO;
                         }
 
@@ -10391,12 +10439,11 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                         w.WriteEndElement();
 
                         w.WriteStartElement("dprms", "itemCollection", DpNs.dprms);
+
                         List<string> item_recpaths = (List<string>)groupTable[strBiblioRecPath];
                         foreach (string item_recpath in item_recpaths)
                         {
                         REDO_GETRECORD:
-                            string strItemXml = "";
-                            byte[] baItemTimestamp = null;
                             // 获得一条记录
                             //return:
                             //      -1  出错
@@ -10404,19 +10451,23 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                             //      1   找到
                             nRet = GetRecord(
                                 channel,
-            item_recpath,
-            out strItemXml,
-            out baItemTimestamp,
-            out strError);
+                                item_recpath,
+                                out string strItemXml,
+                                out byte[] baItemTimestamp,
+                                out strError);
                             if (nRet == -1)
                             {
                                 if (looping.Stopped)
                                     goto ERROR1;
 
-                                DialogResult result = AutoCloseMessageBox.Show(this,
-strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                                string error = strError;
+                                DialogResult result = this.TryGet(() =>
+                                {
+                                    return AutoCloseMessageBox.Show(this,
+error + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
 20 * 1000,
 "ItemSearchForm");
+                                });
                                 if (result == DialogResult.Cancel)
                                     goto ERROR1;
 
@@ -10454,11 +10505,17 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                     w.WriteEndElement();
                     w.WriteEndDocument();
                 }
+
+                Program.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
+                return;
             }
             finally
             {
+                looping.Dispose();
+                /*
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+                */
 
                 /*
                 _stop.EndLoop();
@@ -10466,28 +10523,51 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 _stop.Initial("");
                 _stop.HideProgress();
                 */
-                EndLoop(looping);
             }
 
-            Program.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
-            return;
         ERROR1:
             ShowMessageBox(strError);
         }
 
         // 将从属的书目记录保存到MARC文件
-        void menu_saveBiblioRecordToMarcFile_Click(object sender, EventArgs e)
+        async void menu_saveBiblioRecordToMarcFile_Click(object sender, EventArgs e)
+        {
+            await SaveBiblioRecordToMarcFileAsync();
+        }
+
+        // 将从属的书目记录保存到MARC文件
+        public Task SaveBiblioRecordToMarcFileAsync()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _saveBiblioRecordToMarcFile();
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // 将从属的书目记录保存到MARC文件
+        void _saveBiblioRecordToMarcFile()
         {
             string strError = "";
             int nRet = 0;
 
-            if (this.listView_records.SelectedItems.Count == 0)
+            // if (_stop.IsInLoop == true)
+            if (HasLooping())
+            {
+                strError = "无法重复进入循环";
+                goto ERROR1;
+            }
+
+            var selected_items = ListViewUtil.GetSelectedItems(this.listView_records);
+
+            if (selected_items.Count == 0)
             {
                 strError = "尚未选定要保存的事项";
                 goto ERROR1;
             }
 
-            Hashtable rule_name_table = null;
             bool bTableExists = false;  // 编目规则对照表是否存在
             // 将馆藏地点名和编目规则名的对照表装入内存
             // return:
@@ -10496,7 +10576,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
             //      1   成功
             nRet = LoadRuleNameTable(PathUtil.MergePath(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 "cataloging_rules.xml"),
-                out rule_name_table,
+                out Hashtable rule_name_table,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -10511,33 +10591,40 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 // 观察要保存的第一条记录的marc syntax
             }
 
-            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
-            MainForm.SetControlFont(dlg, this.Font);
+            OpenMarcFileDlg dlg = null;
 
-            dlg.IsOutput = true;
-            dlg.AddG01Visible = true;
-            if (bTableExists == false)
+            var dialog_result = this.TryGet(() =>
             {
-                dlg.RuleVisible = true;
-                dlg.Rule = this.LastCatalogingRule;
-            }
-            dlg.FileName = this.LastIso2709FileName;
-            // dlg.CrLf = this.LastCrLfIso2709;
-            dlg.CrLfVisible = false;   // 2020/3/9
-            dlg.EncodingListItems = Global.GetEncodingList(false);
-            dlg.EncodingName =
-                (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);
-            dlg.EncodingComment = "注: 原始编码方式为 " + Global.GetEncodingName(preferredEncoding);
-            dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
-            dlg.EnableMarcSyntax = false;
-            dlg.ShowDialog(this);
+                dlg = new OpenMarcFileDlg();
+                MainForm.SetControlFont(dlg, this.Font);
 
-            this.LastIso2709FileName = dlg.FileName;
-            this.LastCrLfIso2709 = dlg.CrLf;
-            this.LastEncodingName = dlg.EncodingName;
-            this.LastCatalogingRule = dlg.Rule;
+                dlg.IsOutput = true;
+                dlg.AddG01Visible = true;
+                if (bTableExists == false)
+                {
+                    dlg.RuleVisible = true;
+                    dlg.Rule = this.LastCatalogingRule;
+                }
+                dlg.FileName = this.LastIso2709FileName;
+                // dlg.CrLf = this.LastCrLfIso2709;
+                dlg.CrLfVisible = false;   // 2020/3/9
+                dlg.EncodingListItems = Global.GetEncodingList(false);
+                dlg.EncodingName =
+                    (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);
+                dlg.EncodingComment = "注: 原始编码方式为 " + Global.GetEncodingName(preferredEncoding);
+                dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
+                dlg.EnableMarcSyntax = false;
+                dlg.ShowDialog(this);
 
-            if (dlg.DialogResult != DialogResult.OK)
+                this.LastIso2709FileName = dlg.FileName;
+                this.LastCrLfIso2709 = dlg.CrLf;
+                this.LastEncodingName = dlg.EncodingName;
+                this.LastCatalogingRule = dlg.Rule;
+
+                return dlg.DialogResult;
+            });
+
+            if (dialog_result != DialogResult.OK)
                 return;
 
             bool unimarc_modify_100 = dlg.UnimarcModify100;
@@ -10564,8 +10651,11 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
             string strLastFileName = this.LastIso2709FileName;
             string strLastEncodingName = this.LastEncodingName;
 
-            ExportMarcHoldingDialog dlg_905 = new ExportMarcHoldingDialog();
+            ExportMarcHoldingDialog dlg_905 = null;
+
+            var dialog_905_result = this.TryGet(() =>
             {
+                dlg_905 = new ExportMarcHoldingDialog();
                 MainForm.SetControlFont(dlg_905, this.Font);
 
                 dlg_905.UiState = Program.MainForm.AppInfo.GetString(
@@ -10581,21 +10671,26 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                     "ExportMarcHoldingDialog_uiState",
                     dlg_905.UiState);
 
-                if (dlg_905.DialogResult != DialogResult.OK)
-                    return;
-            }
+                return dlg_905.DialogResult;
+            });
+
+            if (dialog_905_result != DialogResult.OK)
+                return;
 
             bool bExist = File.Exists(dlg.FileName);
             bool bAppend = false;
 
             if (bExist == true)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
                     "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button1);
+                });
                 if (result == DialogResult.Yes)
                     bAppend = true;
 
@@ -10616,25 +10711,21 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 if (strLastEncodingName != ""
                     && strLastEncodingName != dlg.EncodingName)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "文件 '" + dlg.FileName + "' 已在先前已经用 " + strLastEncodingName + " 编码方式存储了记录，现在又以不同的编码方式 " + dlg.EncodingName + " 追加记录，这样会造成同一文件中存在不同编码方式的记录，可能会令它无法被正确读取。\r\n\r\n是否继续? (是)追加  (否)放弃操作",
                         this.DbType + "SearchForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.No)
                     {
                         strError = "放弃处理...";
                         goto ERROR1;
                     }
                 }
-            }
-
-            // if (_stop.IsInLoop == true)
-            if (HasLooping())
-            {
-                strError = "无法重复进入循环";
-                goto ERROR1;
             }
 
             /*
@@ -10658,7 +10749,6 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
             Stream s = null;
 
             int nOutputCount = 0;
-
             try
             {
                 s = File.Open(this.LastIso2709FileName,
@@ -10681,6 +10771,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
 
                 nRet = GetSelectedBiblioRecPath(
+                    looping.Progress,
                     channel,
                     ref biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
                     ref groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
@@ -10695,17 +10786,17 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 int nItemIndex = 0;
                 List<BiblioInfo> sub_items = new List<BiblioInfo>();
 
-                looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                looping.Progress.SetProgressRange(0, selected_items.Count);
 
-                nRet = DumpBiblioAndPartsSubItems.Dump(channel,
+                nRet = DumpBiblioAndPartsSubItems.Dump(
                     looping.Progress,
+                    channel,
                     this.DbType,
                     biblioRecPathList,
                     groupTable,
                     // 书目记录到来
                     (biblio_info) =>
                     {
-
                         strMARC = "";
                         bRuled = false;
                         strMarcSyntax = "";
@@ -10796,12 +10887,15 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                                         Program.MainForm.DefaultFont);
                                     if (strCatalogingRule == null)
                                     {
-                                        DialogResult result = MessageBox.Show(this,
-                                            "由于您没有指定馆藏地点 '" + strLocation + "' 所对应的编目规则名，此馆藏地点被当作 <无限制> 编目规则来处理。\r\n\r\n是否继续操作? (OK 继续；Cancel 放弃整个导出操作)",
-                                            this.DbType + "SearchForm",
-                                            MessageBoxButtons.OKCancel,
-                                            MessageBoxIcon.Question,
-                                            MessageBoxDefaultButton.Button1);
+                                        DialogResult result = this.TryGet(() =>
+                                        {
+                                            return MessageBox.Show(this,
+                                                "由于您没有指定馆藏地点 '" + strLocation + "' 所对应的编目规则名，此馆藏地点被当作 <无限制> 编目规则来处理。\r\n\r\n是否继续操作? (OK 继续；Cancel 放弃整个导出操作)",
+                                                this.DbType + "SearchForm",
+                                                MessageBoxButtons.OKCancel,
+                                                MessageBoxIcon.Question,
+                                                MessageBoxDefaultButton.Button1);
+                                        });
                                         if (result == System.Windows.Forms.DialogResult.Cancel)
                                             throw new InterruptException("中断");
                                         strCatalogingRule = "";
@@ -10881,11 +10975,19 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
 
                         return true;
                     },
-                    () => { Application.DoEvents(); return true; },
+                    null,   // () => { Application.DoEvents(); return true; },
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
+                // 
+                if (bAppend == true)
+                    MainForm.StatusBarMessage = nOutputCount.ToString()
+                        + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
+                else
+                    MainForm.StatusBarMessage = nOutputCount.ToString()
+                        + "条记录成功保存到新文件 " + this.LastIso2709FileName + " 尾部";
+                return;
             }
             catch (Exception ex)
             {
@@ -10908,15 +11010,6 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 EndLoop(looping);
             }
 
-            // 
-            if (bAppend == true)
-                MainForm.StatusBarMessage = nOutputCount.ToString()
-                    + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
-            else
-                MainForm.StatusBarMessage = nOutputCount.ToString()
-                    + "条记录成功保存到新文件 " + this.LastIso2709FileName + " 尾部";
-
-            return;
         ERROR1:
             ShowMessageBox(strError);
         }
