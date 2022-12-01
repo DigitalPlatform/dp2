@@ -3134,7 +3134,7 @@ true);
                         };
                     }
                 },
-default,
+this.CancelToken,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }

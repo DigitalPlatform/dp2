@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -354,5 +355,59 @@ namespace dp2Circulation
 
         #endregion
 
+        // 要设法将是否 BeginLoop()、是否自动重试 等特性用一种统一的参数表达
+#if REMOVED
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public static int GetTable(
+            this IChannelLooping host,
+            string strRecPath,
+            string strStyleList,
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            string strFormat = "table";
+            if (string.IsNullOrEmpty(strStyleList) == false)
+                strFormat += ":" + strStyleList.Replace(",", "|");
+
+            LibraryChannel channel = host.GetChannel();
+            /*
+            var looping = Looping(out LibraryChannel channel,
+                null);
+            */
+            try
+            {
+                long lRet = channel.GetBiblioInfos(
+                    null,   // looping.Progress,
+                    strRecPath,
+                    "",
+                    new string[] { strFormat },   // formats
+                    out string[] results,
+                    out byte[] baNewTimestamp,
+                    out strError);
+                if (lRet == 0)
+                    return 0;
+                if (lRet == -1)
+                    return -1;
+                if (results == null || results.Length == 0)
+                {
+                    strError = "results error";
+                    return -1;
+                }
+                strXml = results[0];
+                return 1;
+            }
+            finally
+            {
+                // looping.Dispose();
+                host.ReturnChannel(channel);
+            }
+        }
+#endif
     }
 }

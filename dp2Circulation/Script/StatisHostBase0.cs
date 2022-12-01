@@ -14,6 +14,20 @@ namespace dp2Circulation
     /// </summary>
     public class StatisHostBase0
     {
+        // 是否使用 UI 线程
+        private bool _useUiThread = true;
+        public bool UseUiThread
+        {
+            get
+            {
+                return _useUiThread;
+            }
+            set
+            {
+                _useUiThread = value;
+            }
+        }
+
         /// <summary>
         /// 当前窗口所从属的框架窗口
         /// </summary>

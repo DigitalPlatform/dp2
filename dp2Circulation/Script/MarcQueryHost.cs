@@ -30,6 +30,7 @@ namespace dp2Circulation
                 _useUiThread = value;
             }
         }
+
         /*
         /// <summary>
         /// 框架窗口

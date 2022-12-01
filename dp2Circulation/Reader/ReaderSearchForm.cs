@@ -5620,36 +5620,6 @@ out strFingerprint);
         // 创建一个新的 C# 脚本文件
         void menu_createMarcQueryCsFile_Click(object sender, EventArgs e)
         {
-#if NO
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要创建的脚本文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            dlg.FileName = "";
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "C#脚本文件 (*.cs)|*.cs|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            try
-            {
-                PatronHost.CreateStartCsFile(dlg.FileName);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message);
-                return;
-            }
-
-            System.Diagnostics.Process.Start("notepad.exe", dlg.FileName);
-
-            this.m_strUsedMarcQueryFilename = dlg.FileName;
-#endif
             CreateMarcQueryCsFile();
         }
 
@@ -5690,13 +5660,31 @@ out strFingerprint);
             this.m_strUsedMarcQueryFilename = dlg.FileName;
         }
 
-        // TODO: 独立线程改造
-        void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
+        async void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
+        {
+            await QuickMarcQueryRecordsAsync();
+        }
+
+        public Task QuickMarcQueryRecordsAsync()
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    _quickMarcQueryRecords();
+                },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        void _quickMarcQueryRecords()
         {
             string strError = "";
             int nRet = 0;
 
-            if (this.listView_records.SelectedItems.Count == 0)
+            var selected_items = ListViewUtil.GetSelectedItems(this.listView_records);
+
+            if (selected_items.Count == 0)
             {
                 strError = "尚未选择要执行 C# 脚本的事项";
                 goto ERROR1;
@@ -5707,24 +5695,27 @@ out strFingerprint);
             if (this.m_biblioTable == null)
                 this.m_biblioTable = new Hashtable();
 
-            OpenFileDialog dlg = new OpenFileDialog();
+            string dlg_filename = "";
+            var dialog_result = this.TryGet(() =>
+            {
+                OpenFileDialog dlg = new OpenFileDialog();
+                dlg.Title = "请指定 C# 脚本文件";
+                dlg.FileName = this.m_strUsedMarcQueryFilename;
+                dlg.Filter = "C# 脚本文件 (*.cs)|*.cs|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+                var result = dlg.ShowDialog();
+                dlg_filename = dlg.FileName;
+                return result;
+            });
 
-            dlg.Title = "请指定 C# 脚本文件";
-            dlg.FileName = this.m_strUsedMarcQueryFilename;
-            dlg.Filter = "C# 脚本文件 (*.cs)|*.cs|All files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
+            if (dialog_result != DialogResult.OK)
                 return;
 
-            this.m_strUsedMarcQueryFilename = dlg.FileName;
-
-            PatronHost host = null;
-            Assembly assembly = null;
+            this.m_strUsedMarcQueryFilename =dlg_filename;
 
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
-                out assembly,
-                out host,
+                out Assembly assembly,
+                out PatronHost host,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -5738,7 +5729,10 @@ out strFingerprint);
                 host.UiItem = null;
 
                 StatisEventArgs args = new StatisEventArgs();
-                host.OnInitial(this, args);
+                this.TryInvoke(host.UseUiThread, () =>
+                {
+                    host.OnInitial(this, args);
+                });
                 if (args.Continue == ContinueType.SkipAll)
                     return;
                 if (args.Continue == ContinueType.Error)
@@ -5748,9 +5742,9 @@ out strFingerprint);
                 }
             }
 
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg_filename + "</div>");
 
-            LibraryChannel channel = this.GetChannel();
+            // LibraryChannel channel = this.GetChannel();
 
             /*
             stop.Style = StopStyle.EnableHalfStop;
@@ -5758,15 +5752,20 @@ out strFingerprint);
             stop.Initial("正在针对读者记录执行 C# 脚本 ...");
             stop.BeginLoop();
             */
-            var looping = BeginLoop(this.DoStop, "正在针对读者记录执行 C# 脚本 ...", "halfstop");
+            var looping = Looping(out LibraryChannel channel,
+                "正在针对读者记录执行 C# 脚本 ...",
+                "disableControl,halfstop");
 
-            this.EnableControls(false);
+            // this.EnableControls(false);
 
-            this.listView_records.Enabled = false;
+            this.TryInvoke(() =>
+            {
+                this.listView_records.Enabled = false;
+            });
             try
             {
                 if (looping.Progress != null)
-                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                    looping.Progress.SetProgressRange(0, selected_items.Count);
 
                 host.CodeFileName = this.m_strUsedMarcQueryFilename;
                 {
@@ -5777,7 +5776,10 @@ out strFingerprint);
                     host.UiItem = null;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnBegin(this, args);
+                    this.TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnBegin(this, args);
+                    });
                     if (args.Continue == ContinueType.SkipAll)
                         return;
                     if (args.Continue == ContinueType.Error)
@@ -5788,13 +5790,17 @@ out strFingerprint);
                 }
 
                 List<ListViewItem> items = new List<ListViewItem>();
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                foreach (ListViewItem item in selected_items)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
+                    string recpath = ListViewUtil.GetItemText(item, 0);
+                    if (string.IsNullOrEmpty(recpath) == true)
                         continue;
 
                     items.Add(item);
                 }
+
+                if (looping.Progress != null)
+                    looping.Progress.SetProgressRange(0, items.Count);
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
                     looping.Progress,
@@ -5808,7 +5814,7 @@ out strFingerprint);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -5827,10 +5833,16 @@ out strFingerprint);
                     host.PatronDom = new XmlDocument();
                     host.PatronDom.LoadXml(info.OldXml);
                     host.Changed = false;
-                    host.UiItem = item.ListViewItem;
+                    this.TryInvoke(() =>
+                    {
+                        host.UiItem = item.ListViewItem;
+                    });
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnRecord(this, args);
+                    this.TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnRecord(this, args);
+                    });
                     if (args.Continue == ContinueType.SkipAll)
                         break;
                     if (args.Continue == ContinueType.Error)
@@ -5849,8 +5861,11 @@ out strFingerprint);
                             info.NewXml = strXml;
                         }
 
-                        item.ListViewItem.BackColor = SystemColors.Info;
-                        item.ListViewItem.ForeColor = SystemColors.InfoText;
+                        this.TryInvoke(() =>
+                        {
+                            item.ListViewItem.BackColor = SystemColors.Info;
+                            item.ListViewItem.ForeColor = SystemColors.InfoText;
+                        });
                     }
 
                     // 显示为工作单形式
@@ -5865,7 +5880,10 @@ out strFingerprint);
                     host.UiItem = null;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnEnd(this, args);
+                    this.TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnEnd(this, args);
+                    });
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
@@ -5883,8 +5901,12 @@ out strFingerprint);
                 if (host != null)
                     host.FreeResources();
 
-                this.listView_records.Enabled = true;
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Enabled = true;
+                });
 
+                looping.Dispose();
                 /*
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -5892,14 +5914,14 @@ out strFingerprint);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
                 */
-                EndLoop(looping);
+                //EndLoop(looping);
 
 
-                this.EnableControls(true);
+                //this.EnableControls(true);
 
-                this.ReturnChannel(channel);
+                //this.ReturnChannel(channel);
 
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg_filename + "</div>");
             }
 
             DoViewComment(false);

@@ -3263,23 +3263,21 @@ out strError);
             if (string.IsNullOrEmpty(strStyleList) == false)
                 strFormat += ":" + strStyleList.Replace(",", "|");
 
-            /*
             LibraryChannel channel = this.GetChannel();
-            */
+            /*
             var looping = Looping(out LibraryChannel channel,
                 null);
+            */
             try
             {
             REDO:
-                string[] results = null;
-                byte[] baNewTimestamp = null;
                 long lRet = channel.GetBiblioInfos(
-                    looping.Progress,
+                    null,   // looping.Progress,
                     strRecPath,
                     "",
                     new string[] { strFormat },   // formats
-                    out results,
-                    out baNewTimestamp,
+                    out string[] results,
+                    out byte[] baNewTimestamp,
                     out strError);
                 if (lRet == 0)
                     return 0;
@@ -3315,10 +3313,8 @@ out strError);
             }
             finally
             {
-                looping.Dispose();
-                /*
+                // looping.Dispose();
                 this.ReturnChannel(channel);
-                */
             }
         }
 

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
@@ -40,11 +41,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_scriptFileName.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_scriptFileName.Text;
+                });
             }
             set
             {
-                this.textBox_scriptFileName.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_scriptFileName.Text = value;
+                });
             }
         }
 
@@ -52,11 +59,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_autoSaveChanges.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_autoSaveChanges.Checked;
+                });
             }
             set
             {
-                this.checkBox_autoSaveChanges.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_autoSaveChanges.Checked = value;
+                });
             }
         }
 
@@ -64,11 +77,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_forceSave.Checked;
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_forceSave.Checked;
+                });
             }
             set
             {
-                this.checkBox_forceSave.Checked = value;
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_forceSave.Checked = value;
+                });
             }
         }
 

@@ -12512,10 +12512,29 @@ TaskScheduler.Default);
 
         async void menu_quickMarcQueryRecords_Click(object sender, EventArgs e)
         {
+            await QuickMarcQueryRecordsAsync();
+        }
+
+        public Task QuickMarcQueryRecordsAsync()
+        {
+            return Task.Factory.StartNew(
+                async () =>
+                {
+                    await _quickMarcQueryRecordsAsync();
+                },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        async Task _quickMarcQueryRecordsAsync()
+        {
             string strError = "";
             int nRet = 0;
 
-            if (this.listView_records.SelectedItems.Count == 0)
+            var selected_items = ListViewUtil.GetSelectedItems(this.listView_records);
+
+            if (selected_items.Count == 0)
             {
                 strError = "尚未选择要执行 C# 脚本的事项";
                 goto ERROR1;
@@ -12526,39 +12545,34 @@ TaskScheduler.Default);
             if (this.m_biblioTable == null)
                 this.m_biblioTable = new Hashtable();
 
-#if NO
-            OpenFileDialog dlg = new OpenFileDialog();
+            RunScriptDialog dlg = null;
 
-            dlg.Title = "请指定 C# 脚本文件";
-            dlg.FileName = this.m_strUsedMarcQueryFilename;
-            dlg.Filter = "C# 脚本文件 (*.cs)|*.cs|All files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
+            var dialog_result = this.TryGet(() =>
+            {
+                dlg = new RunScriptDialog();
+                MainForm.SetControlFont(dlg, this.Font);
+                dlg.ScriptFileName = this.m_strUsedMarcQueryFilename;
 
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-#endif
-            RunScriptDialog dlg = new RunScriptDialog();
-            MainForm.SetControlFont(dlg, this.Font);
-            dlg.ScriptFileName = this.m_strUsedMarcQueryFilename;
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+        "ItemSearchForm",
+        "RunScriptDialog_uiState",
+        "");
+                Program.MainForm.AppInfo.LinkFormState(dlg,
+                    "ItemSearchForm_RunScriptDialog_state");
 
-            dlg.UiState = Program.MainForm.AppInfo.GetString(
-    "ItemSearchForm",
-    "RunScriptDialog_uiState",
-    "");
-            Program.MainForm.AppInfo.LinkFormState(dlg,
-                "ItemSearchForm_RunScriptDialog_state");
+                dlg.ShowDialog(this);
 
-            dlg.ShowDialog(this);
+                Program.MainForm.AppInfo.SetString(
+        "ItemSearchForm",
+        "RunScriptDialog_uiState",
+        dlg.UiState);
 
-            Program.MainForm.AppInfo.SetString(
-    "ItemSearchForm",
-    "RunScriptDialog_uiState",
-    dlg.UiState);
+                return dlg.DialogResult;
+            });
 
-            if (dlg.DialogResult == DialogResult.Cancel)
+            if (dialog_result == DialogResult.Cancel)
                 return;
 
-            // string save_style = Control.ModifierKeys == Keys.Control ? "force" : "";
             string save_style = "dont_enablecontrol,dont_refresh,auto_retry";
             if (dlg.ForceSave)
                 save_style += ",force";
@@ -12583,7 +12597,10 @@ TaskScheduler.Default);
                 host.UiItem = null;
 
                 StatisEventArgs args = new StatisEventArgs();
-                host.OnInitial(this, args);
+                this.TryInvoke(host.UseUiThread, () =>
+                {
+                    host.OnInitial(this, args);
+                });
                 if (args.Continue == ContinueType.SkipAll)
                     return;
                 if (args.Continue == ContinueType.Error)
@@ -12602,26 +12619,18 @@ TaskScheduler.Default);
                 goto ERROR1;
             }
 
-            /*
-            _stop.Style = StopStyle.EnableHalfStop;
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在针对" + this.DbTypeCaption + "记录执行 C# 脚本 ...");
-            _stop.BeginLoop();
-            */
-            var looping = BeginLoop(this.DoStop, "正在针对" + this.DbTypeCaption + "记录执行 C# 脚本 ...", "halfstop");
+            var looping = Looping(out LibraryChannel channel,
+                "正在针对" + this.DbTypeCaption + "记录执行 C# 脚本 ...",
+                "disableControl,timeout:0:2:0,halfstop");
 
-            LibraryChannel channel = this.GetChannel();
-
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(2);
-
-            this.EnableControls(false);
-
-            this.listView_records.Enabled = false;
+            this.TryInvoke(() =>
+            {
+                this.listView_records.Enabled = false;
+            });
             try
             {
                 if (looping != null)
-                    looping.Progress.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                    looping.Progress.SetProgressRange(0, selected_items.Count);
 
                 {
                     // host.MainForm = Program.MainForm;
@@ -12632,7 +12641,10 @@ TaskScheduler.Default);
                     host.UiItem = null;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnBegin(this, args);
+                    this.TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnBegin(this, args);
+                    });
                     if (args.Continue == ContinueType.SkipAll)
                         return;
                     if (args.Continue == ContinueType.Error)
@@ -12643,10 +12655,11 @@ TaskScheduler.Default);
                 }
 
                 List<ListViewItem> items = new List<ListViewItem>();
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                foreach (ListViewItem item in selected_items)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
+                    string recpath = ListViewUtil.GetItemText(item, 0);
+                    if (string.IsNullOrEmpty(recpath) == true
+                        || recpath.StartsWith("error:"))
                         continue;
 
                     items.Add(item);
@@ -12658,13 +12671,16 @@ TaskScheduler.Default);
                 if (nChangeCount > 0)
                 {
                     bool bHideMessageBox = true;
-                    DialogResult result = MessageDialog.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageDialog.Show(this,
                         "当前选定的 " + items.Count.ToString() + " 个事项中有 " + nChangeCount + " 项修改尚未保存。\r\n\r\n请问如何进行修改? \r\n\r\n(重新修改) 重新进行修改，忽略以前内存中的修改; \r\n(继续修改) 以上次的修改为基础继续修改; \r\n(放弃) 放弃整个操作",
     MessageBoxButtons.YesNoCancel,
     MessageBoxDefaultButton.Button1,
     null,
     ref bHideMessageBox,
     new string[] { "重新修改", "继续修改", "放弃" });
+                    });
                     if (result == DialogResult.Cancel)
                         return;
                     if (result == DialogResult.No)
@@ -12674,7 +12690,7 @@ TaskScheduler.Default);
                 }
 
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    looping.Progress,
+                    null,   // looping.Progress,
                     items,
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
@@ -12686,7 +12702,7 @@ TaskScheduler.Default);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (looping.Stopped)
                     {
@@ -12704,29 +12720,57 @@ TaskScheduler.Default);
                     host.DbType = this.DbType;
                     host.RecordPath = info.RecPath;
                     host.ItemDom = new XmlDocument();
-                    if (bOldSource == true)
+                    try
                     {
-                        host.ItemDom.LoadXml(info.OldXml);
-                        // 放弃上一次的修改
-                        if (string.IsNullOrEmpty(info.NewXml) == false)
+                        if (bOldSource == true)
                         {
-                            info.NewXml = "";
-                            this.m_nChangedCount--;
+                            host.ItemDom.LoadXml(info.OldXml);
+                            // 放弃上一次的修改
+                            if (string.IsNullOrEmpty(info.NewXml) == false)
+                            {
+                                info.NewXml = "";
+                                this.m_nChangedCount--;
+                            }
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(info.NewXml) == false)
+                                host.ItemDom.LoadXml(info.NewXml);
+                            else
+                                host.ItemDom.LoadXml(info.OldXml);
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        if (string.IsNullOrEmpty(info.NewXml) == false)
-                            host.ItemDom.LoadXml(info.NewXml);
-                        else
-                            host.ItemDom.LoadXml(info.OldXml);
+                        strError = "记录 '" + host.RecordPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                        string error = strError;
+                        DialogResult result = this.TryGet(() =>
+                        {
+                            return MessageBox.Show(this,
+error + "\r\n\r\n是否跳过此条记录继续处理?\r\n\r\n(Yes 跳过；No 中断处理)",
+"ItemSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                        });
+                        if (result == DialogResult.No)
+                            goto ERROR1;
+                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}。已选择跳过此条继续批处理</div>");
+                        continue;
                     }
+
                     // host.ItemDom.LoadXml(info.OldXml);
                     host.Changed = false;
-                    host.UiItem = item.ListViewItem;
+                    this.TryInvoke(() =>
+                    {
+                        host.UiItem = item.ListViewItem;
+                    });
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnRecord(this, args);
+                    this.TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnRecord(this, args);
+                    });
                     if (args.Continue == ContinueType.SkipAll)
                         break;
                     if (args.Continue == ContinueType.Error)
@@ -12745,8 +12789,11 @@ TaskScheduler.Default);
                             info.NewXml = strXml;
                         }
 
-                        item.ListViewItem.BackColor = SystemColors.Info;
-                        item.ListViewItem.ForeColor = SystemColors.InfoText;
+                        this.TryInvoke(() =>
+                        {
+                            item.ListViewItem.BackColor = SystemColors.Info;
+                            item.ListViewItem.ForeColor = SystemColors.InfoText;
+                        });
                     }
 
                     // 显示为工作单形式
@@ -12780,7 +12827,7 @@ TaskScheduler.Default);
                 }
 
                 {
-                    host.MainForm = Program.MainForm;
+                    // host.MainForm = Program.MainForm;
                     host.DbType = this.DbType;
                     host.RecordPath = "";
                     host.ItemDom = null;
@@ -12788,7 +12835,10 @@ TaskScheduler.Default);
                     host.UiItem = null;
 
                     StatisEventArgs args = new StatisEventArgs();
-                    host.OnEnd(this, args);
+                    this.TryInvoke(host.UseUiThread, () =>
+                    {
+                        host.OnEnd(this, args);
+                    });
                     if (args.Continue == ContinueType.Error)
                     {
                         strError = args.ParamString;
@@ -12809,6 +12859,9 @@ TaskScheduler.Default);
                     if (nRet == -1)
                         goto ERROR1;
                 }
+
+                DoViewComment(false);
+                return;
             }
             catch (Exception ex)
             {
@@ -12820,26 +12873,16 @@ TaskScheduler.Default);
                 if (host != null)
                     host.FreeResources();
 
-                this.listView_records.Enabled = true;
-                this.EnableControls(true);
+                looping.Dispose();
 
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                _stop.HideProgress();
-                _stop.Style = StopStyle.None;
-                */
-                EndLoop(looping);
+                this.TryInvoke(() =>
+                {
+                    this.listView_records.Enabled = true;
+                });
 
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.ScriptFileName + "</div>");
             }
 
-            DoViewComment(false);
-            return;
         ERROR1:
             ShowMessageBox(strError);
         }
