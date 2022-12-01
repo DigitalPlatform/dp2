@@ -5927,7 +5927,7 @@ Program.MainForm.DefaultFont);
         }
 
         // 装入读者查询窗口
-        void menu_exportToReaderSearchForm_Click(object sender, EventArgs e)
+        async void menu_exportToReaderSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -5990,8 +5990,7 @@ Program.MainForm.DefaultFont);
                     form.AddBarcodeToBrowseList(barcode);
                 }
                 form.EnableControls(true);
-                form.RrefreshAllItems();
-
+                await form.RefreshAllItemsAsync();
             }
             finally
             {
@@ -8180,12 +8179,30 @@ TaskScheduler.Default);
         }
 
         // 刷新书目摘要
-        void menu_refreshSelectedItemsBiblioSummary_Click(object sender, EventArgs e)
+        async void menu_refreshSelectedItemsBiblioSummary_Click(object sender, EventArgs e)
+        {
+            await RefreshSelectedItemsBiblioSummaryAsync();
+        }
+
+        public Task RefreshSelectedItemsBiblioSummaryAsync()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _refreshSelectedItemsBiblioSummary();
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        void _refreshSelectedItemsBiblioSummary()
         {
             string strError = "";
             int nRet = 0;
 
-            if (this._listviewRecords.SelectedItems.Count == 0)
+            var selected_items = ListViewUtil.GetSelectedItems(this._listviewRecords);
+
+            if (selected_items.Count == 0)
             {
                 strError = "尚未选择要刷新的浏览行";
                 goto ERROR1;
@@ -8193,10 +8210,11 @@ TaskScheduler.Default);
 
             int nChangedCount = 0;
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in this._listviewRecords.SelectedItems)
+            foreach (ListViewItem item in selected_items)
             {
-                if (string.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
+                string recpath = ListViewUtil.GetItemText(item, 0);
+                if (string.IsNullOrEmpty(recpath) == true
+                        || recpath.StartsWith("error:"))
                     continue;
                 items.Add(item);
 
@@ -8207,42 +8225,48 @@ TaskScheduler.Default);
             // 警告未保存的内容会丢失
             if (nChangedCount > 0)
             {
-                DialogResult result = MessageBox.Show(this,
-    "要刷新的 " + this._listviewRecords.SelectedItems.Count.ToString() + " 个事项中有 " + nChangedCount.ToString() + " 项修改后尚未保存。如果刷新它们，修改内容会丢失。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
+    "要刷新的 " + selected_items.Count.ToString() + " 个事项中有 " + nChangedCount.ToString() + " 项修改后尚未保存。如果刷新它们，修改内容会丢失。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
     "ItemSearchForm",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);
+                });
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
             }
 
             m_tableSummaryColIndex.Clear();
 
-            LibraryChannel channel = this.GetChannel();
+            var looping = Looping(out LibraryChannel channel,
+                "正在刷新书目摘要 ...");
             try
             {
                 nRet = FillBiblioSummaryColumn(
+                    looping.Progress,
                     channel,
                     items,
-                    true,
+                    // true,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                DoViewComment(false);
+                return;
             }
             finally
             {
-                this.ReturnChannel(channel);
+                looping.Dispose();
             }
 
-            DoViewComment(false);
-            return;
         ERROR1:
             ShowMessageBox(strError);
         }
 
         // 刷新所选择的行。也就是重新从数据库中装载浏览列
-        void menu_refreshSelectedItems_Click(object sender, EventArgs e)
+        async void menu_refreshSelectedItems_Click(object sender, EventArgs e)
         {
 #if NO
             string strError = "";
@@ -8317,7 +8341,7 @@ TaskScheduler.Default);
         ERROR1:
             MessageBox.Show(this, strError);
 #endif
-            RrefreshSelectedItems();
+            await RefreshSelectedItemsAsync();
         }
 
 

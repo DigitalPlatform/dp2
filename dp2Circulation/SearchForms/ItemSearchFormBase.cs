@@ -1113,7 +1113,7 @@ item_recpath);
                         {
                             if (Program.MainForm.ArrivedDbName != strDbName)
                             {
-                                strError = $"路径 '{ strRecPath}' 中的数据库名 '{ strDbName}' 不是合法的预约到书库名({Program.MainForm.ArrivedDbName})。很可能所指定的文件不是预约到书库的记录路径文件";
+                                strError = $"路径 '{strRecPath}' 中的数据库名 '{strDbName}' 不是合法的预约到书库名({Program.MainForm.ArrivedDbName})。很可能所指定的文件不是预约到书库的记录路径文件";
                                 goto ERROR1;
                             }
                         }
@@ -1312,6 +1312,23 @@ item_recpath);
             }
         }
 
+        // 2022/11/30
+        // 建议的版本。会自动 SetProgressRange
+        internal int FillBiblioSummaryColumn(
+            Stop stop,
+            LibraryChannel channel,
+            List<ListViewItem> items,
+            out string strError)
+        {
+            stop?.SetProgressRange(0, items.Count);
+            return FillBiblioSummaryColumn(
+channel,
+items,
+stop,
+out strError);
+        }
+
+
         // 包装后的版本
         internal int FillBiblioSummaryColumn(
     LibraryChannel channel,
@@ -1349,6 +1366,7 @@ item_recpath);
         // 实体数据库名 --> parent id 列号
         internal Hashtable m_tableSummaryColIndex = new Hashtable();
 
+        // 注：此版本不会 SetProgressRange
         // TODO: 用 CacheableBiblioLoader 改造
         // parameters:
         //      bBeginLoop  是否要 BeginLoop()。在大循环中使用本函数，要用 false    
@@ -1579,6 +1597,12 @@ item_recpath);
 
             foreach (ListViewItem item in items)
             {
+                // 2022/11/30
+                if (stop != null && stop.State != 0)
+                {
+                    strError = "用户中断";
+                    return 0;
+                }
 #if NO
                 string strRecPath = ListViewUtil.GetItemText(item, 0);
                 // 根据记录路径获得数据库名

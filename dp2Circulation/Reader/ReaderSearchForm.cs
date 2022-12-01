@@ -1896,7 +1896,7 @@ MessageBoxDefaultButton.Button2);
 
 
         // 筛选 --> 读者查询窗
-        void menu_filterToAnotherReaderSearchForm_Click(object sender, EventArgs e)
+        async void menu_filterToAnotherReaderSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -2056,7 +2056,7 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
 
-                form.RrefreshAllItems();
+                await form.RefreshAllItemsAsync();
                 form.ShowMessage("共装入读者记录 " + nCount + " 个", "green", true);
             }
             finally
@@ -2067,7 +2067,7 @@ MessageBoxDefaultButton.Button2);
             this.ShowMessage("完成", "green", true);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
 #if NO
@@ -2170,7 +2170,7 @@ TaskScheduler.Default);
         }
 
         // 刷新所选择的行。也就是重新从数据库中装载浏览列
-        void menu_refreshSelectedItems_Click(object sender, EventArgs e)
+        async void menu_refreshSelectedItems_Click(object sender, EventArgs e)
         {
 #if NO
             string strError = "";
@@ -2217,7 +2217,7 @@ TaskScheduler.Default);
         ERROR1:
             MessageBox.Show(this, strError);
 #endif
-            RrefreshSelectedItems();
+            await RefreshSelectedItemsAsync();
         }
 
 

@@ -507,7 +507,7 @@ namespace dp2Circulation
         // 观察一个事项是否在内存中修改过
         internal bool IsItemChanged(ListViewItem item)
         {
-            string strRecPath = item.Text;
+            string strRecPath = ListViewUtil.GetItemText(item, 0); //  item.Text;
             if (string.IsNullOrEmpty(strRecPath) == true)
                 return false;
 
@@ -535,23 +535,37 @@ namespace dp2Circulation
             return nResult;
         }
 
+        public Task RefreshAllItemsAsync()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _refreshAllItems();
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
         /// <summary>
         /// 刷新所选择的行。也就是重新从数据库中装载浏览列
         /// </summary>
-        public void RrefreshAllItems()
+        void _refreshAllItems()
         {
             string strError = "";
             int nRet = 0;
 
-            if (this._listviewRecords.Items.Count == 0)
+            var all_items = ListViewUtil.GetItems(this._listviewRecords);
+
+            if (all_items.Count == 0)
                 return;
 
             int nChangedCount = 0;
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in this._listviewRecords.Items)
+            foreach (ListViewItem item in all_items)
             {
-                if (string.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
+                string recpath = ListViewUtil.GetItemText(item, 0);
+                if (string.IsNullOrEmpty(recpath) == true
+                        || recpath.StartsWith("error:"))
                     continue;
                 items.Add(item);
 
@@ -562,12 +576,15 @@ namespace dp2Circulation
             // 警告未保存的内容会丢失
             if (nChangedCount > 0)
             {
-                DialogResult result = MessageBox.Show(this,
-    "要刷新的 " + this._listviewRecords.SelectedItems.Count.ToString() + " 个事项中有 " + nChangedCount.ToString() + " 项修改后尚未保存。如果刷新它们，修改内容会丢失。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
+    "要刷新的 " + all_items.Count.ToString() + " 个事项中有 " + nChangedCount.ToString() + " 项修改后尚未保存。如果刷新它们，修改内容会丢失。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
     "SearchForm",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);
+                });
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
             }
@@ -585,19 +602,32 @@ namespace dp2Circulation
             DoViewComment(false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
+        }
+
+        public Task RefreshSelectedItemsAsync()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _refreshSelectedItems();
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
         }
 
         // 
         /// <summary>
         /// 刷新所选择的行。也就是重新从数据库中装载浏览列
         /// </summary>
-        public void RrefreshSelectedItems()
+        void _refreshSelectedItems()
         {
             string strError = "";
             int nRet = 0;
 
-            if (this._listviewRecords.SelectedItems.Count == 0)
+            var selected_items = ListViewUtil.GetSelectedItems(this._listviewRecords);
+
+            if (selected_items.Count == 0)
             {
                 strError = "尚未选择要刷新的浏览行";
                 goto ERROR1;
@@ -605,10 +635,11 @@ namespace dp2Circulation
 
             int nChangedCount = 0;
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in this._listviewRecords.SelectedItems)
+            foreach (ListViewItem item in selected_items)
             {
-                if (string.IsNullOrEmpty(item.Text) == true
-                        || item.Text.StartsWith("error:"))
+                string recpath = ListViewUtil.GetItemText(item, 0);
+                if (string.IsNullOrEmpty(recpath) == true
+                        || recpath.StartsWith("error:"))
                     continue;
                 items.Add(item);
 
@@ -619,12 +650,15 @@ namespace dp2Circulation
             // 警告未保存的内容会丢失
             if (nChangedCount > 0)
             {
-                DialogResult result = MessageBox.Show(this,
-    "要刷新的 " + this._listviewRecords.SelectedItems.Count.ToString() + " 个事项中有 " + nChangedCount.ToString() + " 项修改后尚未保存。如果刷新它们，修改内容会丢失。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
+    "要刷新的 " + selected_items.Count.ToString() + " 个事项中有 " + nChangedCount.ToString() + " 项修改后尚未保存。如果刷新它们，修改内容会丢失。\r\n\r\n是否继续刷新? (OK 刷新；Cancel 放弃刷新)",
     "SearchForm",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);
+                });
                 if (result == System.Windows.Forms.DialogResult.Cancel)
                     return;
             }
@@ -642,7 +676,7 @@ namespace dp2Circulation
             DoViewComment(false);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 包装后的版本
