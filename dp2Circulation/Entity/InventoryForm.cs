@@ -19,6 +19,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -3417,7 +3418,7 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
-        private void listView_baseList_records_DoubleClick(object sender, EventArgs e)
+        private async void listView_baseList_records_DoubleClick(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -3448,7 +3449,7 @@ MessageBoxDefaultButton.Button1);
 
                 if (bLoadToItemWindow == true)
                 {
-                    LoadRecord("ItemInfoForm",
+                    await LoadRecord("ItemInfoForm",
                         "recpath",
                         strOpenStyle);
                     return;
@@ -3459,13 +3460,13 @@ MessageBoxDefaultButton.Button1);
                 //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
                 //      strIdType   标识类型 "barcode" "recpath"
                 //      strOpenType 打开窗口的方式 "new" "exist"
-                LoadRecord("EntityForm",
+                await LoadRecord("EntityForm",
                     "recpath",
                     strOpenStyle);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 装入种册窗/实体窗，用册条码号/记录路径
@@ -3473,7 +3474,7 @@ MessageBoxDefaultButton.Button1);
         //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
         //      strIdType   标识类型 "barcode" "recpath"
         //      strOpenType 打开窗口的方式 "new" "exist"
-        void LoadRecord(string strTargetFormType,
+        async Task LoadRecord(string strTargetFormType,
             string strIdType,
             string strOpenType)
         {
@@ -3484,7 +3485,7 @@ MessageBoxDefaultButton.Button1);
 
             if (this.listView_baseList_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未在列表中选定要装入" + strTargetFormName + "的行");
+                this.MessageBoxShow("尚未在列表中选定要装入" + strTargetFormName + "的行");
                 return;
             }
 
@@ -3530,7 +3531,7 @@ MessageBoxDefaultButton.Button1);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    form.LoadItemByBarcode(strBarcodeOrRecPath, false);
+                    await form.LoadItemByBarcodeAsync(strBarcodeOrRecPath, false);
                 }
                 else
                 {
@@ -3542,7 +3543,7 @@ MessageBoxDefaultButton.Button1);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    form.LoadItemByRecPath(strBarcodeOrRecPath, false);
+                    await form.LoadItemByRecPathAsync("item", strBarcodeOrRecPath, false);
                 }
             }
             else
@@ -3577,13 +3578,13 @@ MessageBoxDefaultButton.Button1);
                 if (strIdType == "barcode")
                 {
                     Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
-                    form.LoadRecord(strBarcodeOrRecPath);
+                    await form.LoadRecordAsync(strBarcodeOrRecPath);
                 }
                 else
                 {
                     Debug.Assert(strIdType == "recpath", "");
 
-                    form.LoadRecordByRecPath(strBarcodeOrRecPath, "");
+                    await form.LoadRecordByRecPathAsync(strBarcodeOrRecPath, "");
                 }
             }
         }

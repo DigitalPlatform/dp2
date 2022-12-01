@@ -364,9 +364,9 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         /// 重新装载当前记录
         /// </summary>
         /// <returns>-1: 出错; 1: 成功</returns>
-        public int Reload()
+        public Task<int> Reload()
         {
-            return LoadRecordByRecPath(this.ItemRecPath, "");
+            return LoadRecordByRecPathAsync(this.ItemRecPath, "");
         }
 
         // (为了兼容以前的 public API。即将弃用。线程模型不理想)
@@ -555,6 +555,7 @@ TaskScheduler.Default);
         {
             get
             {
+                /*
                 if (this.m_strDbType == "item")
                     return "册";
                 else if (this.m_strDbType == "comment")
@@ -565,7 +566,23 @@ TaskScheduler.Default);
                     return "期";
                 else
                     throw new Exception("未知的DbType '" + this.m_strDbType + "'");
+                */
+                return GetDbTypeCaption(m_strDbType);
             }
+        }
+
+        public static string GetDbTypeCaption(string strDbType)
+        {
+            if (strDbType == "item")
+                return "册";
+            else if (strDbType == "comment")
+                return "评注";
+            else if (strDbType == "order")
+                return "订购";
+            else if (strDbType == "issue")
+                return "期";
+            else
+                throw new ArgumentException($"未知的 {nameof(strDbType)} 值 '{strDbType}'");
         }
 
         // (为了兼容以前的 public API。即将弃用。线程模型不理想)
@@ -890,7 +907,7 @@ TaskScheduler.Default);
 
         // parameters:
         //      strStyle    force/空
-        void SaveRecord(string strStyle)
+        async Task SaveRecordAsync(string strStyle)
         {
             string strError = "";
 
@@ -929,7 +946,7 @@ TaskScheduler.Default);
                     goto ERROR1;
 
                 // 重新装载记录
-                nRet = LoadRecordByRecPath(this.ItemRecPath, "");
+                nRet = await LoadRecordByRecPathAsync(this.ItemRecPath, "");
                 return;
             }
             finally
@@ -944,7 +961,7 @@ TaskScheduler.Default);
                 */
             }
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 获得记录的XML格式
@@ -1369,7 +1386,7 @@ TaskScheduler.Default);
         }
 
         // 增添自由词
-        private void toolStripButton_addSubject_Click(object sender, EventArgs e)
+        private async void toolStripButton_addSubject_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -1493,10 +1510,10 @@ TaskScheduler.Default);
             }
 
             // 重新装载内容
-            this.Reload();
+            await this.Reload();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 修改评注的状态
@@ -2430,9 +2447,9 @@ out strError);
             }
         }
 
-        private void toolStripButton_save_Click(object sender, EventArgs e)
+        private async void toolStripButton_save_Click(object sender, EventArgs e)
         {
-            SaveRecord(Control.ModifierKeys == Keys.Control ? "force" : "");
+            await SaveRecordAsync(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
         private void ToolStripMenuItem_insertCoverImageFromClipboard_Click(object sender, EventArgs e)

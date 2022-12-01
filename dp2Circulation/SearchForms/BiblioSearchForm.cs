@@ -1892,7 +1892,7 @@ out strError);
 
                     if (bNeedShareSearch == true)
                     {
-                        this.ShowMessage("等待共享检索响应 ...");
+                        // this.ShowMessage("等待共享检索响应 ...");
                         // 结束检索共享书目
                         // return:
                         //      -1  出错
@@ -2538,7 +2538,10 @@ bQuickLoad);
                 DateTime start_time = DateTime.Now;
                 while (_searchParam._searchComplete == false)
                 {
-                    Application.DoEvents();
+                    var length = timeout - (DateTime.Now - start_time);
+                    this.ShowMessage($"正在共享检索...\r\n已命中:{_searchParam._searchCount}  剩余秒数:{((int)length.TotalSeconds).ToString()}");
+
+                    // Application.DoEvents();
                     Thread.Sleep(200);
                     if (DateTime.Now - start_time > timeout)    // 超时
                         break;
@@ -3079,11 +3082,11 @@ bQuickLoad);
         }
 
         // 装入左侧固定的种册窗
-        void menu_loadToLeftEntityForm_Click(object sender, EventArgs e)
+        async void menu_loadToLeftEntityForm_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要装入左侧实体窗的事项");
+                this.MessageBoxShow("尚未选定要装入左侧实体窗的事项");
                 return;
             }
             string strPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
@@ -3091,14 +3094,14 @@ bQuickLoad);
             EntityForm form = OpenEntityForm(false, true);    // fixed
 
             Debug.Assert(form != null, "");
-            form.LoadRecordOld(strPath, "", true);
+            await form.LoadRecordOldAsync(strPath, "", true);
         }
 
-        void menu_loadToOpenedEntityForm_Click(object sender, EventArgs e)
+        async void menu_loadToOpenedEntityForm_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要装入实体窗口的事项");
+                this.MessageBoxShow("尚未选定要装入实体窗口的事项");
                 return;
             }
             string strPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
@@ -3111,22 +3114,15 @@ bQuickLoad);
 
             if (form == null)
             {
-#if NO
-                form = new EntityForm();
-
-                form.MdiParent = Program.MainForm;
-                form.MainForm = Program.MainForm;
-                form.Show();
-#endif
                 form = OpenEntityForm(false, false);    // 新开一个窗口，普通窗口(不是左侧)
             }
 
             Debug.Assert(form != null, "");
 
-            form.LoadRecordOld(strPath, "", true);
+            await form.LoadRecordOldAsync(strPath, "", true);
         }
 
-        void menu_loadToNewEntityForm_Click(object sender, EventArgs e)
+        async void menu_loadToNewEntityForm_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
@@ -3139,19 +3135,12 @@ bQuickLoad);
 
             if (form == null)
             {
-#if NO
-                form = new EntityForm();
-
-                form.MdiParent = Program.MainForm;
-                form.MainForm = Program.MainForm;
-                form.Show();
-#endif
                 form = OpenEntityForm(false, false);    // 新开一个窗口，普通窗口(不是左侧)
             }
 
             Debug.Assert(form != null, "");
 
-            form.LoadRecordOld(strPath, "", true);
+            await form.LoadRecordOldAsync(strPath, "", true);
         }
 
         // 是否优先装入已经打开的详细窗?

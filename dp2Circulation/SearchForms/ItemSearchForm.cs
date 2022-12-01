@@ -2262,30 +2262,19 @@ out string strError);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    form.LoadItemByBarcode(strBarcodeOrRecPath, false);
+                    await form.LoadItemByBarcodeAsync(strBarcodeOrRecPath, false);
                 }
                 else
                 {
                     Debug.Assert(strIdType == "recpath", "");
 
-                    if (this.DbType == "item")
-                    {
-                        // parameters:
-                        //      bAutoSavePrev   是否自动提交保存先前发生过的修改？如果==true，是；如果==false，则要出现MessageBox提示
-                        // return:
-                        //      -1  error
-                        //      0   not found
-                        //      1   found
-                        form.LoadItemByRecPath(strBarcodeOrRecPath, false);
-                    }
-                    else if (this.DbType == "comment")
-                        form.LoadCommentByRecPath(strBarcodeOrRecPath, false);
-                    else if (this.DbType == "order")
-                        form.LoadOrderByRecPath(strBarcodeOrRecPath, false);
-                    else if (this.DbType == "issue")
-                        form.LoadIssueByRecPath(strBarcodeOrRecPath, false);
-                    else
-                        throw new Exception("未知的DbType '" + this.DbType + "'");
+                    // parameters:
+                    //      bAutoSavePrev   是否自动提交保存先前发生过的修改？如果==true，是；如果==false，则要出现MessageBox提示
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   found
+                    await form.LoadItemByRecPathAsync(this.DbType, strBarcodeOrRecPath, false);
                 }
             }
             else
@@ -7922,7 +7911,7 @@ TaskScheduler.Default);
             return 1;
         }
 
-        void menu_createCallNumber_Click(object sender, EventArgs e)
+        async void menu_createCallNumber_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -8016,7 +8005,7 @@ TaskScheduler.Default);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    form.LoadItemByRecPath(strRecPath, true);
+                    await form.LoadItemByRecPathAsync("item", strRecPath, true);
 
                     // 为当前选定的事项创建索取号
                     // return:

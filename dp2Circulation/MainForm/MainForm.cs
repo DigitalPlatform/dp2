@@ -6873,7 +6873,7 @@ out strError);
 
         }
 
-        private void toolStrip_main_DragDrop(object sender, DragEventArgs e)
+        private async void toolStrip_main_DragDrop(object sender, DragEventArgs e)
         {
             string strError = "";
 
@@ -6908,10 +6908,10 @@ out strError);
                 {
                     EntityForm form = new EntityForm();
                     form.MdiParent = this;
-                    form.MainForm = this;
+                    //form.MainForm = this;
                     form.Show();
 
-                    form.LoadRecordOld(strRecPath,
+                    await form.LoadRecordOldAsync(strRecPath,
                         "",
                         true);
                 }
@@ -6921,17 +6921,18 @@ out strError);
 
                     EntityForm form = new EntityForm();
                     form.MdiParent = this;
-                    form.MainForm = this;
+                    //form.MainForm = this;
                     form.Show();
 
-                    form.LoadItemByRecPath(strRecPath,
+                    await form.LoadItemByRecPathAsync("item",
+                        strRecPath,
                         false);
                 }
                 else if (this.IsReaderDbName(strDbName) == true)
                 {
                     ReaderInfoForm form = new ReaderInfoForm();
                     form.MdiParent = this;
-                    form.MainForm = this;
+                    //form.MainForm = this;
                     form.Show();
 
                     form.LoadRecordByRecPath(strRecPath,
@@ -7029,11 +7030,11 @@ out strError);
             this.PanelFixedVisible = false;
         }
 
-        private void toolButton_refresh_Click(object sender, EventArgs e)
+        private async void toolButton_refresh_Click(object sender, EventArgs e)
         {
             if (this.ActiveMdiChild is EntityForm)
             {
-                ((EntityForm)this.ActiveMdiChild).Reload();
+                await ((EntityForm)this.ActiveMdiChild).Reload();
             }
             /*
             if (this.ActiveMdiChild is ChargingForm)
@@ -7043,7 +7044,7 @@ out strError);
             */
             if (this.ActiveMdiChild is ItemInfoForm)
             {
-                ((ItemInfoForm)this.ActiveMdiChild).Reload();
+                await ((ItemInfoForm)this.ActiveMdiChild).Reload();
             }
             if (this.ActiveMdiChild is QuickChargingForm)
             {

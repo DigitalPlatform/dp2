@@ -213,7 +213,7 @@ namespace dp2Circulation
 
         string GetFirstRecordPath()
         {
-            foreach(ListViewItem item in this.listView_records.Items)
+            foreach (ListViewItem item in this.listView_records.Items)
             {
                 var path = item.Text;
                 if (BiblioSearchForm.IsCmdLine(path))
@@ -231,71 +231,75 @@ namespace dp2Circulation
         /// <param name="bCloseWindow">是否顺便关闭本窗口</param>
         public void LoadFirstDetail(bool bCloseWindow)
         {
-            if (this.listView_records.Items.Count == 0)
-                return;
-
             string strError = "";
-
-            // 找到第一个记录行。注意可能有命令行，需要跳过
-            string strPath = GetFirstRecordPath();  // this.listView_records.Items[0].Text;
-            // 2019/5/23
-            if (string.IsNullOrEmpty(strPath))
+            var ret = this.TryGet(() =>
             {
-                strError = "当前浏览结果中没有任何记录行";
-                goto ERROR1;
-            }
-            if (strPath.IndexOf("@") == -1)
-            {
-                string[] paths = new string[1];
-                paths[0] = strPath;
+                if (this.listView_records.Items.Count == 0)
+                    return 0;
 
-                OpenDetailEventArgs args = new OpenDetailEventArgs
+                // 找到第一个记录行。注意可能有命令行，需要跳过
+                string strPath = GetFirstRecordPath();  // this.listView_records.Items[0].Text;
+                                                        // 2019/5/23
+                if (string.IsNullOrEmpty(strPath))
                 {
-                    Paths = paths,
-                    OpenNew = false
-                };
+                    strError = "当前浏览结果中没有任何记录行";
+                    return -1;
+                }
+                if (strPath.IndexOf("@") == -1)
+                {
+                    string[] paths = new string[1];
+                    paths[0] = strPath;
+
+                    OpenDetailEventArgs args = new OpenDetailEventArgs
+                    {
+                        Paths = paths,
+                        OpenNew = false
+                    };
 
 #if NO
                 this.listView_records.Enabled = false;
                 this.OpenDetail(this, args);
                 this.listView_records.Enabled = true;
 #endif
-                DoOpenDetail(args);
+                    DoOpenDetail(args);
 
-            }
-            else
-            {
-                if (!(m_biblioTable[strPath] is BiblioInfo info))
+                }
+                else
                 {
-                    strError = "路径为 '" + strPath + "' 的事项在 m_biblioTable 中没有找到";
-                    goto ERROR1;
+                    if (!(m_biblioTable[strPath] is BiblioInfo info))
+                    {
+                        strError = "路径为 '" + strPath + "' 的事项在 m_biblioTable 中没有找到";
+                        return -1;
+                    }
+
+                    OpenDetailEventArgs args = new OpenDetailEventArgs
+                    {
+                        Paths = null,
+                        BiblioInfos = new List<BiblioInfo>()
+                    };
+                    args.BiblioInfos.Add(info);
+                    args.OpenNew = false;
+
+                    DoOpenDetail(args);
                 }
 
-                OpenDetailEventArgs args = new OpenDetailEventArgs
+                if (bCloseWindow == true)
                 {
-                    Paths = null,
-                    BiblioInfos = new List<BiblioInfo>()
-                };
-                args.BiblioInfos.Add(info);
-                args.OpenNew = false;
-
-                DoOpenDetail(args);
-            }
-
-            if (bCloseWindow == true)
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                }
+                return 0;
+            });
+            if (ret == -1)
             {
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-            }
-            return;
-            ERROR1:
-            try
-            {
-                MessageBox.Show(this, strError);
-            }
-            catch
-            {
-                throw new Exception(strError);
+                try
+                {
+                    this.MessageBoxShow(strError);
+                }
+                catch
+                {
+                    throw new Exception(strError);
+                }
             }
         }
 
@@ -355,7 +359,7 @@ namespace dp2Circulation
             DoOpenDetail(args);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 

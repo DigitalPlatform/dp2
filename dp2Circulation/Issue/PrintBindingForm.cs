@@ -19,6 +19,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.LibraryClient;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -3977,21 +3978,21 @@ strPubType);
             }
         }
 
-        private void listView_parent_DoubleClick(object sender, EventArgs e)
+        private async void listView_parent_DoubleClick(object sender, EventArgs e)
         {
-            LoadToEntityForm(this.listView_parent);
+            await LoadToEntityForm(this.listView_parent);
         }
 
-        private void listView_member_DoubleClick(object sender, EventArgs e)
+        private async void listView_member_DoubleClick(object sender, EventArgs e)
         {
-            LoadToEntityForm(this.listView_member);
+            await LoadToEntityForm(this.listView_member);
         }
 
-        void LoadToEntityForm(ListView list)
+        async Task LoadToEntityForm(ListView list)
         {
             if (list.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要装载的事项");
+                this.MessageBoxShow("尚未选定要装载的事项");
                 return;
             }
 
@@ -4019,15 +4020,18 @@ strPubType);
             form.Show();
 
             if (String.IsNullOrEmpty(strBarcode) == false)
-                form.LoadItemByBarcode(strBarcode, false);
+                await form.LoadItemByBarcodeAsync(strBarcode, false);
             else if (String.IsNullOrEmpty(strRecPath) == false)
-                form.LoadItemByRecPath(strRecPath, false);
+                await form.LoadItemByRecPathAsync("item", strRecPath, false);
             else if (String.IsNullOrEmpty(strRefID) == false)
-                form.LoadItemByRefID(strRefID, false);
+            {
+                // form.LoadItemByRefID(strRefID, false);
+                await form.LoadItemByRecPathAsync("item", "@refID:" + strRefID, false);
+            }
             else
             {
                 form.Close();
-                MessageBox.Show(this, "所选定行的条码号、记录路径、参考ID全都为空，无法定位记录");
+                this.MessageBoxShow("所选定行的条码号、记录路径、参考ID全都为空，无法定位记录");
             }
         }
 

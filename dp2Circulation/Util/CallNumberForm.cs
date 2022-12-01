@@ -19,6 +19,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -1274,7 +1275,7 @@ COLUMN_CALLNUMBER);
             MessageBox.Show(this, strError);
         }
 
-        private void listView_number_DoubleClick(object sender, EventArgs e)
+        private async void listView_number_DoubleClick(object sender, EventArgs e)
         {
             if (this.listView_number.SelectedItems.Count == 0)
             {
@@ -1301,7 +1302,7 @@ COLUMN_CALLNUMBER);
             //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
             //      strIdType   标识类型 "barcode" "recpath"
             //      strOpenType 打开窗口的方式 "new" "exist"
-            LoadRecord("EntityForm",
+            await LoadRecord("EntityForm",
                 "recpath",
                 strOpenStyle);
         }
@@ -1312,7 +1313,7 @@ COLUMN_CALLNUMBER);
         //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
         //      strIdType   标识类型 "barcode" "recpath"
         //      strOpenType 打开窗口的方式 "new" "exist"
-        void LoadRecord(string strTargetFormType,
+        async Task LoadRecord(string strTargetFormType,
             string strIdType,
             string strOpenType)
         {
@@ -1374,7 +1375,7 @@ COLUMN_CALLNUMBER);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    form.LoadItemByBarcode(strBarcodeOrRecPath, false);
+                    await form.LoadItemByBarcodeAsync(strBarcodeOrRecPath, false);
                 }
                 else
                 {
@@ -1386,7 +1387,7 @@ COLUMN_CALLNUMBER);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    form.LoadItemByRecPath(strBarcodeOrRecPath, false);
+                    await form.LoadItemByRecPathAsync("item", strBarcodeOrRecPath, false);
                 }
             }
             else
@@ -1418,13 +1419,13 @@ COLUMN_CALLNUMBER);
 
                 if (strIdType == "barcode")
                 {
-                    form.LoadRecord(strBarcodeOrRecPath);
+                    await form.LoadRecordAsync(strBarcodeOrRecPath);
                 }
                 else
                 {
                     Debug.Assert(strIdType == "recpath", "");
 
-                    form.LoadRecordByRecPath(strBarcodeOrRecPath, "");
+                    await form.LoadRecordByRecPathAsync(strBarcodeOrRecPath, "");
                 }
             }
         }

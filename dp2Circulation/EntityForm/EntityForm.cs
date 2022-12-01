@@ -31,6 +31,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Z3950;
+using System.Data;
 // using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 
 namespace dp2Circulation
@@ -1497,7 +1498,7 @@ true);
             return form;
         }
 
-        void orderControl1_OpenTargetRecord(object sender, OpenTargetRecordEventArgs e)
+        async void orderControl1_OpenTargetRecord(object sender, OpenTargetRecordEventArgs e)
         {
             // 新打开一个EntityForm
             EntityForm form = null;
@@ -1513,10 +1514,10 @@ true);
             {
                 form = new EntityForm();
                 form.MdiParent = this.MdiParent;
-                form.MainForm = Program.MainForm;
+                // form.MainForm = Program.MainForm;
                 form.Show();
 
-                nRet = form.LoadRecordOld(e.TargetRecPath,
+                nRet = await form.LoadRecordOldAsync(e.TargetRecPath,
                     "",
                     false);
                 if (nRet != 1)
@@ -1738,7 +1739,7 @@ true);
         }
 
         // 验收的时候自动创建实体记录
-        void orderControl1_GenerateEntity(object sender,
+        async void orderControl1_GenerateEntity(object sender,
             GenerateEntityEventArgs e)
         {
             string strError = "";
@@ -1929,7 +1930,7 @@ true);
                 form.MainForm = Program.MainForm;
                 form.Show();
 
-                nRet = form.LoadRecordOld(strTargetRecPath,
+                nRet = await form.LoadRecordOldAsync(strTargetRecPath,
                     "",
                     false);
                 if (nRet != 1)
@@ -2436,14 +2437,14 @@ true);
             SetSaveAllButtonState(!InDisabledState);
         }
 
-        void entityControl1_LoadRecord111(object sender, LoadRecordEventArgs e)
+        async void entityControl1_LoadRecord111(object sender, LoadRecordEventArgs e)
         {
             // return:
             //      -1  出错。已经用MessageBox报错
             //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
             //      1   成功装载
             //      2   通道被占用
-            e.Result = this.LoadRecordOld(e.BiblioRecPath,
+            e.Result = await this.LoadRecordOldAsync(e.BiblioRecPath,
                 "",
                 false);
         }
@@ -3057,8 +3058,9 @@ true);
         /// <summary>
         /// 重新装载当前记录
         /// </summary>
-        public void Reload()
+        public async Task Reload()
         {
+            /*
             string strError = "";
             int nRet = this.LoadRecord(this.BiblioRecPath,
     "",
@@ -3066,8 +3068,16 @@ true);
     true,
     out strError,
     true);
-            if (nRet == -1 /*|| string.IsNullOrEmpty(strError) == false*/)
+            if (nRet == -1)
                 this.MessageBoxShow(strError);
+            */
+            var result = await this.LoadRecordAsync(this.BiblioRecPath,
+"",
+true,
+true,
+true);
+            if (result.Value == -1)
+                this.MessageBoxShow(result.ErrorInfo);
         }
 
         // 尽量不要用这个版本。用 xxxAsync 版本
@@ -3311,7 +3321,7 @@ TaskScheduler.Default);
             return nRet;
         }
 
-
+        // (已经废止。线程模型不良)
         // 兼容以前习惯的版本
         // return:
         //      -1  出错。已经用MessageBox报错
@@ -3357,6 +3367,22 @@ TaskScheduler.Default);
             }
 
             return nRet;
+        }
+
+        // 用于替换 LoadRecordOld()
+        public async Task<int> LoadRecordOldAsync(string strBiblioRecPath,
+            string strPrevNextStyle,
+            bool bCheckInUse)
+        {
+            var result = await LoadRecordAsync(
+            strBiblioRecPath,
+            strPrevNextStyle,
+            bCheckInUse,
+            true,
+            false);
+            if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                this.ShowMessage(result.ErrorInfo, "red", true);
+            return result.Value;
         }
 
         static bool IsAccessDenied(XmlDocument collection_dom,
@@ -3518,7 +3544,7 @@ out string strErrorCode)
                         };
                     }
                 },
-    default,
+    this.CancelToken,
     TaskCreationOptions.LongRunning,
     TaskScheduler.Default);
         }
@@ -5458,27 +5484,13 @@ TaskScheduler.Default);
 
         string GetBiblioQueryString()
         {
-            string strText = this.textBox_queryWord.Text;
+            string strText = this.QueryWord;
             int nRet = strText.IndexOf(';');
             if (nRet != -1)
             {
                 strText = strText.Substring(0, nRet).Trim();
-                this.textBox_queryWord.Text = strText;
+                this.QueryWord = strText;
             }
-
-            /*
-            if (this.checkBox_autoDetectQueryBarcode.Checked == true)
-            {
-                if (strText.Length == 13)
-                {
-                    string strHead = strText.Substring(0, 3);
-                    if (strHead == "978")
-                    {
-                        this.textBox_queryWord.Text = strText + " ;自动用" + strText.Substring(3, 9) + "来检索";
-                        return strText.Substring(3, 9);
-                    }
-                }
-            }*/
 
             return strText;
         }
@@ -5515,6 +5527,24 @@ TaskScheduler.Default);
                                                 // 进行检索
         private async void button_search_Click(object sender, EventArgs e)
         {
+            await SearchAsync();
+        }
+
+        public Task SearchAsync()
+        {
+            return Task.Factory.StartNew(
+                async () =>
+                {
+                    await _searchAsync();
+                },
+    this.CancelToken,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+
+        async Task _searchAsync()
+        {
             string strError = "";
             // zchannel --> ListViewItem
             Hashtable zchannelTable = new Hashtable();
@@ -5532,23 +5562,11 @@ TaskScheduler.Default);
 
                 ActivateBrowseWindow(false);
 
-                this.browseWindow.RecordsList.Items.Clear();
+                this.TryInvoke(() =>
+                {
+                    this.browseWindow.RecordsList.Items.Clear();
+                });
 
-                /*
-                LibraryChannel channel = this.GetChannel();
-                TimeSpan old_timeout = channel.Timeout;
-                channel.Timeout = TimeSpan.FromMinutes(2);
-
-                Progress.Style = StopStyle.EnableHalfStop;
-                Progress.OnStop += Progress_OnStop;
-                Progress.Initial("正在检索 ...");
-                Progress.BeginLoop();
-
-                //this.button_search.Enabled = false;
-                this.EnableControls(false);
-                ////m_nInSearching++;
-
-                */
                 var looping = Looping(out LibraryChannel channel,
                     "正在检索 ...",
                     "timeout:00:02:00,disableControl",
@@ -5559,7 +5577,7 @@ TaskScheduler.Default);
                 this.browseWindow.stop = looping.Progress;
                 try
                 {
-                    if (this.comboBox_from.Text == "")
+                    if (this.QueryFrom == "")
                     {
                         strError = "尚未选定检索途径";
                         goto ERROR1;
@@ -5568,7 +5586,7 @@ TaskScheduler.Default);
 
                     try
                     {
-                        strFromStyle = BiblioSearchForm.GetBiblioFromStyle(this.comboBox_from.Text);
+                        strFromStyle = BiblioSearchForm.GetBiblioFromStyle(this.QueryFrom);
                     }
                     catch (Exception ex)
                     {
@@ -5582,12 +5600,12 @@ TaskScheduler.Default);
                         goto ERROR1;
                     }
 
-                    string strMatchStyle = BiblioSearchForm.GetCurrentMatchStyle(this.comboBox_matchStyle.Text);
-                    if (this.textBox_queryWord.Text == "")
+                    string strMatchStyle = BiblioSearchForm.GetCurrentMatchStyle(this.QueryMatchStyle);
+                    if (this.QueryWord == "")
                     {
                         if (strMatchStyle == "null")
                         {
-                            this.textBox_queryWord.Text = "";
+                            this.QueryWord = "";
 
                             // 专门检索空值
                             strMatchStyle = "exact";
@@ -5626,7 +5644,7 @@ TaskScheduler.Default);
                         //      0   没有检索目标
                         //      1   成功启动检索
                         nRet = BeginSearchShareBiblio(
-                            this.textBox_queryWord.Text,
+                            this.QueryWord,
                             strFromStyle,
                             strMatchStyle,
                             out strError);
@@ -5640,7 +5658,7 @@ TaskScheduler.Default);
 
                     string strQueryXml = "";
                     long lRet = channel.SearchBiblio(looping.Progress,
-                        this.checkedComboBox_biblioDbNames.Text,    // "<全部>",
+                        this.QueryDbNames,    // "<全部>",
                         strQueryWord,   // this.textBox_queryWord.Text,
                         this.MaxSearchResultCount,  // 1000
                         strFromStyle,
@@ -5687,7 +5705,7 @@ TaskScheduler.Default);
                         // 装入浏览格式
                         for (; ; )
                         {
-                            Application.DoEvents(); // 出让界面控制权
+                            // Application.DoEvents(); // 出让界面控制权
 
                             if (looping.Stopped
                                 || _willCloseBrowseWindow)
@@ -5763,7 +5781,7 @@ TaskScheduler.Default);
                             NormalResult result = await _zsearcher.SearchAsync(
             Program.MainForm.UseList,   // UseCollection useList,
             Program.MainForm.IsbnSplitter,
-                            this.textBox_queryWord.Text,
+                            this.QueryWord,
                             this.MaxSearchResultCount,  // 1000
                             strFromStyle,
                             strMatchStyle,
@@ -5777,18 +5795,18 @@ TaskScheduler.Default);
                                     browse_visible = true;
                                 }
 
-                                this.Invoke((Action)(() =>
+                                this.TryInvoke(() =>
                                 {
                                     ListViewItem item = new ListViewItem();
                                     item.Tag = c;
                                     zchannelTable[c] = item;
                                     this.browseWindow?.RecordsList?.Items?.Add(item);
                                     BiblioSearchForm.UpdateCommandLine(item, c, r);
-                                }));
+                                });
                             },
                             (c, r) =>
                             {
-                                this.Invoke((Action)(() =>
+                                this.TryInvoke(() =>
                                 {
                                     ListViewItem item = (ListViewItem)zchannelTable[c];
                                     if (r.Records != null)
@@ -5799,7 +5817,7 @@ TaskScheduler.Default);
                                             r.Records,
                                             item);
                                     BiblioSearchForm.UpdateCommandLine(item, c, r);
-                                }));
+                                });
                             }
                             );
                         }
@@ -5807,7 +5825,6 @@ TaskScheduler.Default);
 
                     if (bNeedShareSearch == true)
                     {
-                        this.ShowMessage("等待共享检索响应 ...");
                         // 结束检索共享书目
                         // return:
                         //      -1  出错
@@ -5873,19 +5890,6 @@ TaskScheduler.Default);
                     if (Program.MainForm.MessageHub != null)
                         Program.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
-                    /*
-                    Progress.EndLoop();
-                    Progress.OnStop -= Progress_OnStop;
-                    Progress.Initial("");
-                    Progress.Style = StopStyle.None;
-
-                    channel.Timeout = old_timeout;
-                    this.ReturnChannel(channel);
-
-                    // this.button_search.Enabled = true;
-                    this.EnableControls(true);
-                    //// m_nInSearching--;
-                    */
                     looping.Dispose();
                 }
 
@@ -5918,16 +5922,13 @@ TaskScheduler.Default);
                     CloseBrowseWindow();
 
                 END1:
-                this.textBox_queryWord.SelectAll();
+                this.TryInvoke(() =>
+                {
+                    this.textBox_queryWord.SelectAll();
+                });
 
-                // 焦点切换到条码textbox
-                /*
-                this.textBox_itemBarcode.SelectAll();
-                this.textBox_itemBarcode.Focus(); 
-                 * */
                 this.SwitchFocus(ITEM_BARCODE);
-
-                DoPendingList();    // 2015/11/29
+                await DoPendingList();    // 2015/11/29
                 return;
             }
             finally
@@ -5939,12 +5940,84 @@ TaskScheduler.Default);
             CloseBrowseWindow();
             this.MessageBoxShow(strError);
             // 焦点仍回到种检索词
-            /*
-            this.textBox_queryWord.Focus();
-            this.textBox_queryWord.SelectAll();
-             * */
             this.SwitchFocus(BIBLIO_SEARCHTEXT);
         }
+
+        #region 检索面板
+
+        public string QueryFrom
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_from.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_from.Text = value;
+                });
+            }
+        }
+
+        public string QueryMatchStyle
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.comboBox_matchStyle.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.comboBox_matchStyle.Text = value;
+                });
+            }
+        }
+
+        public string QueryWord
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.textBox_queryWord.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.textBox_queryWord.Text = value;
+                });
+            }
+        }
+
+        public string QueryDbNames
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.checkedComboBox_biblioDbNames.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.checkedComboBox_biblioDbNames.Text = value;
+                });
+            }
+        }
+
+        #endregion
 
         private void Progress_OnStop(object sender, StopEventArgs e)
         {
@@ -6283,7 +6356,10 @@ TaskScheduler.Default);
                 DateTime start_time = DateTime.Now;
                 while (_searchParam._searchComplete == false)
                 {
-                    Application.DoEvents();
+                    var length = timeout - (DateTime.Now - start_time);
+                    this.ShowMessage($"正在共享检索...\r\n已命中:{_searchParam._searchCount}  剩余秒数:{((int)length.TotalSeconds).ToString()}");
+
+                    // Application.DoEvents();
                     Thread.Sleep(200);
                     if (DateTime.Now - start_time > timeout)    // 超时
                         break;
@@ -6527,11 +6603,14 @@ out strError);
 
         public void CloseBrowseWindow()
         {
-            if (this.browseWindow != null)
+            this.TryInvoke(() =>
             {
-                this.browseWindow.Close();
-                this.browseWindow = null;
-            }
+                if (this.browseWindow != null)
+                {
+                    this.browseWindow.Close();
+                    this.browseWindow = null;
+                }
+            });
         }
 
         void TryShowBrowseWindow()
@@ -6547,78 +6626,72 @@ out strError);
         //      lHitCount   要显示出来的命中数。如果为 -1，则不显示命中数
         void ShowBrowseWindow(long lHitCount)
         {
-#if NO
-            try
+            this.TryInvoke(() =>
             {
-#endif
-            // 2015/10/10
-            if (browseWindow == null || browseWindow.IsDisposed == true)
-                return;
+                // 2015/10/10
+                if (browseWindow == null || browseWindow.IsDisposed == true)
+                    return;
 
-            if (this.browseWindow.Visible == false)
-                Program.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
+                if (this.browseWindow.Visible == false)
+                    Program.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
 
-            // 再观察一段 2015/9/8
-            this.browseWindow.Visible = true;
+                // 再观察一段 2015/9/8
+                this.browseWindow.Visible = true;
 
-            // 2014/7/8
-            if (this.browseWindow.WindowState == FormWindowState.Minimized)
-                this.browseWindow.WindowState = FormWindowState.Normal;
+                // 2014/7/8
+                if (this.browseWindow.WindowState == FormWindowState.Minimized)
+                    this.browseWindow.WindowState = FormWindowState.Normal;
 
-            if (lHitCount != -1)
-                this.browseWindow.Text = "命中 " + lHitCount.ToString() + " 条书目记录。请从中选择一条";
-
-#if NO
-        }
-            catch(System.ObjectDisposedException)
-            {
-
-            }
-#endif
+                if (lHitCount != -1)
+                    this.browseWindow.Text = "命中 " + lHitCount.ToString() + " 条书目记录。请从中选择一条";
+            });
         }
 
         void ActivateBrowseWindow(bool bShow)
         {
-            if (this.browseWindow == null
-                || (this.browseWindow != null && this.browseWindow.IsDisposed == true))
+            this.TryInvoke(() =>
             {
-                this.browseWindow = new BrowseSearchResultForm();
-                MainForm.SetControlFont(this.browseWindow, Program.MainForm.DefaultFont);
-
-                // this.browseWindow.MainForm = Program.MainForm; // 2009/2/17 
-                this.browseWindow.Text = "命中多条种记录。请从中选择一条";
-                this.browseWindow.FormClosing -= browseWindow_FormClosing;
-                this.browseWindow.FormClosing += browseWindow_FormClosing;
-                this.browseWindow.FormClosed -= new FormClosedEventHandler(browseWindow_FormClosed);
-                this.browseWindow.FormClosed += new FormClosedEventHandler(browseWindow_FormClosed);
-                // this.browseWindow.MdiParent = Program.MainForm;
-                if (bShow == true)
+                if (this.browseWindow == null
+                    || (this.browseWindow != null && this.browseWindow.IsDisposed == true))
                 {
-                    Program.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
-                    this.browseWindow.Show();
+                    this.browseWindow = new BrowseSearchResultForm();
+                    MainForm.SetControlFont(this.browseWindow, Program.MainForm.DefaultFont);
+
+                    // this.browseWindow.MainForm = Program.MainForm; // 2009/2/17 
+                    this.browseWindow.Text = "命中多条种记录。请从中选择一条";
+                    this.browseWindow.FormClosing -= browseWindow_FormClosing;
+                    this.browseWindow.FormClosing += browseWindow_FormClosing;
+                    this.browseWindow.FormClosed -= new FormClosedEventHandler(browseWindow_FormClosed);
+                    this.browseWindow.FormClosed += new FormClosedEventHandler(browseWindow_FormClosed);
+                    // this.browseWindow.MdiParent = Program.MainForm;
+                    if (bShow == true)
+                    {
+                        Program.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
+                        this.browseWindow.Show();
+                    }
+
+                    this.browseWindow.OpenDetail -= new OpenDetailEventHandler(browseWindow_OpenDetail);
+                    this.browseWindow.OpenDetail += new OpenDetailEventHandler(browseWindow_OpenDetail);
+
+                    this.browseWindow.LoadNext -= BrowseWindow_LoadNext;
+                    this.browseWindow.LoadNext += BrowseWindow_LoadNext;
                 }
-
-                this.browseWindow.OpenDetail -= new OpenDetailEventHandler(browseWindow_OpenDetail);
-                this.browseWindow.OpenDetail += new OpenDetailEventHandler(browseWindow_OpenDetail);
-
-                this.browseWindow.LoadNext -= BrowseWindow_LoadNext;
-                this.browseWindow.LoadNext += BrowseWindow_LoadNext;
-            }
-            else
-            {
-                if (this.browseWindow.Visible == false
-                    && bShow == true)
+                else
                 {
-                    /*
-                    Program.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
-                    this.browseWindow.Visible = true;
-                     * */
-                    ShowBrowseWindow(-1);
-                }
+                    if (this.browseWindow.Visible == false
+                        && bShow == true)
+                    {
+                        /*
+                        Program.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
+                        this.browseWindow.Visible = true;
+                         * */
+                        ShowBrowseWindow(-1);
+                    }
 
-                this.browseWindow.BringToFront();
-                this.browseWindow.RecordsList.Items.Clear();
-            }
+                    this.browseWindow.BringToFront();
+                    this.browseWindow.RecordsList.Items.Clear();
+                }
+            });
         }
 
         private void BrowseWindow_LoadNext(object sender, LoadNextBatchEventArgs e)
@@ -6715,7 +6788,7 @@ out strError);
         }
          */
 
-        void browseWindow_OpenDetail(object sender, OpenDetailEventArgs e)
+        async void browseWindow_OpenDetail(object sender, OpenDetailEventArgs e)
         {
             int nRet = 0;
 
@@ -6735,9 +6808,17 @@ out strError);
 
                 // TODO: 已经在 BeginLoop() 中了
                 // TODO: 这里要防范调用中出错，引发 MessageBox。MessageBox 可能会被 browseWindow 挡住，无法点按
+                /*
                 nRet = this.LoadRecord(info,
                     true,
                     out string strError);
+                */
+                string strError = "";
+                {
+                    var result = await this.LoadRecordAsync(info, true);
+                    nRet = result.Value;
+                    strError = result.ErrorInfo;
+                }
                 if (nRet == 2)
                     this.AddToPendingList(info.RecPath, "");
                 else if (nRet != 1)
@@ -6772,7 +6853,7 @@ out strError);
             }
 #endif
 
-            nRet = this.LoadRecordOld(strBiblioRecPath, "", true);
+            nRet = await this.LoadRecordOldAsync(strBiblioRecPath, "", true);
             // 2009/11/6 
             if (nRet == 2)
             {
@@ -7018,6 +7099,7 @@ out strError);
             this.DoRegisterEntity();
         }
 
+        // (为兼容以前 API 的版本，线程模型不良，尽快废弃)
         // 2006/12/3 
         // 根据册条码号 装载一个册，连带装入种
         // parameters:
@@ -7039,145 +7121,42 @@ out strError);
         public int LoadItemByBarcode(string strItemBarcode,
             bool bAutoSavePrev)
         {
+            var task = LoadItemByBarcodeAsync(strItemBarcode,
+                bAutoSavePrev);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
+        }
+
+        public Task<int> LoadItemByBarcodeAsync(
+            string strItemBarcode,
+            bool bAutoSavePrev)
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    return _loadItemByBarcode(
+                        strItemBarcode,
+                        bAutoSavePrev);
+                },
+    this.CancelToken,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+        // 根据册条码号，装载书目记录
+        int _loadItemByBarcode(string strItemBarcode,
+            bool bAutoSavePrev)
+        {
             if (string.IsNullOrEmpty(strItemBarcode) == true)
             {
                 this.MessageBoxShow("请先输入一个册条码号才能进行检索");
                 return -1;
             }
-#if NO
-            this.m_nChannelInUse++;
-            if (this.m_nChannelInUse > 1)
-            {
-                this.m_nChannelInUse--;
-                MessageBox.Show(this, "通道已经被占用。请稍后重试");
-                return -1;
-            }
-#endif
-            try
-            {
 
-                int nRet = 0;
-                // TODO: 外部调用时，要能自动把items page激活
-
-                if (this.EntitiesChanged == true
-                    || this.IssuesChanged == true
-                    || this.BiblioChanged == true
-                    || this.ObjectChanged == true
-                    || this.OrdersChanged == true
-                    || this.CommentsChanged == true)
-                {
-                    if (bAutoSavePrev == false)
-                    {
-                        // 警告尚未保存
-                        DialogResult result = this.TryGet(() =>
-                        {
-                            return MessageBox.Show(this,
-                            "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
-                            "EntityForm",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        });
-                        if (result == DialogResult.Cancel)
-                        {
-                            this.MessageBoxShow("放弃装入册事项 (册条码号为 '" + strItemBarcode + "' )");
-                            return -1;
-                        }
-                        if (result == DialogResult.Yes)
-                        {
-                            /*
-                            // 保存当前册信息
-                            nRet = this.entityControl1.DoSaveEntities();
-                            if (nRet == -1)
-                                return -1; // 放弃进一步操作
-                             * */
-                            nRet = this.DoSaveAll();
-                            if (nRet == -1 || nRet == -2)
-                                return -1; // 放弃进一步操作
-
-                        }
-                    }
-                    else
-                    {
-                        /*
-                        // 保存当前册信息
-                        nRet = this.entityControl1.DoSaveEntities();
-                        if (nRet == -1)
-                            return -1; // 放弃进一步操作
-                         * */
-                        nRet = this.DoSaveAll();
-                        if (nRet == -1 || nRet == -2)
-                            return -1; // 放弃进一步操作
-                    }
-                }
-
-
-                // 2006/12/30 
-                if (strItemBarcode != this.textBox_itemBarcode.Text)
-                    this.textBox_itemBarcode.Text = strItemBarcode;
-
-                // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   found
-                nRet = this.entityControl1.DoSearchEntity(this.textBox_itemBarcode.Text,
-                    out BookItem result_item);
-                if (result_item == null)
-                {
-                    string error = $"无法在列表中定位册条码号为 '{this.textBox_itemBarcode.Text}' 的册记录";
-                    if (DisplayOtherLibraryItem == false)
-                        error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
-                    this.MessageBoxShow(error);
-                }
-
-                // 焦点切换到条码输入域
-                // this.SwitchFocus(ITEM_BARCODE);
-
-                this.SwitchFocus(ITEM_LIST);
-
-                return nRet;
-            }
-            finally
-            {
-#if NO
-                this.m_nChannelInUse--;
-#endif
-            }
-        }
-
-        // 2008/11/2 
-        // 根据册记录路径 装载一个册，连带装入种
-        // parameters:
-        //      bAutoSavePrev   是否自动提交保存先前发生过的修改？如果==true，是；如果==false，则要出现MessageBox提示
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
-        /// <summary>
-        /// 根据册记录路径，装入书目记录
-        /// </summary>
-        /// <param name="strItemRecPath">册记录路径</param>
-        /// <param name="bAutoSavePrev">是否自动保存窗口中先前的修改</param>
-        /// <returns>
-        /// <para>-1  出错</para>
-        /// <para>0   没有找到</para>
-        /// <para>1   找到</para>
-        /// </returns>
-        public int LoadItemByRecPath(string strItemRecPath,
-            bool bAutoSavePrev)
-        {
-#if NO
-            this.m_nChannelInUse++;
-            if (this.m_nChannelInUse > 1)
-            {
-                this.m_nChannelInUse--;
-                MessageBox.Show(this, "通道已经被占用。请稍后重试");
-                return -1;
-            }
-#endif
             int nRet = 0;
-
             // TODO: 外部调用时，要能自动把items page激活
 
             if (this.EntitiesChanged == true
@@ -7201,7 +7180,151 @@ out strError);
                     });
                     if (result == DialogResult.Cancel)
                     {
-                        this.MessageBoxShow("放弃装入册事项 (册记录路径为 '" + strItemRecPath + "' )");
+                        this.MessageBoxShow("放弃装入册事项 (册条码号为 '" + strItemBarcode + "' )");
+                        return -1;
+                    }
+                    if (result == DialogResult.Yes)
+                    {
+                        /*
+                        // 保存当前册信息
+                        nRet = this.entityControl1.DoSaveEntities();
+                        if (nRet == -1)
+                            return -1; // 放弃进一步操作
+                         * */
+                        nRet = this.DoSaveAll();
+                        if (nRet == -1 || nRet == -2)
+                            return -1; // 放弃进一步操作
+                    }
+                }
+                else
+                {
+                    /*
+                    // 保存当前册信息
+                    nRet = this.entityControl1.DoSaveEntities();
+                    if (nRet == -1)
+                        return -1; // 放弃进一步操作
+                     * */
+                    nRet = this.DoSaveAll();
+                    if (nRet == -1 || nRet == -2)
+                        return -1; // 放弃进一步操作
+                }
+            }
+
+            // 2006/12/30 
+            if (strItemBarcode != this.textBox_itemBarcode.Text)
+                this.textBox_itemBarcode.Text = strItemBarcode;
+
+            // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = this.entityControl1.DoSearchEntity(this.textBox_itemBarcode.Text,
+                out BookItem result_item);
+            if (result_item == null)
+            {
+                string error = $"无法在列表中定位册条码号为 '{this.textBox_itemBarcode.Text}' 的册记录";
+                if (DisplayOtherLibraryItem == false)
+                    error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
+                this.MessageBoxShow(error);
+            }
+
+            this.SwitchFocus(ITEM_LIST);
+            return nRet;
+        }
+
+        // (为兼容以前 API 的版本，线程模型不良，尽快废弃)
+        // 2008/11/2 
+        // 根据册记录路径 装载一个册，连带装入种
+        // parameters:
+        //      bAutoSavePrev   是否自动提交保存先前发生过的修改？如果==true，是；如果==false，则要出现MessageBox提示
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   found
+        /// <summary>
+        /// 根据册记录路径，装入书目记录
+        /// </summary>
+        /// <param name="strItemRecPath">册记录路径</param>
+        /// <param name="bAutoSavePrev">是否自动保存窗口中先前的修改</param>
+        /// <returns>
+        /// <para>-1  出错</para>
+        /// <para>0   没有找到</para>
+        /// <para>1   找到</para>
+        /// </returns>
+        public int LoadItemByRecPath(string strItemRecPath,
+            bool bAutoSavePrev)
+        {
+            var task = LoadItemByRecPathAsync(
+                "item",
+                strItemRecPath,
+                bAutoSavePrev);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
+        }
+
+
+        public Task<int> LoadItemByRecPathAsync(
+            string strDbType,
+            string strItemRecPath,
+            bool bAutoSavePrev)
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    return _loadItemByRecPath(
+                        strDbType,
+                        strItemRecPath,
+                        bAutoSavePrev);
+                },
+    this.CancelToken,
+    TaskCreationOptions.LongRunning,
+    TaskScheduler.Default);
+        }
+
+        // parameters:
+        //      strDbType   下级数据库类型。为 item/issue/order/comment 之一
+        int _loadItemByRecPath(string strDbType,
+            string strItemRecPath,
+            bool bAutoSavePrev)
+        {
+            int nRet = 0;
+
+            string query_type = "path";
+            if (strItemRecPath.StartsWith("@refID:"))
+            {
+                strItemRecPath = strItemRecPath.Substring("@refID:".Length);
+                query_type = "refID";
+            }
+
+            string strDbTypeCaption = ItemInfoForm.GetDbTypeCaption(strDbType);
+            // TODO: 外部调用时，要能自动把items page激活
+
+            if (this.EntitiesChanged == true
+                || this.IssuesChanged == true
+                || this.BiblioChanged == true
+                || this.ObjectChanged == true
+                || this.OrdersChanged == true
+                || this.CommentsChanged == true)
+            {
+                if (bAutoSavePrev == false)
+                {
+                    // 警告尚未保存
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
+                        $"当前窗口内有 {GetCurrentChangedPartName()} 被修改后尚未保存。\r\n\r\n在装入新的{strDbTypeCaption}信息以前，是否先保存这些修改? ",
+                        "EntityForm",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    });
+                    if (result == DialogResult.Cancel)
+                    {
+                        this.MessageBoxShow($"放弃装入{strDbTypeCaption}事项 ({strDbTypeCaption}记录路径为 '" + strItemRecPath + "' )");
                         return -1;
                     }
                     if (result == DialogResult.Yes)
@@ -7209,7 +7332,6 @@ out strError);
                         nRet = this.DoSaveAll();
                         if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
-
                     }
                 }
                 else
@@ -7239,42 +7361,91 @@ out strError);
                 if (strItemBarcode != this.textBox_itemBarcode.Text)
                     this.textBox_itemBarcode.Text = strItemBarcode;
                  * */
+                if (strDbType == "item")
+                {
+                    string strItemBarcode = "";
+                    BookItem result_item = null;
+                    if (query_type == "refID")
+                    {
+                        // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+                        // return:
+                        //      -1  error
+                        //      0   not found
+                        //      1   found
+                        nRet = this.entityControl1.DoSearchItemByRefID(strItemRecPath,
+                            out result_item);
+                    }
+                    else
+                    {
+                        // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+                        // return:
+                        //      -1  error
+                        //      0   not found
+                        //      1   found
+                        nRet = this.entityControl1.DoSearchItemByRecPath(
+                            strItemRecPath,
+                            out result_item,
+                            false);
+                    }
+                    if (result_item != null)
+                        strItemBarcode = result_item.Barcode;
+                    else
+                    {
+                        string error = $"无法在列表中定位路径为 {strItemRecPath} 的册记录";
+                        if (DisplayOtherLibraryItem == false)
+                            error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
+                        this.MessageBoxShow(error);
+                    }
 
-                string strItemBarcode = "";
-                BookItem result_item = null;
+                    this.TryInvoke(() =>
+                    {
+                        if (strItemBarcode != this.textBox_itemBarcode.Text)
+                            this.textBox_itemBarcode.Text = strItemBarcode;
+                    });
 
-                // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   found
-                nRet = this.entityControl1.DoSearchItemByRecPath(strItemRecPath,
-                    out result_item,
-                    false);
-                if (result_item != null)
-                    strItemBarcode = result_item.Barcode;
+                    this.SwitchFocus(ITEM_LIST);
+                }
+                else if (strDbType == "order")
+                {
+                    // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   found
+                    nRet = this.orderControl1.DoSearchItemByRecPath(strItemRecPath,
+                        out OrderItem result_item);
+                    this.SwitchFocus(ORDER_LIST);
+                }
+                else if (strDbType == "issue")
+                {
+                    // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   found
+                    nRet = this.issueControl1.DoSearchItemByRecPath(strItemRecPath,
+                        out IssueItem result_item);
+                    this.SwitchFocus(ISSUE_LIST);
+                }
+                else if (strDbType == "comment")
+                {
+                    // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   found
+                    nRet = this.commentControl1.DoSearchItemByRecPath(strItemRecPath,
+                        out CommentItem result_item);
+                    this.SwitchFocus(COMMENT_LIST);
+                }
                 else
                 {
-                    string error = $"无法在列表中定位路径为 {strItemRecPath} 的册记录";
-                    if (DisplayOtherLibraryItem == false)
-                        error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
-                    this.MessageBoxShow(error);
+                    throw new ArgumentException($"未知的 {nameof(strDbType)} 值 '{strDbType}'");
                 }
-
-                if (strItemBarcode != this.textBox_itemBarcode.Text)
-                    this.textBox_itemBarcode.Text = strItemBarcode;
-
-                // 焦点切换到条码输入域
-                // this.SwitchFocus(ITEM_BARCODE);
-                this.SwitchFocus(ITEM_LIST);
                 return nRet;
             }
             finally
             {
-#if NO
-                this.m_nChannelInUse--;
-#endif
-
                 looping.Progress.SetAllowNest(bOldNest);
                 /*
                 this.EnableControls(true);
@@ -7287,6 +7458,7 @@ out strError);
             }
         }
 
+        // (为兼容以前 API 的版本，线程模型不良，尽快废弃)
         // 2010/2/26 
         // 根据册记录参考ID 装载一个册，连带装入种
         // parameters:
@@ -7308,91 +7480,88 @@ out strError);
         public int LoadItemByRefID(string strItemRefID,
             bool bAutoSavePrev)
         {
-#if NO
-            this.m_nChannelInUse++;
-            if (this.m_nChannelInUse > 1)
+            var task = LoadItemByRecPathAsync(
+    "item",
+    "@refID:" + strItemRefID,
+    bAutoSavePrev);
+            while (task.IsCompleted == false)
             {
-                this.m_nChannelInUse--;
-                MessageBox.Show(this, "通道已经被占用。请稍后重试");
-                return -1;
+                Application.DoEvents();
             }
-#endif
-            try
+            return task.Result;
+        }
+
+#if REMOVED
+        int _loadItemByRefID(string strItemRefID,
+            bool bAutoSavePrev)
+        {
+            int nRet = 0;
+
+            // TODO: 外部调用时，要能自动把items page激活
+
+            if (this.EntitiesChanged == true
+                || this.IssuesChanged == true
+                || this.BiblioChanged == true
+                || this.ObjectChanged == true
+                || this.OrdersChanged == true
+                || this.CommentsChanged == true)
             {
-
-                int nRet = 0;
-
-                // TODO: 外部调用时，要能自动把items page激活
-
-                if (this.EntitiesChanged == true
-                    || this.IssuesChanged == true
-                    || this.BiblioChanged == true
-                    || this.ObjectChanged == true
-                    || this.OrdersChanged == true
-                    || this.CommentsChanged == true)
+                if (bAutoSavePrev == false)
                 {
-                    if (bAutoSavePrev == false)
+                    // 警告尚未保存
+                    DialogResult result = this.TryGet(() =>
                     {
-                        // 警告尚未保存
-                        DialogResult result = this.TryGet(() =>
-                        {
-                            return MessageBox.Show(this,
-                            "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
-                            "EntityForm",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        });
-                        if (result == DialogResult.Cancel)
-                        {
-                            this.MessageBoxShow("放弃装入册事项 (册记录路径为 '" + strItemRefID + "' )");
-                            return -1;
-                        }
-                        if (result == DialogResult.Yes)
-                        {
-                            nRet = this.DoSaveAll();
-                            if (nRet == -1 || nRet == -2)
-                                return -1; // 放弃进一步操作
-
-                        }
+                        return MessageBox.Show(this,
+                        "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
+                        "EntityForm",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    });
+                    if (result == DialogResult.Cancel)
+                    {
+                        this.MessageBoxShow("放弃装入册事项 (册记录路径为 '" + strItemRefID + "' )");
+                        return -1;
                     }
-                    else
+                    if (result == DialogResult.Yes)
                     {
                         nRet = this.DoSaveAll();
                         if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
+
                     }
                 }
-
-                string strItemBarcode = "";
-                BookItem result_item = null;
-                // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   found
-                nRet = this.entityControl1.DoSearchItemByRefID(strItemRefID,
-                    out result_item);
-                if (result_item != null)
-                    strItemBarcode = result_item.Barcode;
-
-                if (strItemBarcode != this.textBox_itemBarcode.Text)
-                    this.textBox_itemBarcode.Text = strItemBarcode;
-
-                // 焦点切换到条码输入域
-                // this.SwitchFocus(ITEM_BARCODE);
-                this.SwitchFocus(ITEM_LIST);
-
-                return nRet;
+                else
+                {
+                    nRet = this.DoSaveAll();
+                    if (nRet == -1 || nRet == -2)
+                        return -1; // 放弃进一步操作
+                }
             }
-            finally
-            {
-#if NO
-                this.m_nChannelInUse--;
-#endif
-            }
+
+            string strItemBarcode = "";
+            BookItem result_item = null;
+            // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = this.entityControl1.DoSearchItemByRefID(strItemRefID,
+                out result_item);
+            if (result_item != null)
+                strItemBarcode = result_item.Barcode;
+
+            if (strItemBarcode != this.textBox_itemBarcode.Text)
+                this.textBox_itemBarcode.Text = strItemBarcode;
+
+            // 焦点切换到条码输入域
+            // this.SwitchFocus(ITEM_BARCODE);
+            this.SwitchFocus(ITEM_LIST);
+            return nRet;
         }
+#endif
 
+#if REMOVED
         // 2011/6/30 
         // 根据评注记录路径 装载一个评注记录，连带装入种
         // parameters:
@@ -7414,83 +7583,65 @@ out strError);
         public int LoadCommentByRecPath(string strCommentRecPath,
             bool bAutoSavePrev)
         {
-#if NO
-            this.m_nChannelInUse++;
-            if (this.m_nChannelInUse > 1)
+            int nRet = 0;
+
+            // TODO: 外部调用时，要能自动把items page激活
+
+            if (this.EntitiesChanged == true
+                || this.IssuesChanged == true
+                || this.BiblioChanged == true
+                || this.ObjectChanged == true
+                || this.OrdersChanged == true
+                || this.CommentsChanged == true)
             {
-                this.m_nChannelInUse--;
-                MessageBox.Show(this, "通道已经被占用。请稍后重试");
-                return -1;
-            }
-#endif
-            try
-            {
-
-                int nRet = 0;
-
-                // TODO: 外部调用时，要能自动把items page激活
-
-                if (this.EntitiesChanged == true
-                    || this.IssuesChanged == true
-                    || this.BiblioChanged == true
-                    || this.ObjectChanged == true
-                    || this.OrdersChanged == true
-                    || this.CommentsChanged == true)
+                if (bAutoSavePrev == false)
                 {
-                    if (bAutoSavePrev == false)
+                    // 警告尚未保存
+                    DialogResult result = this.TryGet(() =>
                     {
-                        // 警告尚未保存
-                        DialogResult result = this.TryGet(() =>
-                        {
-                            return MessageBox.Show(this,
-                            "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
-                            "EntityForm",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        });
-                        if (result == DialogResult.Cancel)
-                        {
-                            this.MessageBoxShow("放弃装入评注事项 (评注记录路径为 '" + strCommentRecPath + "' )");
-                            return -1;
-                        }
-                        if (result == DialogResult.Yes)
-                        {
-                            nRet = this.DoSaveAll();
-                            if (nRet == -1 || nRet == -2)
-                                return -1; // 放弃进一步操作
-
-                        }
+                        return MessageBox.Show(this,
+                        "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
+                        "EntityForm",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    });
+                    if (result == DialogResult.Cancel)
+                    {
+                        this.MessageBoxShow("放弃装入评注事项 (评注记录路径为 '" + strCommentRecPath + "' )");
+                        return -1;
                     }
-                    else
+                    if (result == DialogResult.Yes)
                     {
                         nRet = this.DoSaveAll();
                         if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
+
                     }
                 }
-
-                CommentItem result_item = null;
-                // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   found
-                nRet = this.commentControl1.DoSearchItemByRecPath(strCommentRecPath,
-                    out result_item);
-
-                this.SwitchFocus(COMMENT_LIST);
-
-                return nRet;
+                else
+                {
+                    nRet = this.DoSaveAll();
+                    if (nRet == -1 || nRet == -2)
+                        return -1; // 放弃进一步操作
+                }
             }
-            finally
-            {
-#if NO
-                this.m_nChannelInUse--;
-#endif
-            }
+
+            CommentItem result_item = null;
+            // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = this.commentControl1.DoSearchItemByRecPath(strCommentRecPath,
+                out result_item);
+
+            this.SwitchFocus(COMMENT_LIST);
+
+            return nRet;
         }
-
+#endif
+#if REMOVED
         // 2009/11/23 
         // 根据订购册记录路径 装载一个订购记录，连带装入种
         // parameters:
@@ -7512,88 +7663,70 @@ out strError);
         public int LoadOrderByRecPath(string strOrderRecPath,
             bool bAutoSavePrev)
         {
-#if NO
-            this.m_nChannelInUse++;
-            if (this.m_nChannelInUse > 1)
+            int nRet = 0;
+
+            // TODO: 外部调用时，要能自动把items page激活
+
+            if (this.EntitiesChanged == true
+                || this.IssuesChanged == true
+                || this.BiblioChanged == true
+                || this.ObjectChanged == true
+                || this.OrdersChanged == true
+                || this.CommentsChanged == true)
             {
-                this.m_nChannelInUse--;
-                MessageBox.Show(this, "通道已经被占用。请稍后重试");
-                return -1;
-            }
-#endif
-            try
-            {
-
-                int nRet = 0;
-
-                // TODO: 外部调用时，要能自动把items page激活
-
-                if (this.EntitiesChanged == true
-                    || this.IssuesChanged == true
-                    || this.BiblioChanged == true
-                    || this.ObjectChanged == true
-                    || this.OrdersChanged == true
-                    || this.CommentsChanged == true)
+                if (bAutoSavePrev == false)
                 {
-                    if (bAutoSavePrev == false)
+                    // 警告尚未保存
+                    DialogResult result = this.TryGet(() =>
                     {
-                        // 警告尚未保存
-                        DialogResult result = this.TryGet(() =>
-                        {
-                            return MessageBox.Show(this,
-                            "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
-                            "EntityForm",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        });
-                        if (result == DialogResult.Cancel)
-                        {
-                            this.MessageBoxShow("放弃装入订购事项 (订购记录路径为 '" + strOrderRecPath + "' )");
-                            return -1;
-                        }
-                        if (result == DialogResult.Yes)
-                        {
-                            nRet = this.DoSaveAll();
-                            if (nRet == -1 || nRet == -2)
-                                return -1; // 放弃进一步操作
-
-                        }
+                        return MessageBox.Show(this,
+                        "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
+                        "EntityForm",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    });
+                    if (result == DialogResult.Cancel)
+                    {
+                        this.MessageBoxShow("放弃装入订购事项 (订购记录路径为 '" + strOrderRecPath + "' )");
+                        return -1;
                     }
-                    else
+                    if (result == DialogResult.Yes)
                     {
                         nRet = this.DoSaveAll();
                         if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
                     }
                 }
-
-                /*
-                if (strItemBarcode != this.textBox_itemBarcode.Text)
-                    this.textBox_itemBarcode.Text = strItemBarcode;
-                 * */
-
-                OrderItem result_item = null;
-                // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   found
-                nRet = this.orderControl1.DoSearchItemByRecPath(strOrderRecPath,
-                    out result_item);
-
-                this.SwitchFocus(ORDER_LIST);
-
-                return nRet;
+                else
+                {
+                    nRet = this.DoSaveAll();
+                    if (nRet == -1 || nRet == -2)
+                        return -1; // 放弃进一步操作
+                }
             }
-            finally
-            {
-#if NO
-                this.m_nChannelInUse--;
-#endif
-            }
+
+            /*
+            if (strItemBarcode != this.textBox_itemBarcode.Text)
+                this.textBox_itemBarcode.Text = strItemBarcode;
+             * */
+
+            OrderItem result_item = null;
+            // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = this.orderControl1.DoSearchItemByRecPath(strOrderRecPath,
+                out result_item);
+
+            this.SwitchFocus(ORDER_LIST);
+
+            return nRet;
         }
+#endif
 
+#if REMOVED
         // 2010/4/27
         // 根据期记录路径 装载一个期记录，连带装入种
         // parameters:
@@ -7615,87 +7748,69 @@ out strError);
         public int LoadIssueByRecPath(string strIssueRecPath,
             bool bAutoSavePrev)
         {
-#if NO
-            this.m_nChannelInUse++;
-            if (this.m_nChannelInUse > 1)
+            int nRet = 0;
+
+            // TODO: 外部调用时，要能自动把items page激活
+
+            if (this.EntitiesChanged == true
+                || this.IssuesChanged == true
+                || this.BiblioChanged == true
+                || this.ObjectChanged == true
+                || this.OrdersChanged == true
+                || this.CommentsChanged == true)
             {
-                this.m_nChannelInUse--;
-                MessageBox.Show(this, "通道已经被占用。请稍后重试");
-                return -1;
-            }
-#endif
-            try
-            {
-
-                int nRet = 0;
-
-                // TODO: 外部调用时，要能自动把items page激活
-
-                if (this.EntitiesChanged == true
-                    || this.IssuesChanged == true
-                    || this.BiblioChanged == true
-                    || this.ObjectChanged == true
-                    || this.OrdersChanged == true
-                    || this.CommentsChanged == true)
+                if (bAutoSavePrev == false)
                 {
-                    if (bAutoSavePrev == false)
+                    // 警告尚未保存
+                    DialogResult result = this.TryGet(() =>
                     {
-                        // 警告尚未保存
-                        DialogResult result = this.TryGet(() =>
-                        {
-                            return MessageBox.Show(this,
-                            "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
-                            "EntityForm",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        });
-                        if (result == DialogResult.Cancel)
-                        {
-                            this.MessageBoxShow("放弃装入册事项 (册记录路径为 '" + strIssueRecPath + "' )");
-                            return -1;
-                        }
-                        if (result == DialogResult.Yes)
-                        {
-                            nRet = this.DoSaveAll();
-                            if (nRet == -1 || nRet == -2)
-                                return -1; // 放弃进一步操作
-
-                        }
+                        return MessageBox.Show(this,
+                        "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。\r\n\r\n在装入新的实体信息以前，是否先保存这些修改? ",
+                        "EntityForm",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    });
+                    if (result == DialogResult.Cancel)
+                    {
+                        this.MessageBoxShow("放弃装入册事项 (册记录路径为 '" + strIssueRecPath + "' )");
+                        return -1;
                     }
-                    else
+                    if (result == DialogResult.Yes)
                     {
                         nRet = this.DoSaveAll();
                         if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
+
                     }
                 }
-
-                /*
-                if (strItemBarcode != this.textBox_itemBarcode.Text)
-                    this.textBox_itemBarcode.Text = strItemBarcode;
-                 * */
-
-                IssueItem result_item = null;
-                // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   found
-                nRet = this.issueControl1.DoSearchItemByRecPath(strIssueRecPath,
-                    out result_item);
-
-                this.SwitchFocus(ISSUE_LIST);
-
-                return nRet;
+                else
+                {
+                    nRet = this.DoSaveAll();
+                    if (nRet == -1 || nRet == -2)
+                        return -1; // 放弃进一步操作
+                }
             }
-            finally
-            {
-#if NO
-                this.m_nChannelInUse--;
-#endif
-            }
+
+            /*
+            if (strItemBarcode != this.textBox_itemBarcode.Text)
+                this.textBox_itemBarcode.Text = strItemBarcode;
+             * */
+
+            IssueItem result_item = null;
+            // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = this.issueControl1.DoSearchItemByRecPath(strIssueRecPath,
+                out result_item);
+
+            this.SwitchFocus(ISSUE_LIST);
+
+            return nRet;
         }
+#endif
 
         private void toolStripMenuItem_SearchOnly_Click(object sender, EventArgs e)
         {
@@ -10852,7 +10967,7 @@ out strError);
 
 
         // (复制)另存书目记录为。注：包括下属的册、订购、期、评注记录和对象资源
-        private void toolStripButton1_marcEditor_saveTo_Click(object sender, EventArgs e)
+        private async void toolStripButton1_marcEditor_saveTo_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -11006,7 +11121,7 @@ out strError);
 
                 // 2019/5/8
                 if (this.BiblioDbName != strOldBiblioDbName)
-                    LoadRecordOld(this.BiblioRecPath, "", false);
+                    await LoadRecordOldAsync(this.BiblioRecPath, "", false);
 
                 return;
             }
@@ -11119,7 +11234,7 @@ out strError);
                         out strError);
                     if (nRet == -1)
                     {
-                        this.MessageBoxShow( strError);
+                        this.MessageBoxShow(strError);
                         return; // 放弃进一步操作
                     }
 
@@ -11405,61 +11520,17 @@ out strError);
         }
 #endif
 
-        private void toolStripButton_prev_Click(object sender, EventArgs e)
+        private async void toolStripButton_prev_Click(object sender, EventArgs e)
         {
-#if NO
-            if (Control.ModifierKeys == Keys.Control)
-            {
-                this.ClearMessage();
-                string strRecPath = GetPrevNextRecPath("prev");
-                if (string.IsNullOrEmpty(strRecPath))
-                    this.ShowMessage("无法移动", "yellow", true);
-                else
-                    this.LoadRecordOld(strRecPath, "", true);
-            }
-            else
-            {
-                // TODO: 可以改进为调用Safe...，这样就不必在意Disable按钮来防止重入了
-                this.LoadRecordOld(this.BiblioRecPath, "prev", true);
-            }
-#endif
-            LoadPrevNextRecord("prev");
+            await LoadPrevNextRecord("prev");
         }
 
-        private void toolStripButton_next_Click(object sender, EventArgs e)
+        private async void toolStripButton_next_Click(object sender, EventArgs e)
         {
-#if NO
-            if (Control.ModifierKeys == Keys.Control)
-            {
-                this.ClearMessage();
-                string strRecPath = GetPrevNextRecPath("next");
-                if (string.IsNullOrEmpty(strRecPath))
-                    this.ShowMessage("无法移动", "yellow", true);
-                else
-                {
-                    if (strRecPath.IndexOf("@") == -1)
-                        this.LoadRecordOld(strRecPath, "", true);
-                    else
-                    {
-                        BiblioSearchForm form = Program.MainForm.GetTopChildWindow<BiblioSearchForm>();
-                        // TODO: if form == null
-                        BiblioInfo info = form.GetBiblioInfo(strRecPath);
-                        if (info == null)
-                            this.ShowMessage($"以路径 {strRecPath} 获得 BiblioInfo 失败", "yellow", true);
-                        else
-                            this.LoadRecord(info, true, out string strTotalError, true);
-                    }
-                }
-            }
-            else
-            {
-                this.LoadRecordOld(this.BiblioRecPath, "next", true);
-            }
-#endif
-            LoadPrevNextRecord("next");
+            await LoadPrevNextRecord("next");
         }
 
-        void LoadPrevNextRecord(string direction)
+        async Task LoadPrevNextRecord(string direction)
         {
             bool resultSet = !(Control.ModifierKeys == Keys.Control);
             //if (Control.ModifierKeys == Keys.Control
@@ -11474,7 +11545,7 @@ out strError);
                 else
                 {
                     if (strRecPath.IndexOf("@") == -1)
-                        this.LoadRecordOld(strRecPath, "", true);
+                        await this.LoadRecordOldAsync(strRecPath, "", true);
                     else
                     {
                         BiblioInfo info = null;
@@ -11498,7 +11569,10 @@ out strError);
                         if (info == null)
                             this.ShowMessage($"以路径 {strRecPath} 获得 BiblioInfo 失败", "yellow", true);
                         else
-                            this.LoadRecord(info, true, out string strTotalError, true);
+                        {
+                            // this.LoadRecord(info, true, out string strTotalError, true);
+                            await this.LoadRecordAsync(info, true, true);
+                        }
                     }
                 }
             }
@@ -11511,7 +11585,7 @@ out strError);
                 }
 
                 // 在同一数据库中按照 ID 前后翻看
-                this.LoadRecordOld(this.BiblioRecPath, direction, true);
+                await this.LoadRecordOldAsync(this.BiblioRecPath, direction, true);
             }
         }
 
@@ -11716,7 +11790,7 @@ out strError);
             return data;
         }
 
-        private void EntityForm_DragDrop(object sender, DragEventArgs e)
+        private async void EntityForm_DragDrop(object sender, DragEventArgs e)
         {
             Debug.WriteLine("EntityForm_DragDrop");
 
@@ -11738,13 +11812,15 @@ out strError);
             {
                 if (data.DbType == "biblio")
                 {
-                    this.LoadRecordOld(data.RecPath,
+                    await this.LoadRecordOldAsync(data.RecPath,
                         "",
                         true);
                 }
                 else if (data.DbType == "item")
                 {
-                    this.LoadItemByRecPath(data.RecPath,
+                    await this.LoadItemByRecPathAsync(
+                        "item",
+                        data.RecPath,
                         this.checkBox_autoSavePrev.Checked);
                 }
                 else
@@ -11772,7 +11848,7 @@ out strError);
 
             return;
         ERROR1:
-            this.MessageBoxShow( strError);
+            this.MessageBoxShow(strError);
 #if NO
             string strError = "";
 
@@ -11930,7 +12006,7 @@ out strError);
                     out strError);
             if (nRet == -1 || nRet == 0)
             {
-                this.MessageBoxShow( strError);
+                this.MessageBoxShow(strError);
                 goto REDO;
             }
 
@@ -12087,7 +12163,7 @@ out strError);
 
             return;
         ERROR1:
-            this.MessageBoxShow( strError);
+            this.MessageBoxShow(strError);
         }
 
         // return:
@@ -12271,7 +12347,7 @@ out strError);
         }
 
         // 装入目标记录
-        private void ToolStripMenuItem_loadTargetBiblioRecord_Click(object sender, EventArgs e)
+        private async void ToolStripMenuItem_loadTargetBiblioRecord_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strTargetBiblioRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
@@ -12287,7 +12363,7 @@ out strError);
             //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
             //      1   成功装载
             //      2   通道被占用
-            LoadRecordOld(strTargetBiblioRecPath,
+            await LoadRecordOldAsync(strTargetBiblioRecPath,
                 "",
                 true);
             return;
@@ -12309,7 +12385,7 @@ out strError);
             // this.timer1.Start();
         }
 
-        void DoPendingList()
+        async Task DoPendingList()
         {
             lock (this.m_listPendingLoadRequest)
             {
@@ -12323,6 +12399,7 @@ out strError);
                 request = this.m_listPendingLoadRequest[0];
             }
 
+            /*
             int nRet = this.LoadRecord(request.RecPath,
                 request.PrevNextStyle,
                 true,
@@ -12330,6 +12407,14 @@ out strError);
                 out strError);
             if (nRet != 1)
                 this.ShowMessage(strError, "red", true);
+            */
+            var result = await LoadRecordAsync(
+                request.RecPath,
+                request.PrevNextStyle,
+                true,
+                false);
+            if (result.Value != 1)
+                this.ShowMessage(result.ErrorInfo, "red", true);
 
             lock (this.m_listPendingLoadRequest)
             {
@@ -12337,7 +12422,7 @@ out strError);
             }
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private async void timer1_Tick(object sender, EventArgs e)
         {
             lock (this.m_listPendingLoadRequest)
             {
@@ -12347,12 +12432,13 @@ out strError);
                     return;
                 }
             }
-            string strError = "";
             PendingLoadRequest request = null;
             lock (this.m_listPendingLoadRequest)
             {
                 request = this.m_listPendingLoadRequest[0];
             }
+            /*
+            string strError = "";
             int nRet = this.LoadRecord(request.RecPath,
                 request.PrevNextStyle,
                 true,
@@ -12368,7 +12454,22 @@ out strError);
                     this.m_listPendingLoadRequest.Remove(request);
                 }
             }
+            */
 
+            var result = await this.LoadRecordAsync(request.RecPath,
+    request.PrevNextStyle,
+    true,
+    false);
+            if (result.Value == 2)
+            {
+            }
+            else
+            {
+                lock (this.m_listPendingLoadRequest)
+                {
+                    this.m_listPendingLoadRequest.Remove(request);
+                }
+            }
         }
 
         // 导出所有信息到XML文件
@@ -12790,7 +12891,7 @@ out strError);
 
             if (keyData == Keys.F5)
             {
-                this.Reload();
+                _ = this.Reload();
                 return true;
             }
 
@@ -15153,7 +15254,7 @@ out strError);
         }
 
         // 装载指定的书目记录
-        void MenuItem_marcEditor_loadRecord_Click(object sender, EventArgs e)
+        async void MenuItem_marcEditor_loadRecord_Click(object sender, EventArgs e)
         {
             string strBiblioRecPath = InputDlg.GetInput(
         this,
@@ -15169,7 +15270,7 @@ out strError);
             //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
             //      1   成功装载
             //      2   通道被占用
-            LoadRecordOld(strBiblioRecPath,
+            await LoadRecordOldAsync(strBiblioRecPath,
                 "",
                 true);
         }

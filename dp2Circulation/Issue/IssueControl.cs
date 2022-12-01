@@ -1657,93 +1657,14 @@ namespace dp2Circulation
             ListViewUtil.SelectAllLines(this.listView);
         }
 
-        void menu_loadToNewItemForm_Click(object sender, EventArgs e)
+        async void menu_loadToNewItemForm_Click(object sender, EventArgs e)
         {
-#if NO
-            string strError = "";
-
-            if (this.ListView.SelectedItems.Count == 0)
-            {
-                strError = "尚未选定要操作的事项";
-                goto ERROR1;
-            }
-
-            IssueItem cur = (IssueItem)this.ListView.SelectedItems[0].Tag;
-
-            if (cur == null)
-            {
-                strError = "IssueItem == null";
-                goto ERROR1;
-            }
-
-            string strRecPath = cur.RecPath;
-            if (string.IsNullOrEmpty(strRecPath) == true)
-            {
-                strError = "所选定的事项记录路径为空，尚未在数据库中建立";
-                goto ERROR1;
-            }
-
-            ItemInfoForm form = null;
-
-            form = new ItemInfoForm();
-            form.MdiParent = Program.MainForm;
-            form.MainForm = Program.MainForm;
-            form.Show();
-
-            form.DbType = "issue";
-
-            form.LoadRecordByRecPath(strRecPath, "");
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-#endif
-            LoadToItemInfoForm(true);
+            await LoadToItemInfoFormAsync(true);
         }
 
-        void menu_loadToExistItemForm_Click(object sender, EventArgs e)
+        async void menu_loadToExistItemForm_Click(object sender, EventArgs e)
         {
-#if NO
-            string strError = "";
-
-            if (this.ListView.SelectedItems.Count == 0)
-            {
-                strError = "尚未选定要操作的事项";
-                goto ERROR1;
-            }
-
-            IssueItem cur = (IssueItem)this.ListView.SelectedItems[0].Tag;
-
-            if (cur == null)
-            {
-                strError = "IssueItem == null";
-                goto ERROR1;
-            }
-
-            string strRecPath = cur.RecPath;
-            if (string.IsNullOrEmpty(strRecPath) == true)
-            {
-                strError = "所选定的事项记录路径为空，尚未在数据库中建立";
-                goto ERROR1;
-            }
-
-            ItemInfoForm form = Program.MainForm.GetTopChildWindow<ItemInfoForm>();
-            if (form == null)
-            {
-                strError = "当前并没有已经打开的期窗";
-                goto ERROR1;
-            }
-            form.DbType = "issue";
-            Global.Activate(form);
-            if (form.WindowState == FormWindowState.Minimized)
-                form.WindowState = FormWindowState.Normal;
-
-            form.LoadRecordByRecPath(strRecPath, "");
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-#endif
-            LoadToItemInfoForm(false);
-
+            await LoadToItemInfoFormAsync(false);
         }
 
         // 自动为新创建的册创建索取号

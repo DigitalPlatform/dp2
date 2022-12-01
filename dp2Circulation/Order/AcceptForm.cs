@@ -1471,9 +1471,12 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (m_detailWindow.BiblioRecPath == strPath)
                 return true;
 
+            /*
             Delegate_SafeLoadRecord d = new Delegate_SafeLoadRecord(m_detailWindow.SafeLoadRecord);
             m_detailWindow.BeginInvoke(d, new object[] { strPath,
                 "" });
+            */
+            _ = m_detailWindow.LoadRecordAsync(strPath, "", true, false);
             return true;
 
             /*
@@ -1551,7 +1554,6 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
             }
 
-
             // TODO: 打开一个EntityForm，然后定位在预定的位置。和当前窗口是兄弟关系
             if (m_detailWindow == null)
             {
@@ -1564,7 +1566,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 m_detailWindow = new EntityForm();
 
                 m_detailWindow.AcceptMode = true;
-                m_detailWindow.MainForm = Program.MainForm;
+                // m_detailWindow.MainForm = Program.MainForm;
                 m_detailWindow.MdiParent = Program.MainForm;
 #if ACCEPT_MODE
 
@@ -1622,7 +1624,6 @@ this.checkBox_prepare_createCallNumber.Checked);
                 if (m_detailWindow.ReadOnly == true)
                     m_detailWindow.ReadOnly = false;
             }
-
         }
 
         // 检查源记录的998$t，看看当前列表中是否已经有这条记录，如果没有，则需要装入

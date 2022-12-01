@@ -668,7 +668,7 @@ namespace dp2Circulation
             var items = ListViewUtil.GetItems(this.listView_origin);
 
             // for (int i = 0; i < this.listView_origin.Items.Count; i++)
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 // ListViewItem item = this.listView_origin.Items[i];
 
@@ -715,7 +715,7 @@ namespace dp2Circulation
             var items = ListViewUtil.GetItems(this.listView_origin);
 
             // for (int i = 0; i < this.listView_origin.Items.Count; i++)
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 // ListViewItem item = this.listView_origin.Items[i];
 
@@ -754,7 +754,7 @@ namespace dp2Circulation
             var items = ListViewUtil.GetItems(this.listView_origin);
 
             // for (int i = 0; i < this.listView_origin.Items.Count; i++)
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 // ListViewItem item = this.listView_origin.Items[i];
 
@@ -2581,7 +2581,7 @@ out strError);
 
                 // 先检查是否有错误事项，顺便构建item列表
                 // List<ListViewItem> items = new List<ListViewItem>();
-                for (int i = 0; 
+                for (int i = 0;
                     i < /*this.listView_merged.Items*/merged_items.Count;
                     i++)
                 {
@@ -3573,7 +3573,7 @@ out strError);
 
             // 栏目标题行
             {
-#region 输出 HTML
+                #region 输出 HTML
 
                 strTableContent += "<tr class='column'>";
                 strTableContent += "<td class='class'>" + strStatisTypeName + "</td>";
@@ -3591,9 +3591,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>已到码洋</td>";
                 }
 
-#endregion
+                #endregion
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3647,7 +3647,7 @@ title_last,
 XLColor.LightGray);
                 }
 
-#endregion
+                #endregion
             }
 
             string strSumPrice = "";
@@ -3718,7 +3718,7 @@ out strError);
                 else
                     strNoSumClass = " sum";
 
-#region 输出 HTML
+                #region 输出 HTML
 
                 strTableContent += "<tr class='content" + HttpUtility.HtmlEncode(strNoSumClass) + "'>";
                 strTableContent += "<td class='class'>" + HttpUtility.HtmlEncode(line.Class) + "</td>";
@@ -3736,9 +3736,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptCurrentFixedPrices) + "</td>";
                 }
 
-#endregion
+                #endregion
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3840,7 +3840,7 @@ strAcceptCurrentFixedPrices);
                     nExcelLineIndex++;
                 }
 
-#endregion
+                #endregion
 
                 if (secondary_lines != null
                     && line.InnerLines != null) // 2013/9/11
@@ -3878,7 +3878,7 @@ strCurrentFixedPrices);
             }
 
             // 汇总行
-#region 输出 HTML
+            #region 输出 HTML
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
         out string strOutputPrice,
@@ -3920,9 +3920,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptOutputFixedPrice) + "</td>";
                 }
             }
-#endregion
+            #endregion
 
-#region 输出 Excel
+            #region 输出 Excel
             if (doc != null)
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
@@ -4025,7 +4025,7 @@ strAcceptOutputFixedPrice);
                     "");    // 没有竖线
             }
 
-#endregion
+            #endregion
 
             strTableContent += "</tr>";
             strTableContent += "</table>";
@@ -4177,7 +4177,7 @@ strAcceptOutputFixedPrice);
             }
 
 
-#region 输出 Excel
+            #region 输出 Excel
 
             if (sheet != null)
             {
@@ -4253,7 +4253,7 @@ title_last,
 "",
 XLColor.LightGray);
             }
-#endregion
+            #endregion
 
             List<StatisLine> sum_items = new List<StatisLine>();
 
@@ -4272,7 +4272,7 @@ XLColor.LightGray);
                 strTableContent.Append("<tr class='content" + HttpUtility.HtmlAttributeEncode(strNoSumClass) + "'>");
                 strTableContent.Append("<td class='class'>" + HttpUtility.HtmlEncode(inner_line.Key) + "</td>");
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4290,7 +4290,7 @@ inner_line.Key/*,
 true*/);
                 }
 
-#endregion
+                #endregion
 
                 int i = 0;
                 foreach (StatisLine line in inner_line.lines)
@@ -4298,7 +4298,7 @@ true*/);
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
 
-#region 输出 Excel
+                    #region 输出 Excel
 
                     if (sheet != null)
                     {
@@ -4318,7 +4318,7 @@ true*/);
     XLAlignmentHorizontalValues.Right);
                     }
 
-#endregion
+                    #endregion
 
                     // 汇总
                     if (inner_line.AllowSum == true)
@@ -4349,7 +4349,7 @@ true*/);
                 strTableContent.Append("<tr class='totalize'>");
                 strTableContent.Append("<td class='class'>合计</td>");
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4364,13 +4364,13 @@ true*/);
 
                 }
 
-#endregion
+                #endregion
 
                 foreach (StatisLine line in sum_items)
                 {
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
-#region 输出 Excel
+                    #region 输出 Excel
                     if (sheet != null)
                     {
                         IXLCell first = WriteExcelCell(
@@ -4392,7 +4392,7 @@ true*/);
                         // second.Style.Border.TopBorder = XLBorderStyleValues.Thin;
 
                     }
-#endregion
+                    #endregion
                 }
                 strTableContent.Append("</tr>");
             }
@@ -5331,7 +5331,7 @@ XLColor.DarkGreen); // 订单
             return 0;
         }
 
-#region Excel 实用函数
+        #region Excel 实用函数
 
         // 合计页的边沿
         public static int SUM_TOP_BLANK_LINES = 2;
@@ -5495,7 +5495,7 @@ long value,
         }
 #endif
 
-#endregion
+        #endregion
 
         int BuildMergedPageTop(PrintOption option,
             Hashtable macro_table,
@@ -7042,16 +7042,16 @@ strContent);
         }
 
         // 打开种册窗，观察订购记录
-        void menu_loadOrderRecord_Click(object sender, EventArgs e)
+        async void menu_loadOrderRecord_Click(object sender, EventArgs e)
         {
-            LoadOrderToEntityForm(this.listView_origin);
+            await LoadOrderToEntityForm(this.listView_origin);
         }
 
-        void LoadOrderToEntityForm(ListView list)
+        async Task LoadOrderToEntityForm(ListView list)
         {
             if (list.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要装载到种册窗的事项");
+                this.MessageBoxShow("尚未选定要装载到种册窗的事项");
                 return;
             }
 
@@ -7064,14 +7064,8 @@ strContent);
             form.Show();
 
             // 2020/4/16
-            form.LoadOrderByRecPath(strRecPath, false);
-
-            /*
-            if (this.comboBox_load_type.Text == "图书")
-                form.LoadOrderByRecPath(strRecPath, false);
-            else
-                form.LoadIssueByRecPath(strRecPath, false);
-            */
+            // form.LoadOrderByRecPath(strRecPath, false);
+            await form.LoadItemByRecPathAsync("order", strRecPath, false);
         }
 
         // 重新进行合并
@@ -7499,7 +7493,7 @@ MessageBoxDefaultButton.Button2);
             public OldNewValue FixedPrice { get; set; }
             public OldNewCopy Copy { get; set; }
 
-#region 扩展的属性
+            #region 扩展的属性
 
             // 订购单价
             public string OrderPrice
@@ -7719,7 +7713,7 @@ MessageBoxDefaultButton.Button2);
             }
 
 
-#endregion
+            #endregion
 
             // 对一些值进行填充和调整
             // 返回 LineInfo 类型是为了便于链式调用
@@ -8630,7 +8624,7 @@ ORIGIN_COLUMN_COPY);
                 var list_origin_items = ListViewUtil.GetItems(this.listView_origin);
 
                 // 循环
-                for (int i = 0; 
+                for (int i = 0;
                     i < /*this.listView_origin.Items*/list_origin_items.Count;
                     i++)
                 {
@@ -8664,7 +8658,7 @@ ORIGIN_COLUMN_COPY);
                     int nStart = i; // 区段开始位置
                     int nLength = 0;    // 区段内事项个数
 
-                    for (int j = i; 
+                    for (int j = i;
                         j < /*this.listView_origin.Items*/list_origin_items.Count;
                         j++)
                     {
@@ -8742,7 +8736,7 @@ ORIGIN_COLUMN_COPY);
                                 }
                             }
                         }
-                        catch(PositionException ex)
+                        catch (PositionException ex)
                         {
                             // 2022/11/29
                             strError = $"{ex.Message}({ex.Position})";
@@ -9419,7 +9413,7 @@ MessageBoxDefaultButton.Button2);
                 MERGED_COLUMN_SELLER);
         }
 
-#region 原始数据
+        #region 原始数据
 
         // 打印原始数据
         private void button_print_printOriginList_Click(object sender, EventArgs e)
@@ -10306,7 +10300,7 @@ column.Evalue);
         }
 
 
-#endregion
+        #endregion
 
         // 保存对原始数据的修改
         private void button_saveChange_saveChange_Click(object sender, EventArgs e)
@@ -11427,12 +11421,12 @@ column.Evalue);
             }
         }
 
-        private void listView_origin_DoubleClick(object sender, EventArgs e)
+        private async void listView_origin_DoubleClick(object sender, EventArgs e)
         {
-            LoadOrderToEntityForm(this.listView_origin);
+            await LoadOrderToEntityForm(this.listView_origin);
         }
 
-#region 到书率分时间片统计
+        #region 到书率分时间片统计
 
         // 到货率统计
         private void button_print_arriveRatioStatis_Click(object sender, EventArgs e)
@@ -12463,7 +12457,7 @@ string strFileName)
             return 0;
         }
 
-#endregion
+        #endregion
 
         // 打印订单 -- 输出 Excel 文件
         private void toolStripMenuItem_outputExcel_Click(object sender, EventArgs e)

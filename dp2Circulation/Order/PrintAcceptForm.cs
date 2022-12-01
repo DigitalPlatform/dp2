@@ -5212,12 +5212,12 @@ out strError);
         }
 
         // 打开种册窗，观察册记录
-        void menu_loadItemRecord_Click(object sender, EventArgs e)
+        async void menu_loadItemRecord_Click(object sender, EventArgs e)
         {
-            LoadItemToEntityForm(this.listView_origin);
+            await LoadItemToEntityForm(this.listView_origin);
         }
 
-        void LoadItemToEntityForm(ListView list)
+        async Task LoadItemToEntityForm(ListView list)
         {
             if (list.SelectedItems.Count == 0)
             {
@@ -5233,7 +5233,7 @@ out strError);
             form.MdiParent = Program.MainForm;
             form.Show();
 
-            form.LoadItemByRecPath(strRecPath, false);
+            await form.LoadItemByRecPathAsync("item", strRecPath, false);
         }
 
 #if NO
@@ -5270,12 +5270,12 @@ out strError);
 #endif
 
         // 打开种册窗，观察订购记录
-        void menu_loadOrderRecord_Click(object sender, EventArgs e)
+        async void menu_loadOrderRecord_Click(object sender, EventArgs e)
         {
-            LoadOrderToEntityForm(this.listView_origin);
+            await LoadOrderToEntityForm(this.listView_origin);
         }
 
-        void LoadOrderToEntityForm(ListView list)
+        async Task LoadOrderToEntityForm(ListView list)
         {
             if (list.SelectedItems.Count == 0)
             {
@@ -5292,9 +5292,15 @@ out strError);
             form.Show();
 
             if (this.PublicationType == "图书")
-                form.LoadOrderByRecPath(strRecPath, false);
+            {
+                // form.LoadOrderByRecPath(strRecPath, false);
+                await form.LoadItemByRecPathAsync("order", strRecPath, false);
+            }
             else
-                form.LoadIssueByRecPath(strRecPath, false);
+            {
+                // form.LoadIssueByRecPath(strRecPath, false);
+                await form.LoadItemByRecPathAsync("issue", strRecPath, false);
+            }
         }
 
 
@@ -8727,9 +8733,9 @@ false);
             return strText.Substring(nRet + 1).Trim();
         }
 
-        private void listView_origin_DoubleClick(object sender, EventArgs e)
+        private async void listView_origin_DoubleClick(object sender, EventArgs e)
         {
-            LoadItemToEntityForm(this.listView_origin);
+            await LoadItemToEntityForm(this.listView_origin);
         }
 
         // 汇率表 打印选项

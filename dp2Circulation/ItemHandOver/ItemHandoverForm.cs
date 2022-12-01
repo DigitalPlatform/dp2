@@ -24,6 +24,7 @@ using DigitalPlatform.Core;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Threading.Tasks;
 
 // 2017/4/8 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -2880,21 +2881,21 @@ strContent);
             return total;
         }
 
-        private void listView_in_DoubleClick(object sender, EventArgs e)
+        private async void listView_in_DoubleClick(object sender, EventArgs e)
         {
-            LoadToEntityForm(this.listView_in);
+            await LoadToEntityForm(this.listView_in);
         }
 
-        private void listView_outof_DoubleClick(object sender, EventArgs e)
+        private async void listView_outof_DoubleClick(object sender, EventArgs e)
         {
-            LoadToEntityForm(this.listView_outof);
+            await LoadToEntityForm(this.listView_outof);
         }
 
-        void LoadToEntityForm(ListView list)
+        async Task LoadToEntityForm(ListView list)
         {
             if (list.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要装载的事项");
+                this.MessageBoxShow("尚未选定要装载的事项");
                 return;
             }
 
@@ -2908,9 +2909,9 @@ strContent);
             form.Show();
 
             if (String.IsNullOrEmpty(strBarcode) == false)
-                form.LoadItemByBarcode(strBarcode, false);
+                await form.LoadItemByBarcodeAsync(strBarcode, false);
             else
-                form.LoadItemByRecPath(strRecPath, false);
+                await form.LoadItemByRecPathAsync("item", strRecPath, false);
         }
 
         // 根据批次号检索装载

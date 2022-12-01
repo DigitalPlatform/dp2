@@ -662,7 +662,7 @@ this.checkBox_returnSearchDetail.Checked);
         }
 
         // 双击
-        private void listView_browse_DoubleClick(object sender, EventArgs e)
+        private async void listView_browse_DoubleClick(object sender, EventArgs e)
         {
             if (this.listView_browse.SelectedItems.Count == 0)
             {
@@ -677,7 +677,7 @@ this.checkBox_returnSearchDetail.Checked);
 
             form.MainForm = Program.MainForm;
             form.Show();
-            form.LoadRecordOld(strPath, "", true);
+            await form.LoadRecordOldAsync(strPath, "", true);
         }
 
         private void listView_browse_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -833,7 +833,7 @@ this.checkBox_returnSearchDetail.Checked);
             MessageDialog.Show(this, text.ToString());
         }
 
-        void menu_loadToNewDetailWindow_Click(object sender, EventArgs e)
+        async void menu_loadToNewDetailWindow_Click(object sender, EventArgs e)
         {
             if (this.listView_browse.SelectedItems.Count == 0)
             {
@@ -847,10 +847,10 @@ this.checkBox_returnSearchDetail.Checked);
             form.MdiParent = Program.MainForm;
             form.MainForm = Program.MainForm;
             form.Show();
-            form.LoadRecordOld(strPath, "", true);
+            await form.LoadRecordOldAsync(strPath, "", true);
         }
 
-        void menu_loadToExistDetailWindow_Click(object sender, EventArgs e)
+        async void menu_loadToExistDetailWindow_Click(object sender, EventArgs e)
         {
             if (this.listView_browse.SelectedItems.Count == 0)
             {
@@ -866,7 +866,7 @@ this.checkBox_returnSearchDetail.Checked);
                 return;
             }
             Global.Activate(form);
-            form.LoadRecordOld(strPath, "", true);
+            await form.LoadRecordOldAsync(strPath, "", true);
         }
 
         void menu_fillBrowseCols_Click(object sender, EventArgs e)

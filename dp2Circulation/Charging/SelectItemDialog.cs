@@ -1257,7 +1257,7 @@ namespace dp2Circulation
         }
 
         // 打开到 种册窗
-        void menuItem_loadToEntityForm_Click(object sender, EventArgs e)
+        async void menuItem_loadToEntityForm_Click(object sender, EventArgs e)
         {
             string strError = "";
             if (this.dpTable_items.SelectedRows.Count == 0)
@@ -1279,15 +1279,15 @@ namespace dp2Circulation
             Global.Activate(form);
 
             if (strItemBarcode.StartsWith("@biblioRecPath:") == true)
-                form.LoadRecordOld(strItemBarcode.Substring("@biblioRecPath:".Length), "", true);
+                await form.LoadRecordOldAsync(strItemBarcode.Substring("@biblioRecPath:".Length), "", true);
             else
-                form.LoadItemByBarcode(strItemBarcode, false);
+                await form.LoadItemByBarcodeAsync(strItemBarcode, false);
 
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
     }
 

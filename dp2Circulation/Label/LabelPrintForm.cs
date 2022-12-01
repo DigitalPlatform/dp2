@@ -2220,11 +2220,11 @@ out string strError);
         }
 
 
-        private void listView_records_DoubleClick(object sender, EventArgs e)
+        private async void listView_records_DoubleClick(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未在列表中选定要操作的事项");
+                this.MessageBoxShow("尚未在列表中选定要操作的事项");
                 return;
             }
 
@@ -2241,13 +2241,13 @@ out string strError);
                 //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
                 //      strIdType   标识类型 "barcode" "recpath"
                 //      strOpenType 打开窗口的方式 "new" "exist"
-                LoadRecord("EntityForm",
+                await LoadRecord("EntityForm",
                     "recpath",
                     strOpenStyle);
             }
             else
             {
-                MessageBox.Show(this, "第一列不能为空");
+                this.MessageBoxShow("第一列不能为空");
             }
         }
 
@@ -2271,7 +2271,7 @@ out string strError);
         //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
         //      strIdType   标识类型 "barcode" "recpath"
         //      strOpenType 打开窗口的方式 "new" "exist"
-        void LoadRecord(string strTargetFormType,
+        async Task LoadRecord(string strTargetFormType,
             string strIdType,
             string strOpenType)
         {
@@ -2346,7 +2346,7 @@ out string strError);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    form.LoadItemByBarcode(strBarcodeOrRecPath, false);
+                    await form.LoadItemByBarcodeAsync(strBarcodeOrRecPath, false);
                 }
                 else
                 {
@@ -2358,7 +2358,7 @@ out string strError);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    form.LoadItemByRecPath(strBarcodeOrRecPath, false);
+                    await form.LoadItemByRecPathAsync("item", strBarcodeOrRecPath, false);
                 }
             }
             else
@@ -2390,69 +2390,69 @@ out string strError);
 
                 if (strIdType == "barcode")
                 {
-                    form.LoadRecord(strBarcodeOrRecPath);
+                    await form.LoadRecordAsync(strBarcodeOrRecPath);
                 }
                 else
                 {
                     Debug.Assert(strIdType == "recpath", "");
 
-                    form.LoadRecordByRecPath(strBarcodeOrRecPath, "");
+                    await form.LoadRecordByRecPathAsync(strBarcodeOrRecPath, "");
                 }
             }
         }
 
-        void menu_itemInfoForm_recPath_newly_Click(object sender, EventArgs e)
+        async void menu_itemInfoForm_recPath_newly_Click(object sender, EventArgs e)
         {
-            LoadRecord("ItemInfoForm",
+            await LoadRecord("ItemInfoForm",
                 "recpath",
                 "new");
         }
 
-        void menu_itemInfoForm_barcode_newly_Click(object sender, EventArgs e)
+        async void menu_itemInfoForm_barcode_newly_Click(object sender, EventArgs e)
         {
-            LoadRecord("ItemInfoForm",
+            await LoadRecord("ItemInfoForm",
                 "barcode",
                 "new");
         }
 
-        void menu_entityForm_recPath_newly_Click(object sender, EventArgs e)
+        async void menu_entityForm_recPath_newly_Click(object sender, EventArgs e)
         {
-            LoadRecord("EntityForm",
+            await LoadRecord("EntityForm",
                 "recpath",
                 "new");
         }
 
-        void menu_entityForm_barcode_newly_Click(object sender, EventArgs e)
+        async void menu_entityForm_barcode_newly_Click(object sender, EventArgs e)
         {
-            LoadRecord("EntityForm",
+            await LoadRecord("EntityForm",
                 "barcode",
                 "new");
         }
 
-        void menu_itemInfoForm_recPath_exist_Click(object sender, EventArgs e)
+        async void menu_itemInfoForm_recPath_exist_Click(object sender, EventArgs e)
         {
-            LoadRecord("ItemInfoForm",
+            await LoadRecord("ItemInfoForm",
                 "recpath",
                 "exist");
         }
 
-        void menu_itemInfoForm_barcode_exist_Click(object sender, EventArgs e)
+        async void menu_itemInfoForm_barcode_exist_Click(object sender, EventArgs e)
         {
-            LoadRecord("ItemInfoForm",
+            await LoadRecord("ItemInfoForm",
                 "barcode",
                 "exist");
         }
 
-        void menu_entityForm_recPath_exist_Click(object sender, EventArgs e)
+        async void menu_entityForm_recPath_exist_Click(object sender, EventArgs e)
         {
-            LoadRecord("EntityForm",
+            await LoadRecord("EntityForm",
                 "recpath",
                 "exist");
         }
 
-        void menu_entityForm_barcode_exist_Click(object sender, EventArgs e)
+        async void menu_entityForm_barcode_exist_Click(object sender, EventArgs e)
         {
-            LoadRecord("EntityForm",
+            await LoadRecord("EntityForm",
                 "barcode",
                 "exist");
         }

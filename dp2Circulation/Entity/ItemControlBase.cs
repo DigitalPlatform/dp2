@@ -16,6 +16,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -1987,59 +1988,74 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
         // parameters:
         //      bNew    是否新开窗口。==false 表示利用已经打开的同类窗口
-        internal void LoadToItemInfoForm(bool bNew)
+        internal async Task LoadToItemInfoFormAsync(bool bNew)
         {
-            this.TryInvoke(() =>
+            string strError = "";
+
+            var selected_item_count = this.TryGet(() =>
             {
-                string strError = "";
+                return this.m_listView.SelectedItems.Count;
+            });
 
-                if (this.m_listView.SelectedItems.Count == 0)
+            if (selected_item_count == 0)
+            {
+                strError = "尚未选定要操作的事项";
+                goto ERROR1;
+            }
+
+            T cur = this.TryGet(() =>
+            {
+                return (T)this.m_listView.SelectedItems[0].Tag;
+            });
+
+            if (cur == null)
+            {
+                strError = "item == null";
+                goto ERROR1;
+            }
+
+            string strRecPath = cur.RecPath;
+            if (string.IsNullOrEmpty(strRecPath) == true)
+            {
+                strError = "所选定的" + this.ItemTypeName + "记录路径为空，尚未在数据库中建立";
+                goto ERROR1;
+            }
+
+            if (bNew == true)
+            {
+                ItemInfoForm form = null;
+                this.TryInvoke(() =>
                 {
-                    strError = "尚未选定要操作的事项";
-                    goto ERROR1;
-                }
-
-                T cur = (T)this.m_listView.SelectedItems[0].Tag;
-
-                if (cur == null)
-                {
-                    strError = "item == null";
-                    goto ERROR1;
-                }
-
-                string strRecPath = cur.RecPath;
-                if (string.IsNullOrEmpty(strRecPath) == true)
-                {
-                    strError = "所选定的" + this.ItemTypeName + "记录路径为空，尚未在数据库中建立";
-                    goto ERROR1;
-                }
-
-                if (bNew == true)
-                {
-                    ItemInfoForm form = new ItemInfoForm();
+                    form = new ItemInfoForm();
                     form.MdiParent = Program.MainForm;
                     form.MainForm = Program.MainForm;
                     form.Show();
                     form.DbType = this.ItemType;
-                    form.LoadRecordByRecPath(strRecPath, "");
-                }
-                else
+                });
+                await form.LoadRecordByRecPathAsync(strRecPath, "");
+            }
+            else
+            {
+                ItemInfoForm form = null;
+                this.TryInvoke(() =>
                 {
-                    ItemInfoForm form = Program.MainForm.GetTopChildWindow<ItemInfoForm>();
+                    form = Program.MainForm.GetTopChildWindow<ItemInfoForm>();
                     if (form == null)
-                    {
-                        strError = "当前并没有已经打开的" + this.ItemTypeName + "窗";
-                        goto ERROR1;
-                    }
+                        return;
                     form.DbType = this.ItemType;
                     Global.Activate(form);
-                    form.LoadRecordByRecPath(strRecPath, "");
+                });
+                if (form == null)
+                {
+                    strError = "当前并没有已经打开的" + this.ItemTypeName + "窗";
+                    return;
                 }
+                await form.LoadRecordByRecPathAsync(strRecPath, "");
+            }
 
-                return;
-            ERROR1:
-                this.MessageBoxShow(strError);
-            });
+            return;
+        ERROR1:
+            this.MessageBoxShow(strError);
         }
 
         #endregion

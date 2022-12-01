@@ -1335,23 +1335,21 @@ namespace dp2Circulation
         }
 
         // 双击：将书目记录装入详细窗
-        private void listView_number_DoubleClick(object sender, EventArgs e)
+        private async void listView_number_DoubleClick(object sender, EventArgs e)
         {
             if (this.listView_number.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要装入详细窗的事项");
+                this.MessageBoxShow("尚未选定要装入详细窗的事项");
                 return;
             }
+
             string strPath = this.listView_number.SelectedItems[0].SubItems[0].Text;
 
             EntityForm form = new EntityForm();
-
             form.MdiParent = Program.MainForm;
-
-            form.MainForm = Program.MainForm;
+            // form.MainForm = Program.MainForm;
             form.Show();
-            form.LoadRecordOld(strPath, "", true);
-
+            await form.LoadRecordOldAsync(strPath, "", true);
         }
 
         private void ZhongcihaoForm_Activated(object sender, EventArgs e)
