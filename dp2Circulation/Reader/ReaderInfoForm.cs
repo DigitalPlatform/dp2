@@ -26,6 +26,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Interfaces;
+using Microsoft.CodeAnalysis.Operations;
 
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
@@ -34,8 +35,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
-using dp2Circulation.Reader;
-using Microsoft.CodeAnalysis.Operations;
+// using dp2Circulation.Reader;
 
 namespace dp2Circulation
 {
@@ -97,11 +97,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.toolStripTextBox_barcode.Text;  //  this.textBox_readerBarcode.Text;
+                return this.TryGet(() =>
+                {
+                    return this.toolStripTextBox_barcode.Text;  //  this.textBox_readerBarcode.Text;
+                });
             }
             set
             {
-                this.toolStripTextBox_barcode.Text = value; //  this.textBox_readerBarcode.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.toolStripTextBox_barcode.Text = value; //  this.textBox_readerBarcode.Text = value;
+                });
             }
         }
 
@@ -539,6 +545,7 @@ namespace dp2Circulation
             this.commander.AddMessage(WM_LOAD_RECORD);
         }
 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         // 根据读者证条码号，装入读者记录
         // parameters:
         //      bForceLoad  在发生重条码的情况下是否强行装入第一条
@@ -549,274 +556,209 @@ namespace dp2Circulation
         /// <param name="bForceLoad">在发生重条码的情况下是否强行装入第一条</param>
         /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
         public int LoadRecord(string strBarcode,
-            bool bForceLoad)
+            bool bForceLoad = false)
+        {
+            var task = LoadRecordAsync(
+strBarcode,
+bForceLoad);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
+        }
+
+        public Task<int> LoadRecordAsync(string strBarcode,
+            bool bForceLoad = false)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _loadRecord(strBarcode, bForceLoad);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        int _loadRecord(string strBarcode,
+            bool bForceLoad = false)
         {
             string strError = "";
             int nRet = 0;
-
-#if NO
-            // 2013/12/4
-            this.m_webExternalHost.StopPrevious();
-            this.webBrowser_readerInfo.Stop();
-#endif
 
             if (this.ReaderXmlChanged == true
                 || this.ObjectChanged == true)
             {
                 // 警告尚未保存
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
 "当前有信息被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要根据证条码号重新装载内容? ",
 "ReaderInfoForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
+                });
                 if (result != DialogResult.Yes)
                     return 0;   // cancelled
             }
 
-            this.m_nChannelInUse++;
-            if (this.m_nChannelInUse > 1)
+            using (var looping = Looping(
+                out LibraryChannel channel,
+                "正在装载读者记录 ...",
+                "disableControl"))
             {
-                this.m_nChannelInUse--;
-                strError = "通道已经被占用。请稍后重试";
-                goto ERROR1;
-            }
-            try
-            {
-#if REMOVED
-                LibraryChannel channel = this.GetChannel();
 
-                /*
-                _stop.OnStop += new StopEventHandler(this.DoStop);
-                _stop.Initial("正在装载读者记录 ...");
-                _stop.BeginLoop();
-                */
-                var looping = BeginLoop(this.DoStop, "正在装载读者记录 ...");
+                this.readerEditControl1.Clear();
+                this.binaryResControl1.Clear();
 
-                EnableControls(false);
-#endif
-                using (var looping = Looping(
-                    out LibraryChannel channel,
-                    "正在装载读者记录 ...",
-                    "disableControl"))
+                ClearReaderHtmlPage();
+
+                this.ClearBorrowHistoryPage();
+                this.ClearQrCodePage();
+
+                byte[] baTimestamp = null;
+                string strOutputRecPath = "";
+                int nRedoCount = 0;
+
+            REDO:
+                looping.Progress.SetMessage("正在装入读者记录 " + strBarcode + " ...");
+
+                List<string> formats = new List<string>() { "xml", "html" };
+                if (Control.ModifierKeys == Keys.Control)
+                    formats = new List<string>() { "xml" };
+                // 2021/7/21
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
+                    formats.Add("structure");
+
+                long lRet = channel.GetReaderInfo(
+                    looping.Progress,
+                    strBarcode,
+                    StringUtil.MakePathList(formats),
+                    out string[] results,
+                    out strOutputRecPath,
+                    out baTimestamp,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                if (lRet == 0)
+                    goto ERROR1;
+
+                if (lRet > 1)
                 {
-                    this.readerEditControl1.Clear();
-#if NO
-                Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                    Program.MainForm.DataDir);
-#endif
-                    ClearReaderHtmlPage();
-                    this.binaryResControl1.Clear();
-
-                    this.ClearBorrowHistoryPage();
-                    this.ClearQrCodePage();
-
-                    try
+                    // 如果重试后依然发生重复
+                    if (nRedoCount > 0)
                     {
-                        byte[] baTimestamp = null;
-                        string strOutputRecPath = "";
-                        int nRedoCount = 0;
-
-                    REDO:
-                        looping.Progress.SetMessage("正在装入读者记录 " + strBarcode + " ...");
-
-                        List<string> formats = new List<string>() { "xml", "html" };
-                        if (Control.ModifierKeys == Keys.Control)
-                            formats = new List<string>() { "xml" };
-                        // 2021/7/21
-                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
-                            formats.Add("structure");
-
-                        long lRet = channel.GetReaderInfo(
-                            looping.Progress,
-                            strBarcode,
-                            StringUtil.MakePathList(formats),
-                            out string[] results,
-                            out strOutputRecPath,
-                            out baTimestamp,
-                            out strError);
-                        if (lRet == -1)
-                            goto ERROR1;
-
-                        if (lRet == 0)
-                            goto ERROR1;
-
-                        if (lRet > 1)
+                        if (bForceLoad == true)
                         {
-                            // 如果重试后依然发生重复
-                            if (nRedoCount > 0)
-                            {
-                                if (bForceLoad == true)
-                                {
-                                    strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，但仍装入其中第一条读者记录。\r\n\r\n这是一个严重错误，请系统管理员尽快排除。";
-                                    MessageBox.Show(this, strError);    // 警告后继续装入第一条 
-                                }
-                                else
-                                {
-                                    strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
-                                    goto ERROR1;    // 当出错处理
-                                }
-                            }
-
-                            SelectPatronDialog dlg = new SelectPatronDialog();
-
-                            dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
-                            nRet = dlg.Initial(
-                                // Program.MainForm,
-                                StringUtil.SplitList(strOutputRecPath),
-                                "请选择一个读者记录",
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-
-                            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_SelectPatronDialog_state");
-                            dlg.ShowDialog(this);
-                            Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
-                            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                                return 0;
-
-                            strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16 // .SelectedBarcode;
-                            nRedoCount++;
-                            goto REDO;
-                        }
-
-                        this.ReaderBarcode = strBarcode;
-
-                        /*
-                        this.RecPath = strRecPath;
-
-                        this.Timestamp = baTimestamp;
-
-                        // 保存刚获得的记录
-                        this.OldRecord = strXml;
-                         */
-
-
-                        // if (results == null || results.Length < 2)
-                        if (results == null || results.Length < 1)
-                        {
-                            strError = "返回的 results 不正常。";
-                            goto ERROR1;
-                        }
-
-                        string strXml = "";
-                        string strHtml = "";
-                        /*
-                        strXml = results[0];
-                        if (results.Length >= 2)
-                            strHtml = results[1];
-                        */
-                        strXml = GetValue(formats, results, "xml");
-                        strHtml = GetValue(formats, results, "html");
-                        string strStructure = GetValue(formats, results, "structure");
-
-                        nRet = this.readerEditControl1.SetData(
-                            strXml,
-                            strOutputRecPath,
-                            baTimestamp,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-
-                        if (string.IsNullOrEmpty(strStructure) == false)
-                        {
-                            ParseStructure(strStructure,
-            out string visibleFields,
-            out string writeableFields);
-
-                            this.readerEditControl1.SetEditable(visibleFields, writeableFields);
-                        }
-
-                        // 接着装入对象资源
-                        {
-                            nRet = this.binaryResControl1.LoadObject(
-                                looping.Progress,
-                                channel,
-                                strOutputRecPath,    // 2008/11/2 changed
-                                strXml,
-                                Program.MainForm.ServerVersion,
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                MessageBox.Show(this, strError);
-                                // return -1;
-                            }
-                        }
-
-                        /*
-                        this.SetXmlToWebbrowser(this.webBrowser_xml,
-                            strXml);
-                         * */
-                        Global.SetXmlToWebbrowser(this.webBrowser_xml,
-                            Program.MainForm.DataDir,
-                            "xml",
-                            strXml);
-
-                        this.m_strSetAction = "change";
-
-                        /*
-                        lRet = Channel.GetReaderInfo(
-                            stop,
-                            strBarcode,
-                            "html",
-                            out strHtml,
-                            out strRecPath,
-                            out baTimestamp,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            ChargingForm.SetHtmlString(this.webBrowser_readerInfo,
-        "装载读者记录发生错误: " + strError);
-
+                            strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，但仍装入其中第一条读者记录。\r\n\r\n这是一个严重错误，请系统管理员尽快排除。";
+                            this.MessageBoxShow(strError);    // 警告后继续装入第一条 
                         }
                         else
                         {
-                            ChargingForm.SetHtmlString(this.webBrowser_readerInfo,
-                                strHtml,
-            Program.MainForm.DataDir,
-            "readerinfoform_reader");
+                            strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
+                            goto ERROR1;    // 当出错处理
                         }
-                         * */
-
-#if NO
-                    // 2013/12/21
-                    this.m_webExternalHost.StopPrevious();
-                    this.webBrowser_readerInfo.Stop();
-
-                    Global.SetHtmlString(this.webBrowser_readerInfo,
-        strHtml,
-        Program.MainForm.DataDir,
-        "readerinfoform_reader");
-#endif
-                        this.SetReaderHtmlString(strHtml);
                     }
-                    finally
+
+                    // -1   error
+                    // 1    redo
+                    // 0    return
+                    var ret = this.TryGet(() =>
                     {
-#if REMOVED
-                    EnableControls(true);
+                        SelectPatronDialog dlg = new SelectPatronDialog();
 
-                    /*
-                    _stop.EndLoop();
-                    _stop.OnStop -= new StopEventHandler(this.DoStop);
-                    _stop.Initial("");
-                    */
-                    EndLoop(looping);
+                        dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
+                        nRet = dlg.Initial(
+                            // Program.MainForm,
+                            StringUtil.SplitList(strOutputRecPath),
+                            "请选择一个读者记录",
+                            out strError);
+                        if (nRet == -1)
+                            return -1;  // goto ERROR1;
 
-                    this.ReturnChannel(channel);
-#endif
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_SelectPatronDialog_state");
+                        dlg.ShowDialog(this);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                            return 0;
+
+                        strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16 // .SelectedBarcode;
+                        nRedoCount++;
+                        return 1;   // goto REDO;
+                    });
+                    if (ret == 0)
+                        return 0;
+                    if (ret == 1)
+                        goto REDO;
+                    return -1;
+                }
+
+                this.ReaderBarcode = strBarcode;
+
+                if (results == null || results.Length < 1)
+                {
+                    strError = "返回的 results 不正常。";
+                    goto ERROR1;
+                }
+
+                string strXml = "";
+                string strHtml = "";
+                strXml = GetValue(formats, results, "xml");
+                strHtml = GetValue(formats, results, "html");
+                string strStructure = GetValue(formats, results, "structure");
+
+                nRet = this.readerEditControl1.SetData(
+                    strXml,
+                    strOutputRecPath,
+                    baTimestamp,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (string.IsNullOrEmpty(strStructure) == false)
+                {
+                    ParseStructure(strStructure,
+    out string visibleFields,
+    out string writeableFields);
+
+                    this.readerEditControl1.SetEditable(visibleFields, writeableFields);
+                }
+
+                // 接着装入对象资源
+                {
+                    nRet = this.binaryResControl1.LoadObject(
+                        looping.Progress,
+                        channel,
+                        strOutputRecPath,    // 2008/11/2 changed
+                        strXml,
+                        Program.MainForm.ServerVersion,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.MessageBoxShow(strError);
+                        // return -1;
                     }
                 }
-            }
-            finally
-            {
-                this.m_nChannelInUse--;
+                Global.SetXmlToWebbrowser(this.webBrowser_xml,
+                    Program.MainForm.DataDir,
+                    "xml",
+                    strXml);
+
+                this.m_strSetAction = "change";
+
+                this.SetReaderHtmlString(strHtml);
             }
 
-            tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
+            this.TryInvoke(() =>
+            {
+                tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
+            });
             return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return -1;
         }
 
@@ -870,20 +812,11 @@ MessageBoxDefaultButton.Button2);
 
         void SetReaderHtmlString(string strHtml)
         {
-#if NO
-            // 2013/12/21
-            this.m_webExternalHost.StopPrevious();
-            this.webBrowser_readerInfo.Stop();
-
-            Global.SetHtmlString(this.webBrowser_readerInfo,
-strHtml,
-Program.MainForm.DataDir,
-"readerinfoform_reader");
-#endif
             this.m_webExternalHost.SetHtmlString(strHtml,
                 "readerinfoform_reader");
         }
 
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         // 根据读者记录路径，装入读者记录
         // parameters:
         // return:
@@ -899,216 +832,181 @@ Program.MainForm.DataDir,
         public int LoadRecordByRecPath(string strRecPath,
             string strPrevNextStyle = "")
         {
-            string strError = "";
+            var task = LoadRecordByRecPathAsync(
+strRecPath,
+strPrevNextStyle);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
+        }
 
-#if NO
-            // 2013/12/4
-            this.m_webExternalHost.StopPrevious();
-            this.webBrowser_readerInfo.Stop();
-#endif
+        public Task<int> LoadRecordByRecPathAsync(string strRecPath,
+            string strPrevNextStyle = "")
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _loadRecordByRecPath(strRecPath, strPrevNextStyle);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        int _loadRecordByRecPath(string strRecPath,
+            string strPrevNextStyle = "")
+        {
+            string strError = "";
 
             if (this.ReaderXmlChanged == true
                 || this.ObjectChanged == true)
             {
                 // 警告尚未保存
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
     "当前有信息被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要根据记录路径重新装载内容? ",
     "ReaderInfoForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button2);
+                });
                 if (result != DialogResult.Yes)
                     return 0;   // cancelled
-
             }
 
-            this.m_nChannelInUse++;
-            if (this.m_nChannelInUse > 1)
+            bool bPrevNext = false;
+
+            if (String.IsNullOrEmpty(strPrevNextStyle) == false)
             {
-                this.m_nChannelInUse--;
-                strError = "通道已经被占用。请稍后重试";
-                goto ERROR1;
+                strRecPath += "$" + strPrevNextStyle.ToLower();
+                bPrevNext = true;
             }
+
+            var looping = Looping(out LibraryChannel channel,
+                $"正在装入读者记录 {strRecPath} {strPrevNextStyle}...",
+                "disableControl");
+
+            if (bPrevNext == false)
+            {
+                ClearReaderHtmlPage();
+
+                this.readerEditControl1.Clear();
+                this.binaryResControl1.Clear();
+            }
+
+            this.ClearBorrowHistoryPage();
+            this.ClearQrCodePage();
             try
             {
-                bool bPrevNext = false;
+                // looping.Progress.SetMessage("正在装入读者记录 " + strRecPath + " ...");
 
-                if (String.IsNullOrEmpty(strPrevNextStyle) == false)
+                List<string> formats = new List<string>() { "xml", "html" };
+                // 2021/7/21
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
+                    formats.Add("structure");
+                long lRet = channel.GetReaderInfo(
+                    looping.Progress,
+                    "@path:" + strRecPath,
+                    StringUtil.MakePathList(formats),   // "xml,html",
+                    out string[] results,
+                    out string strOutputRecPath,
+                    out byte[] baTimestamp,
+                    out strError);
+                if (lRet == -1)
                 {
-                    strRecPath += "$" + strPrevNextStyle.ToLower();
-                    bPrevNext = true;
+                    if (bPrevNext == true)
+                    {
+                        strError += "\r\n\r\n新记录没有装载，窗口中还保留了装载前的记录";
+                    }
+                    goto ERROR1;
                 }
 
-                LibraryChannel channel = this.GetChannel();
-
-                /*
-                _stop.OnStop += new StopEventHandler(this.DoStop);
-                _stop.Initial("正在初始化浏览器组件 ...");
-                _stop.BeginLoop();
-                */
-                var looping = BeginLoop(this.DoStop, "正在初始化浏览器组件 ...");
-
-                EnableControls(false);
-
-                // NewExternal();
-
-                if (bPrevNext == false)
+                if (lRet == 0)
                 {
-                    this.readerEditControl1.Clear();
-#if NO
-                    Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                        Program.MainForm.DataDir);
-#endif
-                    ClearReaderHtmlPage();
+                    if (bPrevNext == true)
+                    {
+                        strError += "\r\n\r\n新记录没有装载，窗口中还保留了装载前的记录";
+                    }
+                    goto ERROR1;
+                }
 
+                if (lRet > 1)   // 不可能发生吧?
+                {
+                    strError = "记录路径 " + strRecPath + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
+                    goto ERROR1;
+                }
+
+                if (results == null || results.Length < 1)
+                {
+                    strError = "返回的results不正常。";
+                    goto ERROR1;
+                }
+
+                string strXml = "";
+                string strHtml = "";
+                strXml = GetValue(formats, results, "xml");
+                strHtml = GetValue(formats, results, "html");
+                string strStructure = GetValue(formats, results, "structure");
+
+                int nRet = this.readerEditControl1.SetData(
+                    strXml,
+                    strOutputRecPath,   // strRecPath,
+                    baTimestamp,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (string.IsNullOrEmpty(strStructure) == false)
+                {
+                    ParseStructure(strStructure,
+    out string visibleFields,
+    out string writeableFields);
+
+                    this.readerEditControl1.SetEditable(visibleFields, writeableFields);
+                }
+
+                // 接着装入对象资源
+                {
                     this.binaryResControl1.Clear();
-                }
-
-                this.ClearBorrowHistoryPage();
-                this.ClearQrCodePage();
-                try
-                {
-                    byte[] baTimestamp = null;
-
-                    looping.Progress.SetMessage("正在装入读者记录 " + strRecPath + " ...");
-
-                    List<string> formats = new List<string>() { "xml", "html" };
-                    // 2021/7/21
-                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.61") >= 0)
-                        formats.Add("structure");
-                    // string[] results = null;
-                    long lRet = channel.GetReaderInfo(
+                    nRet = this.binaryResControl1.LoadObject(
                         looping.Progress,
-                        "@path:" + strRecPath,
-                        StringUtil.MakePathList(formats),   // "xml,html",
-                        out string[] results,
-                        out string strOutputRecPath,
-                        out baTimestamp,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        if (bPrevNext == true)
-                        {
-                            strError += "\r\n\r\n新记录没有装载，窗口中还保留了装载前的记录";
-                        }
-                        goto ERROR1;
-                    }
-
-                    if (lRet == 0)
-                    {
-                        if (bPrevNext == true)
-                        {
-                            strError += "\r\n\r\n新记录没有装载，窗口中还保留了装载前的记录";
-                        }
-                        goto ERROR1;
-                    }
-
-                    if (lRet > 1)   // 不可能发生吧?
-                    {
-                        strError = "记录路径 " + strRecPath + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
-                        goto ERROR1;
-                    }
-
-                    // if (results == null || results.Length < 2)
-                    if (results == null || results.Length < 1)
-                    {
-                        strError = "返回的results不正常。";
-                        goto ERROR1;
-                    }
-
-                    string strXml = "";
-                    string strHtml = "";
-                    /*
-                    strXml = results[0];
-                    if (results.Length >= 2)
-                        strHtml = results[1];
-                    */
-                    strXml = GetValue(formats, results, "xml");
-                    strHtml = GetValue(formats, results, "html");
-                    string strStructure = GetValue(formats, results, "structure");
-
-                    int nRet = this.readerEditControl1.SetData(
+                        channel,
+                        strOutputRecPath,    // 2008/11/2 changed
                         strXml,
-                        strOutputRecPath,   // strRecPath,
-                        baTimestamp,
+                        Program.MainForm.ServerVersion,
                         out strError);
                     if (nRet == -1)
-                        goto ERROR1;
-
-                    if (string.IsNullOrEmpty(strStructure) == false)
                     {
-                        ParseStructure(strStructure,
-        out string visibleFields,
-        out string writeableFields);
-
-                        this.readerEditControl1.SetEditable(visibleFields, writeableFields);
+                        this.MessageBoxShow(strError);
+                        // return -1;
                     }
-
-                    // 接着装入对象资源
-                    {
-                        this.binaryResControl1.Clear();
-                        nRet = this.binaryResControl1.LoadObject(
-                            looping.Progress,
-                            channel,
-                            strOutputRecPath,    // 2008/11/2 changed
-                            strXml,
-                            Program.MainForm.ServerVersion,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            MessageBox.Show(this, strError);
-                            // return -1;
-                        }
-                    }
-
-                    this.ReaderBarcode = this.readerEditControl1.Barcode;
-
-                    /*
-                    this.SetXmlToWebbrowser(this.webBrowser_xml,
-                        strXml);
-                     * */
-                    Global.SetXmlToWebbrowser(this.webBrowser_xml,
-    Program.MainForm.DataDir,
-    "xml",
-    strXml);
-
-                    this.m_strSetAction = "change";
-
-#if NO
-                    // 2013/12/21
-                    this.m_webExternalHost.StopPrevious();
-                    this.webBrowser_readerInfo.Stop();
-
-                    Global.SetHtmlString(this.webBrowser_readerInfo,
-        strHtml,
-        Program.MainForm.DataDir,
-        "readerinfoform_reader");
-#endif
-                    this.SetReaderHtmlString(strHtml);
                 }
-                finally
-                {
-                    EnableControls(true);
 
-                    /*
-                    _stop.EndLoop();
-                    _stop.OnStop -= new StopEventHandler(this.DoStop);
-                    _stop.Initial("");
-                    */
-                    EndLoop(looping);
+                this.ReaderBarcode = this.readerEditControl1.Barcode;
 
-                    this.ReturnChannel(channel);
-                }
+                Global.SetXmlToWebbrowser(this.webBrowser_xml,
+Program.MainForm.DataDir,
+"xml",
+strXml);
+
+                this.m_strSetAction = "change";
+
+                this.SetReaderHtmlString(strHtml);
             }
             finally
             {
-                this.m_nChannelInUse--;
+                looping.Dispose();
             }
 
-            tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
+            this.TryInvoke(() =>
+            {
+                tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
+            });
             return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return -1;
         }
 
@@ -2005,12 +1903,15 @@ Program.MainForm.DataDir,
 
                 if (bChangeReaderForce)
                 {
-                    var result = MessageBox.Show(this,
+                    var result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "您确实要强制修改当前读者记录？\r\n\r\n警告：当读者有在借信息的情况下，强制修改保存功能，*** 不会自动修改 *** 相关在借册记录，会造成借阅信息关联错误。若只是想在修改证条码号以后保存记录，请改用“保存(强制修改证条码号)功能”",
                         "谨慎使用“保存(强制修改)”功能",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Warning,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result == DialogResult.No)
                         return 0;
                 }
@@ -2021,7 +1922,7 @@ Program.MainForm.DataDir,
                 string strTargetRecPath = this.readerEditControl1.RecPath;
                 if (string.IsNullOrEmpty(this.readerEditControl1.RecPath) == true)
                 {
-                    var ret = (int)this.Invoke(new Func<int>(() =>
+                    var ret = this.TryGet(() =>
                     {
                         // 出现对话框，让用户可以选择目标库
                         ReaderSaveToDialog saveto_dlg = new ReaderSaveToDialog();
@@ -2040,7 +1941,7 @@ Program.MainForm.DataDir,
 
                         strTargetRecPath = saveto_dlg.RecPath;
                         return 1;
-                    }));
+                    });
                     if (ret == 0)
                         return 0;
                 }
@@ -2099,18 +2000,9 @@ Program.MainForm.DataDir,
                 }
 
 
-                LibraryChannel channel = this.GetChannel();
-
-                /*
-                _stop.OnStop += new StopEventHandler(this.DoStop);
-                _stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
-                _stop.BeginLoop();
-                */
-                var looping = BeginLoop(this.DoStop, "正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
-
-
-                EnableControls(false);
-
+                var looping = Looping(out LibraryChannel channel,
+                    "正在保存读者记录 " + this.readerEditControl1.Barcode + " ...",
+                    "disableControl");
                 try
                 {
                     string strNewXml = "";
@@ -2180,7 +2072,7 @@ Program.MainForm.DataDir,
 
                         if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
                         {
-                            var ret = (int)this.Invoke(new Func<int>(() =>
+                            var ret = this.TryGet(() =>
                             {
                                 CompareReaderForm dlg = new CompareReaderForm();
                                 dlg.Initial(
@@ -2208,7 +2100,7 @@ Program.MainForm.DataDir,
                                     return -1;
                                 }
                                 return 0;
-                            }));
+                            });
                             if (ret == -1)
                                 return -1;
                         }
@@ -2266,22 +2158,15 @@ Program.MainForm.DataDir,
                             }
                         }
 
-                        this.Invoke((Action)(() =>
-                        {
-                            // 重新装载记录到编辑器
-                            nRet = this.readerEditControl1.SetData(strSavedXml,
-                                strSavedPath,
-                                baNewTimestamp,
-                                out strError);
-                        }));
+                        // 重新装载记录到编辑器
+                        nRet = this.readerEditControl1.SetData(strSavedXml,
+                            strSavedPath,
+                            baNewTimestamp,
+                            out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
                         // 刷新XML显示
-                        /*
-                        this.SetXmlToWebbrowser(this.webBrowser_xml,
-                            strSavedXml);
-                         * */
                         Global.SetXmlToWebbrowser(this.webBrowser_xml,
     Program.MainForm.DataDir,
     "xml",
@@ -2395,24 +2280,16 @@ Program.MainForm.DataDir,
                         string warning = $"虽然读者记录已经保存成功，但通知人脸中心和指纹中心刷新时发生了错误: {StringUtil.MakePathList(warnings, "; ")}";
                         this.ShowMessage(warning, "yellow", true);
                     }
+
+                    if (StringUtil.IsInList("displaysuccess", strStyle) == true)
+                        Program.MainForm.StatusBarMessage = "读者记录保存成功";
+                    return 1;
                 }
                 finally
                 {
-                    EnableControls(true);
-
-                    /*
-                    _stop.EndLoop();
-                    _stop.OnStop -= new StopEventHandler(this.DoStop);
-                    _stop.Initial("");
-                    */
-                    EndLoop(looping);
-
-                    this.ReturnChannel(channel);
+                    looping.Dispose();
                 }
 
-                if (StringUtil.IsInList("displaysuccess", strStyle) == true)
-                    Program.MainForm.StatusBarMessage = "读者记录保存成功";
-                return 1;
             }
             catch (Exception ex)
             {
@@ -6235,8 +6112,11 @@ MessageBoxDefaultButton.Button1);
         {
             _qrCodeLoaded = false;
 
-            ImageUtil.SetImage(this.pictureBox_qrCode, null);   // 2016/12/28
-            this.textBox_pqr.Text = "";
+            this.TryInvoke(() =>
+            {
+                ImageUtil.SetImage(this.pictureBox_qrCode, null);   // 2016/12/28
+                this.textBox_pqr.Text = "";
+            });
         }
 
         int _currentPageNo = 0;
@@ -6381,23 +6261,26 @@ MessageBoxDefaultButton.Button1);
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
-            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
-            string strJs = "";
-
+            this.TryInvoke(() =>
             {
-                HtmlDocument doc = this.webBrowser_borrowHistory.Document;
+                string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
+                string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+                string strJs = "";
 
-                if (doc == null)
                 {
-                    this.webBrowser_borrowHistory.Navigate("about:blank");
-                    doc = this.webBrowser_borrowHistory.Document;
-                }
-                doc = doc.OpenNew(true);
-            }
+                    HtmlDocument doc = this.webBrowser_borrowHistory.Document;
 
-            Global.WriteHtml(this.webBrowser_borrowHistory,
-                "<html><head>" + strLink + strJs + "</head><body>");
+                    if (doc == null)
+                    {
+                        this.webBrowser_borrowHistory.Navigate("about:blank");
+                        doc = this.webBrowser_borrowHistory.Document;
+                    }
+                    doc = doc.OpenNew(true);
+                }
+
+                Global.WriteHtml(this.webBrowser_borrowHistory,
+                    "<html><head>" + strLink + strJs + "</head><body>");
+            });
         }
 
         /// <summary>

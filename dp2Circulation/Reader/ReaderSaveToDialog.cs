@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using DigitalPlatform;
+
 namespace dp2Circulation
 {
     /// <summary>
@@ -47,11 +49,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.label_message.Text;
+                return this.TryGet(() =>
+                {
+                    return this.label_message.Text;
+                });
             }
             set
             {
-                this.label_message.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.label_message.Text = value;
+                });
             }
         }
 
@@ -62,25 +70,31 @@ namespace dp2Circulation
         {
             get
             {
-                // 2021/4/17
-                if (string.IsNullOrEmpty(this.comboBox_readerDbName.Text)
-                    && (string.IsNullOrEmpty(this.textBox_recordID.Text) || this.textBox_recordID.Text == "?"))
-                    return "";
+                return this.TryGet(() =>
+                {
+                    // 2021/4/17
+                    if (string.IsNullOrEmpty(this.comboBox_readerDbName.Text)
+                        && (string.IsNullOrEmpty(this.textBox_recordID.Text) || this.textBox_recordID.Text == "?"))
+                        return "";
 
-                return this.comboBox_readerDbName.Text + "/" + this.textBox_recordID.Text;
+                    return this.comboBox_readerDbName.Text + "/" + this.textBox_recordID.Text;
+                });
             }
             set
             {
-                int nRet = value.IndexOf("/");
-                if (nRet == -1)
+                this.TryInvoke(() =>
                 {
-                    this.comboBox_readerDbName.Text = value;
-                }
-                else
-                {
-                    this.comboBox_readerDbName.Text = value.Substring(0, nRet);
-                    this.textBox_recordID.Text = value.Substring(nRet + 1);
-                }
+                    int nRet = value.IndexOf("/");
+                    if (nRet == -1)
+                    {
+                        this.comboBox_readerDbName.Text = value;
+                    }
+                    else
+                    {
+                        this.comboBox_readerDbName.Text = value.Substring(0, nRet);
+                        this.textBox_recordID.Text = value.Substring(nRet + 1);
+                    }
+                });
             }
         }
 
@@ -91,11 +105,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_recordID.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_recordID.Text;
+                });
             }
             set
             {
-                this.textBox_recordID.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_recordID.Text = value;
+                });
             }
         }
 
@@ -106,11 +126,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_recordID.Enabled;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_recordID.Enabled;
+                });
             }
             set
             {
-                this.textBox_recordID.Enabled = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_recordID.Enabled = value;
+                });
             }
         }
 
@@ -132,7 +158,6 @@ namespace dp2Circulation
             {
                 this.comboBox_readerDbName.Items.Add(Program.MainForm.ReaderDbNames[i]);
             }
-
         }
 
         private void button_OK_Click(object sender, EventArgs e)

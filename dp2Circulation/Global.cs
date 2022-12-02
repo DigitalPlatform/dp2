@@ -25,6 +25,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
+using Jint.Parser.Ast;
 
 namespace dp2Circulation
 {
@@ -2854,34 +2855,37 @@ namespace dp2Circulation
         // 能处理异常的 Navigate
         internal static void Navigate(WebBrowser webBrowser, string urlString)
         {
-            int nRedoCount = 0;
-        REDO:
-            try
+            webBrowser.TryInvoke(() =>
             {
-                webBrowser.Navigate(urlString);
-            }
-            catch (System.Runtime.InteropServices.COMException ex)
-            {
-                /*
-System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (异常来自 HRESULT:0x800700AA)
-   在 System.Windows.Forms.UnsafeNativeMethods.IWebBrowser2.Navigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
-   在 System.Windows.Forms.WebBrowser.PerformNavigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
-   在 System.Windows.Forms.WebBrowser.Navigate(String urlString)
-   在 dp2Circulation.QuickChargingForm._setReaderRenderString(String strText) 位置 F:\cs4.0\dp2Circulation\Charging\QuickChargingForm.cs:行号 394
-                 * */
-                if ((uint)ex.ErrorCode == 0x800700AA)
+                int nRedoCount = 0;
+            REDO:
+                try
                 {
-                    nRedoCount++;
-                    if (nRedoCount < 5)
-                    {
-                        Application.DoEvents(); // 2015/8/13
-                        Thread.Sleep(200);
-                        goto REDO;
-                    }
+                    webBrowser.Navigate(urlString);
                 }
+                catch (System.Runtime.InteropServices.COMException ex)
+                {
+                    /*
+    System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (异常来自 HRESULT:0x800700AA)
+       在 System.Windows.Forms.UnsafeNativeMethods.IWebBrowser2.Navigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
+       在 System.Windows.Forms.WebBrowser.PerformNavigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
+       在 System.Windows.Forms.WebBrowser.Navigate(String urlString)
+       在 dp2Circulation.QuickChargingForm._setReaderRenderString(String strText) 位置 F:\cs4.0\dp2Circulation\Charging\QuickChargingForm.cs:行号 394
+                     * */
+                    if ((uint)ex.ErrorCode == 0x800700AA)
+                    {
+                        nRedoCount++;
+                        if (nRedoCount < 5)
+                        {
+                            Application.DoEvents(); // 2015/8/13
+                            Thread.Sleep(200);
+                            goto REDO;
+                        }
+                    }
 
-                throw ex;
-            }
+                    throw ex;   // TODO: 这里的 throw 谁来捕获?
+                }
+            });
         }
 
         // 有问题，不要用

@@ -913,7 +913,7 @@ namespace dp2Circulation
             input_query,
             bClearList);
                 },
-                default,
+                this.CancelToken,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
         }
@@ -9155,7 +9155,7 @@ TaskScheduler.Default);
             ERROR1:
                 ShowMessageBox(strError);
             },
-default,
+this.CancelToken,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
@@ -13028,7 +13028,7 @@ Keys keyData)
                         this.MessageBoxShow($"DoLogicSearch() 异常: {ExceptionUtil.GetDebugText(ex)}");
                     }
                 },
-    default,
+    this.CancelToken,
     TaskCreationOptions.LongRunning,
     TaskScheduler.Default);
         }

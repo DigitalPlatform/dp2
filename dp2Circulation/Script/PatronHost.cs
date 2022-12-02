@@ -5,6 +5,8 @@ using System.Text;
 using System.Xml;
 using System.Web;
 using System.IO;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace dp2Circulation
 {
@@ -148,6 +150,35 @@ namespace dp2Circulation
             return Path.Combine(Program.MainForm.DataDir, "~patron_statis");
         }
 
+        #region async Task support
+
+        // https://thomaslevesque.com/2015/11/11/explicitly-switch-to-the-ui-thread-in-an-async-method/
+        public SynchronizationContext UiContext { get; set; }
+
+        public CancellationToken CancellationToken { get; set; }
+
+        public virtual Task OnInitialAsync(object sender, StatisEventArgs e)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnBeginAsync(object sender, StatisEventArgs e)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnRecordAsync(object sender, StatisEventArgs e)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnEndAsync(object sender, StatisEventArgs e)
+        {
+            return Task.CompletedTask;
+        }
+
+        #endregion
+
         /// <summary>
         /// 初始化。在统计方案执行的第一阶段被调用
         /// </summary>
@@ -167,6 +198,7 @@ namespace dp2Circulation
         {
 
         }
+
 
         /// <summary>
         /// 处理一条记录。在统计方案执行中，第三阶段，针对每条记录被调用一次

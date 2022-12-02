@@ -104,11 +104,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_barcode.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_barcode.Text;
+                });
             }
             set
             {
-                this.textBox_barcode.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_barcode.Text = value;
+                });
             }
         }
 
@@ -560,11 +566,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_department.Text;
+                //return this.TryGet(() =>
+                //{
+                    return this.textBox_department.Text;
+                //});
             }
             set
             {
-                this.textBox_department.Text = value;
+                //this.TryInvoke(() =>
+                //{
+                    this.textBox_department.Text = value;
+                //});
             }
         }
 
@@ -935,64 +947,67 @@ namespace dp2Circulation
         /// </summary>
         public override void Clear()
         {
-            this.Initializing = true; // 防止因为清除而变色
-
-            try
+            this.TryInvoke(() =>
             {
-                this.Barcode = "";
+                this.Initializing = true; // 防止因为清除而变色
 
-                this.CardNumber = "";
+                try
+                {
+                    this.Barcode = "";
 
-                this.State = "";
+                    this.CardNumber = "";
 
-                this.Comment = "";
+                    this.State = "";
 
-                this.ReaderType = "";
+                    this.Comment = "";
 
-                this.CreateDate = "";
+                    this.ReaderType = "";
 
-                this.ExpireDate = "";
+                    this.CreateDate = "";
 
-                // 2007/6/15
-                this.HirePeriod = "";
-                this.HireExpireDate = "";
+                    this.ExpireDate = "";
 
-                this.Foregift = "";
+                    // 2007/6/15
+                    this.HirePeriod = "";
+                    this.HireExpireDate = "";
 
-                this.NameString = "";
+                    this.Foregift = "";
 
-                this.NamePinyin = "";
+                    this.NameString = "";
 
-                this.Gender = "";
+                    this.NamePinyin = "";
 
-                this.DateOfBirth = "";
+                    this.Gender = "";
 
-                this.IdCardNumber = "";
+                    this.DateOfBirth = "";
 
-                this.Department = "";
+                    this.IdCardNumber = "";
 
-                this.Post = "";
+                    this.Department = "";
 
-                this.Address = "";
+                    this.Post = "";
 
-                this.Tel = "";
+                    this.Address = "";
 
-                this.Email = "";
+                    this.Tel = "";
 
-                this.Rights = "";
+                    this.Email = "";
 
-                this.PersonalLibrary = "";
-                this.Access = "";
+                    this.Rights = "";
 
-                this.Friends = "";
-                this.RefID = "";
+                    this.PersonalLibrary = "";
+                    this.Access = "";
 
-                this.ResetColor();
-            }
-            finally
-            {
-                this.Initializing = false;
-            }
+                    this.Friends = "";
+                    this.RefID = "";
+
+                    this.ResetColor();
+                }
+                finally
+                {
+                    this.Initializing = false;
+                }
+            });
         }
 
 #if NO
@@ -2032,7 +2047,11 @@ namespace dp2Circulation
                 // SetReadOnly("librarian");
             }
             else */
-            SetReadOnly("editable:" + StringUtil.MakePathList(new List<string>(names)));
+
+            this.TryInvoke(() =>
+            {
+                SetReadOnly("editable:" + StringUtil.MakePathList(new List<string>(names)));
+            });
         }
 
         static bool IsAll(List<string> names)

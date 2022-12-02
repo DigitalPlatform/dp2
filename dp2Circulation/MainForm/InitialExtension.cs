@@ -5612,9 +5612,12 @@ out strError);
             }
             set
             {
-                this._focusLibraryCode = value;
-                string strName = string.IsNullOrEmpty(value) == true ? "[总馆]" : value;
-                this.toolStripDropDownButton_selectLibraryCode.Text = "选择分馆 " + strName;
+                this.TryInvoke(() =>
+                {
+                    this._focusLibraryCode = value;
+                    string strName = string.IsNullOrEmpty(value) == true ? "[总馆]" : value;
+                    this.toolStripDropDownButton_selectLibraryCode.Text = "选择分馆 " + strName;
+                });
             }
         }
 

@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.CommonControl;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,8 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace dp2Circulation.Reader
+using DigitalPlatform.CommonControl;
+
+namespace dp2Circulation
 {
+    /// <summary>
+    /// 重建人脸特征对话框
+    /// </summary>
     public partial class RebuildFaceFeatureDialog : Form
     {
         public RebuildFaceFeatureDialog()

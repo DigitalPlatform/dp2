@@ -248,7 +248,12 @@ namespace dp2Circulation
 
                 this.m_bChanged = value;
                 if (this.m_bChanged == false)
-                    this.ResetColor();
+                {
+                    this.TryInvoke(() =>
+                    {
+                        this.ResetColor();
+                    });
+                }
 
                 // 触发事件
                 if ((bOldValue != value || OptimizeTriggerContentChanged == false)
@@ -295,15 +300,18 @@ namespace dp2Circulation
                 return -1;
             }
 
-            this.Initializing = true;
-            try
+            this.TryInvoke(() =>
             {
-                this.DomToMember(strRecPath);
-            }
-            finally
-            {
-                this.Initializing = false;
-            }
+                this.Initializing = true;
+                try
+                {
+                    this.DomToMember(strRecPath);
+                }
+                finally
+                {
+                    this.Initializing = false;
+                }
+            });
 
             this.Changed = false;
             return 0;

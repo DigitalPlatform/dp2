@@ -13,7 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 
-namespace dp2Circulation.Reader
+namespace dp2Circulation
 {
     public partial class PropertyTableDialog : Form
     {

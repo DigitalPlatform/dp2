@@ -1,4 +1,4 @@
-﻿namespace dp2Circulation.Reader
+﻿namespace dp2Circulation
 {
     partial class RebuildFaceFeatureDialog
     {

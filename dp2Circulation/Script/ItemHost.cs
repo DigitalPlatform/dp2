@@ -6,6 +6,8 @@ using System.Xml;
 using System.Web;
 using System.IO;
 using System.Windows.Forms;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -72,6 +74,32 @@ namespace dp2Circulation
         {
             return Path.Combine(Program.MainForm.DataDir, "~item_statis");
         }
+
+        #region async Task support
+
+        public CancellationToken CancellationToken { get; set; }
+
+        public virtual Task OnInitialAsync(object sender, StatisEventArgs e)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnBeginAsync(object sender, StatisEventArgs e)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnRecordAsync(object sender, StatisEventArgs e)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnEndAsync(object sender, StatisEventArgs e)
+        {
+            return Task.CompletedTask;
+        }
+
+        #endregion
 
         /// <summary>
         /// 初始化。在统计方案执行的第一阶段被调用

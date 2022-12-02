@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace dp2Circulation.Reader
+namespace dp2Circulation
 {
     public partial class PropertyTableLineDialog : Form
     {

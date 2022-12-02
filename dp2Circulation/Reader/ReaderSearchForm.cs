@@ -9,6 +9,7 @@ using System.IO;
 using System.Xml;
 using System.Web;
 using System.Reflection;
+using System.Threading.Tasks;
 
 using ClosedXML.Excel;
 
@@ -29,9 +30,10 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
-using dp2Circulation.Reader;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.Operations;
+using System.Threading;
+using System.Runtime.CompilerServices;
+// using dp2Circulation.Reader;
+
 
 namespace dp2Circulation
 {
@@ -5668,16 +5670,16 @@ out strFingerprint);
         public Task QuickMarcQueryRecordsAsync()
         {
             return Task.Factory.StartNew(
-                () =>
+                async () =>
                 {
-                    _quickMarcQueryRecords();
+                    await _quickMarcQueryRecordsAsync();
                 },
 this.CancelToken,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
-        void _quickMarcQueryRecords()
+        async Task _quickMarcQueryRecordsAsync()
         {
             string strError = "";
             int nRet = 0;
@@ -5711,7 +5713,7 @@ TaskScheduler.Default);
             if (dialog_result != DialogResult.OK)
                 return;
 
-            this.m_strUsedMarcQueryFilename =dlg_filename;
+            this.m_strUsedMarcQueryFilename = dlg_filename;
 
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
                 out Assembly assembly,
@@ -5720,66 +5722,28 @@ TaskScheduler.Default);
             if (nRet == -1)
                 goto ERROR1;
 
-            {
-                host.MainForm = Program.MainForm;
-                host.UiForm = this;
-                host.RecordPath = "";
-                host.PatronDom = null;
-                host.Changed = false;
-                host.UiItem = null;
-
-                StatisEventArgs args = new StatisEventArgs();
-                this.TryInvoke(host.UseUiThread, () =>
-                {
-                    host.OnInitial(this, args);
-                });
-                if (args.Continue == ContinueType.SkipAll)
-                    return;
-                if (args.Continue == ContinueType.Error)
-                {
-                    strError = args.ParamString;
-                    goto ERROR1;
-                }
-            }
-
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg_filename + "</div>");
-
-            // LibraryChannel channel = this.GetChannel();
-
-            /*
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在针对读者记录执行 C# 脚本 ...");
-            stop.BeginLoop();
-            */
-            var looping = Looping(out LibraryChannel channel,
-                "正在针对读者记录执行 C# 脚本 ...",
-                "disableControl,halfstop");
-
-            // this.EnableControls(false);
-
             this.TryInvoke(() =>
             {
-                this.listView_records.Enabled = false;
+                host.UiContext = SynchronizationContext.Current;
             });
-            try
-            {
-                if (looping.Progress != null)
-                    looping.Progress.SetProgressRange(0, selected_items.Count);
 
-                host.CodeFileName = this.m_strUsedMarcQueryFilename;
+            //     await syncContext;
+
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(this.CancelToken))
+            {
+
                 {
+                    host.CancellationToken = cts.Token;
                     host.MainForm = Program.MainForm;
+                    host.UiForm = this;
                     host.RecordPath = "";
                     host.PatronDom = null;
                     host.Changed = false;
                     host.UiItem = null;
 
-                    StatisEventArgs args = new StatisEventArgs();
-                    this.TryInvoke(host.UseUiThread, () =>
-                    {
-                        host.OnBegin(this, args);
-                    });
+                    var args = await InvokeStageAsync(
+                        host,
+                        "initial");
                     if (args.Continue == ContinueType.SkipAll)
                         return;
                     if (args.Continue == ContinueType.Error)
@@ -5789,145 +5753,230 @@ TaskScheduler.Default);
                     }
                 }
 
-                List<ListViewItem> items = new List<ListViewItem>();
-                foreach (ListViewItem item in selected_items)
-                {
-                    string recpath = ListViewUtil.GetItemText(item, 0);
-                    if (string.IsNullOrEmpty(recpath) == true)
-                        continue;
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg_filename + "</div>");
 
-                    items.Add(item);
-                }
+                // LibraryChannel channel = this.GetChannel();
 
-                if (looping.Progress != null)
-                    looping.Progress.SetProgressRange(0, items.Count);
-
-                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
-                    looping.Progress,
-                    items,
-                    this.m_biblioTable);
-                loader.DbTypeCaption = this.DbTypeCaption;
-
-                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
-                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
-
-                int i = 0;
-                foreach (LoaderItem item in loader)
-                {
-                    // Application.DoEvents();	// 出让界面控制权
-
-                    if (looping.Stopped)
+                /*
+                stop.Style = StopStyle.EnableHalfStop;
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在针对读者记录执行 C# 脚本 ...");
+                stop.BeginLoop();
+                */
+                var looping = Looping(out LibraryChannel channel,
+                    "正在针对读者记录执行 C# 脚本 ...",
+                    "disableControl,halfstop",
+                    (s, e) =>
                     {
-                        strError = "用户中断";
-                        goto ERROR1;
+                        this.DoStop(s, e);
+                        cts.Cancel();
                     }
+                    );
 
-                    looping.Progress.SetProgressValue(i);
-
-                    BiblioInfo info = item.BiblioInfo;
-
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
-
-                    host.MainForm = Program.MainForm;
-                    host.RecordPath = info.RecPath;
-                    host.PatronDom = new XmlDocument();
-                    host.PatronDom.LoadXml(info.OldXml);
-                    host.Changed = false;
-                    this.TryInvoke(() =>
-                    {
-                        host.UiItem = item.ListViewItem;
-                    });
-
-                    StatisEventArgs args = new StatisEventArgs();
-                    this.TryInvoke(host.UseUiThread, () =>
-                    {
-                        host.OnRecord(this, args);
-                    });
-                    if (args.Continue == ContinueType.SkipAll)
-                        break;
-                    if (args.Continue == ContinueType.Error)
-                    {
-                        strError = args.ParamString;
-                        goto ERROR1;
-                    }
-
-                    if (host.Changed == true)
-                    {
-                        string strXml = host.PatronDom.OuterXml;
-                        if (info != null)
-                        {
-                            if (string.IsNullOrEmpty(info.NewXml) == true)
-                                this.m_nChangedCount++;
-                            info.NewXml = strXml;
-                        }
-
-                        this.TryInvoke(() =>
-                        {
-                            item.ListViewItem.BackColor = SystemColors.Info;
-                            item.ListViewItem.ForeColor = SystemColors.InfoText;
-                        });
-                    }
-
-                    // 显示为工作单形式
-                    i++;
-                }
-
-                {
-                    host.MainForm = Program.MainForm;
-                    host.RecordPath = "";
-                    host.PatronDom = null;
-                    host.Changed = false;
-                    host.UiItem = null;
-
-                    StatisEventArgs args = new StatisEventArgs();
-                    this.TryInvoke(host.UseUiThread, () =>
-                    {
-                        host.OnEnd(this, args);
-                    });
-                    if (args.Continue == ContinueType.Error)
-                    {
-                        strError = args.ParamString;
-                        goto ERROR1;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = "执行 C# 脚本的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
-                goto ERROR1;
-            }
-            finally
-            {
-                if (host != null)
-                    host.FreeResources();
+                // this.EnableControls(false);
 
                 this.TryInvoke(() =>
                 {
-                    this.listView_records.Enabled = true;
+                    this.listView_records.Enabled = false;
                 });
+                try
+                {
+                    if (looping.Progress != null)
+                        looping.Progress.SetProgressRange(0, selected_items.Count);
 
-                looping.Dispose();
-                /*
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
-                */
-                //EndLoop(looping);
+                    host.CodeFileName = this.m_strUsedMarcQueryFilename;
+                    {
+                        host.MainForm = Program.MainForm;
+                        host.RecordPath = "";
+                        host.PatronDom = null;
+                        host.Changed = false;
+                        host.UiItem = null;
+
+                        var args = await InvokeStageAsync(
+                            host,
+                            "begin");
+                        if (args.Continue == ContinueType.SkipAll)
+                            return;
+                        if (args.Continue == ContinueType.Error)
+                        {
+                            strError = args.ParamString;
+                            goto ERROR1;
+                        }
+                    }
+
+                    List<ListViewItem> items = new List<ListViewItem>();
+                    foreach (ListViewItem item in selected_items)
+                    {
+                        string recpath = ListViewUtil.GetItemText(item, 0);
+                        if (string.IsNullOrEmpty(recpath) == true)
+                            continue;
+
+                        items.Add(item);
+                    }
+
+                    if (looping.Progress != null)
+                        looping.Progress.SetProgressRange(0, items.Count);
+
+                    ListViewPatronLoader loader = new ListViewPatronLoader(channel,
+                        looping.Progress,
+                        items,
+                        this.m_biblioTable);
+                    loader.DbTypeCaption = this.DbTypeCaption;
+
+                    loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                    loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                    int i = 0;
+                    foreach (LoaderItem item in loader)
+                    {
+                        // Application.DoEvents();	// 出让界面控制权
+
+                        if (looping.Stopped)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        looping.Progress.SetProgressValue(i);
+
+                        BiblioInfo info = item.BiblioInfo;
+
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+
+                        host.MainForm = Program.MainForm;
+                        host.RecordPath = info.RecPath;
+                        host.PatronDom = new XmlDocument();
+                        host.PatronDom.LoadXml(info.OldXml);
+                        host.Changed = false;
+                        this.TryInvoke(() =>
+                        {
+                            host.UiItem = item.ListViewItem;
+                        });
+
+                        var args = await InvokeStageAsync(
+                            host,
+                            "record");
+                        if (args.Continue == ContinueType.SkipAll)
+                            break;
+                        if (args.Continue == ContinueType.Error)
+                        {
+                            strError = args.ParamString;
+                            goto ERROR1;
+                        }
+
+                        if (host.Changed == true)
+                        {
+                            string strXml = host.PatronDom.OuterXml;
+                            if (info != null)
+                            {
+                                if (string.IsNullOrEmpty(info.NewXml) == true)
+                                    this.m_nChangedCount++;
+                                info.NewXml = strXml;
+                            }
+
+                            this.TryInvoke(() =>
+                            {
+                                item.ListViewItem.BackColor = SystemColors.Info;
+                                item.ListViewItem.ForeColor = SystemColors.InfoText;
+                            });
+                        }
+
+                        // 显示为工作单形式
+                        i++;
+                    }
+
+                    {
+                        host.MainForm = Program.MainForm;
+                        host.RecordPath = "";
+                        host.PatronDom = null;
+                        host.Changed = false;
+                        host.UiItem = null;
+
+                        var args = await InvokeStageAsync(
+                            host,
+                            "end");
+                        if (args.Continue == ContinueType.Error)
+                        {
+                            strError = args.ParamString;
+                            goto ERROR1;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "执行 C# 脚本的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    goto ERROR1;
+                }
+                finally
+                {
+                    cts.Dispose();
+
+                    if (host != null)
+                        host.FreeResources();
+
+                    this.TryInvoke(() =>
+                    {
+                        this.listView_records.Enabled = true;
+                    });
+
+                    looping.Dispose();
+                    /*
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                    stop.HideProgress();
+                    stop.Style = StopStyle.None;
+                    */
+                    //EndLoop(looping);
 
 
-                //this.EnableControls(true);
+                    //this.EnableControls(true);
 
-                //this.ReturnChannel(channel);
+                    //this.ReturnChannel(channel);
 
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg_filename + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg_filename + "</div>");
+                }
             }
 
             DoViewComment(false);
             return;
         ERROR1:
             this.MessageBoxShow(strError);
+        }
+
+        async Task<StatisEventArgs> InvokeStageAsync(
+            PatronHost host,
+            string stage)
+        {
+            var args = new StatisEventArgs();
+            this.TryInvoke(host.UseUiThread, () =>
+            {
+                if (stage == "record")
+                    host.OnRecord(this, args);
+                else if (stage == "initial")
+                    host.OnInitial(this, args);
+                else if (stage == "begin")
+                    host.OnBegin(this, args);
+                else if (stage == "end")
+                    host.OnEnd(this, args);
+                else
+                    throw new ArgumentException($"意外的 {nameof(stage)} 参数值 '{stage}'");
+            });
+            if (args.Continue != ContinueType.Yes)
+                return args;
+
+            if (stage == "record")
+                await host.OnRecordAsync(this, args);
+            else if (stage == "initial")
+                await host.OnInitialAsync(this, args);
+            else if (stage == "begin")
+                await host.OnBeginAsync(this, args);
+            else if (stage == "end")
+                await host.OnEndAsync(this, args);
+            else
+                throw new ArgumentException($"意外的 {nameof(stage)} 参数值 '{stage}'");
+
+            return args;
         }
 
         // 丢弃选定的修改
@@ -8798,6 +8847,32 @@ out strError);
                 if (this.Prompt != null)
                     m_loader.Prompt -= m_loader_Prompt;
             }
+        }
+    }
+
+    // https://thomaslevesque.com/2015/11/11/explicitly-switch-to-the-ui-thread-in-an-async-method/
+    public struct SynchronizationContextAwaiter : INotifyCompletion
+    {
+        private static readonly SendOrPostCallback _postCallback = state => ((Action)state)();
+
+        private readonly SynchronizationContext _context;
+        public SynchronizationContextAwaiter(SynchronizationContext context)
+        {
+            _context = context;
+        }
+
+        public bool IsCompleted => _context == SynchronizationContext.Current;
+
+        public void OnCompleted(Action continuation) => _context.Post(_postCallback, continuation);
+
+        public void GetResult() { }
+    }
+
+    public static class SynchronizationContextExtension
+    {
+        public static SynchronizationContextAwaiter GetAwaiter(this SynchronizationContext context)
+        {
+            return new SynchronizationContextAwaiter(context);
         }
     }
 }
