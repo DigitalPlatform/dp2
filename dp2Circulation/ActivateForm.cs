@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -34,8 +35,6 @@ namespace dp2Circulation
         const int WM_DEVOLVE = API.WM_USER + 204;
         const int WM_ACTIVATE_TARGET = API.WM_USER + 205;
 
-
-
         WebExternalHost m_webExternalHost_new = new WebExternalHost();
         WebExternalHost m_webExternalHost_old = new WebExternalHost();
 
@@ -55,17 +54,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-#if NO
-            MainForm.AppInfo.LoadMdiChildFormStates(this,
-    "mdi_form_state");
-            this.Channel.Url = Program.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
 
             this.readerEditControl_old.SetReadOnly("librarian");
             this.readerEditControl_old.GetValueTable += new GetValueTableEventHandler(readerEditControl1_GetValueTable);
@@ -74,7 +62,6 @@ namespace dp2Circulation
             this.readerEditControl_new.SetReadOnly("librarian");
             this.readerEditControl_new.GetValueTable += new GetValueTableEventHandler(readerEditControl1_GetValueTable);
             this.readerEditControl_new.Initializing = false;   // 如果没有此句，一开始在空模板上修改就不会变色
-
 
             // webbrowser
             this.m_webExternalHost_new.Initial(// Program.MainForm, 
@@ -102,18 +89,6 @@ namespace dp2Circulation
 
         private void ActivateForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if NO
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
-            }
-#endif
-
             if (this.readerEditControl_old.Changed == true)
             {
                 // 警告尚未保存
@@ -163,12 +138,10 @@ namespace dp2Circulation
 
         void readerEditControl1_GetValueTable(object sender, GetValueTableEventArgs e)
         {
-            string strError = "";
-            string[] values = null;
             int nRet = MainForm.GetValueTable(e.TableName,
                 e.DbName,
-                out values,
-                out strError);
+                out string[] values,
+                out string strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             e.values = values;
@@ -183,7 +156,6 @@ namespace dp2Circulation
         private void textBox_oldBarcode_Leave(object sender, EventArgs e)
         {
             Program.MainForm.LeavePatronIdEdit();
-
         }
 
         private void textBox_newBarcode_Enter(object sender, EventArgs e)
@@ -198,6 +170,43 @@ namespace dp2Circulation
             Program.MainForm.LeavePatronIdEdit();
         }
 
+        public string OldBarcode
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.textBox_oldBarcode.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.textBox_oldBarcode.Text = value;
+                });
+            }
+        }
+
+        public string NewBarcode
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.textBox_newBarcode.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.textBox_newBarcode.Text = value;
+                });
+            }
+        }
+
+        // (已经废止)
         /// <summary>
         /// 装载旧记录
         /// </summary>
@@ -205,18 +214,27 @@ namespace dp2Circulation
         /// <returns>-1: 出错; 0: 成功</returns>
         public int LoadOldRecord(string strReaderBarcode)
         {
-            this.textBox_oldBarcode.Text = strReaderBarcode;
+            /*
+            this.OldBarcode = strReaderBarcode;
 
             int nRet = this.LoadRecord(ref strReaderBarcode,
                 this.readerEditControl_old,
                 this.m_webExternalHost_old,
                 // this.webBrowser_oldReaderInfo,
                 this.webBrowser_oldXml);
-            if (this.textBox_oldBarcode.Text != strReaderBarcode)
-                this.textBox_oldBarcode.Text = strReaderBarcode;
+            if (this.OldBarcode != strReaderBarcode)
+                this.OldBarcode = strReaderBarcode;
             return nRet;
+            */
+            var task = LoadOldRecordAsync(strReaderBarcode);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
         }
 
+        // (已经废止)
         /// <summary>
         /// 装载新记录
         /// </summary>
@@ -224,22 +242,30 @@ namespace dp2Circulation
         /// <returns>-1: 出错; 0: 成功</returns>
         public int LoadNewRecord(string strReaderBarcode)
         {
-            this.textBox_newBarcode.Text = strReaderBarcode;
+            /*
+            this.NewBarcode = strReaderBarcode;
 
             int nRet = this.LoadRecord(ref strReaderBarcode,
                 this.readerEditControl_new,
                 this.m_webExternalHost_new,
                 // this.webBrowser_newReaderInfo,
                 this.webBrowser_newXml);
-            if (this.textBox_newBarcode.Text != strReaderBarcode)
-                this.textBox_newBarcode.Text = strReaderBarcode;
+            if (this.NewBarcode != strReaderBarcode)
+                this.NewBarcode = strReaderBarcode;
 
             return nRet;
+            */
+            var task = LoadNewRecordAsync(strReaderBarcode);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+            return task.Result;
         }
 
         private void button_loadOldUserInfo_Click(object sender, EventArgs e)
         {
-            if (this.textBox_oldBarcode.Text == "")
+            if (string.IsNullOrEmpty(this.OldBarcode))
             {
                 MessageBox.Show(this, "尚未指定旧读者证的证条码号");
                 return;
@@ -255,7 +281,7 @@ namespace dp2Circulation
 
         private void button_loadNewUserInfo_Click(object sender, EventArgs e)
         {
-            if (this.textBox_newBarcode.Text == "")
+            if (string.IsNullOrEmpty(this.NewBarcode))
             {
                 MessageBox.Show(this, "尚未指定新读者证的证条码号");
                 return;
@@ -282,14 +308,17 @@ namespace dp2Circulation
                         this.commander,
                         m.Msg) == true)
                     {
-                        string strReaderBarcode = this.textBox_oldBarcode.Text;
+                        _ = LoadOldRecordAsync(this.OldBarcode);
+                        /*
+                        string strReaderBarcode = this.OldBarcode;
                         this.LoadRecord(ref strReaderBarcode,
                             this.readerEditControl_old,
                             this.m_webExternalHost_old,
                             // this.webBrowser_oldReaderInfo,
                             this.webBrowser_oldXml);
-                        if (this.textBox_oldBarcode.Text != strReaderBarcode)
-                            this.textBox_oldBarcode.Text = strReaderBarcode;
+                        if (this.OldBarcode != strReaderBarcode)
+                            this.OldBarcode = strReaderBarcode;
+                        */
                     }
                     return;
                 case WM_LOAD_NEW_USERINFO:
@@ -297,14 +326,17 @@ namespace dp2Circulation
                         this.commander,
                         m.Msg) == true)
                     {
-                        string strReaderBarcode = this.textBox_newBarcode.Text;
+                        _ = LoadNewRecordAsync(this.NewBarcode);
+                        /*
+                        string strReaderBarcode = this.NewBarcode;
                         this.LoadRecord(ref strReaderBarcode,
                             this.readerEditControl_new,
                             this.m_webExternalHost_new,
                             // this.webBrowser_newReaderInfo,
                             this.webBrowser_newXml);
-                        if (this.textBox_newBarcode.Text != strReaderBarcode)
-                            this.textBox_newBarcode.Text = strReaderBarcode;
+                        if (this.NewBarcode != strReaderBarcode)
+                            this.NewBarcode = strReaderBarcode;
+                        */
                     }
                     return;
                 case WM_SAVE_OLD_RECORD:
@@ -312,8 +344,7 @@ namespace dp2Circulation
                         this.commander,
                         m.Msg) == true)
                     {
-
-                        this.SaveOldRecord();
+                        _ = this.SaveOldRecordAsync();
                     }
                     return;
                 case WM_SAVE_NEW_RECORD:
@@ -321,8 +352,7 @@ namespace dp2Circulation
                         this.commander,
                         m.Msg) == true)
                     {
-
-                        this.SaveNewRecord();
+                        _ = this.SaveNewRecordAsync();
                     }
                     return;
                 case WM_DEVOLVE:
@@ -330,8 +360,7 @@ namespace dp2Circulation
                         this.commander,
                         m.Msg) == true)
                     {
-
-                        this.Devolve();
+                        _ = this.DevolveAsync();
                     }
                     return;
                 case WM_ACTIVATE_TARGET:
@@ -339,26 +368,73 @@ namespace dp2Circulation
                         this.commander,
                         m.Msg) == true)
                     {
-
-                        this.ActivateTarget();
+                        _ = this.ActivateTargetAsync();
                     }
                     return;
             }
             base.DefWndProc(ref m);
         }
 
+        // 调用后 this.OldBarcode 可能被修改
+        public async Task<int> LoadOldRecordAsync(string strReaderBarcode)
+        {
+            var result = await LoadRecordAsync(strReaderBarcode,
+                this.readerEditControl_old,
+                this.m_webExternalHost_old,
+                this.webBrowser_oldXml);
+            if (this.OldBarcode != result.Barcode)
+                this.OldBarcode = result.Barcode;
+            return result.Value;
+        }
 
-        // 根据读者证条码号，装入读者记录
+        // 调用后 this.NewBarcode 可能被修改
+        public async Task<int> LoadNewRecordAsync(string strReaderBarcode)
+        {
+            var result = await LoadRecordAsync(strReaderBarcode,
+                this.readerEditControl_new,
+                this.m_webExternalHost_new,
+                this.webBrowser_newXml);
+            if (this.NewBarcode != result.Barcode)
+                this.NewBarcode = result.Barcode;
+            return result.Value;
+        }
+
+        Task<LoadRecordResult> LoadRecordAsync(
+            string strBarcode,
+            ReaderEditControl edit,
+            WebExternalHost external_html,
+            WebBrowser webbXml)
+        {
+            return Task.Factory.StartNew(
+                () =>
+                {
+                    return _loadRecord(strBarcode,
+            edit,
+            external_html,
+            webbXml);
+                },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        class LoadRecordResult : NormalResult
+        {
+            public string Barcode { get; set; } // [out]
+        }
+
+        // 根据读者证条码号，装入读者记录。注意 result.Barcode 中返回的可能是修改后的证条码号(记录路径)内容
         // parameters:
         //      edit    读者编辑控件。可以==null
         //      webbHtml    用于显示HTML的WebBrowser控件。可以==null
         //      webbXml   用于显示XML的WebBrowser控件。可以==null
         // return:
-        //      0   cancelled
-        internal int LoadRecord(ref string strBarcode,
+        //      -1  出错
+        //      0   放弃装入
+        //      1   成功
+        LoadRecordResult _loadRecord(string strBarcode,
             ReaderEditControl edit,
             WebExternalHost external_html,
-            // WebBrowser webbHtml,
             WebBrowser webbXml)
         {
             string strError = "";
@@ -368,39 +444,30 @@ namespace dp2Circulation
                 && edit.Changed == true)
             {
                 // 警告尚未保存
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = this.TryGet(() =>
+                {
+                    return MessageBox.Show(this,
 "当前有信息被修改后尚未保存。若此时装载新内容，现有未保存信息将丢失。\r\n\r\n确实要根据证条码号重新装载内容? ",
 "ActivateForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
+                });
                 if (result != DialogResult.Yes)
-                    return 0;   // cancelled
+                    return new LoadRecordResult
+                    {
+                        Value = 0,
+                        Barcode = strBarcode
+                    };   // cancelled
             }
 
-            /*
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在初始化浏览器组件 ...");
-            _stop.BeginLoop();
-
-            this.Update();
-            Program.MainForm.Update();
-
-            EnableControls(false);
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在初始化浏览器组件 ...",
                 "disableControl");
 
             if (edit != null)
                 edit.Clear();
-#if NO
-            if (webbHtml != null)
-            {
-                Global.ClearHtmlPage(webbHtml,
-                    Program.MainForm.DataDir);
-            }
-#endif
+
             if (external_html != null)
             {
                 external_html.ClearHtmlPage();
@@ -440,32 +507,45 @@ MessageBoxDefaultButton.Button2);
                         strError = "条码 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
                         goto ERROR1;    // 当出错处理
                     }
-                    SelectPatronDialog dlg = new SelectPatronDialog();
 
-                    dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
-                    nRet = dlg.Initial(
-                        // Program.MainForm,
-                        StringUtil.SplitList(strRecPath),
-                        "请选择一个读者记录",
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-                    // TODO: 保存窗口内的尺寸状态
-                    Program.MainForm.AppInfo.LinkFormState(dlg, "ActivateForm_SelectPatronDialog_state");
-                    dlg.ShowDialog(this);
-                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
-                    if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                    var ret = this.TryGet(() =>
                     {
-                        strError = "放弃选择";
-                        return 0;
-                    }
+                        SelectPatronDialog dlg = new SelectPatronDialog();
 
-                    // strBarcode = dlg.SelectedBarcode;
-                    strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16
+                        dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
+                        nRet = dlg.Initial(
+                            // Program.MainForm,
+                            StringUtil.SplitList(strRecPath),
+                            "请选择一个读者记录",
+                            out strError);
+                        if (nRet == -1)
+                            return -1;  // goto ERROR1;
+                        // TODO: 保存窗口内的尺寸状态
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "ActivateForm_SelectPatronDialog_state");
+                        dlg.ShowDialog(this);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-                    nRedoCount++;
-                    goto REDO;
+                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                        {
+                            strError = "放弃选择";
+                            return 0;
+                        }
+
+                        // strBarcode = dlg.SelectedBarcode;
+                        strBarcode = "@path:" + dlg.SelectedRecPath;   // 2015/11/16
+                        nRedoCount++;
+                        return 1;   // goto REDO;
+                    });
+                    if (ret == -1)
+                        goto ERROR1;
+                    if (ret == 0)
+                        return new LoadRecordResult
+                        {
+                            Value = 0,
+                            Barcode = strBarcode
+                        };
+                    if (ret == 1)
+                        goto REDO;
                 }
 
                 if (results == null || results.Length < 2)
@@ -491,49 +571,34 @@ MessageBoxDefaultButton.Button2);
 
                 if (webbXml != null)
                 {
-                    /*
-                    SetXmlToWebbrowser(webbXml,
-                        strXml);
-                     * */
                     Global.SetXmlToWebbrowser(webbXml,
                         Program.MainForm.DataDir,
                         "activateform_xml" + Guid.NewGuid().ToString(),
                         strXml);
                 }
 
-                // this.m_strSetAction = "change";
-
-#if NO
-                if (webbHtml != null)
-                {
-                    Global.SetHtmlString(webbHtml,
-                            strHtml,
-                            Program.MainForm.DataDir,
-                            "activateform_html");
-                }
-#endif
-
                 if (external_html != null)
                     external_html.SetHtmlString(
                         strHtml,
                         "activateform_html" + Guid.NewGuid().ToString());
+                return new LoadRecordResult
+                {
+                    Value = 1,
+                    Barcode = strBarcode
+                };
             }
             finally
             {
                 looping.Dispose();
-                /*
-                EnableControls(true);
-
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                */
             }
-
-            return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
-            return -1;
+            this.MessageBoxShow(strError);
+            return new LoadRecordResult
+            {
+                Value = -1,
+                ErrorInfo = strError,
+                Barcode = strBarcode
+            };
         }
 
         public override void UpdateEnable(bool bEnable)
@@ -569,35 +634,21 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 转移并激活目标证
-        void ActivateTarget()
+        async Task ActivateTargetAsync()
         {
             string strError = "";
             int nRet = 0;
 
             // 把旧证的借阅信息转入新证
-            nRet = DevolveReaderInfo(this.textBox_oldBarcode.Text,
-                this.textBox_newBarcode.Text,
+            nRet = DevolveReaderInfo(this.OldBarcode,
+                this.NewBarcode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             // 刷新
-            {
-                string strReaderBarcode = this.textBox_oldBarcode.Text;
-                this.LoadRecord(ref strReaderBarcode,
-                    this.readerEditControl_old,
-                    this.m_webExternalHost_old,
-                    // this.webBrowser_oldReaderInfo,
-                    this.webBrowser_oldXml);
-            }
-            {
-                string strReaderBarcode = this.textBox_newBarcode.Text;
-                this.LoadRecord(ref strReaderBarcode,
-                    this.readerEditControl_new,
-                    this.m_webExternalHost_new,
-                    // this.webBrowser_newReaderInfo,
-                    this.webBrowser_newXml);
-            }
+            await this.LoadOldRecordAsync(this.OldBarcode);
+            await this.LoadNewRecordAsync(this.NewBarcode);
 
             bool bZhuxiao = false;
 
@@ -610,28 +661,26 @@ MessageBoxDefaultButton.Button2);
                 //      -1  error
                 //      0   成功
                 //      1   服务器端记录发生改变，未保存。注意重新保存记录
-                nRet = SaveReaderInfo(this.readerEditControl_old,
-                    out strError);
-                if (nRet == -1)
+                var result = await SaveReaderInfoAsync(this.readerEditControl_old);
+                if (result.Value == -1)
                 {
-                    strError = strError + "\r\n\r\n目标证没有来得及激活。";
+                    strError = result.ErrorInfo + "\r\n\r\n目标证没有来得及激活。";
                     goto ERROR1;
                 }
-                if (nRet == 1)
+                if (result.Value == 1)
                 {
                     // 发现服务器端记录发生改变，记录因此未保存。
                     // 建议为左右两个记录各增加一个保存按钮。单独可以保存。
-                    MessageBox.Show(this, "源证信息修改后尚未保存，请按保存按钮保存之。");
+                    this.MessageBoxShow("源证信息修改后尚未保存，请按保存按钮保存之。");
                 }
                 else
                 {
                     bZhuxiao = true;
                     // 刷新
                     string strTempReaderBarcode = this.readerEditControl_old.Barcode;
-                    this.LoadRecord(ref strTempReaderBarcode,
-                        null,
+                    var ret = await this.LoadRecordAsync(strTempReaderBarcode,
+                        null,   // 不刷新 reader edit control
                         this.m_webExternalHost_old,
-                        // this.webBrowser_oldReaderInfo,
                         this.webBrowser_oldXml);
                 }
             }
@@ -644,33 +693,42 @@ MessageBoxDefaultButton.Button2);
                 //      -1  error
                 //      0   成功
                 //      1   服务器端记录发生改变，未保存。注意重新保存记录
-                nRet = SaveReaderInfo(this.readerEditControl_new,
-                    out strError);
-                if (nRet == -1)
+                var result = await SaveReaderInfoAsync(this.readerEditControl_new);
+                if (result.Value == -1)
                 {
                     if (bZhuxiao == true)
-                        strError = strError + "\r\n\r\n源证已经注销。";
+                        strError = result.ErrorInfo + "\r\n\r\n源证已经注销。";
                     goto ERROR1;
                 }
-                if (nRet == 1)
+                if (result.Value == 1)
                 {
-                    MessageBox.Show(this, "目标证信息修改后尚未保存，请按保存按钮保存之。");
+                    this.MessageBoxShow("目标证信息修改后尚未保存，请按保存按钮保存之。");
                 }
                 else
                 {
                     string strTempReaderBarcode = this.readerEditControl_new.Barcode;
-                    this.LoadRecord(ref strTempReaderBarcode,
-                        null,
+                    var ret = this.LoadRecordAsync(strTempReaderBarcode,
+                        null,   // 不刷新 reader edit control
                         this.m_webExternalHost_new,
-                        // this.webBrowser_newReaderInfo,
                         this.webBrowser_newXml);
                 }
             }
 
-            MessageBox.Show(this, "转移并激活目标证操作完成");
+            this.MessageBoxShow("转移并激活目标证操作完成");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
+        }
+
+        public Task<NormalResult> SaveReaderInfoAsync(ReaderEditControl edit)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                return _saveReaderInfo(edit);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
         }
 
         // 保存
@@ -678,36 +736,34 @@ MessageBoxDefaultButton.Button2);
         //      -1  error
         //      0   成功
         //      1   服务器端记录发生改变，未保存。注意重新保存记录
-        int SaveReaderInfo(ReaderEditControl edit,
-            out string strError)
+        NormalResult _saveReaderInfo(ReaderEditControl edit)
         {
-            strError = "";
+            string strError = "";
 
             if (edit.Barcode == "")
             {
                 strError = "尚未输入证条码号";
-                return -1;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
             }
 
-            /*
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在保存读者记录 " + edit.Barcode + " ...");
-            _stop.BeginLoop();
-
-            EnableControls(false);
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在保存读者记录 " + edit.Barcode + " ...",
                 "disableControl");
-
             try
             {
-                string strNewXml = "";
                 int nRet = edit.GetData(
-                    out strNewXml,
+                    out string strNewXml,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
 
                 ErrorCodeValue kernel_errorcode;
 
@@ -735,19 +791,23 @@ MessageBoxDefaultButton.Button2);
 
                     if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
                     {
-                        CompareReaderForm dlg = new CompareReaderForm();
-                        dlg.Initial(
-                            //Program.MainForm,
-                            edit.RecPath,
-                            strExistingXml,
-                            baNewTimestamp,
-                            strNewXml,
-                            edit.Timestamp,
-                            "数据库中的记录在编辑期间发生了改变。请仔细核对，并重新修改窗口中的未保存记录，按确定按钮后可重试保存。");
+                        CompareReaderForm dlg = null;
+                        var dialog_result = this.TryGet(() =>
+                        {
+                            dlg = new CompareReaderForm();
+                            dlg.Initial(
+                                edit.RecPath,
+                                strExistingXml,
+                                baNewTimestamp,
+                                strNewXml,
+                                edit.Timestamp,
+                                "数据库中的记录在编辑期间发生了改变。请仔细核对，并重新修改窗口中的未保存记录，按确定按钮后可重试保存。");
 
-                        dlg.StartPosition = FormStartPosition.CenterScreen;
-                        dlg.ShowDialog(this);
-                        if (dlg.DialogResult == DialogResult.OK)
+                            dlg.StartPosition = FormStartPosition.CenterScreen;
+                            return dlg.ShowDialog(this);
+                        });
+
+                        if (dialog_result == DialogResult.OK)
                         {
                             nRet = edit.SetData(dlg.UnsavedXml,
                                 dlg.RecPath,
@@ -755,31 +815,37 @@ MessageBoxDefaultButton.Button2);
                                 out strError);
                             if (nRet == -1)
                             {
-                                return -1;
+                                return new NormalResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = strError
+                                };
                             }
                             strError = "请注意重新保存记录";
-                            return 1;
+                            return new NormalResult
+                            {
+                                Value = 1,
+                                ErrorInfo = strError
+                            };
                         }
                     }
 
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
-
-                /*
-                this.Timestamp = baNewTimestamp;
-                this.OldRecord = strSavedXml;
-                this.RecPath = strSavedPath;
-                 */
 
                 if (lRet == 1)
                 {
                     // 部分字段被拒绝
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                     if (channel.ErrorCode == ErrorCode.PartialDenied)
                     {
                         // 提醒重新装载?
-                        MessageBox.Show(this, "请重新装载记录, 检查哪些字段内容修改被拒绝。");
+                        this.MessageBoxShow("请重新装载记录, 检查哪些字段内容修改被拒绝。");
                     }
                 }
                 else
@@ -790,47 +856,38 @@ MessageBoxDefaultButton.Button2);
                         baNewTimestamp,
                         out strError);
                     if (nRet == -1)
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                 }
 
 
                 strError = "保存成功";
-                return 0;
+                return new NormalResult
+                {
+                    Value = 0,
+                    ErrorInfo = strError
+                };
             }
             finally
             {
                 looping.Dispose();
-                /*
-                EnableControls(true);
-
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                */
             }
         }
 
 
-        int DevolveReaderInfo(string strSourceReaderBarcode,
+        int DevolveReaderInfo(
+            string strSourceReaderBarcode,
             string strTargetReaderBarcode,
             out string strError)
         {
             strError = "";
 
-            /*
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在转移读者借阅信息 ...");
-            _stop.BeginLoop();
-
-            this.Update();
-            Program.MainForm.Update();
-
-            this.EnableControls(false);
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在转移读者借阅信息 ...",
                 "disableControl");
-
             try
             {
                 long lRet = channel.DevolveReaderInfo(
@@ -846,13 +903,6 @@ MessageBoxDefaultButton.Button2);
             finally
             {
                 looping.Dispose();
-                /*
-                this.EnableControls(true);
-
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                */
             }
         }
 
@@ -870,36 +920,42 @@ MessageBoxDefaultButton.Button2);
             this.commander.AddMessage(WM_DEVOLVE);
         }
 
-        void Devolve()
+        async Task DevolveAsync()
         {
             string strError = "";
             int nRet = 0;
 
             // 把源证的借阅信息转入目标证
-            nRet = DevolveReaderInfo(this.textBox_oldBarcode.Text,
-                this.textBox_newBarcode.Text,
+            nRet = DevolveReaderInfo(this.OldBarcode,
+                this.NewBarcode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             // 刷新
-            string strReaderBarcode = this.textBox_oldBarcode.Text;
+            await LoadOldRecordAsync(this.OldBarcode);
+            /*
+            string strReaderBarcode = this.OldBarcode;
             this.LoadRecord(ref strReaderBarcode,
                 this.readerEditControl_old,
                 this.m_webExternalHost_old,
                 // this.webBrowser_oldReaderInfo,
                 this.webBrowser_oldXml);
-            strReaderBarcode = this.textBox_newBarcode.Text;
+            */
+            await LoadNewRecordAsync(this.NewBarcode);
+            /*
+            strReaderBarcode = this.NewBarcode;
             this.LoadRecord(ref strReaderBarcode,
                 this.readerEditControl_new,
                 this.m_webExternalHost_new,
                 // this.webBrowser_newReaderInfo,
                 this.webBrowser_newXml);
+            */
 
-            MessageBox.Show(this, "转移完成");
+            this.MessageBoxShow( "转移完成");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow( strError);
         }
 
 #if NO
@@ -918,55 +974,49 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
-        private void button_saveOld_Click(object sender, EventArgs e)
+        private async void button_saveOld_Click(object sender, EventArgs e)
         {
+            await SaveOldRecordAsync();
         }
 
-        void SaveOldRecord()
+        async Task SaveOldRecordAsync()
         {
-            string strError = "";
-            int nRet = 0;
-
-            nRet = SaveReaderInfo(this.readerEditControl_old,
-    out strError);
-            if (nRet == -1)
+            var result = await SaveReaderInfoAsync(this.readerEditControl_old);
+            if (result.Value == -1)
                 goto ERROR1;
-            if (nRet == 1)
+            if (result.Value == 1)
             {
                 // 发现服务器端记录发生改变，记录因此未保存。
                 goto ERROR1;
             }
 
-            MessageBox.Show(this, "保存成功");
+            this.MessageBoxShow("保存成功");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(result.ErrorInfo);
             return;
         }
 
-        private void button_saveNew_Click(object sender, EventArgs e)
+        private async void button_saveNew_Click(object sender, EventArgs e)
         {
+            await SaveNewRecordAsync();
         }
 
-        void SaveNewRecord()
+        async Task SaveNewRecordAsync()
         {
-            string strError = "";
-            int nRet = 0;
-
-            nRet = SaveReaderInfo(this.readerEditControl_new,
-                out strError);
-            if (nRet == -1)
+            var result = await SaveReaderInfoAsync(this.readerEditControl_new);
+            if (result.Value == -1)
                 goto ERROR1;
-            if (nRet == 1)
+            if (result.Value == 1)
             {
                 // 发现服务器端记录发生改变，记录因此未保存。
                 goto ERROR1;
             }
 
-            MessageBox.Show(this, "保存成功");
+            this.MessageBoxShow("保存成功");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(result.ErrorInfo);
             return;
         }
 
@@ -1048,7 +1098,7 @@ MessageBoxDefaultButton.Button2);
 
                 if (String.IsNullOrEmpty(strReaderBarcode) == false)
                 {
-                    this.textBox_oldBarcode.Text = strReaderBarcode;
+                    this.OldBarcode = strReaderBarcode;
                     this.button_loadOldUserInfo_Click(this, null);
                 }
             }
@@ -1060,7 +1110,7 @@ MessageBoxDefaultButton.Button2);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         private void panel_new_DragEnter(object sender, DragEventArgs e)
@@ -1071,7 +1121,6 @@ MessageBoxDefaultButton.Button2);
             }
             else
                 e.Effect = DragDropEffects.None;
-
         }
 
         private void panel_new_DragDrop(object sender, DragEventArgs e)
@@ -1115,7 +1164,7 @@ MessageBoxDefaultButton.Button2);
 
                 if (String.IsNullOrEmpty(strReaderBarcode) == false)
                 {
-                    this.textBox_newBarcode.Text = strReaderBarcode;
+                    this.NewBarcode = strReaderBarcode;
                     this.button_loadNewUserInfo_Click(this, null);
                 }
             }
@@ -1127,7 +1176,7 @@ MessageBoxDefaultButton.Button2);
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow( strError);
         }
 
         private void toolStripButton_old_save_Click(object sender, EventArgs e)
@@ -1179,6 +1228,5 @@ MessageBoxDefaultButton.Button2);
         {
             e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
-
     }
 }

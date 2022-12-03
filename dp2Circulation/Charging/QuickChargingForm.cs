@@ -3801,38 +3801,37 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 打开到 读者窗
-        void menuItem_loadToReaderInfoForm_Click(object sender, EventArgs e)
+        async void menuItem_loadToReaderInfoForm_Click(object sender, EventArgs e)
         {
-            LoadToPatronTypeForm("readerinfo_form");
+            await LoadToPatronTypeForm("readerinfo_form");
         }
 
         // 打开到 交费窗
-        void menuItem_loadToAmerceForm_Click(object sender, EventArgs e)
+        async void menuItem_loadToAmerceForm_Click(object sender, EventArgs e)
         {
-            LoadToPatronTypeForm("amerce_form");
-
+            await LoadToPatronTypeForm("amerce_form");
         }
 
         // 打开到 激活窗 (源)
-        void menuItem_loadToActivateForm_old_Click(object sender, EventArgs e)
+        async void menuItem_loadToActivateForm_old_Click(object sender, EventArgs e)
         {
-            LoadToPatronTypeForm("activate_form_old");
+            await LoadToPatronTypeForm("activate_form_old");
         }
 
         // 打开到 激活窗 (目标)
-        void menuItem_loadToActivateForm_new_Click(object sender, EventArgs e)
+        async void menuItem_loadToActivateForm_new_Click(object sender, EventArgs e)
         {
-            LoadToPatronTypeForm("activate_form_new");
+            await LoadToPatronTypeForm("activate_form_new");
         }
 
         // 打开到 停借窗
-        void menuItem_loadToReaderManageForm_Click(object sender, EventArgs e)
+        async void menuItem_loadToReaderManageForm_Click(object sender, EventArgs e)
         {
-            LoadToPatronTypeForm("readermanage_form");
+            await LoadToPatronTypeForm("readermanage_form");
         }
 
         // 装入读者相关类型的窗口
-        void LoadToPatronTypeForm(string strType)
+        async Task LoadToPatronTypeForm(string strType)
         {
             string strError = "";
             if (this.dpTable_tasks.SelectedRows.Count == 0)
@@ -3858,7 +3857,7 @@ MessageBoxDefaultButton.Button2);
                 ReaderInfoForm form = Program.MainForm.EnsureReaderInfoForm();
                 Global.Activate(form);
 
-                form.LoadRecord(selected_task.ReaderBarcode,
+                await form.LoadRecordAsync(selected_task.ReaderBarcode,
                     false);
             }
             if (strType == "amerce_form")
@@ -3866,32 +3865,32 @@ MessageBoxDefaultButton.Button2);
                 AmerceForm form = Program.MainForm.EnsureAmerceForm();
                 Global.Activate(form);
 
-                form.LoadReader(selected_task.ReaderBarcode, true);
+                await form.LoadReaderAsync(selected_task.ReaderBarcode, true);
             }
             if (strType == "activate_form_old")
             {
                 ActivateForm form = Program.MainForm.EnsureActivateForm();
                 Global.Activate(form);
 
-                form.LoadOldRecord(selected_task.ReaderBarcode);
+                await form.LoadOldRecordAsync(selected_task.ReaderBarcode);
             }
             if (strType == "activate_form_new")
             {
                 ActivateForm form = Program.MainForm.EnsureActivateForm();
                 Global.Activate(form);
 
-                form.LoadNewRecord(selected_task.ReaderBarcode);
+                await form.LoadNewRecordAsync(selected_task.ReaderBarcode);
             }
             if (strType == "readermanage_form")
             {
                 ReaderManageForm form = Program.MainForm.EnsureReaderManageForm();
                 Global.Activate(form);
 
-                form.LoadRecord(selected_task.ReaderBarcode);
+                await form.LoadRecordAsync(selected_task.ReaderBarcode);
             }
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 打开到 册窗

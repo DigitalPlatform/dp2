@@ -102,7 +102,6 @@ namespace dp2Circulation
             this.button_writeCard.Enabled = false;
             try
             {
-
                 // 先完成数据库操作
                 nRet = this.AmerceForm.Submit(
                     this.AmerceItems,

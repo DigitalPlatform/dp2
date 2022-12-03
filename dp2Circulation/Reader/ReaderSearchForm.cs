@@ -749,7 +749,7 @@ out strError);
         }
 
         // (根据读者证条码号)把读者记录装入读者窗
-        private void listView_records_DoubleClick(object sender, EventArgs e)
+        private async void listView_records_DoubleClick(object sender, EventArgs e)
         {
             string strOpenStyle = "new";
             if (this.LoadToExistDetailWindow == true)
@@ -759,7 +759,7 @@ out strError);
             LoadRecordToReaderInfoForm(strOpenStyle,
                 "barcode"); // 双击这里故意用barcode方式，就是为了警告重复的读者证条码号
              * */
-            LoadRecordToReaderInfoForm(strOpenStyle,
+            await LoadRecordToReaderInfoForm(strOpenStyle,
                 "auto"); // 双击这里故意用auto或barcode方式，就是为了警告重复的读者证条码号
         }
 
@@ -767,12 +767,12 @@ out strError);
         // parameters:
         //      strIdType   标识类型 "barcode" "recpath" "auto"
         //      strOpenStyle 打开窗口的方式 "new" "exist"
-        void LoadRecordToReaderInfoForm(string strOpenStyle,
+        async Task LoadRecordToReaderInfoForm(string strOpenStyle,
             string strIdType)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要装入读者窗的事项");
+                this.MessageBoxShow("尚未选定要装入读者窗的事项");
                 return;
             }
 
@@ -816,16 +816,14 @@ out strError);
             if (form == null)
             {
                 form = new ReaderInfoForm();
-
                 form.MdiParent = Program.MainForm;
-
                 form.MainForm = Program.MainForm;
                 form.Show();
             }
 
             if (strIdType == "barcode")
             {
-                form.LoadRecord(strBarcodeOrRecPath, false); // 发生重复条码时，不强行装入，起到警告工作人员的作用
+                await form.LoadRecordAsync(strBarcodeOrRecPath, false); // 发生重复条码时，不强行装入，起到警告工作人员的作用
                 // form.AsyncLoadRecord(strBarcodeOrRecPath);
             }
             else
@@ -833,7 +831,7 @@ out strError);
                 Debug.Assert(strIdType == "recpath", "");
 
                 // form.LoadRecord("@path:" + strRecPath, false);   // 这个办法有问题，ReaderInfoForm.ReaderBarcode有误
-                form.LoadRecordByRecPath(strBarcodeOrRecPath, "");
+                await form.LoadRecordByRecPathAsync(strBarcodeOrRecPath, "");
             }
         }
 
@@ -907,30 +905,30 @@ out strError);
 
 
         // 装入读者窗 1
-        void menu_recPath_newly_Click(object sender, EventArgs e)
+        async void menu_recPath_newly_Click(object sender, EventArgs e)
         {
-            LoadRecordToReaderInfoForm("new",
+            await LoadRecordToReaderInfoForm("new",
                 "recpath");
         }
 
         // 2
-        void menu_barcode_newly_Click(object sender, EventArgs e)
+        async void menu_barcode_newly_Click(object sender, EventArgs e)
         {
-            LoadRecordToReaderInfoForm("new",
+            await LoadRecordToReaderInfoForm("new",
                 "barcode");
         }
 
         // 3
-        void menu_recPath_exist_Click(object sender, EventArgs e)
+        async void menu_recPath_exist_Click(object sender, EventArgs e)
         {
-            LoadRecordToReaderInfoForm("exist",
+            await LoadRecordToReaderInfoForm("exist",
                 "recpath");
         }
 
         // 4
-        void menu_barcode_exist_Click(object sender, EventArgs e)
+        async void menu_barcode_exist_Click(object sender, EventArgs e)
         {
-            LoadRecordToReaderInfoForm("exist",
+            await LoadRecordToReaderInfoForm("exist",
                 "barcode");
         }
 
@@ -2152,7 +2150,7 @@ MessageBoxDefaultButton.Button2);
                 if (nRet != 1)
                     this.MessageBoxShow(strError);
             },
-default,
+this.CancelToken,
 TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }

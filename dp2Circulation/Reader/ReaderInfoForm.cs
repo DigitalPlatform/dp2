@@ -580,6 +580,10 @@ TaskCreationOptions.LongRunning,
 TaskScheduler.Default);
         }
 
+        // return:
+        //      -1  出错
+        //      0   放弃
+        //      1   成功
         int _loadRecord(string strBarcode,
             bool bForceLoad = false)
         {
@@ -2535,7 +2539,18 @@ strXml);
             return 0;
         }
 
-        void SaveTo()
+        public Task SaveToAsync()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _saveTo();
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        void _saveTo()
         {
             string strError = "";
             int nRet = 0;
@@ -2548,19 +2563,25 @@ strXml);
             }
 
             // 出现对话框，让用户可以选择目标库
-            ReaderSaveToDialog saveto_dlg = new ReaderSaveToDialog();
-            MainForm.SetControlFont(saveto_dlg, this.Font, false);
-            saveto_dlg.Text = "新增一条读者记录";
-            saveto_dlg.MessageText = "请选择要保存的目标记录位置\r\n(记录ID为 ? 表示追加保存到数据库末尾)";
-            // saveto_dlg.MainForm = Program.MainForm;
-            saveto_dlg.RecPath = this.readerEditControl1.RecPath;
-            saveto_dlg.RecID = "?";
+            ReaderSaveToDialog saveto_dlg = null;
 
-            Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
-            saveto_dlg.ShowDialog(this);
-            Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
+            var dialog_result = this.TryGet(() =>
+            {
+                saveto_dlg = new ReaderSaveToDialog();
+                MainForm.SetControlFont(saveto_dlg, this.Font, false);
+                saveto_dlg.Text = "新增一条读者记录";
+                saveto_dlg.MessageText = "请选择要保存的目标记录位置\r\n(记录ID为 ? 表示追加保存到数据库末尾)";
+                // saveto_dlg.MainForm = Program.MainForm;
+                saveto_dlg.RecPath = this.readerEditControl1.RecPath;
+                saveto_dlg.RecID = "?";
 
-            if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
+                saveto_dlg.ShowDialog(this);
+                Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
+                return saveto_dlg.DialogResult;
+            });
+
+            if (dialog_result == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
             // 校验证条码号
@@ -2623,17 +2644,9 @@ strXml);
                     bIdChanged = true;
             }
 
-            LibraryChannel channel = this.GetChannel();
-
-            /*
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
-            _stop.BeginLoop();
-            */
-            var looping = BeginLoop(this.DoStop, "正在保存读者记录 " + this.readerEditControl1.Barcode + " ...");
-
-            EnableControls(false);
-
+            var looping = Looping(out LibraryChannel channel,
+                "正在保存读者记录 " + this.readerEditControl1.Barcode + " ...",
+                "disableControl");
             try
             {
                 string strNewXml = "";
@@ -2695,19 +2708,24 @@ strXml);
 
                     if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
                     {
-                        CompareReaderForm dlg = new CompareReaderForm();
-                        dlg.Initial(
-                            //Program.MainForm,
-                            this.readerEditControl1.RecPath,
-                            strExistingXml,
-                            baNewTimestamp,
-                            strNewXml,
-                            this.readerEditControl1.Timestamp,
-                            "数据库中的记录在编辑期间发生了改变。请仔细核对，并重新修改窗口中的未保存记录，按确定按钮后可重试保存。");
+                        CompareReaderForm dlg = null;
 
-                        dlg.StartPosition = FormStartPosition.CenterScreen;
-                        dlg.ShowDialog(this);
-                        if (dlg.DialogResult == DialogResult.OK)
+                        var dialog_result1 = this.TryGet(() =>
+                        {
+                            dlg = new CompareReaderForm();
+                            dlg.Initial(
+                                //Program.MainForm,
+                                this.readerEditControl1.RecPath,
+                                strExistingXml,
+                                baNewTimestamp,
+                                strNewXml,
+                                this.readerEditControl1.Timestamp,
+                                "数据库中的记录在编辑期间发生了改变。请仔细核对，并重新修改窗口中的未保存记录，按确定按钮后可重试保存。");
+
+                            dlg.StartPosition = FormStartPosition.CenterScreen;
+                            return dlg.ShowDialog(this);
+                        });
+                        if (dialog_result1 == DialogResult.OK)
                         {
                             nRet = this.readerEditControl1.SetData(dlg.UnsavedXml,
                                 dlg.RecPath,
@@ -2715,9 +2733,9 @@ strXml);
                                 out strError);
                             if (nRet == -1)
                             {
-                                MessageBox.Show(this, strError);
+                                this.MessageBoxShow( strError);
                             }
-                            MessageBox.Show(this, "请注意重新保存记录");
+                            this.MessageBoxShow("请注意重新保存记录");
                             return;
                         }
                     }
@@ -2725,21 +2743,15 @@ strXml);
                     goto ERROR1;
                 }
 
-                /*
-                this.Timestamp = baNewTimestamp;
-                this.OldRecord = strSavedXml;
-                this.RecPath = strSavedPath;
-                 */
-
                 if (lRet == 1)
                 {
                     // 部分字段被拒绝
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
 
                     if (channel.ErrorCode == ErrorCode.PartialDenied)
                     {
                         // 提醒重新装载?
-                        MessageBox.Show(this, "请重新装载记录, 检查哪些字段内容修改被拒绝。");
+                        this.MessageBoxShow("请重新装载记录, 检查哪些字段内容修改被拒绝。");
                     }
                 }
                 else
@@ -2756,24 +2768,22 @@ strXml);
                         out strError);
                     if (nRet == -1)
                     {
-                        MessageBox.Show(this, strError);
+                        this.MessageBoxShow( strError);
                     }
                     if (nRet >= 1)
                     {
                         // 重新获得时间戳
-                        string[] results = null;
-                        string strOutputPath = "";
                         lRet = channel.GetReaderInfo(
                             looping.Progress,
                             "@path:" + strSavedPath,
                             "", // "xml,html",
-                            out results,
-                            out strOutputPath,
+                            out string[] results,
+                            out string strOutputPath,
                             out baNewTimestamp,
                             out strError);
                         if (lRet == -1 || lRet == 0)
                         {
-                            MessageBox.Show(this, strError);
+                            this.MessageBoxShow( strError);
                         }
                     }
 
@@ -2784,10 +2794,7 @@ strXml);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    /*
-                    this.SetXmlToWebbrowser(this.webBrowser_xml,
-                        strSavedXml);
-                     * */
+
                     Global.SetXmlToWebbrowser(this.webBrowser_xml,
     Program.MainForm.DataDir,
     "xml",
@@ -2806,7 +2813,7 @@ strXml);
                             out strError);
                         if (nRet == -1)
                         {
-                            MessageBox.Show(this, strError);
+                            this.MessageBoxShow(strError);
                             // return -1;
                         }
                     }
@@ -2814,9 +2821,6 @@ strXml);
                     // 2011/11/23
                     // 装载记录到HTML
                     {
-                        byte[] baTimestamp = null;
-                        string strOutputRecPath = "";
-
                         string strBarcode = this.readerEditControl1.Barcode;
 
                         looping.Progress.SetMessage("正在装入读者记录 " + strBarcode + " ...");
@@ -2827,8 +2831,8 @@ strXml);
                             strBarcode,
                             "html",
                             out results,
-                            out strOutputRecPath,
-                            out baTimestamp,
+                            out string strOutputRecPath,
+                            out byte[] baTimestamp,
                             out strError);
                         if (lRet == -1)
                         {
@@ -2864,31 +2868,20 @@ strXml);
 #endif
                         this.SetReaderHtmlString(strHtml);
                     }
-
                 }
             }
             finally
             {
-                EnableControls(true);
-
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                */
-                EndLoop(looping);
-
-                this.ReturnChannel(channel);
+                looping.Dispose();
             }
 
             if (bReserveFieldsCleared == true)
-                MessageBox.Show(this, "另存成功。新记录的密码为初始状态，显示名尚未设置。");
+                this.MessageBoxShow("另存成功。新记录的密码为初始状态，显示名尚未设置。");
             else
-                MessageBox.Show(this, "另存成功。");
+                this.MessageBoxShow("另存成功。");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
-            return;
+            this.MessageBoxShow(strError);
         }
 
 #if REMOVED
@@ -2904,10 +2897,21 @@ strXml);
         }
 #endif
 
+        public Task DeleteRecordAsync(string style = "")
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                _deleteRecord(style);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
         // 删除记录
         // parameters:
         //      style   force 表示强制删除。否则就是普通删除
-        void DeleteRecord(string style = "")
+        void _deleteRecord(string style = "")
         {
             string strError = "";
 
@@ -2935,31 +2939,25 @@ strXml);
             if (bForceDelete)
                 strText += "\r\n\r\n警告：当读者有在借信息的情况下，强制删除功能在删除读者记录时 *** 不会修改 *** 相关在借册记录，会造成借阅信息关联错误。正常情况下应该先将该读者的在借册全部执行还书，然后再删除读者记录。请慎重操作";
 
-            DialogResult result = MessageBox.Show(this,
+            DialogResult result = this.TryGet(() =>
+            {
+                return MessageBox.Show(this,
                 strText,
                 "ReaderInfoForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2);
+            });
             if (result != DialogResult.Yes)
                 return;
 
-            LibraryChannel channel = this.GetChannel();
-
-            /*
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在删除读者记录 " + this.readerEditControl1.Barcode + " ...");
-            _stop.BeginLoop();
-            */
-            var looping = BeginLoop(this.DoStop, "正在删除读者记录 " + this.readerEditControl1.Barcode + " ...");
-
-            EnableControls(false);
-
+            var looping = Looping(out LibraryChannel channel,
+                "正在删除读者记录 " + this.readerEditControl1.Barcode + " ...",
+                "disableControl");
             try
             {
-                string strNewXml = "";
                 int nRet = this.readerEditControl1.GetData(
-                    out strNewXml,
+                    out string strNewXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -2992,19 +2990,23 @@ strXml);
 
                     if (kernel_errorcode == ErrorCodeValue.TimestampMismatch)
                     {
-                        CompareReaderForm dlg = new CompareReaderForm();
-                        dlg.Initial(
-                            //Program.MainForm,
-                            this.readerEditControl1.RecPath,
-                            strExistingXml,
-                            baNewTimestamp,
-                            strNewXml,
-                            this.readerEditControl1.Timestamp,
-                            "数据库中的记录在编辑期间发生了改变。请仔细核对，若还想继续删除，按‘确定’按钮后可重试删除。如果不想删除了，请按‘取消’按钮");
+                        CompareReaderForm dlg = null;
+                        var dialog_result = this.TryGet(() =>
+                        {
+                            dlg = new CompareReaderForm();
+                            dlg.Initial(
+                                //Program.MainForm,
+                                this.readerEditControl1.RecPath,
+                                strExistingXml,
+                                baNewTimestamp,
+                                strNewXml,
+                                this.readerEditControl1.Timestamp,
+                                "数据库中的记录在编辑期间发生了改变。请仔细核对，若还想继续删除，按‘确定’按钮后可重试删除。如果不想删除了，请按‘取消’按钮");
 
-                        dlg.StartPosition = FormStartPosition.CenterScreen;
-                        dlg.ShowDialog(this);
-                        if (dlg.DialogResult == DialogResult.OK)
+                            dlg.StartPosition = FormStartPosition.CenterScreen;
+                            return dlg.ShowDialog(this);
+                        });
+                        if (dialog_result == DialogResult.OK)
                         {
                             nRet = this.readerEditControl1.SetData(dlg.UnsavedXml,
                                 dlg.RecPath,
@@ -3012,9 +3014,9 @@ strXml);
                                 out strError);
                             if (nRet == -1)
                             {
-                                MessageBox.Show(this, strError);
+                                this.MessageBoxShow(strError);
                             }
-                            MessageBox.Show(this, "请注意读者记录此时***并未***删除。\r\n\r\n如要删除记录，请按‘删除’按钮重新提交删除请求。");
+                            this.MessageBoxShow("请注意读者记录此时***并未***删除。\r\n\r\n如要删除记录，请按‘删除’按钮重新提交删除请求。");
                             return;
                         }
                     }
@@ -3032,7 +3034,7 @@ strXml);
                 if (nRet == -1)
                 {
                     strError = "删除操作后的SetData()操作失败: " + strError;
-                    MessageBox.Show(this, strError);
+                    this.MessageBoxShow(strError);
                 }
 
                 this.readerEditControl1.Changed = false;
@@ -3062,24 +3064,13 @@ strXml);
             }
             finally
             {
-                EnableControls(true);
-
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                */
-                EndLoop(looping);
-
-                this.ReturnChannel(channel);
+                looping.Dispose();
             }
 
-            MessageBox.Show(this, "删除成功。\r\n\r\n您会发现编辑窗口中还留着读者记录内容，但请不要担心，数据库里的读者记录已经被删除了。\r\n\r\n如果您这时后悔了，还可以按“保存按钮”把读者记录原样保存回去。");
+            this.MessageBoxShow("删除成功。\r\n\r\n您会发现编辑窗口中还留着读者记录内容，但请不要担心，数据库里的读者记录已经被删除了。\r\n\r\n如果您这时后悔了，还可以按“保存按钮”把读者记录原样保存回去。");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
-            return;
-
+            this.MessageBoxShow(strError);
         }
 
         // 选项
@@ -3093,8 +3084,18 @@ strXml);
             dlg.ShowDialog(this);
         }
 
+        public Task HireAsync()
+        {
+            return Task.Factory.StartNew(async () =>
+            {
+                await _hireAsync();
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
 
-        void Hire()
+        async Task _hireAsync()
         {
             if (this.ReaderXmlChanged == true
                 || this.ObjectChanged == true)
@@ -3158,62 +3159,40 @@ strXml);
 #endif
             }
 
-            LibraryChannel channel = this.GetChannel();
-
-            /*
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在创建读者记录 " + this.readerEditControl1.Barcode + " 的 租金交费请求 ...");
-            _stop.BeginLoop();
-            */
-            var looping = BeginLoop(this.DoStop, "正在创建读者记录 " + this.readerEditControl1.Barcode + " 的 租金交费请求 ...");
-
-            EnableControls(false);
+            var looping = Looping(out LibraryChannel channel,
+                "正在创建读者记录 " + this.readerEditControl1.Barcode + " 的 租金交费请求 ...",
+                "disableControl");
             try
             {
                 string strReaderBarcode = this.readerEditControl1.Barcode;
                 string strAction = "hire";
 
-                string strOutputrReaderXml = "";
-                string strOutputID = "";
-
                 long lRet = channel.Hire(
                     looping.Progress,
                     strAction,
                     strReaderBarcode,
-                    out strOutputrReaderXml,
-                    out strOutputID,
+                    out string strOutputrReaderXml,
+                    out string strOutputID,
                     out strError);
                 if (lRet == -1)
                 {
                     goto ERROR1;
                 }
-
-
             }
             finally
             {
-                EnableControls(true);
-
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                */
-                EndLoop(looping);
-
-                this.ReturnChannel(channel);
+                looping.Dispose();
             }
 
             // 重新装载窗口内容
-            LoadRecord(this.readerEditControl1.Barcode,
+            await LoadRecordAsync(this.readerEditControl1.Barcode,
                 false);
 
-            MessageBox.Show(this, "创建租金交费请求 成功");
+            this.MessageBoxShow("创建租金交费请求 成功");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
-
         }
 
         // 前一条读者记录
@@ -3263,7 +3242,7 @@ strXml);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.LoadRecord(
+                            _ = this.LoadRecordAsync(
                                 this.toolStripTextBox_barcode.Text,
                                 // this.textBox_readerBarcode.Text,
                                 false);
@@ -3283,7 +3262,7 @@ strXml);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.DeleteRecord(msg == WM_FORCE_DELETE_RECORD ? "force" : "");
+                            _ = this.DeleteRecordAsync(msg == WM_FORCE_DELETE_RECORD ? "force" : "");
                         }
                     }
                     finally
@@ -3329,10 +3308,10 @@ strXml);
                                     return;
                                 }
                                 this.ClearMessage();
-                                LoadRecordByRecPath(strRecPath, "");
+                                _ = LoadRecordByRecPathAsync(strRecPath, "");
                             }
                             else
-                                LoadRecordByRecPath(this.readerEditControl1.RecPath, direction);
+                                _ = LoadRecordByRecPathAsync(this.readerEditControl1.RecPath, direction);
                         }
                     }
                     finally
@@ -3366,7 +3345,7 @@ strXml);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.Hire();
+                            _ = this.HireAsync();
                         }
                     }
                     finally
@@ -3382,7 +3361,7 @@ strXml);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.Foregift("foregift");
+                            _ = this.ForegiftAsync("foregift");
                         }
                     }
                     finally
@@ -3398,7 +3377,7 @@ strXml);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.Foregift("return");
+                            _ = this.ForegiftAsync("return");
                         }
                     }
                     finally
@@ -3414,7 +3393,7 @@ strXml);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.SaveTo();
+                            _ = this.SaveToAsync();
                         }
                     }
                     finally
@@ -3509,21 +3488,40 @@ strXml);
             this.webBrowser_readerInfo.Stop();
         }
 
-
+        // (为了兼容以前的 public API。即将弃用。线程模型不理想)
         // parameters:
         //      strAction   为foregift和return之一
         void Foregift(string strAction)
         {
+            var task = ForegiftAsync(strAction);
+            while (task.IsCompleted == false)
+            {
+                Application.DoEvents();
+            }
+        }
+
+        public Task ForegiftAsync(string strAction)
+        {
+            return Task.Factory.StartNew(async () =>
+            {
+                await _foregiftAsync(strAction);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        async Task _foregiftAsync(string strAction)
+        {
             if (this.ReaderXmlChanged == true
                 || this.ObjectChanged == true)
             {
-                MessageBox.Show(this, "当前有信息被修改后尚未保存。必须先保存后，才能进行创建押金的操作。");
+                this.MessageBoxShow("当前有信息被修改后尚未保存。必须先保存后，才能进行创建押金的操作。");
                 return;
             }
 
             string strError = "";
             int nRet = 0;
-
 
             if (this.readerEditControl1.Barcode == "")
             {
@@ -3582,22 +3580,12 @@ strXml);
             if (strAction == "return")
                 strActionName = "押金退费";
 
-            LibraryChannel channel = this.GetChannel();
-
-            /*
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在创建读者记录 " + this.readerEditControl1.Barcode + " 的" + strActionName + "记录 ...");
-            _stop.BeginLoop();
-            */
-            var looping = BeginLoop(this.DoStop, "正在创建读者记录 " + this.readerEditControl1.Barcode + " 的" + strActionName + "记录 ...");
-
-            EnableControls(false);
+            var looping = Looping(out LibraryChannel channel,
+                "正在创建读者记录 " + this.readerEditControl1.Barcode + " 的" + strActionName + "记录 ...",
+                "disableControl");
             try
             {
                 string strReaderBarcode = this.readerEditControl1.Barcode;
-
-                string strOutputrReaderXml = "";
-                string strOutputID = "";
 
                 Debug.Assert(strAction == "foregift" || strAction == "return", "");
 
@@ -3605,8 +3593,8 @@ strXml);
                     looping.Progress,
                     strAction,
                     strReaderBarcode,
-                    out strOutputrReaderXml,
-                    out strOutputID,
+                    out string strOutputrReaderXml,
+                    out string strOutputID,
                     out strError);
                 if (lRet == -1)
                 {
@@ -3615,28 +3603,18 @@ strXml);
             }
             finally
             {
-                EnableControls(true);
-
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                */
-                EndLoop(looping);
-
-                this.ReturnChannel(channel);
+                looping.Dispose();
             }
 
             // 重新装载窗口内容
-            LoadRecord(this.readerEditControl1.Barcode,
+            var ret = await LoadRecordAsync(this.readerEditControl1.Barcode,
                 false);
-
-            MessageBox.Show(this, "创建" + strActionName + "记录成功");
+            if (ret == 1)
+                this.MessageBoxShow("创建" + strActionName + "记录成功");
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
             return;
-
         }
 
         // 创建租金交费请求

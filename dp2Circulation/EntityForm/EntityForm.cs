@@ -612,7 +612,7 @@ namespace dp2Circulation
                 true);
              * */
 
-            this.checkBox_autoSavePrev.Checked = Program.MainForm.AppInfo.GetBoolean(
+            this.AutoSavePrev = Program.MainForm.AppInfo.GetBoolean(
                 "entityform",
                 "auto_save_prev",
                 true);
@@ -1498,7 +1498,7 @@ true);
             return form;
         }
 
-        async void orderControl1_OpenTargetRecord(object sender, OpenTargetRecordEventArgs e)
+        void orderControl1_OpenTargetRecord(object sender, OpenTargetRecordEventArgs e)
         {
             // 新打开一个EntityForm
             EntityForm form = null;
@@ -1517,7 +1517,7 @@ true);
                 // form.MainForm = Program.MainForm;
                 form.Show();
 
-                nRet = await form.LoadRecordOldAsync(e.TargetRecPath,
+                nRet = form.LoadRecordOld(e.TargetRecPath,
                     "",
                     false);
                 if (nRet != 1)
@@ -1525,7 +1525,6 @@ true);
                     e.ErrorInfo = "目标书目记录 " + e.TargetRecPath + " 装载失败";
                     return;
                 }
-
             }
 
             form.ActivateItemsPage();
@@ -1739,7 +1738,7 @@ true);
         }
 
         // 验收的时候自动创建实体记录
-        async void orderControl1_GenerateEntity(object sender,
+        void orderControl1_GenerateEntity(object sender,
             GenerateEntityEventArgs e)
         {
             string strError = "";
@@ -1930,7 +1929,7 @@ true);
                 form.MainForm = Program.MainForm;
                 form.Show();
 
-                nRet = await form.LoadRecordOldAsync(strTargetRecPath,
+                nRet = form.LoadRecordOld(strTargetRecPath,
                     "",
                     false);
                 if (nRet != 1)
@@ -2437,14 +2436,15 @@ true);
             SetSaveAllButtonState(!InDisabledState);
         }
 
-        async void entityControl1_LoadRecord111(object sender, LoadRecordEventArgs e)
+        void entityControl1_LoadRecord111(object sender, LoadRecordEventArgs e)
         {
+            // 注: 这里不能用 LoadRecordOldAsync()。只能用 LoadRecordOld()
             // return:
             //      -1  出错。已经用MessageBox报错
             //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
             //      1   成功装载
             //      2   通道被占用
-            e.Result = await this.LoadRecordOldAsync(e.BiblioRecPath,
+            e.Result = this.LoadRecordOld(e.BiblioRecPath,
                 "",
                 false);
         }
@@ -2760,7 +2760,7 @@ true);
                 Program.MainForm.AppInfo.SetBoolean(
                     "entityform",
                     "auto_save_prev",
-                    this.checkBox_autoSavePrev.Checked);
+                    this.AutoSavePrev);
 
                 // 2008/11/2 
                 // RegisterType
@@ -3021,6 +3021,42 @@ true);
             }
         }
 
+        public bool AutoSavePrev
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.checkBox_autoSavePrev.Checked;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.checkBox_autoSavePrev.Checked = value;
+                });
+            }
+        }
+
+        public string QuickItemBarcode
+        {
+            get
+            {
+                return this.TryGet(() =>
+                {
+                    return this.textBox_itemBarcode.Text;
+                });
+            }
+            set
+            {
+                this.TryInvoke(() =>
+                {
+                    this.textBox_itemBarcode.Text = value;
+                });
+            }
+        }
+
         // return:
         //      -1  出错
         //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel；或者“到头”“到尾”)
@@ -3155,10 +3191,7 @@ TaskScheduler.Default);
     || this.OrdersChanged == true
     || this.CommentsChanged == true)
             {
-                var auto_save_prev = this.TryGet(() =>
-                {
-                    return this.checkBox_autoSavePrev.Checked;
-                });
+                var auto_save_prev = this.AutoSavePrev;
                 if (auto_save_prev == true
                     && bWarningNotSave == false)
                 {
@@ -3199,10 +3232,7 @@ TaskScheduler.Default);
 
             // 清空4个下属记录的控件
             this.entityControl1.ClearItems();
-            this.TryInvoke(() =>
-            {
-                this.textBox_itemBarcode.Text = "";
-            });
+            this.QuickItemBarcode = "";
 
             this.issueControl1.ClearItems();
             this.orderControl1.ClearItems();
@@ -3586,10 +3616,7 @@ out string strErrorCode)
                 || this.OrdersChanged == true
                 || this.CommentsChanged == true)
             {
-                var auto_save_prev = this.TryGet(() =>
-                {
-                    return this.checkBox_autoSavePrev.Checked;
-                });
+                var auto_save_prev = this.AutoSavePrev;
 
                 // 2008/6/25 
                 if (auto_save_prev == true
@@ -3746,10 +3773,8 @@ out string strErrorCode)
 
                 // 清空4个下属记录的控件
                 this.entityControl1.ClearItems();
-                this.TryInvoke(() =>
-                {
-                    this.textBox_itemBarcode.Text = ""; // 2009/1/5 
-                });
+
+                this.QuickItemBarcode = ""; // 2009/1/5 
                 this.issueControl1.ClearItems();
                 this.orderControl1.ClearItems();   // 2008/11/2 
                 this.commentControl1.ClearItems();
@@ -7211,19 +7236,19 @@ out strError);
             }
 
             // 2006/12/30 
-            if (strItemBarcode != this.textBox_itemBarcode.Text)
-                this.textBox_itemBarcode.Text = strItemBarcode;
+            if (strItemBarcode != this.QuickItemBarcode)
+                this.QuickItemBarcode = strItemBarcode;
 
             // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
             // return:
             //      -1  error
             //      0   not found
             //      1   found
-            nRet = this.entityControl1.DoSearchEntity(this.textBox_itemBarcode.Text,
+            nRet = this.entityControl1.DoSearchEntity(this.QuickItemBarcode,
                 out BookItem result_item);
             if (result_item == null)
             {
-                string error = $"无法在列表中定位册条码号为 '{this.textBox_itemBarcode.Text}' 的册记录";
+                string error = $"无法在列表中定位册条码号为 '{this.QuickItemBarcode}' 的册记录";
                 if (DisplayOtherLibraryItem == false)
                     error += "。\r\n请到“帮助/参数配置”对话框“种册”属性页，勾选“显示其他分馆的册记录”。然后重新装载册记录";
                 this.MessageBoxShow(error);
@@ -7397,11 +7422,8 @@ out strError);
                         this.MessageBoxShow(error);
                     }
 
-                    this.TryInvoke(() =>
-                    {
-                        if (strItemBarcode != this.textBox_itemBarcode.Text)
-                            this.textBox_itemBarcode.Text = strItemBarcode;
-                    });
+                    if (strItemBarcode != this.QuickItemBarcode)
+                        this.QuickItemBarcode = strItemBarcode;
 
                     this.SwitchFocus(ITEM_LIST);
                 }
@@ -8038,7 +8060,7 @@ out strError);
                 || this.ObjectChanged == true)
             {
                 // 2008/6/25
-                if (this.checkBox_autoSavePrev.Checked == true
+                if (this.AutoSavePrev == true
                     && bAutoSave == true)
                 {
                     nRet = this.DoSaveAll();
@@ -11224,7 +11246,7 @@ out strError);
             try
             {
                 // 看看输入的条码是否为ISBN条码
-                if (IsISBnBarcode(this.textBox_itemBarcode.Text) == true)
+                if (IsISBnBarcode(this.QuickItemBarcode) == true)
                 {
                     // 保存当前册信息
                     nRet = this.entityControl1.DoSaveItems(
@@ -11241,8 +11263,8 @@ out strError);
                     ReleaseProtectedTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
 
                     // 转而触发新种检索操作
-                    this.textBox_queryWord.Text = this.textBox_itemBarcode.Text;
-                    this.textBox_itemBarcode.Text = "";
+                    this.QueryWord = this.QuickItemBarcode;
+                    this.QuickItemBarcode = "";
 
                     this.button_search_Click(null, null);
                     return;
@@ -11250,7 +11272,7 @@ out strError);
 
                 // 检查册条码号形式是否合法
                 if (NeedVerifyItemBarcode == true
-                    && string.IsNullOrEmpty(this.textBox_itemBarcode.Text) == false)    // 2009/11/24 空的字符串不进行检查
+                    && string.IsNullOrEmpty(this.QuickItemBarcode) == false)    // 2009/11/24 空的字符串不进行检查
                 {
                     // 形式校验条码号
                     // return:
@@ -11261,7 +11283,7 @@ out strError);
                     //      2   是合法的册条码号
                     nRet = VerifyBarcode(
                         Program.MainForm.FocusLibraryCode, // this.CurrentLibraryCodeList,
-                        this.textBox_itemBarcode.Text,
+                        this.QuickItemBarcode,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -11269,14 +11291,14 @@ out strError);
                     // 输入的条码号格式不合法
                     if (nRet == 0)
                     {
-                        strError = "您输入的条码号 " + this.textBox_itemBarcode.Text + " 格式不正确(" + strError + ")。请重新输入。\r\n\r\n请注意内务当前图书馆代码为 '" + Program.MainForm.FocusLibraryCode + "'，馆代码选择不当也会造成格式不正确的报错";
+                        strError = "您输入的条码号 " + this.QuickItemBarcode + " 格式不正确(" + strError + ")。请重新输入。\r\n\r\n请注意内务当前图书馆代码为 '" + Program.MainForm.FocusLibraryCode + "'，馆代码选择不当也会造成格式不正确的报错";
                         goto ERROR1;
                     }
 
                     // 实际输入的是读者证条码号
                     if (nRet == 1)
                     {
-                        strError = "您输入的条码号 " + this.textBox_itemBarcode.Text + " 是读者证条码号。请输入册条码号。";
+                        strError = "您输入的条码号 " + this.QuickItemBarcode + " 是读者证条码号。请输入册条码号。";
                         goto ERROR1;
                     }
 
@@ -11291,14 +11313,14 @@ out strError);
                 if (this.RegisterType == RegisterType.Register)
                 {
                     // 登记
-                    this.entityControl1.DoNewEntity(this.textBox_itemBarcode.Text);
+                    this.entityControl1.DoNewEntity(this.QuickItemBarcode);
 
                     this.SwitchFocus(ITEM_BARCODE);
                 }
                 else if (this.RegisterType == RegisterType.QuickRegister)
                 {
                     // 快速登记
-                    nRet = this.entityControl1.DoQuickNewEntity(this.textBox_itemBarcode.Text);
+                    nRet = this.entityControl1.DoQuickNewEntity(this.QuickItemBarcode);
                     if (nRet != -1)
                     {
                         /*
@@ -11313,8 +11335,8 @@ out strError);
                 {
                     // 只检索
                     //this.EnableControls(false);
-                    LoadItemByBarcode(this.textBox_itemBarcode.Text,
-                        this.checkBox_autoSavePrev.Checked);
+                    LoadItemByBarcode(this.QuickItemBarcode,
+                        this.AutoSavePrev);
                     //this.EnableControls(true);
                 }
             }
@@ -11821,7 +11843,7 @@ out strError);
                     await this.LoadItemByRecPathAsync(
                         "item",
                         data.RecPath,
-                        this.checkBox_autoSavePrev.Checked);
+                        this.AutoSavePrev);
                 }
                 else
                 {

@@ -708,11 +708,17 @@ namespace dp2Circulation
         {
             get
             {
-                return this.textBox_recPath.Text;
+                return this.TryGet(() =>
+                {
+                    return this.textBox_recPath.Text;
+                });
             }
             set
             {
-                this.textBox_recPath.Text = value;
+                this.TryInvoke(() =>
+                {
+                    this.textBox_recPath.Text = value;
+                });
             }
         }
 
@@ -1062,89 +1068,92 @@ namespace dp2Circulation
 
         internal override void RefreshDom()
         {
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "barcode", this.Barcode);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "cardNumber", this.CardNumber);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "state", this.State);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "comment", this.Comment);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "readerType", this.ReaderType);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "createDate", this.CreateDate);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "expireDate", this.ExpireDate);
-
-            // 2007/6/15
-            XmlNode nodeHire = null;
-            nodeHire = this._dataDom.DocumentElement.SelectSingleNode("hire");
-            if (nodeHire == null)
+            this.TryInvoke(() =>
             {
-                nodeHire = this._dataDom.CreateElement("hire");
-                this._dataDom.DocumentElement.AppendChild(nodeHire);
-            }
-            DomUtil.SetAttr(nodeHire, "expireDate", this.HireExpireDate);
-            DomUtil.SetAttr(nodeHire, "period", this.HirePeriod);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "foregift", this.Foregift);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "name", this.NameString);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-    "namePinyin", this.NamePinyin);
-
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "gender", this.Gender);
-
-            // 2012/4/11
-            // 根据记录中是否已经有<dateOfBirth>元素来决定是否使用这个元素，以免对旧的dp2Library版本写记录过程中丢失<dateOfBirth>元素
-            XmlNode nodeExistBirthdate = this._dataDom.DocumentElement.SelectSingleNode("dateOfBirth");    // BUG 2012/5/3 原先少了.DocumentElement
-            if (nodeExistBirthdate == null)
                 DomUtil.SetElementText(this._dataDom.DocumentElement,
-                    "birthday", this.DateOfBirth);
-            else
+                    "barcode", this.Barcode);
+
                 DomUtil.SetElementText(this._dataDom.DocumentElement,
-                    "dateOfBirth", this.DateOfBirth);
+                    "cardNumber", this.CardNumber);
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "idCardNumber", this.IdCardNumber);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "state", this.State);
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "department", this.Department);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "comment", this.Comment);
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "post", this.Post);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "readerType", this.ReaderType);
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "address", this.Address);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "createDate", this.CreateDate);
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "tel", this.Tel);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "expireDate", this.ExpireDate);
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "email", this.Email);
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "rights", this.Rights);
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "personalLibrary", this.PersonalLibrary);
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "access", this.Access);
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-                "friends", this.Friends);
-            DomUtil.SetElementText(this._dataDom.DocumentElement,
-    "refID", this.RefID);
+                // 2007/6/15
+                XmlNode nodeHire = null;
+                nodeHire = this._dataDom.DocumentElement.SelectSingleNode("hire");
+                if (nodeHire == null)
+                {
+                    nodeHire = this._dataDom.CreateElement("hire");
+                    this._dataDom.DocumentElement.AppendChild(nodeHire);
+                }
+                DomUtil.SetAttr(nodeHire, "expireDate", this.HireExpireDate);
+                DomUtil.SetAttr(nodeHire, "period", this.HirePeriod);
 
-            base.RefreshDom();
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "foregift", this.Foregift);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "name", this.NameString);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+        "namePinyin", this.NamePinyin);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "gender", this.Gender);
+
+                // 2012/4/11
+                // 根据记录中是否已经有<dateOfBirth>元素来决定是否使用这个元素，以免对旧的dp2Library版本写记录过程中丢失<dateOfBirth>元素
+                XmlNode nodeExistBirthdate = this._dataDom.DocumentElement.SelectSingleNode("dateOfBirth");    // BUG 2012/5/3 原先少了.DocumentElement
+                if (nodeExistBirthdate == null)
+                    DomUtil.SetElementText(this._dataDom.DocumentElement,
+                        "birthday", this.DateOfBirth);
+                else
+                    DomUtil.SetElementText(this._dataDom.DocumentElement,
+                        "dateOfBirth", this.DateOfBirth);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "idCardNumber", this.IdCardNumber);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "department", this.Department);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "post", this.Post);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "address", this.Address);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "tel", this.Tel);
+
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "email", this.Email);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "rights", this.Rights);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "personalLibrary", this.PersonalLibrary);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "access", this.Access);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+                    "friends", this.Friends);
+                DomUtil.SetElementText(this._dataDom.DocumentElement,
+        "refID", this.RefID);
+
+                base.RefreshDom();
+            });
         }
 
         /// <summary>

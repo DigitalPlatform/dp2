@@ -4784,18 +4784,21 @@ barcodes[0],
         }
 
         // 装载条码
-        private void toolStripButton_loadBarcode_Click(object sender, EventArgs e)
+        private async void toolStripButton_loadBarcode_Click(object sender, EventArgs e)
         {
             if (this.ToolStripMenuItem_loadReaderInfo.Checked == true)
-                LoadReaderBarcode();
+                await LoadReaderBarcode();
             else if (this.ToolStripMenuItem_loadItemInfo.Checked == true)
-                LoadItemBarcode();
+                await LoadItemBarcode();
             else
             {
                 Debug.Assert(this.ToolStripMenuItem_autoLoadItemOrReader.Checked == true, "");
-                LoadItemOrReaderBarcode();
+                await LoadItemOrReaderBarcode();
             }
-            this.toolStripTextBox_barcode.SelectAll();
+            this.TryInvoke(() =>
+            {
+                this.toolStripTextBox_barcode.SelectAll();
+            });
         }
 
         private void toolStripTextBox_barcode_KeyDown(object sender, KeyEventArgs e)
@@ -4849,13 +4852,13 @@ barcodes[0],
 
         // 装入册条码号相关记录
         // 尽量占用当前已经打开的种册窗
-        void LoadItemBarcode()
+        async Task LoadItemBarcode()
         {
             string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
 
             if (string.IsNullOrEmpty(strBarcode))
             {
-                MessageBox.Show(this, "尚未输入条码");
+                this.MessageBoxShow("尚未输入条码");
                 return;
             }
 
@@ -4882,7 +4885,7 @@ barcodes[0],
             //      -1  error
             //      0   not found
             //      1   found
-            form.LoadItemByBarcode(strBarcode, false);
+            await form.LoadItemByBarcodeAsync(strBarcode, false);
         }
 
         public string GetUpperCase(string strText)
@@ -4909,13 +4912,13 @@ barcodes[0],
 
         // 装入读者证条码号相关的记录
         // 尽量占用当前已经打开的读者窗
-        void LoadReaderBarcode()
+        async Task LoadReaderBarcode()
         {
             string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
 
             if (string.IsNullOrEmpty(strBarcode))
             {
-                MessageBox.Show(this, "尚未输入条码号");
+                this.MessageBoxShow("尚未输入条码号");
                 return;
             }
 
@@ -4936,12 +4939,12 @@ barcodes[0],
             // 根据读者证条码号，装入读者记录
             // parameters:
             //      bForceLoad  在发生重条码的情况下是否强行装入第一条
-            form.LoadRecord(strBarcode,
+            await form.LoadRecordAsync(strBarcode,
                 false);
         }
 
         // 自动判断条码类型并装入相应的记录
-        void LoadItemOrReaderBarcode()
+        async Task LoadItemOrReaderBarcode()
         {
             string strError = "";
 
@@ -4981,13 +4984,13 @@ barcodes[0],
             }
 
             if (nRet == 1)
-                LoadReaderBarcode();
+                await LoadReaderBarcode();
 
             if (nRet == 2)
-                LoadItemBarcode();
+                await LoadItemBarcode();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.MessageBoxShow(strError);
         }
 
         // 写入词典库记录

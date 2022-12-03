@@ -259,10 +259,13 @@ namespace dp2Circulation
                 if ((bOldValue != value || OptimizeTriggerContentChanged == false)
                     && this.ContentChanged != null)
                 {
-                    ContentChangedEventArgs e = new ContentChangedEventArgs();
-                    e.OldChanged = bOldValue;
-                    e.CurrentChanged = value;
-                    ContentChanged(this, e);
+                    this.TryInvoke(() =>
+                    {
+                        ContentChangedEventArgs e = new ContentChangedEventArgs();
+                        e.OldChanged = bOldValue;
+                        e.CurrentChanged = value;
+                        ContentChanged(this, e);
+                    });
                 }
             }
         }

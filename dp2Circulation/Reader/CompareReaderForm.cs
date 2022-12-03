@@ -34,7 +34,6 @@ namespace dp2Circulation
         }
 
         public void Initial(
-            // MainForm mainform,
             string strRecPath,
             string strExistingXml,
             byte [] baExistingTimestamp,
@@ -42,8 +41,6 @@ namespace dp2Circulation
             byte [] baUnsaveTimestamp,
             string strMessage)
         {
-            // this.MainForm = mainform;
-
             this.RecPath = strRecPath;
 
             this.ExistingXml = strExistingXml;
@@ -144,7 +141,5 @@ namespace dp2Circulation
         {
             e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
-
-
     }
 }

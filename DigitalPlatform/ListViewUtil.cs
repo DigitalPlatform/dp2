@@ -31,6 +31,14 @@ namespace DigitalPlatform.GUI
             });
         }
 
+        public static List<ListViewItem> GetCheckedItems(ListView list)
+        {
+            return list.TryGet(() =>
+            {
+                return list.CheckedItems.Cast<ListViewItem>().ToList();
+            });
+        }
+
         public static void BeginSelectItem(Control control, ListViewItem item)
         {
             control.BeginInvoke(new Action<ListViewItem>(

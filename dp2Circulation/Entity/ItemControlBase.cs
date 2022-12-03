@@ -314,7 +314,7 @@ namespace dp2Circulation
             }
             else
             {
-                MessageBox.Show(this, this.GetType().ToString() + "控件没有挂接 GenerateData 事件");
+                MessageBoxShow(this.GetType().ToString() + "控件没有挂接 GenerateData 事件");
                 return null;
             }
         }
@@ -327,7 +327,7 @@ namespace dp2Circulation
             }
             else
             {
-                MessageBox.Show(this, this.GetType().ToString() + "控件没有挂接 GenerateData 事件");
+                MessageBoxShow(this.GetType().ToString() + "控件没有挂接 GenerateData 事件");
             }
         }
 
@@ -1261,7 +1261,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
                 {
                     strWarning += " 服务器返回的EntityInfo结构中RefID为空";
-                    // MessageBox.Show(this/*ForegroundWindow.Instance*/, "服务器返回的EntityInfo结构中RefID为空");
                     return true;
                 }
 
@@ -1285,7 +1284,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                     out strError);
                 if (nRet == -1 || nRet == 0)
                 {
-                    // MessageBox.Show(this/*ForegroundWindow.Instance*/, "定位错误信息 '" + errorinfos[i].ErrorInfo + "' 所在行的过程中发生错误:" + strError);
                     strWarning += " 定位错误信息 '" + errorinfos[i].ErrorInfo + "' 所在行的过程中发生错误:" + strError;
                     continue;
                 }
@@ -1317,7 +1315,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                             out strError);
                         if (nRet == -1)
                         {
-                            // MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
                             strWarning += " " + strError;
                         }
                     }
@@ -1333,7 +1330,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                             out strError);
                         if (nRet == -1)
                         {
-                            // MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
                             strWarning += " " + strError;
 
                         }
@@ -1351,29 +1347,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                         if (string.IsNullOrEmpty(strTempBiblioDbName) == true)
                         {
                             strWarning += " " + this.ItemType + "类型的数据库名 '" + strTempItemDbName + "' 没有找到对应的书目库名";
-                            //// MessageBox.Show(this/*ForegroundWindow.Instance*/, this.ItemType + "类型的数据库名 '" + strTempItemDbName + "' 没有找到对应的书目库名");
                             return true;
                         }
-#if NO
-                        if (this.ItemType == "item")
-                            strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(strTempItemDbName);
-                        else if (this.ItemType == "order")
-                            strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromOrderDbName(strTempItemDbName);
-                        else if (this.ItemType == "issue")
-                            strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromIssueDbName(strTempItemDbName);
-                        else if (this.ItemType == "comment")
-                            strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromCommentDbName(strTempItemDbName);
-                        else
-                        {
-                            MessageBox.Show(this/*ForegroundWindow.Instance*/, "未知的 ItemType 类型 '"+this.ItemType+"'");
-                            return true;
-                        }
-
-                        Debug.Assert(String.IsNullOrEmpty(strTempBiblioDbName) == false, "");
-                        // TODO: 这里要正规报错
-#endif
-
-
 
                         string strTempBiblioRecPath = strTempBiblioDbName + "/" + bookitem.Parent;
 
@@ -1418,7 +1393,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strWarning += "\r\n请注意修改后重新提交保存";
-                //// MessageBox.Show(this/*ForegroundWindow.Instance*/, strWarning);
                 return true;
             }
 
@@ -1781,7 +1755,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
             if (nRet == -1)
             {
-                // MessageBox.Show(this, strError);    // this/*ForegroundWindow.Instance*/
                 return -1;
             }
 
@@ -1824,7 +1797,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             DisplayKeys(strRecPath, strXml);
             return;
         ERROR1:
-            MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
+            MessageBoxShow(strError);
         }
 
         // 改变归属
@@ -1870,7 +1843,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             Program.MainForm.StatusBarMessage = this.ItemTypeName + "信息 修改归属 成功";
             return;
         ERROR1:
-            MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
+            MessageBoxShow(strError);
         }
 
         // 改变归属
@@ -2055,7 +2028,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
             return;
         ERROR1:
-            this.MessageBoxShow(strError);
+            MessageBoxShow(strError);
         }
 
         #endregion
@@ -2248,7 +2221,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                         dupitem.HilightListViewItem(true);
 
                         if (bDisplayWarning == true)
-                            MessageBox.Show(this/*ForegroundWindow.Instance*/, strText);
+                            MessageBoxShow(/*ForegroundWindow.Instance,*/ strText);
                         return 1;
                     }
                 }
@@ -2286,13 +2259,12 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 }
                 if (nRet == -1)
                 {
-                    // MessageBox.Show(this/*ForegroundWindow.Instance*/, "对" + this.ItemTypeName + "-" + strFromCaption + " '" + strSearchText + "' 进行检索的过程中发生错误: " + strError);
-                    MessageBox.Show(Program.MainForm, "对" + this.ItemTypeName + "-" + strFromCaption + " '" + strSearchText + "' 进行检索的过程中发生错误: " + strError);
+                    MessageBoxShow(/*Program.MainForm,*/ "对" + this.ItemTypeName + "-" + strFromCaption + " '" + strSearchText + "' 进行检索的过程中发生错误: " + strError);
                     return -1;
                 }
                 else if (nRet == 0)
                 {
-                    MessageBox.Show(Program.MainForm, "没有找到" + strFromCaption + "为 '" + strSearchText + "' 的" + this.ItemTypeName + "记录。");
+                    MessageBoxShow(/*Program.MainForm,*/ "没有找到" + strFromCaption + "为 '" + strSearchText + "' 的" + this.ItemTypeName + "记录。");
                     return 0;
                 }
                 else if (nRet == 1)
@@ -2306,7 +2278,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                     nRet = this.TriggerLoadRecord(strBiblioRecPath);
                     if (nRet != 1)
                     {
-                        MessageBox.Show(this, "TriggerLoadRecord 出错。错误码 " + nRet.ToString());
+                        MessageBoxShow("TriggerLoadRecord 出错。错误码 " + nRet.ToString());
                         return -1;
                     }
 
@@ -2318,7 +2290,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 {
                     // Debug.Assert(false, "用" + this.ItemTypeName + "记录路径检索绝对不会发生重复现象");
                     Debug.Assert(false, "用" + this.ItemTypeName + "记录 " + strSearchPrefix + " 检索应当不会发生重复现象");
-                    MessageBox.Show(this/*ForegroundWindow.Instance*/, "用 '" + strIndex + "' 检索" + this.ItemTypeName + "记录命中多于一条，为 " + nRet.ToString() + " 条");
+                    MessageBoxShow(/*ForegroundWindow.Instance,*/ "用 '" + strIndex + "' 检索" + this.ItemTypeName + "记录命中多于一条，为 " + nRet.ToString() + " 条");
                     return -1;
                 }
 
@@ -2328,6 +2300,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
             {
                 return -1;
             }
+        }
+
+        // 2022/12/3
+        void MessageBoxShow(string text)
+        {
+            // 注: this.Visible == false 时候可能会影响 MessageBox.Show(this, ...)，导致弹出在主窗口背后无法点到
+            Program.MainForm.MessageBoxShow(text);
         }
 
         // 
@@ -2351,66 +2330,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 strItemRecPath,
                 out result_item,
                 bDisplayWarning);
-#if NO
-            int nRet = 0;
-            string strError = "";
-            result_item = null;
-
-            // 先检查是否已在本窗口中?
-            // 对当前窗口内进行册记录路径查重
-            if (this.Items != null)
-            {
-                T dupitem = this.Items.GetItemByRecPath(strItemRecPath) as T;
-                if (dupitem != null)
-                {
-                    string strText = "";
-                    if (dupitem.ItemDisplayState == ItemDisplayState.Deleted)
-                        strText = this.ItemTypeName + "记录 '" + strItemRecPath + "' 正好为本种中未提交之一删除"+this.ItemTypeName+"请求。";
-                    else
-                        strText = this.ItemTypeName + "记录 '" + strItemRecPath + "' 在本种中找到。";
-
-                    dupitem.HilightListViewItem(true);
-
-                    if (bDisplayWarning == true)
-                        MessageBox.Show(this/*ForegroundWindow.Instance*/, strText);
-                    return 1;
-                }
-            }
-
-            // 向服务器提交检索请求
-            string strBiblioRecPath = "";
-            // string strIndex = "@path:" + strItemRecPath;
-
-            // 根据期记录路径检索，检索出其从属的书目记录路径。
-            nRet = SearchBiblioRecPath("@path:" + strItemRecPath,
-                out strBiblioRecPath,
-                out strError);
-            if (nRet == -1)
-            {
-                MessageBox.Show(this/*ForegroundWindow.Instance*/, "对期记录路径 '" + strItemRecPath + "' 进行检索的过程中发生错误: " + strError);
-                return -1;
-            }
-            else if (nRet == 0)
-            {
-                MessageBox.Show(this/*ForegroundWindow.Instance*/, "没有找到路径为 '" + strItemRecPath + "' 的期记录。");
-                return 0;
-            }
-            else if (nRet == 1)
-            {
-                Debug.Assert(strBiblioRecPath != "", "");
-                this.TriggerLoadRecord(strBiblioRecPath);
-
-                // 选上期事项
-                result_item = HilightLineByItemRecPath(strItemRecPath, true);
-                return 1;
-            }
-            else if (nRet > 1) // 命中发生重复
-            {
-                Debug.Assert(false, "用"+this.ItemTypeName+"记录路径检索绝对不会发生重复现象");
-            }
-
-            return 0;
-#endif
         }
 
         void DisplayKeys(string strRecPath, string strXml)
@@ -2448,7 +2367,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
             dlg.ShowDialog(this);
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
         }
 
         int GetKeys(
@@ -2647,72 +2566,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
     strItemRefID,
     out result_item,
     bDisplayWarning);
-
-#if NO
-            result_item = null;
-
-            int nRet = 0;
-            string strError = "";
-
-            // 先检查是否已在本窗口中?
-            // 对当前窗口内进行册记录参考 ID 查重
-            if (this.Items != null)
-            {
-                T dupitem = this.Items.GetItemByRefID(strItemRefID) as T;
-                if (dupitem != null)
-                {
-                    string strText = "";
-                    if (dupitem.ItemDisplayState == ItemDisplayState.Deleted)
-                        strText = this.ItemTypeName + "记录 '" + strItemRefID + "' 正好为本种中未提交之一删除"+this.ItemTypeName+"请求。";
-                    else
-                        strText = this.ItemTypeName + "记录 '" + strItemRefID + "' 在本种中找到。";
-
-                    dupitem.HilightListViewItem(true);
-
-                    MessageBox.Show(this/*ForegroundWindow.Instance*/, strText);
-                    return 1;
-                }
-            }
-
-            // 向服务器提交检索请求
-            string strBiblioRecPath = "";
-
-            string strSearchText = "@refID:" + strItemRefID;
-
-            nRet = SearchBiblioRecPath(strSearchText,
-                out strBiblioRecPath,
-                out strError);
-            if (nRet == -1)
-            {
-                MessageBox.Show(this/*ForegroundWindow.Instance*/, "对"+this.ItemTypeName+"记录的参考ID '" + strItemRefID + "' 进行检索的过程中发生错误: " + strError);
-                return -1;
-            }
-            else if (nRet == 0)
-            {
-                MessageBox.Show(this/*ForegroundWindow.Instance*/, "没有找到参考 ID 为 '" + strItemRefID + "' 的"+this.ItemTypeName+"记录。");
-                return 0;
-            }
-            else if (nRet == 1)
-            {
-                Debug.Assert(strBiblioRecPath != "", "");
-                this.TriggerLoadRecord(strBiblioRecPath);
-
-                result_item = HilightLineByItemRefID(strItemRefID, true);
-                return 1;
-            }
-            else if (nRet > 1) // 命中发生重复
-            {
-                Debug.Assert(false, "用"+this.ItemTypeName+"记录参考 ID 检索应当不会发生重复现象");
-                MessageBox.Show(this/*ForegroundWindow.Instance*/, "用参考ID '" + strItemRefID + "' 检索"+this.ItemTypeName+"记录命中多于一条，为 " + nRet.ToString() + " 条");
-                return -1;
-            }
-
-            return 0;
-            /*
-        ERROR1:
-            return -1;
-             * */
-#endif
         }
 
         public virtual string ErrorInfo
