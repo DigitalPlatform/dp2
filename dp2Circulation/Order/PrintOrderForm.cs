@@ -563,6 +563,7 @@ namespace dp2Circulation
             // load page
             this.button_load_loadFromBatchNo.Enabled = bEnable;
             this.button_load_loadFromFile.Enabled = bEnable;
+            this.button_load_loadFromOrderTime.Enabled = bEnable;
 
             this.comboBox_load_type.Enabled = bEnable;
 
@@ -10656,9 +10657,12 @@ column.Evalue);
         {
             get
             {
-                for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                var items = ListViewUtil.GetItems(this.listView_origin);
+                // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                foreach (var item in items)
                 {
-                    OriginItemData data = (OriginItemData)this.listView_origin.Items[i].Tag;
+                    // OriginItemData data = (OriginItemData)this.listView_origin.Items[i].Tag;
+                    OriginItemData data = (OriginItemData)item.Tag;
                     if (data.Changed == true)
                         return true;
                 }

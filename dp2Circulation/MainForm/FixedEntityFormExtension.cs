@@ -62,11 +62,14 @@ namespace dp2Circulation
 
         public void SetMdiToNormal()
         {
-            if (this.ActiveMdiChild != null)
+            this.TryInvoke(() =>
             {
-                if (this.ActiveMdiChild.WindowState != FormWindowState.Normal)
-                    this.ActiveMdiChild.WindowState = FormWindowState.Normal;
-            }
+                if (this.ActiveMdiChild != null)
+                {
+                    if (this.ActiveMdiChild.WindowState != FormWindowState.Normal)
+                        this.ActiveMdiChild.WindowState = FormWindowState.Normal;
+                }
+            });
         }
 
         internal BiblioSearchForm _dockedBiblioSearchForm = null;
@@ -91,6 +94,7 @@ namespace dp2Circulation
         }
 
         // 在固定面板区“浏览”属性页显示重复的书目记录列表
+        // thread: ui 线程外安全
         // parameters:
         //      strRecPathList  路径字符串列表，逗号分隔。如果为空，表示要清除浏览窗口中原有的内容
         public int DisplayDupBiblioList(string strRecPathList,

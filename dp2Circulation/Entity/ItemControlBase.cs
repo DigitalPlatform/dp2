@@ -7,6 +7,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Xml;
 using System.Drawing;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -16,7 +17,6 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -44,10 +44,12 @@ namespace dp2Circulation
         /// </summary>
         public event GenerateDataEventHandler GenerateData = null;
 
+#if REMOVED
         /// <summary>
         /// 装载记录
         /// </summary>
         public event LoadRecordHandler LoadRecord = null;
+#endif
 
         internal bool m_bRemoveDeletedItem = false;   // 在删除事项时, 是否从视觉上抹除这些事项(实际上内存里面还保留有即将提交的事项)?
 
@@ -503,6 +505,7 @@ namespace dp2Circulation
             this.GetMacroValue?.Invoke(sender, e);
         }
 
+#if REMOVED
         // return:
         //      -1  出错。已经用MessageBox报错
         //      0   没有装载
@@ -522,6 +525,7 @@ namespace dp2Circulation
             this.LoadRecord(this, e);
             return e.Result;
         }
+#endif
 
         /// <summary>
         /// Item 类型。item/order/issue/comment
@@ -1761,7 +1765,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             return nRet;
         }
 
-        #region 菜单命令
+#region 菜单命令
 
         internal void menu_getKeys_Click(object sender, EventArgs e)
         {
@@ -2031,7 +2035,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             MessageBoxShow(strError);
         }
 
-        #endregion
+#endregion
 
         // 外部调用接口
         /// <summary>
@@ -2153,6 +2157,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             return bookitem;
         }
 
+        public delegate Task<int> loadBiblioRecord(string biblio_recpath);
+
+        public class SearchItemResult : NormalResult
+        {
+            public T ResultItem { get; set; }
+        }
+
         /*
 操作类型 crashReport -- 异常报告 
 主题 dp2circulation 
@@ -2196,6 +2207,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
         public int DoSearchItem(
             string strSearchPrefix,
             string strSearchText,
+            loadBiblioRecord func_loadBiblioRecord,
             out T result_item,
             bool bDisplayWarning = true)
         {
@@ -2270,6 +2282,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                 else if (nRet == 1)
                 {
                     Debug.Assert(strBiblioRecPath != "", "");
+
+                    /*
                     // return:
                     //      -1  出错。已经用MessageBox报错
                     //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
@@ -2279,6 +2293,18 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
                     if (nRet != 1)
                     {
                         MessageBoxShow("TriggerLoadRecord 出错。错误码 " + nRet.ToString());
+                        return -1;
+                    }
+                    */
+                    var task = func_loadBiblioRecord?.Invoke(strBiblioRecPath);
+                    while(task.IsCompleted == false)
+                    {
+                        Application.DoEvents();
+                    }
+                    nRet = task.Result;
+                    if (nRet != 1)
+                    {
+                        MessageBoxShow("func_loadBiblioRecord 出错。错误码 " + nRet.ToString());
                         return -1;
                     }
 
@@ -2319,15 +2345,18 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
         /// 根据事项记录路径 检索出 书目记录 和全部下属事项记录，装入窗口
         /// </summary>
         /// <param name="strItemRecPath">事项记录路径</param>
+        /// <param name="func_loadBiblioRecord"></param>
         /// <param name="result_item">返回匹配记录路径的那个事项</param>
         /// <param name="bDisplayWarning">是否显示警告信息</param>
         /// <returns>-1: 出错; 0: 没有找到; 1: 成功</returns>
         public int DoSearchItemByRecPath(string strItemRecPath,
+            loadBiblioRecord func_loadBiblioRecord,
             out T result_item,
             bool bDisplayWarning = true)
         {
             return DoSearchItem("@path:",
                 strItemRecPath,
+                func_loadBiblioRecord,
                 out result_item,
                 bDisplayWarning);
         }
@@ -2555,15 +2584,18 @@ dp2Circulation 版本: dp2Circulation, Version=3.6.7270.28358, Culture=neutral, 
         /// 根据事项记录参考ID 检索出 书目记录 和全部下属事项记录，装入窗口
         /// </summary>
         /// <param name="strItemRefID">事项记录的参考 ID</param>
+        /// <param name="func_loadBiblioRecord"></param>
         /// <param name="result_item">返回匹配记录路径的那个事项</param>
         /// <param name="bDisplayWarning">是否显示警告信息</param>
         /// <returns>-1: 出错; 0: 没有找到; 1: 成功</returns>
         public int DoSearchItemByRefID(string strItemRefID,
+            loadBiblioRecord func_loadBiblioRecord,
             out T result_item,
             bool bDisplayWarning = true)
         {
             return DoSearchItem("@refID:",
     strItemRefID,
+    func_loadBiblioRecord,
     out result_item,
     bDisplayWarning);
         }
@@ -2646,7 +2678,7 @@ size.Height);
             }
         }
 
-        #region ILoopingHost
+#region ILoopingHost
 
         IChannelLooping _loopingHost = null;
 
@@ -2732,7 +2764,7 @@ size.Height);
         }
 
 
-        #endregion
+#endregion
     }
 
     /*

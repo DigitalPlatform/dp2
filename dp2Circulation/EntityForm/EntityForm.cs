@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Web;
 using System.Text;
+using System.Data;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -31,7 +32,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Z3950;
-using System.Data;
 // using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 
 namespace dp2Circulation
@@ -42,6 +42,8 @@ namespace dp2Circulation
     public partial class EntityForm : MyForm
     {
         string _dbType = "biblio";
+
+        // thread: ui 线程外安全
         public string DbType
         {
             get
@@ -141,16 +143,7 @@ namespace dp2Circulation
 
         string BiblioOriginPath = "";   // 书目记录在数据库中的原始路径
 
-        // BookItemCollection bookitems = null;
-
-        // string m_strBiblioRecPath = ""; // 本窗口中的种记录路径
-
-        // BiblioDbFromInfo[] DbFromInfos = null;
-
         BrowseSearchResultForm browseWindow = null;
-
-        //// int m_nInSearching = 0;
-        // string m_strTempBiblioRecPath = "";
 
         RegisterType m_registerType = RegisterType.Register;
 
@@ -175,7 +168,7 @@ namespace dp2Circulation
         /// </summary>
         public byte[] BiblioTimestamp = null;
 
-        // 
+        // thread: ui 线程外安全
         /// <summary>
         /// 当前记录的书目库名。
         /// 主要给C#二次开发脚本用
@@ -188,6 +181,7 @@ namespace dp2Circulation
             }
         }
 
+        // thread: ui 线程外安全
         /// <summary>
         /// 书目记录路径
         /// </summary>
@@ -258,6 +252,7 @@ namespace dp2Circulation
             }
         }
 
+        // thread: ui 线程外安全
         void SetTitle(string text)
         {
             this.TryInvoke(() =>
@@ -433,6 +428,7 @@ namespace dp2Circulation
             this.MemoNumbers = new List<CallNumberForm.MemoTailNumber>();
         }
 
+        // thread: ui 线程外安全
         void EnableItemsPage(bool bEnable)
         {
             EnablePage(bEnable,
@@ -447,6 +443,7 @@ namespace dp2Circulation
 #endif
         }
 
+        // thread: ui 线程外安全
         void EnableObjectsPage(bool bEnable)
         {
             EnablePage(bEnable,
@@ -454,6 +451,7 @@ namespace dp2Circulation
                 this.tabPage_object);
         }
 
+        // thread: ui 线程外安全
         void EnableIssuesPage(bool bEnable)
         {
             EnablePage(bEnable,
@@ -461,6 +459,7 @@ namespace dp2Circulation
                 this.tabPage_issue);
         }
 
+        // thread: ui 线程外安全
         void EnableOrdersPage(bool bEnable)
         {
             EnablePage(bEnable,
@@ -468,6 +467,7 @@ namespace dp2Circulation
                 this.tabPage_order);
         }
 
+        // thread: ui 线程外安全
         void EnableCommentsPage(bool bEnable)
         {
             EnablePage(bEnable,
@@ -483,6 +483,7 @@ namespace dp2Circulation
             }
         }
 
+        // thread: ui 线程外安全
         void EnablePage(bool bEnable,
             TabControl container,
             TabPage page)
@@ -582,7 +583,6 @@ namespace dp2Circulation
                 this.binaryResControl1.Enabled = false;
             }
 
-
             Program.MainForm.FillBiblioFromList(this.comboBox_from);
 
             // 恢复上次退出时保留的检索途径
@@ -602,7 +602,6 @@ namespace dp2Circulation
                 "entityform",
                 "search_matchstyle",
                 "前方一致");
-
 
             /*
             // 2008/6/25 
@@ -625,7 +624,6 @@ namespace dp2Circulation
             InitialEntityColumnDefs(Path.Combine(Program.MainForm.UserDir, "item_list.xml"));
             InitialEntityControl(true);
             this.EnableItemsPage(false);
-
 
             // 初始化期控件
 
@@ -654,10 +652,11 @@ namespace dp2Circulation
             this.issueControl1.ChangeItem -= new ChangeItemEventHandler(issueControl1_ChangeItem);
             this.issueControl1.ChangeItem += new ChangeItemEventHandler(issueControl1_ChangeItem);
 
+#if REMOVED
             // 2010/4/27
             this.issueControl1.LoadRecord -= new LoadRecordHandler(entityControl1_LoadRecord111);
             this.issueControl1.LoadRecord += new LoadRecordHandler(entityControl1_LoadRecord111);
-
+#endif
             // 2012/9/22
             this.issueControl1.GenerateData -= new GenerateDataEventHandler(entityControl1_GenerateData);
             this.issueControl1.GenerateData += new GenerateDataEventHandler(entityControl1_GenerateData);
@@ -716,10 +715,11 @@ namespace dp2Circulation
             this.orderControl1.SetTargetRecPath -= new SetTargetRecPathEventHandler(orderControl1_SetTargetRecPath);
             this.orderControl1.SetTargetRecPath += new SetTargetRecPathEventHandler(orderControl1_SetTargetRecPath);
 
+#if REMOVED
             // 2009/11/23 
             this.orderControl1.LoadRecord -= new LoadRecordHandler(entityControl1_LoadRecord111);
             this.orderControl1.LoadRecord += new LoadRecordHandler(entityControl1_LoadRecord111);
-
+#endif
             this.orderControl1.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(orderControl1_VerifyLibraryCode);
             this.orderControl1.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(orderControl1_VerifyLibraryCode);
 
@@ -759,9 +759,10 @@ namespace dp2Circulation
             this.commentControl1.SetTargetRecPath += new SetTargetRecPathEventHandler(orderControl1_SetTargetRecPath);
 
             */
+#if REMOVED
             this.commentControl1.LoadRecord -= new LoadRecordHandler(entityControl1_LoadRecord111);
             this.commentControl1.LoadRecord += new LoadRecordHandler(entityControl1_LoadRecord111);
-
+#endif
             this.CommentControl.AddSubject -= new AddSubjectEventHandler(CommentControl_AddSubject);
             this.CommentControl.AddSubject += new AddSubjectEventHandler(CommentControl_AddSubject);
 
@@ -982,9 +983,9 @@ true);
                 /*
                 this.entityControl1.EnableControlsEvent += new EnableControlsHandler(entityControl1_EnableControls);
                 */
-
+#if REMOVED
                 this.entityControl1.LoadRecord += new LoadRecordHandler(entityControl1_LoadRecord111);
-
+#endif
                 // 2009/2/24 
                 this.entityControl1.GenerateData += new GenerateDataEventHandler(entityControl1_GenerateData);
 
@@ -1005,15 +1006,15 @@ true);
                 /*
                 this.entityControl1.EnableControlsEvent -= new EnableControlsHandler(entityControl1_EnableControls);
                 */
+#if REMOVED
                 this.entityControl1.LoadRecord -= new LoadRecordHandler(entityControl1_LoadRecord111);
+#endif
                 this.entityControl1.GenerateData -= new GenerateDataEventHandler(entityControl1_GenerateData);
                 this.entityControl1.ShowMessage -= entityControl1_ShowMessage;
 
                 // this.entityControl1.Stop = null;
                 this.entityControl1.SetLoopingHost(null);
             }
-
-
         }
 
         void MainForm_StreamProgressChanged(object sender, StreamProgressChangedEventArgs e)
@@ -2436,6 +2437,7 @@ true);
             SetSaveAllButtonState(!InDisabledState);
         }
 
+#if REMOVED
         void entityControl1_LoadRecord111(object sender, LoadRecordEventArgs e)
         {
             // 注: 这里不能用 LoadRecordOldAsync()。只能用 LoadRecordOld()
@@ -2448,6 +2450,7 @@ true);
                 "",
                 false);
         }
+#endif
 
         /*
         void entityControl1_EnableControls(object sender, EnableControlsEventArgs e)
@@ -7162,8 +7165,14 @@ out strError);
             return Task.Factory.StartNew(
                 () =>
                 {
+                    /*
                     return _loadItemByBarcode(
                         strItemBarcode,
+                        bAutoSavePrev);
+                    */
+                    return _loadItemByRecPath(
+                        "item",
+                        "@barcode:" + strItemBarcode,
                         bAutoSavePrev);
                 },
     this.CancelToken,
@@ -7171,6 +7180,7 @@ out strError);
     TaskScheduler.Default);
         }
 
+#if REMOVED     // 改用 _loadItemByRecPath()
         // 根据册条码号，装载书目记录
         int _loadItemByBarcode(string strItemBarcode,
             bool bAutoSavePrev)
@@ -7244,7 +7254,12 @@ out strError);
             //      -1  error
             //      0   not found
             //      1   found
-            nRet = this.entityControl1.DoSearchEntity(this.QuickItemBarcode,
+            nRet = this.entityControl1.DoSearchEntity(
+                this.QuickItemBarcode,
+                (biblio_recpath) =>
+                {
+                    return LoadRecordAsync(biblio_recpath, "", false);
+                },
                 out BookItem result_item);
             if (result_item == null)
             {
@@ -7257,6 +7272,7 @@ out strError);
             this.SwitchFocus(ITEM_LIST);
             return nRet;
         }
+#endif
 
         // (为兼容以前 API 的版本，线程模型不良，尽快废弃)
         // 2008/11/2 
@@ -7310,20 +7326,41 @@ out strError);
     TaskScheduler.Default);
         }
 
+        // 将 @barcode:xxxxxx 的前缀和内容分离开。query_type 中返回 "barcode"
+        void ParseQueryType(ref string text,
+            out string query_type)
+        {
+            query_type = "";
+            if (text.StartsWith("@") == false)
+                return;
+            int offset = text.IndexOf(':');
+            if (offset == -1)
+                return;
+            query_type = text.Substring(1, offset - 1);
+            text = text.Substring(offset + 1);
+        }
+
+        // 根据下级记录类型，和下级记录路径(或参考 ID 或册条码号)，装载书目记录。
+        // 
         // parameters:
         //      strDbType   下级数据库类型。为 item/issue/order/comment 之一
+        //      strItemRecPath  下级记录路径。
+        //                      strItemRecPath 内容可以带有前缀 "@refID" 或 "@barcode"，利用参考 ID 或册条码号装入
         int _loadItemByRecPath(string strDbType,
             string strItemRecPath,
             bool bAutoSavePrev)
         {
             int nRet = 0;
 
-            string query_type = "path";
-            if (strItemRecPath.StartsWith("@refID:"))
-            {
-                strItemRecPath = strItemRecPath.Substring("@refID:".Length);
-                query_type = "refID";
-            }
+            ParseQueryType(ref strItemRecPath,
+                out string query_type);
+
+            Debug.Assert(query_type == "refID"
+                || query_type == "barcode"
+                || query_type == "path"
+                || string.IsNullOrEmpty(query_type));
+            if (string.IsNullOrEmpty(query_type))
+                query_type = "path";    // 默认 path
 
             string strDbTypeCaption = ItemInfoForm.GetDbTypeCaption(strDbType);
             // TODO: 外部调用时，要能自动把items page激活
@@ -7397,10 +7434,15 @@ out strError);
                         //      -1  error
                         //      0   not found
                         //      1   found
-                        nRet = this.entityControl1.DoSearchItemByRefID(strItemRecPath,
+                        nRet = this.entityControl1.DoSearchItemByRefID(
+                            strItemRecPath,
+                            (biblio_recpath) =>
+                            {
+                                return LoadRecordAsync(biblio_recpath, "", false);
+                            },
                             out result_item);
                     }
-                    else
+                    else if (query_type == "path")
                     {
                         // 注：如果所装入的item从属于和当前种不同的种，如果当前书目数据被修改过，会警告是否(破坏性)装入，但是书目数据不会被保存。这是一个问题。
                         // return:
@@ -7409,9 +7451,28 @@ out strError);
                         //      1   found
                         nRet = this.entityControl1.DoSearchItemByRecPath(
                             strItemRecPath,
+                            (biblio_recpath) =>
+                            {
+                                return LoadRecordAsync(biblio_recpath, "", false);
+                            },
                             out result_item,
                             false);
                     }
+                    else if (query_type == "barcode")
+                    {
+                        nRet = this.entityControl1.DoSearchEntity(
+                            strItemRecPath, // this.QuickItemBarcode,
+                            (biblio_recpath) =>
+                            {
+                                return LoadRecordAsync(biblio_recpath, "", false);
+                            },
+                            out result_item);
+                    }
+                    else
+                    {
+                        throw new Exception($"无法识别的 query_type '{query_type}'");
+                    }
+
                     if (result_item != null)
                         strItemBarcode = result_item.Barcode;
                     else
@@ -7435,6 +7496,10 @@ out strError);
                     //      0   not found
                     //      1   found
                     nRet = this.orderControl1.DoSearchItemByRecPath(strItemRecPath,
+                        (biblio_recpath) =>
+                        {
+                            return LoadRecordAsync(biblio_recpath, "", false);
+                        },
                         out OrderItem result_item);
                     this.SwitchFocus(ORDER_LIST);
                 }
@@ -7445,7 +7510,12 @@ out strError);
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    nRet = this.issueControl1.DoSearchItemByRecPath(strItemRecPath,
+                    nRet = this.issueControl1.DoSearchItemByRecPath(
+                        strItemRecPath,
+                        (biblio_recpath) =>
+                        {
+                            return LoadRecordAsync(biblio_recpath, "", false);
+                        },
                         out IssueItem result_item);
                     this.SwitchFocus(ISSUE_LIST);
                 }
@@ -7457,6 +7527,10 @@ out strError);
                     //      0   not found
                     //      1   found
                     nRet = this.commentControl1.DoSearchItemByRecPath(strItemRecPath,
+                        (biblio_recpath) =>
+                        {
+                            return LoadRecordAsync(biblio_recpath, "", false);
+                        },
                         out CommentItem result_item);
                     this.SwitchFocus(COMMENT_LIST);
                 }
@@ -8703,6 +8777,7 @@ out strError);
         }
 
         // 保存书目记录到数据库
+        // thread: ui 线程外安全
         // parameters:
         //      bIncludeFileID  (书目记录XML)是否要根据当前rescontrol内容合成<dprms:file>元素?
         // return:
@@ -8868,9 +8943,8 @@ out strError);
                 if (StringUtil.IsInList("checkUnique", strStyle) == true)
                 {
                     {
-                        string strError1;
                         nRet = Program.MainForm.DisplayDupBiblioList("",
-            out strError1);
+            out string strError1);
                         if (nRet == -1)
                         {
                             strError = strError + "\r\n\r\n在显示发生重复的书目记录时出错: " + strError1;
@@ -8908,11 +8982,13 @@ out strError);
                         if (this.Fixed == false)
                         {
                             Program.MainForm.SetMdiToNormal();
-                            this.MenuItem_marcEditor_toggleFixed_Click(this, new EventArgs());
+                            this.TryInvoke(() =>
+                            {
+                                this.MenuItem_marcEditor_toggleFixed_Click(this, new EventArgs());
+                            });
                         }
-                        string strError1;
                         nRet = Program.MainForm.DisplayDupBiblioList(strOutputPath,
-            out strError1);
+            out string strError1);
                         if (nRet == -1)
                         {
                             strError = strError + "\r\n\r\n在显示发生重复的书目记录时出错: " + strError1;
@@ -8926,6 +9002,7 @@ out strError);
                     }
                     if (channel.ErrorCode == ErrorCode.TimestampMismatch)
                     {
+                        // 显示两条书目记录，对比显示
                         // return:
                         //      -1  出错
                         //      0   放弃保存
@@ -9004,7 +9081,12 @@ out strError);
                 if (bSearchDup == true)
                 {
                     if (this.AutoSearchDup == true)
-                        API.PostMessage(this.Handle, WM_SEARCH_DUP, 0, 0);
+                    {
+                        this.TryInvoke(() =>
+                        {
+                            API.PostMessage(this.Handle, WM_SEARCH_DUP, 0, 0);
+                        });
+                    }
                 }
 
                 // if (bPartialDenied == true)
@@ -9141,6 +9223,8 @@ out strError);
             return -1;
         }
 
+        // 显示两条书目记录，对比显示
+        // thread: ui 线程外安全
         // return:
         //      -1  出错
         //      0   放弃保存
@@ -9153,22 +9237,13 @@ out strError);
         {
             strError = "";
 
-            List<string> format_list = new List<string>();
-            format_list.Add("xml");
-
-            // string strOutputBiblioRecPath = "";
-            string strXml = "";
-
-            string[] results = null;
-            byte[] baTimestamp = null;
-
             long lRet = channel.GetBiblioInfos(
                 null,
                 strRecPath,
                 "",
-                format_list.ToArray(),
-                out results,
-                out baTimestamp,
+                new string[] { "xml" },
+                out string[] results,
+                out byte[] baTimestamp,
                 out strError);
             if (lRet == -1)
             {
@@ -9181,19 +9256,24 @@ out strError);
                 return 0;   // not found
             }
 
-            strXml = results[0];
+            string strXml = results[0];
 
-            TimestampMismatchDialog dlg = new TimestampMismatchDialog();
+            TimestampMismatchDialog dlg = null;
 
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.SavingXml = strSavingXml;
-            dlg.SavedXml = strXml;
-            // dlg.MainForm = Program.MainForm;
+            var dialog_result = this.TryGet(() =>
+            {
+                dlg = new TimestampMismatchDialog();
 
-            Program.MainForm.AppInfo.LinkFormState(dlg, "PartialDeniedDialog_state");
-            dlg.ShowDialog(this);
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.SavingXml = strSavingXml;
+                dlg.SavedXml = strXml;
+                // dlg.MainForm = Program.MainForm;
 
-            if (dlg.DialogResult == System.Windows.Forms.DialogResult.OK)
+                Program.MainForm.AppInfo.LinkFormState(dlg, "PartialDeniedDialog_state");
+                return dlg.ShowDialog(this);
+            });
+
+            if (dialog_result == System.Windows.Forms.DialogResult.OK)
             {
                 if (dlg.Action == "retrySave")
                     return 1;   // 重试强行覆盖
@@ -9201,13 +9281,16 @@ out strError);
                 {
                     if (this.Fixed == false)
                     {
-                        // 将当前窗口放在左侧
-                        Program.MainForm.SetMdiToNormal();
-                        this.MenuItem_marcEditor_toggleFixed_Click(this, new EventArgs());
+                        this.TryInvoke(() =>
+                        {
+                            // 将当前窗口放在左侧
+                            Program.MainForm.SetMdiToNormal();
+                            this.MenuItem_marcEditor_toggleFixed_Click(this, new EventArgs());
 
-                        // 右侧打开一个新窗口限制数据库中的当前记录
-                        EntityForm form = OpenNewEntityForm(strRecPath);
-                        form.ShowMessage("这是用于对比的，数据库中的记录", "green", true);
+                            // 右侧打开一个新窗口显示数据库中的当前记录
+                            EntityForm form = OpenNewEntityForm(strRecPath);
+                            form.ShowMessage("这是用于对比的，数据库中的记录", "green", true);
+                        });
                     }
                 }
             }
