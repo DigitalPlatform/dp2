@@ -3557,14 +3557,16 @@ Keys keyData)
             if (bEnable == false)
             {
                 _enableControlsLevel++;
-                Debug.Assert(_enableControlsLevel >= 0);
+                Debug.Assert(_enableControlsLevel >= 0, 
+                    $"++ 后 _enableControlsLevel({_enableControlsLevel}) 应该 >=0");
                 if (_enableControlsLevel == 1)
                     return true;
             }
             else
             {
                 _enableControlsLevel--;
-                Debug.Assert(_enableControlsLevel >= 0);
+                Debug.Assert(_enableControlsLevel >= 0,
+                    $"-- 后 _enableControlsLevel({_enableControlsLevel}) 应该 >=0");
                 if (_enableControlsLevel == 0)
                     return true;
             }

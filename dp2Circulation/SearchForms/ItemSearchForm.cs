@@ -6481,7 +6481,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 goto ERROR1;
             */
             {
-                var result = await form.LoadFromOrderRecPathFile(
+                var result = await form.LoadFromOrderRecPathFileAsync(
                     true,
                     strFilename);
                 if (result.Value == -1)
@@ -6552,7 +6552,7 @@ strError + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以
                 goto ERROR1;
             */
             {
-                var result = await form.LoadFromOrderRecPathFile(
+                var result = await form.LoadFromOrderRecPathFileAsync(
     true,
     strFilename);
                 if (result.Value == -1)

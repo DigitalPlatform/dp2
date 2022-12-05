@@ -607,51 +607,51 @@ namespace dp2Circulation
                 //      1   装载已经完成
                 //      2   虽然装载了数据，但是其中有错误事项
                 int nState = ReportLoadState(out strError);
-
-                if (nState != 1)
+                this.TryInvoke(() =>
                 {
-                    this.button_next.Enabled = false;
-                }
-                else
-                    this.button_next.Enabled = true;
+                    if (nState != 1)
+                        this.button_next.Enabled = false;
+                    else
+                        this.button_next.Enabled = true;
+                });
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_saveChange)
             {
-
                 //      0   没有发生过修改
                 //      1   发生了修改，并且尚未保存
                 //      2   发生了修改，已经保存过了，并没有新的修改
                 int nState = ReportSaveChangeState(out strError);
                 int nErrorCount = GetErrorLineCount();
-                if (nState == 1)
-                {
-                    this.button_saveChange_saveChange.Enabled = true;
-                }
-                else
-                {
-                    this.button_saveChange_saveChange.Enabled = false;
-                }
-
-                // 没有错误事项，没有修改或者修改已经保存
-                if (nErrorCount == 0 && nState != 1)
-                    this.button_next.Enabled = true;
-                else
-                    this.button_next.Enabled = false;
-
                 if (nErrorCount > 0)
                     strError += "\r\n\r\n原始数据列表中有错误事项(红色背景) " + nErrorCount.ToString() + "个";
 
-                this.textBox_saveChange_info.Text = strError;
+                this.TryInvoke(() =>
+                {
+                    if (nState == 1)
+                        this.button_saveChange_saveChange.Enabled = true;
+                    else
+                        this.button_saveChange_saveChange.Enabled = false;
+
+                    // 没有错误事项，没有修改或者修改已经保存
+                    if (nErrorCount == 0 && nState != 1)
+                        this.button_next.Enabled = true;
+                    else
+                        this.button_next.Enabled = false;
+
+                    this.textBox_saveChange_info.Text = strError;
+                });
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_print)
             {
-                this.button_next.Enabled = false;
+                this.TryInvoke(() =>
+                {
+                    this.button_next.Enabled = false;
+                });
             }
             else
             {
                 Debug.Assert(false, "未知的tabpage状态");
             }
-
         }
 
         // 汇报数据装载情况。
@@ -791,7 +791,7 @@ namespace dp2Circulation
             string strFilename,
             out string strError)
         {
-            var task = LoadFromOrderRecPathFile(
+            var task = LoadFromOrderRecPathFileAsync(
 bAutoSetSeriesType,
 strFilename);
             while (task.IsCompleted == false)
@@ -803,7 +803,7 @@ strFilename);
             return result.Value;
         }
 
-        public Task<NormalResult> LoadFromOrderRecPathFile(
+        public Task<NormalResult> LoadFromOrderRecPathFileAsync(
     bool bAutoSetSeriesType,
     string strFilename)
         {
@@ -1101,7 +1101,7 @@ TaskScheduler.Default);
             if (nRet == -1)
                 goto ERROR1;
             */
-            var result = await LoadFromOrderRecPathFile(
+            var result = await LoadFromOrderRecPathFileAsync(
                 true,
                 dlg.FileName);
             if (result.Value == -1)
@@ -10304,14 +10304,14 @@ column.Evalue);
         #endregion
 
         // 保存对原始数据的修改
-        private void button_saveChange_saveChange_Click(object sender, EventArgs e)
+        private async void button_saveChange_saveChange_Click(object sender, EventArgs e)
         {
             // 组织成批保存 SetOrders
-            string strError = "";
+            // string strError = "";
             // TODO: 保存修改后，最好重新合并一次？
-            int nRet = SaveOrders(out strError);
-            if (nRet == -1)
-                MessageBox.Show(this, strError);
+            var result = await SaveOrdersAsync();
+            if (result.Value == -1)
+                MessageBox.Show(this, result.ErrorInfo);
             else
             {
                 this.m_nSavedCount++;
@@ -10319,7 +10319,7 @@ column.Evalue);
                 // 警告 验收情况 状态
                 if (this.AcceptCondition == true)
                 {
-                    MessageBox.Show(this, "注意，当前状态为 “打印验收情况”，您所保存的对数据的修改，未包含对订购记录状态和订购时间字段的修改。也就是说，保存数据修改后，相关新订购数据并未变成“已订购”状态，也就不能用于验收(原来已经打印过订单的订购数据不受影响，可以验收)。\r\n\r\n如果要进行普通订单打印，需要先在本窗口“装载”属性页中清除对“验收情况”的勾选，然后重新装载数据");
+                    this.MessageBoxShow("注意，当前状态为 “打印验收情况”，您所保存的对数据的修改，未包含对订购记录状态和订购时间字段的修改。也就是说，保存数据修改后，相关新订购数据并未变成“已订购”状态，也就不能用于验收(原来已经打印过订单的订购数据不受影响，可以验收)。\r\n\r\n如果要进行普通订单打印，需要先在本窗口“装载”属性页中清除对“验收情况”的勾选，然后重新装载数据");
                 }
 
                 // 刷新Origin的深浅间隔色
@@ -10359,7 +10359,10 @@ column.Evalue);
             if (StringUtil.IsInList("order", strStyle) == false)
                 return results;
 
-            foreach (ListViewItem item in this.listView_origin.Items)
+            var origin_items = ListViewUtil.GetItems(this.listView_origin);
+
+            // foreach (ListViewItem item in this.listView_origin.Items)
+            foreach (var item in origin_items)
             {
                 if (item.ImageIndex == TYPE_ERROR)
                     continue;
@@ -10379,36 +10382,47 @@ column.Evalue);
             return results;
         }
 
-        // 保存对原始订购记录的修改
-        int SaveOrders(out string strError)
+        public Task<NormalResult> SaveOrdersAsync()
         {
-            strError = "";
+            return Task.Factory.StartNew(() =>
+            {
+                return _saveOrders();
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // 保存对原始订购记录的修改
+        NormalResult _saveOrders()
+        {
+            string strError = "";
             int nRet = 0;
 
-            /*
-            EnableControls(false);
-
-            LibraryChannel channel = this.GetChannel();
-
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在保存原始记录 ...");
-            _stop.BeginLoop();
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在保存原始记录 ...",
                 "disableControl");
             try
             {
                 string strPrevBiblioRecPath = "";
+
+                var origin_items = ListViewUtil.GetItems(this.listView_origin);
+
                 List<EntityInfo> entity_list = new List<EntityInfo>();
-                for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+                for (int i = 0; i < origin_items.Count; i++)
                 {
-                    ListViewItem item = this.listView_origin.Items[i];
+                    // ListViewItem item = this.listView_origin.Items[i];
+                    var item = origin_items[i];
 
                     if (item.ImageIndex == TYPE_ERROR)
                     {
                         strError = "原始数据列表中，第 " + (i + 1).ToString() + " 个事项为错误状态。需要先排除问题才能进行保存。";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     OriginItemData data = (OriginItemData)item.Tag;
@@ -10434,8 +10448,11 @@ column.Evalue);
                             strPrevBiblioRecPath,
                             out strError);
                         if (nRet == -1)
-                            return -1;
-
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         entity_list.Clear();
                     }
 
@@ -10447,7 +10464,11 @@ column.Evalue);
                     catch (Exception ex)
                     {
                         strError = "order record XML装载到DOM时发生错误: " + ex.Message;
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     DomUtil.SetElementText(dom.DocumentElement,
@@ -10483,7 +10504,11 @@ column.Evalue);
                         catch (Exception ex)
                         {
                             strError = "日期字符串 '" + strOrderTime + "' 格式错误：" + ex.Message;
-                            return -1;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         }
 
                         DomUtil.SetElementText(dom.DocumentElement,
@@ -10533,25 +10558,20 @@ column.Evalue);
                         strPrevBiblioRecPath,
                         out strError);
                     if (nRet == -1)
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
 
                     entity_list.Clear();
                 }
 
-                return 0;
+                return new NormalResult();
             }
             finally
             {
                 looping.Dispose();
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-
-                this.ReturnChannel(channel);
-
-                EnableControls(true);
-                */
             }
         }
 
@@ -10638,18 +10658,24 @@ column.Evalue);
             out ListViewItem item)
         {
             item = null;
-            for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            var origin_items = ListViewUtil.GetItems(this.listView_origin);
+            // for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            foreach (var current in origin_items)
             {
-                item = this.listView_origin.Items[i];
-                OriginItemData data = (OriginItemData)item.Tag;
+                // item = this.listView_origin.Items[i];
+                OriginItemData data = (OriginItemData)current.Tag;
                 if (data.RefID == strRefID)
+                {
+                    item = current;
                     return data;
+                }
             }
 
             item = null;
             return null;
         }
 
+        // thread: ui 线程外安全
         /// <summary>
         /// 内容是否发生过修改
         /// </summary>
@@ -12652,10 +12678,8 @@ string strFileName)
         }
 
         // 根据订购时间范围装载
-        private void button_load_loadFromOrderTime_Click(object sender, EventArgs e)
+        private async void button_load_loadFromOrderTime_Click(object sender, EventArgs e)
         {
-            string strError = "";
-
             DateSliceDialog dlg = new DateSliceDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.Text = "请指定订购时间范围";
@@ -12667,23 +12691,35 @@ string strFileName)
             if (dlg.DialogResult == DialogResult.Cancel)
                 return;
 
-            int nRet = SearchAndFill(dlg.Rfc1123TimeRange,
+            var result = await SearchAndFillAsync(dlg.Rfc1123TimeRange,
                 "订购时间",
-                "exact",
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+                "exact");
+            if (result.Value == -1)
+                this.MessageBoxShow(result.ErrorInfo);
         }
 
-        int SearchAndFill(string strQueryWord,
+        public Task<NormalResult> SearchAndFillAsync(
+            string strQueryWord,
             string strFrom,
-            string strMatchStyle,
-            out string strError)
+            string strMatchStyle)
         {
-            strError = "";
+            return Task.Factory.StartNew(() =>
+            {
+                return _searchAndFill(strQueryWord,
+            strFrom,
+            strMatchStyle);
+            },
+this.CancelToken,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+        }
+
+        // TODO: 独立线程改造
+        NormalResult _searchAndFill(string strQueryWord,
+            string strFrom,
+            string strMatchStyle)
+        {
+            string strError = "";
             int nRet = 0;
 
             if (System.Windows.Forms.Control.ModifierKeys == Keys.Control)
@@ -12694,36 +12730,31 @@ string strFileName)
                 if (this.Changed == true)
                 {
                     // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = this.TryGet(() =>
+                    {
+                        return MessageBox.Show(this,
                         "当前窗口内有原始信息被修改后尚未保存。若此时为装载新内容而清除原有信息，则未保存信息将丢失。\r\n\r\n确实要装载新内容? ",
                         "PrintOrderForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    });
                     if (result != DialogResult.Yes)
                     {
-                        return 0; // 放弃
+                        return new NormalResult(); // 放弃
                     }
                 }
 
-                this.listView_origin.Items.Clear();
-                this.SortColumns_origin.Clear();
-                SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+                this.TryInvoke(() =>
+                {
+                    this.listView_origin.Items.Clear();
+                    this.SortColumns_origin.Clear();
+                    SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+                });
             }
 
             _changed_recpaths = Program.MainForm.GetChangedRecords("order");
 
-            /*
-            EnableControls(false);
-
-            LibraryChannel channel = this.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(2);
-
-            _stop.OnStop += new StopEventHandler(this.DoStop);
-            _stop.Initial("正在检索 ...");
-            _stop.BeginLoop();
-            */
             var looping = Looping(out LibraryChannel channel,
                 "正在检索 ...",
                 "timeout:0:2:0,disableControl");
@@ -12747,12 +12778,20 @@ string strFileName)
     "", // strOutputStyle
     out strError);
                 if (lRet == -1)
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
 
                 if (lRet == 0)
                 {
                     strError = $"检索词 '{strQueryWord}' 没有命中记录";
-                    return -1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
                 }
 
                 ResultSetLoader loader = new ResultSetLoader(channel,
@@ -12772,12 +12811,16 @@ string strFileName)
                 int i = 0;
                 foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (looping.Stopped)
                     {
                         strError = "用户中断";
-                        return -1;
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = strError
+                        };
                     }
 
                     // 处理浏览结果
@@ -12796,7 +12839,11 @@ string strFileName)
                             this.listView_origin,
                             out strError);
                         if (nRet == -1)
-                            return -1;
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = strError
+                            };
                         if (nRet == -2)
                             nDupCount++;
 
@@ -12811,26 +12858,18 @@ string strFileName)
                 looping.Progress.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
                 if (nRet == -1)
-                    return -1;
-                return 1;
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                return new NormalResult { Value = 1 };
             }
             finally
             {
                 looping.Dispose();
-                /*
-                _stop.EndLoop();
-                _stop.OnStop -= new StopEventHandler(this.DoStop);
-                _stop.Initial("");
-                _stop.HideProgress();
-
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-
-                EnableControls(true);
-                */
             }
         }
-
     }
 
     internal class OutputProjectData

@@ -1901,28 +1901,31 @@ false);
             this.Close();
         }
 
-        // TODO: 线程安全??
         // 获得当前正在编辑、已经修改尚未保存的记录路径集合
+        // thread: ui 线程外安全
         public List<RecordForm> GetChangedRecords(string strStyle)
         {
-            List<RecordForm> results = new List<RecordForm>();
-            // 遍历所有 MDI 子窗口
-            foreach (Form child in this.MdiChildren)
+            return this.TryGet(() =>
             {
-                dynamic window = child;
-
-                try
+                List<RecordForm> results = new List<RecordForm>();
+                // 遍历所有 MDI 子窗口
+                foreach (Form child in this.MdiChildren)
                 {
-                    List<RecordForm> temp = window.GetChangedRecords(strStyle);
-                    results.AddRange(temp);
-                }
-                catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
-                {
-                    continue;
-                }
-            }
+                    dynamic window = child;
 
-            return results;
+                    try
+                    {
+                        List<RecordForm> temp = window.GetChangedRecords(strStyle);
+                        results.AddRange(temp);
+                    }
+                    catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
+                    {
+                        continue;
+                    }
+                }
+
+                return results;
+            });
         }
 
 #if NO

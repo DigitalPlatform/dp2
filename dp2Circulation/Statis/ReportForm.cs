@@ -6078,7 +6078,7 @@ MessageBoxDefaultButton.Button2);
         // TODO: 最好把第一次初始化本地 sql 表的动作也纳入 XML 文件中，这样做单项任务的时候，就不会毁掉其他的表
         // 创建批处理计划
         // 根元素的 state 属性， 值为 first 表示正在进行首次创建，尚未完成; daily 表示已经创建完，进入每日同步阶段
-        int BuildPlan(string strTypeList,
+        int _buildPlan(string strTypeList,
             out XmlDocument task_dom,
             out string strError)
         {
@@ -6244,17 +6244,16 @@ MessageBoxDefaultButton.Button2);
                         return -1;
                     if (nRet == 0)
                     {
-                        DialogResult result = DialogResult.No;
                         string strText = strError;
-                        this.Invoke((Action)(() =>
+                        var result = this.TryGet(() =>
                         {
-                            result = MessageBox.Show(this,
+                            return MessageBox.Show(this,
      strText + "\r\n\r\n建议先中断处理，配置好书目库的分类号检索点再重新创建本地存储。如果此时继续处理，则会无法同步分类号信息，以后也无法创建和分类号有关的报表。\r\n\r\n是否继续处理?",
      "ReportForm",
      MessageBoxButtons.YesNo,
      MessageBoxIcon.Question,
      MessageBoxDefaultButton.Button2);
-                        }));
+                        });
                         if (result == System.Windows.Forms.DialogResult.No)
                             return -1;  // 
                     }
@@ -6503,7 +6502,7 @@ MessageBoxDefaultButton.Button2);
         // 执行首次创建本地存储的计划
         // parameters:
         //      task_dom    存储了计划信息的 XMlDocument 对象。执行后，里面的信息会记载了断点信息等。如果完全完成，则保存前可以仅仅留下结束点信息
-        int DoPlan(ref XmlDocument task_dom,
+        int _doPlan(ref XmlDocument task_dom,
             out string strError)
         {
             strError = "";
@@ -6521,7 +6520,6 @@ MessageBoxDefaultButton.Button2);
             var looping = Looping(out LibraryChannel channel,
                 "正在创建本地存储 ...",
                 "disableControl,timeout:0:5:0");
-
             try
             {
                 this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
@@ -6880,8 +6878,6 @@ MessageBoxDefaultButton.Button2);
 
                         if (strState != "finish")
                         {
-                            string strLastDate = "";
-                            long lLastIndex = 0;
                             // TODO: 中断时断点记载
                             // TODO: 进度条应该是重新设置的
                             nRet = DoCreateOperLogTable(
@@ -6891,8 +6887,8 @@ MessageBoxDefaultButton.Button2);
                                 strStartDate,
                                 strEndDate,
                                 LogType.AccessLog,
-                                out strLastDate,
-                                out lLastIndex,
+                                out string strLastDate,
+                                out long lLastIndex,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -6918,9 +6914,9 @@ MessageBoxDefaultButton.Button2);
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
                 _stop.HideProgress();
-                */
 
                 EnableControls(true);
+                */
             }
         }
 
@@ -7011,15 +7007,21 @@ MessageBoxDefaultButton.Button2);
 
         // 创建本地存储
         // TODO: 中间从服务器复制表的阶段，也应该可以中断，以后可以从断点继续。会出现一个对话框，询问是否继续
-        private void button_start_createLocalStorage_Click(object sender, EventArgs e)
+        private async void button_start_createLocalStorage_Click(object sender, EventArgs e)
         {
-            _ = Task.Factory.StartNew(() => CreateLocalStorage(),
-                CancellationToken.None,
+            await CreateLocalStorageAsync();
+        }
+
+        Task CreateLocalStorageAsync()
+        {
+            return Task.Factory.StartNew(
+                () => _createLocalStorage(),
+                this.CancelToken,
                 TaskCreationOptions.LongRunning,
                 TaskScheduler.Default);
         }
 
-        void CreateLocalStorage()
+        void _createLocalStorage()
         {
             string strError = "";
 
@@ -7047,7 +7049,7 @@ MessageBoxDefaultButton.Button2);
                 if (task_dom == null)
                 {
                     // 创建批处理计划
-                    nRet = BuildPlan("*",    // * "operlog"
+                    nRet = _buildPlan("*",    // * "operlog"
                         out task_dom,
                         out strError);
                     if (nRet == -1)
@@ -7057,7 +7059,8 @@ MessageBoxDefaultButton.Button2);
 
                 try
                 {
-                    nRet = DoPlan(ref task_dom, out strError);
+                    nRet = _doPlan(ref task_dom,
+                        out strError);
                 }
                 finally
                 {
@@ -7069,10 +7072,7 @@ MessageBoxDefaultButton.Button2);
 
                 SetStartButtonStates();
                 SetDailyReportButtonState();
-                this.Invoke((Action)(() =>
-                {
-                    MessageBox.Show(this, "处理完成");
-                }));
+                this.MessageBoxShow("处理完成");
             }
             catch (Exception ex)
             {
@@ -7084,10 +7084,7 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             SetStartButtonStates();
             SetDailyReportButtonState();
-            this.Invoke((Action)(() =>
-            {
-                MessageBox.Show(this, strError);
-            }));
+            this.MessageBoxShow(strError);
         }
 
         void ReportException(string strError, bool bMessageBox = true)
