@@ -1,0 +1,205 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "License API V1",
+    "description": "许可管理 API V1",
+    "contact": {
+      "name": "xietao",
+      "url": "https://github.com/DigitalPlatform/dp2",
+      "email": "xietao@dp2003.com"
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/api/Verify": {
+      "post": {
+        "tags": [
+          "Api"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              },
+              "example": {
+  "ProductName": "dp2library",
+  "MacList": "1,2",
+  "Hashed": null
+}
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              },
+              "example": {
+  "ProductName": "dp2library",
+  "MacList": "1,2",
+  "Hashed": null
+}
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              },
+              "example": {
+  "ProductName": "dp2library",
+  "MacList": "1,2",
+  "Hashed": null
+}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                },
+                "example": {
+  "State": null,
+  "ErrorInfo": null,
+  "Hashed": "6468d407059074a8256aad15f9e31e93"
+}
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                },
+                "example": {
+  "State": null,
+  "ErrorInfo": null,
+  "Hashed": "6468d407059074a8256aad15f9e31e93"
+}
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                },
+                "example": {
+  "State": null,
+  "ErrorInfo": null,
+  "Hashed": "6468d407059074a8256aad15f9e31e93"
+}
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Api"
+        ],
+        "parameters": [
+          {
+            "name": "product_name",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mac_list",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hashed",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                },
+                "example": {
+  "State": null,
+  "ErrorInfo": null,
+  "Hashed": "6468d407059074a8256aad15f9e31e93"
+}
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                },
+                "example": {
+  "State": null,
+  "ErrorInfo": null,
+  "Hashed": "6468d407059074a8256aad15f9e31e93"
+}
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                },
+                "example": {
+  "State": null,
+  "ErrorInfo": null,
+  "Hashed": "6468d407059074a8256aad15f9e31e93"
+}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VerifyRequest": {
+        "type": "object",
+        "properties": {
+          "ProductName": {
+            "type": "string",
+            "nullable": true
+          },
+          "MacList": {
+            "type": "string",
+            "nullable": true
+          },
+          "Hashed": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VerifyResponse": {
+        "type": "object",
+        "properties": {
+          "State": {
+            "type": "string",
+            "nullable": true
+          },
+          "ErrorInfo": {
+            "type": "string",
+            "nullable": true
+          },
+          "Hashed": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

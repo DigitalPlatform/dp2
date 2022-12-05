@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Speech.Synthesis;
 using System.Text;
 using System.Threading;
@@ -12,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.License;
 using DigitalPlatform.Text;
 
 using static DigitalPlatform.CirculationClient.ClientInfo;
@@ -75,6 +78,71 @@ namespace DigitalPlatform.CirculationClient
         }
 
         #region 序列号
+
+        static VerifyRequest BuildHashed(VerifyRequest request)
+        {
+            request.Hashed = GetMd5($"{request.ProductName}|{request.MacList}|{DateTime.UtcNow.ToString("yyyyMMdd")}");
+            return request;
+        }
+
+        static string GetMd5(string strText)
+        {
+            MD5 hasher = MD5.Create();
+            byte[] buffer = Encoding.UTF8.GetBytes(strText);
+            byte[] target = hasher.ComputeHash(buffer);
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in target)
+            {
+                sb.Append(b.ToString("x2").ToLower());
+            }
+
+            return sb.ToString();
+        }
+
+        // 验证 MAC 地址是否被允许
+        public static async Task<NormalResult> VerifyMac(
+            string baseUrl,
+            string product_name,
+            string mac_list)
+        {
+            var request = new VerifyRequest
+            {
+                ProductName = product_name,
+                MacList = mac_list,
+            };
+            BuildHashed(request);
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var client = new LicenseClient(baseUrl, httpClient);
+                    var result = await client.VerifyAsync(request);
+                    if (result.State == null)
+                        return new NormalResult();
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = result.ErrorInfo,
+                        ErrorCode = result.State
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                ClientInfo.WriteErrorLog($"VerifyMac() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"VerifyMac() 出现异常：{ex.Message}",
+                    ErrorCode = ex.GetType().ToString(),
+                };
+            }
+        }
+
+        // 最近一次网络验证 MAC 地址的时间
+        static DateTime _lastNetworkVerifyMacTime = DateTime.MinValue;
+        static int _lastNetworkVerifyMacResult = -1;
+        static TimeSpan _networkVerifyExpireLength = TimeSpan.FromMinutes(10);  // TimeSpan.FromHours(12)
 
         // parameters:
         //      strRequireFuncList   要求必须具备的功能列表。逗号间隔的字符串
@@ -142,6 +210,9 @@ namespace DigitalPlatform.CirculationClient
                 || (bSkipVerify == false && MatchLocalString(strSerialCode) == false)
                 || String.IsNullOrEmpty(strSerialCode) == true)
             {
+                _lastNetworkVerifyMacResult = -1;
+                _lastNetworkVerifyMacTime = DateTime.MinValue;
+
                 if (bReinput == false && bReset == false)
                 {
                     strError = "序列号无效";
@@ -180,6 +251,66 @@ namespace DigitalPlatform.CirculationClient
                 bReset = false;
                 goto REDO_VERIFY;
             }
+
+            // 网络验证
+            // 2022/12/5
+            if (bSkipVerify == false)
+            {
+                if (DateTime.Now - _lastNetworkVerifyMacTime < _networkVerifyExpireLength
+                    && _lastNetworkVerifyMacResult == 1)
+                    return 1;
+
+                string mode = "online"; // 默认 online。online/offline/strict 之一
+
+                bool offline = CheckFunction(GetEnvironmentString(""), "offline");
+                bool strict = CheckFunction(GetEnvironmentString(""), "strict");
+                if (offline)
+                    mode = "offline";
+                if (strict == true)
+                    mode = "strict";
+
+                // 如果没有 'offline' function
+                if (mode == "online" || mode == "strict")
+                {
+                    _lastNetworkVerifyMacTime = DateTime.Now;
+                    var mac_list = string.Join(",", macs);
+                    var task = VerifyMac("https://localhost:7005/",
+                        ProductName,
+                        mac_list);
+                    while(task.IsCompleted == false)
+                    {
+                        Application.DoEvents();
+                    }
+                    var result = task.Result;
+                    if (mode == "strict")
+                    {
+                        // 如果模式为 strict，那么返回状态必须是空才行 
+                        if (result.Value != 0 || string.IsNullOrEmpty(result.ErrorCode) == false)
+                        {
+                            strError = result.ErrorInfo;
+                            _lastNetworkVerifyMacResult = -1;
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        // 如果模式为一般 online，那么返回状态为 [notFound] 或空都是可以的 
+                        if (result.Value == 0 || result.ErrorCode == "[notFound]")
+                        {
+
+                        }
+                        else
+                        {
+                            strError = result.ErrorInfo;
+                            _lastNetworkVerifyMacResult = -1;
+                            return -1;
+                        }
+                    }
+
+                    _lastNetworkVerifyMacResult = 1;
+                }
+            }
+
             return 1;
         }
 
