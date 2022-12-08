@@ -2733,7 +2733,7 @@ TaskScheduler.Default);
                                 out strError);
                             if (nRet == -1)
                             {
-                                this.MessageBoxShow( strError);
+                                this.MessageBoxShow(strError);
                             }
                             this.MessageBoxShow("请注意重新保存记录");
                             return;
@@ -2768,7 +2768,7 @@ TaskScheduler.Default);
                         out strError);
                     if (nRet == -1)
                     {
-                        this.MessageBoxShow( strError);
+                        this.MessageBoxShow(strError);
                     }
                     if (nRet >= 1)
                     {
@@ -2783,7 +2783,7 @@ TaskScheduler.Default);
                             out strError);
                         if (lRet == -1 || lRet == 0)
                         {
-                            this.MessageBoxShow( strError);
+                            this.MessageBoxShow(strError);
                         }
                     }
 
@@ -8946,5 +8946,73 @@ MessageBoxDefaultButton.Button1);
 
             this.commander.AddMessage(WM_FORCE_DELETE_RECORD);
         }
+
+        // 2022/12/8
+        // parameters:
+        //      fileName    要输出的文件的全路径，但不包括扩展名部分。函数调用成功后，会在返回的 outputFileName 中包含扩展名
+        // return:
+        //      -1  出错。包括中断情况
+        //      0   没有找到 usage 对象
+        //      1   成功
+        public int DownloadObjectFile(string usage,
+            string fileName,
+            out string outputFileName,
+            out string strError)
+        {
+            strError = "";
+            outputFileName = "";
+
+            var item = this.binaryResControl1.FindItemByUsage(usage).FirstOrDefault();
+            if (item == null)
+                return 0;   // 没有找到该 usage 的对象
+            var mime = this.binaryResControl1.GetMime(item);
+            var ext = GetImageExt(mime);
+            outputFileName = fileName + ext;
+            var ret = this.binaryResControl1.DownloadObjectFile(item,
+                outputFileName,
+                out strError);
+            if (ret == -1)
+                return -1;
+            if (ret == 0)
+            {
+                strError = "中断";
+                return -1;
+            }
+            return 1;
+        }
+
+        // 根据 MIME 得到图像文件名扩展名
+        public static string GetImageExt(string mime)
+        {
+            switch (mime)
+            {
+                case "image/pjpeg":
+                case "image/jpeg":
+                    return ".jpeg";
+                case "image/gif":
+                    return ".gif";
+                case "image/bmp":
+                    return ".bmp";
+                case "image/tiff":
+                    return ".tiff";
+                case "image/x-icon":
+                    return ".icon";
+                case "image/x-png":
+                case "image/png":
+                    return ".png";
+                case "image/x-emf":
+                    return ".emf";
+                case "image/x-exif":
+                    return ".exif";
+                case "image/x-wmf":
+                    return ".wmf";
+            }
+            var parts = StringUtil.ParseTwoPart(mime, "/");
+            var ext = parts[1];
+            if (ext.StartsWith("x-"))
+                ext = ext.Substring(2);
+            return "." + ext;
+        }
+
     }
 }

@@ -274,7 +274,7 @@ namespace DigitalPlatform.CirculationClient
                 {
                     _lastNetworkVerifyMacTime = DateTime.Now;
                     var mac_list = string.Join(",", macs);
-                    var task = VerifyMac("https://localhost:7005/",
+                    var task = VerifyMac("https://dp2003.com/sncenter",
                         ProductName,
                         mac_list);
                     while(task.IsCompleted == false)

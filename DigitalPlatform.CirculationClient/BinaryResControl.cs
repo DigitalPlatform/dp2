@@ -1916,6 +1916,30 @@ bool bChanged)
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
+            int nRet = DownloadObjectFile(
+                strResPath,
+                dlg.FileName,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            this.MessageBoxShow(strError);
+        }
+
+        // 2022/12/8
+        // return:
+        //      -1  出错
+        //      0   中断
+        //      1   成功
+        public int DownloadObjectFile(
+            string strResPath,
+            string fileName,
+            out string strError)
+        {
+            strError = "";
+
             LibraryChannel channel = this.CallGetChannel(out Looping looping);
 
             TimeSpan old_timeout = channel.Timeout;
@@ -1930,12 +1954,10 @@ bool bChanged)
 
             try
             {
-                // EnableControlsInLoading(true);
-
                 long lRet = channel.GetRes(
                     looping?.Progress,
                     strResPath,
-                    dlg.FileName,
+                    fileName,
                     "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
                     out string strMetaData,
                     out byte[] baOutputTimeStamp,
@@ -1945,8 +1967,10 @@ bool bChanged)
                 if (lRet == -1)
                 {
                     strError = "下载资源文件失败，原因: " + strError;
-                    goto ERROR1;
+                    return -1;
                 }
+
+                return 1;
             }
             finally
             {
@@ -1960,9 +1984,49 @@ bool bChanged)
                 this.CallReturnChannel(channel, looping);
                 // Stop.Initial("");
             }
-            return;
-        ERROR1:
-            this.MessageBoxShow(strError);
+        }
+
+        // 2022/12/8
+        // return:
+        //      -1  出错
+        //      0   中断
+        //      1   成功
+        public int DownloadObjectFile(ListViewItem item,
+            string fileName,
+            out string strError)
+        {
+            strError = "";
+
+            LineState state = GetLineState(item);
+
+            if (state == LineState.New)
+            {
+                strError = "尚未上载的对象，本来就在本地，无需导出";
+                return -1;
+            }
+
+            if (state == LineState.Changed)
+            {
+                strError = "已经修改而未提交的对象，本来就在本地，无需导出";
+                return -1;
+            }
+
+            string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
+            // string strLocalPath = ListViewUtil.GetItemText(item, COLUMN_LOCALPATH);
+
+            string strResPath = this.BiblioRecPath + "/object/" + strID;
+
+            strResPath = strResPath.Replace(":", "/");
+
+            return DownloadObjectFile(
+                strResPath,
+                fileName,
+                out strError);
+        }
+
+        public string GetMime(ListViewItem item)
+        {
+            return ListViewUtil.GetItemText(item, COLUMN_MIME);
         }
 
         // 确认是否还有增删改的事项
