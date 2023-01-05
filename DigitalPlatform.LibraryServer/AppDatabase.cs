@@ -2786,7 +2786,7 @@ out strError);
             int nRet = 0;
 
             // TODO: 关注一下数据库不存在的时候是不是会报这个错
-            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == false)
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName, out _) == false)
             {
                 strError = "数据库 '' 的类型不是实用库，无法用 DeleteUtilDatabase() 来加以删除";
                 return -1;
@@ -3298,7 +3298,7 @@ out strError);
                 #region 实用库
 
                 // 单独删除实用库
-                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName, out _) == true)
                 {
                     // 删除一个实用库。
                     // 也会自动修改 library.xml 的相关元素
@@ -4117,7 +4117,7 @@ out strError);
                 }
 
                 // 刷新实用库
-                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName, out _) == true)
                 {
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
@@ -4881,7 +4881,7 @@ out strError);
                 }
 
                 // 初始化实用库
-                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName, out _) == true)
                 {
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeDatabase == null)

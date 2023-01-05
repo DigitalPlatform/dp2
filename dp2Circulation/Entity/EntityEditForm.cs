@@ -1350,7 +1350,7 @@ MessageBoxDefaultButton.Button2);
                 int nRet = Program.MainForm.VerifySerialCode("rfid", false, out strError);
                 if (nRet == -1 || nRet == 0)
                 {
-                    strError = "写入 RFID 标签功能尚未被许可('rfid')";
+                    strError = $"写入 RFID 标签功能尚未被许可('rfid'): {strError}";
                     return -1;
                 }
             }

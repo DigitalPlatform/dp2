@@ -3643,7 +3643,8 @@ strBrowseInfoStyle);
                 }
                 else if (app.AmerceDbName == strDbName)
                 {
-                    if (StringUtil.IsInList("getrecord", sessioninfo.RightsOrigin) == false
+                    if (/*StringUtil.IsInList("getrecord", sessioninfo.RightsOrigin) == false*/
+                        StringUtil.IsInList("amerce", sessioninfo.RightsOrigin) == false
                         || sessioninfo.UserType == "reader")
                     {
                         ClearXml(record);
@@ -4072,6 +4073,8 @@ strDbName);
             {
                 // 权限判断
 
+                // 改用 CheckGetResRights() 判断是否具备读取权限
+                /*
                 // 权限字符串
                 if (StringUtil.IsInList("getrecord", sessioninfo.RightsOrigin) == false)
                 {
@@ -4080,6 +4083,7 @@ strDbName);
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+                */
 
                 string strDbName = "";
 
@@ -4087,12 +4091,41 @@ strDbName);
                 if (sessioninfo.UserType == "reader")
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获取数据库记录。作为读者不能获取任何数据库记录";
+                    result.ErrorInfo = "获取数据库记录被拒绝。作为读者不能获取任何数据库记录";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
                 else
                 {
+                    // 2023/1/5
+                    // 判断资源读取权限
+                    {
+                        // 检查用户使用 GetRes API 的权限
+                        // return:
+                        //      -1  error
+                        //      0   不具备权限
+                        //      1   具备权限
+                        //      2   具备部分权限(2022/5/20)
+                        int nRet = app.CheckGetResRights(
+                            sessioninfo,
+                            sessioninfo.LibraryCodeList,
+                            sessioninfo.RightsOrigin,
+                            strPath,
+                            out string strLibraryCode,
+                            out string strFilePath,
+                            out strError);
+                        if (nRet == 0 || nRet == 2)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+
+#if REMOVED
                     // 需要限制检索读者库为当前管辖的范围
                     string strLibraryCode = "";
                     strDbName = ResPath.GetDbName(strPath);
@@ -4112,6 +4145,7 @@ strDbName);
                             return result;
                         }
                     }
+#endif
                 }
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
@@ -14146,6 +14180,7 @@ Stack:
 
                 // 权限判断
 
+                /*
                 // 权限字符串
                 if (StringUtil.IsInList("getres", sessioninfo.RightsOrigin) == false)
                 {
@@ -14154,6 +14189,7 @@ Stack:
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+                */
 
                 // 判断资源读取权限
                 {

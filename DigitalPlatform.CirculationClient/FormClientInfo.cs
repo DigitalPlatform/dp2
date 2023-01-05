@@ -130,6 +130,13 @@ namespace DigitalPlatform.CirculationClient
             catch (Exception ex)
             {
                 ClientInfo.WriteErrorLog($"VerifyMac() 出现异常：{ExceptionUtil.GetDebugText(ex)}");
+                if (ex is HttpRequestException)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = ex.Message + " " + ex.GetType().ToString(),
+                        ErrorCode = ex.GetType().ToString(),
+                    };
                 return new NormalResult
                 {
                     Value = -1,

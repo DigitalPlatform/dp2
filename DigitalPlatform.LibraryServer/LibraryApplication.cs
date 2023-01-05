@@ -15767,21 +15767,29 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
+                    // 2023/1/5
+                    if (StringUtil.IsInList("writecfgfile", strRights) == false)
+                    {
+                        strError = "写入配置文件 " + strResPath + " 被拒绝。不具备 writecfgfile 权限";
+                        return 0;
+                    }
                 }
 
                 // 记录ID
                 if (StringUtil.IsPureNumber(strFirstPart) == true
                     || strFirstPart == "?")
                 {
+                    // 首先要具备 setbiblioinfo 权限
+                    if (StringUtil.IsInList("writerecord,setbiblioinfo", strRights) == false)
+                    {
+                        strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 writerecord 或 setbiblioinfo 权限";
+                        return 0;
+                    }
+
                     // 只到记录ID这一层
                     if (strPath == "")
                     {
-                        if (StringUtil.IsInList("writerecord", strRights) == false)
-                        {
-                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 writerecord 权限";
-                            return 0;
-                        }
-                        return 1;   // 如果有了writerecord权限，就不再需要writeres权限
+                        return 1;   // 如果有了writerecord 或 setbiblioinfo 权限
                     }
 
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
@@ -15789,20 +15797,25 @@ strLibraryCode);    // 读者所在的馆代码
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        // (在具备 setbiblioinfo 基础上)进一步需要 writeobject 或 writebiblioobject 权限
+                        if (StringUtil.IsInList("writeobject,writebiblioobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 或 writebiblioobject权限";
                             return 0;
                         }
                         return 1;   // 如果有了writeobject权限，就不再需要writeres权限
                     }
                 }
 
+                /*
                 if (StringUtil.IsInList("writeres", strRights) == false)
                 {
                     strError = "写入资源 " + strResPath + " 被拒绝。不具备 writeres 权限";
                     return 0;
                 }
+                */
+                strError = "写入资源 " + strResPath + " 被拒绝";
+                return 0;
             }
 
             // 读者库
@@ -15833,12 +15846,25 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
+                    // 2023/1/5
+                    if (StringUtil.IsInList("writecfgfile", strRights) == false)
+                    {
+                        strError = "写入配置文件 " + strResPath + " 被拒绝。不具备 writecfgfile 权限";
+                        return 0;
+                    }
                 }
 
                 // 记录ID
                 if (StringUtil.IsPureNumber(strFirstPart) == true
                     || strFirstPart == "?")
                 {
+                    // 首先要具备 setreaderinfo 权限
+                    if (StringUtil.IsInList("setreaderinfo", strRights) == false)
+                    {
+                        strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 setreaderinfo 权限";
+                        return 0;
+                    }
+
                     // 只到记录ID这一层
                     if (strPath == "")
                     {
@@ -15859,20 +15885,25 @@ strLibraryCode);    // 读者所在的馆代码
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        // (在具备 setreaderinfo 基础上)进一步需要 writeobject 或 writereaderobject 权限
+                        if (StringUtil.IsInList("writeobject,writereaderobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 或 writereaderobject 权限";
                             return 0;
                         }
-                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                        return 1; 
                     }
                 }
 
+                /*
                 if (StringUtil.IsInList("writeres", strRights) == false)
                 {
                     strError = "写入资源 " + strResPath + " 被拒绝。不具备 writeres 权限";
                     return 0;
                 }
+                */
+                strError = "写入资源 " + strResPath + " 被拒绝";
+                return 0;
             }
 
 
@@ -15904,6 +15935,21 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
+                    // 2023/1/5
+                    if (StringUtil.IsInList("writecfgfile", strRights) == false)
+                    {
+                        strError = "写入配置文件 " + strResPath + " 被拒绝。不具备 writecfgfile 权限";
+                        return 0;
+                    }
+                }
+
+                var error = CheckDbSetRights(strRights,
+strDbName,
+out string db_type);
+                if (error != null)
+                {
+                    strError = error;
+                    return 0;
                 }
 
                 // 记录ID
@@ -15922,24 +15968,31 @@ strLibraryCode);    // 读者所在的馆代码
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        // (在具备 setxxxinfo 基础上)进一步需要 writeobject 或 writexxxobject 权限
+                        if (StringUtil.IsInList($"writeobject,write{db_type}object", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 权限";
+                            strError = $"写入对象资源 { strResPath } 被拒绝。不具备 writeobject 或 write{db_type}object 权限";
                             return 0;
                         }
-                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                        return 1; 
                     }
                 }
 
+                /*
                 if (StringUtil.IsInList("writeres", strRights) == false)
                 {
                     strError = "写入资源 " + strResPath + " 被拒绝。不具备 writeres 权限";
                     return 0;
                 }
+                */
+                strError = "写入资源 " + strResPath + " 被拒绝";
+                return 0;
             }
 
             // 实用库 2013/10/30
-            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strDbName) == true)
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, 
+                strDbName,
+                out string util_db_type) == true)
             {
                 string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
 
@@ -15956,21 +16009,29 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
+                    // 2023/1/5
+                    if (StringUtil.IsInList("writecfgfile", strRights) == false)
+                    {
+                        strError = "写入配置文件 " + strResPath + " 被拒绝。不具备 writecfgfile 权限";
+                        return 0;
+                    }
                 }
 
                 // 记录ID
                 if (StringUtil.IsPureNumber(strFirstPart) == true
                     || strFirstPart == "?")
                 {
+                    // setxxxinfo
+                    if (StringUtil.IsInList($"writerecord,set{util_db_type}info", strRights) == false)
+                    {
+                        strError = $"直接写入记录 { strResPath} 被拒绝。不具备 writerecord 或 set{util_db_type}info 权限";
+                        return 0;
+                    }
+
                     // 只到记录ID这一层
                     if (strPath == "")
                     {
-                        if (StringUtil.IsInList("writerecord", strRights) == false)
-                        {
-                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 writerecord 权限";
-                            return 0;
-                        }
-                        return 1;   // 如果有了writerecord权限，就不再需要writeres权限
+                        return 1;
                     }
 
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
@@ -15978,20 +16039,24 @@ strLibraryCode);    // 读者所在的馆代码
                     // 对象资源
                     if (strFirstPart == "object")
                     {
-                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        if (StringUtil.IsInList($"writeobject,write{util_db_type}object", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 权限";
+                            strError = $"写入对象资源 { strResPath} 被拒绝。不具备 writeobject 或 write{util_db_type}object 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writeobject权限，就不再需要writeres权限
                     }
                 }
 
+                /*
                 if (StringUtil.IsInList("writeres", strRights) == false)
                 {
                     strError = "写入资源 " + strResPath + " 被拒绝。不具备 writeres 权限";
                     return 0;
                 }
+                */
+                strError = "写入资源 " + strResPath + " 被拒绝";
+                return 0;
             }
 
             strError = "写入资源 " + strResPath + " 被拒绝。不具备特定的权限";
@@ -16261,22 +16326,58 @@ strLibraryCode);    // 读者所在的馆代码
                 }
             }
 
+            /*
             // 如果具备 writeobject 权限，则具备所有对象的读取权限了
             if (StringUtil.IsInList("writeobject", strRights) == true
                 || StringUtil.IsInList("writeres", strRights) == true)
                 return 1;
+            */
 
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);
 
-            // 书目库
-            if (this.IsBiblioDbName(strDbName) == true)
+            // 书目库 读者库 等
+            // 2022/12/9
+            var error = CheckDbGetRights(sessioninfo,
+                strDbName,
+                out string db_type);
+            if (error != null)
+            {
+                strError = error;
+                return 0;
+            }
+
+            // 2023/1/5
+            // 对读者库记录的特殊要求
+            if (IsReaderDbName(strDbName,
+                out _,
+                out _) == true)
+            {
+                // 检查当前操作者是否管辖这个读者库
+                // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                if (IsCurrentChangeableReaderPath(strDbName + "/?",
+                    sessioninfo.ExpandLibraryCodeList/*sessioninfo.LibraryCodeList*/) == false)
+                {
+                    strError = "读者库 '" + strDbName + "' 不在当前用户管辖范围内，不允许读取";
+                    return 0;
+                }
+            }
+
             {
                 string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
 
                 // cfgs
                 if (strRecordID == "cfgs")
                 {
-                    return 1;   // 书目库下属的配置文件
+                    // 只要已经具备 getxxxinfo 权限，则可以获得 cfgs 下的所有配置文件
+                    /*
+                    // 2022/12/9
+                    if (StringUtil.IsInList("getcfgfile", sessioninfo.RightsOrigin) == false)
+                    {
+                        strError = "用户 " + sessioninfo.UserID + " 获取配置文件被拒绝。不具备 getcfgfile 权限。";
+                        return 0;
+                    }
+                    */
+                    return 1;   // 各类库下属的配置文件
                 }
 
                 // 记录ID
@@ -16294,6 +16395,14 @@ strLibraryCode);    // 读者所在的馆代码
                     // 对象资源
                     if (strObject == "object")
                     {
+                        // 检查 getobject 或 getxxxobject 权限
+                        error = CheckObjectRights(sessioninfo, db_type);
+                        if (error != null)
+                        {
+                            strError = error;
+                            return 0;
+                        }
+
                         string strObjectID = StringUtil.GetFirstPartPath(ref strPath);
 
                         string strPartCmd = "";
@@ -16431,12 +16540,144 @@ strLibraryCode);    // 读者所在的馆代码
             }
 #endif
 
-            return 1;
 #if NO
             strError = "获取资源 " + strResPath + " 被拒绝。不具备特定的权限";
             return 0;
 #endif
         }
+
+        // 检查 getxxxinfo 权限
+        string CheckDbGetRights(SessionInfo sessioninfo,
+            string strDbName,
+            out string db_type)
+        {
+            db_type = "";
+            string right = "";
+
+            if (this.IsBiblioDbName(strDbName) == true)
+            {
+                db_type = "biblio";
+                right = "getbiblioinfo";
+            }
+            else if (this.IsReaderDbName(strDbName) == true)
+            {
+                db_type = "reader";
+                right = "getreaderinfo";
+            }
+            else if (this.IsOrderDbName(strDbName))
+            {
+                db_type = "order";
+                right = "getorderinfo";
+            }
+            else if (this.IsIssueDbName(strDbName))
+            {
+                db_type = "issue";
+                right = "getissueinfo";
+            }
+            else if (this.IsItemDbName(strDbName))
+            {
+                db_type = "item";
+                right = "getiteminfo";
+            }
+            else if (this.IsCommentDbName(strDbName))
+            {
+                db_type = "comment";
+                right = "getcommentinfo";
+            }
+            else if (this.IsAuthorityDbName(strDbName))
+            {
+                db_type = "authority";
+                right = "getauthorityinfo";
+            }
+            else if (this.AmerceDbName == strDbName)
+            {
+                db_type = "amerce";
+                right = "amerce";
+            }
+            else
+                right = "getres";
+            //else
+            //    return $"数据库 {strDbName} 内资源不允许访问";
+
+            if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
+                return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+
+            return null;
+        }
+
+        // 检查 getxxxobject 权限
+        string CheckObjectRights(
+            SessionInfo sessioninfo,
+            string db_type)
+        {
+            // getobject 是指允许获得所有数据库记录的下级对象
+            if (StringUtil.IsInList("getobject", sessioninfo.RightsOrigin) == true)
+                return null;
+
+            if (db_type == "biblio"
+            && StringUtil.IsInList($"get{db_type}object", sessioninfo.RightsOrigin) == true)
+                return null;
+
+            return $"用户 { sessioninfo.UserID} 获取{db_type}记录下属的对象被拒绝。不具备 getxxxobject 权限或 getobject 权限";
+        }
+
+        // 检查 setxxxinfo 权限
+        string CheckDbSetRights(string rights,
+    string strDbName,
+    out string db_type)
+        {
+            db_type = "";
+            string right = "";
+
+            if (this.IsBiblioDbName(strDbName) == true)
+            {
+                db_type = "biblio";
+                right = "setbiblioinfo";
+            }
+            else if (this.IsReaderDbName(strDbName) == true)
+            {
+                db_type = "reader";
+                right = "setreaderinfo";
+            }
+            else if (this.IsOrderDbName(strDbName))
+            {
+                db_type = "order";
+                right = "setorderinfo";
+            }
+            else if (this.IsIssueDbName(strDbName))
+            {
+                db_type = "issue";
+                right = "setissueinfo";
+            }
+            else if (this.IsItemDbName(strDbName))
+            {
+                db_type = "item";
+                right = "setiteminfo";
+            }
+            else if (this.IsCommentDbName(strDbName))
+            {
+                db_type = "comment";
+                right = "setcommentinfo";
+            }
+            else if (this.IsAuthorityDbName(strDbName))
+            {
+                db_type = "authority";
+                right = "setauthorityinfo";
+            }
+            else if (this.AmerceDbName == strDbName)
+            {
+                db_type = "amerce";
+                right = "amerce";
+            }
+            else
+                return $"数据库 {strDbName} 内资源不允许写入";
+
+            if (StringUtil.IsInList(right, rights) == false)
+                return $"写入数据库 {strDbName} 内资源被拒绝。当前用户不具备 {right} 权限。";
+
+            return null;
+        }
+
 
         static bool PageInRange(string strPartCmd)
         {

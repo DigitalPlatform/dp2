@@ -8411,7 +8411,7 @@ out string strError)
                     continue;
                 }
 
-                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, dbname) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, dbname, out _) == true)
                 {
                     // 删除一个实用库。
                     // 也会自动修改 library.xml 的相关元素

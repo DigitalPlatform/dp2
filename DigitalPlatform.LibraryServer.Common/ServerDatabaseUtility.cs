@@ -44,7 +44,7 @@ namespace DigitalPlatform.LibraryServer.Common
             // 实用库
             if (IsUtilDbType(strDbType))
             {
-                if (IsUtilDbName(cfg_dom, strDbName) == true)
+                if (IsUtilDbName(cfg_dom, strDbName, out _) == true)
                 {
                     strError = "删除完成后，实用库名 '" + strDbName + "' 在 library.xml 的 utilDb 元素内没有清理干净";
                     return 0;
@@ -140,7 +140,7 @@ namespace DigitalPlatform.LibraryServer.Common
             // 实用库
             if (IsUtilDbType(strDbType))
             {
-                if (IsUtilDbName(cfg_dom, strDbName) == false)
+                if (IsUtilDbName(cfg_dom, strDbName, out _) == false)
                 {
                     strError = "创建完成后，实用库名 '" + strDbName + "' 在 library.xml 的 utilDb 元素内没有设置";
                     return 0;
@@ -352,12 +352,15 @@ namespace DigitalPlatform.LibraryServer.Common
         // 是否为实用库名
         // 实用库包括 publisher / zhongcihao / dictionary / inventory 类型
         public static bool IsUtilDbName(XmlDocument LibraryCfgDom,
-            string strUtilDbName)
+            string strUtilDbName,
+            out string db_type)
         {
-            XmlNode node = LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "']");
+            db_type = "";
+            var node = LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "']") as XmlElement;
             if (node == null)
                 return false;
 
+            db_type = node.GetAttribute("type");
             return true;
         }
 
