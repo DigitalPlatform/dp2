@@ -144,10 +144,6 @@
 		<comment lang='en'>search</comment>
 	</property>
 
-	<property name='getrecord'>
-		<comment lang='zh'>获得记录</comment>
-		<comment lang='en'>get record</comment>
-	</property>
 	<property name='getcalendar'>
 		<comment lang='zh'>获得日历</comment>
 		<comment lang='en'>get calendar</comment>
@@ -272,14 +268,16 @@
 		<comment lang='zh'>获取违约金下属对象</comment>
 		<comment lang='en'>get amerce object</comment>
 	</property>
+	<!--
 	<property name='getrecord'>
-		<comment lang='zh'>获取元数据记录</comment>
+		<comment lang='zh'>获取元数据记录(已废止)</comment>
 		<comment lang='en'>get metadata record</comment>
 	</property>
-	<property name='getcfgfile'>
+	<property name='getcfgfile' comment='暂未使用'>
 		<comment lang='zh'>获取配置文件</comment>
 		<comment lang='en'>get config file</comment>
 	</property>
+	-->
 	
 	<!--
 	<property name='getres'>

@@ -319,6 +319,7 @@
     <Compile Include="ReaderConverter.cs" />
     <Compile Include="RecordConverter.cs" />
     <Compile Include="deleted\RightsTableControl.cs" />
+    <Compile Include="RecordMemory.cs" />
     <Compile Include="ResultSort\AppResultSort.cs" />
     <Compile Include="ResultSort\MemorySet.cs" />
     <Compile Include="Script\Interfaces.cs" />

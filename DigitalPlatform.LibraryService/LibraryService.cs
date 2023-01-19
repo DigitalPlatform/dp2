@@ -25,6 +25,8 @@ using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using Microsoft.SqlServer.Server;
+using System.Runtime.Remoting.Activation;
+using System.Data;
 
 namespace dp2Library
 {
@@ -4071,6 +4073,19 @@ strDbName);
 
             try
             {
+                // 2023/1/10
+                // 检查 strPath 是否指向数据库元数据记录
+                // (GetRecord() API 被限定只能用于获取数据库元数据记录)
+                if (app.IsDatabaseMetadataPath(
+    sessioninfo,
+    strPath) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"获取资源 '{strPath}' 被拒绝。GetRecord() API 只允许用于获取数据库元数据记录";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
                 // 权限判断
 
                 // 改用 CheckGetResRights() 判断是否具备读取权限
@@ -4086,6 +4101,7 @@ strDbName);
                 */
 
                 string strDbName = "";
+                string strLibraryCode = "";
 
                 // 对读者身份的附加判断
                 if (sessioninfo.UserType == "reader")
@@ -4111,7 +4127,7 @@ strDbName);
                             sessioninfo.LibraryCodeList,
                             sessioninfo.RightsOrigin,
                             strPath,
-                            out string strLibraryCode,
+                            out strLibraryCode,
                             out string strFilePath,
                             out strError);
                         if (nRet == 0 || nRet == 2)
@@ -4125,10 +4141,10 @@ strDbName);
                             goto ERROR1;
                     }
 
+                    strDbName = ResPath.GetDbName(strPath);
 #if REMOVED
                     // 需要限制检索读者库为当前管辖的范围
                     string strLibraryCode = "";
-                    strDbName = ResPath.GetDbName(strPath);
                     bool bReaderDbInCirculation = true;
                     if (app.IsReaderDbName(strDbName,
                         out bReaderDbInCirculation,
@@ -4249,6 +4265,51 @@ strDbName);
                         return result;
                     }
 #endif
+                }
+
+                // 2023/1/9
+                // 调用 BuildReaderResults() 来生成用于返回的读者记录 XML
+                if (app.IsReaderDbName(strDbName))
+                {
+                    string[] results = null;
+
+                    {
+                        XmlDocument readerdom = new XmlDocument();
+                        try
+                        {
+                            readerdom.LoadXml(strXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "读者记录 '" + strPath + "' 装入XMLDOM时出错: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        // 2023/1/16
+                        // 过滤掉一些元素
+                        app.FilterReaderRecord(readerdom, strLibraryCode);
+                        strXml = readerdom.DocumentElement.OuterXml;
+                    }
+
+                    int nRet = app.BuildReaderResults(
+    sessioninfo,
+    null,
+    strXml,   // strXml,
+    LibraryApplication.GetReaderInfoLevel("getreaderinfo", sessioninfo.Rights),
+    "xml",
+    strLibraryCode,
+    null,   // recpaths,
+    null, // strMetadata,
+    strOutputPath,
+    timestamp,
+    OperType.None,
+    null,
+    "",
+    ref results,
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    strXml = results[0];
                 }
 
             END1:
@@ -4654,8 +4715,8 @@ strDbName);
 
 #endif
 
-                    // 注: 0 并不表示没有命中。命中数要看 searchresults.Length
-                    result.Value = lRet;
+                // 注: 0 并不表示没有命中。命中数要看 searchresults.Length
+                result.Value = lRet;
                 result.ErrorInfo = strError;
                 return result;
             }
@@ -14242,6 +14303,101 @@ Stack:
                         out bReaderDbInCirculation,
                         out strLibraryCode) == true)
                     {
+                        // 2023/1/17
+                        if (app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
+                        {
+                            // strError = "不允许用 GetRes() 来获得读者记录。请改用 GetReaderInfo() API";
+                            // goto ERROR1;
+                            /*
+                            if (StringUtil.IsInList("withresmetadata", strStyle))
+                            {
+                                strError = "获取读者记录时暂不支持 strStyle 包含 withresmetadata 用法";
+                                goto ERROR1;
+                            }
+                            */
+
+                            // 用 GetReaderInfo() 来获取读者元数据记录
+                            // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+                            string path = "@path:" + strResPath;
+                            if (string.IsNullOrEmpty(strStyle) == false)
+                                path += "$" + strStyle.Replace(",", "|");
+                            /*
+                            if (StringUtil.IsInList("prev", strStyle))
+                                path += "$prev";
+                            else if (StringUtil.IsInList("next", strStyle))
+                                path += "$next";
+                            */
+
+                            List<string> formats = new List<string>();
+                            if (StringUtil.IsInList("data", strStyle))
+                                formats.Add("xml");
+                            if (StringUtil.IsInList("metadata", strStyle))
+                                formats.Add("metadata");
+                            var ret = app.GetReaderInfo(
+sessioninfo,
+path,
+StringUtil.MakePathList(formats),
+out string[] results,
+out string temp_path,
+out byte[] temp_timestamp);
+                            if (StringUtil.IsInList("timestamp", strStyle))
+                                baOutputTimestamp = temp_timestamp;
+                            if (StringUtil.IsInList("outputpath", strStyle))
+                                strOutputResPath = temp_path;
+                            if (formats.Contains("metadata"))
+                                strMetadata = GetResult(results, formats.IndexOf("metadata"));
+
+                            if (ret.Value == -1)
+                            {
+                                result = ret;
+                                if (channel.ErrorCode != ChannelErrorCode.None
+                                    && result.ErrorCode == ErrorCode.NoError)
+                                    ConvertKernelErrorCode(channel.ErrorCode,
+                                        ref result);
+                            }
+                            else if (ret.Value == 0)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = ret.ErrorInfo;
+                                result.ErrorCode = ErrorCode.NotFound;
+                            }
+                            else if (ret.Value > 1)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = ret.ErrorInfo;
+                                result.ErrorCode = ErrorCode.SystemError;
+                            }
+                            string xml = null;
+                            if (formats.Contains("xml"))
+                                xml = GetResult(results, formats.IndexOf("xml"));
+
+                            // 返回 baContent
+                            if (xml != null)
+                            {
+                                int nRet = ChunkMemory.ReturnFragment(xml,
+    nStart,
+    nLength,
+    strStyle,
+    out baContent,
+    out long total_length,
+    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                result.Value = total_length;
+
+                                // 压缩内容
+                                if (StringUtil.IsInList("gzip", strStyle)
+                                    && baContent != null && baContent.Length > 0)
+                                {
+                                    baContent = ByteArray.CompressGzip(baContent);
+                                    result.ErrorCode = ErrorCode.Compressed;
+                                }
+                            }
+
+                            return result;
+                        }
+#if REMOVED
+
                         bIsReaderDb = true;
 
                         if (bIsReader == true)
@@ -14267,6 +14423,98 @@ Stack:
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
+#endif
+                    }
+                    else if (app.IsBiblioDbName(strDbName)
+                        && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
+                    {
+                        // strError = "不允许用 GetRes() 来获得书目记录。请改用 GetBiblioInfo() API";
+                        // goto ERROR1;
+                        if (StringUtil.IsInList("withresmetadata", strStyle))
+                        {
+                            strError = "获取书目记录时暂不支持 strStyle 包含 withresmetadata 用法";
+                            goto ERROR1;
+                        }
+
+                        // 用 GetBiblioInfo() 来获取书目元数据记录
+                        // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+                        string path = strResPath;
+                        if (string.IsNullOrEmpty(strStyle) == false)
+                            path += "$" + strStyle.Replace(",", "|");
+
+                        // Result.Value -1出错 0没有找到 1找到
+                        List<string> formats = new List<string>();
+                        if (StringUtil.IsInList("data", strStyle))
+                            formats.Add("xml");
+                        if (StringUtil.IsInList("outputpath", strStyle))
+                            formats.Add("outputpath"); 
+                        if (StringUtil.IsInList("metadata", strStyle))
+                            formats.Add("metadata");
+
+                        var ret = app.GetBiblioInfos(
+    sessioninfo,
+    path,
+    null,   // strBiblioXml,
+    formats.ToArray(),
+    out string[] results,
+    out byte [] temp_timestamp);
+                        if (StringUtil.IsInList("timestamp", strStyle))
+                            baOutputTimestamp = temp_timestamp;
+                        if (formats.Contains("outputpath")
+                            && results != null && results.Length >= 2)
+                            strOutputResPath = GetResult(results, formats.IndexOf("outputpath"));
+                        if (formats.Contains("metadata")
+                            && results != null && results.Length >= 2)
+                            strMetadata = GetResult(results,formats.IndexOf("metadata"));
+
+                        if (ret.Value == -1)
+                        {
+                            result = ret;
+                            if (channel.ErrorCode != ChannelErrorCode.None
+                                && result.ErrorCode == ErrorCode.NoError)
+                                ConvertKernelErrorCode(channel.ErrorCode,
+                                    ref result);
+                        }
+                        else if (ret.Value == 0)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = ret.ErrorInfo;
+                            result.ErrorCode = ErrorCode.NotFound;
+                        }
+                        else if (ret.Value > 1)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = ret.ErrorInfo;
+                            result.ErrorCode = ErrorCode.SystemError;
+                        }
+                        string xml = null;
+                        if (formats.Contains("xml"))
+                            xml = GetResult(results, formats.IndexOf("xml"));
+
+                        // 返回 baContent
+                        if (xml != null)
+                        {
+                            int nRet = ChunkMemory.ReturnFragment(xml,
+nStart,
+nLength,
+strStyle,
+out baContent,
+out long total_length,
+out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            result.Value = total_length;
+
+                            // 压缩内容
+                            if (StringUtil.IsInList("gzip", strStyle)
+                                && baContent != null && baContent.Length > 0)
+                            {
+                                baContent = ByteArray.CompressGzip(baContent);
+                                result.ErrorCode = ErrorCode.Compressed;
+                            }
+                        }
+
+                        return result;
                     }
                     else if (app.AmerceDbName == strDbName)
                     {
@@ -14451,6 +14699,18 @@ Stack:
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        static string GetResult(string[] results,
+    int index)
+        {
+            if (index == -1)
+                return null;
+            if (results == null)
+                return null;
+            if (results.Length < index)
+                return null;
+            return results[index];
         }
 
         public static void ConvertKernelErrorCode(ChannelErrorCode origin,
@@ -14712,11 +14972,12 @@ Stack:
                         return result;
                     }
 
+                    string strDbName = ResPath.GetDbName(strResPath);
+
                     long lRet = 0;
                     // 2015/9/3 新增删除资源的功能
                     if (StringUtil.IsInList("delete", strStyle) == true)
                     {
-                        string strDbName = ResPath.GetDbName(strResPath);
                         if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
                         {
                             if (StringUtil.IsInList("inventorydelete", sessioninfo.RightsOrigin) == false)
@@ -14738,6 +14999,108 @@ Stack:
                             result.ErrorInfo = "删除资源 '" + strResPath + "' 的权限不够";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
+                        }
+                    }
+                    else if ((app.IsBiblioDbName(strDbName) || app.IsReaderDbName(strDbName))
+                        && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
+                    {
+                        // 书目库、元数据记录
+                        // 转为调用 SetBiblioInfo()
+                        // 读者库、元数据记录
+                        // 转为调用 SetReaderInfo()
+
+                        // TODO: 根据 strStyle 判断请求的意图。只有当真正写入 data 时才需要拼接 chunk
+                        // 注意 strStyle 的 gzip 风格
+                        if (StringUtil.IsInList("gzip", strStyle)
+    && baContent != null && baContent.Length > 0)
+                            baContent = ByteArray.DecompressGzip(baContent);
+
+                        // 记忆 WriteRes() API 中途的 chunk
+                        // return:
+                        //      -1  出错
+                        //      0   未完成
+                        //      1   完成
+                        int nRet = sessioninfo.MemoryChunk(strResPath,
+                            strRanges,
+                            lTotalLength,
+                            baContent,
+                            out byte[] full_data,
+                            out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+                        if (nRet == 1)
+                        {
+                            // 从此开始 baContent 里面是一条记录的全部内容
+                            baContent = full_data;
+                            string strBiblio = Encoding.UTF8.GetString(baContent);
+                            string strAction = "change";
+                            if (string.IsNullOrEmpty(strResPath)
+                                || ResPath.IsAppendRecPath(strResPath))
+                                strAction = "new";
+                            if (app.IsBiblioDbName(strDbName))
+                            {
+                                var ret = app.SetBiblioInfo(sessioninfo,
+                                    strAction,
+                                    strResPath,
+                                    "xml",
+                                    strBiblio,
+                                    baInputTimestamp,
+                                    null,
+                                    "", // strStyle,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp);
+                                if (ret.Value == -1)
+                                    return ret;
+                                // 查重发现了重复的书目记录，保存被拒绝
+                                if (ret.Value > 0)
+                                {
+                                    ret.Value = -1;
+                                    return ret;
+                                }
+                                lRet = 0;
+                            }
+                            if (app.IsReaderDbName(strDbName))
+                            {
+                                var ret = app.SetReaderInfo(sessioninfo,
+                                    strAction,
+                                    strResPath,
+                                    strBiblio,
+                                    null, // strOldXml
+                                    baInputTimestamp,
+                                    out _,
+                                    out _,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp,
+                                    out _);
+                                if (ret.Value == -1)
+                                    return ret;
+                                // 部分字段被拒绝
+                                if (ret.Value == 1)
+                                {
+                                    ret.Value = -1;
+                                    return ret;
+                                }
+                                lRet = 0;
+                            }
+                            /*
+                            lRet = channel.WriteRes(strResPath,
+    $"0-{lTotalLength-1}",
+    lTotalLength,
+    data,
+    strMetadata,
+    strStyle,
+    baInputTimestamp,
+    out strOutputResPath,
+    out baOutputTimestamp,
+    out strError);
+                            */
+                        }
+                        else
+                        {
+                            baOutputTimestamp = baInputTimestamp;
+                            lRet = 0;
+                            baContent = null;   // 避免后续处理 baContent
+                            bWriteOperLog = false;  // 中途的 round 不要写入日志
                         }
                     }
                     else

@@ -2163,7 +2163,7 @@ namespace dp2Kernel
                 {
                     result.Value = -1;
                     result.ErrorCode = ErrorCodeValue.CommonError;
-                    result.ErrorString = "目前不支持attachment风格。";
+                    result.ErrorString = "目前不支持 attachment 风格。";
                     return result;
 
                 }

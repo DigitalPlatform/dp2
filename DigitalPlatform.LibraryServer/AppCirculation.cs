@@ -2008,6 +2008,7 @@ namespace DigitalPlatform.LibraryServer
             strReaderFormatList,
             strReaderLibraryCode,  // calendar/advancexml/html 时需要
             null,    // recpaths 时需要
+            null, // strMetadata,
             strOutputReaderRecPath,   // recpaths 时需要
             null,    // timestamp 时需要
             OperType.Borrow,
@@ -8256,6 +8257,7 @@ out _);
     strReaderFormatList,
     strReaderLibraryCode,  // calendar/advancexml/html 时需要
     null,    // recpaths 时需要
+    null, // strMetadata,
     strOutputReaderRecPath,   // recpaths 时需要
     null,    // timestamp 时需要
     OperType.Return,

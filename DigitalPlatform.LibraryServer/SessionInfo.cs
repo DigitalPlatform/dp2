@@ -95,6 +95,10 @@ namespace DigitalPlatform.LibraryServer
         public int Step = 0;
 #endif
 
+        // 2023/1/16
+        // Session 存储记忆
+        public ChunkMemory MemoryTable { get; set; }
+
         public Account Account = null;
 
         // public Stack LoginCallStack = new Stack();
@@ -631,6 +635,38 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(this.App.GlobalAddRights) == false)
                 strRights += "," + this.App.GlobalAddRights;
             return 1;
+        }
+
+        // 记忆 WriteRes() API 中途的 chunk
+        // return:
+        //      -1  出错
+        //      0   未完成
+        //      1   完成
+        public int MemoryChunk(string path,
+            string range,
+            long lTotalLength,
+            byte[] chunk,
+            out byte[] data,
+            out string strError)
+        {
+            if (this.MemoryTable == null)
+            {
+                this.MemoryTable = new ChunkMemory();
+                this.MemoryTable.Initialize(this.TempDir);
+            }
+
+            // 记忆
+            // return:
+            //      -1  出错
+            //      0   未完成
+            //      1   完成
+            int nRet = this.MemoryTable.Memory(path,
+                range,
+                lTotalLength,
+                chunk,
+                out data,
+                out strError);
+            return nRet;
         }
 
         /*

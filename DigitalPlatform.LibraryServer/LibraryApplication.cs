@@ -32,6 +32,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
+using System.Data.SqlClient;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -16203,6 +16204,49 @@ out string db_type);
             return results;
         }
 
+        // 2023/1/10
+        // 判断一个路径是否为数据库元数据记录路径?
+        public bool IsDatabaseMetadataPath(
+            SessionInfo sessioninfo,
+            string strResPath)
+        {
+            string strPath = strResPath.Replace("\\", "/");
+
+            // 根据逻辑名称找到对应的起始物理目录
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = GetStartDir(ref strPath,
+                sessioninfo,
+                "list",
+                out string strTargetDir,
+                out string strError);
+            if (nRet == -1)
+                return false;
+            if (nRet == 1)
+                return false;
+
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
+            if (strRecordID == "cfgs")
+                return false;   // 配置文件目录
+            if (StringUtil.IsPureNumber(strRecordID) == true
+    || strRecordID == "?")
+            {
+                // 只到记录ID这一层
+                if (string.IsNullOrEmpty(strPath) == true)
+                    return true;
+                string strObject = StringUtil.GetFirstPartPath(ref strPath);
+                if (strObject == "object")
+                    return false;
+                string strObjectID = StringUtil.GetFirstPartPath(ref strPath);
+                return false;
+            }
+
+            return false;
+        }
+
         // 检查用户使用 GetRes API 的权限
         // parameters:
         //      strLibraryCodeList  当前用户所管辖的馆代码列表
@@ -16594,10 +16638,10 @@ out string db_type);
                 db_type = "amerce";
                 right = "amerce";
             }
-            else
-                right = "getres";
             //else
-            //    return $"数据库 {strDbName} 内资源不允许访问";
+            //    right = "getres";
+            else
+                return $"数据库 {strDbName} 内资源不允许访问";
 
             if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
                 return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
@@ -16614,11 +16658,13 @@ out string db_type);
             if (StringUtil.IsInList("getobject", sessioninfo.RightsOrigin) == true)
                 return null;
 
-            if (db_type == "biblio"
-            && StringUtil.IsInList($"get{db_type}object", sessioninfo.RightsOrigin) == true)
+            if (string.IsNullOrEmpty(db_type))
+                throw new Exception($"用户 {sessioninfo.UserID} CheckObjectRights() 出现异常，db_type 参数为空");
+
+            if (StringUtil.IsInList($"get{db_type}object", sessioninfo.RightsOrigin) == true)
                 return null;
 
-            return $"用户 { sessioninfo.UserID} 获取{db_type}记录下属的对象被拒绝。不具备 getxxxobject 权限或 getobject 权限";
+            return $"用户 { sessioninfo.UserID} 获取{db_type}记录下属的对象被拒绝。不具备 get{db_type}object 权限或 getobject 权限";
         }
 
         // 检查 setxxxinfo 权限

@@ -525,13 +525,24 @@ namespace DigitalPlatform.LibraryServer
                     if (formats != null && formats.Length > 0)
                         strStyle += ",content,data";
 
+                    // 2023/1/19
+                    if (formats != null && Array.IndexOf(formats, "metadata") != -1)
+                        strStyle += ",metadata";
+
                     string strSearchRecPath = strCurrentBiblioRecPath;  // 用于实际检索的路径，用于显示
+                    /*
                     if (String.IsNullOrEmpty(strCommand) == false
                         && (strCommand == "prev" || strCommand == "next"))
                     {
                         strStyle += "," + strCommand;
                         strSearchRecPath += "," + strCommand;
                     }
+                    */
+                    // 2023/1/19
+                    // 附加的一些 style。包括 prev next withresmetadata
+                    // TODO: 可以把合并后 strStyle 内容中重复出现的一些值归并一下
+                    if (string.IsNullOrEmpty(strCommand) == false)
+                        strStyle += "," + strCommand.Replace("|", ",");
 
                     lRet = channel.GetRes(strCurrentBiblioRecPath,
                         strStyle,

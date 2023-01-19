@@ -5195,10 +5195,10 @@ out strError);
 
         // 获得读者信息
         // parameters:
-        //      strBarcode  读者证条码号。如果前方引导以"@path:"，则表示读者记录路径。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
+        //      strBarcode  读者证条码号。如果前方引导以"@path:"，则表示读者记录路径。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向。实际上 $ 后面可以是多个 style 值，它们之间用 '|' 分隔。可用的 style 值一般有 prev next withresmetadata outputpath(多余)
         //                  可以使用读者证号二维码
         //                  TODO: 是否可以使用身份证号?
-        //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
+        //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary/metadata
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
         //      strRecPath  [out] 读者记录路径。如果命中多个读者记录，这里是逗号分隔的路径列表字符串。最多 100 个路径
         // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
@@ -5216,6 +5216,8 @@ out strError);
             results = null;
             baTimestamp = null;
             strRecPath = "";
+
+            string strMetadata = "";
 
             List<string> recpaths = null;
 
@@ -5349,16 +5351,24 @@ out strError);
                         goto ERROR1;
                     }
 
-                    string strMetaData = "";
+                    string strStyle = "content,data,timestamp,outputpath";
+                    // 2023/1/19
+                    if (StringUtil.IsInList("metadata", strResultTypeList))
+                        strStyle += ",metadata";
 
-                    // 2008/6/20 changed
-                    string strStyle = "content,data,metadata,timestamp,outputpath";
 
+                    /*
                     if (String.IsNullOrEmpty(strCommand) == false
             && (strCommand == "prev" || strCommand == "next"))
                     {
                         strStyle += "," + strCommand;
                     }
+                    */
+                    // 2023/1/19
+                    // 附加的一些 style。包括 prev next withresmetadata
+                    // TODO: 可以把合并后 strStyle 内容中重复出现的一些值归并一下
+                    if (string.IsNullOrEmpty(strCommand) == false)
+                        strStyle += "," + strCommand.Replace("|", ",");
 
                     // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                     if (this.IsCurrentChangeableReaderPath(strReaderRecPath,
@@ -5371,7 +5381,7 @@ out strError);
                     lRet = channel.GetRes(strReaderRecPath,
                         strStyle,
                         out strXml,
-                        out strMetaData,
+                        out strMetadata,
                         out baTimestamp,
                         out strOutputPath,
                         out strError);
@@ -5381,9 +5391,9 @@ out strError);
                         if (channel.ErrorCode == ChannelErrorCode.NotFound)
                         {
                             result.Value = 0;
-                            if (strCommand == "prev")
+                            if (StringUtil.IsInList("prev", strCommand))
                                 result.ErrorInfo = "到头";
-                            else if (strCommand == "next")
+                            else if (StringUtil.IsInList("next", strCommand))
                                 result.ErrorInfo = "到尾";
                             else
                                 result.ErrorInfo = "没有找到";
@@ -5851,35 +5861,10 @@ out strError);
             {
                 if (readerdom != null)
                 {
-                    DomUtil.DeleteElement(readerdom.DocumentElement, "password");
-                    DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
-                    // 2020/9/8
-                    AddPatronOI(readerdom, strLibraryCode);
-
+                    FilterReaderRecord(readerdom, strLibraryCode);
                     strXml = null;  // 从此以后不用 strXml，而用 readerdom
                 }
 
-                /*
-                if (string.IsNullOrEmpty(strXml) == false)
-                {
-                    XmlDocument temp = new XmlDocument();
-                    try
-                    {
-                        temp.LoadXml(strXml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "读者记录 XML 装入 DOM 时出错:" + ex.Message;
-                        goto ERROR1;
-                    }
-
-                    DomUtil.DeleteElement(temp.DocumentElement, "password");
-                    DomUtil.SetElementText(temp.DocumentElement, "libraryCode", strLibraryCode);
-                    // 2020/9/8
-                    AddPatronOI(temp, strLibraryCode);
-                    strXml = temp.DocumentElement.OuterXml;
-                }
-                */
             }
 
             nRet = BuildReaderResults(
@@ -5890,6 +5875,7 @@ out strError);
                 strResultTypeList,
                 strLibraryCode,
                 recpaths,
+                strMetadata,
                 strOutputPath,
                 baTimestamp,
                 OperType.None,
@@ -6089,6 +6075,16 @@ out strError);
             return result;
         }
 
+        // (为返回给前端)过滤掉读者记录中的一些元素，另外添加一些必要的元素
+        public void FilterReaderRecord(XmlDocument readerdom, 
+            string strLibraryCode)
+        {
+            DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+            DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
+            // 2020/9/8
+            AddPatronOI(readerdom, strLibraryCode);
+        }
+
         // 2022/3/7
         public int GetExpandCodeList(SessionInfo sessioninfo,
             out string strExpandCodeList,
@@ -6170,7 +6166,7 @@ out strError);
         // parameters:
         //      readerdom   读者 XmlDocument 对象。如果为空，则 strXml 参数中应该有读者记录
         //      strXml      读者 XML 记录。如果 readerdom 为空，可以用这里的值
-        int BuildReaderResults(
+        public int BuildReaderResults(
             SessionInfo sessioninfo,
             XmlDocument readerdom,
             string strXml,
@@ -6178,6 +6174,7 @@ out strError);
             string strResultTypeList,
             string strReaderLibraryCode,  // calendar/advancexml/html 时需要
             List<string> recpaths,    // recpaths 时需要
+            string strMetadata,     // metadata 时需要
             string strOutputPath,   // recpaths 时需要
             byte[] baTimestamp,    // timestamp 时需要
             OperType operType,  // html 时需要
@@ -6302,6 +6299,10 @@ out strError);
                     // 2011/1/27
                     // results[i] = ByteArray.GetHexTimeStampString(baTimestamp);
                     SetResult(results_list, i, ByteArray.GetHexTimeStampString(baTimestamp));
+                }
+                else if (String.Compare(strResultType, "metadata", true) == 0)
+                {
+                    SetResult(results_list, i, strMetadata);
                 }
                 else if (String.Compare(strResultType, "recpaths", true) == 0)
                 {
@@ -7595,6 +7596,7 @@ out strError);
         strResultTypeList,
         "", // strLibraryCode,
         recpaths,
+        null, // strMetadata,
         strOutputPath,
         timestamp,
         OperType.None,
