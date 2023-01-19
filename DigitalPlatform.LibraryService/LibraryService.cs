@@ -4056,8 +4056,8 @@ strDbName);
         // 获得数据库记录
         // parameters:
         //
-        // 权限：读者不能获取任何数据库记录。
-        //      工作人员则要看 getrecord 权限是否具备
+        // 权限：读者身份不能获取任何数据库记录。
+        //      工作人员身份则要看 getxxxinfo 等权限是否具备
         public LibraryServerResult GetRecord(
             string strPath,
             out byte[] timestamp,
@@ -4173,6 +4173,77 @@ strDbName);
                     return result;
                 }
 
+                // 书目记录
+                if (app.IsBiblioDbName(strDbName))
+                {
+                    // Result.Value -1出错 0没有找到 1找到
+                    var ret = app.GetBiblioInfos(
+sessioninfo,
+strPath,
+null,   // strBiblioXml,
+new string[] { "xml" },
+out string[] results,
+out timestamp);
+                    if (ret.Value == -1)
+                    {
+                        return ret;
+                    }
+                    else if (ret.Value == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = ret.ErrorInfo;
+                        result.ErrorCode = ErrorCode.NotFound;
+                        return result;
+                    }
+                    else if (ret.Value > 1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = ret.ErrorInfo;
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+                    strXml = GetResult(results, 0);
+                    result.Value = string.IsNullOrEmpty(strXml) ? 0 : Encoding.UTF8.GetByteCount(strXml);
+                    result.ErrorInfo = strError;
+                    return result;
+                }
+
+                // 读者记录
+                if (app.IsReaderDbName(strDbName))
+                {
+                    // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+                    var ret = app.GetReaderInfo(
+sessioninfo,
+"@path:" + strPath,
+"xml",
+out string[] results,
+out _,
+out timestamp);
+                    if (ret.Value == -1)
+                    {
+                        return ret;
+                    }
+                    else if (ret.Value == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = ret.ErrorInfo;
+                        result.ErrorCode = ErrorCode.NotFound;
+                        return result;
+                    }
+                    else if (ret.Value > 1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = ret.ErrorInfo;
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+                    strXml = GetResult(results, 0);
+                    result.Value = string.IsNullOrEmpty(strXml) ? 0 : Encoding.UTF8.GetByteCount(strXml);
+                    result.ErrorInfo = strError;
+                    return result;
+                }
+
+
                 string strMetaData = "";
                 string strOutputPath = "";
 
@@ -4267,6 +4338,7 @@ strDbName);
 #endif
                 }
 
+#if REMOVED
                 // 2023/1/9
                 // 调用 BuildReaderResults() 来生成用于返回的读者记录 XML
                 if (app.IsReaderDbName(strDbName))
@@ -4311,7 +4383,7 @@ strDbName);
                         goto ERROR1;
                     strXml = results[0];
                 }
-
+#endif
             END1:
                 result.Value = lRet;
                 result.ErrorInfo = strError;
@@ -14317,7 +14389,6 @@ Stack:
                             */
 
                             // 用 GetReaderInfo() 来获取读者元数据记录
-                            // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                             string path = "@path:" + strResPath;
                             if (string.IsNullOrEmpty(strStyle) == false)
                                 path += "$" + strStyle.Replace(",", "|");
@@ -14333,6 +14404,7 @@ Stack:
                                 formats.Add("xml");
                             if (StringUtil.IsInList("metadata", strStyle))
                                 formats.Add("metadata");
+                            // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
                             var ret = app.GetReaderInfo(
 sessioninfo,
 path,
@@ -14442,7 +14514,6 @@ out byte[] temp_timestamp);
                         if (string.IsNullOrEmpty(strStyle) == false)
                             path += "$" + strStyle.Replace(",", "|");
 
-                        // Result.Value -1出错 0没有找到 1找到
                         List<string> formats = new List<string>();
                         if (StringUtil.IsInList("data", strStyle))
                             formats.Add("xml");
@@ -14451,6 +14522,7 @@ out byte[] temp_timestamp);
                         if (StringUtil.IsInList("metadata", strStyle))
                             formats.Add("metadata");
 
+                        // Result.Value -1出错 0没有找到 1找到
                         var ret = app.GetBiblioInfos(
     sessioninfo,
     path,
