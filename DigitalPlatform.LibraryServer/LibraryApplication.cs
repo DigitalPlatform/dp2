@@ -15584,9 +15584,10 @@ strLibraryCode);    // 读者所在的馆代码
         // TODO: 需要把写入和删除的权限分开处理
         // 注： 
         //      writetemplate 写入模板配置文件 template 所需要的权限; 
-        //      writeobject 写入对象所需要的权限; 
-        //      writerecord 写入数据库文件所需要的权限
-        //      writeres 写入数据库记录、配置文件、对象等所需要的笼统的权限
+        //      writecfgfile    写入模板配置文件以外的其它配置文件所需要的权限;
+        //      writeobject writexxxobject 等    写入对象所需要的权限; 
+        //      writerecord setxxxinfo 等    写入各种数据库记录所需要的权限
+        //      (已废止)writeres 写入数据库记录、配置文件、对象等所需要的笼统的权限
         // parameters:
         //      strLibraryCodeList  当前用户所管辖的馆代码列表
         //      strAction   要执行的动作。为 change 和 delete 之一
@@ -16206,6 +16207,8 @@ out string db_type);
 
         // 2023/1/10
         // 判断一个路径是否为数据库元数据记录路径?
+        // 注: 暂未校验路径中数据库名的正确性。只是形态上检查了路径
+        // parameters:
         public bool IsDatabaseMetadataPath(
             SessionInfo sessioninfo,
             string strResPath)
@@ -16228,6 +16231,17 @@ out string db_type);
                 return false;
 
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+
+            /*
+            // 书目库 读者库 等
+            // 2022/12/9
+            var error = CheckDbGetRights(sessioninfo,
+                strDbName,
+                out string db_type);
+            if (error != null)
+                return false;
+            */
+
             string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
             if (strRecordID == "cfgs")
                 return false;   // 配置文件目录
@@ -16643,8 +16657,11 @@ out string db_type);
             else
                 return $"数据库 {strDbName} 内资源不允许访问";
 
-            if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
-                return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+            if (sessioninfo != null)
+            {
+                if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
+                    return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+            }
 
             return null;
         }

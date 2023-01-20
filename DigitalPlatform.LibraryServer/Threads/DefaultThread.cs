@@ -272,6 +272,20 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 2023/1/20
+            // 清理 MemoryTable(MemoryChunk机制)
+            {
+                try
+                {
+                    this.App.MemoryTable?.CleanIdle(TimeSpan.FromMinutes(5));
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 清除 MemoryTable 时 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
+
             // 2021/11/21
             // 确保连接到 dp2mserver
             {

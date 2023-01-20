@@ -27,7 +27,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.LibraryServer.Common;
-using System.Linq;
+// using System.Linq;
 
 namespace DigitalPlatform.LibraryServer
 {

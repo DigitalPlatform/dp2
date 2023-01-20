@@ -322,16 +322,46 @@ namespace dp2Library
             return 0;
         }
 
+        [Flags]
+        enum PrepareEnvironmentStyle
+        {
+            None = 0,
+            PrepareSessionInfo = 0x1,
+            CheckLogin = 0x2,
+            CheckHangup = 0x4,
+            Touch = 0x8,
+        }
+
+        // 兼容以前版本
+        LibraryServerResult PrepareEnvironment(
+    string strApiName,
+    bool bPrepareSessionInfo,
+    bool bCheckLogin = false,
+    bool bCheckHangup = false)
+        {
+            PrepareEnvironmentStyle style = PrepareEnvironmentStyle.Touch;
+            if (bPrepareSessionInfo)
+                style |= PrepareEnvironmentStyle.PrepareSessionInfo;
+            if (bCheckLogin)
+                style |= PrepareEnvironmentStyle.CheckLogin;
+            if (bCheckHangup)
+                style |= PrepareEnvironmentStyle.CheckHangup;
+            return PrepareEnvironment(strApiName,
+                style);
+        }
+
         // 准备Application和SessionInfo环境
         // return:
         //      Value == 0  正常
         //      Value == -1 不正常
         LibraryServerResult PrepareEnvironment(
-            string strApiName,
-            bool bPrepareSessionInfo,
-            bool bCheckLogin = false,
-            bool bCheckHangup = false)
+    string strApiName,
+    PrepareEnvironmentStyle style = PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin | PrepareEnvironmentStyle.CheckHangup | PrepareEnvironmentStyle.Touch)
         {
+            bool bPrepareSessionInfo = style.HasFlag(PrepareEnvironmentStyle.PrepareSessionInfo);
+            bool bCheckLogin = style.HasFlag(PrepareEnvironmentStyle.CheckLogin);
+            bool bCheckHangup = style.HasFlag(PrepareEnvironmentStyle.CheckHangup);
+
             if (bPrepareSessionInfo == false && bCheckLogin == true)
             {
                 /*
@@ -496,8 +526,11 @@ namespace dp2Library
             // 2011/1/27
             if (sessioninfo != null)
             {
-                this.sessioninfo.Touch();
-                this.sessioninfo.CallCount++;
+                if (style.HasFlag(PrepareEnvironmentStyle.Touch))
+                {
+                    this.sessioninfo.Touch();
+                    this.sessioninfo.CallCount++;
+                }
 
 #if NO
                 if (string.IsNullOrEmpty(this.sessioninfo.UserID) == true)
@@ -3011,6 +3044,7 @@ namespace dp2Library
                 // 权限判断
 
                 // 权限字符串
+                // TODO: 废止 search 权限。用 searchbiblio searchreader 等权限来进行判断
                 if (StringUtil.IsInList("search", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
@@ -4053,6 +4087,99 @@ strDbName);
             */
         }
 
+        const int MAX_METADATA_BUFFER_SIZE = 500 * 1024;
+
+        // 获得数据库记录
+        // 新版本，以调用 GetRes() API 实现
+        // parameters:
+        //
+        public LibraryServerResult GetRecord(
+            string strPath,
+            out byte[] timestamp,
+            out string strXml)
+        {
+            timestamp = null;
+            strXml = null;
+
+            LibraryServerResult result = this.PrepareEnvironment("GetRecord", 
+                PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin);   // 注意，没有 .Touch
+            if (result.Value == -1)
+                return result;
+
+            {
+                // 检查 strPath 是否指向数据库元数据记录
+                // (GetRecord() API 被限定只能用于获取数据库元数据记录)
+                if (app.IsDatabaseMetadataPath(
+    sessioninfo,
+    strPath) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"获取资源 '{strPath}' 被拒绝。GetRecord() API 只允许用于获取数据库元数据记录";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
+            List<byte> bytes = new List<byte>();
+            long total_bytes = -1;  // 总字节数。-1 表示尚未初始化
+            int getted = 0; // 已经获得的字节数
+            long fragment_start = 0;    // 片段起始偏移
+            int fragment_length = -1;   // 片段长度。-1 表示希望尽可能多获得
+            while (!(total_bytes != -1 && getted >= total_bytes))
+            {
+                var ret = GetRes(strPath,
+                    fragment_start,
+                    fragment_length,
+                    "data,timestamp",
+                    out byte[] temp,
+                    out string _,
+                    out string _,
+                    out timestamp);
+                if (ret.Value == -1)
+                    return ret;
+
+
+
+                total_bytes = ret.Value;
+
+                // 保护缓冲区，避免内存不够
+                // 比如使用 GetRecord() 获取一个尺寸很大的对象的时候
+                if (total_bytes > MAX_METADATA_BUFFER_SIZE)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = $"路径为 '' 的资源的总长度({total_bytes})超过极限值 {MAX_METADATA_BUFFER_SIZE}，无法用 GetRecord() 处理和返回，请改用 GetRes() API";
+                    return result;
+                }
+
+                getted += temp.Length;
+                fragment_start += temp.Length;
+
+                bytes.AddRange(temp);
+            }
+
+            if (bytes != null)
+            {
+                if (bytes.Count > 0)
+                    strXml = Encoding.UTF8.GetString(bytes.ToArray());
+                else
+                    strXml = "";
+            }
+
+            result.Value = bytes.Count;
+            result.ErrorInfo = null;
+            return result;
+
+            /*
+            ERROR1:
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.SystemError;
+                return result;
+            */
+        }
+
+
+#if OLDVERSION  // 以前的版本。2023/1/20 已经改用调用 dp2library GetRes() API 实现。即将废止此 API
         // 获得数据库记录
         // parameters:
         //
@@ -4406,6 +4533,7 @@ out timestamp);
             result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
+#endif
 
         // 2022/11/3
         // 检查当前账户是否有查看一条违约金记录的权限
@@ -14149,7 +14277,7 @@ strLibraryCodeList);
         // rights:
         //      需要 getres 权限
         // return:
-        //      result.Value    -1 出错；0 成功
+        //      result.Value    -1 出错；其它 拟获得的资源的 byte 数总长度(注意 baContent 参数返回的是本次获得的内容，不一定是全部内容)
         public LibraryServerResult GetRes(string strResPath,
             long nStart,
             int nLength,
@@ -14518,9 +14646,12 @@ out byte[] temp_timestamp);
                         if (StringUtil.IsInList("data", strStyle))
                             formats.Add("xml");
                         if (StringUtil.IsInList("outputpath", strStyle))
-                            formats.Add("outputpath"); 
+                            formats.Add("outputpath");
                         if (StringUtil.IsInList("metadata", strStyle))
                             formats.Add("metadata");
+
+                        // TODO: 从一个缓存中获得 xml 和 timestamp。
+                        // 如果成功得到 xml，则尝试用 getres() 从 dp2kernel 获得时间戳，如果时间戳和从缓存获得的时间戳不吻合，则要重新 GetBiblioInfo()
 
                         // Result.Value -1出错 0没有找到 1找到
                         var ret = app.GetBiblioInfos(
@@ -14529,7 +14660,7 @@ out byte[] temp_timestamp);
     null,   // strBiblioXml,
     formats.ToArray(),
     out string[] results,
-    out byte [] temp_timestamp);
+    out byte[] temp_timestamp);
                         if (StringUtil.IsInList("timestamp", strStyle))
                             baOutputTimestamp = temp_timestamp;
                         if (formats.Contains("outputpath")
@@ -14537,7 +14668,7 @@ out byte[] temp_timestamp);
                             strOutputResPath = GetResult(results, formats.IndexOf("outputpath"));
                         if (formats.Contains("metadata")
                             && results != null && results.Length >= 2)
-                            strMetadata = GetResult(results,formats.IndexOf("metadata"));
+                            strMetadata = GetResult(results, formats.IndexOf("metadata"));
 
                         if (ret.Value == -1)
                         {
@@ -14928,10 +15059,10 @@ out strError);
         // 注：写入 backup 或 cfgs 目录要求具备 backup 或者 managedatabase 权限；
         //      写入 upload 目录需要 upload 或者 managedatabase 权限
         //      写入 library.xml 需要 managedatabase 权限
-        //      写入 cfgs/template 文件需要 writetemplate 权限
-        //      写入数据库记录，需要 writerecord 权限
-        //      写入数据库记录下的对象，需要 writeobject 权限
-        //      写入其他(比如 库名/cfgs/配置文件名 )资源，需要 writeres 权限
+        //      写入 cfgs/template 文件需要 writetemplate 权限(写入其它配置文件需要 writecfgfile 权限)
+        //      写入数据库记录，需要 setxxxinfo 等权限
+        //      写入数据库记录下的对象，需要 setxxxobject 权限
+        //      写入其他(比如 库名/cfgs/配置文件名 )资源，需要 writetemplate writecfgfile setxxxinfo 等权限
         //      writeres 权限
         public LibraryServerResult WriteRes(
             string strResPath,
@@ -15080,6 +15211,7 @@ out strError);
                         // 转为调用 SetBiblioInfo()
                         // 读者库、元数据记录
                         // 转为调用 SetReaderInfo()
+                        strOutputResPath = strResPath;
 
                         // TODO: 根据 strStyle 判断请求的意图。只有当真正写入 data 时才需要拼接 chunk
                         // 注意 strStyle 的 gzip 风格
@@ -15089,15 +15221,27 @@ out strError);
 
                         // 记忆 WriteRes() API 中途的 chunk
                         // return:
+                        //      -2  时间戳不匹配
                         //      -1  出错
                         //      0   未完成
                         //      1   完成
-                        int nRet = sessioninfo.MemoryChunk(strResPath,
+                        int nRet = app.MemoryChunk(strResPath,
                             strRanges,
                             lTotalLength,
                             baContent,
+                            baInputTimestamp,
                             out byte[] full_data,
+                            out byte[] new_timestamp,
                             out strError);
+                        if (nRet == -2)
+                        {
+                            // 依然返回服务器认为正确的时间戳
+                            baOutputTimestamp = new_timestamp;
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.TimestampMismatch;
+                            return result;
+                        }
                         if (nRet == -1)
                             throw new Exception(strError);
                         if (nRet == 1)
@@ -15116,7 +15260,7 @@ out strError);
                                     strResPath,
                                     "xml",
                                     strBiblio,
-                                    baInputTimestamp,
+                                    new_timestamp,
                                     null,
                                     "", // strStyle,
                                     out strOutputResPath,
@@ -15169,7 +15313,7 @@ out strError);
                         }
                         else
                         {
-                            baOutputTimestamp = baInputTimestamp;
+                            baOutputTimestamp = new_timestamp;
                             lRet = 0;
                             baContent = null;   // 避免后续处理 baContent
                             bWriteOperLog = false;  // 中途的 round 不要写入日志
