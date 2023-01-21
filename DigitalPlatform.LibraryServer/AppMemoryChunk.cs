@@ -1,6 +1,9 @@
-﻿using System;
+﻿using DigitalPlatform.Script;
+using Microsoft.Extensions.Logging.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -56,5 +59,99 @@ namespace DigitalPlatform.LibraryServer
             return nRet;
         }
 
+        #region GetRes() API 的记录缓存
+
+        const int MAX_RESCACHE_COUNT = 4096;
+
+        // 用于 GetRes() API 的记录缓存
+        ObjectCache<GetResItem> _getResCache = new ObjectCache<GetResItem>();
+
+        public void ResCache_SetRecord(string key,
+            string recpath,
+            string xml,
+            string metadata,
+            byte[] timestamp)
+        {
+            if (_getResCache.Count > MAX_RESCACHE_COUNT)
+                _getResCache.Clear();
+
+            var item = new GetResItem
+            {
+                Key = key,
+                RecPath = recpath,
+                Xml = xml,
+                Metadata = metadata,
+                Timestamp = timestamp,
+                CreateTime = DateTime.Now
+            };
+            _getResCache.SetObject(key, item);
+        }
+
+        // parameters:
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到了
+        public int ResCache_GetRecord(
+            string key,
+            out string recpath,
+            out string xml,
+            out string metadata,
+            out byte[] timestamp)
+        {
+            recpath = null;
+            xml = "";
+            metadata = null;
+            timestamp = null;
+
+            var item = _getResCache.GetObject(key, null);
+            if (item == null)
+                return 0;   // 没有找到
+
+            recpath = item.RecPath;
+            xml = item.Xml;
+            metadata = item.Metadata;
+            timestamp = item.Timestamp;
+            return 1;
+        }
+
+        public void ResCache_RemoveRecord(string key)
+        {
+            _getResCache.SetObject(key, null);
+        }
+
+        // 清除较旧的事项
+        public void ResCache_CleanIdle(TimeSpan length)
+        {
+            DateTime now = DateTime.Now;
+            List<GetResItem> delete_items = new List<GetResItem>();
+            _getResCache.ProcessAll((item) =>
+            {
+                if (now - item.CreateTime > length)
+                    delete_items.Add(item);
+                return true;
+            });
+
+            foreach(var item in delete_items)
+            {
+                _getResCache.SetObject(item.Key, null);
+            }
+        }
+
+        class GetResItem
+        {
+            // 缓存事项 Key。一般由记录路径和数据风格两部分拼接而成
+            public string Key { get; set; }
+
+            // 记录路径
+            public string RecPath { get; set; }
+            public string Xml { get; set; }
+            public string Metadata { get; set; }
+            public byte[] Timestamp { get; set; }
+
+            public DateTime CreateTime { get; set; }
+        }
+
+        #endregion
     }
 }

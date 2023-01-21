@@ -145,6 +145,34 @@ namespace DigitalPlatform.Script
             }
         }
 
+        // return:
+        //      true    希望继续向后处理
+        //      false   希望中断处理
+        public delegate bool delegate_processItem(T item);
+        
+        // return:
+        //      实际处理的事项个数
+        public int ProcessAll(delegate_processItem func)
+        {
+            this._lock.EnterWriteLock();
+            try
+            {
+                int count = 0;
+                foreach (string path in this.m_table.Keys)
+                {
+                    var item = (ObjectItem<T>)this.m_table[path];
+                    count++;
+                    var ret = func?.Invoke(item.Object);
+                    if (ret == false)
+                        return count;
+                }
+                return count;
+            }
+            finally
+            {
+                this._lock.ExitWriteLock();
+            }
+        }
     }
 
     public class ObjectItem<T>

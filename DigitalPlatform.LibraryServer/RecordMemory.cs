@@ -258,6 +258,13 @@ namespace DigitalPlatform.LibraryServer
             total_length = 0;
 
             var data = Encoding.UTF8.GetBytes(xml);
+
+            if (fragment_start >= data.Length)
+            {
+                strError = $"起点({fragment_start})越过数据长度范围({data.Length})";
+                return -1;
+            }
+
             if (fragment_length == -1)
             {
                 fragment_length = Math.Min(data.Length - (int)fragment_start, 100 * 1024);
@@ -269,8 +276,17 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (fragment_start + fragment_length > data.Length)
             {
+                /*
                 strError = $"起点({fragment_start})加上片段长度({fragment_length})超过数据总长度({data.Length})";
                 return -1;
+                */
+                // 自动调节
+                fragment_length = data.Length - (int)fragment_start;
+                if (fragment_length < 0)
+                {
+                    strError = $"起点({fragment_start})越过数据长度范围({data.Length})";
+                    return -1;
+                }
             }
 
             total_length = data.Length;

@@ -273,7 +273,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 2023/1/20
-            // 清理 MemoryTable(MemoryChunk机制)
+            // 清理 MemoryTable(MemoryChunk机制，为 WriteRes() API 服务)
             {
                 try
                 {
@@ -282,6 +282,20 @@ namespace DigitalPlatform.LibraryServer
                 catch (Exception ex)
                 {
                     string strErrorText = "DefaultTread中 清除 MemoryTable 时 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
+
+            // 2023/1/21
+            // 清理 ResCache(为 GetRes() API 服务)
+            {
+                try
+                {
+                    this.App.ResCache_CleanIdle(TimeSpan.FromMinutes(5));
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 清除 ResCache 时 出现异常: " + ExceptionUtil.GetDebugText(ex);
                     this.App.WriteErrorLog(strErrorText);
                 }
             }
