@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
+using MongoDB.Driver.Core.Misc;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -180,6 +181,18 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        /*
+        public bool ChangeFirstTimestamp(string rec_path,
+            byte[] timestamp)
+        {
+            var item = GetItem(rec_path);
+            if (item == null)
+                return false;
+            item.FirstTimestamp = timestamp;
+            return true;
+        }
+        */
+
         void DeleteItemByRecPath(string rec_path)
         {
             lock (_table.SyncRoot)
@@ -293,6 +306,15 @@ namespace DigitalPlatform.LibraryServer
             content = new byte[fragment_length];
             Array.Copy(data, fragment_start, content, 0, fragment_length);
             return 0;
+        }
+
+        // 判断一个范围字符串，是否为第一个分片
+        public static bool IsFirstChunk(string range)
+        {
+            var rangeList = new RangeList(range);
+            if (rangeList.Count > 0 && rangeList[0].lStart == 0)
+                return true;
+            return false;
         }
     }
 

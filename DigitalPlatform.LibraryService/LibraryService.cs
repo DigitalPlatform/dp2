@@ -27,6 +27,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using Microsoft.SqlServer.Server;
 using System.Runtime.Remoting.Activation;
 using System.Data;
+using System.Data.SqlClient;
 
 namespace dp2Library
 {
@@ -15313,6 +15314,38 @@ out strError);
     && baContent != null && baContent.Length > 0)
                             baContent = ByteArray.DecompressGzip(baContent);
 
+                        // 如果首次分片的路径是追加方式
+                        if (ResPath.IsAppendRecPath(strResPath))
+                        {
+                            if (ChunkMemory.IsFirstChunk(strRanges) == false)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = $"分片写入时，第一个分片以外的分片其路径不应为追加形态(请求的路径为 '{strResPath}')";
+                                result.ErrorCode = ErrorCode.SystemError;
+                                return result;
+                            }
+                            var append_ret = WriteResForAppend(channel,
+strResPath,
+lTotalLength,
+baInputTimestamp,
+out byte[] output_timestamp,
+out string temp_recpath,
+out strError);
+                            if (append_ret == -1)
+                            {
+                                result.Value = append_ret;
+                                result.ErrorInfo = strError;
+                                ConvertKernelErrorCode(channel.ErrorCode,
+                    ref result);
+                                return result;
+                            }
+                            // 修改原始时间戳
+                            baInputTimestamp = output_timestamp;
+                            // 路径变成确定形态
+                            strResPath = temp_recpath;
+                            strOutputResPath = temp_recpath;
+                        }
+
                         // 记忆 WriteRes() API 中途的 chunk
                         // return:
                         //      -2  时间戳不匹配
@@ -15407,6 +15440,8 @@ out strError);
                         }
                         else
                         {
+                            strOutputResPath = strResPath;
+
                             baOutputTimestamp = new_timestamp;
                             lRet = 0;
                             baContent = null;   // 避免后续处理 baContent
@@ -15544,6 +15579,30 @@ out strError);
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        // 为获得真实记录路径而追加写入一次
+        long WriteResForAppend(RmsChannel channel,
+            string strResPath,
+            long lTotalLength,
+            byte[] baInputTimestamp,
+            out byte[] baOutputTimestamp,
+            out string strOutputResPath,
+            out string strError)
+        {
+            byte[] data = new byte[1];
+            // TODO: 追加方式(记录 ID 为 ?)的分片写入的第一次，strOutputResPath 如何返回？
+            var lRet = channel.WriteRes(strResPath,
+$"0-0",
+lTotalLength,
+data,
+"", // strMetadata,
+"data,timestamp,outputpath", // strStyle,
+baInputTimestamp,
+out strOutputResPath,
+out baOutputTimestamp,
+out strError);
+            return lRet;
         }
 
         /// *** 评注相关功能

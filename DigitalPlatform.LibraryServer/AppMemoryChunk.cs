@@ -1,11 +1,12 @@
-﻿using DigitalPlatform.Script;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+
+using DigitalPlatform.Script;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -58,6 +59,14 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             return nRet;
         }
+
+        /*
+        public bool ChangeFirstTimestamp(string path,
+            byte[] timestamp)
+        {
+            return this.MemoryTable.ChangeFirstTimestamp(path, timestamp);
+        }
+        */
 
         #region GetRes() API 的记录缓存
 
