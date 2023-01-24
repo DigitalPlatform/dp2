@@ -95,7 +95,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (ByteArray.Compare(timestamp, item.LastTimestamp) != 0)
                         {
-                            output_timestamp = timestamp;
+                            output_timestamp = item.LastTimestamp;
                             strError = $"前端请求的时间戳({ByteArray.GetHexTimeStampString(timestamp)})和服务器端的时间戳({ByteArray.GetHexTimeStampString(item.LastTimestamp)})不匹配";
                             return -2;
                         }
