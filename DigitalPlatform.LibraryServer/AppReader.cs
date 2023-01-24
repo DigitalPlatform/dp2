@@ -944,7 +944,7 @@ namespace DigitalPlatform.LibraryServer
         //      工作人员则要看 setreaderinfo权限是否具备
         //      特殊操作可能还需要 changereaderstate 和 changereaderforegift changereaderbarcode 权限
         // 日志:
-        //      要产生日志
+        //      要产生操作日志
         public LibraryServerResult SetReaderInfo(
             SessionInfo sessioninfo,
             string strAction,

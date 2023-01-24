@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.Globalization;
 
 using Ionic.Zip;
 
@@ -13,7 +14,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
-using System.Globalization;
 using DigitalPlatform.Core;
 
 namespace dp2LibraryConsole
@@ -820,11 +820,45 @@ out strError);
             strUserName = Console.ReadLine();
 
             Console.Write("Password:");
+            /*
             Console.BackgroundColor = Console.ForegroundColor;
-            // Console.ForegroundColor = ConsoleColor.Black;
             strPassword = Console.ReadLine();
             Console.ResetColor();
+            */
+            strPassword = ReadPassword();
             return false;
+        }
+
+        // 2023/1/23
+        static string ReadPassword()
+        {
+            StringBuilder password = new StringBuilder();
+            char newLineChar = '\r';
+            while (true)
+            {
+                ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
+                char passwordChar = consoleKeyInfo.KeyChar;
+
+                if (passwordChar == newLineChar)
+                {
+                    Console.WriteLine();
+                    return password.ToString();
+                }
+                else
+                {
+                    // TODO: 处理 backspace
+                    if (passwordChar == '\b')
+                    {
+                        Console.Write("\b \b"); // 回退，覆盖一个空格，再次回退。起到抹掉最后一个字符的作用
+                        password.Remove(password.Length - 1, 1);
+                    }
+                    else
+                    {
+                        Console.Write('*');
+                        password.Append(passwordChar);
+                    }
+                }
+            }
         }
 
         // Implement IDisposable.

@@ -4564,6 +4564,8 @@ nsmgr);
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
         //      baOutputTimestamp   操作完成后，新的时间戳
+        // 日志:
+        //      要产生操作日志
         public LibraryServerResult SetBiblioInfo(
             SessionInfo sessioninfo,
             string strAction,
@@ -5005,7 +5007,6 @@ out strError);
                         goto ERROR1;
                     if (nRet == 0)
                     {
-
                         strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
                         goto ERROR1;
                     }

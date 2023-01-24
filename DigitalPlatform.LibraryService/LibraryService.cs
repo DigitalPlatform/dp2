@@ -15445,8 +15445,8 @@ out strError);
                             baOutputTimestamp = new_timestamp;
                             lRet = 0;
                             baContent = null;   // 避免后续处理 baContent
-                            bWriteOperLog = false;  // 中途的 round 不要写入日志
                         }
+                        bWriteOperLog = false;  // SetBiblioInfo() 或者 SetReaderInfo() 已经写入了操作日志，此处不再写入操作日志
                     }
                     else
                     {
