@@ -90,6 +90,14 @@ namespace DigitalPlatform.LibraryServer
                         tail = one_range.lStart + one_range.lLength;
                     }
 
+                    // range 字符串为空的时候，当作第一个分片情形
+                    if (string.IsNullOrEmpty(range))
+                    {
+                        first_chunk = true;
+                        item.FirstTimestamp = timestamp;
+                        stream.SetLength(0);
+                    }
+
                     // 如果不是第一个 chunk，则需要检查和以前时间戳是否匹配
                     if (first_chunk == false)
                     {
@@ -315,6 +323,8 @@ namespace DigitalPlatform.LibraryServer
         public static bool IsFirstChunk(string range)
         {
             var rangeList = new RangeList(range);
+            if (rangeList.Count == 0)
+                return true;    // 当 range 为空字符串时，作用为写入一条空白记录
             if (rangeList.Count > 0 && rangeList[0].lStart == 0)
                 return true;
             return false;

@@ -8002,6 +8002,12 @@ out strError);
                 return 0;
             }
 
+            // 2023/1/16
+            // 对于空记录不进行查重
+            if (string.IsNullOrEmpty(strBiblioXml)
+                || strBiblioXml == "<root />")
+                return 0;
+
             string strKey = Get997a(strBiblioXml, out strError);
             if (strKey == null)
                 return -1;

@@ -539,5 +539,41 @@ string style = "")
         {
             _cancelCurrent?.Cancel();
         }
+
+        private async void MenuItem_test_special_Click(object sender, EventArgs e)
+        {
+            using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(this._cancelApp.Token))
+            {
+                _cancelCurrent = cancel;
+                await Task.Run(() =>
+                {
+                    EnableControls(false);
+                    try
+                    {
+                        var result = TestRecord.PrepareEnvironment();
+                        if (result.Value == -1)
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+
+                        result = TestRecord.CreateEmptyRecord(cancel.Token);
+                        if (result.Value == -1)
+                        {
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                            return;
+                        }
+
+                        DataModel.SetMessage("创建空白记录完成", "green");
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendString($"exception: {ex.Message}");
+                    }
+                    finally
+                    {
+                        EnableControls(true);
+                    }
+                });
+            }
+
+        }
     }
 }

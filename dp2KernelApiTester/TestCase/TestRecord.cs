@@ -44,6 +44,21 @@ namespace dp2KernelApiTester
             }
             */
 
+            // 2023/1/26
+            {
+                var create_result = CreateEmptyRecord(token);
+                if (create_result.Value == -1)
+                    return create_result;
+
+                var result = DeleteRecords(
+    token,
+    create_result.CreatedPaths,
+    create_result.AccessPoints,
+    "");
+                if (result.Value == -1)
+                    return result;
+            }
+
             {
                 var create_result = QuickCreateRecords(100, token);
                 if (create_result.Value == -1)
@@ -631,6 +646,63 @@ namespace dp2KernelApiTester
                 ErrorInfo = strError
             };
         }
+
+        // 创建空白记录
+        public static CreateResult CreateEmptyRecord(CancellationToken token = default)
+        {
+            var channel = DataModel.GetChannel();
+
+            List<string> created_paths = new List<string>();
+            List<AccessPoint> created_accesspoints = new List<AccessPoint>();
+
+            {
+                token.ThrowIfCancellationRequested();
+
+                string path = $"{strDatabaseName}/?";
+
+                token.ThrowIfCancellationRequested();
+
+                byte[] bytes = new byte[0];
+                var ret = channel.WriteRes(path,
+                    $"",
+                    0,
+                    bytes,
+                    "",
+                    "content,data",
+                    null,
+                    out string output_path,
+                    out byte[] output_timestamp,
+                    out string strError);
+
+                if (ret == -1)
+                    return new CreateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        CreatedPaths = null,
+                        AccessPoints = null,
+                    };
+
+                created_paths.Add(output_path);
+                /*
+                created_accesspoints.Add(new AccessPoint
+                {
+                    Key = current_barcode,
+                    From = "册条码号",
+                    Path = output_path,
+                });
+                */
+
+                DataModel.SetMessage($"创建记录 {output_path} 成功");
+            }
+
+            return new CreateResult
+            {
+                CreatedPaths = created_paths,
+                AccessPoints = created_accesspoints,
+            };
+        }
+
 
         public class AccessPoint
         {

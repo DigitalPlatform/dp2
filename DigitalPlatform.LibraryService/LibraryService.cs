@@ -15590,10 +15590,10 @@ out strError);
             out string strOutputResPath,
             out string strError)
         {
-            byte[] data = new byte[1];
+            byte[] data = new byte[0];
             // TODO: 追加方式(记录 ID 为 ?)的分片写入的第一次，strOutputResPath 如何返回？
             var lRet = channel.WriteRes(strResPath,
-$"0-0",
+"", // lTotalLength == 0 ? "" : $"0-0",
 lTotalLength,
 data,
 "", // strMetadata,
