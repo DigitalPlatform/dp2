@@ -270,9 +270,12 @@ namespace DigitalPlatform.LibraryServer
             content = null;
             total_length = 0;
 
+            if (xml == null)
+                throw new ArgumentException($"参数 {nameof(xml)} 值不允许为 null", nameof(xml));
+
             var data = Encoding.UTF8.GetBytes(xml);
 
-            if (fragment_start >= data.Length)
+            if (fragment_start > data.Length)
             {
                 strError = $"起点({fragment_start})越过数据长度范围({data.Length})";
                 return -1;
