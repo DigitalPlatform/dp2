@@ -554,7 +554,14 @@ string style = "")
                         if (result.Value == -1)
                             DataModel.SetMessage(result.ErrorInfo, "error");
 
-                        result = TestRecord.CreateEmptyRecord(cancel.Token);
+                        result = TestRecord.CreateEmptyRecord("1", cancel.Token);
+                        if (result.Value == -1)
+                        {
+                            DataModel.SetMessage(result.ErrorInfo, "error");
+                            return;
+                        }
+
+                        result = TestRecord.CreateEmptyRecord("2", cancel.Token);
                         if (result.Value == -1)
                         {
                             DataModel.SetMessage(result.ErrorInfo, "error");

@@ -46,7 +46,7 @@ namespace dp2KernelApiTester
 
             // 2023/1/26
             {
-                var create_result = CreateEmptyRecord(token);
+                var create_result = CreateEmptyRecord("1", token);
                 if (create_result.Value == -1)
                     return create_result;
 
@@ -648,7 +648,9 @@ namespace dp2KernelApiTester
         }
 
         // 创建空白记录
-        public static CreateResult CreateEmptyRecord(CancellationToken token = default)
+        public static CreateResult CreateEmptyRecord(
+            string style,
+            CancellationToken token = default)
         {
             var channel = DataModel.GetChannel();
 
@@ -663,8 +665,14 @@ namespace dp2KernelApiTester
                 token.ThrowIfCancellationRequested();
 
                 byte[] bytes = new byte[0];
+
+                string ranges = "";
+                if (StringUtil.IsInList("1", style))
+                    ranges = "";
+                else if (StringUtil.IsInList("2", style))
+                    ranges = "0:0"; // 新用法，可以定义一个长度为 0 的分段
                 var ret = channel.WriteRes(path,
-                    $"",
+                    ranges,
                     0,
                     bytes,
                     "",
