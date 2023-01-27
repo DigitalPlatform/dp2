@@ -5007,8 +5007,15 @@ out strError);
                         goto ERROR1;
                     if (nRet == 0)
                     {
-                        strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
-                        goto ERROR1;
+                        if (IsEmptyXml(strBiblio) == true)
+                        {
+                            strMarcSyntax = cfg.BiblioDbSyntax;  // 权且当作数据库一致的 MARC 格式来处理
+                        }
+                        else
+                        {
+                            strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
+                            goto ERROR1;
+                        }
                     }
 
                     if (cfg == null)
@@ -8004,8 +8011,12 @@ out strError);
 
             // 2023/1/16
             // 对于空记录不进行查重
+            /*
             if (string.IsNullOrEmpty(strBiblioXml)
                 || strBiblioXml == "<root />")
+                return 0;
+            */
+            if (IsEmptyXml(strBiblioXml))
                 return 0;
 
             string strKey = Get997a(strBiblioXml, out strError);
@@ -8121,6 +8132,14 @@ out strError);
 
             strError = StringUtil.MakePathList(recpaths);
             return recpaths.Count;
+        }
+
+        static bool IsEmptyXml(string strBiblioXml)
+        {
+            if (string.IsNullOrEmpty(strBiblioXml)
+                || strBiblioXml == "<root />")
+                return true;
+            return false;
         }
 
         /*

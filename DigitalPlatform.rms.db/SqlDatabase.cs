@@ -14727,18 +14727,24 @@ handle.CancelTokenSource.Token).Result;
                 RangeItem range = (RangeItem)rangeList[i];
                 long lStartOfTarget = range.lStart;     // 恢复到image字段的位置  
                 int nNeedReadLength = (int)range.lLength;   // 需要读缓冲区的长度
+                /*
                 if (rangeList.Count == 1 && nNeedReadLength == 0)
                 {
                     bFull = true;
                     break;
                 }
+                */
 
+                /*
                 string strThisEnd = Convert.ToString(lStartOfTarget + (Int64)nNeedReadLength - (Int64)1);
-
                 Debug.Assert(strThisEnd.IndexOf("-") == -1, "");
 
                 string strThisRange = Convert.ToString(lStartOfTarget)
                     + "-" + strThisEnd;
+                */
+                // 2023/1/27
+                string strThisEnd = (range.lStart + range.lLength - 1).ToString();  // 内容的最后一个字符的 offset。当内容为空的时候，有可能为 "-1"
+                string strThisRange = range.ToString();
 
                 // return
                 //		-1	出错 
@@ -14782,9 +14788,17 @@ handle.CancelTokenSource.Token).Result;
                     bFull = true;
                     string strFullEnd = "";
                     {
+                        /*
                         int nPosition = strNewRange.IndexOf('-');
                         if (nPosition >= 0)
                             strFullEnd = strNewRange.Substring(nPosition + 1);
+                        */
+                        RangeList temp = new RangeList(strNewRange);
+                        if (temp.Count != 1)
+                            throw new Exception($"strNewRange '{strNewRange}' 格式错误，应为一个段落形态");
+                        Debug.Assert(temp.Count == 1);
+                        var temp_item = temp[0];
+                        strFullEnd = (temp_item.lStart + temp_item.lLength - 1).ToString();
                     }
 
                     // 当为范围的最后一次,且本次范围的末尾等于总范围的末尾,且还没有删除时
