@@ -82,6 +82,7 @@
     <Compile Include="LoanParam\TestLoanParam.cs" />
     <Compile Include="ResultSet\TestResultSet.cs" />
     <Compile Include="TestAdjustOverflow.cs" />
+    <Compile Include="TestAssemblyCache.cs" />
     <Compile Include="TestAuthorNumber.cs" />
     <Compile Include="BarcodeValidator\TestBarcodeValidator.cs" />
     <Compile Include="TestBiblioTable.cs" />

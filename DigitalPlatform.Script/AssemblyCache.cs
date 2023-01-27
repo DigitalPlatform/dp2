@@ -35,6 +35,7 @@ namespace DigitalPlatform.Script
         RecordLockCollection _pathLock = new RecordLockCollection();
 
         // 获得一个对象。如果对象尚不存在，则用给定的 proc 方法创建它
+        // 如果 proc 为 null，则对象不存在时本函数返回 null
         public T GetObject(string strPath, CreateItem<T> proc)
         {
             this._lock.EnterUpgradeableReadLock();
@@ -51,10 +52,14 @@ namespace DigitalPlatform.Script
                     if (item != null)
                         return item.Object;
 
-                    item = new ObjectItem<T>();
-                    item.Object = proc();
-                    this.SetObjectItem(strPath, item); 
-                    return item.Object;
+                    if (proc != null)
+                    {
+                        item = new ObjectItem<T>();
+                        item.Object = proc();
+                        this.SetObjectItem(strPath, item);
+                        return item.Object;
+                    }
+                    return (T)default;
                 }
                 finally
                 {
