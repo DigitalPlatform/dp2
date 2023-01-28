@@ -365,6 +365,13 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
+                // 2023/1/28
+                if (IsDatabaseMetadataPath(sessioninfo, strCurrentBiblioRecPath) == false)
+                {
+                    strError = $"不允许使用 GetBiblioInfos() 获取路径为 '{strCurrentBiblioRecPath}' 的资源。请改用 GetRes() API";
+                    goto ERROR1;
+                }
+
                 string strAccessParameters = "";
                 bool bRightVerified = false;
                 // 检查存取权限
