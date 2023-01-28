@@ -28,6 +28,7 @@ using Microsoft.SqlServer.Server;
 using System.Runtime.Remoting.Activation;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 
 namespace dp2Library
 {
@@ -14632,7 +14633,7 @@ out byte[] temp_timestamp);
                     else
 
 #endif
-                    if ((app.IsBiblioDbName(strDbName) || app.IsReaderDbName(strDbName))
+                    if ((app.IsBiblioDbName(strDbName) || app.IsReaderDbName(strDbName) || strDbName == app.AmerceDbName)
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
                     {
                         // strError = "不允许用 GetRes() 来获得书目记录。请改用 GetBiblioInfo() API";
@@ -14769,6 +14770,60 @@ out byte[] temp_timestamp);
                                     result.ErrorCode = ErrorCode.SystemError;
                                 }
                             }
+                            else if (strDbName == app.AmerceDbName)
+                            {
+                                lRet = channel.GetRes(strResPath,
+                                    strStyle + ",data", // 确保可以获取到记录 XML
+                                    out string amerce_xml,
+                                    out strMetadata,
+                                    out baOutputTimestamp,
+                                    out strOutputResPath,
+                                    out strError);
+                                if (lRet == -1)
+                                {
+                                    result.Value = lRet;
+                                    result.ErrorInfo = strError;
+                                    ConvertKernelErrorCode(channel.ErrorCode,
+                                        ref result);
+                                    return result;
+                                }
+
+                                XmlDocument amerce_dom = new XmlDocument();
+                                try
+                                {
+                                    amerce_dom.LoadXml(amerce_xml);
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "违约金记录 '" + strOutputResPath + "' 装入XMLDOM时出错: " + ex.Message;
+                                    goto ERROR1;
+                                }
+
+                                // 检查当前账户是否有查看一条违约金记录的权限
+                                // return:
+                                //      -1  出错
+                                //      0   不具备权限
+                                //      1   具备权限
+                                int nRet = HasAmerceRight(
+                                    sessioninfo,
+                                    strOutputResPath,
+                                    amerce_dom,
+                                    out strError);
+                                if (nRet != 1)
+                                {
+                                    result.Value = -1;
+                                    result.ErrorInfo = strError;
+                                    result.ErrorCode = ErrorCode.AccessDenied;
+                                    return result;
+                                }
+
+                                if (StringUtil.IsInList("data", strStyle))
+                                {
+                                    formats.Add("xml");
+                                    results = new string[] { amerce_xml };
+                                }
+                            }
+
 
                             if (formats.Contains("xml"))
                                 xml = GetResult(results, formats.IndexOf("xml"));
@@ -14814,6 +14869,8 @@ out strError);
 
                         return result;
                     }
+
+#if OLDCODE
                     else if (app.AmerceDbName == strDbName)
                     {
                         DigitalPlatform.LibraryServer.LibraryApplication.ResPathType type = LibraryApplication.GetResPathType(strResPath);
@@ -14833,6 +14890,7 @@ out strError);
                             goto ERROR1;
                         }
                     }
+#endif
                 }
 
                 bool bWriteLog = false; // 是否需要记入操作日志
