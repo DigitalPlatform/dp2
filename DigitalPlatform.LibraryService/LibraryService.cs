@@ -5215,7 +5215,7 @@ out timestamp);
         {
             if (StringUtil.IsInList("xml", strBrowseInfoStyle) == false
                 && record.RecordBody != null)
-                record.RecordBody = null;
+                record.RecordBody.Xml = null;
         }
 
         static void ClearRecord(Record record,
