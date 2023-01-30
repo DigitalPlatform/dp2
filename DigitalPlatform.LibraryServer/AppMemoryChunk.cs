@@ -31,8 +31,10 @@ namespace DigitalPlatform.LibraryServer
             long lTotalLength,
             byte[] chunk,
             byte[] timestamp,
+            string style,
             out byte[] data,
             out byte[] output_timestamp,
+            out string output_style,
             out string strError)
         {
             output_timestamp = null;
@@ -54,8 +56,10 @@ namespace DigitalPlatform.LibraryServer
                 lTotalLength,
                 chunk,
                 timestamp,
+                style,
                 out data,
                 out output_timestamp,
+                out output_style,
                 out strError);
             return nRet;
         }

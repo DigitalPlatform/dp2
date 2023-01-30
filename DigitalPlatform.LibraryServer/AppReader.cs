@@ -1143,8 +1143,10 @@ namespace DigitalPlatform.LibraryServer
                 }
                 if (baOldTimestamp != null)
                 {
+                    /*
                     strError = "strAction 值为 new 时, baOldTimestamp 参数必须为空";
                     goto ERROR1;
+                    */
                 }
             }
             else
@@ -1847,6 +1849,7 @@ out List<string> send_skips);
                             goto ERROR1;
                         }
 
+                        /*
                         // 2007/11/12
                         // 加上了这句话，就禁止了action为new时的定id保存功能。这个功能本来是被允许的。不过禁止后，更可避免概念混淆、出错。
                         if (strID != "?")
@@ -1854,6 +1857,7 @@ out List<string> send_skips);
                             strError = "当strAction为new时，strRecPath必须为 读者库名/? 形态，或空(空表示取第一个读者库的当前最尾号)。(但目前strRecPath为'" + strRecPath + "')";
                             goto ERROR1;
                         }
+                        */
                     }
 
                     // 构造出适合保存的新读者记录

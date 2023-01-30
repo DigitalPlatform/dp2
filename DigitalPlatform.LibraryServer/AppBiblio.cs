@@ -592,32 +592,37 @@ namespace DigitalPlatform.LibraryServer
                     // 2014/12/16
                     strCurrentBiblioRecPath = strOutputPath;
 
-                    // 2013/3/6
-                    // 过滤字段内容
-                    if (string.IsNullOrEmpty(strAccessParameters) == false
-                        || !(StringUtil.IsInList("writeres", sessioninfo.Rights) == true || StringUtil.IsInList("writeobject", sessioninfo.Rights) == true)
-                        )
-                    {
-                        // 根据字段权限定义过滤出允许的内容
-                        // parameters:
-                        //      strUserRights   用户权限。如果为 null，表示不启用过滤 856 字段功能
-                        // return:
-                        //      -1  出错
-                        //      0   成功
-                        //      1   有部分字段被修改或滤除
-                        nRet = FilterBiblioByFieldNameList(
+                }
+
+                // 2023/1/28 把这一段放到外面，让前端提交的 XML 记录也经过字段过滤步骤
+                // 2013/3/6
+                // 过滤字段内容
+                // 没有 writeres 和 writeobject 权限，也可以进入处理?
+                if (string.IsNullOrEmpty(strAccessParameters) == false
+                    // || !(StringUtil.IsInList("writeres", sessioninfo.Rights) == true || StringUtil.IsInList("writeobject", sessioninfo.Rights) == true)
+                    || StringUtil.IsInList("writeobject,writebiblioobject", sessioninfo.Rights) == false
+                    )
+                {
+                    // 根据字段权限定义过滤出允许的内容
+                    // parameters:
+                    //      strUserRights   用户权限。如果为 null，表示不启用过滤 856 字段功能
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    //      1   有部分字段被修改或滤除
+                    nRet = FilterBiblioByFieldNameList(
 #if USE_OBJECTRIGHTS
                             StringUtil.IsInList("objectRights", this.Function) == true ? sessioninfo.Rights : null,
 #else
-                            sessioninfo.Rights,
+                        sessioninfo.Rights,
 #endif
-                            strAccessParameters,
-                            ref strBiblioXml,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }
+                        strAccessParameters,
+                        ref strBiblioXml,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
                 }
+
 
                 if (formats != null)
                 {
@@ -2407,7 +2412,8 @@ return result;
             try
             {
                 if (string.IsNullOrEmpty(strFieldNameList) == false
-                    || !(StringUtil.IsInList("writeres", strRights) == true || StringUtil.IsInList("writeobject", strRights) == true)
+                    // || !(StringUtil.IsInList("writeres", strRights) == true || StringUtil.IsInList("writeobject", strRights) == true)
+                    || StringUtil.IsInList("writeobject,writebiblioobject", strRights) == false
                     )
                 {
                     // return:
@@ -2500,7 +2506,7 @@ out strError);
 
                 // 如果不具备writeobjects权限
                 // TODO: 是否 writeres 权限也管用?
-                if (StringUtil.IsInList("writeobject", strRights) == false)
+                if (StringUtil.IsInList("writeobject,writebiblioobject", strRights) == false)
                 {
                     // TODO: 用MergeDprmsFile()函数替代下面段落 
 
@@ -3806,8 +3812,8 @@ nsmgr);
                 return 0;
 
             // 只要当前账户具备 writeobject 或 writeres 权限，等于他可以获取任何对象，为了编辑加工的需要
-            if (StringUtil.IsInList("writeobject", strUserRights) == true
-                || StringUtil.IsInList("writeres", strUserRights) == true)
+            if (StringUtil.IsInList("writeobject,writebiblioobject", strUserRights) == true
+                /*|| StringUtil.IsInList("writeres", strUserRights) == true*/)
                 return 0;
 
             string strMaskChar = new string((char)1, 1);
@@ -3862,8 +3868,8 @@ nsmgr);
             strError = "";
 
             // 只要当前账户具备 writeobject 或 writeres 权限，等于他可以获取任何对象，为了编辑加工的需要
-            if (StringUtil.IsInList("writeobject", strUserRights) == true
-                || StringUtil.IsInList("writeres", strUserRights) == true)
+            if (StringUtil.IsInList("writeobject,writebiblioobject", strUserRights) == true
+                /*|| StringUtil.IsInList("writeres", strUserRights) == true*/)
                 return 0;
 
             MarcRecord record = new MarcRecord(strMARC);
@@ -4495,7 +4501,8 @@ nsmgr);
                         strTitle,
                         strBody,
                         strMime,
-                        (text) => {
+                        (text) =>
+                        {
                             ReadersMonitor.WriteEmailLogConditional(this, text);
                         },
                         out strError);
@@ -4715,7 +4722,9 @@ nsmgr);
                 && string.IsNullOrEmpty(strBiblioRecPath) == false
                 && ResPath.IsAppendRecPath(strBiblioRecPath) == false)
             {
-                strAction = "change";
+                // 如果 style 中包含 new，则 strAction 不会被改变
+                if (StringUtil.IsInList("new", strStyle) == false)
+                    strAction = "change";
 
 #if NO
                 strError = "当(new)创建书目记录的时候，只能使用“书目库名/?”形式的路径(而不能使用 '" + strBiblioRecPath + "' 形式)。如果要在指定位置保存，可使用修改(change)子功能";
@@ -4902,7 +4911,7 @@ nsmgr);
                         else if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
                         {
                             strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 " +
-                                strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo" +
+                                (strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo") +
                                 " " + strAction + " 操作的存取权限";
                             result.Value = -1;
                             result.ErrorInfo = strError;
@@ -4921,10 +4930,10 @@ nsmgr);
                 if (strDbType == "biblio")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setbiblioinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息被拒绝。不具备 order 或 setbiblioinfo 权限。";
+                        result.ErrorInfo = "设置书目信息被拒绝。不具备 setbiblioinfo 或 writerecord 或 order 权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -5141,7 +5150,7 @@ out strError);
 
                     if (strOwner != sessioninfo.UserID)
                     {
-                        strError = $"当前用户 '{ sessioninfo.UserID }' 不是{ strDbTypeCaption }记录 '{ strBiblioRecPath }' 的创建者(998$z) '{strOwner}'，因此 setbiblio(authority)info { strAction } 操作被拒绝";
+                        strError = $"当前用户 '{sessioninfo.UserID}' 不是{strDbTypeCaption}记录 '{strBiblioRecPath}' 的创建者(998$z) '{strOwner}'，因此 setbiblio(authority)info {strAction} 操作被拒绝";
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -6754,10 +6763,10 @@ out strError);
             if (bWriteRightVerified == false)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setbiblioinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "设置书目信息被拒绝。不具备 order 或 setbiblioinfo 权限。";
+                    result.ErrorInfo = "设置书目信息被拒绝。不具备 setbiblioinfo 或 writerecord 或 order 权限";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

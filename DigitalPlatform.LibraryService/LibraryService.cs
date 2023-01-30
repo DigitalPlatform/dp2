@@ -3292,12 +3292,13 @@ namespace dp2Library
                 }
                 else
                 {
+
                     // dp2kernel 原有功能
                     lRet = channel.DoGetSearchResult(
                         strResultSetName,
                         lStart,
                         lCount,
-                        strBrowseInfoStyle,
+                        GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 id 
                         strLang,
                         null,
                         out searchresults,
@@ -3541,6 +3542,16 @@ namespace dp2Library
             }
         }
 
+        // 把前端请求 dp2library GetSearchResult() API 时的 style 转化为真正请求 dp2kernel 时的 style
+        // 主要是确保在需要过滤的时候获得 xml 列
+        static string GetModifiedStyle(string strBrowseInfoStyle)
+        {
+            string modified_style = strBrowseInfoStyle + ",id";
+            if (StringUtil.IsInList("cols", strBrowseInfoStyle))
+                modified_style += ",xml";
+            return modified_style;
+        }
+
         // 2022/11/29 从 GetSearchResult() 处理中转移到此处。可能和 GetBrowseRecords() 中的旧代码有差异
         // 对 XML 记录进行过滤或者修改
         void FilterResultSet(Record[] searchresults,
@@ -3562,6 +3573,13 @@ namespace dp2Library
 
             foreach (Record record in searchresults)
             {
+                // 2023/1/29
+                if (string.IsNullOrEmpty(record.Path))
+                {
+                    ClearRecord(record, $"因缺乏 record.Path 部分，无法进行过滤。请在 strBrowseStyle 中包含 id");
+                    continue;
+                }
+
                 string strDbName = ResPath.GetDbName(record.Path);
 
                 bool bIsReader = sessioninfo.UserType == "reader";
@@ -3739,9 +3757,13 @@ strDbName);
                         ClearCols(record, LibraryApplication.FILTERED);
                     }
                 }
+
+                // 2023/1/29
+                ClearWorkingFields(record, strBrowseInfoStyle);
             }
         }
 
+#if OLDVERSION
         /*
          * record.Cols 和 record.RecordBody.Xml 需要进行过滤处理
          * 1) (style 中包含 xml)如果 .Xml 被 access 处理(减少字段或者禁止)
@@ -3898,6 +3920,123 @@ strDbName);
                     else
                         record.Cols = null;
                 }
+            }
+        }
+#endif
+
+        static void SetRecordBodyError(Record record,
+            string strError,
+            ErrorCodeValue error_code)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+            dom.DocumentElement.SetAttribute("error", strError);
+            record.RecordBody.Xml = dom.DocumentElement.OuterXml;
+            record.RecordBody.Result.ErrorCode = error_code;
+        }
+
+        /*
+ * record.Cols 和 record.RecordBody.Xml 需要进行过滤处理
+ * 1) (style 中包含 xml)如果 .Xml 被 access 处理(减少字段或者禁止)
+ *  1.1 如果 style 中有 cols，则重新创建 cols
+ *  1.2 如果 style 中没有 cols，则设置 cols 为 null
+ * 2) 如果 style 中没有 xml，也就是说 .Xml == null，
+ * 并且发现 XML 需要按照 access 处理(减少字段或者禁止)，那么 Cols 设置 [滤除]
+ * */
+        void FilterBiblioRecord(Record record,
+            string strBiblioDbName,
+            bool has_getbiblioinfo_right,
+            string access,
+            string strBrowseInfoStyle)
+        {
+            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+
+            // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
+            if (bHasCols == false && bHasXml == false)
+                return;
+
+            string origin_xml = record.RecordBody?.Xml;
+
+            /*
+            if (string.IsNullOrEmpty(access))
+                return; // 保持 XML 和 Cols 不变
+            */
+
+            if (record.RecordBody == null
+|| string.IsNullOrEmpty(record.RecordBody.Xml))
+                return;
+
+            if (string.IsNullOrEmpty(origin_xml))
+                return;
+
+            bool bXmlChanged = false;
+
+            string xml = null;
+
+            var ret = app.GetBiblioInfos(
+sessioninfo,
+record.Path,
+origin_xml,
+new string[] { "xml" },
+out string[] results,
+out byte[] _);
+            if (ret.Value == -1 || ret.Value > 1)
+            {
+                SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.CommonError);
+                ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
+                ClearXml(record);
+            }
+            else if (ret.Value == 0)
+            {
+                SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.NotFound);
+                ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
+                ClearXml(record);
+            }
+            else
+            {
+                if (results == null || results.Length == 0)
+                {
+                    SetRecordBodyError(record, "results error", ErrorCodeValue.CommonError);
+                    ClearCols(record, LibraryApplication.FILTERED + "GetBiblioInfo() results error");
+                    ClearXml(record);
+                }
+                else
+                {
+                    xml = results[0];
+
+                    record.RecordBody.Xml = xml;
+
+                    bXmlChanged = true;
+                }
+            }
+
+            if (bXmlChanged)  // XML 记录发生过改变，也要重新创建 Cols
+            {
+                if (bHasCols)
+                {
+                    // 有可能返回 null
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
+
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    // return:
+                    //      // cols中包含的字符总数
+                    //      -1  出错
+                    //      0   记录没有找到
+                    //      其他  cols 中包含的字符总数。最少为 1，不会为 0
+                    int nRet = app.GetCols(
+                        channel,
+                        strFormat,
+                        strBiblioDbName,
+                        xml,
+                        // 0,
+                        out string[] cols,
+                        out string strError);
+                    // TODO: 检查 nRet == -1 时候 cols 是否为报错信息
+                    record.Cols = cols;
+                }
+                else
+                    record.Cols = null;
             }
         }
 
@@ -4619,7 +4758,7 @@ out timestamp);
                 string strError = "";
 
                 long lRet = channel.GetBrowseRecords(paths,
-                    strBrowseInfoStyle,
+                    GetModifiedStyle(strBrowseInfoStyle), // 为了过滤需要，确保获得 xml 和 id 
                     out searchresults,
                     out strError);
                 if (lRet == -1)
@@ -4954,6 +5093,15 @@ out timestamp);
                 else
                     record.Cols[i] = "";
             }
+        }
+
+        // 清除 dp2library 和 dp2kernel 之间为了权限过滤而增加的列
+        static void ClearWorkingFields(Record record,
+            string strBrowseInfoStyle)
+        {
+            if (StringUtil.IsInList("xml", strBrowseInfoStyle) == false
+                && record.RecordBody != null)
+                record.RecordBody = null;
         }
 
         static void ClearRecord(Record record,
@@ -15372,9 +15520,11 @@ out strError);
     && baContent != null && baContent.Length > 0)
                             baContent = ByteArray.DecompressGzip(baContent);
 
+                        bool is_append_path = false;
                         // 如果首次分片的路径是追加方式
                         if (ResPath.IsAppendRecPath(strResPath))
                         {
+                            is_append_path = true;
                             if (ChunkMemory.IsFirstChunk(strRanges) == false)
                             {
                                 result.Value = -1;
@@ -15415,8 +15565,10 @@ out strError);
                             lTotalLength,
                             baContent,
                             baInputTimestamp,
+                            is_append_path ? "new" : "",   // new 表示第一次分片是追加形态的路径。记忆下来
                             out byte[] full_data,
                             out byte[] new_timestamp,
+                            out string output_style,
                             out strError);
                         if (nRet == -2)
                         {
@@ -15436,7 +15588,8 @@ out strError);
                             string strBiblio = Encoding.UTF8.GetString(baContent);
                             string strAction = "change";
                             if (string.IsNullOrEmpty(strResPath)
-                                || ResPath.IsAppendRecPath(strResPath))
+                                || ResPath.IsAppendRecPath(strResPath)
+                                || StringUtil.IsInList("new", output_style))
                                 strAction = "new";
                             if (app.IsBiblioDbName(strDbName))
                             {
@@ -15447,7 +15600,7 @@ out strError);
                                     strBiblio,
                                     new_timestamp,
                                     null,
-                                    "", // strStyle,
+                                    StringUtil.IsInList("new", output_style) ? "new" : "", // strStyle,
                                     out strOutputResPath,
                                     out baOutputTimestamp);
                                 if (ret.Value == -1)
@@ -15459,6 +15612,8 @@ out strError);
                                     return ret;
                                 }
                                 lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
                             }
                             if (app.IsReaderDbName(strDbName))
                             {
@@ -15482,6 +15637,8 @@ out strError);
                                     return ret;
                                 }
                                 lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
                             }
                             /*
                             lRet = channel.WriteRes(strResPath,
@@ -15518,6 +15675,12 @@ out strError);
                             out strOutputResPath,
                             out baOutputTimestamp,
                             out strError);
+
+                        // 做错误码的翻译工作
+                        // 2008/7/28
+                        // result.ErrorCode = ConvertKernelErrorCode(channel.ErrorCode);
+                        ConvertKernelErrorCode(channel.ErrorCode,
+            ref result);
                     }
                     result.Value = lRet;
                     result.ErrorInfo = strError;
@@ -15525,11 +15688,6 @@ out strError);
                     // 2016/10/12
                     app.ClearCacheCfgs(strResPath);
 
-                    // 做错误码的翻译工作
-                    // 2008/7/28
-                    // result.ErrorCode = ConvertKernelErrorCode(channel.ErrorCode);
-                    ConvertKernelErrorCode(channel.ErrorCode,
-        ref result);
                 }
 
                 // 2017/6/7

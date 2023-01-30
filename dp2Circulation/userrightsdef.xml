@@ -423,8 +423,8 @@
 		<comment lang='en'>write amerce object</comment>
 	</property>
 	
-	<property name='writerecord'>
-		<comment lang='zh'>写入元数据记录</comment>
+	<property name='writerecord' comment='危险权限'>
+		<comment lang='zh'>写入各种元数据记录</comment>
 		<comment lang='en'>write metadata records</comment>
 	</property>
 	

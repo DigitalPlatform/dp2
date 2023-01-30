@@ -15782,9 +15782,9 @@ strLibraryCode);    // 读者所在的馆代码
                     || strFirstPart == "?")
                 {
                     // 首先要具备 setbiblioinfo 权限
-                    if (StringUtil.IsInList("writerecord,setbiblioinfo", strRights) == false)
+                    if (StringUtil.IsInList("setbiblioinfo,writerecord", strRights) == false)
                     {
-                        strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 writerecord 或 setbiblioinfo 权限";
+                        strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 setbiblioinfo 或 writerecord 权限";
                         return 0;
                     }
 
@@ -15878,8 +15878,7 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writerecord权限，就不再需要writeres权限
                          * */
-                        strError = "不允许使用WriteRes()写入读者库记录";
-                        return 0;
+                        return 1;
                     }
 
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
@@ -16024,9 +16023,9 @@ out string db_type);
                     || strFirstPart == "?")
                 {
                     // setxxxinfo
-                    if (StringUtil.IsInList($"writerecord,set{util_db_type}info", strRights) == false)
+                    if (StringUtil.IsInList($"set{util_db_type}info,writerecord", strRights) == false)
                     {
-                        strError = $"直接写入记录 { strResPath} 被拒绝。不具备 writerecord 或 set{util_db_type}info 权限";
+                        strError = $"直接写入记录 { strResPath} 被拒绝。不具备 set{util_db_type}info 或 writerecord 权限";
                         return 0;
                     }
 
@@ -16616,6 +16615,7 @@ out string db_type);
             {
                 db_type = "biblio";
                 right = "getbiblioinfo";
+                // TODO: 注意，当前账户可能用存取定义来决定读取权限。这里可以返回一些线索，供后面判断使用。可以简单判断当前账户是否具备存取定义，而不一定细判断 getbiblioinfo=* 权限是否具备
             }
             else if (this.IsReaderDbName(strDbName) == true)
             {

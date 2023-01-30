@@ -34,6 +34,7 @@ namespace DigitalPlatform.LibraryServer
         // 注: 本函数要求前端严格按照 offset 从小到大顺序请求写入分片。主要是算法在收到第一个分片的时候自动清除了临时文件的全部内容，另外时间戳环环相扣的逻辑也是按照这个顺序来确定的
         // parameters:
         //      timestamp 前端发来的时间戳
+        //      style   需要记忆的风格
         //      output_timestamp 服务器返回给前端的时间戳。前端会在下一次接续请求的时候发来这个时间戳
         // return:
         //      -2  时间戳不匹配
@@ -45,12 +46,15 @@ namespace DigitalPlatform.LibraryServer
             long lTotalLength,
             byte[] chunk,
             byte[] timestamp,
+            string style,
             out byte[] data,
             out byte[] output_timestamp,
+            out string output_style,
             out string strError)
         {
             data = null;
             output_timestamp = null;
+            output_style = null;
             strError = "";
 
             // 防止事项数越过极限
@@ -80,6 +84,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             first_chunk = true;
                             item.FirstTimestamp = timestamp;
+                            item.Style = style;
                             stream.SetLength(0);
                         }
 
@@ -95,6 +100,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         first_chunk = true;
                         item.FirstTimestamp = timestamp;
+                        item.Style = style;
                         stream.SetLength(0);
                     }
 
@@ -126,6 +132,7 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR; // 返回时要自动删除临时文件
                         }
                         output_timestamp = item.FirstTimestamp; // 返回前端第一次发来的时间戳
+                        output_style = item.Style;
                         goto FINISH;
                     }
                 }
@@ -343,6 +350,9 @@ namespace DigitalPlatform.LibraryServer
         public byte[] LastTimestamp { get; set; }
 
         public DateTime CreateTime { get; set; }
+
+        // 记忆的风格
+        public string Style { get; set; }
 
         public void DeleteTempFile()
         {
