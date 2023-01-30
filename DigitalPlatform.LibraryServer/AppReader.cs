@@ -5202,6 +5202,7 @@ out strError);
         //      strBarcode  读者证条码号。如果前方引导以"@path:"，则表示读者记录路径。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向。实际上 $ 后面可以是多个 style 值，它们之间用 '|' 分隔。可用的 style 值一般有 prev next withresmetadata outputpath(多余)
         //                  可以使用读者证号二维码
         //                  TODO: 是否可以使用身份证号?
+        //      strPatronXml    前端提供的读者 XML 记录
         //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary/metadata
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
         //      strRecPath  [out] 读者记录路径。如果命中多个读者记录，这里是逗号分隔的路径列表字符串。最多 100 个路径
@@ -5212,6 +5213,7 @@ out strError);
         public LibraryServerResult GetReaderInfo(
             SessionInfo sessioninfo,
             string strBarcode,
+            string strPatronXml,    // 2023/1/30
             string strResultTypeList,
             out string[] results,
             out string strRecPath,
@@ -5296,6 +5298,7 @@ out strError);
             long lRet = 0;
 
             // 前端提供临时记录
+            // 这种使用 strBarcode 的方式要逐步淘汰，改用 strPatronXml 参数
             if (strBarcode[0] == '<')
             {
                 strXml = strBarcode;
@@ -5355,64 +5358,75 @@ out strError);
                         goto ERROR1;
                     }
 
-                    string strStyle = "content,data,timestamp,outputpath";
-                    // 2023/1/19
-                    if (StringUtil.IsInList("metadata", strResultTypeList))
-                        strStyle += ",metadata";
-
-
-                    /*
-                    if (String.IsNullOrEmpty(strCommand) == false
-            && (strCommand == "prev" || strCommand == "next"))
+                    // 2023/1/30
+                    if (string.IsNullOrEmpty(strPatronXml) == false)
                     {
-                        strStyle += "," + strCommand;
-                    }
-                    */
-                    // 2023/1/19
-                    // 附加的一些 style。包括 prev next withresmetadata
-                    // TODO: 可以把合并后 strStyle 内容中重复出现的一些值归并一下
-                    if (string.IsNullOrEmpty(strCommand) == false)
-                        strStyle += "," + strCommand.Replace("|", ",");
-
-                    // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
-                    if (this.IsCurrentChangeableReaderPath(strReaderRecPath,
-                        sessioninfo.LibraryCodeList) == false)
-                    {
-                        strError = "读者记录路径 '" + strReaderRecPath + "' 的读者库不在当前用户管辖范围内";
-                        goto ERROR1;
-                    }
-
-                    lRet = channel.GetRes(strReaderRecPath,
-                        strStyle,
-                        out strXml,
-                        out strMetadata,
-                        out baTimestamp,
-                        out strOutputPath,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        // 注意 this.ErrorCode == ChannelErrorCode.NotFoundObjectFile 算是一种错误，要让前端意识到存在错误并去修复
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
-                        {
-                            result.Value = 0;
-                            if (StringUtil.IsInList("prev", strCommand))
-                                result.ErrorInfo = "到头";
-                            else if (StringUtil.IsInList("next", strCommand))
-                                result.ErrorInfo = "到尾";
-                            else
-                                result.ErrorInfo = "没有找到";
-                            result.ErrorCode = ErrorCode.NotFound;
-                            return result;
-                        }
-
-                        nRet = -1;
+                        strXml = strPatronXml;
+                        strOutputPath = strReaderRecPath;
+                        bRecordGetted = true;
+                        nRet = 1;
                     }
                     else
                     {
-                        nRet = 1;
-                    }
+                        string strStyle = "content,data,timestamp,outputpath";
+                        // 2023/1/19
+                        if (StringUtil.IsInList("metadata", strResultTypeList))
+                            strStyle += ",metadata";
 
-                    bRecordGetted = true;
+
+                        /*
+                        if (String.IsNullOrEmpty(strCommand) == false
+                && (strCommand == "prev" || strCommand == "next"))
+                        {
+                            strStyle += "," + strCommand;
+                        }
+                        */
+                        // 2023/1/19
+                        // 附加的一些 style。包括 prev next withresmetadata
+                        // TODO: 可以把合并后 strStyle 内容中重复出现的一些值归并一下
+                        if (string.IsNullOrEmpty(strCommand) == false)
+                            strStyle += "," + strCommand.Replace("|", ",");
+
+                        // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                        if (this.IsCurrentChangeableReaderPath(strReaderRecPath,
+                            sessioninfo.LibraryCodeList) == false)
+                        {
+                            strError = "读者记录路径 '" + strReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                            goto ERROR1;
+                        }
+
+                        lRet = channel.GetRes(strReaderRecPath,
+                            strStyle,
+                            out strXml,
+                            out strMetadata,
+                            out baTimestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            // 注意 this.ErrorCode == ChannelErrorCode.NotFoundObjectFile 算是一种错误，要让前端意识到存在错误并去修复
+                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            {
+                                result.Value = 0;
+                                if (StringUtil.IsInList("prev", strCommand))
+                                    result.ErrorInfo = "到头";
+                                else if (StringUtil.IsInList("next", strCommand))
+                                    result.ErrorInfo = "到尾";
+                                else
+                                    result.ErrorInfo = "没有找到";
+                                result.ErrorCode = ErrorCode.NotFound;
+                                return result;
+                            }
+
+                            nRet = -1;
+                        }
+                        else
+                        {
+                            nRet = 1;
+                        }
+
+                        bRecordGetted = true;
+                    }
                 }
                 else if (StringUtil.HasHead(strBarcode, strLeadDisplayName) == true)
                 {

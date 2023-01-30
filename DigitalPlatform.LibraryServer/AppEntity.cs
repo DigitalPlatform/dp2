@@ -3010,6 +3010,88 @@ out strError);
             return 0;
         }
 
+        // 方便写入单条下级记录的包装后函数
+        public LibraryServerResult SetItemInfo(
+    SessionInfo sessioninfo,
+    string strDbType,
+    string strAction,
+    string strRecPath,
+    string strXml,
+    byte[] baTimestamp,
+    string strStyle,
+    out string strOutputRecPath,
+    out byte[] baOutputTimestamp)
+        {
+            strOutputRecPath = "";
+            baOutputTimestamp = null;
+
+            var entity = new EntityInfo();
+            entity.Action = strAction;
+            entity.NewRecPath = strRecPath;
+            entity.NewRecord = strXml;
+            entity.NewTimestamp = baTimestamp;
+
+            LibraryServerResult result = new LibraryServerResult();
+            EntityInfo[] errorinfos = null;
+
+            if (strDbType == "item" || strDbType == "entity")
+            {
+
+                result = SetEntities(
+    sessioninfo,
+    "", // strBiblioRecPath,
+    new EntityInfo[] { entity },
+    out errorinfos);
+            }
+            else if (strDbType == "order")
+            {
+                result = OrderItemDatabase.SetItems(
+    sessioninfo,
+    "", // strBiblioRecPath,
+    new EntityInfo[] { entity },
+    out errorinfos);
+            }
+            else if (strDbType == "issue")
+            {
+                result = IssueItemDatabase.SetItems(
+    sessioninfo,
+    "", // strBiblioRecPath,
+    new EntityInfo[] { entity },
+    out errorinfos);
+            }
+            else if (strDbType == "comment")
+            {
+                result = CommentItemDatabase.SetItems(
+    sessioninfo,
+    "", // strBiblioRecPath,
+    new EntityInfo[] { entity },
+    out errorinfos);
+            }
+            else
+            {
+                result.Value = -1;
+                result.ErrorInfo = $"无法识别的数据库类型 '{strDbType}'";
+                result.ErrorCode = ErrorCode.SystemError;
+                return result;
+            }
+
+            if (result.Value == -1)
+                return result;
+
+            foreach (var error in errorinfos)
+            {
+                if (error.ErrorCode != ErrorCodeValue.NoError)
+                {
+                    // TODO: error code
+                    result.Value = -1;
+                    result.ErrorInfo = error.ErrorInfo;
+                    return result;
+                }
+            }
+
+            return result;
+        }
+
         // 设置/保存册信息
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。库名可以用来确定书目库，id可以被实体记录用来设置<parent>元素内容。另外书目库名和EntityInfo中的NewRecPath形成映照关系，需要检查它们是否正确对应

@@ -350,20 +350,20 @@ namespace DigitalPlatform.CirculationClient
                             Debug.Assert(record.Path == recpaths[i], "");
                             ListViewItem item = items[i];
 
-                            if (record.RecordBody.Result != null
-                                && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                            if (record?.RecordBody?.Result != null
+                                && record?.RecordBody?.Result?.ErrorCode != ErrorCodeValue.NoError)
                             {
-                                strError = record.RecordBody.Result.ErrorString;    // 2016/5/27
+                                strError = record?.RecordBody?.Result?.ErrorString;    // 2016/5/27
                                 ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
                                 item.ImageIndex = 1;    // error!
                                 i++;
                                 continue;
                             }
 
-                            string strMetadataXml = record.RecordBody.Metadata;
+                            string strMetadataXml = record.RecordBody?.Metadata;
                             //Debug.Assert(string.IsNullOrEmpty(strMetadataXml) == false, "");
 
-                            byte[] baMetadataTimestamp = record.RecordBody.Timestamp;
+                            byte[] baMetadataTimestamp = record.RecordBody?.Timestamp;
                             //Debug.Assert(baMetadataTimestamp != null, "");
 
                             // 取metadata值

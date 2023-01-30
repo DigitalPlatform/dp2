@@ -15778,8 +15778,7 @@ strLibraryCode);    // 读者所在的馆代码
                 }
 
                 // 记录ID
-                if (StringUtil.IsPureNumber(strFirstPart) == true
-                    || strFirstPart == "?")
+                if (IsId(strFirstPart) == true)
                 {
                     // 首先要具备 setbiblioinfo 权限
                     if (StringUtil.IsInList("setbiblioinfo,writerecord", strRights) == false)
@@ -15857,8 +15856,7 @@ strLibraryCode);    // 读者所在的馆代码
                 }
 
                 // 记录ID
-                if (StringUtil.IsPureNumber(strFirstPart) == true
-                    || strFirstPart == "?")
+                if (IsId(strFirstPart) == true)
                 {
                     // 首先要具备 setreaderinfo 权限
                     if (StringUtil.IsInList("setreaderinfo", strRights) == false)
@@ -15892,7 +15890,7 @@ strLibraryCode);    // 读者所在的馆代码
                             strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 或 writereaderobject 权限";
                             return 0;
                         }
-                        return 1; 
+                        return 1;
                     }
                 }
 
@@ -15954,14 +15952,16 @@ out string db_type);
                 }
 
                 // 记录ID
-                if (StringUtil.IsPureNumber(strFirstPart) == true
-                    || strFirstPart == "?")
+                if (IsId(strFirstPart) == true)
                 {
                     // 只到记录ID这一层
                     if (strPath == "")
                     {
+                        /*
                         strError = "不允许使用WriteRes()写入评注库(等类型的书目下级)记录";
                         return 0;
+                        */
+                        return 1;
                     }
 
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
@@ -15972,10 +15972,10 @@ out string db_type);
                         // (在具备 setxxxinfo 基础上)进一步需要 writeobject 或 writexxxobject 权限
                         if (StringUtil.IsInList($"writeobject,write{db_type}object", strRights) == false)
                         {
-                            strError = $"写入对象资源 { strResPath } 被拒绝。不具备 writeobject 或 write{db_type}object 权限";
+                            strError = $"写入对象资源 {strResPath} 被拒绝。不具备 writeobject 或 write{db_type}object 权限";
                             return 0;
                         }
-                        return 1; 
+                        return 1;
                     }
                 }
 
@@ -15991,7 +15991,7 @@ out string db_type);
             }
 
             // 实用库 2013/10/30
-            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, 
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom,
                 strDbName,
                 out string util_db_type) == true)
             {
@@ -16019,13 +16019,12 @@ out string db_type);
                 }
 
                 // 记录ID
-                if (StringUtil.IsPureNumber(strFirstPart) == true
-                    || strFirstPart == "?")
+                if (IsId(strFirstPart) == true)
                 {
                     // setxxxinfo
                     if (StringUtil.IsInList($"set{util_db_type}info,writerecord", strRights) == false)
                     {
-                        strError = $"直接写入记录 { strResPath} 被拒绝。不具备 set{util_db_type}info 或 writerecord 权限";
+                        strError = $"直接写入记录 {strResPath} 被拒绝。不具备 set{util_db_type}info 或 writerecord 权限";
                         return 0;
                     }
 
@@ -16042,7 +16041,7 @@ out string db_type);
                     {
                         if (StringUtil.IsInList($"writeobject,write{util_db_type}object", strRights) == false)
                         {
-                            strError = $"写入对象资源 { strResPath} 被拒绝。不具备 writeobject 或 write{util_db_type}object 权限";
+                            strError = $"写入对象资源 {strResPath} 被拒绝。不具备 writeobject 或 write{util_db_type}object 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writeobject权限，就不再需要writeres权限
@@ -16062,6 +16061,20 @@ out string db_type);
 
             strError = "写入资源 " + strResPath + " 被拒绝。不具备特定的权限";
             return 0;
+        }
+
+        // 是否为记录 ID?
+        // 注：下列形态都是 ID:
+        //      1
+        //      ?
+        //      ?123abc
+        static bool IsId(string text)
+        {
+            if (StringUtil.IsPureNumber(text) == true
+                || text == "?"
+                || text.StartsWith("#"))
+                return true;
+            return false;
         }
 
         // exception:
@@ -16244,8 +16257,7 @@ out string db_type);
             string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
             if (strRecordID == "cfgs")
                 return false;   // 配置文件目录
-            if (StringUtil.IsPureNumber(strRecordID) == true
-    || strRecordID == "?")
+            if (IsId(strRecordID) == true)
             {
                 // 只到记录ID这一层
                 if (string.IsNullOrEmpty(strPath) == true)
@@ -16438,8 +16450,7 @@ out string db_type);
                 }
 
                 // 记录ID
-                if (StringUtil.IsPureNumber(strRecordID) == true
-                    || strRecordID == "?")
+                if (IsId(strRecordID) == true)
                 {
                     // 只到记录ID这一层
                     if (string.IsNullOrEmpty(strPath) == true)
@@ -16557,8 +16568,7 @@ out string db_type);
                 }
 
                 // 记录ID
-                if (StringUtil.IsPureNumber(strFirstPart) == true
-                    || strFirstPart == "?")
+                if (IsId(strFirstPart) == true)
                 {
                     // 只到记录ID这一层
                     if (strPath == "")
@@ -16617,6 +16627,12 @@ out string db_type);
                 right = "getbiblioinfo";
                 // TODO: 注意，当前账户可能用存取定义来决定读取权限。这里可以返回一些线索，供后面判断使用。可以简单判断当前账户是否具备存取定义，而不一定细判断 getbiblioinfo=* 权限是否具备
             }
+            else if (this.IsAuthorityDbName(strDbName) == true)
+            {
+                db_type = "authority";
+                right = "getauthorityinfo";
+                // TODO: 注意，当前账户可能用存取定义来决定读取权限。这里可以返回一些线索，供后面判断使用。可以简单判断当前账户是否具备存取定义，而不一定细判断 getbiblioinfo=* 权限是否具备
+            }
             else if (this.IsReaderDbName(strDbName) == true)
             {
                 db_type = "reader";
@@ -16657,6 +16673,29 @@ out string db_type);
             else
                 return $"数据库 {strDbName} 内资源不允许访问";
 
+            // 书目库(规范库)，先判断存取定义
+            if ((db_type == "biblio" || db_type == "authority")
+                && String.IsNullOrEmpty(sessioninfo.Access) == false)
+            {
+                // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
+                // parameters:
+                //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+                // return:
+                //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+                //      null    具备权限
+                //      其它      不具备权限。文字是报错信息
+                var error = CheckGetBiblioInfoAccess(
+                    sessioninfo,
+                    db_type,
+                    strDbName,
+                    false,
+                    out _);
+                if (error == "normal")
+                    goto NORMAL_RIGHTS;
+                return error;
+            }
+
+        NORMAL_RIGHTS:
             if (sessioninfo != null)
             {
                 if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
@@ -16665,6 +16704,89 @@ out string db_type);
 
             return null;
         }
+
+        // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
+        // parameters:
+        //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+        // return:
+        //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+        //      null    具备权限
+        //      其它      不具备权限。文字是报错信息
+        string CheckGetBiblioInfoAccess(
+            SessionInfo sessioninfo,
+            string db_type,
+            string strDbName,
+            bool check_normal_right,
+            out string strAccessParameters)
+        {
+            strAccessParameters = "";
+
+            Debug.Assert((db_type == "biblio" || db_type == "authority"));
+
+            // 检查存取权限
+            {
+                string strAction = "*";
+
+                // return:
+                //      null    指定的操作类型的权限没有定义
+                //      ""      定义了指定类型的操作权限，但是否定的定义
+                //      其它      权限列表。* 表示通配的权限列表
+                string strActionList = LibraryApplication.GetDbOperRights(sessioninfo.Access,
+                    strDbName,
+                    GetBiblioInfoAction(db_type));
+                if (strActionList == null)
+                {
+                    if (LibraryApplication.GetDbOperRights(sessioninfo.Access,
+                        "",
+                        GetBiblioInfoAction(db_type)) != null)
+                    {
+                        return $"用户 '{sessioninfo.UserID}' 不具备 针对数据库 '{strDbName}' 执行 {GetBiblioInfoAction(db_type)} 操作的存取权限";
+                    }
+                    else
+                    {
+                        // 没有定义任何 getbiblioinfo 的存取定义(虽然定义了其他操作的存取定义)
+                        // 这时应该转过去看普通的权限
+                        if (check_normal_right)
+                            goto VERIFY_NORMAL_RIGHTS;
+                        return "normal";
+                    }
+                }
+                if (strActionList == "*")
+                {
+                    // 通配
+                }
+                else
+                {
+                    if (IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
+                    {
+                        return $"用户 '{sessioninfo.UserID}' 不具备 针对数据库 '{strDbName}' 执行 {GetBiblioInfoAction(db_type)} 操作的存取权限";
+                    }
+                }
+                return null;
+            }
+
+        VERIFY_NORMAL_RIGHTS:
+            {
+                if (db_type == "biblio")
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
+                    {
+                        return "获取书目信息被拒绝。不具备 getbiblioinfo 或 order 权限。";
+                    }
+                }
+                else if (db_type == "authority")
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("getauthorityinfo", sessioninfo.RightsOrigin) == false)
+                    {
+                        return "获取规范信息被拒绝。不具备 getauthorityinfo 权限。";
+                    }
+                }
+            }
+            return null;
+        }
+
 
         // 检查 getxxxobject 权限
         string CheckObjectRights(
@@ -16681,7 +16803,7 @@ out string db_type);
             if (StringUtil.IsInList($"get{db_type}object", sessioninfo.RightsOrigin) == true)
                 return null;
 
-            return $"用户 { sessioninfo.UserID} 获取{db_type}记录下属的对象被拒绝。不具备 get{db_type}object 权限或 getobject 权限";
+            return $"用户 {sessioninfo.UserID} 获取{db_type}记录下属的对象被拒绝。不具备 get{db_type}object 权限或 getobject 权限";
         }
 
         // 检查 setxxxinfo 权限
@@ -16925,8 +17047,7 @@ out string db_type);
             }
 
             // 记录ID
-            if (StringUtil.IsPureNumber(strFirstPart) == true
-                || strFirstPart == "?")
+            if (IsId(strFirstPart) == true)
             {
                 // 只到记录ID这一层
                 if (String.IsNullOrEmpty(strPath) == true)

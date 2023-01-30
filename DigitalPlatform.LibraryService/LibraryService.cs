@@ -1981,6 +1981,7 @@ namespace dp2Library
                 return app.GetReaderInfo(
                     sessioninfo,
                     strBarcode,
+                    null,
                     strResultTypeList,
                     out results,
                     out strRecPath,
@@ -3974,6 +3975,7 @@ strDbName);
 
             string xml = null;
 
+            // Result.Value -1出错 0没有找到 1找到
             var ret = app.GetBiblioInfos(
 sessioninfo,
 record.Path,
@@ -4040,6 +4042,7 @@ out byte[] _);
             }
         }
 
+#if OLDVERSION
         /*
          * record.Cols 和 record.RecordBody.Xml 需要进行过滤处理
          * 1) (style 中包含 xml)如果 .Xml 被 :level 处理(减少字段或者禁止)
@@ -4184,6 +4187,117 @@ out byte[] _);
                 r.RecordBody.Xml = dom.DocumentElement == null ? dom.OuterXml : dom.DocumentElement.OuterXml;
             }
         }
+#endif
+
+        // 过滤读者记录 XML
+        // parameters:
+        //      read_level
+        //                  null    没有找到 getreaderinfo 前缀
+        //                  ""      找到了前缀，并且 level 部分为空
+        //                  其他     返回 level 部分
+
+        void FilterPatronRecord(Record record,
+            string strPatronDbName,
+            string read_level,
+            string strBrowseInfoStyle)
+        {
+            bool bHasCols = StringUtil.IsInList("cols", strBrowseInfoStyle);
+            bool bHasXml = StringUtil.IsInList("xml", strBrowseInfoStyle);
+
+            // 如果 record 中没有包含 cols 或者 xml，那么就没有必要进行权限过滤
+            if (bHasCols == false && bHasXml == false)
+                return;
+
+            // 加速运算
+            // *** 没有 getreaderinfo 权限
+            if (read_level == null)
+            {
+                ClearXml(record);
+                ClearCols(record, LibraryApplication.FILTERED);
+                return;
+            }
+
+            string origin_xml = record.RecordBody?.Xml;
+
+            if (record.RecordBody == null
+|| string.IsNullOrEmpty(record.RecordBody.Xml))
+                return;
+
+            if (string.IsNullOrEmpty(origin_xml))
+                return;
+
+            bool bXmlChanged = false;
+
+            string xml = null;
+
+            // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+            var ret = app.GetReaderInfo(
+sessioninfo,
+"@path:" + record.Path,
+origin_xml,
+"xml",
+out string[] results,
+out string _,
+out byte[] _);
+            if (ret.Value == -1 || ret.Value > 1)
+            {
+                SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.CommonError);
+                ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
+                ClearXml(record);
+            }
+            else if (ret.Value == 0)
+            {
+                SetRecordBodyError(record, ret.ErrorInfo, ErrorCodeValue.NotFound);
+                ClearCols(record, LibraryApplication.FILTERED + ret.ErrorInfo);
+                ClearXml(record);
+            }
+            else
+            {
+                if (results == null || results.Length == 0)
+                {
+                    SetRecordBodyError(record, "results error", ErrorCodeValue.CommonError);
+                    ClearCols(record, LibraryApplication.FILTERED + "GetBiblioInfo() results error");
+                    ClearXml(record);
+                }
+                else
+                {
+                    xml = results[0];
+
+                    record.RecordBody.Xml = xml;
+
+                    bXmlChanged = true;
+                }
+            }
+
+            if (bXmlChanged)  // XML 记录发生过改变，也要重新创建 Cols
+            {
+                if (bHasCols)
+                {
+                    // 有可能返回 null
+                    string strFormat = StringUtil.GetStyleParam(strBrowseInfoStyle, "format");
+
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    // return:
+                    //      // cols中包含的字符总数
+                    //      -1  出错
+                    //      0   记录没有找到
+                    //      其他  cols 中包含的字符总数。最少为 1，不会为 0
+                    int nRet = app.GetCols(
+                        channel,
+                        strFormat,
+                        strPatronDbName,
+                        xml,
+                        // 0,
+                        out string[] cols,
+                        out string strError);
+                    // TODO: 检查 nRet == -1 时候 cols 是否为报错信息
+                    record.Cols = cols;
+                }
+                else
+                    record.Cols = null;
+            }
+        }
+
 
         void FilterAmerceRecord(Record record)
         {
@@ -14886,6 +15000,7 @@ out byte[] temp_timestamp);
                                 var ret = app.GetReaderInfo(
     sessioninfo,
     path,
+    null,
     StringUtil.MakePathList(formats),
     out results,
     out string temp_path,
@@ -15505,7 +15620,14 @@ out strError);
                             return result;
                         }
                     }
-                    else if ((app.IsBiblioDbName(strDbName) || app.IsReaderDbName(strDbName))
+                    else if (
+                        (app.IsBiblioDbName(strDbName) 
+                        || app.IsReaderDbName(strDbName)
+                        || app.IsItemDbName(strDbName)
+                        || app.IsOrderDbName(strDbName)
+                        || app.IsIssueDbName(strDbName)
+                        || app.IsCommentDbName(strDbName)
+                        )
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
                     {
                         // 书目库、元数据记录
@@ -15591,6 +15713,13 @@ out strError);
                                 || ResPath.IsAppendRecPath(strResPath)
                                 || StringUtil.IsInList("new", output_style))
                                 strAction = "new";
+
+                            if (StringUtil.IsInList("new", output_style))
+                            {
+                                // 最后一次改为用追加方式的路径兑现保存
+                                strResPath = ResPath.GetDbName(strResPath) + "/?";
+                            }
+
                             if (app.IsBiblioDbName(strDbName))
                             {
                                 var ret = app.SetBiblioInfo(sessioninfo,
@@ -15640,18 +15769,28 @@ out strError);
                                 strError = ret.ErrorInfo;
                                 result.ErrorCode = ret.ErrorCode;
                             }
-                            /*
-                            lRet = channel.WriteRes(strResPath,
-    $"0-{lTotalLength-1}",
-    lTotalLength,
-    data,
-    strMetadata,
-    strStyle,
-    baInputTimestamp,
-    out strOutputResPath,
-    out baOutputTimestamp,
-    out strError);
-                            */
+                            if (app.IsItemDbName(strDbName)
+                        || app.IsOrderDbName(strDbName)
+                        || app.IsIssueDbName(strDbName)
+                        || app.IsCommentDbName(strDbName))
+                            {
+                                string db_type = app.GetDbType(strDbName, out _);
+
+                                var ret = app.SetItemInfo(sessioninfo,
+                                    db_type,
+                                    strAction,
+                                    strResPath,
+                                    strBiblio,
+                                    baInputTimestamp,
+                                    null,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp);
+                                if (ret.Value == -1)
+                                    return ret;
+                                lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
+                            }
                         }
                         else
                         {
@@ -15806,6 +15945,7 @@ out strError);
             out string strOutputResPath,
             out string strError)
         {
+            /*
             byte[] data = new byte[0];
             // TODO: 追加方式(记录 ID 为 ?)的分片写入的第一次，strOutputResPath 如何返回？
             var lRet = channel.WriteRes(strResPath,
@@ -15819,6 +15959,11 @@ out strOutputResPath,
 out baOutputTimestamp,
 out strError);
             return lRet;
+            */
+            baOutputTimestamp = Guid.NewGuid().ToByteArray();
+            strOutputResPath = ResPath.GetDbName(strResPath) + "/#" + Guid.NewGuid().ToString();
+            strError = "";
+            return 0;
         }
 
         /// *** 评注相关功能

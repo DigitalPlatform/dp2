@@ -5337,3 +5337,492 @@ out strError);
                         account.PasswordExpire = GetPasswordExpire(readerdom.DocumentElement);
                     }
                 }
+
+
+                ~~~~~~~~~~~~~
+
+                        // 为获得真实记录路径而追加写入一次
+        long WriteResForAppend(RmsChannel channel,
+            string strResPath,
+            long lTotalLength,
+            byte[] baInputTimestamp,
+            out byte[] baOutputTimestamp,
+            out string strOutputResPath,
+            out string strError)
+        {
+            byte[] data = new byte[0];
+            // TODO: 追加方式(记录 ID 为 ?)的分片写入的第一次，strOutputResPath 如何返回？
+            var lRet = channel.WriteRes(strResPath,
+"0:0", // lTotalLength == 0 ? "" : $"0-0",
+lTotalLength,
+data,
+"", // strMetadata,
+"data,timestamp,outputpath", // strStyle,
+baInputTimestamp,
+out strOutputResPath,
+out baOutputTimestamp,
+out strError);
+            return lRet;
+        }
+
+
+        ~~~~~~~~~~
+
+                // 写入资源
+        // 注：写入 backup 或 cfgs 目录要求具备 backup 或者 managedatabase 权限；
+        //      写入 upload 目录需要 upload 或者 managedatabase 权限
+        //      写入 library.xml 需要 managedatabase 权限
+        //      写入 cfgs/template 文件需要 writetemplate 权限(写入其它配置文件需要 writecfgfile 权限)
+        //      写入数据库记录，需要 setxxxinfo 等权限
+        //      写入数据库记录下的对象，需要 setxxxobject 权限
+        //      写入其他(比如 库名/cfgs/配置文件名 )资源，需要 writetemplate writecfgfile setxxxinfo 等权限
+        //      writeres 权限
+        public LibraryServerResult WriteRes(
+            string strResPath,
+            string strRanges,
+            long lTotalLength,
+            byte[] baContent,
+            string strMetadata,
+            string strStyle,
+            byte[] baInputTimestamp,
+            out string strOutputResPath,
+            out byte[] baOutputTimestamp)
+        {
+            strOutputResPath = "";
+            baOutputTimestamp = null;
+
+            // TODO: 这里不检查 hangup。但具体功能细节里面可以检查。在 hangup 情况下，可以专门放行修改 library.xml 的请求，而其他请求此时不允许操作
+            LibraryServerResult result = this.PrepareEnvironment("WriteRes", true, true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                bool bWriteOperLog = true;
+                string strError = "";
+                string strLibraryCode = ""; // 实际写入操作的读者库馆代码
+
+                {
+                    // 检查用户使用 WriteRes API 的权限
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的馆代码列表
+                    //      strAction   要执行的动作。为 change 和 delete 之一
+                    //      strLibraryCode  [out]如果是写入读者库，这里返回实际写入的读者库的馆代码。如果不是写入读者库，则返回空
+                    // return:
+                    //      -1  error
+                    //      0   不具备权限
+                    //      1   具备权限
+                    int nRet = app.CheckWriteResRights(
+                        sessioninfo.LibraryCodeList,
+                        sessioninfo.RightsOrigin,
+                        strResPath,
+                        StringUtil.IsInList("delete", strStyle) ? "delete" : "change",
+                        out strLibraryCode,
+                        out strError);
+
+                    if (nRet == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                    if (nRet == -1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(strResPath) == false
+                    && strResPath[0] == '!')
+                {
+                    // TODO: 检查权限。如果权限足够，也可以访问某些 数据目录下的二级目录
+                    string strTargetDir = app.DataDir;
+                    string strFilePath = Path.Combine(strTargetDir, strResPath.Substring(1));
+                    // return:
+                    //      -2  时间戳不匹配
+                    //      -1  一般性错误
+                    //      0   成功
+                    //      其他  成功删除的文件和目录个数
+                    int nRet = app.WriteFile(
+                        Path.Combine(app.DataDir, "upload"),    // TODO: ?? 这里要测试一下，可能请求意图写入 backup 子目录呢
+                        strFilePath,
+                        strRanges,
+                        lTotalLength,
+                        baContent,
+                        strStyle,
+                        baInputTimestamp,
+                        out baOutputTimestamp,
+                        out strError);
+                    if (nRet == -2)
+                    {
+                        result.ErrorCode = ErrorCode.TimestampMismatch;
+                        result.Value = -1;
+                    }
+                    else if (nRet == -1)
+                    {
+                        result.ErrorCode = ErrorCode.SystemError;
+                        result.Value = -1;
+
+                    }
+                    else
+                        result.Value = nRet;
+
+                    result.ErrorInfo = strError;
+
+                    strOutputResPath = strResPath;
+
+                    bWriteOperLog = false;  // 不要写入日志
+                }
+                else
+                {
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "get channel error";
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+
+                    string strDbName = ResPath.GetDbName(strResPath);
+
+                    long lRet = 0;
+                    // 2015/9/3 新增删除资源的功能
+                    if (StringUtil.IsInList("delete", strStyle) == true)
+                    {
+                        if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
+                        {
+                            if (StringUtil.IsInList("inventorydelete", sessioninfo.RightsOrigin) == false)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = "当前用户缺乏删除盘点库记录 '" + strResPath + "' 所需要的 inventorydelete 权限";
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                            lRet = channel.DoDeleteRes(strResPath,
+                                baInputTimestamp,
+                                strStyle,   // 2017/9/16 增加
+                                out baOutputTimestamp,
+                                out strError);
+                        }
+                        else
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = "删除资源 '" + strResPath + "' 的权限不够";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+                    else if (
+                        (app.IsBiblioDbName(strDbName) 
+                        || app.IsReaderDbName(strDbName)
+                        || app.IsItemDbName(strDbName)
+                        || app.IsOrderDbName(strDbName)
+                        || app.IsIssueDbName(strDbName)
+                        || app.IsCommentDbName(strDbName)
+                        )
+                        && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
+                    {
+                        // 书目库、元数据记录
+                        // 转为调用 SetBiblioInfo()
+                        // 读者库、元数据记录
+                        // 转为调用 SetReaderInfo()
+                        strOutputResPath = strResPath;
+
+                        // TODO: 根据 strStyle 判断请求的意图。只有当真正写入 data 时才需要拼接 chunk
+                        // 注意 strStyle 的 gzip 风格
+                        if (StringUtil.IsInList("gzip", strStyle)
+    && baContent != null && baContent.Length > 0)
+                            baContent = ByteArray.DecompressGzip(baContent);
+
+                        bool is_append_path = false;
+                        // 如果首次分片的路径是追加方式
+                        if (ResPath.IsAppendRecPath(strResPath))
+                        {
+                            is_append_path = true;
+                            if (ChunkMemory.IsFirstChunk(strRanges) == false)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = $"分片写入时，第一个分片以外的分片其路径不应为追加形态(请求的路径为 '{strResPath}')";
+                                result.ErrorCode = ErrorCode.SystemError;
+                                return result;
+                            }
+                            var append_ret = WriteResForAppend(channel,
+strResPath,
+lTotalLength,
+baInputTimestamp,
+out byte[] output_timestamp,
+out string temp_recpath,
+out strError);
+                            if (append_ret == -1)
+                            {
+                                result.Value = append_ret;
+                                result.ErrorInfo = strError;
+                                ConvertKernelErrorCode(channel.ErrorCode,
+                    ref result);
+                                return result;
+                            }
+                            // 修改原始时间戳
+                            baInputTimestamp = output_timestamp;
+                            // 路径变成确定形态
+                            strResPath = temp_recpath;
+                            strOutputResPath = temp_recpath;
+                        }
+
+                        // 记忆 WriteRes() API 中途的 chunk
+                        // return:
+                        //      -2  时间戳不匹配
+                        //      -1  出错
+                        //      0   未完成
+                        //      1   完成
+                        int nRet = app.MemoryChunk(strResPath,
+                            strRanges,
+                            lTotalLength,
+                            baContent,
+                            baInputTimestamp,
+                            is_append_path ? "new" : "",   // new 表示第一次分片是追加形态的路径。记忆下来
+                            out byte[] full_data,
+                            out byte[] new_timestamp,
+                            out string output_style,
+                            out strError);
+                        if (nRet == -2)
+                        {
+                            // 依然返回服务器认为正确的时间戳
+                            baOutputTimestamp = new_timestamp;
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.TimestampMismatch;
+                            return result;
+                        }
+                        if (nRet == -1)
+                            throw new Exception(strError);
+                        if (nRet == 1)
+                        {
+                            // 从此开始 baContent 里面是一条记录的全部内容
+                            baContent = full_data;
+                            string strBiblio = Encoding.UTF8.GetString(baContent);
+                            string strAction = "change";
+                            if (string.IsNullOrEmpty(strResPath)
+                                || ResPath.IsAppendRecPath(strResPath)
+                                || StringUtil.IsInList("new", output_style))
+                                strAction = "new";
+                            if (app.IsBiblioDbName(strDbName))
+                            {
+                                var ret = app.SetBiblioInfo(sessioninfo,
+                                    strAction,
+                                    strResPath,
+                                    "xml",
+                                    strBiblio,
+                                    new_timestamp,
+                                    null,
+                                    StringUtil.IsInList("new", output_style) ? "new" : "", // strStyle,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp);
+                                if (ret.Value == -1)
+                                    return ret;
+                                // 查重发现了重复的书目记录，保存被拒绝
+                                if (ret.Value > 0)
+                                {
+                                    ret.Value = -1;
+                                    return ret;
+                                }
+                                lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
+                            }
+                            if (app.IsReaderDbName(strDbName))
+                            {
+                                var ret = app.SetReaderInfo(sessioninfo,
+                                    strAction,
+                                    strResPath,
+                                    strBiblio,
+                                    null, // strOldXml
+                                    baInputTimestamp,
+                                    out _,
+                                    out _,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp,
+                                    out _);
+                                if (ret.Value == -1)
+                                    return ret;
+                                // 部分字段被拒绝
+                                if (ret.Value == 1)
+                                {
+                                    ret.Value = -1;
+                                    return ret;
+                                }
+                                lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
+                            }
+                            if (app.IsItemDbName(strDbName)
+                        || app.IsOrderDbName(strDbName)
+                        || app.IsIssueDbName(strDbName)
+                        || app.IsCommentDbName(strDbName))
+                            {
+                                string db_type = app.GetDbType(strDbName, out _);
+
+                                var ret = app.SetItemInfo(sessioninfo,
+                                    db_type,
+                                    strAction,
+                                    strResPath,
+                                    strBiblio,
+                                    baInputTimestamp,
+                                    null,
+                                    out strOutputResPath,
+                                    out baOutputTimestamp);
+                                if (ret.Value == -1)
+                                    return ret;
+                                lRet = 0;
+                                strError = ret.ErrorInfo;
+                                result.ErrorCode = ret.ErrorCode;
+                            }
+                        }
+                        else
+                        {
+                            strOutputResPath = strResPath;
+
+                            baOutputTimestamp = new_timestamp;
+                            lRet = 0;
+                            baContent = null;   // 避免后续处理 baContent
+                        }
+                        bWriteOperLog = false;  // SetBiblioInfo() 或者 SetReaderInfo() 已经写入了操作日志，此处不再写入操作日志
+                    }
+                    else
+                    {
+                        lRet = channel.WriteRes(strResPath,
+                            strRanges,
+                            lTotalLength,
+                            baContent,
+                            strMetadata,
+                            strStyle,
+                            baInputTimestamp,
+                            out strOutputResPath,
+                            out baOutputTimestamp,
+                            out strError);
+
+                        // 做错误码的翻译工作
+                        // 2008/7/28
+                        // result.ErrorCode = ConvertKernelErrorCode(channel.ErrorCode);
+                        ConvertKernelErrorCode(channel.ErrorCode,
+            ref result);
+                    }
+                    result.Value = lRet;
+                    result.ErrorInfo = strError;
+
+                    // 2016/10/12
+                    app.ClearCacheCfgs(strResPath);
+
+                }
+
+                // 2017/6/7
+                if (StringUtil.IsInList("simulate", strStyle))
+                    bWriteOperLog = false;
+
+                if (bWriteOperLog == true
+                    && result.Value != -1)  // 2014/4/21 调用出错的情况就不要写入日志了
+                {
+                    XmlDocument domOperLog = new XmlDocument();
+                    domOperLog.LoadXml("<root />");
+
+                    // 读者所在的馆代码。如果操作不涉及到读者库，则没有<libraryCode>元素
+                    if (string.IsNullOrEmpty(strLibraryCode) == false)
+                    {
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "libraryCode",
+                            strLibraryCode);
+                    }
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "operation", "writeRes");
+
+                    string strOperTimeString = app.Clock.GetClock();   // RFC1123格式
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                        sessioninfo.UserID);
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                        strOperTimeString);
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "requestResPath",
+                        strResPath);
+
+                    if (StringUtil.IsInList("delete", strStyle) == false)
+                    {
+                        Debug.Assert(string.IsNullOrEmpty(strOutputResPath) == false, "");
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "resPath",
+                            strOutputResPath);
+
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "ranges",
+                            strRanges);
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "totalLength",
+                            lTotalLength.ToString());
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "metadata",
+                            strMetadata);
+                    }
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "style",
+    strStyle);
+
+                    Stream attachment = null;
+                    if (baContent != null && baContent.Length > 0)
+                        attachment = new MemoryStream(baContent);
+                    try
+                    {
+                        int nRet = app.OperLog.WriteOperLog(domOperLog,
+                            sessioninfo.ClientAddress,
+                            attachment,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "WriteRes() API 写入日志时发生错误: " + strError;
+                            result.Value = -1;
+                            result.ErrorCode = ErrorCode.SystemError;
+                            result.ErrorInfo = strError;
+                            return result;
+                        }
+                    }
+                    finally
+                    {
+                        if (attachment != null)
+                            attachment.Close();
+                    }
+                }
+
+                // 2022/4/12
+                // 上载限速
+                if (baContent != null && baContent.Length > 0)
+                {
+                    var timeout = TimeSpan.FromSeconds(60);
+                    var content_length = baContent.Length;
+                    var consume_result = app.ComsumeUpload(baContent.Length,
+                        timeout,
+                        app.AppDownToken);
+                    /*
+                    if (consume_result.Value == -1
+                        && consume_result.ErrorCode == "overflow")
+                    {
+                        result.ErrorCode = ErrorCode.ServerTimeout;
+                        result.ErrorInfo = $"访问过于频繁导致带宽超出限额。请稍后重试请求";
+                        return result;
+                    }
+                    */
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library WriteRes() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+

@@ -377,6 +377,7 @@ namespace DigitalPlatform.LibraryServer
                 // 检查存取权限
                 if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                 {
+#if OLDCODE
                     string strAction = "*";
 
                     // return:
@@ -422,6 +423,30 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
                     bRightVerified = true;
+#endif
+                    // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
+                    // parameters:
+                    //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+                    // return:
+                    //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+                    //      null    具备权限
+                    //      其它      不具备权限。文字是报错信息
+                    var error = CheckGetBiblioInfoAccess(
+                        sessioninfo,
+                        strDbType,
+                        strBiblioDbName,
+                        false,
+                        out strAccessParameters);
+                    if (error == "normal")
+                        goto VERIFY_NORMAL_RIGHTS;
+                    if (error != null)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = error;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                    bRightVerified = true;
                 }
 
             VERIFY_NORMAL_RIGHTS:
@@ -433,7 +458,7 @@ namespace DigitalPlatform.LibraryServer
                         if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "获取书目信息被拒绝。不具备 order 或 getbiblioinfo 权限。";
+                            result.ErrorInfo = "获取书目信息被拒绝。不具备 getbiblioinfo 或 order 权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
