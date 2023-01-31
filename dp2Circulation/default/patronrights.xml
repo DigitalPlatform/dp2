@@ -32,7 +32,7 @@
     <comment lang='zh'>获得册信息</comment>
     <comment lang='en'>get item info</comment>
   </property>
-  <property name='setiteminfo'>
+  <property name='setiteminfo' alias='setentities'>
     <comment lang='zh'>修改册</comment>
     <comment lang='en'>set item info</comment>
   </property>

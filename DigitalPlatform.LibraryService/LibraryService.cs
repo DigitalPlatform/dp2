@@ -5216,6 +5216,19 @@ out timestamp);
             if (StringUtil.IsInList("xml", strBrowseInfoStyle) == false
                 && record.RecordBody != null)
                 record.RecordBody.Xml = null;
+            // 2023/1/31
+            // 注: RecordBody 里面可能有 Meatdata 但 Xml 为空，针对 Path 指向对象记录的情况。也就是说 RecordBody 不一定是因为要返回 Xml 而存在，也完全可能为返回 Metadata 而存在。所以，当需要清除 Xml 内容的时候，不要去清除 RecordBody，而是直接清除 RecordBody.Xml 即可
+        
+        
+            // 2023/1/31
+            // 清除非报错状态的 Result 成员，减小通讯包体积
+            if (record.RecordBody != null && record.RecordBody.Result != null)
+            {
+                var result = record.RecordBody.Result;
+                if (result.ErrorCode == ErrorCodeValue.NoError
+                    && string.IsNullOrEmpty(result.ErrorString))
+                    record.RecordBody.Result = null;
+            }
         }
 
         static void ClearRecord(Record record,
@@ -7769,10 +7782,10 @@ out timestamp);
                 }
 
                 // 权限字符串
-                if (StringUtil.IsInList("setissues,setissueinfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setissueinfo,setissues,writerecord", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "保存期信息 操作被拒绝。不具备setissueinfo或setissues权限。";
+                    result.ErrorInfo = "保存期信息 操作被拒绝。不具备 setissueinfo、setissues 或 writerecord 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9165,7 +9178,7 @@ out timestamp);
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
         //      entityinfos 要提交的的实体信息数组
-        // 权限：需要有setiteminfo权限(兼容setentities权限)
+        // 权限：需要有setiteminfo 权限(兼容setentities权限) 或 writerecord 权限
         // 日志：
         //      要产生日志
         public LibraryServerResult SetEntities(
@@ -9285,10 +9298,10 @@ out timestamp);
                 }
 
                 // 权限字符串
-                if (StringUtil.IsInList("setorders,setorderinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setorderinfo,setorders,writeobject,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "保存订购信息 操作被拒绝。不具备order、setorderinfo或setorders权限。";
+                    result.ErrorInfo = "保存订购信息 操作被拒绝。不具备 setorderinfo、setorders、writeobject 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -11968,8 +11981,9 @@ true);
                         //      0   不具备权限
                         //      1   具备权限
                         nRet = app.CheckWriteResRights(
-                            sessioninfo.LibraryCodeList,
-                            sessioninfo.RightsOrigin,
+                            sessioninfo,
+                            //sessioninfo.LibraryCodeList,
+                            //sessioninfo.RightsOrigin,
                             // string.IsNullOrEmpty(strFileName) ? strCategory : strCategory + "/" + strFileName,
                             strCategory,
                             "delete",
@@ -15505,7 +15519,18 @@ out strError);
                 string strError = "";
                 string strLibraryCode = ""; // 实际写入操作的读者库馆代码
 
+                string strDbName = ResPath.GetDbName(strResPath);
                 {
+                    string strAction = StringUtil.IsInList("delete", strStyle) ? "delete" : "change";
+                    // 2023/1/31
+                    // 路径中的 ID 为问号代表这是一个 "new" 动作。但后继分片请求是否需要检查权限？
+                    if (app.IsBiblioDbName(strDbName)
+                        && app.IsDatabaseMetadataPath(sessioninfo, strResPath, out _, out string id) == true
+                        && LibraryApplication.IsId(id))
+                    {
+                        strAction = "new";
+                    }
+
                     // 检查用户使用 WriteRes API 的权限
                     // parameters:
                     //      strLibraryCodeList  当前用户所管辖的馆代码列表
@@ -15516,10 +15541,11 @@ out strError);
                     //      0   不具备权限
                     //      1   具备权限
                     int nRet = app.CheckWriteResRights(
-                        sessioninfo.LibraryCodeList,
-                        sessioninfo.RightsOrigin,
+                        sessioninfo,
+                        //sessioninfo.LibraryCodeList,
+                        //sessioninfo.RightsOrigin,
                         strResPath,
-                        StringUtil.IsInList("delete", strStyle) ? "delete" : "change",
+                        strAction,
                         out strLibraryCode,
                         out strError);
 
@@ -15591,7 +15617,6 @@ out strError);
                         return result;
                     }
 
-                    string strDbName = ResPath.GetDbName(strResPath);
 
                     long lRet = 0;
                     // 2015/9/3 新增删除资源的功能
@@ -15621,7 +15646,7 @@ out strError);
                         }
                     }
                     else if (
-                        (app.IsBiblioDbName(strDbName) 
+                        (app.IsBiblioDbName(strDbName)
                         || app.IsReaderDbName(strDbName)
                         || app.IsItemDbName(strDbName)
                         || app.IsOrderDbName(strDbName)
@@ -16028,7 +16053,7 @@ out strError);
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
         //      commentinfos 要提交的的评注信息数组
-        // 权限：需要有setcommentinfo权限
+        // 权限：需要有setcommentinfo 或 writerecord 权限
         // 日志：
         //      要产生日志
         public LibraryServerResult SetComments(
@@ -16045,10 +16070,10 @@ out strError);
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setcommentinfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setcommentinfo,writerecord", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "保存评注信息 操作被拒绝。不具备setcommentinfo权限。";
+                    result.ErrorInfo = "保存评注信息 操作被拒绝。不具备 setcommentinfo 或 writerecord 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

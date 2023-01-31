@@ -15589,16 +15589,14 @@ strLibraryCode);    // 读者所在的馆代码
         //      writerecord setxxxinfo 等    写入各种数据库记录所需要的权限
         //      (已废止)writeres 写入数据库记录、配置文件、对象等所需要的笼统的权限
         // parameters:
-        //      strLibraryCodeList  当前用户所管辖的馆代码列表
-        //      strAction   要执行的动作。为 change 和 delete 之一
+        //      strAction   要执行的动作。为 new/change/delete 之一
         //      strLibraryCode  [out]如果是写入读者库，这里返回实际写入的读者库的馆代码。如果不是写入读者库，则返回空
         // return:
         //      -1  error
         //      0   不具备权限
         //      1   具备权限
         public int CheckWriteResRights(
-            string strLibraryCodeList,
-            string strRights,
+            SessionInfo sessioninfo,
             string strResPath,
             string strAction,
             out string strLibraryCode,
@@ -15607,9 +15605,15 @@ strLibraryCode);    // 读者所在的馆代码
             strError = "";
             strLibraryCode = "";
 
+            //      strLibraryCodeList  当前用户所管辖的馆代码列表
+            string strLibraryCodeList = sessioninfo.LibraryCodeList;
+            string strRights = sessioninfo.RightsOrigin;
+
             string strActionName = "写入";
             if (strAction == "delete")
                 strActionName = "删除";
+            else if (strAction == "new")
+                strActionName = "创建";
 
             string strPath = strResPath.Replace("\\", "/");
 
@@ -15784,12 +15788,35 @@ strLibraryCode);    // 读者所在的馆代码
                     // 只到记录ID这一层
                     if (strPath == "")
                     {
+                        // 检查当前用户是否具备 SetBiblioInfo() API 的存取定义权限
+                        // parameters:
+                        //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+                        // return:
+                        //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+                        //      null    具备权限
+                        //      其它      不具备权限。文字是报错信息
+                        var error = CheckSetBiblioInfoAccess(
+    sessioninfo,
+    "biblio",
+    strDbName,
+    strAction,
+    true,
+    out _,
+    out _);
+                        if (error != null)
+                        {
+                            strError = error;
+                            return 0;
+                        }
+
+                        /*
                         // 要具备 setbiblioinfo 权限
                         if (StringUtil.IsInList("setbiblioinfo,writerecord", strRights) == false)
                         {
                             strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 setbiblioinfo 或 writerecord 权限";
                             return 0;
                         }
+                        */
                         return 1;   // 如果有了writerecord 或 setbiblioinfo 权限
                     }
 
@@ -16064,7 +16091,7 @@ out string db_type);
         //      1
         //      ?
         //      ?123abc
-        static bool IsId(string text)
+        public static bool IsId(string text)
         {
             if (StringUtil.IsPureNumber(text) == true
                 || text == "?"
@@ -16213,14 +16240,30 @@ out string db_type);
             return results;
         }
 
+        public bool IsDatabaseMetadataPath(
+    SessionInfo sessioninfo,
+    string strResPath)
+        {
+            return IsDatabaseMetadataPath(
+    sessioninfo,
+    strResPath,
+    out _,
+    out _);
+        }
+
         // 2023/1/10
         // 判断一个路径是否为数据库元数据记录路径?
         // 注: 暂未校验路径中数据库名的正确性。只是形态上检查了路径
         // parameters:
         public bool IsDatabaseMetadataPath(
             SessionInfo sessioninfo,
-            string strResPath)
+            string strResPath,
+            out string strDbName,
+            out string strRecordID)
         {
+            strDbName = "";
+            strRecordID = "";
+
             string strPath = strResPath.Replace("\\", "/");
 
             // 根据逻辑名称找到对应的起始物理目录
@@ -16238,7 +16281,7 @@ out string db_type);
             if (nRet == 1)
                 return false;
 
-            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            strDbName = StringUtil.GetFirstPartPath(ref strPath);
 
             /*
             // 书目库 读者库 等
@@ -16250,7 +16293,7 @@ out string db_type);
                 return false;
             */
 
-            string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
+            strRecordID = StringUtil.GetFirstPartPath(ref strPath);
             if (strRecordID == "cfgs")
                 return false;   // 配置文件目录
             if (IsId(strRecordID) == true)
@@ -16732,6 +16775,123 @@ out string db_type);
             return null;
         }
 
+        // 检查当前用户是否具备 SetBiblioInfo() API 的存取定义权限
+        // parameters:
+        //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+        // return:
+        //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+        //      null    具备权限
+        //      其它      不具备权限。文字是报错信息
+        string CheckSetBiblioInfoAccess(SessionInfo sessioninfo,
+            string strDbType,
+            string strBiblioDbName,
+            string strAction,
+            bool check_normal_right,
+            out string strAccessParameters,
+            out bool bOwnerOnly)
+        {
+            strAccessParameters = "";
+            bOwnerOnly = false;
+
+            Debug.Assert((strDbType == "biblio" || strDbType == "authority"));
+
+            bool bRightVerified = false;
+
+            // 检查存取权限
+            if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+            {
+                string strAccessActionList = "";
+                // return:
+                //      null    指定的操作类型的权限没有定义
+                //      ""      定义了指定类型的操作权限，但是否定的定义
+                //      其它      权限列表。* 表示通配的权限列表
+                strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                    strBiblioDbName,
+                    strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo");
+                if (strAccessActionList == null)
+                {
+                    // 看看是不是关于 setbiblioinfo 的任何权限都没有定义?
+                    strAccessActionList = GetDbOperRights(sessioninfo.Access,
+                        "",
+                        strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo");
+                    if (strAccessActionList == null)
+                    {
+                        if (check_normal_right)
+                        {
+                            // 2013/4/18
+                            // TODO: 可以提示"既没有... 也没有 ..."
+                            goto CHECK_RIGHTS_2;
+                        }
+                        return "normal";    // 还需要继续检查普通权限中的 setbiblioinfo
+                    }
+                    else
+                    {
+                        return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 " +
+                            (strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo") +
+                            " " + strAction + " 操作的存取权限";
+                    }
+                }
+                if (strAccessActionList == "*")
+                {
+                    // 通配
+                }
+                else
+                {
+                    if (strAction == "delete"
+                        && IsInAccessList("ownerdelete", strAccessActionList, out strAccessParameters) == true)
+                    {
+                        bOwnerOnly = true;
+                    }
+                    else if (strAction == "change"
+                        && IsInAccessList("ownerchange", strAccessActionList, out strAccessParameters) == true)
+                    {
+                        bOwnerOnly = true;
+                    }
+                    else if (strAction == "onlydeletebiblio"
+                        && IsInAccessList("owneronlydeletebiblio", strAccessActionList, out strAccessParameters) == true)
+                    {
+                        bOwnerOnly = true;
+                    }
+                    else if (strAction == "onlydeletesubrecord"
+                        && IsInAccessList("owneronlydeletesubrecord", strAccessActionList, out strAccessParameters) == true)
+                    {
+                        bOwnerOnly = true;
+                    }
+                    else if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
+                    {
+                        return "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 " +
+                            (strDbType == "biblio" ? "setbiblioinfo" : "setauthorityinfo") +
+                            " " + strAction + " 操作的存取权限";
+                    }
+                }
+
+                bRightVerified = true;
+            }
+
+        CHECK_RIGHTS_2:
+            if (bRightVerified == false)
+            {
+                if (strDbType == "biblio")
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("setbiblioinfo,writerecord,order", sessioninfo.RightsOrigin) == false)
+                    {
+                        return "设置书目信息被拒绝。不具备 setbiblioinfo 或 writerecord 或 order 权限";
+                    }
+                }
+                if (strDbType == "authority")
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("setauthorityinfo,writerecord", sessioninfo.RightsOrigin) == false)
+                    {
+                        return "设置规范信息被拒绝。不具备 setauthorityinfo 或 writerecord 权限。";
+                    }
+                }
+            }
+
+            return null;
+        }
+
         // 检查当前用户是否具备 GetBiblioInfo() API 的存取定义权限
         // parameters:
         //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
@@ -16854,22 +17014,22 @@ out string db_type);
             else if (this.IsOrderDbName(strDbName))
             {
                 db_type = "order";
-                right = "setorderinfo";
+                right = "setorderinfo,setorders";
             }
             else if (this.IsIssueDbName(strDbName))
             {
                 db_type = "issue";
-                right = "setissueinfo";
+                right = "setissueinfo,setissues";
             }
             else if (this.IsItemDbName(strDbName))
             {
                 db_type = "item";
-                right = "setiteminfo";
+                right = "setiteminfo,setentities";
             }
             else if (this.IsCommentDbName(strDbName))
             {
                 db_type = "comment";
-                right = "setcommentinfo";
+                right = "setcommentinfo";   // 注: setcommentinfo 没有别名
             }
             else if (this.IsAuthorityDbName(strDbName))
             {

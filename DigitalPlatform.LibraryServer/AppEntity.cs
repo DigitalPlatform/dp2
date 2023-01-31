@@ -3029,7 +3029,12 @@ out strError);
             entity.Action = strAction;
             entity.NewRecPath = strRecPath;
             entity.NewRecord = strXml;
-            entity.NewTimestamp = baTimestamp;
+            entity.OldTimestamp = baTimestamp;
+
+            /*
+            if (strAction == "change")
+                entity.OldRecPath = strRecPath;
+            */
 
             LibraryServerResult result = new LibraryServerResult();
             EntityInfo[] errorinfos = null;
@@ -3083,9 +3088,20 @@ out strError);
                 if (error.ErrorCode != ErrorCodeValue.NoError)
                 {
                     // TODO: error code
+                    // string name = error.ErrorCode.ToString();
+                    // result.ErrorCode = (ErrorCode)Enum.Parse(typeof(ErrorCode), name);
+                    result.ErrorCode = LibraryServerResult.FromErrorValue(error.ErrorCode);
                     result.Value = -1;
                     result.ErrorInfo = error.ErrorInfo;
+                    if (error.ErrorCode == ErrorCodeValue.TimestampMismatch)
+                        baOutputTimestamp = error.OldTimestamp;
+                    strOutputRecPath = error.NewRecPath;
                     return result;
+                }
+                else
+                {
+                    baOutputTimestamp = error.NewTimestamp;
+                    strOutputRecPath = error.NewRecPath;
                 }
             }
 
@@ -3111,10 +3127,10 @@ out strError);
             LibraryServerResult result = new LibraryServerResult();
 
             // 权限字符串
-            if (StringUtil.IsInList("setentities,setiteminfo,order", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList("setiteminfo,setentities,writerecord,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "保存册信息 操作被拒绝。不具备 order、setiteminfo 或 setentities 权限。";
+                result.ErrorInfo = "保存册信息 操作被拒绝。不具备 setiteminfo、setentities、writerecord 或 order 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -4313,7 +4329,9 @@ out strError);
                 }
                 else if (info.Action == "change")
                 {
-                    if (info.NewRecPath != info.OldRecPath)
+                    // 如果 OldRecPath 有内容，则它必须和 NewRecPath 一致
+                    if (info.NewRecPath != info.OldRecPath
+                        && string.IsNullOrEmpty(info.OldRecPath) == false)
                     {
                         strError = "参数不正确。SetEntities() 当操作类型为 change 时，info.NewRecPath('" + info.NewRecPath + "') 应当和 info.OldRecPath('" + info.OldRecPath + "') 值相同";
 #if NO
@@ -4328,8 +4346,11 @@ out strError);
                         return -1;
                     }
 
-                    Debug.Assert(info.NewRecPath == info.OldRecPath, "当操作类型为change时，info.NewRecPath应当和info.OldRecPath相同");
-                    if (aPath[0] == info.OldRecPath) // 正好是自己
+                    // 2023/1/31
+                    string path = GetOldRecPath(info);
+
+                    // Debug.Assert(info.NewRecPath == info.OldRecPath, "当操作类型为change时，info.NewRecPath应当和info.OldRecPath相同");
+                    if (aPath[0] == path) // 正好是自己
                         bDup = false;
                     else
                         bDup = true;    // 别的记录中已经使用了这个条码号
@@ -5144,9 +5165,8 @@ out strError);
                 info.NewTimestamp = exist_timestamp;
             }
 
-            // 只有order权限的情况
-            if (StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
-                && StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
+            // 只有order权限(并且没有 setiteminfo setentities writerecord)的情况
+            if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
             {
                 // 2009/11/26 changed
@@ -5184,7 +5204,7 @@ out strError);
                         "state");
                     if (IncludeStateProcessing(strState) == false)
                     {
-                        strError = "当前帐户只有order权限而没有setiteminfo(或setentities)权限，不能用delete功能删除从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.NewRecPath + "'";
+                        strError = "当前帐户只有 order 权限而没有 setiteminfo(或setentities、writerecord) 权限，不能用delete功能删除从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.NewRecPath + "'";
                         goto ERROR1;    // TODO: 如何返回AccessDenied错误码呢?
                     }
                 }
@@ -5332,7 +5352,8 @@ out strError);
                 goto ERROR1;
             }
 
-            if (info.OldRecPath != info.NewRecPath)
+            if (info.OldRecPath != info.NewRecPath
+                && string.IsNullOrEmpty(info.OldRecPath) == false)
             {
                 strError = "当action为\"change\"时，info.NewRecordPath路径 '" + info.NewRecPath + "' 和info.OldRecPath '" + info.OldRecPath + "' 必须相同";
                 goto ERROR1;
@@ -5409,9 +5430,8 @@ out strError);
 
             if (bExist == true)
             {
-                // 只有order权限的情况
-                if (StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
+                // 只有order权限(并且没有 setiteminfo setentities writerecord)的情况
+                if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
                 {
                     // 2009/11/26 changed
@@ -5446,7 +5466,7 @@ out strError);
                             "state");
                         if (IncludeStateProcessing(strState) == false)
                         {
-                            strError = "当前帐户只有 order 权限而没有 setiteminfo (或setentities)权限，不能用 change 功能修改从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'(此种记录的状态要包含“加工中”才能允许修改)";
+                            strError = "当前帐户只有 order 权限而没有 setiteminfo (或setentities、writerecord)权限，不能用 change 功能修改从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'(此种记录的状态要包含“加工中”才能允许修改)";
                             goto ERROR1;
                         }
                     }
@@ -5707,36 +5727,40 @@ out strError);
                 // 时间戳不相等了
                 // 需要把info.OldRecord和strExistXml进行比较，看看和册登录有关的元素（要害元素）值是否发生了变化。
                 // 如果这些要害元素并未发生变化，就继续进行合并、覆盖保存操作
-
-                XmlDocument domOld = new XmlDocument();
-
-                try
+                if (string.IsNullOrEmpty(info.OldRecord) == false)
                 {
-                    domOld.LoadXml(info.OldRecord);
-                }
-                catch (Exception ex)
-                {
-                    strError = "info.OldRecord装载进入DOM时发生错误: " + ex.Message;
-                    goto ERROR1;
-                }
+                    XmlDocument domOld = new XmlDocument();
 
-                if (bForce == false)
-                {
-                    // 2020/10/12
-                    string[] elements = null;
-                    if (strAction == "transfer")
-                        elements = transfer_entity_element_names;
-                    else if (strAction == "setuid")
-                        elements = setuid_entity_element_names;
+                    try
+                    {
+                        domOld.LoadXml(info.OldRecord);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "(当时间戳不匹配时)info.OldRecord装载进入DOM时发生错误: " + ex.Message;
+                        goto ERROR1;
+                    }
 
-                    // 比较两个记录, 看看和册登录有关的字段是否发生了变化
-                    // return:
-                    //      0   没有变化
-                    //      1   有变化
-                    nRet = IsRegisterInfoChanged(domOld,
-                        domExist,
-                        elements/*strAction == "transfer" ? transfer_entity_element_names : null*/);
+                    if (bForce == false)
+                    {
+                        // 2020/10/12
+                        string[] elements = null;
+                        if (strAction == "transfer")
+                            elements = transfer_entity_element_names;
+                        else if (strAction == "setuid")
+                            elements = setuid_entity_element_names;
+
+                        // 比较两个记录, 看看和册登录有关的字段是否发生了变化
+                        // return:
+                        //      0   没有变化
+                        //      1   有变化
+                        nRet = IsRegisterInfoChanged(domOld,
+                            domExist,
+                            elements/*strAction == "transfer" ? transfer_entity_element_names : null*/);
+                    }
                 }
+                else
+                    nRet = 1;
 
                 if (nRet == 1 || bForce == true) // 2008/5/29 changed
                 {
@@ -5746,9 +5770,9 @@ out strError);
                     error.OldTimestamp = exist_timestamp;
 
                     if (bExist == false)
-                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + info.OldRecPath + "') 已被删除。";
+                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + GetOldRecPath(info) + "') 已被删除。";
                     else
-                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + info.OldRecPath + "') 已发生过修改";
+                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + GetOldRecPath(info) + "') 已发生过修改";
                     error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                     ErrorInfos.Add(error);
                     return -1;
@@ -5984,6 +6008,14 @@ out strError);
             error.ErrorCode = ErrorCodeValue.CommonError;
             ErrorInfos.Add(error);
             return -1;
+        }
+
+        // 先尝试从 OldRecPath 宏获得，如果为空，则改为从 NewRecPath 中获得
+        static string GetOldRecPath(EntityInfo info)
+        {
+            if (string.IsNullOrEmpty(info.OldRecPath) == false)
+                return info.OldRecPath;
+            return info.NewRecPath;
         }
 
         // 2021/8/31
@@ -6445,9 +6477,8 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            // 只有order权限的情况
-            if (StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
-                && StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
+            // 只有order权限(并且没有 setiteminfo setentities writerecord)的情况
+            if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
             {
                 // 2009/11/26 changed
@@ -6483,7 +6514,7 @@ out strError);
                         "state");
                     if (IncludeStateProcessing(strState) == false)
                     {
-                        strError = "当前帐户只有order权限而没有setiteminfo(或setentities)权限，不能用move功能删除从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'";
+                        strError = "当前帐户只有order权限而没有setiteminfo(或setentities、writerecord)权限，不能用move功能删除从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'";
                         goto ERROR1;
                     }
                 }

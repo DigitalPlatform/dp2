@@ -2529,11 +2529,10 @@ out strError);
                     }
                 }
 
-                // 如果不具备writeobjects权限
-                // TODO: 是否 writeres 权限也管用?
-                if (StringUtil.IsInList("writeobject,writebiblioobject", strRights) == false)
+                // 如果不具备 writebiblioobject 和 writeobject 权限
+                if (StringUtil.IsInList("writebiblioobject,writeobject", strRights) == false)
                 {
-                    // TODO: 用MergeDprmsFile()函数替代下面段落 
+                    // TODO: 用 MergeDprmsFile() 函数替代下面段落 
 
                     // 删除new中的全部<dprms:file>元素，然后将old记录中的全部<dprms:file>元素插入到new记录中
 
@@ -4873,6 +4872,7 @@ nsmgr);
                 Debug.Assert(cfg != null, "");
                 strUnionCatalogStyle = cfg.UnionCatalogStyle;
 
+#if OLDVERSION
                 // 检查存取权限
                 if (String.IsNullOrEmpty(sessioninfo.Access) == false)
                 {
@@ -4947,6 +4947,34 @@ nsmgr);
 
                     bRightVerified = true;
                 }
+
+#endif
+
+                // 检查当前用户是否具备 SetBiblioInfo() API 的存取定义权限
+                // parameters:
+                //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+                // return:
+                //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+                //      null    具备权限
+                //      其它      不具备权限。文字是报错信息
+                var error = CheckSetBiblioInfoAccess(
+                    sessioninfo,
+                    strDbType,
+                    strBiblioDbName,
+                    strAction,
+                    false,
+                    out strAccessParameters,
+                    out bOwnerOnly);
+                if (error == "normal")
+                    goto CHECK_RIGHTS_2;
+                if (error != null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = error;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+                bRightVerified = true;
             }
 
         CHECK_RIGHTS_2:
@@ -4966,10 +4994,10 @@ nsmgr);
                 if (strDbType == "authority")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("setauthorityinfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setauthorityinfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置规范信息被拒绝。不具备 setauthorityinfo 权限。";
+                        result.ErrorInfo = "设置规范信息被拒绝。不具备 setauthorityinfo 或 writerecord 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -6049,11 +6077,10 @@ out strError);
                     }
 
                     // 权限字符串
-                    if (StringUtil.IsInList("setentities,setiteminfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，但当前用户不具备setiteminfo或setentities权限，不能删除它们。";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，但当前用户不具备 setiteminfo、setentities 或 writerecord 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6109,10 +6136,10 @@ out strError);
                     }
 
                     // 权限字符串
-                    if (StringUtil.IsInList("setorders,setorderinfo,order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setorderinfo,setorders,writerecord,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但当前用户不具备order、setorderinfo或setorders权限，不能删除它们。";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但当前用户不具备 setorderinfo、setorders、writeobject 或 order 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6168,10 +6195,10 @@ out strError);
                     }
 
                     // 权限字符串
-                    if (StringUtil.IsInList("setissues,setissueinfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setissueinfo,setissues,writeobject", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但当前用户不具备setissueinfo或setissues权限，不能删除它们。";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但当前用户不具备 setissueinfo、setissues或 writerecord 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -6223,10 +6250,10 @@ out strError);
                     }
 
                     // 权限字符串
-                    if (StringUtil.IsInList("setcommentinfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setcommentinfo,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，但当前用户不具备setcommentinfo权限，不能删除它们。";
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，但当前用户不具备setcommentinfo 或 writerecord 权限，不能删除它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;
@@ -7301,9 +7328,9 @@ out strError);
             if (entityinfos != null && entityinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setentities,setiteminfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的实体记录，但当前用户不具备 setiteminfo 或 setentities 权限，不能复制或者移动它们。";
+                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的实体记录，但当前用户不具备 setiteminfo、setentities 或 writerecord 权限，不能复制或者移动它们。";
                     return -2;
                 }
 
@@ -7361,9 +7388,9 @@ out strError);
             if (orderinfos != null && orderinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setorders,setorderinfo,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setorderinfo,setorders,writeobject,order", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的订购记录，但当前用户不具备 order、setorderinfo 或 setorders 权限，不能复制或移动它们。";
+                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的订购记录，但当前用户不具备 setorderinfo、setorders 、writerecord 或 order 权限，不能复制或移动它们。";
                     return -2;
                 }
 
@@ -7413,9 +7440,9 @@ out strError);
             if (issueinfos != null && issueinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setissues,setissueinfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setissueinfo,setissues,writeobject", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的期记录，但当前用户不具备 setissueinfo 或 setissues 权限，不能复制或移动它们。";
+                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的期记录，但当前用户不具备 setissueinfo、setissues 或 writerecord 权限，不能复制或移动它们。";
                     return -2;
                 }
 
@@ -7465,9 +7492,9 @@ out strError);
             if (commentinfos != null && commentinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setcommentinfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setcommentinfo,writerecord", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的评注记录，但当前用户不具备 setcommentinfo 权限，不能复制或移动它们。";
+                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的评注记录，但当前用户不具备 setcommentinfo 或 writerecord 权限，不能复制或移动它们。";
                     return -2;
                 }
 
@@ -8257,10 +8284,10 @@ out strError);
                 if (entityinfos != null && entityinfos.Count > 0)
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("setentities,setiteminfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "为册记录设置书目信息的操作被拒绝。前用户不具备 setiteminfo 或 setentities 权限，不能修改它们。";
+                        result.ErrorInfo = "为册记录设置书目信息的操作被拒绝。前用户不具备 setiteminfo、setentities 或 writerecord 权限，不能修改它们。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         // return result;
                         return 1;

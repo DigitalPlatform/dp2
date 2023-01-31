@@ -1688,7 +1688,8 @@ namespace dp2Circulation
                 error_code = searchresult.RecordBody.Result.ErrorCode;
                 error_string = searchresult.RecordBody.Result.ErrorString;
 
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 '" + searchresult.Path + "' 装入浏览信息时出错: " + error_string) + "</div>");
+                if (error_code != ErrorCodeValue.NoError)
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 '" + searchresult.Path + "' 装入浏览信息时出错: (" + error_code.ToString() + ") " + error_string) + "</div>");
             }
 
             var libraryCodeList = Program.MainForm._currentLibraryCodeList;
