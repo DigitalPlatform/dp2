@@ -27,6 +27,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Core;
+using Jint.Parser;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -647,6 +648,7 @@ namespace DigitalPlatform.LibraryServer
         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
         // parameters:
         //          useClientRefID  [out]是否使用了前端给出的 RefID?
+        //          fileElementFiltered [out] dprms:file 元素是否被过滤掉了?
         // return:
         //      -1  出错
         //      0   没有实质性修改
@@ -655,6 +657,7 @@ namespace DigitalPlatform.LibraryServer
             string[] important_fields,
             string rights,
             out bool useClientRefID,
+            out bool fileElementFiltered,
             out string strXml,
             out string strError)
         {
@@ -662,6 +665,7 @@ namespace DigitalPlatform.LibraryServer
             strXml = "";
 
             useClientRefID = false;
+            fileElementFiltered = false;
 
             // 流通元素名列表
             string[] remove_element_names = new string[] {
@@ -779,6 +783,27 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 这是前端给出的记录中就有的 refID 内容，需要触发查重
                 useClientRefID = true;
+            }
+
+            {
+                // 2023/1/31
+                // 根据 writexxxobject 权限对 dprms:file 元素进行限定
+                if (StringUtil.IsInList("writereaderobject,writeobject", rights) == false)
+                {
+                    // 删除target中的全部<dprms:file>元素，然后将source记录中的全部<dprms:file>元素插入到target记录中
+                    XmlDocument temp = new XmlDocument();
+                    temp.LoadXml("<root />");
+                    // return:
+                    //      false   没有发生实质性改变
+                    //      true    发生了实质性改变
+                    if (MergeDprmsFile(ref dom,
+                        temp) == true)
+                    {
+                        // SetReaderInfo() API 返回错误码，表明前端提交的 dp2rms:file 元素没有被写入(但 API 成功返回了，算是局部兑现)
+                        fileElementFiltered = true;
+                        bChanged = true;
+                    }
+                }
             }
 
             // 检查重要元素是否兑现创建
@@ -1860,6 +1885,8 @@ out List<string> send_skips);
                         */
                     }
 
+                    bool fileElementFiltered = false;
+
                     // 构造出适合保存的新读者记录
                     if (bForce == false)
                     {
@@ -1874,6 +1901,7 @@ out List<string> send_skips);
                             string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                             sessioninfo.RightsOrigin,
                             out bool useClientRefID,
+                            out fileElementFiltered,
                             out string xml,
                             out strError);
                         if (nRet == -1)
@@ -2089,6 +2117,16 @@ strLibraryCode);    // 读者所在的馆代码
                             1);
                     }
 
+                    // 2023/1/31
+                    if (fileElementFiltered)
+                    {
+                        if (result.ErrorCode == ErrorCode.NoError)
+                        result.ErrorCode = ErrorCode.PartialDenied;
+                        if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                            result.ErrorInfo += "; ";
+                        result.ErrorInfo += "读者 XML 记录中的 dprms:file 元素在保存前被滤除";
+                    }
+
                     this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
                 }
                 else if (strAction == "change"
@@ -2135,6 +2173,16 @@ strLibraryCode);    // 读者所在的馆代码
                         var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
                         Append(comment, "AND(dataFields 集合:", names.ToArray(), ")");
+                        count++;
+                    }
+
+                    // 2023/1/31
+                    // 根据 writexxxobject 权限对 dprms:file 元素进行限定
+                    if (StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false)
+                    {
+                        var names = StringUtil.SplitList("http://dp2003.com/dprms:file");
+                        element_names = element_names.Except(names).ToArray();
+                        Append(comment, "SUB(http://dp2003.com/dprms:file 元素，因账户未定义 writereaderobject 或 writeobject 权限:", names.ToArray(), ")");
                         count++;
                     }
 
@@ -2208,6 +2256,14 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         var names = StringUtil.SplitList(data_fields);
                         element_names = element_names.Intersect(names).ToArray();
+                    }
+
+                    // 2023/1/31
+                    // 根据 writexxxobject 权限对 dprms:file 元素进行限定
+                    if (StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false)
+                    {
+                        var names = StringUtil.SplitList("http://dp2003.com/dprms:file");
+                        element_names = element_names.Except(names).ToArray();
                     }
 
                     // return:
@@ -2930,7 +2986,8 @@ root, strLibraryCode);
 
             // 2021/8/3
             string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
-            if (string.IsNullOrEmpty(write_level) == false)
+            if (string.IsNullOrEmpty(write_level) == false
+                || StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false/*2023/1/31*/)
             {
                 var outof_names = GetOutofElements(domExist,
                     element_names,

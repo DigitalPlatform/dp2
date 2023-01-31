@@ -3029,7 +3029,10 @@ out strError);
             entity.Action = strAction;
             entity.NewRecPath = strRecPath;
             entity.NewRecord = strXml;
-            entity.OldTimestamp = baTimestamp;
+            if (strAction == "change" || strAction == "delete")
+                entity.OldTimestamp = baTimestamp;
+            else
+                entity.NewTimestamp = baTimestamp;
 
             /*
             if (strAction == "change")
