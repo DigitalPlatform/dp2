@@ -657,7 +657,7 @@ namespace DigitalPlatform.LibraryServer
             string[] important_fields,
             string rights,
             out bool useClientRefID,
-            out bool fileElementFiltered,
+            // out bool fileElementFiltered,
             out string strXml,
             out string strError)
         {
@@ -665,7 +665,7 @@ namespace DigitalPlatform.LibraryServer
             strXml = "";
 
             useClientRefID = false;
-            fileElementFiltered = false;
+            // fileElementFiltered = false;
 
             // 流通元素名列表
             string[] remove_element_names = new string[] {
@@ -785,6 +785,7 @@ namespace DigitalPlatform.LibraryServer
                 useClientRefID = true;
             }
 
+#if REMOVED
             {
                 // 2023/1/31
                 // 根据 writexxxobject 权限对 dprms:file 元素进行限定
@@ -805,6 +806,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
             }
+#endif
 
             // 检查重要元素是否兑现创建
             if (important_fields != null && important_fields.Length > 0)
@@ -1885,7 +1887,7 @@ out List<string> send_skips);
                         */
                     }
 
-                    bool fileElementFiltered = false;
+                    // bool fileElementFiltered = false;
 
                     // 构造出适合保存的新读者记录
                     if (bForce == false)
@@ -1901,7 +1903,7 @@ out List<string> send_skips);
                             string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                             sessioninfo.RightsOrigin,
                             out bool useClientRefID,
-                            out fileElementFiltered,
+                            // out fileElementFiltered,
                             out string xml,
                             out strError);
                         if (nRet == -1)
@@ -2117,15 +2119,17 @@ strLibraryCode);    // 读者所在的馆代码
                             1);
                     }
 
+#if REMOVED
                     // 2023/1/31
                     if (fileElementFiltered)
                     {
                         if (result.ErrorCode == ErrorCode.NoError)
-                        result.ErrorCode = ErrorCode.PartialDenied;
+                            result.ErrorCode = ErrorCode.PartialDenied;
                         if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                             result.ErrorInfo += "; ";
                         result.ErrorInfo += "读者 XML 记录中的 dprms:file 元素在保存前被滤除";
                     }
+#endif
 
                     this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
                 }
@@ -2158,7 +2162,7 @@ strLibraryCode);    // 读者所在的馆代码
                     string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
                     if (string.IsNullOrEmpty(write_level) == false)
                     {
-                        var names = GetElementNames(write_level);
+                        var names = GetElementNames(write_level, element_names);
                         element_names = element_names.Intersect(names).ToArray();
                         Append(comment, "AND(写集合:", names.ToArray(), ")");
                         count++;
@@ -2176,6 +2180,7 @@ strLibraryCode);    // 读者所在的馆代码
                         count++;
                     }
 
+#if REMOVED
                     // 2023/1/31
                     // 根据 writexxxobject 权限对 dprms:file 元素进行限定
                     if (StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false)
@@ -2185,6 +2190,7 @@ strLibraryCode);    // 读者所在的馆代码
                         Append(comment, "SUB(http://dp2003.com/dprms:file 元素，因账户未定义 writereaderobject 或 writeobject 权限:", names.ToArray(), ")");
                         count++;
                     }
+#endif
 
                     if (count > 0)
                         Append(comment, "=(", element_names.ToArray(), ")");
@@ -2258,6 +2264,7 @@ strLibraryCode);    // 读者所在的馆代码
                         element_names = element_names.Intersect(names).ToArray();
                     }
 
+#if REMOVED
                     // 2023/1/31
                     // 根据 writexxxobject 权限对 dprms:file 元素进行限定
                     if (StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false)
@@ -2265,6 +2272,7 @@ strLibraryCode);    // 读者所在的馆代码
                         var names = StringUtil.SplitList("http://dp2003.com/dprms:file");
                         element_names = element_names.Except(names).ToArray();
                     }
+#endif
 
                     // return:
                     //      -2  记录中有流通信息，不能删除
@@ -2410,7 +2418,7 @@ strLibraryCode);    // 读者所在的馆代码
             if (string.IsNullOrEmpty(write_level) == true
     && string.IsNullOrEmpty(read_level) == false)
             {
-                var write_names = new List<string>(full_element_names);
+                var write_names = GetFullElementNames(full_element_names);
                 var read_names = GetElementNames(read_level);
                 var overflow_names = write_names.Except(read_names).ToArray();
                 if (overflow_names.Count() > 0)
@@ -2986,8 +2994,8 @@ root, strLibraryCode);
 
             // 2021/8/3
             string write_level = GetReaderInfoLevel("setreaderinfo", sessioninfo.RightsOrigin);
-            if (string.IsNullOrEmpty(write_level) == false
-                || StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false/*2023/1/31*/)
+            if (string.IsNullOrEmpty(write_level) == false/*
+                || StringUtil.IsInList("writereaderobject,writeobject", sessioninfo.RightsOrigin) == false*//*2023/1/31*/)
             {
                 var outof_names = GetOutofElements(domExist,
                     element_names,
@@ -5936,10 +5944,10 @@ out strError);
             {
                 if (readerdom != null)
                 {
+                    // (为返回给前端)过滤掉读者记录中的一些元素，另外添加一些必要的元素
                     FilterReaderRecord(readerdom, strLibraryCode);
                     strXml = null;  // 从此以后不用 strXml，而用 readerdom
                 }
-
             }
 
             nRet = BuildReaderResults(
@@ -6151,7 +6159,7 @@ out strError);
         }
 
         // (为返回给前端)过滤掉读者记录中的一些元素，另外添加一些必要的元素
-        public void FilterReaderRecord(XmlDocument readerdom, 
+        public void FilterReaderRecord(XmlDocument readerdom,
             string strLibraryCode)
         {
             DomUtil.DeleteElement(readerdom.DocumentElement, "password");
@@ -6241,6 +6249,7 @@ out strError);
         // parameters:
         //      readerdom   读者 XmlDocument 对象。如果为空，则 strXml 参数中应该有读者记录
         //      strXml      读者 XML 记录。如果 readerdom 为空，可以用这里的值
+        //      level       当前账户 getreaderinfo:xxx 权限中的 xxx 部分。表示当前账户读取读者记录内字段(级别)的详细权限
         public int BuildReaderResults(
             SessionInfo sessioninfo,
             XmlDocument readerdom,
@@ -6291,7 +6300,11 @@ out strError);
                 filtered_readerdom.LoadXml(readerdom.OuterXml);
             else
                 filtered_readerdom.LoadXml(strXml);
-            FilterByLevel(filtered_readerdom, level, "read", this.PatronMaskDefinition);
+
+            FilterByLevel(filtered_readerdom,
+            level,
+            "read",
+            this.PatronMaskDefinition);
 
             string[] result_types = strResultTypeList.Split(new char[] { ',' });
             //results = new string[result_types.Length];
@@ -7927,19 +7940,43 @@ out strError);
             return false;
         }
 
+        static bool RemoveDprmsFile(XmlDocument readerdom)
+        {
+            XmlDocument temp = new XmlDocument();
+            temp.LoadXml("<root />");
+            return MergeDprmsFile(ref readerdom, temp);
+        }
+
         // 按照级别对读者记录中的信息字段进行过滤
         // 注: 无论如何都要删除读者记录中的 password 元素
+        // parameters:
+        //      style   风格。可能包含 read/write/excludefile 
+        //              read 表示这是用于读的 level 权限；write 表示这是用于写的 level 权限。如果 read 和 write 都缺乏，则当作 read 理解
+        //              excludefile 表示要故意排除掉 "http://dp2003.com/dprms:file"。一般用于当前账户不具备 writeobject 和 writereaderobject 权限时
+        //      maskDefinition  马赛克定义。对需要打马赛克的字段进行部分屏蔽的方法
         public static bool FilterByLevel(XmlDocument readerdom,
             string level,
             string style = "read",
             string maskDefinition = null)
         {
-            if (string.IsNullOrEmpty(level))
+            bool changed = false;
+
+            // 2023/2/1
+            ParseLevel(level, out string list, out string ext_rights);
+
+            if (string.IsNullOrEmpty(list))
             {
+                // 去除 dprms:file 元素
+                if (StringUtil.IsInList("-object", ext_rights) == true)
+                {
+                    changed = RemoveDprmsFile(readerdom);
+                }
+
+                // 去除 password 元素
                 var node = DomUtil.DeleteElement(readerdom.DocumentElement, "password");
                 if (node != null)
-                    return true;
-                return false;
+                    changed = true;
+                return changed;
             }
 
             bool read = StringUtil.IsInList("read", style);
@@ -7948,7 +7985,6 @@ out strError);
             if (read == false && write == false)
                 read = true;
 
-            bool changed = true;
             /*
 基本字段："borrows","overdues","reservations","outofReservations"
 第一级：证状态，发证日期，失效日期，姓名(除第一字以后都被马赛克)
@@ -7962,6 +7998,7 @@ out strError);
 第九级：+ 指纹，掌纹，人脸特征
              * */
             var names = GetElementNames(level);
+
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("*");
             foreach (XmlElement element in nodes)
             {
@@ -8013,6 +8050,7 @@ out strError);
         }
 
         // 获得专用的元素名，形态为 uri:localName
+        // 表示对象的 dprms:file 元素返回 "http://dp2003.com/dprms:file"
         static string GetMyName(XmlElement element)
         {
             if (string.IsNullOrEmpty(element.NamespaceURI))
@@ -8052,16 +8090,44 @@ out strError);
             return StringUtil.SplitList(item.Elements);
         }
 
+        // 获得一个排除了 dprms.file 元素名的元素名全集集合
+        static List<string> GetFullElementNames(string[] full_names)
+        {
+            var names = new List<string>(full_names);
+            names.Remove("dprms.file");
+            names.Remove("http://dp2003.com/dprms:file");
+            return names;
+        }
+
+
         // 获得元素名列表
         // parameters:
-        //      name    元素集合的名称或者定义。
+        //      name_param    元素集合的名称或者定义。
         //              形态: n|元素名|组名
         //              (n代表数字)
         //              注: 这里使用 dprms.file 元素名，实际上表达的是 "http://dp2003.com/dprms:file"，因为 setreaderinfo:xxx 这里 xxx 之内不允许里面再出现冒号，逗号，竖线
-        static List<string> GetElementNames(string name)
+        static List<string> GetElementNames(string name_param,
+            string[] full_names = null)
         {
+            var full_names_empty = (full_names == null || full_names.Length == 0);
+            if (string.IsNullOrEmpty(name_param))
+            {
+                if (full_names_empty)
+                    throw new ArgumentException("当 full_names 为空时，GetElementNames() 不允许使用空字符串列表");
+            }
+
+            // 2023/2/1
+            ParseLevel(name_param, out string name, out string ext_rights);
+
             List<string> results = new List<string>();
             var parts = StringUtil.SplitList(name, '|');
+            if (parts.Count == 0)
+            {
+                if (full_names_empty)
+                    throw new ArgumentException($"GetElementNames() 参数 name_param 值 '{name_param}' 中的完全集合部分未明确给出集合，无法进行兑现运算");
+                // 兑现全集
+                parts = new List<string>(full_names);
+            }
             foreach (string part in parts)
             {
                 if (StringUtil.IsNumber(part))
@@ -8093,6 +8159,19 @@ out strError);
             // 2021/8/4
             // 去除发生冲突的名字。比如 ?name 和后方的 name 冲突了，?name 应予删除
             results = RemoveConflictName(results);
+
+            // 2023/2/1
+            if (StringUtil.IsInList("-object", ext_rights) == true)
+            {
+                // 减去 file
+                results.Remove("http://dp2003.com/dprms:file");
+            }
+            else if (StringUtil.IsInList("+object", ext_rights) == true)
+            {
+                // 加入 file
+                if (results.Contains("http://dp2003.com/dprms:file") == false)
+                    results.Add("http://dp2003.com/dprms:file");
+            }
 
             return results;
         }
@@ -8198,6 +8277,8 @@ out strError);
             return names;
         }
 
+        const string LEVEL_DELIMETER = "|===rights===";
+
         // 从 rights 字符串中得到 getreaderinfo 权限的 level 字符串
         // 原理：权限字符串中通常会这样定义 getreaderinfo:1，其中 1 表示 level "1"
         // return:
@@ -8211,7 +8292,56 @@ out strError);
             //      ""      找到了前缀，并且值部分为空
             //      其他     返回值部分
             var level = StringUtil.GetParameterByPrefix(rights, prefix);
+            if (level == null)
+                return level;
+
+            if (prefix == "getreaderinfo")
+            {
+                // 把 rights 中的 getreaderobject 和 getobject 也融合到返回的字符串中
+                List<string> list = new List<string>();
+                if (StringUtil.IsInList("getreaderobject", rights) == true)
+                    list.Add("readerobject");
+                if (StringUtil.IsInList("getobject", rights) == true)
+                    list.Add("object");
+                if (list.Count > 0 && string.IsNullOrEmpty(level))
+                    return "";  // 完全集合
+                if (list.Count > 0)
+                    return level + LEVEL_DELIMETER + "+object";
+                return level + LEVEL_DELIMETER + "-object";
+            }
+            else if (prefix == "setreaderinfo")
+            {
+                // 把 rights 中的 writereaderobject 和 writeobject 也融合到返回的字符串中
+                List<string> list = new List<string>();
+                if (StringUtil.IsInList("writereaderobject", rights) == true)
+                    list.Add("readerobject");
+                if (StringUtil.IsInList("writeobject", rights) == true)
+                    list.Add("object");
+                if (list.Count > 0 && string.IsNullOrEmpty(level))
+                    return "";  // 完全集合
+                if (list.Count > 0)
+                    return level + LEVEL_DELIMETER + "+object";
+                return level + LEVEL_DELIMETER + "-object";
+            }
+
             return level;
+        }
+
+        // 2023/2/1
+        // 把 "1|2|3|===rights===+object" 筛分为 "1|2|3" 和 "+getobject" 两个部分
+        public static void ParseLevel(string text,
+            out string level,
+            out string rights)
+        {
+            level = text;
+            rights = null;
+            if (string.IsNullOrEmpty(text))
+                return;
+            int index = text.IndexOf(LEVEL_DELIMETER);
+            if (index == -1)
+                return;
+            level = text.Substring(0, index);
+            rights = text.Substring(index + LEVEL_DELIMETER.Length);
         }
 
         // 合并两个权限字符串。

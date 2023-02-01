@@ -15756,6 +15756,21 @@ strLibraryCode);    // 读者所在的馆代码
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);
             bool is_object_path = IsRestObjectPath(strPath);
 
+            // 检查当前账户是否具有 setxxxinfo 或 writerecord 权限
+            var error = CheckDbSetRights(strRights,
+strDbName,
+out string db_type);
+            if (error != null)
+            {
+                // 如果是对象路径，则还要继续向后判断，看看是否具备 writexxxobject 权限
+                // 其它情况直接就返回“不具备权限”
+                if (is_object_path == false)
+                {
+                    strError = error;
+                    return 0;
+                }
+            }
+
             // 书目库
             if (this.IsBiblioDbName(strDbName) == true)
             {
@@ -15795,7 +15810,7 @@ strLibraryCode);    // 读者所在的馆代码
                         //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
                         //      null    具备权限
                         //      其它      不具备权限。文字是报错信息
-                        var error = CheckSetBiblioInfoAccess(
+                        var check_error = CheckSetBiblioInfoAccess(
     sessioninfo,
     "biblio",
     strDbName,
@@ -15803,9 +15818,9 @@ strLibraryCode);    // 读者所在的馆代码
     true,
     out _,
     out _);
-                        if (error != null)
+                        if (check_error != null)
                         {
-                            strError = error;
+                            strError = check_error;
                             return 0;
                         }
 
@@ -15935,7 +15950,8 @@ strLibraryCode);    // 读者所在的馆代码
             if (this.IsCommentDbName(strDbName) == true
                 || this.IsItemDbName(strDbName) == true
                 || this.IsIssueDbName(strDbName) == true
-                || this.IsOrderDbName(strDbName) == true)
+                || this.IsOrderDbName(strDbName) == true
+                || this.AmerceDbName == strDbName)
             {
                 string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
 
@@ -15960,20 +15976,7 @@ strLibraryCode);    // 读者所在的馆代码
                     }
                 }
 
-                // 检查当前账户是否具有 setxxxinfo 或 writerecord 权限
-                var error = CheckDbSetRights(strRights,
-strDbName,
-out string db_type);
-                if (error != null)
-                {
-                    // 如果是对象路径，则还要继续向后判断，看看是否具备 getxxxobject 权限
-                    // 其它情况直接就返回“不具备权限”
-                    if (is_object_path == false)
-                    {
-                        strError = error;
-                        return 0;
-                    }
-                }
+                // check set db
 
                 // 记录ID
                 if (IsId(strFirstPart) == true)
@@ -16082,7 +16085,7 @@ out string db_type);
                 return 0;
             }
 
-            strError = "写入资源 " + strResPath + " 被拒绝。不具备特定的权限";
+            strError = "写入资源 " + strResPath + " 被拒绝。无法识别数据库类型";
             return 0;
         }
 
