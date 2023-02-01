@@ -121,7 +121,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 比较 oldOuterXmls 和 newOuterXmls 之间是否有差异
-            return oldOuterXmls.SequenceEqual(newOuterXmls);
+            return !oldOuterXmls.SequenceEqual(newOuterXmls);
         }
 
 #if NO

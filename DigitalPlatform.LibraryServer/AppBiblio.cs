@@ -648,6 +648,19 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                 }
 
+                // 根据账户权限中是否具备 getbiblioobject 或 getobject，决定是否滤除书目 XML 记录中的 dprms:file 元素
+                // 注意判断针对 object 的写权限字段范围是否大于读。
+                // 如果出现这种情况，可以有两种方法处理:
+                // 1) 立即报错返回。因为如果不报错，前端提交的没有 file 元素的记录直接覆盖进去，原有记录的 file 元素就丢失了。
+                // 2) SetBiblioInfo() API 内处理的时候，削弱写权限，等于用读和写的交集来决定那些字段可以写入。不过这样的缺点是系统给管理员发现系统表现不符合预期会感到困惑，不容易想到这是写权限字段范围大于读引起的保护性降格行为
+                if (StringUtil.IsInList("getbiblioobject,getobject", sessioninfo.RightsOrigin) == false
+                    && string.IsNullOrEmpty(strBiblioXml) == false)
+                {
+                    XmlDocument temp = new XmlDocument();
+                    temp.LoadXml(strBiblioXml);
+                    if (RemoveDprmsFile(temp))
+                        strBiblioXml = temp.DocumentElement.OuterXml;
+                }
 
                 if (formats != null)
                 {
@@ -2529,17 +2542,16 @@ out strError);
                     }
                 }
 
-                // 如果不具备 writebiblioobject 和 writeobject 权限
+                // 如果不具备 writebiblioobject 和 writeobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
                 if (StringUtil.IsInList("writebiblioobject,writeobject", strRights) == false)
                 {
-                    // TODO: 用 MergeDprmsFile() 函数替代下面段落 
-
-                    // 删除new中的全部<dprms:file>元素，然后将old记录中的全部<dprms:file>元素插入到new记录中
-
-                    // TODO: 如果前端提交的关于 dprms:file 元素的修改被拒绝，则要通过设置 bChangePartDenied = true 来反映这种情况
-
                     string strRequstFragments = GetAllFileElements(domNew);
 
+                    // 2023/2/1
+                    // TODO: 用 MergeDprmsFile() 函数替代下面段落 
+                    MergeDprmsFile(ref domNew, domOld);
+#if OLDCODE
+                    // 删除new中的全部<dprms:file>元素，然后将old记录中的全部<dprms:file>元素插入到new记录中
                     XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
                     nsmgr.AddNamespace("dprms", DpNs.dprms);
 
@@ -2563,11 +2575,13 @@ out strError);
 
                         domNew.DocumentElement.AppendChild(fragment);
                     }
+#endif
 
                     // 2017/6/2
                     string strAcceptedFragments = GetAllFileElements(domNew);
                     if (strRequstFragments != strAcceptedFragments)
                     {
+                        // 如果前端提交的关于 dprms:file 元素的修改被拒绝，则要通过设置 bChangePartDenied = true 来反映这种情况
                         bChangePartDenied = true;
                         if (string.IsNullOrEmpty(strComment) == false)
                             strComment += "; ";
@@ -2576,7 +2590,20 @@ out strError);
                         else
                             strComment += "因不具备 writeobject 权限, 修改 dprms:file (数字对象)元素被拒绝";
                     }
+                }
+                else
+                {
+                    // 此时 StringUtil.IsInList("writebiblioobject,writeobject", strRights) == true
+                    // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
+                    // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
+                    if (StringUtil.IsInList("getbiblioobject,getobject", strRights) == false)
+                    {
+                        strError = "操作被放弃。当前用户的权限定义不正确：具有 writebiblioobject(或writeobject) 但不具有 getbiblioobject(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内书目记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                        return -1;
+                    }
 
+                    // TODO: 是否仅当 domOld 里面确实存在 dprms:file 元素的时候才这样报错？
+                    // 不过这样有可能会让账户权限账户定义不正确的情况长期隐藏(并在比较尴尬的时候暴露出来)，不利于系统维护
                 }
 
                 if (StringUtil.IsInList("905", strUnionCatalogStyle) == true)
