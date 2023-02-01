@@ -4905,7 +4905,7 @@ out string strErrorCode)
         }
 
         // 全部保存
-        private void button_save_Click(object sender, EventArgs e)
+        private async void button_save_Click(object sender, EventArgs e)
         {
             this.EnableControls(false);
             this.m_nInDisable++;
@@ -4914,7 +4914,10 @@ out string strErrorCode)
                 if (string.IsNullOrEmpty(this.BiblioRecPath) == true)
                     toolStripButton1_marcEditor_saveTo_Click(null, null);
                 else
-                    DoSaveAll();
+                {
+                    // DoSaveAll();
+                    await DoSaveAllAsync();
+                }
             }
             finally
             {
@@ -4939,7 +4942,7 @@ out string strErrorCode)
         /// <returns>-1: 有错。此时不排除有些信息保存成功。0: 成功。</returns>
         public int DoSaveAll(string strStyle = "displaysuccess,verifydata,searchdup")
         {
-            var task = DoSaveAllAsync();
+            var task = DoSaveAllAsync(strStyle);
             while (task.IsCompleted == false)
             {
                 Application.DoEvents();
@@ -8623,13 +8626,16 @@ out strError);
                         return -1;
                     if (this._genData.DetailHostObj != null)
                     {
-                        BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
-                        // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
-                        this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
-                        if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                        this.TryInvoke(() =>    // 2023/2/1
                         {
-                            this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
-                        }
+                            BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                            // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
+                            this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
+                            if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                            {
+                                this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                            }
+                        });
                     }
                 }
 
@@ -8905,13 +8911,16 @@ out strError);
                     goto ERROR1;
                 if (this._genData.DetailHostObj != null)
                 {
-                    BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
-                    // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
-                    this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
-                    if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                    this.TryInvoke(() =>    // 2023/2/1
                     {
-                        this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
-                    }
+                        BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
+                        // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
+                        this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
+                        if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                        {
+                            this.MessageBoxShow("保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
+                        }
+                    });
                 }
             }
 
