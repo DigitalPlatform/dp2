@@ -1343,10 +1343,13 @@ out strError);
                 goto ERROR1;
             }
 
-            if (info.OldRecPath != info.NewRecPath)
+            if (string.IsNullOrEmpty(info.OldRecPath) == false)
             {
-                strError = "当action为\"change\"时，info.NewRecordPath路径 '" + info.NewRecPath + "' 和info.OldRecPath '" + info.OldRecPath + "' 必须相同";
-                goto ERROR1;
+                if (info.OldRecPath != info.NewRecPath)
+                {
+                    strError = "当action为\"change\"时，info.NewRecordPath路径 '" + info.NewRecPath + "' 和info.OldRecPath '" + info.OldRecPath + "' 必须相同";
+                    goto ERROR1;
+                }
             }
 
             string strExistXml = "";
@@ -1521,11 +1524,20 @@ out strError);
                         part_type = "全部都没有";
                     strWarning = strError;
                 }
+
+                // 为了后面的 CheckParent
+                domNew.LoadXml(strNewXml);
             }
             else
             {
                 // 2008/10/19
                 strNewXml = domNew.OuterXml;
+            }
+
+            // 2023/2/1
+            if (LibraryApplication.CheckParent(/*strNewXml*/domNew, null, out strError) != 1)
+            {
+                goto ERROR1;
             }
 
             // 保存新记录
@@ -2094,8 +2106,18 @@ out strError);
                                 }
                                 else if (info.Action == "change")
                                 {
-                                    Debug.Assert(info.NewRecPath == info.OldRecPath, "当操作类型为change时，info.NewRecPath应当和info.OldRecPath相同");
-                                    if (aPath[0] == info.OldRecPath) // 正好是自己
+                                    if (string.IsNullOrEmpty(info.OldRecPath) == false)
+                                    {
+                                        if (info.NewRecPath != info.OldRecPath)
+                                        {
+                                            strError = $"当操作类型为change时，info.NewRecPath('{info.NewRecPath}') 应当和 info.OldRecPath('{info.OldRecPath}') 相同";
+                                            goto ERROR1;
+                                        }
+                                    }
+
+                                    // 2023/2/1
+                                    var path = LibraryApplication.GetOldRecPath(info);
+                                    if (aPath[0] == path) // 正好是自己
                                         bDup = false;
                                     else
                                         bDup = true;// 别的记录中已经使用了这个条码号
@@ -2267,6 +2289,13 @@ out strError);
                         // 2010/4/8
                         XmlDocument temp = new XmlDocument();
                         temp.LoadXml(strNewXml);
+
+                        // 2023/2/1
+                        if (LibraryApplication.CheckParent(temp, strBiblioRecId, out strError) != 1)
+                        {
+                            goto ERROR1;
+                        }
+
                         nRet = this.App.SetOperation(
                             ref temp,
                             "create",

@@ -6014,7 +6014,7 @@ out strError);
         }
 
         // 先尝试从 OldRecPath 宏获得，如果为空，则改为从 NewRecPath 中获得
-        static string GetOldRecPath(EntityInfo info)
+        public static string GetOldRecPath(EntityInfo info)
         {
             if (string.IsNullOrEmpty(info.OldRecPath) == false)
                 return info.OldRecPath;
@@ -6027,7 +6027,7 @@ out strError);
         //      -1  检查过程出错
         //      0   不合法
         //      1   合法
-        static int CheckParent(XmlDocument dom,
+        public static int CheckParent(XmlDocument dom,
             string parent_id,
             out string strError)
         {
