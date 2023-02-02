@@ -16787,9 +16787,11 @@ out string db_type);
                     if (level == null)
                         return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
                 }
-
-                if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
-                    return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+                else
+                {
+                    if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
+                        return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+                }
             }
 
             return null;
