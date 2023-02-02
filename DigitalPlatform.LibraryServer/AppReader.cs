@@ -8298,6 +8298,17 @@ out strError);
             //      ""      找到了前缀，并且值部分为空
             //      其他     返回值部分
             var level = StringUtil.GetParameterByPrefix(rights, prefix);
+            
+            // 2023/2/2
+            // setreaderinfo 如果找不到，再尝试找 writrecord
+            if (prefix == "setreaderinfo" && level == null)
+            {
+                if (StringUtil.IsInList("writerecord", rights) == true)
+                    level = ""; // 当作等同于 setreaderinfo: 继续向后处理
+                else
+                    return null;
+            }
+            
             if (level == null)
                 return level;
 
