@@ -15757,8 +15757,11 @@ strLibraryCode);    // 读者所在的馆代码
             bool is_object_path = IsRestObjectPath(strPath);
 
             // 检查当前账户是否具有 setxxxinfo 或 writerecord 权限
-            var error = CheckDbSetRights(strRights,
+            var error = CheckDbSetRights(
+                sessioninfo,
+                strRights,
 strDbName,
+strAction,
 out string db_type);
             if (error != null)
             {
@@ -15903,12 +15906,15 @@ out string db_type);
                     // 只到记录ID这一层
                     if (strPath == "")
                     {
+                        /*
                         // 要具备 setreaderinfo 或 writerecord 权限
                         if (StringUtil.IsInList("setreaderinfo,writerecord", strRights) == false)
                         {
                             strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 setreaderinfo 或 writerecord 权限";
                             return 0;
                         }
+                        */
+                        // 前面 CheckDbSetRights() 已经检查过了
                         return 1;
                     }
 
@@ -16771,6 +16777,17 @@ out string db_type);
         NORMAL_RIGHTS:
             if (sessioninfo != null)
             {
+                if (db_type == "reader")
+                {
+                    // return:
+                    //      null    没有找到 getreaderinfo 前缀
+                    //      ""      找到了前缀，并且 level 部分为空
+                    //      其他     返回 level 部分
+                    var level = GetReaderInfoLevel(right, sessioninfo.RightsOrigin);
+                    if (level == null)
+                        return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
+                }
+
                 if (StringUtil.IsInList(right, sessioninfo.RightsOrigin) == false)
                     return $"用户 {sessioninfo.UserID} 获取数据库 {strDbName} 内资源被拒绝。不具备 {right} 权限。";
             }
@@ -16997,8 +17014,11 @@ out string db_type);
         }
 
         // 检查 setxxxinfo 权限
-        string CheckDbSetRights(string rights,
+        string CheckDbSetRights(
+            SessionInfo sessioninfo,
+            string rights,
     string strDbName,
+    string strAction,
     out string db_type)
         {
             db_type = "";
@@ -17008,6 +17028,7 @@ out string db_type);
             {
                 db_type = "biblio";
                 right = "setbiblioinfo";
+                // TODO: 注意，当前账户可能用存取定义来决定写入权限。这里可以返回一些线索，供后面判断使用。可以简单判断当前账户是否具备存取定义，而不一定细判断 getbiblioinfo=* 权限是否具备
             }
             else if (this.IsReaderDbName(strDbName) == true)
             {
@@ -17047,9 +17068,50 @@ out string db_type);
             else
                 return $"数据库 {strDbName} 内资源不允许写入";
 
-            if (StringUtil.IsInList(right + ",writerecord", rights) == false)
-                return $"写入数据库 {strDbName} 内资源被拒绝。当前用户不具备 {right} 或 writerecord 权限。";
+            if (db_type == "reader")
+            {
+                // return:
+                //      null    没有找到 getreaderinfo 前缀
+                //      ""      找到了前缀，并且 level 部分为空
+                //      其他     返回 level 部分
+                var level = GetReaderInfoLevel(right, rights);
+                if (level == null && StringUtil.IsInList("writerecord", rights) == false)
+                    return $"写入数据库 {strDbName} 内资源被拒绝。当前用户不具备 setreaderinfo 或 writerecord 权限。";
+            }
+            else if (db_type == "biblio" || db_type == "authority")
+            {
+                // 书目库(规范库)，先判断存取定义
+                if (String.IsNullOrEmpty(sessioninfo.Access) == false)
+                {
+                    // 检查当前用户是否具备 SetBiblioInfo() API 的存取定义权限
+                    // parameters:
+                    //      check_normal_right 是否要连带一起检查普通权限？如果不连带，则本函数可能返回 "normal"，意思是需要追加检查一下普通权限
+                    // return:
+                    //      "normal"    (存取定义已经满足要求了，但)还需要进一步检查普通权限
+                    //      null    具备权限
+                    //      其它      不具备权限。文字是报错信息
+                    var error = CheckSetBiblioInfoAccess(
+                        sessioninfo,
+                        db_type,
+                        strDbName,
+                        strAction,
+                        false,
+                        out _,
+                        out _);
+                    if (error == "normal")
+                        goto NORMAL_RIGHTS;
+                    return error;
+                }
 
+            NORMAL_RIGHTS:
+                if (StringUtil.IsInList(right + ",writerecord", rights) == false)
+                    return $"写入数据库 {strDbName} 内资源被拒绝。当前用户不具备 {right} 或 writerecord 权限。";
+            }
+            else
+            {
+                if (StringUtil.IsInList(right + ",writerecord", rights) == false)
+                    return $"写入数据库 {strDbName} 内资源被拒绝。当前用户不具备 {right} 或 writerecord 权限。";
+            }
             return null;
         }
 

@@ -654,6 +654,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有实质性修改
         //      1   发生了实质性修改
         int BuildNewReaderRecord(XmlDocument domNewRec,
+            string[] full_element_names,    // 2023/2/2 新增
             string[] important_fields,
             string rights,
             out bool useClientRefID,
@@ -841,7 +842,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     StringBuilder comment = new StringBuilder();
                     {
-                        var element_names = GetElementNames(write_level);
+                        var element_names = GetElementNames(write_level, full_element_names/*2023/2/2*/);
                         Append(comment, "(写集合:", element_names.ToArray(), ")");
 
                         element_names = new List<string>(element_names.Except(remove_element_names));
@@ -1038,7 +1039,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 2021/7/16
                         // 对于 setreaderinfo:n 权限，要检查是否包含 state 元素
-                        var names = GetElementNames(write_level);
+                        var names = GetElementNames(write_level, element_names/*2023/2/2*/);
                         if (names.Contains("state") == false)
                         {
                             result.Value = -1;
@@ -1900,6 +1901,7 @@ out List<string> send_skips);
                         //      0   没有实质性修改
                         //      1   发生了实质性修改
                         nRet = BuildNewReaderRecord(domNewRec,
+                            element_names,
                             string.IsNullOrEmpty(important_fields) ? null : important_fields.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
                             sessioninfo.RightsOrigin,
                             out bool useClientRefID,
@@ -2252,7 +2254,7 @@ strLibraryCode);    // 读者所在的馆代码
                         // 微调一下，让 element_names 中增加包含 libraryCode 和 oi 这两个原本是服务器自动维护的元素
                         element_names = StringUtil.Append(_reader_element_names, new string[] { "libraryCode", "oi" });
 
-                        var names = GetElementNames(write_level);
+                        var names = GetElementNames(write_level, element_names/*2023/2/2*/);
                         element_names = element_names.Intersect(names).ToArray();
                     }
 
@@ -2404,8 +2406,8 @@ strLibraryCode);    // 读者所在的馆代码
             if (string.IsNullOrEmpty(write_level) == false
                 && string.IsNullOrEmpty(read_level) == false)
             {
-                var write_names = GetElementNames(write_level);
-                var read_names = GetElementNames(read_level);
+                var write_names = GetElementNames(write_level, full_element_names/*2023/2/2*/);
+                var read_names = GetElementNames(read_level, full_element_names/*2023/2/2*/);
                 var overflow_names = write_names.Except(read_names).ToArray();
                 if (overflow_names.Count() > 0)
                 {
@@ -2419,7 +2421,7 @@ strLibraryCode);    // 读者所在的馆代码
     && string.IsNullOrEmpty(read_level) == false)
             {
                 var write_names = GetFullElementNames(full_element_names);
-                var read_names = GetElementNames(read_level);
+                var read_names = GetElementNames(read_level, full_element_names/*2023/2/2*/);
                 var overflow_names = write_names.Except(read_names).ToArray();
                 if (overflow_names.Count() > 0)
                 {
@@ -6566,7 +6568,9 @@ out strError);
                             struct_dom.DocumentElement.SetAttribute("visibleFields", "[none]");
                         else if (string.IsNullOrEmpty(read_level) == false)
                         {
-                            var names = GetElementNames(read_level);
+                            string[] full_element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
+
+                            var names = GetElementNames(read_level, full_element_names/*2023/2/2*/);
                             if (base_names != null)
                                 names = new List<string>(names.Intersect(base_names));
                             struct_dom.DocumentElement.SetAttribute("visibleFields", StringUtil.MakePathList(names));
@@ -6593,7 +6597,9 @@ out strError);
                             struct_dom.DocumentElement.SetAttribute("writeableFields", "[none]");
                         else if (string.IsNullOrEmpty(write_level) == false)
                         {
-                            var names = GetElementNames(write_level);
+                            string[] full_element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
+
+                            var names = GetElementNames(write_level, full_element_names/*2023/2/2*/);
                             if (base_names != null)
                                 names = new List<string>(names.Intersect(base_names));
                             struct_dom.DocumentElement.SetAttribute("writeableFields", StringUtil.MakePathList(names));
@@ -7997,7 +8003,7 @@ out strError);
 第八级：+ 租金押金字段 
 第九级：+ 指纹，掌纹，人脸特征
              * */
-            var names = GetElementNames(level);
+            var names = GetElementNames(level); // 这里 level 里面不会出现空表示全集合的情况，因为以前在前面分流了
 
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("*");
             foreach (XmlElement element in nodes)
@@ -8113,7 +8119,7 @@ out strError);
             if (string.IsNullOrEmpty(name_param))
             {
                 if (full_names_empty)
-                    throw new ArgumentException("当 full_names 为空时，GetElementNames() 不允许使用空字符串列表");
+                    throw new ArgumentException("当 full_element_names 为空时，GetElementNames() 不允许使用空字符串列表");
             }
 
             // 2023/2/1

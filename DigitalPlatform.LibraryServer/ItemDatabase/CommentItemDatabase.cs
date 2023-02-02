@@ -42,6 +42,11 @@ namespace DigitalPlatform.LibraryServer
                 "content", // 文字内容
         };
 
+        /* 2023/2/2 注:
+         * 注意 reader 账户需要具有 writecommentobject 权限，读者在 OPAC 界面上才能顺利上传和修改凭著记录的图片附件
+         * 
+         * */
+
         // DoOperChange()和DoOperMove()的下级函数
         // 合并新旧记录
         // return:
@@ -57,6 +62,26 @@ namespace DigitalPlatform.LibraryServer
         {
             strMergedXml = "";
             strError = "";
+
+            string strWarning = "";
+
+            bool bChangePartDeniedParam = false;
+            // return:
+            //      -1  error
+            //      0   new record not changed
+            //      1   new record changed
+            int nRet = MergeOldNewRec(
+                "comment",
+                sessioninfo.RightsOrigin,
+                domExist,
+                domNew,
+                ref bChangePartDeniedParam,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (bChangePartDeniedParam)
+                strWarning = strError;
 
             string[] element_table = core_comment_element_names;
 
@@ -110,6 +135,7 @@ namespace DigitalPlatform.LibraryServer
                     element_table[i], strTextNew);
             }
 
+#if OLDCODE
             // 清除以前的<dprms:file>元素
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -127,6 +153,7 @@ namespace DigitalPlatform.LibraryServer
                 frag.InnerXml = node.OuterXml;
                 domExist.DocumentElement.AppendChild(frag);
             }
+#endif
 
             /*
             // 2012/10/3
@@ -137,6 +164,13 @@ namespace DigitalPlatform.LibraryServer
              * */
             // 修改者不能改变最初的馆代码
             strMergedXml = domExist.OuterXml;
+
+            if (string.IsNullOrEmpty(strWarning) == false)
+            {
+                strError = strWarning;
+                return 1;
+            }
+
             return 0;
         }
 
@@ -687,6 +721,11 @@ out string strError)
         }
 
         // 构造出适合保存的新事项记录
+        // return:
+        //      -1  出错
+        //      0   正确
+        //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中
         public override int BuildNewItemRecord(
             SessionInfo sessioninfo,
             bool bForce,
@@ -698,18 +737,40 @@ out string strError)
             strError = "";
             strXml = "";
 
-            XmlDocument dom = new XmlDocument();
+            int nPartialRet = 0;
+            string warning = "";
 
+            // return:
+            //      -1  出错
+            //      0   正确
+            //      1   有部分修改没有兑现。说明在strError中
+            //      2   全部修改都没有兑现。说明在strError中
+            int nRet = base.BuildNewItemRecord(sessioninfo,
+            bForce,
+            strBiblioRecId,
+            strOriginXml,
+            out strXml,
+            out strError);
+            if (nRet == -1)
+                return -1;
+            nPartialRet = nRet;
+            if (nRet == 1 || nRet == 2)
+            {
+                warning = strError;
+            }
+
+            XmlDocument dom = new XmlDocument();
             try
             {
-                dom.LoadXml(strOriginXml);
+                dom.LoadXml(strXml);
             }
             catch (Exception ex)
             {
-                strError = "装载strOriginXml到DOM时出错: " + ex.Message;
+                strError = "装载 strXml 到DOM时出错: " + ex.Message;
                 return -1;
             }
 
+            /*
             // 如果 ID 为非空，才会主动修改/写入 parent 元素
             if (string.IsNullOrEmpty(strBiblioRecId) == false)
             {
@@ -718,6 +779,7 @@ out string strError)
                 "parent",
                 strBiblioRecId);
             }
+            */
 
             // 2012/10/3
             // 当前用户所管辖的馆代码
@@ -725,11 +787,15 @@ out string strError)
                 "libraryCode",
                 sessioninfo.LibraryCodeList);
 
+            /*
             // 2017/1/13
             DomUtil.RemoveEmptyElements(dom.DocumentElement);
+            */
 
             strXml = dom.OuterXml;
-            return 0;
+            if (string.IsNullOrEmpty(warning) == false)
+                strError = warning;
+            return nPartialRet;
         }
 
         // 获得事项数据库名

@@ -228,7 +228,14 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      element_names   要害元素名列表。如果为 null，表示会用到 core_entity_element_names
         //      check_outof_elements    是否检查并报错超范围的 XML 元素。
-        int MergeTwoEntityXml(XmlDocument domExist,
+        // return:
+        //      -1  出错
+        //      0   正确
+        //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+        int MergeTwoEntityXml(
+            SessionInfo sessioninfo,
+            XmlDocument domExist,
             XmlDocument domNew,
             string[] element_names,
             bool check_outof_elements,
@@ -237,6 +244,31 @@ namespace DigitalPlatform.LibraryServer
         {
             strMergedXml = "";
             strError = "";
+            int nRet = 0;
+
+            string strWarning = "";
+
+            bool bChangePartDeniedParam = false;
+
+            if (sessioninfo != null)
+            {
+                // return:
+                //      -1  error
+                //      0   new record not changed
+                //      1   new record changed
+                nRet = ItemDatabase.MergeOldNewRec(
+                    "item",
+                    sessioninfo.RightsOrigin,
+                    domExist,
+                    domNew,
+                    ref bChangePartDeniedParam,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (bChangePartDeniedParam)
+                    strWarning = strError;
+            }
 
             if (element_names == null)
             {
@@ -251,7 +283,7 @@ namespace DigitalPlatform.LibraryServer
             // 检查提交保存的新记录中是否有超出定义范围的元素，如果有则报错返回
             if (check_outof_elements)
             {
-                int nRet = CheckOutofRangeElements(domNew, out strError);
+                nRet = CheckOutofRangeElements(domNew, out strError);
                 if (nRet == -1)
                     return -1;
             }
@@ -284,25 +316,36 @@ namespace DigitalPlatform.LibraryServer
                     name, strTextNew);
             }
 
-            // 清除以前的<dprms:file>元素
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
-            nsmgr.AddNamespace("dprms", DpNs.dprms);
+            // 日志恢复的时候会使用旧代码，效果是直接使用新记录中的 dprms:file 元素
+            if (sessioninfo == null)
+            {
+                // 清除以前的<dprms:file>元素
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+                nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-            XmlNodeList nodes = domExist.DocumentElement.SelectNodes("//dprms:file", nsmgr);
-            foreach (XmlNode node in nodes)
-            {
-                node.ParentNode.RemoveChild(node);
-            }
-            // 兑现新记录中的 dprms:file 元素
-            nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
-            foreach (XmlElement node in nodes)
-            {
-                XmlDocumentFragment frag = domExist.CreateDocumentFragment();
-                frag.InnerXml = node.OuterXml;
-                domExist.DocumentElement.AppendChild(frag);
+                XmlNodeList nodes = domExist.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+                foreach (XmlNode node in nodes)
+                {
+                    node.ParentNode.RemoveChild(node);
+                }
+                // 兑现新记录中的 dprms:file 元素
+                nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+                foreach (XmlElement node in nodes)
+                {
+                    XmlDocumentFragment frag = domExist.CreateDocumentFragment();
+                    frag.InnerXml = node.OuterXml;
+                    domExist.DocumentElement.AppendChild(frag);
+                }
             }
 
             strMergedXml = domExist.OuterXml;
+
+            if (string.IsNullOrEmpty(strWarning) == false)
+            {
+                strError = strWarning;
+                return 1;
+            }
+
             return 0;
         }
 
@@ -3027,7 +3070,14 @@ out strError);
 
             var entity = new EntityInfo();
             entity.Action = strAction;
-            entity.NewRecPath = strRecPath;
+            if (strAction == "delete")
+            {
+                entity.OldRecPath = strRecPath;
+            }
+            else
+            {
+                entity.NewRecPath = strRecPath;
+            }
             entity.NewRecord = strXml;
             if (strAction == "change" || strAction == "delete")
                 entity.OldTimestamp = baTimestamp;
@@ -3094,10 +3144,21 @@ out strError);
                     // string name = error.ErrorCode.ToString();
                     // result.ErrorCode = (ErrorCode)Enum.Parse(typeof(ErrorCode), name);
                     result.ErrorCode = LibraryServerResult.FromErrorValue(error.ErrorCode);
-                    result.Value = -1;
+                    // “部分兑现保存”，不被当作报错
+                    if (error.ErrorCode == ErrorCodeValue.PartialDenied)
+                        result.Value = 0;
+                    else
+                        result.Value = -1;
                     result.ErrorInfo = error.ErrorInfo;
                     if (error.ErrorCode == ErrorCodeValue.TimestampMismatch)
-                        baOutputTimestamp = error.OldTimestamp;
+                    {
+                        if (strAction == "delete")
+                            baOutputTimestamp = error.NewTimestamp;
+                        else
+                            baOutputTimestamp = error.OldTimestamp;
+                    }
+                    else
+                        baOutputTimestamp = error.NewTimestamp;
                     strOutputRecPath = error.NewRecPath;
                     return result;
                 }
@@ -3891,6 +3952,8 @@ out strError);
                             }
                         }
 
+                        string partial_warning = "";
+
                         // 构造出适合保存的新册记录
                         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
                         // TODO: 如果strNewXml中出现了流通字段，是否需要警告前端，甚至直接报错？因为这样可以引起前端的注意，避免前端以为自己通过新创建实体记录加借还信息“成功”了。
@@ -3899,7 +3962,14 @@ out strError);
                         XmlDocument new_xml_dom = null;
                         if (bForce == false)
                         {
-                            nRet = BuildNewEntityRecord(info.NewRecord,
+                            // return:
+                            //      -1  出错
+                            //      0   正确
+                            //      1   有部分修改没有兑现。说明在strError中
+                            //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                            nRet = BuildNewEntityRecord(
+                                sessioninfo,
+                                info.NewRecord,
                                 out string strNewXml,
                                 out strError);
                             if (nRet == -1)
@@ -3912,6 +3982,8 @@ out strError);
                                 ErrorInfos.Add(error);
                                 continue;
                             }
+                            if (nRet == 1 || nRet == 2)
+                                partial_warning = strError;
 
                             // 2010/4/8
                             new_xml_dom = new XmlDocument();
@@ -4128,8 +4200,17 @@ out strError);
                                 error.NewRecord = new_xml_dom.DocumentElement.OuterXml; // strNewXml;    // 所真正保存的记录，可能稍有变化, 因此需要返回给前端
                                 error.NewTimestamp = output_timestamp;
 
-                                error.ErrorInfo = "保存新记录的操作成功。NewTimeStamp中返回了新的时间戳, RecPath中返回了实际存入的记录路径。";
-                                error.ErrorCode = ErrorCodeValue.NoError;
+                                // 2023/2/2
+                                if (string.IsNullOrEmpty(partial_warning) == false)
+                                {
+                                    error.ErrorInfo = partial_warning;
+                                    error.ErrorCode = ErrorCodeValue.PartialDenied;
+                                }
+                                else
+                                {
+                                    error.ErrorInfo = "保存新记录的操作成功。NewTimeStamp中返回了新的时间戳, RecPath中返回了实际存入的记录路径。";
+                                    error.ErrorCode = ErrorCodeValue.NoError;
+                                }
                                 ErrorInfos.Add(error);
                             }
                         }
@@ -4272,7 +4353,7 @@ out strError);
             return result;
         }
 
-        #region SetEntities() 下级函数
+#region SetEntities() 下级函数
 
         // 为 state 元素增加一个子串
         static void ModifyState(XmlDocument dom, string one)
@@ -4870,7 +4951,14 @@ out strError);
         // 构造出适合保存的新册记录
         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
         // parameters:
-        int BuildNewEntityRecord(string strOriginXml,
+        // return:
+        //      -1  出错
+        //      0   正确
+        //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+        int BuildNewEntityRecord(
+            SessionInfo sessioninfo,
+            string strOriginXml,
             out string strXml,
             out string strError)
         {
@@ -4923,9 +5011,83 @@ out strError);
 
             // 2017/1/13
             DomUtil.RemoveEmptyElements(dom.DocumentElement);
-            strXml = dom.OuterXml;
+            // strXml = dom.OuterXml;
+
+            {
+                // 2023/2/2
+                XmlDocument domExist = new XmlDocument();
+                domExist.LoadXml("<root />");
+                // return:
+                //      -1  出错
+                //      0   正确
+                //      1   有部分修改没有兑现。说明在strError中
+                //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                nRet = MergeTwoItemXml(
+                    sessioninfo,
+                    domExist,
+                    dom,
+                    out strXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1 || nRet == 2)
+                {
+                    return nRet;
+                }
+            }
+
+
             return 0;
         }
+
+        // DoOperChange()和DoOperMove()的下级函数
+        // 合并新旧记录
+        // return:
+        //      -1  出错
+        //      0   正确
+        //      1   有部分修改没有兑现。说明在strError中
+        public static int MergeTwoItemXml(
+            SessionInfo sessioninfo,
+            XmlDocument domExist,
+            XmlDocument domNew,
+            out string strMergedXml,
+            out string strError)
+        {
+            strMergedXml = "";
+            strError = "";
+
+            string strWarning = "";
+
+            bool bChangePartDeniedParam = false;
+            // return:
+            //      -1  error
+            //      0   new record not changed
+            //      1   new record changed
+            int nRet = ItemDatabase.MergeOldNewRec(
+                "item",
+                sessioninfo.RightsOrigin,
+                domExist,
+                domNew,
+                ref bChangePartDeniedParam,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (bChangePartDeniedParam)
+                strWarning = strError;
+
+            strMergedXml = domNew.OuterXml;
+
+            if (string.IsNullOrEmpty(strWarning) == false)
+            {
+                strError = strWarning;
+                return 1;
+            }
+
+            return 0;
+        }
+
+
 
         // 删除册记录的操作
         int DoEntityOperDelete(
@@ -5123,6 +5285,37 @@ out strError);
                 {
                     strError = "拟删除的册记录 '" + info.NewRecPath + "' 中包含有流通信息(" + strDetail + ")，不能删除。";
                     goto ERROR1;
+                }
+            }
+
+            if (bForce == false)
+            {
+                // 2023/2/2
+                XmlDocument domNew = new XmlDocument();
+                domNew.LoadXml("<root />");
+                // return:
+                //      -1  出错
+                //      0   正确
+                //      1   有部分修改没有兑现。说明在strError中
+                //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                nRet = MergeTwoItemXml(
+                    sessioninfo,
+                    domExist,
+                    domNew,
+                    out string _,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1 || nRet == 2)
+                {
+                    error = new EntityInfo(info);
+                    if (nRet == 1)
+                        error.ErrorInfo = $"删除操作被拒绝。因部分字段不具备删除权限: {strError}";
+                    else
+                        error.ErrorInfo = $"删除操作被拒绝。因全部字段不具备删除权限: {strError}";
+                    error.ErrorCode = ErrorCodeValue.PartialDenied;
+                    ErrorInfos.Add(error);
+                    return -1;
                 }
             }
 
@@ -5813,10 +6006,47 @@ out strError);
                     return -1;
             }
 
+            string part_type = "";
+            string strWarning = "";
+
             // 合并新旧记录
             // string strNewXml = "";
             if (bForce == false)
             {
+                // 2020/10/12
+                string[] elements = null;
+                if (strAction == "transfer")
+                    elements = transfer_entity_element_names;
+                else if (strAction == "setuid")
+                    elements = setuid_entity_element_names;
+
+                // return:
+                //      -1  出错
+                //      0   正确
+                //      1   有部分修改没有兑现。说明在strError中
+                //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                nRet = MergeTwoEntityXml(
+                    sessioninfo,
+                    domExist,
+                    domNew,
+                    elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
+                    StringUtil.IsInList("outofrangeAsError", strStyle),
+                    out string strNewXml,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1 || nRet == 2)
+                {
+                    if (nRet == 1)
+                        part_type = "部分";
+                    else
+                        part_type = "全部都没有";
+                    strWarning = strError;
+                }
+
+                domNew = new XmlDocument();
+                domNew.LoadXml(strNewXml);
+
                 if (bNoOperations == false)
                 {
                     // 2010/4/8
@@ -5829,25 +6059,6 @@ out strError);
                     if (nRet == -1)
                         goto ERROR1;
                 }
-
-                // 2020/10/12
-                string[] elements = null;
-                if (strAction == "transfer")
-                    elements = transfer_entity_element_names;
-                else if (strAction == "setuid")
-                    elements = setuid_entity_element_names;
-
-                nRet = MergeTwoEntityXml(domExist,
-                    domNew,
-                    elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
-                    StringUtil.IsInList("outofrangeAsError", strStyle),
-                    out string strNewXml,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                domNew = new XmlDocument();
-                domNew.LoadXml(strNewXml);
             }
             else
             {
@@ -5999,7 +6210,13 @@ out strError);
                 error.NewRecord = /*strNewXml*/domNew.DocumentElement.OuterXml;
 
                 error.ErrorInfo = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
-                error.ErrorCode = ErrorCodeValue.NoError;
+                if (string.IsNullOrEmpty(strWarning) == false)
+                {
+                    error.ErrorInfo = "保存操作" + part_type + "兑现。" + strWarning;
+                    error.ErrorCode = ErrorCodeValue.PartialDenied;
+                }
+                else
+                    error.ErrorCode = ErrorCodeValue.NoError;
                 ErrorInfos.Add(error);
             }
 
@@ -6470,8 +6687,17 @@ out strError);
                     goto ERROR1;
             }
 
+            string part_type = "";
+            string strWarning = "";
             // 合并新旧记录
-            nRet = MergeTwoEntityXml(domSourceExist,
+            // return:
+            //      -1  出错
+            //      0   正确
+            //      1   有部分修改没有兑现。说明在strError中
+            //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+            nRet = MergeTwoEntityXml(
+                sessioninfo,
+                domSourceExist,
                 domNew,
                 null,
                 StringUtil.IsInList("outofrangeAsError", strStyle),
@@ -6479,6 +6705,14 @@ out strError);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+            if (nRet == 1 || nRet == 2)
+            {
+                if (nRet == 1)
+                    part_type = "部分";
+                else
+                    part_type = "全部都没有";
+                strWarning = strError;
+            }
 
             // 只有order权限(并且没有 setiteminfo setentities writerecord)的情况
             if (StringUtil.IsInList("setiteminfo,setentities,writerecord", sessioninfo.RightsOrigin) == false
@@ -6682,7 +6916,13 @@ out strError);
                 error.NewRecord = strNewXml;
 
                 error.ErrorInfo = "移动操作成功。NewRecPath中返回了实际保存的路径, NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的源记录稍有差异)。";
-                error.ErrorCode = ErrorCodeValue.NoError;
+                if (string.IsNullOrEmpty(strWarning) == false)
+                {
+                    error.ErrorInfo = "移动操作" + part_type + "兑现。" + strWarning;
+                    error.ErrorCode = ErrorCodeValue.PartialDenied;
+                }
+                else
+                    error.ErrorCode = ErrorCodeValue.NoError;
                 ErrorInfos.Add(error);
             }
 
@@ -6710,7 +6950,7 @@ out strError);
             return true;
         }
 
-        #endregion
+#endregion
 
 #if NO
         // 根据册条码号列表，得到记录路径列表

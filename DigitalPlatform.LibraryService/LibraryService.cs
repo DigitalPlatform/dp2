@@ -5218,8 +5218,8 @@ out timestamp);
                 record.RecordBody.Xml = null;
             // 2023/1/31
             // 注: RecordBody 里面可能有 Meatdata 但 Xml 为空，针对 Path 指向对象记录的情况。也就是说 RecordBody 不一定是因为要返回 Xml 而存在，也完全可能为返回 Metadata 而存在。所以，当需要清除 Xml 内容的时候，不要去清除 RecordBody，而是直接清除 RecordBody.Xml 即可
-        
-        
+
+
             // 2023/1/31
             // 清除非报错状态的 Result 成员，减小通讯包体积
             if (record.RecordBody != null && record.RecordBody.Result != null)
@@ -15519,14 +15519,17 @@ out strError);
                 string strError = "";
                 string strLibraryCode = ""; // 实际写入操作的读者库馆代码
 
+                bool delete = (StringUtil.IsInList("delete", strStyle) == true);
+
                 string strDbName = ResPath.GetDbName(strResPath);
                 {
-                    string strAction = StringUtil.IsInList("delete", strStyle) ? "delete" : "change";
+                    string strAction = delete ? "delete" : "change";
                     // 2023/1/31
                     // 路径中的 ID 为问号代表这是一个 "new" 动作。但后继分片请求是否需要检查权限？
                     if (app.IsBiblioDbName(strDbName)
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath, out _, out string id) == true
-                        && LibraryApplication.IsId(id))
+                        && LibraryApplication.IsId(id)
+                        && delete == false)
                     {
                         strAction = "new";
                     }
@@ -15620,7 +15623,7 @@ out strError);
 
                     long lRet = 0;
                     // 2015/9/3 新增删除资源的功能
-                    if (StringUtil.IsInList("delete", strStyle) == true)
+                    if (delete)
                     {
                         if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
                         {
@@ -15636,6 +15639,29 @@ out strError);
                                 strStyle,   // 2017/9/16 增加
                                 out baOutputTimestamp,
                                 out strError);
+                        }
+                        else if (app.IsItemDbName(strDbName)
+                        || app.IsOrderDbName(strDbName)
+                        || app.IsIssueDbName(strDbName)
+                        || app.IsCommentDbName(strDbName))
+                        {
+                            string db_type = app.GetDbType(strDbName, out _);
+
+                            var ret = app.SetItemInfo(
+                                sessioninfo,
+                                db_type,
+                                "delete",
+                                strResPath,
+                                "",
+                                baInputTimestamp,
+                                "",
+                                out strOutputResPath,
+                                out baOutputTimestamp);
+                            if (ret.Value == -1)
+                                return ret;
+                            lRet = 0;
+                            strError = ret.ErrorInfo;
+                            result.ErrorCode = ret.ErrorCode;
                         }
                         else
                         {

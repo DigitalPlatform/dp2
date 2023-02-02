@@ -90,6 +90,26 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            string strWarning = "";
+
+            bool bChangePartDeniedParam = false;
+            // return:
+            //      -1  error
+            //      0   new record not changed
+            //      1   new record changed
+            nRet = MergeOldNewRec(
+                "issue",
+                sessioninfo.RightsOrigin,
+                domExist,
+                domNew,
+                ref bChangePartDeniedParam,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (bChangePartDeniedParam)
+                strWarning = strError;
+
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
 
             /*
@@ -293,6 +313,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
         END1:
+#if OLDCODE
             // 清除以前的<dprms:file>元素
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -310,8 +331,16 @@ namespace DigitalPlatform.LibraryServer
                 frag.InnerXml = node.OuterXml;
                 domExist.DocumentElement.AppendChild(frag);
             }
+#endif
 
             strMergedXml = domExist.OuterXml;
+
+            if (string.IsNullOrEmpty(strWarning) == false)
+            {
+                strError = strWarning;
+                return 1;
+            }
+
             return 0;
         }
 
@@ -1069,7 +1098,13 @@ out string strError)
             return 1;
         }
 
+#if REMOVED
         // 构造出适合保存的新事项记录
+        // return:
+        //      -1  出错
+        //      0   正确
+        //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中
         public override int BuildNewItemRecord(
             SessionInfo sessioninfo,
             bool bForce,
@@ -1108,7 +1143,7 @@ out string strError)
             strXml = dom.OuterXml;
             return 0;
         }
-
+#endif
 
         // 获得事项数据库名
         // return:

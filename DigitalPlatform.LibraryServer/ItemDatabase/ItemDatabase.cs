@@ -367,6 +367,141 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
+        // 合并新旧记录
+        // parameters:
+        //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+        //      domOld  旧记录。
+        //      domNew  新记录。函数执行后其内容会被改变
+        // return:
+        //      -1  error
+        //      0   new record not changed
+        //      1   new record changed
+        public static int MergeOldNewRec(
+            string db_type,
+    string strRights,
+    //string strOldBiblioXml,
+    //ref string strNewBiblioXml,
+    XmlDocument domOld,
+    XmlDocument domNew,
+    ref bool bChangePartDeniedParam,
+    out string strError)
+        {
+            strError = "";
+            string strNewSave = domNew.OuterXml;
+
+            string strComment = "";
+            bool bChangePartDenied = false;
+
+            try
+            {
+                /*
+                XmlDocument domNew = new XmlDocument();
+                if (String.IsNullOrEmpty(strNewBiblioXml) == true)
+                    strNewBiblioXml = "<root />";
+                try
+                {
+                    domNew.LoadXml(strNewBiblioXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "strNewBiblioXml装入XMLDOM时出错: " + ex.Message;
+                    return -1;
+                }
+
+                XmlDocument domOld = new XmlDocument();
+                if (String.IsNullOrEmpty(strOldBiblioXml) == true
+                    || (string.IsNullOrEmpty(strOldBiblioXml) == false && strOldBiblioXml.Length == 1))
+                    strOldBiblioXml = "<root />";
+                try
+                {
+                    domOld.LoadXml(strOldBiblioXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "strOldBiblioXml装入XMLDOM时出错: " + ex.Message;
+                    return -1;
+                }
+                */
+
+                // 确保<operations>元素被服务器彻底控制
+                {
+                    // 删除new中的全部<operations>元素，然后将old记录中的全部<operations>元素插入到new记录中
+
+                    // 删除new中的全部<operations>元素
+                    XmlNodeList nodes = domNew.DocumentElement.SelectNodes("//operations");
+                    for (int i = 0; i < nodes.Count; i++)
+                    {
+                        XmlNode node = nodes[i];
+                        if (node.ParentNode != null)
+                            node.ParentNode.RemoveChild(node);
+                    }
+
+                    // 然后将old记录中的全部<operations>元素插入到new记录中
+                    nodes = domOld.DocumentElement.SelectNodes("//operations");
+                    for (int i = 0; i < nodes.Count; i++)
+                    {
+                        XmlNode node = nodes[i];
+
+                        XmlDocumentFragment fragment = domNew.CreateDocumentFragment();
+                        fragment.InnerXml = node.OuterXml;
+
+                        domNew.DocumentElement.AppendChild(fragment);
+                    }
+                }
+
+                // 如果不具备 writebiblioobject 和 writeobject 权限，则要屏蔽前端发来的 XML 记录中的 dprms:file 元素
+                if (StringUtil.IsInList($"write{db_type}object,writeobject", strRights) == false)
+                {
+                    string strRequstFragments = LibraryApplication.GetAllFileElements(domNew);
+
+                    LibraryApplication.MergeDprmsFile(ref domNew, domOld);
+
+                    string strAcceptedFragments = LibraryApplication.GetAllFileElements(domNew);
+                    if (strRequstFragments != strAcceptedFragments)
+                    {
+                        // 如果前端提交的关于 dprms:file 元素的修改被拒绝，则要通过设置 bChangePartDenied = true 来反映这种情况
+                        bChangePartDenied = true;
+                        if (string.IsNullOrEmpty(strComment) == false)
+                            strComment += "; ";
+                        if (string.IsNullOrEmpty(strAcceptedFragments) && string.IsNullOrEmpty(strRequstFragments) == false)
+                            strComment += $"因不具备 write{db_type}object 或 writeobject 权限, 创建 dprms:file (数字对象)元素被拒绝";
+                        else
+                            strComment += $"因不具备 write{db_type}object 或 writeobject 权限, 修改 dprms:file (数字对象)元素被拒绝";
+                    }
+                }
+                else
+                {
+                    // 此时 StringUtil.IsInList("writebiblioobject,writeobject", strRights) == true
+                    // 意味着直接采纳前端发来的 XML 记录中的 dprms:file 元素，写入记录
+                    // 但需要注意检查账户权限，读的字段范围是否小于写的字段范围？如果小了，则读和写往返一轮会丢失记录中原有的 dprms:file 元素。这种情况需要直接报错
+                    if (StringUtil.IsInList($"get{db_type}object,getobject", strRights) == false)
+                    {
+                        strError = $"操作被放弃。当前用户的权限定义不正确：具有 write{db_type}object(或writeobject) 但不具有 get{db_type}object(或getobject) 权限(即写范围大于读范围)，这样会造成数据库内记录中原有的 dprms:file 元素丢失。请修改当前账户权限再重新操作";
+                        return -1;
+                    }
+
+                    // TODO: 是否仅当 domOld 里面确实存在 dprms:file 元素的时候才这样报错？
+                    // 不过这样有可能会让账户权限账户定义不正确的情况长期隐藏(并在比较尴尬的时候暴露出来)，不利于系统维护
+                }
+
+                var strNewBiblioXml = domNew.OuterXml;
+
+                if (strNewSave == strNewBiblioXml)
+                    return 0;
+
+                return 1;
+            }
+            finally
+            {
+                if (bChangePartDenied == true && string.IsNullOrEmpty(strComment) == false)
+                    strError += strComment;
+
+                if (bChangePartDenied == true)
+                    bChangePartDeniedParam = true;
+            }
+        }
+
+
         // 是否允许创建新记录?
         // parameters:
         // return:
@@ -407,6 +542,11 @@ namespace DigitalPlatform.LibraryServer
         // 构造出适合保存的新事项记录
         // parameters:
         //      bForce  是否为强制保存?
+        // return:
+        //      -1  出错
+        //      0   正确
+        //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中
         public virtual int BuildNewItemRecord(
             SessionInfo sessioninfo,
             bool bForce,
@@ -415,10 +555,63 @@ namespace DigitalPlatform.LibraryServer
             out string strXml,
             out string strError)
         {
+            /*
             strXml = "";
             strError = "ItemDatabase::BuildNewItemRecord() 尚未实现";
 
             return -1;
+            */
+
+            strError = "";
+            strXml = "";
+
+            XmlDocument dom = new XmlDocument();
+
+            try
+            {
+                dom.LoadXml(strOriginXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "装载 strOriginXml 到 DOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            // 如果 ID 为非空，才会主动修改/写入 parent 元素
+            if (string.IsNullOrEmpty(strBiblioRecId) == false)
+            {
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "parent",
+                    strBiblioRecId);
+            }
+
+            DomUtil.RemoveEmptyElements(dom.DocumentElement);
+
+            {
+                // 2023/2/2
+                XmlDocument domExist = new XmlDocument();
+                domExist.LoadXml("<root />");
+                // return:
+                //      -1  出错
+                //      0   正确
+                //      1   有部分修改没有兑现。说明在strError中
+                //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                int nRet = MergeTwoItemXml(
+                    sessioninfo,
+                    domExist,
+                    dom,
+                    out strXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1 || nRet == 2)
+                {
+                    return nRet;
+                }
+            }
+
+            // strXml = dom.OuterXml;
+            return 0;
         }
 
         // 获得事项记录
@@ -705,7 +898,6 @@ namespace DigitalPlatform.LibraryServer
             // 如果记录路径为空, 则先获得记录路径
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
             {
-
                 nRet = IsLocateParamNullOrEmpty(
                     oldLocateParams,
                     out strError);
@@ -861,8 +1053,35 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet != 1)
                     goto ERROR1;
-            }
 
+                // 2023/2/2
+                XmlDocument domNew = new XmlDocument();
+                domNew.LoadXml("<root />");
+                // return:
+                //      -1  出错
+                //      0   正确
+                //      1   有部分修改没有兑现。说明在strError中
+                //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
+                nRet = MergeTwoItemXml(
+                    sessioninfo,
+                    domExist,
+                    domNew,
+                    out string _,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1 || nRet == 2)
+                {
+                    error = new EntityInfo(info);
+                    if (nRet == 1)
+                        error.ErrorInfo = $"删除操作被拒绝。因部分字段不具备删除权限: {strError}";
+                    else
+                        error.ErrorInfo = $"删除操作被拒绝。因全部字段不具备删除权限: {strError}";
+                    error.ErrorCode = ErrorCodeValue.PartialDenied;
+                    ErrorInfos.Add(error);
+                    return -1;
+                }
+            }
 
             // 比较时间戳
             // 观察时间戳是否发生变化
@@ -1188,12 +1407,11 @@ out strError);
             //      0   正确
             //      1   有部分修改没有兑现。说明在strError中
             //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
-            string strNewXml = "";
             nRet = MergeTwoItemXml(
                 sessioninfo,
                 domSourceExist,
                 domNew,
-                out strNewXml,
+                out string strNewXml,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1420,27 +1638,32 @@ out strError);
                 // 需要把info.OldRecord和strExistXml进行比较，看看和业务有关的元素（要害元素）值是否发生了变化。
                 // 如果这些要害元素并未发生变化，就继续进行合并、覆盖保存操作
 
-                XmlDocument domOld = new XmlDocument();
+                if (string.IsNullOrEmpty(info.OldRecord) == false)
+                {
+                    XmlDocument domOld = new XmlDocument();
 
-                try
-                {
-                    domOld.LoadXml(info.OldRecord);
-                }
-                catch (Exception ex)
-                {
-                    strError = "info.OldRecord装载进入DOM时发生错误: " + ex.Message;
-                    goto ERROR1;
-                }
+                    try
+                    {
+                        domOld.LoadXml(info.OldRecord);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "(时间戳不匹配时)info.OldRecord装载进入DOM时发生错误: " + ex.Message;
+                        goto ERROR1;
+                    }
 
-                if (bForce == false)
-                {
-                    // 比较两个记录, 看看和事项有关的字段是否发生了变化
-                    // return:
-                    //      0   没有变化
-                    //      1   有变化
-                    nRet = IsItemInfoChanged(domOld,
-                        domExist);
+                    if (bForce == false)
+                    {
+                        // 比较两个记录, 看看和事项有关的字段是否发生了变化
+                        // return:
+                        //      0   没有变化
+                        //      1   有变化
+                        nRet = IsItemInfoChanged(domOld,
+                            domExist);
+                    }
                 }
+                else
+                    nRet = 1;
 
                 if (nRet == 1 || bForce == true)    // 2008/10/19
                 {
@@ -1450,9 +1673,9 @@ out strError);
                     error.OldTimestamp = exist_timestamp;
 
                     if (bExist == false)
-                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + info.OldRecPath + "') 已被删除。";
+                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + LibraryApplication.GetOldRecPath(info) + "') 已被删除。";
                     else
-                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + info.OldRecPath + "') 已发生过修改";
+                        error.ErrorInfo = "保存操作发生错误: 数据库中的原记录 (路径为'" + LibraryApplication.GetOldRecPath(info) + "') 已发生过修改";
                     error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                     ErrorInfos.Add(error);
                     return -1;
@@ -1493,16 +1716,6 @@ out strError);
                         DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
                 }
 
-                // 2010/4/8
-                nRet = this.App.SetOperation(
-                    ref domNew,
-                    "lastModified",
-                    sessioninfo.UserID,
-                    "",
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
                 // return:
                 //      -1  出错
                 //      0   正确
@@ -1527,6 +1740,16 @@ out strError);
 
                 // 为了后面的 CheckParent
                 domNew.LoadXml(strNewXml);
+
+                // 2010/4/8
+                nRet = this.App.SetOperation(
+                    ref domNew,
+                    "lastModified",
+                    sessioninfo.UserID,
+                    "",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
             }
             else
             {
@@ -2215,7 +2438,13 @@ out strError);
                             }
                         }
 
+                        string partial_warning = "";
                         // 构造出适合保存的新事项记录
+                        // return:
+                        //      -1  出错
+                        //      0   正确
+                        //      1   有部分修改没有兑现。说明在strError中
+                        //      2   全部修改都没有兑现。说明在strError中
                         nRet = BuildNewItemRecord(
                             sessioninfo,
                             bForce,
@@ -2231,6 +2460,8 @@ out strError);
                             ErrorInfos.Add(error);
                             continue;
                         }
+                        if (nRet == 1 || nRet == 2)
+                            partial_warning = strError;
 
                         {
                             XmlDocument domNew = new XmlDocument();
@@ -2351,8 +2582,17 @@ out strError);
                             error.NewRecord = strNewXml;    // 所真正保存的记录，可能稍有变化, 因此需要返回给前端
                             error.NewTimestamp = output_timestamp;
 
-                            error.ErrorInfo = "保存新记录的操作成功。NewTimeStamp中返回了新的时间戳, RecPath中返回了实际存入的记录路径。";
-                            error.ErrorCode = ErrorCodeValue.NoError;
+                            // 2023/2/2
+                            if (string.IsNullOrEmpty(partial_warning) == false)
+                            {
+                                error.ErrorInfo = partial_warning;
+                                error.ErrorCode = ErrorCodeValue.PartialDenied;
+                            }
+                            else
+                            {
+                                error.ErrorInfo = "保存新记录的操作成功。NewTimeStamp中返回了新的时间戳, RecPath中返回了实际存入的记录路径。";
+                                error.ErrorCode = ErrorCodeValue.NoError;
+                            }
                             ErrorInfos.Add(error);
                         }
                     }

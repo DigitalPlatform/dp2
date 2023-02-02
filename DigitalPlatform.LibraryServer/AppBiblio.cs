@@ -2755,7 +2755,7 @@ out strError);
         }
 
         // 获得全部 dprms:file 元素的字符串拼接。返回前先排序。这样不同元素顺序的表示法被当作等同的
-        static string GetAllFileElements(XmlDocument domNew)
+        public static string GetAllFileElements(XmlDocument domNew)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);

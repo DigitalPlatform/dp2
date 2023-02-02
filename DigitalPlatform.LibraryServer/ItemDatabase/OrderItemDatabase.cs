@@ -67,6 +67,26 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            string strWarning = "";
+
+            bool bChangePartDeniedParam = false;
+            // return:
+            //      -1  error
+            //      0   new record not changed
+            //      1   new record changed
+            nRet = MergeOldNewRec(
+                "order",
+                sessioninfo.RightsOrigin,
+                domExist,
+                domNew,
+                ref bChangePartDeniedParam,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (bChangePartDeniedParam)
+                strWarning = strError;
+
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
 
             bool bControlled = true;
@@ -126,7 +146,6 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            string strWarning = "";
             bool bAllDenied = false;    // 对字段的修改是否全部被拒绝
 
             // 分馆用户要特意单独处理<distribute>元素
@@ -170,6 +189,7 @@ namespace DigitalPlatform.LibraryServer
                 domExist.DocumentElement.InnerXml = strTempMergedXml;
             }
 
+#if OLDCODE
             // 清除以前的<dprms:file>元素
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -187,6 +207,7 @@ namespace DigitalPlatform.LibraryServer
                 frag.InnerXml = node.OuterXml;
                 domExist.DocumentElement.AppendChild(frag);
             }
+#endif
 
             strMergedXml = domExist.OuterXml;
 
@@ -679,7 +700,7 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-#endif 
+#endif
         // 构造用于获取事项记录的XML检索式
         public override int MakeGetItemRecXmlSearchQuery(
             List<string> locateParams,
@@ -1119,7 +1140,13 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
+#if REMOVED
         // 构造出适合保存的新事项记录
+        // return:
+        //      -1  出错
+        //      0   正确
+        //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中
         public override int BuildNewItemRecord(
             SessionInfo sessioninfo,
             bool bForce,
@@ -1132,14 +1159,13 @@ namespace DigitalPlatform.LibraryServer
             strXml = "";
 
             XmlDocument dom = new XmlDocument();
-
             try
             {
                 dom.LoadXml(strOriginXml);
             }
             catch (Exception ex)
             {
-                strError = "装载strOriginXml到DOM时出错: " + ex.Message;
+                strError = "装载 strOriginXml 到 DOM时出错: " + ex.Message;
                 return -1;
             }
 
@@ -1158,6 +1184,7 @@ namespace DigitalPlatform.LibraryServer
             strXml = dom.OuterXml;
             return 0;
         }
+#endif
 
         // 获得事项数据库名
         // return:

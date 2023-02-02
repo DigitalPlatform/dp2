@@ -2853,7 +2853,9 @@ out strError);
                         else if (strAction == "setuid")
                             elements = setuid_entity_element_names;
 
-                        nRet = MergeTwoEntityXml(domExist,
+                        nRet = MergeTwoEntityXml(
+                            null,
+                            domExist,
                             domNew,
                             elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                             false,
@@ -3237,7 +3239,9 @@ out strError);
                         else if (strAction == "setuid")
                             elements = setuid_entity_element_names;
 
-                        nRet = MergeTwoEntityXml(domExist,
+                        nRet = MergeTwoEntityXml(
+                            null,
+                            domExist,
                             domNew,
                             elements,   // strAction == "transfer" ? transfer_entity_element_names : null,
                             false,
