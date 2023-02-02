@@ -710,10 +710,14 @@ out string strError)
                 return -1;
             }
 
-            // 2010/4/2
-            DomUtil.SetElementText(dom.DocumentElement,
+            // 如果 ID 为非空，才会主动修改/写入 parent 元素
+            if (string.IsNullOrEmpty(strBiblioRecId) == false)
+            {
+                // 2010/4/2
+                DomUtil.SetElementText(dom.DocumentElement,
                 "parent",
                 strBiblioRecId);
+            }
 
             // 2012/10/3
             // 当前用户所管辖的馆代码

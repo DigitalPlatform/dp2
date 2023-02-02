@@ -416,7 +416,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strXml = "";
-            strError = "BuildNewItemRecord() 尚未实现";
+            strError = "ItemDatabase::BuildNewItemRecord() 尚未实现";
 
             return -1;
         }
