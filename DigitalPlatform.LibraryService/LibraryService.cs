@@ -6529,11 +6529,13 @@ out timestamp);
             }
         }
 
-        // 获得册信息
+        // 获得册、订购、期、评注等信息
         // TODO: 需要改进为，如果册记录存在，但是书目记录不存在，也能够适当返回
         // parameters:
         //      strItemDbType   2015/1/30
-        //      strBarcode  册条码号。特殊情况下，可以使用"@path:"引导的册记录路径(只需要库名和id两个部分)作为检索入口。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
+        //      strBarcode      如果 strItemDbType 为 "item"，这里为册条码号。
+        //                      如果 strItemDbType 为 "Order" "Issue" "Comment" 之一，这里为 参考ID。
+        //                      特殊情况下，可以使用"@path:"引导的册记录(或者其它类型记录)路径(只需要库名和id两个部分)作为检索入口。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
         //      strResultType   指定需要在strResult参数中返回的数据格式。为"xml" "html" "uii"之一。
         //                      如果为空，则表示strResult参数中不返回任何数据。无论这个参数为什么值，strItemRecPath中都回返回册记录路径(如果命中了的话)
         //      strItemRecPath  返回册记录路径。可能为逗号间隔的列表，包含多个路径
@@ -6570,6 +6572,8 @@ out timestamp);
 
             try
             {
+                string strError = "";
+
                 if (string.IsNullOrEmpty(strItemDbType) == true)
                     strItemDbType = "item";
 
@@ -6617,6 +6621,11 @@ out timestamp);
                         return result;
                     }
                 }
+                else
+                {
+                    strError = $"未能识别的 strItemDbType 值 '{strItemDbType}'";
+                    goto ERROR1;
+                }
 
                 // test
                 // Thread.Sleep(new TimeSpan(0, 0, 30));
@@ -6625,7 +6634,6 @@ out timestamp);
                 long lRet = 0;
 
                 string strXml = "";
-                string strError = "";
                 // string strOutputPath = "";
 
                 if (String.IsNullOrEmpty(strBarcode) == true)
@@ -6919,6 +6927,7 @@ out timestamp);
 
 #endif
 
+#if OLDCODE // 被 FilterItemRecord() 代替
                 // GET_OTHERINFO:
 
                 // 过滤<borrower>元素
@@ -6997,6 +7006,26 @@ out timestamp);
 #endif
                 }
 
+#endif
+
+                // 2023/2/3
+                // 按照当前账户的权限，来过滤掉原始册记录中的一些敏感字段
+                // return:
+                //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+                //      -1  出错
+                //      0   过滤后记录没有改变
+                //      1   过滤后记录发生了改变
+                nRet = app.FilterItemRecord(
+            sessioninfo,
+            strItemDbType,
+            item_dom,
+            out strError);
+                if (nRet == -1 || nRet == -2)
+                    goto ERROR1;
+                if (nRet == 1)
+                    strXml = item_dom.DocumentElement.OuterXml;
+
+
                 // 取得册信息
                 if (String.IsNullOrEmpty(strResultType) == true
                     || String.Compare(strResultType, "recpath", true) == 0)
@@ -7005,6 +7034,7 @@ out timestamp);
                 }
                 else if (String.Compare(strResultType, "xml", true) == 0)
                 {
+                    /*
                     // 2020/8/27
                     // 加上 oi 元素
                     try
@@ -7019,15 +7049,22 @@ out timestamp);
                         app.WriteErrorLog($"(GetItemInfo())为册记录添加 oi 元素时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{strXml}'");
                         strResult = strXml;
                     }
+                    */
+                    // 2023/2/3
+                    strResult = item_dom.DocumentElement?.OuterXml;
                 }
                 else if (String.Compare(strResultType, "uii", true) == 0)
                 {
                     try
                     {
+                        /*
                         XmlDocument itemdom = new XmlDocument();
                         itemdom.LoadXml(strXml);
                         // 加上 oi 元素
                         app.AddItemOI(itemdom);
+                        */
+                        var itemdom = item_dom; // 2023/2/3
+
                         string oi = DomUtil.GetElementText(itemdom.DocumentElement, "oi");
                         string barcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
                         strResult = oi + "." + barcode;
@@ -7085,6 +7122,7 @@ out timestamp);
                 }
 
                 // 若需要同时取得种记录
+                // TODO: 这里要检查一下，所获得的书目记录里面是否还有一些该过滤的字段没有被过滤
                 if (String.IsNullOrEmpty(strBiblioType) == false
                     && string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
@@ -7176,6 +7214,8 @@ out timestamp);
                         strBiblio = strBiblioXml;
                         goto END1;
                     }
+
+                    // TODO: BuildFormats() 以前要做一些字段过滤；或者为了安全，改造 BuildFormats() 代码让它里面包含过滤的功能
 
                     {
                         // TODO: 允许 strBiblioType 里面包含多种格式。这时 strBiblio 里面要用 XML 包装返回多个结果
@@ -8314,10 +8354,29 @@ out timestamp);
             issue_timestamp = null;
             strOutputBiblioRecPath = "";
 
+            /*
             LibraryServerResult result = this.PrepareEnvironment("GetIssueInfo", true, true);
             if (result.Value == -1)
                 return result;
+            */
 
+            LibraryServerResult result = this.PrepareEnvironment("GetIssueInfo",
+PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin);   // 注意，没有 .Touch
+            if (result.Value == -1)
+                return result;
+
+            return GetItemInfo("issue",
+                strRefID,
+                strItemXml,
+                strResultType,
+                out strResult,
+                out strIssueRecPath,
+                out issue_timestamp,
+                strBiblioType,
+                out strBiblio,
+                out strOutputBiblioRecPath);
+
+#if OLDCODE     // 2023/2/3 被 GetItemInfo() 替代
             try
             {
                 // 权限字符串
@@ -8834,6 +8893,8 @@ out timestamp);
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+
+#endif
         }
 
         // *** 此API已经废止 ***
@@ -9355,10 +9416,29 @@ out timestamp);
             order_timestamp = null;
             strOutputBiblioRecPath = "";
 
+            /*
             LibraryServerResult result = this.PrepareEnvironment("GetOrderInfo", true, true);
             if (result.Value == -1)
                 return result;
+            */
 
+            LibraryServerResult result = this.PrepareEnvironment("GetOrderInfo",
+    PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin);   // 注意，没有 .Touch
+            if (result.Value == -1)
+                return result;
+
+            return GetItemInfo("order",
+                strRefID,
+                strItemXml,
+                strResultType,
+                out strResult,
+                out strOrderRecPath,
+                out order_timestamp,
+                strBiblioType,
+                out strBiblio,
+                out strOutputBiblioRecPath);
+
+#if OLDCODE // 2023/2/3 被 GetItemInfo() 替代
             try
             {
                 // 权限字符串
@@ -9852,6 +9932,8 @@ out timestamp);
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+
+#endif
         }
 
         // *** 此API已经废止 ***
@@ -14909,9 +14991,17 @@ out byte[] temp_timestamp);
                     else
 
 #endif
-                    if ((app.IsBiblioDbName(strDbName) || app.IsReaderDbName(strDbName) || strDbName == app.AmerceDbName)
+                    if ((app.IsBiblioDbName(strDbName)
+                        || app.IsReaderDbName(strDbName)
+                        || app.IsItemDbName(strDbName)
+                        || app.IsOrderDbName(strDbName)
+                        || app.IsIssueDbName(strDbName)
+                        || app.IsCommentDbName(strDbName)
+                        || strDbName == app.AmerceDbName)
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
                     {
+                        string db_type = app.GetAllDbType(strDbName);
+
                         // strError = "不允许用 GetRes() 来获得书目记录。请改用 GetBiblioInfo() API";
                         // goto ERROR1;
                         /*
@@ -14940,7 +15030,7 @@ out byte[] temp_timestamp);
 
                         if (get_ret == 0)
                         {
-                            if (app.IsBiblioDbName(strDbName))
+                            if (db_type == "biblio")
                             {
                                 // 用 GetBiblioInfo() 来获取书目元数据记录
                                 // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
@@ -14998,7 +15088,7 @@ out byte[] temp_timestamp);
                                     result.ErrorCode = ErrorCode.SystemError;
                                 }
                             }
-                            else if (app.IsReaderDbName(strDbName))
+                            else if (db_type == "reader")
                             {
                                 // 用 GetReaderInfo() 来获取读者元数据记录
                                 string path = "@path:" + strResPath;
@@ -15047,8 +15137,79 @@ out byte[] temp_timestamp);
                                     result.ErrorCode = ErrorCode.SystemError;
                                 }
                             }
-                            else if (strDbName == app.AmerceDbName)
+                            else if (db_type == "item"
+                        || db_type == "order"
+                        || db_type == "issue"
+                        || db_type == "comment")
                             {
+                                // 册、订购、期、评注记录
+                                lRet = channel.GetRes(strResPath,
+                                    strStyle + ",data", // 确保可以获取到记录 XML
+                                    out xml,
+                                    out string temp_metadata,
+                                    out byte[] temp_timestamp,
+                                    out string temp_path,
+                                    out strError);
+
+                                if (StringUtil.IsInList("timestamp", strStyle))
+                                    baOutputTimestamp = temp_timestamp;
+                                if (StringUtil.IsInList("outputpath", strStyle))
+                                    strOutputResPath = temp_path;
+                                if (StringUtil.IsInList("metadata", strStyle))
+                                    strMetadata = temp_metadata;
+                                if (StringUtil.IsInList("data", strStyle) == false)
+                                    xml = null;
+
+                                if (lRet == -1)
+                                {
+                                    result.Value = lRet;
+                                    result.ErrorInfo = strError;
+                                    ConvertKernelErrorCode(channel.ErrorCode,
+                                        ref result);
+                                    return result;
+                                }
+
+                                if (string.IsNullOrEmpty(xml) == false)
+                                {
+                                    XmlDocument dom = new XmlDocument();
+                                    try
+                                    {
+                                        dom.LoadXml(xml);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        strError = $"{db_type}记录 '" + strOutputResPath + "' 装入XMLDOM时出错: " + ex.Message;
+                                        goto ERROR1;
+                                    }
+
+                                    // 2023/2/3
+                                    // 按照当前账户的权限，来过滤掉原始册记录中的一些敏感字段
+                                    // return:
+                                    //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+                                    //      -1  出错
+                                    //      0   过滤后记录没有改变
+                                    //      1   过滤后记录发生了改变
+                                    int nRet = app.FilterItemRecord(
+                                        sessioninfo,
+                                        db_type,
+                                        dom,
+                                        out strError);
+                                    if (nRet == -1 || nRet == -2)
+                                    {
+                                        result.Value = -1;
+                                        result.ErrorInfo = strError;
+                                        if (nRet == -2)
+                                            result.ErrorCode = ErrorCode.AccessDenied;
+                                        else
+                                            result.ErrorCode = ErrorCode.SystemError;
+                                        return result;
+                                    }
+                                    xml = dom.DocumentElement.OuterXml;
+                                }
+                            }
+                            else if (db_type == "amerce")
+                            {
+                                // TODO: 建议这里抽取出一个函数 GetAmerceInfo()，里面包含检查分馆权限的功能。FilterResultSet() 那里也可以用上这个抽取出来的函数
                                 lRet = channel.GetRes(strResPath,
                                     strStyle + ",data", // 确保可以获取到记录 XML
                                     out string amerce_xml,
@@ -15101,12 +15262,11 @@ out byte[] temp_timestamp);
                                 }
                             }
 
-
                             if (formats.Contains("xml"))
                                 xml = GetResult(results, formats.IndexOf("xml"));
 
                             // 记忆起来
-                            if (formats.Contains("xml"))
+                            if (string.IsNullOrEmpty(xml) == false/*formats.Contains("xml")*/)
                                 app.ResCache_SetRecord(strCacheResPath,
                                     strOutputResPath,
                                     xml,
@@ -15625,8 +15785,17 @@ out strError);
                     // 2015/9/3 新增删除资源的功能
                     if (delete)
                     {
+                        if (app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = $"不允许使用 WriteRes() 删除元数据记录以外的其它类型资源 {strResPath}";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+
                         if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
                         {
+                            // 盘点库记录
                             if (StringUtil.IsInList("inventorydelete", sessioninfo.RightsOrigin) == false)
                             {
                                 result.Value = -1;
@@ -15639,6 +15808,43 @@ out strError);
                                 strStyle,   // 2017/9/16 增加
                                 out baOutputTimestamp,
                                 out strError);
+                        }
+                        else if (app.IsBiblioDbName(strDbName))
+                        {
+                            var ret = app.SetBiblioInfo(sessioninfo,
+                                "delete",
+                                strResPath,
+                                "",
+                                "",
+                                baInputTimestamp,
+                                "",
+                                "",
+                                out strOutputResPath,
+                                out baOutputTimestamp);
+                            if (ret.Value == -1)
+                                return ret;
+                            lRet = 0;
+                            strError = ret.ErrorInfo;
+                            result.ErrorCode = ret.ErrorCode;
+                        }
+                        else if (app.IsReaderDbName(strDbName))
+                        {
+                            var ret = app.SetReaderInfo(sessioninfo,
+                                "delete",
+                                strResPath,
+                                "",
+                                "",
+                                baInputTimestamp,
+                                out _,
+                                out _,
+                                out strOutputResPath,
+                                out baOutputTimestamp,
+                                out _);
+                            if (ret.Value == -1)
+                                return ret;
+                            lRet = 0;
+                            strError = ret.ErrorInfo;
+                            result.ErrorCode = ret.ErrorCode;
                         }
                         else if (app.IsItemDbName(strDbName)
                         || app.IsOrderDbName(strDbName)
@@ -16206,10 +16412,29 @@ out strError);
             comment_timestamp = null;
             strOutputBiblioRecPath = "";
 
+            /*
             LibraryServerResult result = this.PrepareEnvironment("GetCommentInfo", true, true);
             if (result.Value == -1)
                 return result;
+            */
 
+            LibraryServerResult result = this.PrepareEnvironment("GetCommentInfo",
+PrepareEnvironmentStyle.PrepareSessionInfo | PrepareEnvironmentStyle.CheckLogin);   // 注意，没有 .Touch
+            if (result.Value == -1)
+                return result;
+
+            return GetItemInfo("comment",
+                strRefID,
+                strItemXml,
+                strResultType,
+                out strResult,
+                out strCommentRecPath,
+                out comment_timestamp,
+                strBiblioType,
+                out strBiblio,
+                out strOutputBiblioRecPath);
+
+#if OLDCODE     // 2023/2/3 被 GetItemInfo() 替代
             try
             {
                 // 权限字符串
@@ -16729,6 +16954,8 @@ out strError);
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+
+#endif
         }
 
         // *** 此API已经废止 ***

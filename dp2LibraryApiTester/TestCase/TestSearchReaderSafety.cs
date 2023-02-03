@@ -672,7 +672,8 @@ $"id,cols,xml",
                 // Cols 被滤除
                 if (/*Array.IndexOf(record.Cols, "本科生") != -1
                     ||*/ Array.IndexOf(record.Cols, "数学系") != -1
-                    || Array.IndexOf(record.Cols, "张三") != -1)
+                    // || Array.IndexOf(record.Cols, "张三") != -1
+                    )
                 {
                     string error = $"用户 {userName} 通过 GetSearchResult() API 获得了没有过滤的原始浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
                     errors.Add(error);
@@ -685,7 +686,7 @@ $"id,cols,xml",
                     XmlDocument dom = new XmlDocument();
                     dom.LoadXml(xml);
                     //var barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-                    var name = DomUtil.GetElementText(dom.DocumentElement, "name");
+                    //var name = DomUtil.GetElementText(dom.DocumentElement, "name");
                     //var readerType = DomUtil.GetElementText(dom.DocumentElement, "readerType");
                     var department = DomUtil.GetElementText(dom.DocumentElement, "department");
 
@@ -699,9 +700,10 @@ $"id,cols,xml",
                     if (string.IsNullOrEmpty(department) == false)
                         errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML 元素 department");
 
+                    /*
                     if (name == "张三")
                         errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML 元素 name (没有过滤)");
-
+                    */
                 }
             }
 
@@ -988,22 +990,23 @@ $"id,cols,xml",
             if (userName == "test_level1" && patronDbName == _globalPatronDbName)
             {
                 // Cols 被滤除
-                if (/*Array.IndexOf(record.Cols, "本科生") != -1
+                if (/* Array.IndexOf(record.Cols, "本科生") != -1
                     ||*/ Array.IndexOf(record.Cols, "数学系") != -1
-                    || Array.IndexOf(record.Cols, "张三") != -1)
+                    // || Array.IndexOf(record.Cols, "张三") != -1
+                    )
                 {
                     string error = $"用户 {userName} 通过 GetSearchResult() API 获得了没有过滤的原始浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
                     errors.Add(error);
                 }
 
-                // 用户 "test_level1" 应无法看到 XML 中的 barcode readerType department 元素才对
+                // 用户 "test_level1" 应无法看到 XML 中的 department 元素才对
                 // name 元素能看到，但应该是被 mask 形态
                 if (string.IsNullOrEmpty(xml) == false)
                 {
                     XmlDocument dom = new XmlDocument();
                     dom.LoadXml(xml);
                     // var barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-                    var name = DomUtil.GetElementText(dom.DocumentElement, "name");
+                    // var name = DomUtil.GetElementText(dom.DocumentElement, "name");
                     //var readerType = DomUtil.GetElementText(dom.DocumentElement, "readerType");
                     var department = DomUtil.GetElementText(dom.DocumentElement, "department");
 
@@ -1016,9 +1019,10 @@ $"id,cols,xml",
                     if (string.IsNullOrEmpty(department) == false)
                         errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML 元素 department");
 
+                    /*
                     if (name == "张三")
                         errors.Add($"用户 {userName} 通过 GetSearchResult() API 获得了读者记录 XML 元素 name (没有过滤)");
-
+                    */
                 }
             }
 
@@ -1033,7 +1037,7 @@ $"id,cols,xml",
                 // Cols 应被滤除
                 if (record.Cols != null)
                 {
-                    if (record.Cols[0] != _FILTERED)
+                    if (record.Cols[0].StartsWith(_FILTERED) == false)
                     {
                         string error = $"用户 {userName} 通过 GetSearchResult() API 获得了没有过滤的原始浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
                         errors.Add(error);

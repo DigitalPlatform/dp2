@@ -20,6 +20,7 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+// using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -3054,6 +3055,7 @@ out strError);
 
                     if (lRet == -1)
                     {
+                        /*
                         // iteminfo.OldRecPath = aPath[i];
                         iteminfo.OldRecPath = record.Path;
 
@@ -3067,8 +3069,49 @@ out strError);
                         iteminfo.NewRecord = "";
                         iteminfo.NewTimestamp = null;
                         iteminfo.Action = "";
-
+                        */
+                        LibraryApplication.SetError(iteminfo,
+    record.Path,
+    channel.ErrorInfo,
+    channel.OriginErrorCode);
                         goto CONTINUE;
+                    }
+
+                    // 2023/2/3
+                    if (string.IsNullOrEmpty(strXml) == false)
+                    {
+                        nRet = LibraryApplication.LoadToDom(strXml,
+                            out XmlDocument item_dom,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            LibraryApplication.SetError(iteminfo,
+record.Path,
+strError);
+                            goto CONTINUE;
+                        }
+
+                        // 按照当前账户的权限，来过滤掉原始事项记录中的一些敏感字段
+                        // return:
+                        //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+                        //      -1  出错
+                        //      0   过滤后记录没有改变
+                        //      1   过滤后记录发生了改变
+                        nRet = FilterItemRecord(sessioninfo,
+                            item_dom,
+                            out strError);
+                        iteminfo.ErrorInfo = strError;
+                        if (nRet == -1)
+                        {
+                            strXml = null;  // 出错以后不返回 XML 记录
+                            iteminfo.ErrorCode = ErrorCodeValue.CommonError;
+                        }
+                        if (nRet == -2)
+                        {
+                            strXml = null;  // 权限不够，整个不返回 XML 记录
+                            iteminfo.ErrorCode = ErrorCodeValue.AccessDenied;
+                        }
+                        strXml = item_dom.DocumentElement?.OuterXml;
                     }
 
                     iteminfo.OldRecPath = strOutputPath;
@@ -4273,5 +4316,72 @@ out string strError)
 
             return 1;
         }
+
+
+        // 按照当前账户的权限，来过滤掉原始事项记录中的一些敏感字段
+        // 重载的函数建议先调用本基类函数，然后再实现差异化逻辑
+        // return:
+        //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+        //      -1  出错
+        //      0   过滤后记录没有改变
+        //      1   过滤后记录发生了改变
+        public virtual int FilterItemRecord(
+            SessionInfo sessioninfo,
+            XmlDocument item_dom,
+            out string strError)
+        {
+            strError = "";
+
+            bool changed = false;
+
+            string db_type = this.ItemNameInternal.ToLower();
+            string alias_right = "";
+            // 检查 db_type
+            switch (db_type)
+            {
+                case "item":
+                    alias_right = "getentities";
+                    break;
+                case "order":
+                    alias_right = "getorders";
+                    break;
+                case "issue":
+                    alias_right = "getissues";
+                    break;
+                case "comment":
+                    alias_right = "getcomments";
+                    break;
+                default:
+                    strError = $"无法识别的 db_type '{db_type}'";
+                    return -1;
+            }
+
+            // 检查 getxxxinfo 基本权限
+            if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false
+                && (string.IsNullOrEmpty(alias_right) == false && StringUtil.IsInList(alias_right, sessioninfo.RightsOrigin) == false))
+            {
+                if (string.IsNullOrEmpty(alias_right))
+                    strError = $"当前用户不具备 get{db_type}info 权限";
+                else
+                    strError = $"当前用户不具备 get{db_type}info 或 {alias_right} 权限";
+                return -2;
+            }
+
+            if (item_dom == null || item_dom.DocumentElement == null)
+                return 0;
+
+            // 如果不具备 getxxxobject 权限过滤掉 dprms:file
+            if (StringUtil.IsInList($"get{db_type}object,getobject", sessioninfo.RightsOrigin) == false)
+            {
+                if (LibraryApplication.RemoveDprmsFile(item_dom))
+                    changed = true;
+            }
+
+            if (changed == true)
+                return 1;
+            return 0;
+        }
+
     }
+
 }

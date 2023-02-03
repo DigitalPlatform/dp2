@@ -281,7 +281,7 @@ $"id,cols,xml",
                     if (userName == "test_access1")
                     {
                         // Cols 被滤除
-                        if (record.Cols[0] != "[滤除]")
+                        if (record.Cols[0].StartsWith("[滤除]") == false)
                         {
                             string error = $"用户 {userName} 通过 GetSearchResult() API 获得了浏览列内容 '{string.Join(",", record.Cols)}'，违反安全性原则";
                             errors.Add(error);

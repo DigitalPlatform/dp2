@@ -16,6 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Data.SqlTypes;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -2030,6 +2031,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (lRet == -1)
                     {
+                        /*
                         // entityinfo.OldRecPath = aPath[i];
                         entityinfo.OldRecPath = record.Path;
                         entityinfo.ErrorCode = channel.OriginErrorCode;
@@ -2042,11 +2044,60 @@ namespace DigitalPlatform.LibraryServer
                         entityinfo.NewRecord = "";
                         entityinfo.NewTimestamp = null;
                         entityinfo.Action = "";
+                        */
+                        SetError(entityinfo,
+                            record.Path,
+                            channel.ErrorInfo,
+                            channel.OriginErrorCode);
                         goto CONTINUE;
                     }
 
                     XmlDocument itemdom = null;
 
+                    // 2023/2/3
+                    if (string.IsNullOrEmpty(strXml) == false)
+                    {
+                        if (itemdom == null)
+                        {
+                            nRet = LibraryApplication.LoadToDom(strXml,
+                                out itemdom,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                SetError(entityinfo,
+    record.Path,
+    strError);
+                                goto CONTINUE;
+                            }
+                        }
+                        // 按照当前账户的权限，来过滤掉原始事项记录中的一些敏感字段
+                        // return:
+                        //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+                        //      -1  出错
+                        //      0   过滤后记录没有改变
+                        //      1   过滤后记录发生了改变
+                        nRet = FilterItemRecord(sessioninfo,
+                            "item",
+                            itemdom,
+                            out strError);
+                        entityinfo.ErrorInfo = strError;
+                        if (nRet == -1)
+                        {
+                            strXml = null;  // 出错以后不返回 XML 记录
+                            entityinfo.ErrorCode = ErrorCodeValue.CommonError;
+                            goto END1;
+                        }
+                        if (nRet == -2)
+                        {
+                            strXml = null;  // 权限不够，整个不返回 XML 记录
+                            entityinfo.ErrorCode = ErrorCodeValue.AccessDenied;
+                            goto END1;
+                        }
+                        strXml = itemdom.DocumentElement?.OuterXml;
+                    }
+
+
+#if OLDCODE // 被 FilterItemRecord 替代
                     // 修改<borrower>
                     if ((sessioninfo.GlobalUser == false || sessioninfo.UserType == "reader") // 分馆用户必须要过滤，因为要修改<borrower>
                         && string.IsNullOrEmpty(strXml) == false)
@@ -2107,6 +2158,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == 1)
                             strXml = itemdom.DocumentElement.OuterXml;
                     }
+#endif
 
                     // 把实体记录按照OPAC要求进行加工，增补一些元素
                     if (StringUtil.IsInList("opac", strStyle) == true
@@ -2118,7 +2170,12 @@ namespace DigitalPlatform.LibraryServer
                                 out itemdom,
                                 out strError);
                             if (nRet == -1)
-                                goto ERROR1;
+                            {
+                                SetError(entityinfo,
+    record.Path,
+    strError);
+                                goto CONTINUE;
+                            }
                         }
 
                         nRet = AddOpacInfos(
@@ -2132,6 +2189,7 @@ namespace DigitalPlatform.LibraryServer
                         strXml = itemdom.DocumentElement.OuterXml;
                     }
 
+                END1:
                     entityinfo.OldRecPath = strOutputPath;
                     entityinfo.OldRecord = strXml;
                     entityinfo.OldTimestamp = timestamp;
@@ -2172,6 +2230,24 @@ namespace DigitalPlatform.LibraryServer
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        public static void SetError(EntityInfo entityinfo,
+            string strPath,
+            string strError,
+            ErrorCodeValue error_code = ErrorCodeValue.CommonError)
+        {
+            entityinfo.OldRecPath = strPath;
+            entityinfo.ErrorCode = error_code;
+            entityinfo.ErrorInfo = strError;
+
+            entityinfo.OldRecord = "";
+            entityinfo.OldTimestamp = null;
+
+            entityinfo.NewRecPath = "";
+            entityinfo.NewRecord = "";
+            entityinfo.NewTimestamp = null;
+            entityinfo.Action = "";
         }
 
         // 根据当前账户的权限，过滤浏览列中的 borrower 元素内容
@@ -4353,7 +4429,7 @@ out strError);
             return result;
         }
 
-#region SetEntities() 下级函数
+        #region SetEntities() 下级函数
 
         // 为 state 元素增加一个子串
         static void ModifyState(XmlDocument dom, string one)
@@ -6950,7 +7026,7 @@ out strError);
             return true;
         }
 
-#endregion
+        #endregion
 
 #if NO
         // 根据册条码号列表，得到记录路径列表
@@ -7616,6 +7692,105 @@ out strError);
             }
             return 1;
         }
+
+        // 按照当前账户的权限，来过滤掉原始册记录中的一些敏感字段
+        // return:
+        //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+        //      -1  出错
+        //      0   过滤后记录没有改变
+        //      1   过滤后记录发生了改变
+        public int FilterItemRecord(
+    SessionInfo sessioninfo,
+    string db_type,
+    XmlDocument item_dom,
+    out string strError)
+        {
+            strError = "";
+
+            if (db_type == "order")
+                return this.OrderItemDatabase.FilterItemRecord(
+                    sessioninfo,
+                    item_dom,
+                    out strError);
+            if (db_type == "issue")
+                return this.IssueItemDatabase.FilterItemRecord(
+                    sessioninfo,
+                    item_dom,
+                    out strError);
+            if (db_type == "comment")
+                return this.CommentItemDatabase.FilterItemRecord(
+                    sessioninfo,
+                    item_dom,
+                    out strError);
+
+            if (db_type != "item")
+            {
+                strError = $"出现了不能处理的数据库类型 '{db_type}'";
+                return -1;
+            }
+
+            Debug.Assert(db_type == "item");
+            string alias_right = "getentities";
+
+            // 检查 getiteminfo getentities 基本权限
+            if (StringUtil.IsInList($"get{db_type}info", sessioninfo.RightsOrigin) == false
+                && (string.IsNullOrEmpty(alias_right) == false && StringUtil.IsInList(alias_right, sessioninfo.RightsOrigin) == false))
+            {
+                if (string.IsNullOrEmpty(alias_right))
+                    strError = $"当前用户不具备 get{db_type}info 权限";
+                else
+                    strError = $"当前用户不具备 get{db_type}info 或 {alias_right} 权限";
+                return -2;
+            }
+
+            if (item_dom == null || item_dom.DocumentElement == null)
+                return 0;
+
+            bool changed = false;
+
+            // 修改<borrower>
+            if (sessioninfo.GlobalUser == false || sessioninfo.UserType == "reader") // 分馆用户或者读者必须要过滤，因为要修改<borrower>
+            {
+                // return:
+                //      -1  出错
+                //      0   itemdom 没有发生改变
+                //      1   itemdom 发生了改变
+                int nRet = this.FilterBorrower(
+                    sessioninfo,
+                    item_dom,
+                    "error_in_field",
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    changed = true;
+            }
+
+            // 如果不具备 getxxxobject 权限过滤掉 dprms:file
+            if (StringUtil.IsInList("getitemobject,getobject", sessioninfo.RightsOrigin) == false)
+            {
+                if (RemoveDprmsFile(item_dom))
+                    changed = true;
+            }
+
+            // 2023/2/3 注: 原先 LibraryService::GetItemInfo() 返回 "xml" 格式的内容的时候，加 oi 元素如果出现异常，会写入错误日志，然后依然返回加 oi 元素以前的 xml 内容
+            // 加上 oi 元素
+            try
+            {
+                this.AddItemOI(item_dom);
+            }
+            catch (Exception ex)
+            {
+                this.WriteErrorLog($"(FilterItemRecord())为册记录添加 oi 元素时出现异常: \r\n{ExceptionUtil.GetDebugText(ex)}\r\n\r\n册记录 XML:'{item_dom.OuterXml}'");
+                strError = $"(FilterItemRecord())为册记录添加 oi 元素时出现异常: {ex.Message}";
+                return -1;
+            }
+
+            if (changed == true)
+                return 1;
+            return 0;
+        }
+
     }
 
     // 实体信息

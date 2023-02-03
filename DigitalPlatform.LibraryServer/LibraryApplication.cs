@@ -33,6 +33,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
 using System.Data.SqlClient;
+using System.Security.Policy;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -4548,6 +4549,21 @@ out strError);
             }
 
             return false;
+        }
+
+        // 2023/2/3
+        public string GetAllDbType(string strDbName)
+        {
+            var type = GetDbType(strDbName,
+    out _);
+            if (type != null)
+                return type;
+            if (IsBiblioDbName(strDbName))
+                return "reader";
+            if (strDbName == this.AmerceDbName)
+                return "amerce";
+            
+            return null;
         }
 
         // 获得(书目库相关角色)数据库的类型，顺便返回所从属的书目库名

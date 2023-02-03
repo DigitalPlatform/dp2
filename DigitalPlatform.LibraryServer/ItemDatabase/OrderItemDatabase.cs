@@ -1230,6 +1230,39 @@ namespace DigitalPlatform.LibraryServer
             // return 0;
         }
 
+        // 按照当前账户的权限，来过滤掉原始事项记录中的一些敏感字段
+        // 重载的函数建议先调用本基类函数，然后再实现差异化逻辑
+        // return:
+        //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+        //      -1  出错
+        //      0   过滤后记录没有改变
+        //      1   过滤后记录发生了改变
+        public override int FilterItemRecord(
+    SessionInfo sessioninfo,
+    XmlDocument item_dom,
+    out string strError)
+        {
+            strError = "";
+
+            bool changed = false;
+            // return:
+            //      -2  权限不具备。也可以理解为全部字段都应被过滤掉
+            //      -1  出错
+            //      0   过滤后记录没有改变
+            //      1   过滤后记录发生了改变
+            int nRet = base.FilterItemRecord(sessioninfo,
+                item_dom,
+                out strError);
+            if (nRet == -2 || nRet == -1)
+                return nRet;
+            if (nRet == 1)
+                changed = true;
+
+            if (changed == true)
+                return 1;
+            return 0;
+        }
+
 #if NO1
         // 对新旧事项记录中包含的定位信息进行比较, 看看是否发生了变化(进而就需要查重)
         // parameters:

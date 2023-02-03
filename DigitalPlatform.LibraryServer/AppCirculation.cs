@@ -3674,7 +3674,6 @@ start_time_1,
                 return;
             }
 
-
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
             strLocation = StringUtil.GetPureLocation(strLocation);
 

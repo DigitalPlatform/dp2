@@ -1076,7 +1076,9 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else if (strAction == "delete")
                 {
+                    // 账户权限前置条件检查。
                     // 检查当前账户是否有完全的 setreaderinfo 权限
+                    // 如果没有完全的 setreaderinfo 权限，则要求字段列表中有 r_delete 权限才允许删除
 
                     // 2021/7/15
                     // return:
@@ -4920,6 +4922,13 @@ root, strLibraryCode);
                         return -1;
                     }
 
+                    // 2023/2/3
+                    if (IsDatabaseMetadataPath(sessioninfo, strReaderRecPath) == false)
+                    {
+                        strError = $"不支持使用 SearchReaderRecord() 获取对象 '{strReaderRecPath}'";
+                        return -1;
+                    }
+
                     string strMetaData = "";
 
                     // 2008/6/20 changed
@@ -5429,6 +5438,14 @@ out strError);
                         strError = "记录路径 '" + strReaderRecPath + "' 并不是一个读者库记录路径，因此拒绝操作。";
                         goto ERROR1;
                     }
+
+                    // 2023/2/3
+                    if (IsDatabaseMetadataPath(sessioninfo, strReaderRecPath) == false)
+                    {
+                        strError = $"不支持使用 GetReaderInfo() 获取对象 '{strReaderRecPath}'";
+                        goto ERROR1;
+                    }
+
 
                     // 2023/1/30
                     if (string.IsNullOrEmpty(strPatronXml) == false)
@@ -6671,6 +6688,7 @@ out strError);
         }
 
         // 检测一下数据库名是否在允许的读者库名之列
+        // 注: 读者元数据记录路径和读者记录下的对象记录路径，调用本函数都会返回 true
         public bool IsReaderRecPath(string strRecPath)
         {
             string strReaderDbName = ResPath.GetDbName(strRecPath);
@@ -6736,11 +6754,27 @@ out strError);
                 strError = "strSourceRecPath参数所给出的源记录路径 '" + strSourceRecPath + "' 并不是一个读者库记录路径";
                 goto ERROR1;
             }
+
+            // 2023/2/3
+            if (IsDatabaseMetadataPath(sessioninfo, strSourceRecPath) == false)
+            {
+                strError = $"不支持使用 MoveReaderInfo() 操作对象 '{strSourceRecPath}'";
+                goto ERROR1;
+            }
+
             if (this.IsReaderRecPath(strTargetRecPath) == false)
             {
                 strError = "strTargetRecPath参数所给出的目标记录路径 '" + strTargetRecPath + "' 并不是一个读者库记录路径";
                 goto ERROR1;
             }
+
+            // 2023/2/3
+            if (IsDatabaseMetadataPath(sessioninfo, strTargetRecPath) == false)
+            {
+                strError = $"不支持使用 MoveReaderInfo() 操作对象 '{strTargetRecPath}'";
+                goto ERROR1;
+            }
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -7951,7 +7985,7 @@ out strError);
             return false;
         }
 
-        static bool RemoveDprmsFile(XmlDocument readerdom)
+        public static bool RemoveDprmsFile(XmlDocument readerdom)
         {
             XmlDocument temp = new XmlDocument();
             temp.LoadXml("<root />");
