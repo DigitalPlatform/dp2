@@ -1087,16 +1087,21 @@ namespace DigitalPlatform.LibraryServer
                     if (write_level == null)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "删除读者记录操作被拒绝。不具备 setreaderinfo (全部字段)权限 或 包含 r_delete 的 setreaderinfo: 权限";
+                        result.ErrorInfo = "删除读者记录操作被拒绝。不具备 setreaderinfo (全部字段)权限 或 包含 r_delete 的 setreaderinfo: 权限 或 writerecord 权限";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
 
-                    if (string.IsNullOrEmpty(write_level) == false
-                        && StringUtil.IsInList("r_delete", write_level.Replace("|", ",")) == false)
+                    // 剖析原始 setreaderinfo: 的 level 字符串，看看里面是否有 r_delete
+                    var low_level = StringUtil.GetParameterByPrefix(sessioninfo.RightsOrigin, "setreaderinfo");
+                    // 这一步检查的目的是，如果账户权限中有 setreaderinfo:xxx，则要求 xxx 中包含 r_delete，才允许删除读者记录；
+                    // 而如果账户权限中仅有 setreaderinfo (也就是说没有 xxx 部分)，则允许删除读者记录。
+                    // 另外还有一种情况是账户权限中仅有 writerecord，效果相当于 setreaderinfo，这样也允许删除读者记录
+                    if (string.IsNullOrEmpty(low_level) == false
+                        && StringUtil.IsInList("r_delete", low_level.Replace("|", ",")) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "删除读者记录操作被拒绝。不具备包含 r_delete 的 setreaderinfo: 权限";
+                        result.ErrorInfo = $"删除读者记录操作被拒绝。当前用户权限值 'setreaderinfo:{low_level}' 的字段权限部分 '{low_level}' 中未包含 r_delete";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -8298,7 +8303,7 @@ out strError);
             //      ""      找到了前缀，并且值部分为空
             //      其他     返回值部分
             var level = StringUtil.GetParameterByPrefix(rights, prefix);
-            
+
             // 2023/2/2
             // setreaderinfo 如果找不到，再尝试找 writrecord
             if (prefix == "setreaderinfo" && level == null)
@@ -8308,7 +8313,7 @@ out strError);
                 else
                     return null;
             }
-            
+
             if (level == null)
                 return level;
 
