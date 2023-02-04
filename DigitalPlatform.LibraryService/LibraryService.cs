@@ -3046,6 +3046,7 @@ namespace dp2Library
 
                 // 权限判断
 
+                /*
                 // 权限字符串
                 // TODO: 废止 search 权限。用 searchbiblio searchreader 等权限来进行判断
                 if (StringUtil.IsInList("search", sessioninfo.RightsOrigin) == false)
@@ -3055,10 +3056,12 @@ namespace dp2Library
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+                */
 
                 string strError = "";
                 int nRet = 0;
 
+#if OLDCODE
                 // 对读者身份的附加判断
                 if (sessioninfo.UserType == "reader")
                 {
@@ -3102,6 +3105,7 @@ namespace dp2Library
                         return result;
                     }
                 }
+#endif
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                 if (channel == null)
@@ -3141,6 +3145,25 @@ namespace dp2Library
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                // 检查一个 XML 检索式里面的数据库名是否超出当前账户的权限
+                // return:
+                //      -1  检查过程出错
+                //      0   没有超出权限的情况
+                //      1   有超出权限的情况，报错信息在 strError 中
+                nRet = app.CheckSearchRights(
+                    sessioninfo,
+                    strTargetQueryXml,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "检索被拒绝。" + strError;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
 
                 // 2021/9/12
                 {
@@ -3700,6 +3723,7 @@ strBrowseInfoStyle);
                 }
                 else if (app.AmerceDbName == strDbName)
                 {
+#if REMOVED
                     if (/*StringUtil.IsInList("getrecord", sessioninfo.RightsOrigin) == false*/
                         StringUtil.IsInList("amerce", sessioninfo.RightsOrigin) == false
                         || sessioninfo.UserType == "reader")
@@ -3708,6 +3732,7 @@ strBrowseInfoStyle);
                         ClearCols(record, LibraryApplication.FILTERED);
                     }
                     else
+#endif
                         FilterAmerceRecord(record);
                     // 注: GetRecord() API 可以获取违约金记录
                     // settlement undosettlement deletesettlement
@@ -3929,11 +3954,12 @@ strDbName);
             string strError,
             ErrorCodeValue error_code)
         {
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml("<root />");
-            dom.DocumentElement.SetAttribute("error", strError);
-            record.RecordBody.Xml = dom.DocumentElement.OuterXml;
+            if (record.RecordBody == null)
+                record.RecordBody = new RecordBody();
+            if (record.RecordBody.Result == null)
+                record.RecordBody.Result = new Result();
             record.RecordBody.Result.ErrorCode = error_code;
+            record.RecordBody.Result.ErrorString = strError;
         }
 
         /*
@@ -4313,12 +4339,14 @@ out byte[] _);
             }
             catch (Exception ex)
             {
-                // strError = "违约金记录 '" + strPath + "' 装入XMLDOM时出错: " + ex.Message;
+                var error = "违约金记录 '" + record.Path + "' 装入XMLDOM时出错: " + ex.Message;
+                SetRecordBodyError(record, error, ErrorCodeValue.CommonError);
                 ClearXml(record);
+                ClearCols(record, LibraryApplication.FILTERED);
                 return;
             }
 
-            int nRet = HasAmerceRight(
+            int nRet = HasAmerceReadRight(
     sessioninfo,
     record.Path,
     amerce_dom,
@@ -4327,8 +4355,7 @@ out byte[] _);
             {
                 ClearXml(record);
                 ClearCols(record, LibraryApplication.FILTERED);
-                record.RecordBody.Result.ErrorCode = ErrorCodeValue.AccessDenied;
-                record.RecordBody.Result.ErrorString = strError;
+                SetRecordBodyError(record, strError, ErrorCodeValue.AccessDenied);
             }
 
             /*
@@ -4796,13 +4823,26 @@ out timestamp);
         //      -1  出错
         //      0   不具备权限
         //      1   具备权限
-        int HasAmerceRight(
+        int HasAmerceReadRight(
             SessionInfo sessioninfo,
             string strAmerceRecPath,
             XmlDocument amerce_dom,
             out string strError)
         {
             strError = "";
+
+            if (sessioninfo.UserType == "reader")
+            {
+                strError = "读者身份不允许查看违约金记录";
+                return 0;
+            }
+
+            if (StringUtil.IsInList("amerce,settlement", sessioninfo.RightsOrigin) == false)
+            {
+                strError = "当前账户不具备 amerce 或 settlement 权限";
+                return 0;
+            }
+
             // 当前用户只能获取和管辖的馆代码关联的违约金记录
             if (sessioninfo.GlobalUser == false)
             {
@@ -15242,7 +15282,7 @@ out byte[] temp_timestamp);
                                 //      -1  出错
                                 //      0   不具备权限
                                 //      1   具备权限
-                                int nRet = HasAmerceRight(
+                                int nRet = HasAmerceReadRight(
                                     sessioninfo,
                                     strOutputResPath,
                                     amerce_dom,
@@ -15869,6 +15909,21 @@ out strError);
                             strError = ret.ErrorInfo;
                             result.ErrorCode = ret.ErrorCode;
                         }
+                        else if (strDbName == app.AmerceDbName)
+                        {
+                            if (StringUtil.IsInList("deletesettlement", sessioninfo.RightsOrigin) == false)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = "当前用户缺乏 deletesettlement 权限";
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                            lRet = channel.DoDeleteRes(strResPath,
+                                baInputTimestamp,
+                                strStyle,
+                                out baOutputTimestamp,
+                                out strError);
+                        }
                         else
                         {
                             result.Value = -1;
@@ -16083,7 +16138,6 @@ out strError);
 
                     // 2016/10/12
                     app.ClearCacheCfgs(strResPath);
-
                 }
 
                 // 2017/6/7

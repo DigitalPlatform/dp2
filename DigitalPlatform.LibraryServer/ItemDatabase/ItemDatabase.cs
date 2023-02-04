@@ -20,7 +20,6 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-// using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryServer
 {

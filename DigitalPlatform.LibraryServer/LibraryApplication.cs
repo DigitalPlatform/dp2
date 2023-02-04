@@ -32,8 +32,6 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
 using DigitalPlatform.Marc;
-using System.Data.SqlClient;
-using System.Security.Policy;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -16761,7 +16759,7 @@ out string db_type);
             else if (this.AmerceDbName == strDbName)
             {
                 db_type = "amerce";
-                right = "amerce";
+                right = "amerce,settlement";
             }
             //else
             //    right = "getres";
@@ -17032,6 +17030,8 @@ out string db_type);
         }
 
         // 检查 setxxxinfo 权限
+        // parameters:
+        //      strAction   new/change/delete 之一
         string CheckDbSetRights(
             SessionInfo sessioninfo,
             string rights,
@@ -17080,8 +17080,15 @@ out string db_type);
             }
             else if (this.AmerceDbName == strDbName)
             {
+                // TODO: 违约金库元数据记录不允许 WriteRes() API 直接写入。按规定是用 Settlement() API 进行操作
+                // 违约金库对象记录允许具有 amerce settlement undosettlement deletesettlement 等权限的账户操作
                 db_type = "amerce";
-                right = "amerce";
+                if (strAction == "new")
+                    right = "settlement";   // 只有结算者才被允许直接修改违约金库记录。注: Amerce() API 过程虽然也要修改违约金库记录，但那是通过 dp2library Amerce() API 进行的，不是前端直接请求 WriteRes() API 修改违约金记录
+                else if (strAction == "change")
+                    right = "undosettlement,deletesettlement";
+                else if (strAction == "delete")
+                    right = "deletesettlement";
             }
             else
                 return $"数据库 {strDbName} 内资源不允许写入";

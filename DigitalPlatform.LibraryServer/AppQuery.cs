@@ -21,6 +21,8 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Data.SqlClient;
+using Microsoft.SqlServer.Server;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -93,13 +95,13 @@ namespace DigitalPlatform.LibraryServer
                         return 1;
                     }
                 }
-
             }
 
             return 0;
         }
 
         // 检查检索式内有没有超越当前用户管辖的读者库范围的读者库
+        // 注: 本函数并不检查检索式中出现的读者库以外的其它类型的数据库
         // return:
         //      -1  error
         //      0   没有超越要求
@@ -361,13 +363,21 @@ namespace DigitalPlatform.LibraryServer
 
             // 遍历所有 item 元素
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//item");
-            foreach (XmlElement node in nodes)
+            foreach (XmlElement item in nodes)
             {
                 // 找到最近一个祖先的 target@list
-                string strList = GetTargetList(node);
+                string strList = GetTargetList(item);
                 if (strList == null)
                     continue;
-                List<string> parts = StringUtil.ParseTwoPart(strList, ":");
+
+                // 2023/2/4
+                // list 中用分号分隔为一个一个段落，每个段落表示一个数据库的检索途径
+                string[] aDatabase = strList.Split(';');
+
+                // 2023/2/4
+                // 只取第一个分段
+                string first_segment = aDatabase[0];
+                List<string> parts = StringUtil.ParseTwoPart(first_segment, ":");
 
                 string strDbName = parts[0];
                 string strFrom = parts[1];
@@ -391,10 +401,10 @@ namespace DigitalPlatform.LibraryServer
 
                 string strFromStyle = this.kdbs.GetFromStyles(strDbName, strFrom, "zh");
 
-                string strQueryWord = node.SelectSingleNode("word/text()")?.Value;
-                string strMatchStyle = node.SelectSingleNode("match/text()")?.Value;
-                string strDataType = node.SelectSingleNode("dataType/text()")?.Value;
-                string strRelation = node.SelectSingleNode("relation/text()")?.Value;
+                string strQueryWord = item.SelectSingleNode("word/text()")?.Value;
+                string strMatchStyle = item.SelectSingleNode("match/text()")?.Value;
+                string strDataType = item.SelectSingleNode("dataType/text()")?.Value;
+                string strRelation = item.SelectSingleNode("relation/text()")?.Value;
 
                 if (string.IsNullOrEmpty(strRelation))
                     strRelation = "=";
@@ -450,10 +460,10 @@ namespace DigitalPlatform.LibraryServer
                     bChanged = true;
                 }
 
-                DomUtil.SetElementText(node, "match", strMatchStyle);
-                DomUtil.SetElementText(node, "word", strQueryWord);
-                DomUtil.SetElementText(node, "dataType", strDataType);
-                DomUtil.SetElementText(node, "relation", strRelation);
+                DomUtil.SetElementText(item, "match", strMatchStyle);
+                DomUtil.SetElementText(item, "word", strQueryWord);
+                DomUtil.SetElementText(item, "dataType", strDataType);
+                DomUtil.SetElementText(item, "relation", strRelation);
             }
 
             if (bChanged == true)
@@ -561,7 +571,6 @@ namespace DigitalPlatform.LibraryServer
                     continue;
 
                 target_dbs.AddRange(multi_dbs);
-
             }
 
             if (bChanged == false)
@@ -572,6 +581,137 @@ namespace DigitalPlatform.LibraryServer
 
             strTargetList = target_dbs.GetString();
             return 1;
+        }
+
+        // 检查一个 XML 检索式里面的数据库名是否超出当前账户的权限
+        // return:
+        //      -1  检查过程出错
+        //      0   没有超出权限的情况
+        //      1   有超出权限的情况，报错信息在 strError 中
+        public int CheckSearchRights(
+            SessionInfo sessioninfo,
+            string strQueryXml,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strQueryXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "XML 检索式装入 XMLDOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            // 权限超出的数据库名列表
+            List<string> outof_list = new List<string>();
+
+            // 遍历所有 item 元素
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//item");
+            foreach (XmlElement item in nodes)
+            {
+                // 找到最近一个祖先的 target@list
+                string strList = GetTargetList(item);
+                if (strList == null)
+                    continue;   // 注: 也可以选择返回 -1 报错，说检索式结构不正确
+
+                var dbnames = GetDbNames(strList);
+                foreach (var dbname in dbnames)
+                {
+                    var error = HasSearchRight(sessioninfo, dbname);
+                    if (error != null)
+                        outof_list.Add(dbname + ":" + error);
+                }
+            }
+
+            if (outof_list.Count > 0)
+            {
+                strError = $"当前账户对下列数据库不具备检索权限:\r\n{StringUtil.MakePathList(outof_list, "\r\n")} ";
+                return 1;
+            }
+
+            return 0;
+        }
+
+        // 判断一个数据库名是否允许当前用户检索
+        string HasSearchRight(SessionInfo sessioninfo,
+            string strDbName)
+        {
+            string rights = sessioninfo.RightsOrigin;
+
+            string right = "";
+            if (this.IsBiblioDbName(strDbName) == true)
+            {
+                right = "searchbiblio";
+            }
+            else if (this.IsReaderDbName(strDbName) == true)
+            {
+                var ret = (StringUtil.IsInList("searchreader", rights));
+                if (ret == false)
+                    return $"不具备权限 searchreader";
+                {
+                    // 检查当前操作者是否管辖这个读者库
+                    // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                    if (this.IsCurrentChangeableReaderPath(strDbName + "/?",
+                        sessioninfo.ExpandLibraryCodeList) == false)
+                        return "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
+                }
+                return null;
+            }
+            else if (this.IsOrderDbName(strDbName))
+            {
+                right = "searchorder";
+            }
+            else if (this.IsIssueDbName(strDbName))
+            {
+                right = "searchissue";
+            }
+            else if (this.IsItemDbName(strDbName))
+            {
+                right = "searchitem";
+            }
+            else if (this.IsCommentDbName(strDbName))
+            {
+                right = "searchcomment";
+            }
+            else if (this.IsAuthorityDbName(strDbName))
+            {
+                right = "searchauthority";
+            }
+            else if (this.AmerceDbName == strDbName)
+            {
+                right = "amerce,settlement";
+            }
+            else
+                return "无法识别数据库类型";
+
+            if (StringUtil.IsInList(right, rights) == false)
+                return $"不具备权限 {right}";
+            return null;
+        }
+
+        // 从 targe@list 中剖析出所有库名
+        static List<string> GetDbNames(string strList)
+        {
+            List<string> results = new List<string>();
+            // 以 ; 号分成多个库
+            string[] aDatabase = strList.Split(';');
+            foreach (string strOneDatabase in aDatabase)
+            {
+                if (string.IsNullOrEmpty(strOneDatabase))
+                    continue;
+
+                var parts = StringUtil.ParseTwoPart(strOneDatabase, ":");
+
+                string strDbName = parts[0];
+                if (string.IsNullOrEmpty(strDbName) == false)
+                    results.Add(strDbName);
+            }
+
+            return results;
         }
     }
 

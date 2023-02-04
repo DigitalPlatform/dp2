@@ -26,7 +26,7 @@ namespace DigitalPlatform.rms
         // return:
         //		-1	出错
         //		0	成功
-        public static int GetSearchInfo(XmlNode nodeItem,
+        public static int GetSearchInfo(XmlElement nodeItem,
             string strOutputStyle,
             out string strTarget,
             out string strWord,
@@ -60,18 +60,17 @@ namespace DigitalPlatform.rms
             XmlElement nodeTarget = QueryUtil.GetTarget(nodeItem);
             if (nodeTarget == null)
             {
-                strError = "检索式的target元素未定义";
+                strError = $"item 元素 '{nodeItem.OuterXml}' 的祖先没有找到 target 元素";
                 return -1;
             }
-            strTarget = DomUtil.GetAttrDiff(nodeTarget, "list");
+            strTarget = DomUtil.GetAttrDiff(nodeTarget, "list")?.Trim();
             if (strTarget == null)
             {
-                strError = "target元素的list属性未定义";
+                strError = $"target 元素 '{nodeTarget.OuterXml}' 的 list 属性未定义";
             }
-            strTarget = strTarget.Trim();
-            if (strTarget == "")
+            if (string.IsNullOrEmpty(strTarget))
             {
-                strError = "target元素的list属性值不能为空字符串";
+                strError = $"target 元素 '{nodeTarget.OuterXml}' 的 list 属性值不应为空";
                 return -1;
             }
 
@@ -83,12 +82,11 @@ namespace DigitalPlatform.rms
             XmlNode nodeWord = nodeItem.SelectSingleNode("word");
             if (nodeWord == null)
             {
-                strError = "检索式的word元素未定义";
+                strError = $"item 元素 '{nodeItem.OuterXml}' 下级没有找到 word 元素";
                 return -1;
             }
             strWord = nodeWord.InnerText.Trim();    //  // 2012/2/16
-            strWord = strWord.Trim();
-
+            // strWord = strWord.Trim();
 
             //------------------------------------
             //匹配方式
@@ -324,18 +322,18 @@ namespace DigitalPlatform.rms
         //		nodeItem    item节点
         // return:
         //		target节点，没找到返回null
-        private static XmlElement GetTarget(XmlNode nodeItem)
+        private static XmlElement GetTarget(XmlElement nodeItem)
         {
-            XmlNode nodeCurrent = nodeItem;
+            XmlElement nodeCurrent = nodeItem;
             while (true)
             {
                 if (nodeCurrent == null)
                     return null;
 
                 if (nodeCurrent.Name == "target")
-                    return nodeCurrent as XmlElement;
+                    return nodeCurrent;
 
-                nodeCurrent = nodeCurrent.ParentNode;
+                nodeCurrent = nodeCurrent.ParentNode as XmlElement;
             }
         }
 

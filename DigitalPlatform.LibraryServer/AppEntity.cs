@@ -16,7 +16,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Data.SqlTypes;
 
 
 namespace DigitalPlatform.LibraryServer
