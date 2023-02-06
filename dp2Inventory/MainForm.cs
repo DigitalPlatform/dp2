@@ -161,7 +161,7 @@ bool bClickClose = false)
 
         private async void MainForm_Load(object sender, EventArgs e)
         {
-            // FormClientInfo.SerialNumberMode = "must";
+            FormClientInfo.SerialNumberMode = "must";
             var ret = FormClientInfo.Initial("dp2inventory",
                 () => StringUtil.IsDevelopMode());
             if (ret == false)
@@ -237,7 +237,6 @@ bool bClickClose = false)
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             _cancel?.Cancel();
-
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -246,6 +245,7 @@ bool bClickClose = false)
             _shelfDialog?.Close();
 
             _cancel?.Dispose();
+            _cancel = null;
 
             SaveSettings();
 
@@ -540,7 +540,6 @@ bool bClickClose = false)
 
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
         {
-            /*
             // return:
             //      -1  出错
             //      0   正确
@@ -554,7 +553,6 @@ bool bClickClose = false)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-            */
         }
 
         private void MenuItem_about_Click(object sender, EventArgs e)

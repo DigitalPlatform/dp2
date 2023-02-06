@@ -4549,6 +4549,8 @@ out strError);
             return false;
         }
 
+        // 检测一个数据库的类型
+        // TODO: 需要逐渐增加支持的数据库类型，直到支持全部
         // 2023/2/3
         public string GetAllDbType(string strDbName)
         {
@@ -4556,7 +4558,7 @@ out strError);
     out _);
             if (type != null)
                 return type;
-            if (IsBiblioDbName(strDbName))
+            if (IsReaderDbName(strDbName))
                 return "reader";
             if (strDbName == this.AmerceDbName)
                 return "amerce";

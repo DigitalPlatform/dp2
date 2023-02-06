@@ -33,8 +33,8 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 // [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyVersion("1.0.1")]
-[assembly: AssemblyFileVersion("1.0.1.0")]
+[assembly: AssemblyVersion("1.0.2")]
+[assembly: AssemblyFileVersion("1.0.2.0")]
 
 // 0.0.1 (2021/4/22) 首个发布版本
 // 0.0.2 (2021/4/22)
@@ -84,3 +84,4 @@ using System.Runtime.InteropServices;
 // 0.0.18 (2022/3/12)   library.xml 中 rfid/ownerInstitution/@map 增加新算法 0.02 支持
 // 0.0.19 (2022/3/15)   (快速模式)盘点中途，如果 dp2library 服务器一端 library.xml 中 rfid 元素被修改，导致机构代码映射改变，dp2Inventory 利用 UII 对照关系获得的 OI 不再准确，导致 getItemInfo NotFound 错误，报错信息增加了一段提示文字“为避免缓存信息陈旧问题，建议改用慢速模式重新盘点”
 // 1.0.1  (2022/9/14)   发布第一个 v1 版本
+// 1.0.2  (2023/2/6)    增加序列号机制

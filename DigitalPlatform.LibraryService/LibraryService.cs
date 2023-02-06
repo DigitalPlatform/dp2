@@ -15041,6 +15041,7 @@ out byte[] temp_timestamp);
                         && app.IsDatabaseMetadataPath(sessioninfo, strResPath) == true)
                     {
                         string db_type = app.GetAllDbType(strDbName);
+                        Debug.Assert(string.IsNullOrEmpty(db_type) == false);
 
                         // strError = "不允许用 GetRes() 来获得书目记录。请改用 GetBiblioInfo() API";
                         // goto ERROR1;
