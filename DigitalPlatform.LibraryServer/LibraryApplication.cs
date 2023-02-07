@@ -16503,7 +16503,7 @@ out string db_type);
             {
                 // 如果是对象路径，则还要继续向后判断，看看是否具备 getxxxobject 权限
                 // 其它情况直接就返回“不具备权限”
-                if (is_object_path == false)
+                // if (is_object_path == false)
                 {
                     strError = error;
                     return 0;
